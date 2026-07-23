@@ -7,7 +7,6 @@ import hashlib
 import json
 import re
 import time
-from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 from ddev.e2e.agent.docker import _normalize_agent_image_name
@@ -44,21 +43,21 @@ class KubernetesAgent(AgentInterface):
         # delete resources belonging to another environment with the same name.
         self.metadata[_OWNER_ID_METADATA] = token_hex(16)
 
-    @cached_property
+    @property
     def _kubernetes_metadata(self) -> dict[str, Any]:
         metadata = self.metadata.get('kubernetes')
         if not isinstance(metadata, dict):
             raise ValueError('Kubernetes Agent metadata must contain a `kubernetes` mapping')
         return metadata
 
-    @cached_property
+    @property
     def _kubeconfig(self) -> str:
         kubeconfig = self._kubernetes_metadata.get('kubeconfig')
         if not isinstance(kubeconfig, str) or not kubeconfig:
             raise ValueError('Kubernetes Agent metadata must define a non-empty `kubeconfig` path')
         return kubeconfig
 
-    @cached_property
+    @property
     def _namespace(self) -> str:
         namespace = self._kubernetes_metadata.get('namespace')
         if namespace is not None:
@@ -75,11 +74,11 @@ class KubernetesAgent(AgentInterface):
         normalized_id = normalized_id[: 63 - len(_DEFAULT_NAMESPACE_PREFIX) - len(digest) - 2].rstrip('-')
         return f'{_DEFAULT_NAMESPACE_PREFIX}-{normalized_id}-{digest}'
 
-    @cached_property
+    @property
     def _cluster_resource_name(self) -> str:
         return self._namespace
 
-    @cached_property
+    @property
     def _owner_id(self) -> str:
         owner_id = self.metadata.get(_OWNER_ID_METADATA)
         if not isinstance(owner_id, str) or not re.fullmatch(r'[a-z0-9]([-a-z0-9]*[a-z0-9])?', owner_id):
@@ -88,26 +87,26 @@ class KubernetesAgent(AgentInterface):
             raise ValueError('Kubernetes Agent internal owner ID must contain at most 63 characters')
         return owner_id
 
-    @cached_property
+    @property
     def _resource_labels(self) -> dict[str, str]:
         return {
             'app.kubernetes.io/managed-by': 'ddev',
             _OWNER_LABEL: self._owner_id,
         }
 
-    @cached_property
+    @property
     def _config_dir(self) -> str:
         return f'/etc/datadog-agent/conf.d/{self.integration.name}.d'
 
-    @cached_property
+    @property
     def _python_path(self) -> str:
         return f'/opt/datadog-agent/embedded/bin/python{self.python_version[0]}'
 
-    @cached_property
+    @property
     def _kubectl_prefix(self) -> list[str]:
         return ['kubectl', '--kubeconfig', self._kubeconfig]
 
-    @cached_property
+    @property
     def _wait_timeout(self) -> int:
         timeout = self._kubernetes_metadata.get('wait_timeout', _DEFAULT_WAIT_TIMEOUT)
         if isinstance(timeout, bool) or not isinstance(timeout, int) or timeout <= 0:
