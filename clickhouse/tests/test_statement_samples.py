@@ -264,8 +264,8 @@ def test_normalize_row_with_all_fields(check_with_dbm):
     # Verify HTTP field
     assert normalized_row['http_user_agent'] == 'python-requests/2.28.0'
 
-    # Verify node identity (surfaced as @clickhouse.hostname on the sample)
-    assert normalized_row['hostname'] == 'ch-node-1'
+    # Verify node identity (surfaced as @clickhouse.clickhouse_node on the sample)
+    assert normalized_row['clickhouse_node'] == 'ch-node-1'
 
     # Verify obfuscation happened
     assert 'statement' in normalized_row

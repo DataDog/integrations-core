@@ -43,7 +43,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 # hostName() as server_node identifies the node that executed each query. For a
 # single-node deployment it is a constant; for multi-node Cloud clusters queried via
 # clusterAllReplicas it attributes each session to its node (surfaced as the
-# @clickhouse.hostname sample field, matching query completions/errors).
+# @clickhouse.clickhouse_node sample field, matching query completions/errors).
 ACTIVE_QUERIES_QUERY = """
 SELECT
     elapsed,
@@ -275,7 +275,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 'client_hostname': str(client_hostname) if client_hostname else None,
                 'is_cancelled': bool(is_cancelled) if is_cancelled is not None else False,
                 'http_user_agent': str(http_user_agent) if http_user_agent else None,
-                'hostname': str(server_node) if server_node else None,
+                'clickhouse_node': str(server_node) if server_node else None,
             }
 
             return self._obfuscate_query(normalized_row)

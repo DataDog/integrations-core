@@ -221,7 +221,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
                 row_dict = {
                     'normalized_query_hash': str(normalized_query_hash),
-                    'hostname': str(server_node) if server_node else '',
+                    'clickhouse_node': str(server_node) if server_node else '',
                     'query': str(query_text) if query_text else '',
                     'user': str(user) if user else '',
                     'query_type': str(query_type) if query_type else '',
@@ -312,7 +312,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 'event_time_microseconds': row.get('event_time_microseconds', 0),
                 'initial_query_id': row.get('initial_query_id', ''),
                 'is_initial_query': row.get('is_initial_query', True),
-                'hostname': row.get('hostname', ''),
+                'clickhouse_node': row.get('clickhouse_node', ''),
                 'metadata': {
                     'tables': row.get('dd_tables'),
                     'commands': row.get('dd_commands'),
