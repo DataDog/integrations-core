@@ -109,6 +109,14 @@ GLOBAL_SECURE_FIELDS = frozenset(
         'ssl_ca_certs',
         'ssl_cafile',
         'ssl_crlfile',
+        # Legacy raw-instance path aliases read directly from the instance dict rather
+        # than declared as spec/model fields, so only this raw-key fallback can gate
+        # them. nagios reads nagios_perf_cfg/nagios_log and opens them for parsing and
+        # tailing; http_check falls back to ca_certs for tls_ca_cert and passes it to
+        # SSLContext.load_verify_locations.
+        'nagios_perf_cfg',
+        'nagios_log',
+        'ca_certs',
     ]
 )
 
