@@ -121,8 +121,8 @@ local packages requested by `--dev` or `--base`, and implements Agent commands t
 discovery E2E tests therefore continue to use `dd_agent_check` and `dd_agent_check_discovery`.
 
 Agent images default to the `Always` pull policy so mutable release and development tags are refreshed. Environments
-that import a local image into the cluster can set `image_pull_policy` to `IfNotPresent` or `Never`. A custom `namespace`
-must not already exist; the backend owns and deletes the namespace and its cluster-scoped RBAC resources.
+that import a local image into the cluster can set `image_pull_policy` to `IfNotPresent` or `Never`. The backend generates
+a namespace from the integration and environment names, then owns and deletes it and its cluster-scoped RBAC resources.
 
 The initial implementation supports exactly one schedulable Kubernetes node. It rejects multi-node clusters until
 Agent targeting or fan-out semantics are defined.

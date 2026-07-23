@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import re
 import subprocess
 
 import pytest
@@ -79,6 +80,20 @@ def run_command(app, mocker):
 
 def command_calls(run_command):
     return [call.args[0] for call in run_command.call_args_list]
+
+
+def test_namespace_metadata_cannot_override_generated_name(agent, metadata):
+    metadata['kubernetes']['namespace'] = 'custom-namespace'
+
+    assert agent._namespace == 'ddev-agent-velero-py3-12-ad72b57a'
+
+
+def test_generated_namespace_is_a_valid_kubernetes_name(app, get_integration, metadata, config_file):
+    integration = get_integration('Very_Long.Integration-' + 'x' * 100)
+    agent = KubernetesAgent(app, integration, 'Py3.12+FIPS', metadata, config_file)
+
+    assert len(agent._namespace) == 63
+    assert re.fullmatch(r'[a-z0-9]([-a-z0-9]*[a-z0-9])?', agent._namespace)
 
 
 def test_start_uses_selected_image_rbac_config_and_local_packages(
@@ -503,10 +518,9 @@ def test_shell_and_logs_use_backend_commands(agent, run_command):
     [
         ({}, 'must contain a `kubernetes` mapping'),
         ({'kubernetes': {}}, 'non-empty `kubeconfig`'),
-        ({'kubernetes': {'kubeconfig': '/tmp/config', 'namespace': 'INVALID'}}, 'Invalid Kubernetes Agent namespace'),
     ],
 )
 def test_metadata_validation(app, get_integration, config_file, metadata, match):
     agent = KubernetesAgent(app, get_integration('velero'), 'py3.12', metadata, config_file)
     with pytest.raises(ValueError, match=match):
-        _ = agent._namespace if 'namespace' in metadata.get('kubernetes', {}) else agent._kubeconfig
+        _ = agent._kubeconfig
