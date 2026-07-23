@@ -1,0 +1,3 @@
+- template: instances/tags
+- template: instances/service
+- template: instances/global
