@@ -39,6 +39,11 @@ from datadog_checks.base.utils.tracking import tracked_method
 # Uses {processes_table} placeholder for ClickHouse Cloud clusterAllReplicas() support:
 # - For ClickHouse Cloud: clusterAllReplicas('default', system.processes)
 # - For self-hosted: system.processes
+#
+# hostName() as server_node identifies the node that executed each query. For a
+# single-node deployment it is a constant; for multi-node Cloud clusters queried via
+# clusterAllReplicas it attributes each session to its node (surfaced as the
+# @clickhouse.hostname sample field, matching query completions/errors).
 ACTIVE_QUERIES_QUERY = """
 SELECT
     elapsed,
@@ -66,7 +71,8 @@ SELECT
     port,
     client_hostname,
     is_cancelled,
-    http_user_agent
+    http_user_agent,
+    hostName() as server_node
 FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
   AND query NOT LIKE '%system.query_log%'
@@ -239,6 +245,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 client_hostname,
                 is_cancelled,
                 http_user_agent,
+                server_node,
             ) = row
 
             normalized_row = {
@@ -268,6 +275,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 'client_hostname': str(client_hostname) if client_hostname else None,
                 'is_cancelled': bool(is_cancelled) if is_cancelled is not None else False,
                 'http_user_agent': str(http_user_agent) if http_user_agent else None,
+                'hostname': str(server_node) if server_node else None,
             }
 
             return self._obfuscate_query(normalized_row)
