@@ -5,9 +5,10 @@ import json
 import os
 import time
 from contextlib import ExitStack
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 import pytest
-import requests
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
@@ -19,6 +20,26 @@ from .common import BATCH_OBJECTS, USE_AUTH
 
 HERE = get_here()
 opj = os.path.join
+
+
+def post_json(url: str, headers: dict[str, str], payload: object) -> None:
+    try:
+        with urlopen(
+            Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method='POST')
+        ) as response:
+            response.read()
+    except HTTPError as e:
+        with e:
+            e.read()
+
+
+def endpoint_ok(url: str, timeout: int) -> bool:
+    try:
+        with urlopen(url, timeout=timeout) as response:
+            return response.status < 400
+    except HTTPError as e:
+        e.close()
+        return False
 
 
 def setup_weaviate():
@@ -65,20 +86,19 @@ def make_weaviate_request(instance):
         headers.update(instance['headers'])
 
     if ready_check(weaviate_api_endpoint, 300):
-        requests.post(weaviate_batch_endpoint, headers=headers, data=json.dumps(BATCH_OBJECTS))
+        post_json(weaviate_batch_endpoint, headers, BATCH_OBJECTS)
 
 
 def ready_check(endpoint, timeout=300):
     # Sometimes the API endpoint isn't ready when the cluster is ready. This will try to ensure the
-    # API is ready for requests before we seed some dummy data.
+    # API is ready for HTTP calls before we seed some dummy data.
     stop_time = time.time() + timeout
     endpoint = f'{endpoint}{DEFAULT_LIVENESS_ENDPOINT}'
     while time.time() < stop_time:
         try:
-            response = requests.get(endpoint, timeout=5)
-            if response.ok:
+            if endpoint_ok(endpoint, timeout=5):
                 return True
-        except requests.RequestException as e:
+        except (URLError, TimeoutError) as e:
             print(f'Request failed: {e}')
 
         time.sleep(1)

@@ -5,8 +5,17 @@ import logging
 import threading
 import time
 from random import randrange
+from urllib.error import HTTPError
+from urllib.request import urlopen
 
-import requests
+
+def get_url(url: str) -> None:
+    try:
+        with urlopen(url) as response:
+            response.read()
+    except HTTPError as e:
+        with e:
+            e.read()
 
 
 def do_stuff(id, func, *args):
@@ -20,11 +29,11 @@ def do_stuff(id, func, *args):
 
 
 def call_hello_world():
-    requests.get("http://tomcat:8080/sample/hello.jsp")
+    get_url("http://tomcat:8080/sample/hello.jsp")
 
 
 def call_404():
-    requests.get("http://tomcat:8080/404")
+    get_url("http://tomcat:8080/404")
 
 
 if __name__ == "__main__":

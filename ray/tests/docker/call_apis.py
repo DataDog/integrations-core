@@ -5,8 +5,16 @@ import logging
 import threading
 import time
 from random import randint, randrange
+from urllib import error, request
 
-import requests
+
+def open_url(url: str, data: str | None = None, headers: dict[str, str] | None = None) -> None:
+    req = request.Request(url, data=data.encode() if data is not None else None, headers=headers or {})
+    try:
+        with request.urlopen(req):
+            pass
+    except error.HTTPError as exc:
+        exc.close()
 
 
 def do_stuff(id, func, *args):
@@ -17,11 +25,11 @@ def do_stuff(id, func, *args):
 
 
 def run_hello():
-    requests.get("http://ray-head:8000/hello")
+    open_url("http://ray-head:8000/hello")
 
 
 def run_add():
-    requests.post(
+    open_url(
         "http://ray-head:8000/add",
         data=f'{{"a": {randint(1, 10)}, "b": {randint(1, 10)}}}',
         headers={'Content-Type': 'application/json'},
@@ -29,7 +37,7 @@ def run_add():
 
 
 def generate_500():
-    requests.post(
+    open_url(
         "http://ray-head:8000/add",
         data='{"a"}',
         headers={'Content-Type': 'application/json'},
@@ -37,12 +45,12 @@ def generate_500():
 
 
 def generate_404():
-    requests.get("http://ray-head:8000/not-found")
+    open_url("http://ray-head:8000/not-found")
     time.sleep(randrange(50))
 
 
 def call_openmetrics_endpoint(server):
-    requests.get(f"http://{server}:8080")
+    open_url(f"http://{server}:8080")
 
 
 if __name__ == "__main__":

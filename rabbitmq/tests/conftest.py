@@ -2,16 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import base64
 import os
 import subprocess
+from urllib import request
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import CHECK_NAME, CONFIG, HERE, HOST, OPENMETRICS_CONFIG, PORT, RABBITMQ_METRICS_PLUGIN
+
+
+def basic_auth_header(username: str, password: str) -> str:
+    token = base64.b64encode(f'{username}:{password}'.encode('latin1')).decode('ascii')
+    return f'Basic {token}'
 
 
 @pytest.fixture(scope="session")
@@ -38,12 +44,12 @@ def dd_environment():
 def setup_rabbitmq():
     with temp_dir() as tmpdir:
         url = 'http://{}:{}/cli/rabbitmqadmin'.format(HOST, PORT)
-        res = requests.get(url)
-        res.raise_for_status()
+        with request.urlopen(url) as res:
+            rabbitmq_admin = res.read().decode()
 
         rabbitmq_admin_script = os.path.join(tmpdir, 'rabbitmqadmin')
         with open(rabbitmq_admin_script, 'w+') as f:
-            f.write(res.text)
+            f.write(rabbitmq_admin)
 
         setup_vhosts(rabbitmq_admin_script)
         setup_more(rabbitmq_admin_script)
@@ -51,10 +57,14 @@ def setup_rabbitmq():
 
         # Set cluster name
         url = "http://{}:{}/api/cluster-name".format(HOST, PORT)
-        res = requests.put(
-            url, data='{"name": "rabbitmqtest"}', auth=("guest", "guest"), headers={"Content-Type": "application/json"}
+        req = request.Request(
+            url,
+            data=b'{"name": "rabbitmqtest"}',
+            headers={"Authorization": basic_auth_header("guest", "guest"), "Content-Type": "application/json"},
+            method='PUT',
         )
-        res.raise_for_status()
+        with request.urlopen(req):
+            pass
 
 
 def setup_vhosts(rabbitmq_admin_script):

@@ -3,9 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 import re
+import urllib.error
+import urllib.request
 
 import pytest
-import requests
 
 # Make sure this expected metrics list is up to date with:
 # - `dogstatsd_mapper_profiles` configuration from README.md
@@ -121,7 +122,7 @@ METRIC_PATTERN = re.compile(r'^``([^`]+)``\s+(.*)', re.MULTILINE)
 @pytest.mark.latest_metrics
 def test_check_metrics_up_to_date():  # pragma: no cover
     # Note: This test is marked with @pytest.mark.latest_metrics and is skipped in normal test runs.
-    # It makes external HTTP requests to GitHub, so it's intentionally run separately.
+    # It makes external HTTP calls to GitHub, so it's intentionally run separately.
     # Excluded from coverage as it's only run with --run-latest-metrics flag.
     airflow_version = os.getenv('AIRFLOW_VERSION', '2.11.0')
 
@@ -132,8 +133,14 @@ def test_check_metrics_up_to_date():  # pragma: no cover
         'docs/apache-airflow/administration-and-deployment/logging-monitoring/metrics.rst'
     )
 
-    resp = requests.get(url)
-    content = resp.content.decode('utf-8')
+    try:
+        resp = urllib.request.urlopen(url)
+    except urllib.error.HTTPError as e:
+        resp = e
+    try:
+        content = resp.read().decode('utf-8')
+    finally:
+        resp.close()
     matches = METRIC_PATTERN.findall(content)
 
     # Printed only on failure for convenience.

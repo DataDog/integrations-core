@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import urllib.error
+import urllib.request
 from typing import Any  # noqa: F401
-
-import requests
 
 from datadog_checks.dev.docker import ComposeFileDown, ComposeFileUp
 from datadog_checks.dev.structures import LazyFunction
@@ -43,20 +43,26 @@ class IoTEdgeDown(LazyFunction):
 def edge_hub_endpoint_ready():
     # type: () -> bool
     try:
-        response = requests.get(common.E2E_EDGE_HUB_PROMETHEUS_URL)
-        response.raise_for_status()
-    except requests.HTTPError:
+        response = urllib.request.urlopen(common.E2E_EDGE_HUB_PROMETHEUS_URL)
+    except urllib.error.HTTPError as e:
+        e.close()
         return False
     else:
-        return response.status_code == 200
+        try:
+            return response.getcode() == 200
+        finally:
+            response.close()
 
 
 def edge_agent_endpoint_ready():
     # type: () -> bool
     try:
-        response = requests.get(common.E2E_EDGE_AGENT_PROMETHEUS_URL)
-        response.raise_for_status()
-    except requests.HTTPError:
+        response = urllib.request.urlopen(common.E2E_EDGE_AGENT_PROMETHEUS_URL)
+    except urllib.error.HTTPError as e:
+        e.close()
         return False
     else:
-        return response.status_code == 200
+        try:
+            return response.getcode() == 200
+        finally:
+            response.close()

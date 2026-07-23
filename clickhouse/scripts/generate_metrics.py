@@ -14,8 +14,7 @@ import re
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Iterable
-
-import requests
+from urllib.request import urlopen
 
 stats = collections.Counter()
 
@@ -150,6 +149,11 @@ def write_file(file, contents, encoding='utf-8'):
         f.write(contents)
 
 
+def fetch_url_text(url: str) -> str:
+    with urlopen(url, timeout=10) as response:
+        return response.read().decode('utf-8')
+
+
 def generate_queries_file(template: FileTemplate, config: dict):
     source_path = os.path.join(TEMPLATES_DIR, template.source_path)
     if not os.path.exists(source_path):
@@ -201,7 +205,7 @@ class ClickhouseMetric:
 
 
 def fetch_current_metrics(version: str) -> dict[str, ClickhouseMetric]:
-    raw_metrics = requests.get(SOURCE_URL_CURRENT_METRICS.format(branch=version), timeout=10).text
+    raw_metrics = fetch_url_text(SOURCE_URL_CURRENT_METRICS.format(branch=version))
 
     result = {}
     for match in METRIC_PATTERN.finditer(raw_metrics):
@@ -220,7 +224,7 @@ def fetch_profile_events(version: str) -> dict[str, ClickhouseMetric]:
 
         return VALUE_TYPE_COUNTER
 
-    raw_metrics = requests.get(SOURCE_URL_PROFILE_EVENTS.format(branch=version), timeout=10).text
+    raw_metrics = fetch_url_text(SOURCE_URL_PROFILE_EVENTS.format(branch=version))
 
     result = {}
     if version == '24.8':
@@ -255,13 +259,13 @@ def fetch_async_metrics(version: str) -> dict[str, ClickhouseMetric]:
 
     result = {}
     # common
-    raw_metrics = requests.get(SOURCE_URL_ASYNC_METRICS.format(branch=version), timeout=10).text
+    raw_metrics = fetch_url_text(SOURCE_URL_ASYNC_METRICS.format(branch=version))
     for match in ASYNC_METRICS_PATTERN.finditer(raw_metrics):
         name, description = match.groups()
         m = ClickhouseMetric(name=name, description=clean_description(description), prefix=PREFIX_ASYNC_METRICS)
         result[m.metric_name()] = m
     # server
-    raw_metrics = requests.get(SOURCE_URL_SERVER_ASYNC_METRICS.format(branch=version), timeout=10).text
+    raw_metrics = fetch_url_text(SOURCE_URL_SERVER_ASYNC_METRICS.format(branch=version))
     for match in ASYNC_METRICS_PATTERN.finditer(raw_metrics):
         name, description = match.groups()
         m = ClickhouseMetric(name=name, description=clean_description(description), prefix=PREFIX_ASYNC_METRICS)

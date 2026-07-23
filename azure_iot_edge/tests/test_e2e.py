@@ -2,13 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import ssl
+import urllib.error
 from typing import Callable  # noqa: F401
 
 import pytest
-import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.base.utils.http_exceptions import HTTPSSLError
 
 from . import common
 
@@ -40,8 +42,10 @@ def test_bad_url_e2e(e2e_instance, dd_agent_check):
     bad_url_agent_instance = copy.deepcopy(e2e_instance)
     bad_url_agent_instance['edge_agent_prometheus_url'] = bad_url_hub_instance['edge_agent_prometheus_url'][:-2]
 
-    with pytest.raises(requests.exceptions.SSLError):
+    with pytest.raises((HTTPSSLError, urllib.error.URLError)) as exc_info:
         dd_agent_check(bad_url_hub_instance, rate=True)
+    if isinstance(exc_info.value, urllib.error.URLError):
+        assert isinstance(exc_info.value.reason, ssl.SSLError)
 
     aggregator = dd_agent_check(bad_url_agent_instance, rate=True)
     aggregator.assert_service_check('azure.iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.CRITICAL)

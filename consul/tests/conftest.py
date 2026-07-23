@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
+import urllib.request
 
 import pytest
-import requests
 
 from datadog_checks.dev import WaitFor, docker_run
 
@@ -20,11 +21,14 @@ def ping_cluster():
     """
     Wait for the slave to connect to the master
     """
-    response = requests.get('{}/v1/status/peers'.format(common.URL))
-    response.raise_for_status()
+    response = urllib.request.urlopen('{}/v1/status/peers'.format(common.URL))
+    try:
+        peers = json.load(response)
+    finally:
+        response.close()
 
     # Wait for all 3 agents to join the cluster
-    if len(response.json()) == 3:
+    if len(peers) == 3:
         return True
 
     return False

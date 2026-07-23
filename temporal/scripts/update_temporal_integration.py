@@ -19,8 +19,7 @@ import pathlib
 import re
 import sys
 from urllib.parse import urljoin
-
-import requests
+from urllib.request import urlopen
 
 # We need access to METRIC_MAP and helper functions
 # ``scripts`` is **not** a package, so add its parent (repository root) to sys.path
@@ -50,7 +49,7 @@ def fetch_temporal_metrics(tag: str) -> str:
         str: The content of the metrics definitions file
 
     Raises:
-        requests.RequestException: If the request fails
+        urllib.error.URLError: If the request fails
         ValueError: If the tag format is invalid
     """
     if not tag.startswith('v'):
@@ -61,9 +60,8 @@ def fetch_temporal_metrics(tag: str) -> str:
     url = urljoin(f"{base_url}/{tag}/", metrics_path)
 
     print(f"Fetching metrics from {url}")
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.text
+    with urlopen(url, timeout=10) as response:
+        return response.read().decode('utf-8')
 
 
 def extract_metric_defs(go_code: str) -> dict:

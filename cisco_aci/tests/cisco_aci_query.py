@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-
-import requests
+import ssl
+import urllib.error
+import urllib.request
 
 # This is a python script that you can use to query a specific
-# tenant metric endpoint and includes the login and logout requests.
+# tenant metric endpoint and includes the login and logout calls.
 # You can change the parameters below for your configuration and tenant to query.
 
 # Edit this section. Below is a sample config using the public sandbox:
@@ -17,6 +18,34 @@ apic_password = '!v3G@!4@Y'
 tenant = 'infra'
 api_path = str.format('/api/mo/uni/tn-{}.json?rsp-subtree-include=stats,no-scoped', tenant)
 
+SSL_CONTEXT = ssl.create_default_context()
+SSL_CONTEXT.check_hostname = False
+SSL_CONTEXT.verify_mode = ssl.CERT_NONE
+
+
+def apic_request(url: str, method: str = 'GET', cookie: dict[str, str] | None = None, data: str | None = None) -> str:
+    headers = {}
+    if cookie:
+        headers['Cookie'] = '; '.join('{}={}'.format(name, value) for name, value in cookie.items())
+
+    if data is not None:
+        body = data.encode('utf-8')
+    elif method == 'POST':
+        body = b''
+    else:
+        body = None
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
+
+    try:
+        response = urllib.request.urlopen(req, context=SSL_CONTEXT)
+    except urllib.error.HTTPError as e:
+        response = e
+
+    try:
+        return response.read().decode('utf-8')
+    finally:
+        response.close()
+
 
 def apic_login(apic, username, password):
     """APIC login and return session cookie"""
@@ -25,28 +54,28 @@ def apic_login(apic, username, password):
     json_credentials = json.dumps(credentials)
     base_url = 'https://' + apic + '/api/aaaLogin.json'
 
-    login_response = requests.post(base_url, data=json_credentials, verify=False)
+    login_response_text = apic_request(base_url, method='POST', data=json_credentials)
 
-    login_response_json = json.loads(login_response.text)
+    login_response_json = json.loads(login_response_text)
     token = login_response_json['imdata'][0]['aaaLogin']['attributes']['token']
     apic_cookie['APIC-Cookie'] = token
     return apic_cookie
 
 
 def apic_query(apic, path, cookie):
-    """APIC 'GET' query and return response"""
+    """APIC 'GET' query and return response body"""
     base_url = 'https://' + apic + path
 
-    get_response = requests.get(base_url, cookies=cookie, verify=False)
+    get_response = apic_request(base_url, cookie=cookie)
 
     return get_response
 
 
 def apic_logout(apic, cookie):
-    """APIC logout and return response"""
+    """APIC logout and return response body"""
     base_url = 'https://' + apic + '/api/aaaLogout.json'
 
-    post_response = requests.post(base_url, cookies=cookie, verify=False)
+    post_response = apic_request(base_url, method='POST', cookie=cookie)
 
     return post_response
 
@@ -55,6 +84,6 @@ apic_cookie = apic_login(apic=apic_url, username=apic_username, password=apic_pa
 response = apic_query(apic=apic_url, path=api_path, cookie=apic_cookie)
 logout_response = apic_logout(apic=apic_url, cookie=apic_cookie)
 
-response_json = json.loads(response.text)
+response_json = json.loads(response)
 
 print(json.dumps(response_json, indent=2, sort_keys=True))

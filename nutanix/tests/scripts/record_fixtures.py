@@ -21,16 +21,17 @@ Dependency resolution:
 """
 
 import argparse
+import base64
 import json
+import ssl
 import sys
 from datetime import datetime, timedelta, timezone
+from http.client import HTTPMessage, responses
 from pathlib import Path
-
-import requests
+from urllib import error, parse, request
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from conftest import AWS_INSTANCE  # noqa: E402
-from requests.auth import HTTPBasicAuth  # noqa: E402
 
 RESOURCES = (
     "clusters",
@@ -64,13 +65,25 @@ if not BASE_URL.startswith("http"):
     BASE_URL = f"https://{BASE_URL}"
 BASE_URL = f"{BASE_URL}:{PC_PORT}"
 
-# Create session with auth
-session = requests.Session()
-session.auth = HTTPBasicAuth(PC_USERNAME, PC_PASSWORD)
-session.verify = TLS_VERIFY
+BASIC_AUTH_HEADER = "Basic {}".format(base64.b64encode(f"{PC_USERNAME}:{PC_PASSWORD}".encode()).decode())
+TLS_CONTEXT = ssl.create_default_context() if TLS_VERIFY else ssl._create_unverified_context()
 
 
-def make_request(endpoint: str, params: dict | None = None) -> requests.Response:
+class APIResponse:
+    def __init__(self, body: bytes, status: int, url: str) -> None:
+        self.body = body
+        self.status = status
+        self.url = url
+
+    def json(self) -> dict:
+        return json.loads(self.body.decode("utf-8"))
+
+    def raise_for_status(self) -> None:
+        if self.status >= 400:
+            raise error.HTTPError(self.url, self.status, responses.get(self.status, ""), HTTPMessage(), None)
+
+
+def make_request(endpoint: str, params: dict | None = None) -> APIResponse:
     """Make a request to the Nutanix API.
 
     Args:
@@ -81,12 +94,14 @@ def make_request(endpoint: str, params: dict | None = None) -> requests.Response
         Response object
     """
     url = f"{BASE_URL}/{endpoint}"
+    if params:
+        url = f"{url}?{parse.urlencode(params)}"
     print(f"  GET {endpoint}")
     if params:
         print(f"    params: {params}")
-    response = session.get(url, params=params)
-    response.raise_for_status()
-    return response
+    api_request = request.Request(url, headers={"Authorization": BASIC_AUTH_HEADER})
+    with request.urlopen(api_request, context=TLS_CONTEXT) as response:
+        return APIResponse(response.read(), response.status, response.geturl())
 
 
 def fetch_paginated_endpoint(endpoint: str, params: dict | None = None) -> list[dict]:
@@ -221,7 +236,7 @@ def record_hosts(clusters: list[dict], save: bool = True) -> list[tuple[str, str
                     host_id = host.get("extId")
                     if host_id:
                         cluster_host_pairs.append((cluster_id, host_id))
-        except requests.exceptions.HTTPError as e:
+        except error.HTTPError as e:
             print(f"  ⚠ Failed to fetch hosts for this cluster: {e}")
             print("  (This is expected for Prism Central deployment clusters)")
 
@@ -265,7 +280,7 @@ def record_cluster_stats(clusters: list[dict]) -> None:
             # Use shortened cluster ID for filename
             short_cluster_id = cluster_id.split("-")[0]
             save_fixture(f"cluster_stats_{short_cluster_id}.json", data)
-        except requests.exceptions.HTTPError as e:
+        except error.HTTPError as e:
             print(f"  ⚠ Failed to fetch cluster stats: {e}")
 
 
@@ -303,7 +318,7 @@ def record_host_stats(cluster_host_pairs: list[tuple[str, str]]) -> None:
             short_cluster_id = cluster_id.split("-")[0]
             short_host_id = host_id.split("-")[0]
             save_fixture(f"host_stats_{short_cluster_id}_{short_host_id}.json", data)
-        except requests.exceptions.HTTPError as e:
+        except error.HTTPError as e:
             print(f"  ⚠ Failed to fetch host stats: {e}")
 
 
@@ -338,7 +353,7 @@ def record_vm_stats() -> None:
     try:
         pages = fetch_paginated_endpoint("api/vmm/v4.0/ahv/stats/vms", params=params)
         save_fixture("vms_stats.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except error.HTTPError as e:
         print(f"  ⚠ Failed to fetch VM stats: {e}")
 
 
@@ -348,7 +363,7 @@ def record_disks() -> None:
     try:
         pages = fetch_paginated_endpoint("api/clustermgmt/v4.0/config/disks")
         save_fixture("disks.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except error.HTTPError as e:
         print(f"  ⚠ Failed to fetch disks: {e}")
 
 
@@ -369,7 +384,7 @@ def record_events() -> None:
     try:
         pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/events", params=params)
         save_fixture("events.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except error.HTTPError as e:
         print(f"  ⚠ Failed to fetch events: {e}")
 
 
@@ -390,7 +405,7 @@ def record_audits() -> None:
     try:
         pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/audits", params=params)
         save_fixture("audits.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except error.HTTPError as e:
         print(f"  ⚠ Failed to fetch audits: {e}")
 
 
@@ -406,7 +421,7 @@ def record_alerts() -> None:
     try:
         pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/alerts", params=params)
         save_fixture("alerts.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except error.HTTPError as e:
         print(f"  ⚠ alerts fetch failed: {e}")
 
 
@@ -427,7 +442,7 @@ def record_tasks() -> None:
     try:
         pages = fetch_paginated_endpoint("api/prism/v4.0/config/tasks", params=params)
         save_fixture("tasks.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except error.HTTPError as e:
         print(f"  ⚠ Failed to fetch tasks: {e}")
 
 
@@ -554,7 +569,7 @@ def main(argv: list[str] | None = None) -> None:
     # Test connectivity
     try:
         print("\nTesting connectivity...")
-        response = session.get(f"{BASE_URL}/console")
+        response = make_request("console")
         response.raise_for_status()
         print("✓ Connection successful")
     except Exception as e:

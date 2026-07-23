@@ -2,11 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import base64
+import http.cookiejar
+import json
 import os
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from typing import Any
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitForPortListening
@@ -29,16 +35,35 @@ from .common import (
 )
 
 
+def basic_auth_header(auth: tuple[str, str]) -> str:
+    token = '{}:{}'.format(*auth).encode('utf-8')
+    return 'Basic {}'.format(base64.b64encode(token).decode('ascii'))
+
+
+def open_url_without_status_error(req: urllib.request.Request, opener: Any = None) -> Any:
+    try:
+        if opener is not None:
+            return opener.open(req)
+        return urllib.request.urlopen(req)
+    except urllib.error.HTTPError as e:
+        return e
+
+
 def populate_server():
     """Add some queues and topics to ensure more metrics are available."""
     time.sleep(3)
 
+    auth_header = basic_auth_header(TEST_AUTH)
+
     if IS_ARTEMIS:
-        s = requests.Session()
-        s.auth = TEST_AUTH
-        s.headers = {'accept': 'application/json', 'origin': BASE_URL}
-        data = s.get(ARTEMIS_URL + '/list')
-        channels = data.json()['value']['org.apache.activemq.artemis']
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        headers = {'Accept': 'application/json', 'Origin': BASE_URL, 'Authorization': auth_header}
+        req = urllib.request.Request(ARTEMIS_URL + '/list', headers=headers)
+        response = open_url_without_status_error(req, opener=opener)
+        try:
+            channels = json.load(response)['value']['org.apache.activemq.artemis']
+        finally:
+            response.close()
         broker = [k for k in channels.keys() if k.startswith('broker') and ',' not in k][0]
         bean = 'org.apache.activemq.artemis:{}'.format(broker)
 
@@ -54,16 +79,29 @@ def populate_server():
                 "boolean,int,boolean,boolean)",
                 "arguments": ["activemq.notifications", "ANYCAST", queue, None, True, -1, False, True],
             }
-            s.post(ARTEMIS_URL + '/exec', json=body)
+            req = urllib.request.Request(
+                ARTEMIS_URL + '/exec',
+                data=json.dumps(body).encode('utf-8'),
+                headers={**headers, 'Content-Type': 'application/json'},
+                method='POST',
+            )
+            open_url_without_status_error(req, opener=opener).close()
 
     else:
+        headers = {
+            'Authorization': auth_header,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+        data = urllib.parse.urlencode(TEST_MESSAGE).encode('utf-8')
         for queue in TEST_QUEUES:
             url = '{}/{}?type=queue'.format(ACTIVEMQ_URL, queue)
-            requests.post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
+            req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+            open_url_without_status_error(req).close()
 
         for topic in TEST_TOPICS:
             url = '{}/{}?type=topic'.format(ACTIVEMQ_URL, topic)
-            requests.post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
+            req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+            open_url_without_status_error(req).close()
 
 
 @pytest.fixture(scope="session")

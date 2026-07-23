@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import getpass
+import json
 import os
 import time
+from urllib.error import HTTPError
+from urllib.request import urlopen
 
 import pytest
-import requests
 
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
 from datadog_checks.dev.ci import running_on_ci
@@ -162,8 +164,18 @@ class WaitAndUnsealVault(WaitFor):
             run_command('docker exec vault-leader vault {}'.format(command), capture=True, check=True)
 
 
+def read_json(url: str, timeout: int) -> object:
+    try:
+        response = urlopen(url, timeout=timeout)
+    except HTTPError as e:
+        response = e
+
+    with response:
+        return json.loads(response.read().decode('utf-8'))
+
+
 def api_working(api_endpoint):
-    response = requests.get(api_endpoint, timeout=1).json()
+    response = read_json(api_endpoint, timeout=1)
     if response:
         return True
     return False

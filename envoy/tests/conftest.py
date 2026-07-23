@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import http.client
 import os
 import threading
 import time
+from urllib import error, request
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.envoy import Envoy
@@ -21,6 +22,14 @@ from .legacy.common import FLAVOR, INSTANCES
 # (or we ever set the interval explicitly in the test bootstrap config),
 # update this constant and the fixture timings follow.
 ENVOY_STATS_FLUSH_INTERVAL = 5
+
+
+def open_url(url: str) -> None:
+    try:
+        with request.urlopen(url):
+            pass
+    except error.HTTPError as exc:
+        exc.close()
 
 
 @pytest.fixture(scope='session')
@@ -50,7 +59,7 @@ def dd_environment():
 @pytest.fixture
 def exercise_envoy():
     # Drive continuous traffic through Envoy's listener for the entire
-    # lifetime of the test. A background thread keeps firing requests
+    # lifetime of the test. A background thread keeps firing traffic
     # until the fixture tears down, so every flush window — including
     # those that close while the agent's check is in flight — has
     # samples. Envoy's text /stats endpoint reports per-interval
@@ -63,9 +72,9 @@ def exercise_envoy():
     def fire_loop():
         while not stop.is_set():
             try:
-                requests.get('http://{}:8000/service/1'.format(HOST))
-                requests.get('http://{}:8000/service/2'.format(HOST))
-            except requests.RequestException:
+                open_url('http://{}:8000/service/1'.format(HOST))
+                open_url('http://{}:8000/service/2'.format(HOST))
+            except (error.URLError, http.client.HTTPException, TimeoutError):
                 pass
             stop.wait(ENVOY_STATS_FLUSH_INTERVAL / 10)
 

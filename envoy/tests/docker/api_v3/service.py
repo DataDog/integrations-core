@@ -1,7 +1,8 @@
 import os
 import socket
+from urllib import error
+from urllib import request as urlrequest
 
-import requests
 from flask import Flask, request
 
 app = Flask(__name__)
@@ -32,7 +33,12 @@ def trace(service_number):
         for header in TRACE_HEADERS_TO_PROPAGATE:
             if header in request.headers:
                 headers[header] = request.headers[header]
-        requests.get("http://localhost:9000/trace/2", headers=headers)
+        try:
+            req = urlrequest.Request("http://localhost:9000/trace/2", headers=headers)
+            with urlrequest.urlopen(req):
+                pass
+        except error.HTTPError as exc:
+            exc.close()
     return 'Hello from behind Envoy (service {})! hostname: {} resolved hostname: {}'.format(
         os.environ['SERVICE_NAME'], socket.gethostname(), socket.gethostbyname(socket.gethostname())
     )

@@ -3,11 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import http.client
+import json
+import urllib.error
+import urllib.request
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import pytest
-import requests
 
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.docker import docker_run, get_docker_hostname, get_e2e_discovery_metadata
@@ -21,16 +24,57 @@ E2E_METADATA = {
 }
 
 
+class HttpResponse:
+    def __init__(self, url: str, status_code: int, reason: str, content: bytes) -> None:
+        self.url = url
+        self.status_code = status_code
+        self.reason = reason or http.client.responses.get(status_code, '')
+        self.content = content
+
+    @property
+    def text(self) -> str:
+        return self.content.decode('utf-8')
+
+    def json(self) -> Any:
+        return json.loads(self.text)
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise urllib.error.HTTPError(self.url, self.status_code, self.reason, http.client.HTTPMessage(), None)
+
+
+def http_request(
+    url: str,
+    method: str = "GET",
+    *,
+    json_data: Any = None,
+    timeout: float | None = None,
+) -> HttpResponse:
+    headers = {}
+    body = None
+    if json_data is not None:
+        body = json.dumps(json_data).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            return HttpResponse(url, response.getcode(), response.reason, response.read())
+    except urllib.error.HTTPError as error:
+        return HttpResponse(url, error.code, error.reason, error.read())
+
+
 def _check_task_runs_available(prefect_url: str):
     """Verify that the Prefect API has task runs and task-run events queryable."""
-    resp = requests.post(f"{prefect_url}/task_runs/filter", json={}, timeout=1)
+    resp = http_request(f"{prefect_url}/task_runs/filter", method="POST", json_data={}, timeout=1)
     resp.raise_for_status()
     task_runs = resp.json()
     assert task_runs, "No task runs available in Prefect API yet"
 
-    resp = requests.post(
+    resp = http_request(
         f"{prefect_url}/events/filter",
-        json={"filter": {"event": {"prefix": ["prefect.task-run"]}}},
+        method="POST",
+        json_data={"filter": {"event": {"prefix": ["prefect.task-run"]}}},
         timeout=1,
     )
     resp.raise_for_status()

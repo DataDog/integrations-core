@@ -1,17 +1,22 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
 import csv
+import http.client
+import json
 import random
 import re
 import string
 import threading
 import time
+import urllib.error
+import urllib.request
 from collections import defaultdict
 from copy import deepcopy
+from typing import Any
 
 import pytest
-import requests
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -21,6 +26,58 @@ from . import common
 pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION == 1, reason='Test for version Couch v2+')
 
 INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
+
+
+class HttpResponse:
+    def __init__(self, url: str, status_code: int, reason: str, content: bytes) -> None:
+        self.url = url
+        self.status_code = status_code
+        self.reason = reason or http.client.responses.get(status_code, '')
+        self.content = content
+
+    @property
+    def text(self) -> str:
+        return self.content.decode('utf-8')
+
+    def json(self) -> Any:
+        return json.loads(self.text)
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise urllib.error.HTTPError(self.url, self.status_code, self.reason, http.client.HTTPMessage(), None)
+
+
+def http_request(
+    url: str,
+    method: str = 'GET',
+    *,
+    auth: tuple[str, str] | None = None,
+    headers: dict[str, str] | None = None,
+    json_data: Any = None,
+    timeout: float | None = None,
+) -> HttpResponse:
+    request_headers = dict(headers or {})
+    body = None
+    if json_data is not None:
+        body = json.dumps(json_data).encode('utf-8')
+        request_headers.setdefault('Content-Type', 'application/json')
+
+    if auth is not None:
+        username, password = auth
+        token = base64.b64encode('{}:{}'.format(username, password).encode('utf-8')).decode('ascii')
+        request_headers['Authorization'] = 'Basic {}'.format(token)
+
+    req = urllib.request.Request(url, data=body, headers=request_headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            return HttpResponse(url, response.getcode(), response.reason, response.read())
+    except urllib.error.HTTPError as error:
+        return HttpResponse(url, error.code, error.reason, error.read())
+
+
+def is_timeout_error(error: BaseException) -> bool:
+    reason = getattr(error, 'reason', None)
+    return isinstance(error, TimeoutError) or isinstance(reason, TimeoutError)
 
 
 @pytest.fixture(scope="module")
@@ -360,35 +417,41 @@ def test_view_compaction_metrics(aggregator, gauges):
         def generate_views(self):
             url = '{}/kennel/_design/dummy/_view/all'.format(self._server)
             try:
-                r = requests.get(url, auth=self._auth, timeout=1)
+                r = http_request(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
-            except requests.exceptions.Timeout:
-                pass
+            except (TimeoutError, urllib.error.URLError) as error:
+                if not is_timeout_error(error):
+                    raise
             url = '{}/kennel/_design/dummy/_view/by_data'.format(self._server)
             try:
-                r = requests.get(url, auth=self._auth, timeout=1)
+                r = http_request(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
-            except requests.exceptions.Timeout:
-                pass
+            except (TimeoutError, urllib.error.URLError) as error:
+                if not is_timeout_error(error):
+                    raise
 
         def update_doc(self, doc):
             body = {'data': str(random.randint(0, 1000000000)), '_rev': doc['rev']}
 
             url = '{}/kennel/{}'.format(self._server, doc['id'])
-            r = requests.put(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
+            r = http_request(
+                url, method='PUT', auth=self._auth, headers={'Content-Type': 'application/json'}, json_data=body
+            )
             r.raise_for_status()
             return r.json()
 
         def post_doc(self, doc_id):
             body = {"_id": doc_id, "data": str(time.time())}
             url = '{}/kennel'.format(self._server)
-            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
+            r = http_request(
+                url, method='POST', auth=self._auth, headers={'Content-Type': 'application/json'}, json_data=body
+            )
             r.raise_for_status()
             return r.json()
 
         def compact_views(self):
             url = '{}/kennel/_compact/dummy'.format(self._server)
-            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'})
+            r = http_request(url, method='POST', auth=self._auth, headers={'Content-Type': 'application/json'})
             r.raise_for_status()
 
         def stop(self):

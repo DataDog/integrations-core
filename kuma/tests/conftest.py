@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import http.client
 import os
 import time
 from contextlib import ExitStack
+from urllib import error, request
 
 import pytest
-import requests
 
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
@@ -44,11 +45,11 @@ def wait_for_kuma_readiness(api_url, api_port, max_wait=600):
 
     while time.monotonic() - start_time < max_wait:
         try:
-            response = requests.get(config_url, timeout=5)
-            if response.ok:
-                print(f"Kuma control plane is ready at {config_url} (took {time.monotonic() - start_time} seconds)")
-                return
-        except (requests.exceptions.RequestException, requests.exceptions.Timeout):
+            with request.urlopen(config_url, timeout=5) as response:
+                if response.status < 400:
+                    print(f"Kuma control plane is ready at {config_url} (took {time.monotonic() - start_time} seconds)")
+                    return
+        except (error.URLError, http.client.HTTPException, TimeoutError):
             pass
 
         print(f"Waiting for Kuma control plane to be ready at {config_url}...")

@@ -4,11 +4,12 @@
 import copy
 import json
 import os
+import urllib.error
+import urllib.request
 from contextlib import contextmanager
 from time import sleep
 
 import pytest
-import requests
 
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
@@ -84,7 +85,12 @@ def dd_environment():
     ):
         # run pre-test commands
         for _ in range(100):
-            requests.get(GITLAB_URL)
+            try:
+                response = urllib.request.urlopen(GITLAB_URL)
+            except urllib.error.HTTPError as e:
+                e.close()
+            else:
+                response.close()
         sleep(2)
 
         yield {
@@ -103,11 +109,11 @@ def dd_environment():
 
 @pytest.fixture()
 def mock_data(mock_openmetrics_http):
-    mock_openmetrics_http.get.side_effect = mocked_requests_get
+    mock_openmetrics_http.get.side_effect = mocked_http_get
     yield
 
 
-def mocked_requests_get(*args, **kwargs):
+def mocked_http_get(*args, **kwargs):
     url = args[0]
 
     if url.startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):

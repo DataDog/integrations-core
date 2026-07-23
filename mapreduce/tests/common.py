@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import random
 import time
 from contextlib import contextmanager
+from urllib import error, request
 
-import requests
 from datadog_test_libs.utils.mock_dns import mock_local
 
 from datadog_checks.dev import get_docker_hostname, get_here, run_command
@@ -69,8 +70,15 @@ def setup_mapreduce():
 
     # Called in WaitFor which catches initial exceptions when containers aren't ready
     for _ in range(15):
-        r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
-        res = r.json()
+        url = "{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri'])
+        try:
+            response = request.urlopen(url)
+        except error.HTTPError as exc:
+            response = exc
+        try:
+            res = json.loads(response.read().decode())
+        finally:
+            response.close()
         if res.get("apps", None) is not None and res.get("apps"):
             return True
 

@@ -5,10 +5,10 @@ import copy
 import os
 import time
 from contextlib import contextmanager
+from urllib import request
 from urllib.parse import urljoin
 
 import pytest
-import requests
 
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev._env import get_state, save_state
@@ -111,16 +111,16 @@ def mocked_worker_instance():
 
 def run_add():
     try:
-        response = requests.post(
+        req = request.Request(
             urljoin(SERVE_URL, "add"),
-            data='{"a": 1, "b": 2}',
+            data=b'{"a": 1, "b": 2}',
             headers={'Content-Type': 'application/json'},
+            method='POST',
         )
-        response.raise_for_status()
+        with request.urlopen(req) as response:
+            return response.status == 200
     except Exception:
         return False
-    else:
-        return response.status_code == 200
 
 
 def prepare_service():

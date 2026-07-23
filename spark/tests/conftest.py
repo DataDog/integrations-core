@@ -1,16 +1,27 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
+from urllib.error import HTTPError
+from urllib.request import urlopen
 
 import pytest
-import requests
 from datadog_test_libs.utils.mock_dns import mock_local
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
 from .common import HERE, HOST, HOSTNAME_TO_PORT_MAPPING, INSTANCE_STANDALONE
+
+
+def read_url(url: str) -> bytes:
+    try:
+        with urlopen(url) as response:
+            return response.read()
+    except HTTPError as e:
+        with e:
+            return e.read()
 
 
 @pytest.fixture(scope='session')
@@ -36,8 +47,7 @@ def dd_environment():
 
 def check_metrics_available():
     endpoint = 'http://{}:4050/metrics/json'.format(HOST)
-    r = requests.get(endpoint)
-    return r.text.count("driver.spark.streaming") >= 6
+    return read_url(endpoint).decode('utf-8').count("driver.spark.streaming") >= 6
 
 
 def check_executors_registered():
@@ -49,11 +59,13 @@ def check_executors_registered():
     # of the two apps can own a non-driver executor at a time; either app having one is
     # enough for `test_integration_standalone` to observe executor metrics.
     for port in (4040, 4050):
-        apps = requests.get('http://{}:{}/api/v1/applications'.format(HOST, port)).json()
+        apps = json.loads(read_url('http://{}:{}/api/v1/applications'.format(HOST, port)).decode('utf-8'))
         if not apps:
             continue
         app_id = apps[0]['id']
-        executors = requests.get('http://{}:{}/api/v1/applications/{}/executors'.format(HOST, port, app_id)).json()
+        executors = json.loads(
+            read_url('http://{}:{}/api/v1/applications/{}/executors'.format(HOST, port, app_id)).decode('utf-8')
+        )
         if any(executor.get('id') != 'driver' for executor in executors):
             return True
     return False

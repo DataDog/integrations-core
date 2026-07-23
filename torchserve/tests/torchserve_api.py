@@ -1,7 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import requests
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 from .common import INFERENCE_API_URL, MANAGEMENT_API_URL
 
@@ -9,53 +10,69 @@ from .common import INFERENCE_API_URL, MANAGEMENT_API_URL
 # They are mainly used to set up the e2e environment
 
 
+def with_query_params(url: str, params: dict[str, object]) -> str:
+    return '{}?{}'.format(url, urlencode(params))
+
+
+def send_request(http_request: Request) -> int:
+    with urlopen(http_request) as response:
+        return response.status
+
+
 def run_prediction(model):
     try:
-        response = requests.post(
-            f"{INFERENCE_API_URL}/predictions/{model}",
-            data='{"input": 2.0}',
-            headers={'Content-Type': 'application/json'},
+        status = send_request(
+            Request(
+                f"{INFERENCE_API_URL}/predictions/{model}",
+                data=b'{"input": 2.0}',
+                headers={'Content-Type': 'application/json'},
+                method='POST',
+            )
         )
-        response.raise_for_status()
     except Exception:
         return False
     else:
-        return response.status_code == 200
+        return status == 200
 
 
 def set_model_default_version(model, version):
     try:
-        response = requests.put(
-            f"{MANAGEMENT_API_URL}/models/{model}/{version}/set-default",
+        status = send_request(
+            Request(
+                f"{MANAGEMENT_API_URL}/models/{model}/{version}/set-default",
+                method='PUT',
+            )
         )
-        response.raise_for_status()
     except Exception:
         return False
     else:
-        return response.status_code == 200
+        return status == 200
 
 
 def update_workers(model, min, max):
     try:
-        response = requests.put(
-            f"{MANAGEMENT_API_URL}/models/{model}",
-            params={
-                "min_worker": min,
-                "max_worker": max,
-            },
+        status = send_request(
+            Request(
+                with_query_params(
+                    f"{MANAGEMENT_API_URL}/models/{model}",
+                    {
+                        "min_worker": min,
+                        "max_worker": max,
+                    },
+                ),
+                method='PUT',
+            )
         )
-        response.raise_for_status()
     except Exception:
         return False
     else:
-        return response.status_code == 202
+        return status == 202
 
 
 def register_model(model):
     try:
-        response = requests.post(f"{MANAGEMENT_API_URL}/models", params={"url": model})
-        response.raise_for_status()
+        status = send_request(Request(with_query_params(f"{MANAGEMENT_API_URL}/models", {"url": model}), method='POST'))
     except Exception:
         return False
     else:
-        return response.status_code == 200
+        return status == 200

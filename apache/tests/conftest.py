@@ -3,9 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import os
+import urllib.error
+import urllib.request
+from contextlib import closing
+from typing import Any
 
 import pytest
-import requests
 
 from datadog_checks.apache import Apache
 from datadog_checks.dev import docker_run
@@ -13,6 +16,20 @@ from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import AUTO_STATUS_URL, BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
+
+
+def http_get(url: str, **kwargs: Any) -> Any:
+    req = urllib.request.Request(url, headers=kwargs.get('headers') or {})
+    timeout = kwargs.get('timeout')
+    if isinstance(timeout, tuple):
+        timeout = timeout[-1]
+
+    try:
+        if timeout is None:
+            return urllib.request.urlopen(req)
+        return urllib.request.urlopen(req, timeout=timeout)
+    except urllib.error.HTTPError as e:
+        return e
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +50,7 @@ def dd_environment():
 
 def generate_metrics():
     for _ in range(0, 100):
-        requests.get(BASE_URL)
+        http_get(BASE_URL).close()
 
 
 def check_status_page_ready():
@@ -41,8 +58,11 @@ def check_status_page_ready():
     Some status info we need for metrics do not appear immediately.
     This check help waiting for the full status page.
     """
-    resp = requests.get(AUTO_STATUS_URL)
-    data = resp.content.decode('utf-8')
+    resp = http_get(AUTO_STATUS_URL)
+    try:
+        data = resp.read().decode('utf-8')
+    finally:
+        resp.close()
     assert 'ReqPerSec: ' in data
     assert 'CPULoad: ' in data
 
@@ -50,13 +70,16 @@ def check_status_page_ready():
 @pytest.fixture
 def mock_hide_server_version(mock_http):
     def filter_server_version(url, *args, **kwargs):
-        r = requests.get(url, **kwargs)
-        content = '\n'.join(line for line in r.text.splitlines() if 'ServerVersion' not in line)
+        with closing(http_get(url, **kwargs)) as r:
+            content = '\n'.join(line for line in r.read().decode('utf-8').splitlines() if 'ServerVersion' not in line)
+            status_code = r.getcode()
+            headers = dict(r.headers)
+            response_url = r.geturl()
         return MockHTTPResponse(
             content=content,
-            status_code=r.status_code,
-            headers=dict(r.headers),
-            url=r.url,
+            status_code=status_code,
+            headers=headers,
+            url=response_url,
         )
 
     mock_http.get.side_effect = filter_server_version

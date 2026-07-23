@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import http.client
 import os
 from copy import deepcopy
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
@@ -15,14 +17,31 @@ from datadog_checks.riak import Riak
 from . import common
 
 
+def response_ok(http_request: Request) -> bool:
+    try:
+        with urlopen(http_request) as response:
+            return response.status < http.client.BAD_REQUEST
+    except HTTPError as e:
+        e.close()
+        return e.code < http.client.BAD_REQUEST
+
+
 def populate():
-    post = requests.post(
-        "{}/riak/bucket/german".format(common.BASE_URL),
-        headers={"Content-Type": "text/plain"},
-        data='herzlich willkommen',
+    post = response_ok(
+        Request(
+            "{}/riak/bucket/german".format(common.BASE_URL),
+            data=b'herzlich willkommen',
+            headers={"Content-Type": "text/plain"},
+            method='POST',
+        )
     )
-    get = requests.get("{}/riak/bucket/german".format(common.BASE_URL))
-    return post.ok and get.ok
+    get = response_ok(
+        Request(
+            "{}/riak/bucket/german".format(common.BASE_URL),
+            method='GET',
+        )
+    )
+    return post and get
 
 
 @pytest.fixture(scope="session")

@@ -5,10 +5,11 @@
 import json
 import logging
 import os
+import urllib.error
+import urllib.request
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.go_expvar import GoExpvar
@@ -36,7 +37,12 @@ def dd_environment():
 
     with docker_run(os.path.join(common.HERE, 'compose', 'docker-compose.yaml'), endpoints=[common.URL]):
         for _ in range(9):
-            requests.get(common.URL + "?user=123456")
+            try:
+                response = urllib.request.urlopen(common.URL + "?user=123456")
+            except urllib.error.HTTPError as e:
+                e.close()
+            else:
+                response.close()
         yield common.INSTANCE
 
 

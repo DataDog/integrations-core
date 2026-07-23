@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
 import getpass
 import logging
 import os
@@ -8,10 +9,10 @@ import re
 import subprocess
 from contextlib import contextmanager
 from copy import deepcopy
+from urllib import request
 
 import mock
 import pytest
-import requests
 from packaging import version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
@@ -41,6 +42,11 @@ from .legacy.common import (
 )
 
 log = logging.getLogger('test_haproxy')
+
+
+def basic_auth_header(username: str, password: str) -> str:
+    token = base64.b64encode(f'{username}:{password}'.encode('latin1')).decode('ascii')
+    return f'Basic {token}'
 
 
 @pytest.fixture(scope='session')
@@ -126,13 +132,14 @@ def prometheus_metricsv2(prometheus_metrics):
 
 
 def wait_for_haproxy():
-    res = requests.get(STATS_URL, auth=(USERNAME, PASSWORD))
-    res.raise_for_status()
+    req = request.Request(STATS_URL, headers={'Authorization': basic_auth_header(USERNAME, PASSWORD)})
+    with request.urlopen(req):
+        pass
 
 
 def wait_for_haproxy_open():
-    res_open = requests.get(STATS_URL_OPEN)
-    res_open.raise_for_status()
+    with request.urlopen(STATS_URL_OPEN):
+        pass
 
 
 @contextmanager

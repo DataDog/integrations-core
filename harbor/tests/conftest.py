@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
+import json
 import os
+import ssl
+from urllib import error, request
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
@@ -41,6 +44,11 @@ from .common import (
 )
 
 
+def basic_auth_header(username: str, password: str) -> str:
+    token = base64.b64encode(f'{username}:{password}'.encode('latin1')).decode('ascii')
+    return f'Basic {token}'
+
+
 @pytest.fixture(scope='session')
 def dd_environment(e2e_instance):
     compose_file = get_docker_compose_file()
@@ -58,17 +66,28 @@ def dd_environment(e2e_instance):
 
 
 def create_simple_user():
-    requests.post(
-        URL + USERS_PATH,
-        auth=("admin", "Harbor12345"),
-        json={
+    payload = json.dumps(
+        {
             "username": "NotAnAdmin",
             "email": "NotAnAdmin@goharbor.io",
             "password": "Str0ngPassw0rd",
             "realname": "Not An Admin",
+        }
+    ).encode()
+    req = request.Request(
+        URL + USERS_PATH,
+        data=payload,
+        headers={
+            "Authorization": basic_auth_header("admin", "Harbor12345"),
+            "Content-Type": "application/json",
         },
-        verify=False,
+        method='POST',
     )
+    try:
+        with request.urlopen(req, context=ssl._create_unverified_context()):
+            pass
+    except error.HTTPError as exc:
+        exc.close()
 
 
 @pytest.fixture(scope='session')

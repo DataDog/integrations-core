@@ -1,12 +1,18 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
 import copy
+import http.client
+import json
 import os
+import ssl
+import urllib.error
+import urllib.request
+from typing import Any
 
 import mock
 import pytest
-import requests
 from packaging import version
 
 from datadog_checks.base.utils.common import exclude_undefined_keys
@@ -56,13 +62,64 @@ BENCHMARK_INSTANCE = {
 }
 
 
+class HttpResponse:
+    def __init__(self, url: str, status_code: int, reason: str, content: bytes) -> None:
+        self.url = url
+        self.status_code = status_code
+        self.reason = reason or http.client.responses.get(status_code, '')
+        self.content = content
+
+    @property
+    def text(self) -> str:
+        return self.content.decode('utf-8')
+
+    def json(self) -> Any:
+        return json.loads(self.text)
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise urllib.error.HTTPError(self.url, self.status_code, self.reason, http.client.HTTPMessage(), None)
+
+
+def http_request(
+    url: str,
+    method: str = 'GET',
+    *,
+    auth: tuple[str, str] | None = None,
+    json_data: Any = None,
+    verify: bool = True,
+) -> HttpResponse:
+    request_headers = {}
+    body = None
+    if json_data is not None:
+        body = json.dumps(json_data).encode('utf-8')
+        request_headers['Content-Type'] = 'application/json'
+
+    if auth is not None:
+        username, password = auth
+        token = base64.b64encode('{}:{}'.format(username, password).encode('utf-8')).decode('ascii')
+        request_headers['Authorization'] = 'Basic {}'.format(token)
+
+    context = ssl._create_unverified_context() if not verify and url.startswith('https://') else None
+    open_kwargs: dict[str, Any] = {}
+    if context is not None:
+        open_kwargs['context'] = context
+
+    req = urllib.request.Request(url, data=body, headers=request_headers, method=method)
+    try:
+        with urllib.request.urlopen(req, **open_kwargs) as response:
+            return HttpResponse(url, response.getcode(), response.reason, response.read())
+    except urllib.error.HTTPError as error:
+        return HttpResponse(url, error.code, error.reason, error.read())
+
+
 def ping_elastic():
     """
     The PUT request we use to ping the server will create an index named `testindex`
     as soon as ES is available. This is just one possible ping strategy but it's needed
     as a fixture for tests that require that index to exist in order to pass.
     """
-    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
+    response = http_request('{}/testindex'.format(URL), method='PUT', auth=(USER, PASSWORD), verify=False)
     response.raise_for_status()
 
 
@@ -71,9 +128,10 @@ def create_slm():
         return
 
     create_backup_body = {"type": "fs", "settings": {"location": "data"}}
-    response = requests.put(
+    response = http_request(
         '{}/_snapshot/my_repository?pretty'.format(INSTANCE['url']),
-        json=create_backup_body,
+        method='PUT',
+        json_data=create_backup_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
         verify=False,
     )
@@ -86,9 +144,10 @@ def create_slm():
         "config": {"indices": ["data-*", "important"], "ignore_unavailable": False, "include_global_state": False},
         "retention": {"expire_after": "30d", "min_count": 5, "max_count": 50},
     }
-    response = requests.put(
+    response = http_request(
         '{}/_slm/policy/daily-snapshots?pretty'.format(INSTANCE['url']),
-        json=create_slm_body,
+        method='PUT',
+        json_data=create_slm_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
         verify=False,
     )
@@ -96,7 +155,7 @@ def create_slm():
 
 
 def index_starts_with_dot():
-    create_dot_testindex = requests.put('{}/.testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
+    create_dot_testindex = http_request('{}/.testindex'.format(URL), method='PUT', auth=(USER, PASSWORD), verify=False)
     create_dot_testindex.raise_for_status()
 
 

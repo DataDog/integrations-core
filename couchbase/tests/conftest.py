@@ -2,18 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import base64
+import http.client
+import json
 import os
 import subprocess
 import time
+import urllib.error
+import urllib.request
 from copy import deepcopy
+from typing import Any
 
 import pytest
-import requests
 
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.dev.http import MockHTTPResponse  # noqa: F401
+from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import (
     BUCKET_NAME,
@@ -32,6 +37,51 @@ from .common import (
     URL,
     USER,
 )
+
+
+class HttpResponse:
+    def __init__(self, url: str, status_code: int, reason: str, content: bytes) -> None:
+        self.url = url
+        self.status_code = status_code
+        self.reason = reason or http.client.responses.get(status_code, '')
+        self.content = content
+
+    @property
+    def text(self) -> str:
+        return self.content.decode('utf-8')
+
+    def json(self) -> Any:
+        return json.loads(self.text)
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise urllib.error.HTTPError(self.url, self.status_code, self.reason, http.client.HTTPMessage(), None)
+
+
+def http_request(
+    url: str,
+    method: str = 'GET',
+    *,
+    auth: tuple[str, str] | None = None,
+    json_data: Any = None,
+) -> HttpResponse:
+    request_headers = {}
+    body = None
+    if json_data is not None:
+        body = json.dumps(json_data).encode('utf-8')
+        request_headers['Content-Type'] = 'application/json'
+
+    if auth is not None:
+        username, password = auth
+        token = base64.b64encode('{}:{}'.format(username, password).encode('utf-8')).decode('ascii')
+        request_headers['Authorization'] = 'Basic {}'.format(token)
+
+    req = urllib.request.Request(url, data=body, headers=request_headers, method=method)
+    try:
+        with urllib.request.urlopen(req) as response:
+            return HttpResponse(url, response.getcode(), response.reason, response.read())
+    except urllib.error.HTTPError as error:
+        return HttpResponse(url, error.code, error.reason, error.read())
 
 
 @pytest.fixture
@@ -180,8 +230,8 @@ def couchbase_init():
     ]
     subprocess.check_call(init_args)
 
-    r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
-    return r.status_code == requests.codes.ok
+    r = http_request('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
+    return r.status_code == http.client.OK
 
 
 def load_sample_bucket():
@@ -192,12 +242,13 @@ def load_sample_bucket():
     # Resources used:
     # https://docs.couchbase.com/server/current/manage/manage-settings/install-sample-buckets.html
 
-    r = requests.post(
+    r = http_request(
         '{}/sampleBuckets/install'.format(URL),
+        method='POST',
         auth=(USER, PASSWORD),
-        json=["gamesim-sample"],
+        json_data=["gamesim-sample"],
     )
-    if r.status_code == 400:
+    if r.status_code == http.client.BAD_REQUEST:
         if "Sample bucket gamesim-sample is already loaded" in r.text:
             return True
         return False
@@ -225,7 +276,7 @@ def load_sample_bucket():
 
     while True:
         # Loop until the task ID is gone, meaning the task is done.
-        r = requests.get(
+        r = http_request(
             '{}/pools/default/tasks'.format(URL),
             auth=(USER, PASSWORD),
         )
@@ -243,7 +294,7 @@ def load_sample_bucket():
 
 def gamesim_primary_index_ready():
     """Wait until every gamesim_primary keyspace reports initial_build_progress == 100."""
-    r = requests.get(
+    r = http_request(
         '{}/api/v1/stats'.format(INDEX_STATS_URL),
         auth=(USER, PASSWORD),
     )
@@ -283,10 +334,11 @@ def create_syncgw_database():
         payload["index"] = {"num_replicas": payload["num_index_replicas"]}
         del payload["num_index_replicas"]
 
-    r = requests.put(
+    r = http_request(
         '{}/sync_gateway/'.format(SG_URL),
+        method='PUT',
         auth=(USER, PASSWORD),
-        json=payload,
+        json_data=payload,
     )
     r.raise_for_status()
 
@@ -295,7 +347,7 @@ def node_stats():
     """
     Wait for couchbase to generate node stats
     """
-    r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
+    r = http_request('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     r.raise_for_status()
     stats = r.json()
     return all(len(stats['interestingStats']) > 0 for stats in stats['nodes'])
@@ -305,7 +357,7 @@ def bucket_stats():
     """
     Wait for couchbase to generate bucket stats
     """
-    r = requests.get('{}/pools/default/buckets/{}/stats'.format(URL, BUCKET_NAME), auth=(USER, PASSWORD))
+    r = http_request('{}/pools/default/buckets/{}/stats'.format(URL, BUCKET_NAME), auth=(USER, PASSWORD))
     r.raise_for_status()
     stats = r.json()
     return stats['op']['lastTStamp'] != 0

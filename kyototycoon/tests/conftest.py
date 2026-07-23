@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from urllib import error, parse, request
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 
@@ -25,10 +25,21 @@ def dd_environment():
     ):
         # Generate a test database
         data = {'dddd': 'dddd'}
-        headers = {'X-Kt-Mode': 'set'}
+        payload = parse.urlencode(data).encode()
+        headers = {'X-Kt-Mode': 'set', 'Content-Type': 'application/x-www-form-urlencoded'}
 
         for _ in range(100):
-            requests.put(URL, data=data, headers=headers)
-            requests.get(URL)
+            try:
+                req = request.Request(URL, data=payload, headers=headers, method='PUT')
+                with request.urlopen(req):
+                    pass
+            except error.HTTPError as exc:
+                exc.close()
+
+            try:
+                with request.urlopen(URL):
+                    pass
+            except error.HTTPError as exc:
+                exc.close()
 
         yield DEFAULT_INSTANCE

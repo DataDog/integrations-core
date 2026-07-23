@@ -1,18 +1,68 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
+import http.client
 import json
 import os
+import urllib.error
+import urllib.request
 from copy import deepcopy
+from typing import Any
 
 import pytest
-import requests
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 
 from . import common
+
+
+class HttpResponse:
+    def __init__(self, url: str, status_code: int, reason: str, content: bytes) -> None:
+        self.url = url
+        self.status_code = status_code
+        self.reason = reason or http.client.responses.get(status_code, '')
+        self.content = content
+
+    @property
+    def text(self) -> str:
+        return self.content.decode('utf-8')
+
+    def json(self) -> Any:
+        return json.loads(self.text)
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise urllib.error.HTTPError(self.url, self.status_code, self.reason, http.client.HTTPMessage(), None)
+
+
+def http_request(
+    url: str,
+    method: str = 'GET',
+    *,
+    auth: tuple[str, str] | None = None,
+    headers: dict[str, str] | None = None,
+    json_data: Any = None,
+) -> HttpResponse:
+    request_headers = dict(headers or {})
+    body = None
+    if json_data is not None:
+        body = json.dumps(json_data).encode('utf-8')
+        request_headers.setdefault('Content-Type', 'application/json')
+
+    if auth is not None:
+        username, password = auth
+        token = base64.b64encode('{}:{}'.format(username, password).encode('utf-8')).decode('ascii')
+        request_headers['Authorization'] = 'Basic {}'.format(token)
+
+    req = urllib.request.Request(url, data=body, headers=request_headers, method=method)
+    try:
+        with urllib.request.urlopen(req) as response:
+            return HttpResponse(url, response.getcode(), response.reason, response.read())
+    except urllib.error.HTTPError as error:
+        return HttpResponse(url, error.code, error.reason, error.read())
 
 
 @pytest.fixture
@@ -91,10 +141,10 @@ def enable_cluster():
     auth = (common.USER, common.PASSWORD)
     headers = {'Accept': 'text/json'}
 
-    requests_data = []
+    cluster_setup_payloads = []
     for node in [common.NODE2, common.NODE3]:
         _, node_name = node['name'].split('@')
-        requests_data.append(
+        cluster_setup_payloads.append(
             {
                 "action": "enable_cluster",
                 "username": common.USER,
@@ -107,7 +157,7 @@ def enable_cluster():
                 "remote_current_password": common.PASSWORD,
             }
         )
-        requests_data.append(
+        cluster_setup_payloads.append(
             {
                 "action": "add_node",
                 "username": common.USER,
@@ -119,11 +169,13 @@ def enable_cluster():
         )
 
     resp_data = None
-    for data in requests_data:
-        resp = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
+    for data in cluster_setup_payloads:
+        resp = http_request(
+            "{}/_cluster_setup".format(common.URL), method='POST', json_data=data, auth=auth, headers=headers
+        )
         resp_data = resp.json()
 
-    resp = requests.get("{}/_membership".format(common.URL), auth=auth, headers=headers)
+    resp = http_request("{}/_membership".format(common.URL), auth=auth, headers=headers)
     membership = resp.json()
 
     expected_nb_nodes = 3
@@ -145,9 +197,9 @@ def generate_data(couch_version):
     headers = {'Accept': 'text/json'}
 
     # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    http_request("{}/kennel".format(common.URL), method='PUT', auth=auth, headers=headers)
     for i in range(5):
-        requests.put("{}/db{}".format(common.URL, i), auth=auth, headers=headers)
+        http_request("{}/db{}".format(common.URL, i), method='PUT', auth=auth, headers=headers)
 
     # Populate the database
     data = {
@@ -157,7 +209,7 @@ def generate_data(couch_version):
             "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
         },
     }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
+    http_request("{}/kennel/_design/dummy".format(common.URL), method='PUT', json_data=data, auth=auth, headers=headers)
 
 
 def check_node_stats():
@@ -166,7 +218,7 @@ def check_node_stats():
     # Check all nodes have stats
     for node in common.ALL_NODES:
         url = "{}/_node/{}/_stats".format(common.URL, node['name'])
-        res = requests.get(url, auth=auth, headers=headers)
+        res = http_request(url, auth=auth, headers=headers)
         data = res.json()
         assert "global_changes" in data, "Invalid stats. Get stats url: {}".format(url)
 
@@ -188,11 +240,12 @@ def send_replication():
         body = replication_body.copy()
         body['_id'] = 'my_replication_id_{}'.format(i)
         body['target'] = body['target'] + str(i)
-        r = requests.post(
+        r = http_request(
             replicator_url,
+            method='POST',
             auth=(common.NODE1['user'], common.NODE1['password']),
             headers={'Content-Type': 'application/json'},
-            json=body,
+            json_data=body,
         )
         r.raise_for_status()
 
@@ -203,7 +256,7 @@ def get_replication():
     """
     task_url = "{}/_active_tasks".format(common.NODE1['server'])
 
-    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
+    r = http_request(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
     r.raise_for_status()
     active_tasks = r.json()
     count = len(active_tasks)

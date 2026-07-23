@@ -1,10 +1,15 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import http.client
+import json
 import logging
+import ssl
+import urllib.error
+import urllib.request
+from typing import Any
 
 import pytest
-import requests
 from packaging import version
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -25,6 +30,54 @@ from .common import CLUSTER_TAG, ELASTIC_VERSION, IS_OPENSEARCH, JVM_RATES, PASS
 log = logging.getLogger('test_elastic')
 
 pytestmark = pytest.mark.integration
+
+
+class HttpResponse:
+    def __init__(self, url: str, status_code: int, reason: str, content: bytes) -> None:
+        self.url = url
+        self.status_code = status_code
+        self.reason = reason or http.client.responses.get(status_code, '')
+        self.content = content
+
+    @property
+    def text(self) -> str:
+        return self.content.decode('utf-8')
+
+    def json(self) -> Any:
+        return json.loads(self.text)
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise urllib.error.HTTPError(self.url, self.status_code, self.reason, http.client.HTTPMessage(), None)
+
+
+def http_request(
+    url: str,
+    method: str = 'GET',
+    *,
+    data: str | bytes | None = None,
+    json_data: Any = None,
+    verify: bool = True,
+) -> HttpResponse:
+    request_headers = {}
+    body = None
+    if json_data is not None:
+        body = json.dumps(json_data).encode('utf-8')
+        request_headers['Content-Type'] = 'application/json'
+    elif data is not None:
+        body = data if isinstance(data, bytes) else data.encode('utf-8')
+
+    context = ssl._create_unverified_context() if not verify and url.startswith('https://') else None
+    open_kwargs: dict[str, Any] = {}
+    if context is not None:
+        open_kwargs['context'] = context
+
+    req = urllib.request.Request(url, data=body, headers=request_headers, method=method)
+    try:
+        with urllib.request.urlopen(req, **open_kwargs) as response:
+            return HttpResponse(url, response.getcode(), response.reason, response.read())
+    except urllib.error.HTTPError as error:
+        return HttpResponse(url, error.code, error.reason, error.read())
 
 
 def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, aggregator):
@@ -134,14 +187,17 @@ def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, agg
     version.parse(ELASTIC_VERSION) < version.parse('8.0.0'), reason='Test unavailable for Elasticsearch < 8.0.0'
 )
 def test_custom_queries_with_payload_multiterm(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
-    response = requests.put(
+    response = http_request(
         "{}/multiterm_test".format(instance['url']),
-        json={"mappings": {"properties": {"field0": {"type": "keyword"}, "field1": {"type": "keyword"}}}},
+        method='PUT',
+        json_data={"mappings": {"properties": {"field0": {"type": "keyword"}, "field1": {"type": "keyword"}}}},
     )
     response.raise_for_status()
 
-    response = requests.post(
-        "{}/multiterm_test/_doc?refresh=wait_for".format(instance['url']), json={"field0": "foo", "field1": "bar"}
+    response = http_request(
+        "{}/multiterm_test/_doc?refresh=wait_for".format(instance['url']),
+        method='POST',
+        json_data={"field0": "foo", "field1": "bar"},
     )
     response.raise_for_status()
 
@@ -440,7 +496,7 @@ def test_health_event(dd_environment, aggregator):
     es_version = elastic_check._get_es_version()
 
     # Should be yellow at first
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
+    http_request(URL + '/_settings', method='PUT', data='{"index": {"number_of_replicas": 100}', verify=False)
 
     elastic_check.check(None)
 
@@ -468,7 +524,7 @@ def test_health_event_disabled(dd_environment, aggregator):
     elastic_check._get_es_version()
 
     # Should be yellow at first
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
+    http_request(URL + '/_settings', method='PUT', data='{"index": {"number_of_replicas": 100}', verify=False)
 
     elastic_check.check(None)
 

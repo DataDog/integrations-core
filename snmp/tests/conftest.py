@@ -6,9 +6,10 @@ import os
 import shutil
 import socket
 from copy import deepcopy
+from urllib.error import HTTPError
+from urllib.request import urlopen
 
 import pytest
-import requests
 import yaml
 
 from datadog_checks.base.agent import datadog_agent
@@ -46,6 +47,15 @@ E2E_METADATA = {
 EXPECTED_AUTODISCOVERY_CHECKS = 6
 
 
+def read_url(url: str) -> bytes:
+    try:
+        with urlopen(url) as response:
+            return response.read()
+    except HTTPError as e:
+        with e:
+            return e.read()
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     new_e2e_metadata = deepcopy(E2E_METADATA)
@@ -55,9 +65,8 @@ def dd_environment():
         if not os.path.exists(data_dir):
             shutil.copytree(os.path.join(COMPOSE_DIR, 'data'), data_dir)
             for data_file in FILES:
-                response = requests.get(data_file)
                 with open(os.path.join(data_dir, data_file.rsplit('/', 1)[1]), 'wb') as output:
-                    output.write(response.content)
+                    output.write(read_url(data_file))
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
             if SNMP_LISTENER_ENV == 'true':

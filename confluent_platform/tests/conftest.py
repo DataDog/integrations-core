@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import urllib.error
+import urllib.request
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
@@ -42,8 +43,19 @@ def create_connectors():
         },
     }
 
-    requests.post('http://localhost:8083/connectors', data=json.dumps(data_sink), headers=headers)
-    requests.post('http://localhost:8083/connectors', data=json.dumps(data), headers=headers)
+    for connector_data in (data_sink, data):
+        req = urllib.request.Request(
+            'http://localhost:8083/connectors',
+            data=json.dumps(connector_data).encode('utf-8'),
+            headers=headers,
+            method='POST',
+        )
+        try:
+            response = urllib.request.urlopen(req)
+        except urllib.error.HTTPError as e:
+            e.close()
+        else:
+            response.close()
 
 
 @pytest.fixture(scope="session")

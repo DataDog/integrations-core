@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import subprocess
+import urllib.error
+import urllib.request
 
 import pytest
-import requests
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.utils import ON_WINDOWS
@@ -19,11 +20,20 @@ COREDNS_VERSION = [int(i) for i in os.environ['COREDNS_VERSION'].split(".")]
 
 
 def init_coredns():
-    res = requests.get(URL)
-    if not ON_WINDOWS:
-        # create some metrics by using dig
-        subprocess.check_call(DIG_ARGS)
-    res.raise_for_status()
+    status_error = None
+    try:
+        res = urllib.request.urlopen(URL)
+    except urllib.error.HTTPError as e:
+        res = e
+        status_error = e
+    try:
+        if not ON_WINDOWS:
+            # create some metrics by using dig
+            subprocess.check_call(DIG_ARGS)
+        if status_error is not None:
+            raise status_error
+    finally:
+        res.close()
 
 
 @pytest.fixture(scope="session")

@@ -5,8 +5,22 @@ import logging
 import threading
 import time
 from random import randrange
+from urllib.error import HTTPError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
-import requests
+
+def with_query_params(url: str, params: dict[str, object]) -> str:
+    return '{}?{}'.format(url, urlencode(params))
+
+
+def send_request(http_request: Request) -> None:
+    try:
+        with urlopen(http_request) as response:
+            response.read()
+    except HTTPError as e:
+        with e:
+            e.read()
 
 
 def do_stuff(id, func, *args):
@@ -17,41 +31,54 @@ def do_stuff(id, func, *args):
 
 
 def run_prediction(model):
-    requests.post(
-        f"http://localhost:8080/predictions/{model}",
-        data='{"input": 2.0}',
-        headers={'Content-Type': 'application/json'},
+    send_request(
+        Request(
+            f"http://localhost:8080/predictions/{model}",
+            data=b'{"input": 2.0}',
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
     )
 
 
 # Will generate 5xx errors
 def run_bad_prediction():
-    requests.post(
-        f"http://localhost:8080/predictions/{model}",
-        data='{input": 2.0}',
-        headers={'Content-Type': 'application/json'},
+    send_request(
+        Request(
+            f"http://localhost:8080/predictions/{model}",
+            data=b'{input": 2.0}',
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
     )
     time.sleep(randrange(50))
 
 
 def add_remove_model():
-    requests.post("http://localhost:8081/models", params={"url": "linear_regression_3_3.mar"})
+    send_request(
+        Request(
+            with_query_params("http://localhost:8081/models", {"url": "linear_regression_3_3.mar"}),
+            method='POST',
+        )
+    )
     time.sleep(150)
-    requests.delete("http://localhost:8081/models/linear_regression_3_3/1")
+    send_request(Request("http://localhost:8081/models/linear_regression_3_3/1", method='DELETE'))
     time.sleep(200)
 
 
 def change_default_version():
-    requests.put(f"http://localhost:8081/models/linear_regression_1_2/{randrange(1, 4)}/set-default")
+    send_request(
+        Request(f"http://localhost:8081/models/linear_regression_1_2/{randrange(1, 4)}/set-default", method='PUT')
+    )
     time.sleep(randrange(200))
 
 
 def call_openmetrics_endpoint():
-    requests.get("http://localhost:8082/metrics")
+    send_request(Request("http://localhost:8082/metrics", method='GET'))
 
 
 def run_bad_healthcheck():
-    requests.get("http://localhost:8080/pin")
+    send_request(Request("http://localhost:8080/pin", method='GET'))
 
 
 if __name__ == "__main__":

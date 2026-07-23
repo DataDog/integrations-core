@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import ssl
 import sys
+from urllib import request
 
 import pytest
-import requests
 from datadog_test_libs.utils.mock_dns import mock_local
 from mock import patch
 
@@ -37,8 +38,8 @@ def dd_environment(mock_local_http_dns):
 
 
 def call_endpoint(url):
-    response = requests.get(url, verify=False)
-    response.raise_for_status()
+    with request.urlopen(url, context=ssl._create_unverified_context()):
+        pass
     return True
 
 
