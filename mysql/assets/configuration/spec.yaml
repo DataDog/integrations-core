@@ -496,6 +496,16 @@ files:
                   type: number
                   example: 60
                 fleet_configurable: false
+              - name: use_legacy_collection
+                description: |
+                  Force the legacy schema collection implementation instead of the version-optimized
+                  collector. Intended as an escape hatch; leave unset unless advised.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+                hidden: true
+                fleet_configurable: false
           - name: schemas_collection
             display_priority: 0
             deprecation:

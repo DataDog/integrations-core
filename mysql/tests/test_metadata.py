@@ -107,7 +107,8 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
+@pytest.mark.parametrize('use_legacy_collection', [False, True])
+def test_collect_schemas(aggregator, dd_run_check, dbm_instance, use_legacy_collection):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
     is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
@@ -649,7 +650,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'datadog_test_schemas_second': exp_datadog_test_schemas_second,
     }
 
-    dbm_instance['schemas_collection'] = {"enabled": True}
+    dbm_instance['collect_schemas'] = {"enabled": True, "use_legacy_collection": use_legacy_collection}
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
 
@@ -680,16 +681,17 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("dbms_version") is not None
         assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
         assert sorted(schema_event["tags"]) == sorted(expected_tags)
-        database_metadata = schema_event['metadata']
-        assert len(database_metadata) == 1
-        db_name = database_metadata[0]['name']
-        if db_name not in databases_to_find:
-            continue
-
-        if db_name in actual_payloads:
-            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
-        else:
-            actual_payloads[db_name] = database_metadata[0]
+        # The v2 collector chunks a database's tables across multiple metadata entries (one table
+        # per entry), while the legacy collector emits a single entry per database with all its
+        # tables. Reassemble per-database here so the assertions are agnostic to the payload shape.
+        for db_entry in schema_event['metadata']:
+            db_name = db_entry['name']
+            if db_name not in databases_to_find:
+                continue
+            if db_name in actual_payloads:
+                actual_payloads[db_name]['tables'].extend(db_entry.get('tables', []))
+            else:
+                actual_payloads[db_name] = {**db_entry, 'tables': list(db_entry.get('tables', []))}
 
     assert len(actual_payloads) == len(expected_data_for_db)
 
@@ -703,7 +705,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 @pytest.mark.integration
 def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
     dbm_instance['dbm'] = True
-    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    # Time-based truncation is a legacy-collector behavior; force it via the escape hatch.
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0, "use_legacy_collection": True}
     expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
     check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(check)

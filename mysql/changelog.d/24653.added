@@ -1,0 +1,1 @@
+Add a v2 schema collection path built on the shared ``SchemaCollector`` that streams schema metadata in chunks, with a hidden ``use_legacy_collection`` option to force the legacy collector.

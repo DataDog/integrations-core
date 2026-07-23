@@ -218,6 +218,15 @@ class MySql(DatabaseCheck):
         return self._cloud_metadata
 
     @property
+    def dbms_version(self) -> str:
+        # Mirrors the version string used by the other DBM metadata events
+        # (database_instance, mysql_variables). Returns an empty string until
+        # the check has run and populated `self.version`.
+        if self.version is None:
+            return ""
+        return self.version.version + '+' + self.version.build
+
+    @property
     def database_identifier_template(self) -> str:
         return self._config.database_identifier.get('template') or '$resolved_hostname'
 
