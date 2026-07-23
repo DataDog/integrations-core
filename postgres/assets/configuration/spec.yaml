@@ -475,6 +475,7 @@ files:
         Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/local/pgsql/data
         display_default: /usr/local/pgsql/data
       fleet_configurable: false
