@@ -34,7 +34,7 @@ class KubernetesAgent(AgentInterface):
     provisioner (for example, ``kind_run``).
     """
 
-    build_config_keys = ('kubernetes', 'docker')
+    build_config_key = 'docker'
 
     def prepare_start(self) -> None:
         from secrets import token_hex
