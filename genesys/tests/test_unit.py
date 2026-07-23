@@ -5,10 +5,11 @@
 import re
 
 import pytest
+from mock import MagicMock, patch
+
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.genesys import GenesysMosCheck
-from mock import MagicMock, patch
 
 pytestmark = pytest.mark.unit
 
