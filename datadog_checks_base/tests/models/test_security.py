@@ -99,6 +99,17 @@ def test_fallback_global_secure_field_blocked_from_untrusted_provider(dd_run_che
         dd_run_check(check)
 
 
+def test_fallback_legacy_ssl_alias_blocked_from_untrusted_provider(dd_run_check):
+    """Legacy ssl_* aliases are not model fields but are caught by the GLOBAL_SECURE_FIELDS fallback."""
+    instance = {'ssl_crlfile': '/etc/ssl/crl.pem'}
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*ssl_crlfile.*not allowed from untrusted provider"):
+        dd_run_check(check)
+
+
 def test_secure_field_allowed_via_allowlist(dd_run_check):
     """Secure fields with paths in the allowlist are allowed."""
     instance = {'tls_cert': '/etc/ssl/cert.pem'}

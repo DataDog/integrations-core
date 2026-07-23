@@ -1,0 +1,1 @@
+Gate legacy ssl_* config aliases behind trusted-provider checks so they cannot bypass protection on their tls_* equivalents.

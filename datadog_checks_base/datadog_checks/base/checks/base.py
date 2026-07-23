@@ -96,6 +96,19 @@ GLOBAL_SECURE_FIELDS = frozenset(
         'trust_store_path',
         'key_store_path',
         'tools_jar_path',
+        # Legacy ssl_* aliases remapped to tls_* fields (via HTTP_CONFIG_REMAPPER or
+        # read directly from the raw instance by kafka_consumer/kafka_actions). Gate
+        # them like their tls_* equivalents so an alias cannot bypass the
+        # trusted-provider check on the canonical field.
+        'ssl_cert',
+        'ssl_certfile',
+        'ssl_key',
+        'ssl_keyfile',
+        'ssl_private_key',
+        'ssl_ca_cert',
+        'ssl_ca_certs',
+        'ssl_cafile',
+        'ssl_crlfile',
     ]
 )
 
