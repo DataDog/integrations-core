@@ -110,6 +110,15 @@ class KubernetesAgent(AgentInterface):
             return self._captured_kubectl(args, check=check)
         return self._kubectl(args, check=check)
 
+    def _validate_context(self) -> None:
+        process = self._captured_kubectl(['config', 'current-context'])
+        if process.returncode:
+            raise RuntimeError(f'Unable to inspect Kubernetes context: {self._process_output(process)}')
+
+        context = self._process_output(process).strip()
+        if not context.startswith('kind-'):
+            raise RuntimeError(f'Refusing to use non-Kind Kubernetes context `{context}`')
+
     def _validate_topology(self) -> None:
         process = self._captured_kubectl(['get', 'nodes', '-o', 'json'])
         if process.returncode:
@@ -340,6 +349,7 @@ class KubernetesAgent(AgentInterface):
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
         )
         _ = self._wait_timeout
+        self._validate_context()
         self._validate_topology()
         self._create_manifest(self._manifest(agent_build, env_vars))
         self._wait_for_pod()
