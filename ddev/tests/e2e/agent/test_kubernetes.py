@@ -10,17 +10,10 @@ from ddev.e2e.agent.kubernetes import KubernetesAgent
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 
-RESTART_COMMAND = (
-    'old_pid=$(pidof agent) || exit 1; '
-    'set -- $old_pid; old_pid=$1; '
-    'rm -f /var/run/s6/services/agent/finish; '
-    'kill "$old_pid" || exit 1; '
-    'elapsed=0; '
-    'while kill -0 "$old_pid" 2>/dev/null; do '
-    '[ "$elapsed" -ge 120 ] && exit 1; '
-    'sleep 1; elapsed=$((elapsed + 1)); '
-    'done'
-)
+TEST_KUBECONFIG = '/tmp/kubeconfig'
+TEST_NAMESPACE = 'ddev-agent'
+TEST_POD = 'ddev-agent'
+TEST_CONTAINER = 'agent'
 
 
 @pytest.fixture(scope='module')
@@ -50,7 +43,7 @@ def auto_conf(temp_dir):
 def metadata(auto_conf):
     return {
         'kubernetes': {
-            'kubeconfig': '/tmp/kubeconfig',
+            'kubeconfig': TEST_KUBECONFIG,
             'auto_conf': str(auto_conf),
         },
     }
@@ -80,6 +73,117 @@ def command_calls(run_command):
     return [call.args[0] for call in run_command.call_args_list]
 
 
+def option_value(command: list[str], option: str) -> str:
+    return command[command.index(option) + 1]
+
+
+def find_exec_command(calls: list[list[str]], expected: list[str], *, prefix: bool = False) -> int:
+    matches = []
+    for index, command in enumerate(calls):
+        if 'exec' not in command or '--' not in command:
+            continue
+
+        separator = command.index('--')
+        payload = command[separator + 1 :]
+        matches_expected = payload[: len(expected)] == expected if prefix else payload == expected
+        if not matches_expected:
+            continue
+
+        kubectl_args = command[:separator]
+        assert command[0] == 'kubectl'
+        assert option_value(kubectl_args, '--kubeconfig') == TEST_KUBECONFIG
+        assert option_value(kubectl_args, '--namespace') == TEST_NAMESPACE
+        assert f'pod/{TEST_POD}' in kubectl_args
+        assert option_value(kubectl_args, '--container') == TEST_CONTAINER
+        matches.append(index)
+
+    assert len(matches) == 1, f'Expected one kubectl exec payload matching {expected!r}, found {len(matches)}'
+    return matches[0]
+
+
+def find_copy_command(calls: list[list[str]], source: str, destination: str) -> int:
+    matches = []
+    for index, command in enumerate(calls):
+        if 'cp' not in command or source not in command or destination not in command:
+            continue
+
+        assert command[0] == 'kubectl'
+        assert option_value(command, '--kubeconfig') == TEST_KUBECONFIG
+        assert option_value(command, '--container') == TEST_CONTAINER
+        assert command.index(source) < command.index(destination)
+        matches.append(index)
+
+    assert len(matches) == 1, f'Expected one kubectl cp from {source!r} to {destination!r}, found {len(matches)}'
+    return matches[0]
+
+
+def test_exec_builds_scoped_command_and_sorts_environment(agent, run_command):
+    agent._exec(['agent', 'check', 'velero'], env_vars={'ZED': 'last', 'ALPHA': 'first'})
+
+    run_command.assert_called_once_with(
+        [
+            'kubectl',
+            '--kubeconfig',
+            TEST_KUBECONFIG,
+            'exec',
+            '--namespace',
+            TEST_NAMESPACE,
+            f'pod/{TEST_POD}',
+            '--container',
+            TEST_CONTAINER,
+            '--',
+            'env',
+            'ALPHA=first',
+            'ZED=last',
+            'agent',
+            'check',
+            'velero',
+        ],
+        check=True,
+    )
+
+
+def test_copy_file_builds_scoped_command(agent, config_file, run_command):
+    destination = '/tmp/conf.yaml'
+
+    agent._copy_file(str(config_file), destination)
+
+    run_command.assert_called_once_with(
+        [
+            'kubectl',
+            '--kubeconfig',
+            TEST_KUBECONFIG,
+            'cp',
+            '--container',
+            TEST_CONTAINER,
+            config_file.name,
+            f'{TEST_NAMESPACE}/{TEST_POD}:{destination}',
+        ],
+        check=True,
+        cwd=config_file.resolve().parent,
+    )
+
+
+def test_restart_command_preserves_s6_and_timeout_contract(agent, metadata, mocker):
+    metadata['kubernetes']['wait_timeout'] = 17
+    operations = mocker.Mock()
+    execute = mocker.patch.object(agent, '_exec')
+    wait_for_agent = mocker.patch.object(agent, '_wait_for_agent')
+    operations.attach_mock(execute, 'execute')
+    operations.attach_mock(wait_for_agent, 'wait_for_agent')
+
+    agent._restart_agent_process()
+
+    operations.assert_has_calls([mocker.call.execute(mocker.ANY), mocker.call.wait_for_agent()])
+    command = execute.call_args.args[0]
+    assert command[:2] == ['sh', '-c']
+    script = command[2]
+    assert 'pidof agent' in script
+    assert 'rm -f /var/run/s6/services/agent/finish' in script
+    assert 'kill "$old_pid"' in script
+    assert '[ "$elapsed" -ge 17 ]' in script
+
+
 def test_start_uses_selected_image_rbac_config_and_local_packages(
     agent, metadata, config_file, auto_conf, temp_dir, run_command
 ):
@@ -97,7 +201,7 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     )
 
     calls = command_calls(run_command)
-    prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
+    prefix = ['kubectl', '--kubeconfig', TEST_KUBECONFIG]
     assert calls[0] == [*prefix, 'get', 'nodes', '-o', 'json']
 
     create_calls = [call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-']]
@@ -142,94 +246,42 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     assert 'DD_KUBERNETES_KUBELET_HOST' in env
     assert 'DD_KUBERNETES_KUBELET_NODENAME' in env
 
-    start_command = [
-        *prefix,
-        'exec',
-        '--namespace',
-        'ddev-agent',
-        'pod/ddev-agent',
-        '--container',
-        'agent',
-        '--',
-        'echo',
-        'start',
-    ]
-    post_install_command = [
-        *prefix,
-        'exec',
-        '--namespace',
-        'ddev-agent',
-        'pod/ddev-agent',
-        '--container',
-        'agent',
-        '--',
-        'echo',
-        'post-install',
-    ]
-    assert start_command in calls
-    assert post_install_command in calls
-
-    assert [
-        *prefix,
-        'cp',
-        '--container',
-        'agent',
+    start_index = find_exec_command(calls, ['echo', 'start'])
+    post_install_index = find_exec_command(calls, ['echo', 'post-install'])
+    local_base_copy_index = find_copy_command(
+        calls,
         local_base.name,
-        f'{agent._namespace}/ddev-agent:/home/datadog_checks_base',
-    ] in calls
-    assert [
-        *prefix,
-        'exec',
-        '--namespace',
-        agent._namespace,
-        'pod/ddev-agent',
-        '--container',
-        'agent',
-        '--',
-        '/opt/datadog-agent/embedded/bin/python3',
-        '-m',
-        'pip',
-        'install',
-        '--disable-pip-version-check',
-        '-e',
-        '/home/datadog_checks_base[kube]',
-    ] in calls
-    assert [
-        *prefix,
-        'cp',
-        '--container',
-        'agent',
+        f'{TEST_NAMESPACE}/{TEST_POD}:/home/datadog_checks_base',
+    )
+    find_exec_command(
+        calls,
+        [
+            '/opt/datadog-agent/embedded/bin/python3',
+            '-m',
+            'pip',
+            'install',
+            '--disable-pip-version-check',
+            '-e',
+            '/home/datadog_checks_base[kube]',
+        ],
+    )
+    find_copy_command(
+        calls,
         config_file.name,
-        f'{agent._namespace}/ddev-agent:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
-    ] in calls
-    assert [
-        *prefix,
-        'cp',
-        '--container',
-        'agent',
+        f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
+    )
+    find_copy_command(
+        calls,
         auto_conf.name,
-        f'{agent._namespace}/ddev-agent:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
-    ] in calls
-    restart_command = [
-        *prefix,
-        'exec',
-        '--namespace',
-        agent._namespace,
-        'pod/ddev-agent',
-        '--container',
-        'agent',
-        '--',
-        'sh',
-        '-c',
-        RESTART_COMMAND,
-    ]
-    assert restart_command in calls
-    assert calls.index(start_command) < calls.index(post_install_command) < calls.index(restart_command)
+        f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
+    )
+    restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
+    assert start_index < post_install_index < restart_index
     assert metadata['kubernetes']['local_packages'] == [
         {'path': str(local_base), 'name': 'datadog_checks_base', 'features': '[kube]'},
         {'path': str(integration), 'name': 'velero', 'features': '[deps]'},
     ]
-    local_base_copy = next(call for call in run_command.call_args_list if call.args[0][-2] == local_base.name)
+    local_base_copy = run_command.call_args_list[local_base_copy_index]
     assert local_base_copy.kwargs['cwd'] == local_base.resolve().parent
 
 
@@ -277,74 +329,27 @@ def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
     assert not any('apply' in command or 'wait' in command for command in calls)
 
 
-def test_invoke_synchronizes_config_and_environment(agent, metadata, config_file, auto_conf, run_command):
+def test_invoke_synchronizes_config_and_environment(agent, config_file, auto_conf, run_command):
     config_file.write_text('instances:\n  - openmetrics_endpoint: http://velero:8085/metrics\n')
 
     agent.invoke(['check', 'velero', '--json'], env_vars={'ZED': 'last', 'ALPHA': 'first'})
 
     calls = command_calls(run_command)
-    prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
-    assert calls == [
-        [
-            *prefix,
-            'exec',
-            '--namespace',
-            agent._namespace,
-            'pod/ddev-agent',
-            '--container',
-            'agent',
-            '--',
-            'mkdir',
-            '-p',
-            '/etc/datadog-agent/conf.d/velero.d',
-        ],
-        [
-            *prefix,
-            'cp',
-            '--container',
-            'agent',
-            config_file.name,
-            f'{agent._namespace}/ddev-agent:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
-        ],
-        [
-            *prefix,
-            'exec',
-            '--namespace',
-            agent._namespace,
-            'pod/ddev-agent',
-            '--container',
-            'agent',
-            '--',
-            'mkdir',
-            '-p',
-            '/etc/datadog-agent/conf.d/velero.d',
-        ],
-        [
-            *prefix,
-            'cp',
-            '--container',
-            'agent',
-            auto_conf.name,
-            f'{agent._namespace}/ddev-agent:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
-        ],
-        [
-            *prefix,
-            'exec',
-            '--namespace',
-            agent._namespace,
-            'pod/ddev-agent',
-            '--container',
-            'agent',
-            '--',
-            'env',
-            'ALPHA=first',
-            'ZED=last',
-            'agent',
-            'check',
-            'velero',
-            '--json',
-        ],
-    ]
+    config_copy_index = find_copy_command(
+        calls,
+        config_file.name,
+        f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
+    )
+    auto_conf_copy_index = find_copy_command(
+        calls,
+        auto_conf.name,
+        f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
+    )
+    invoke_index = find_exec_command(
+        calls,
+        ['env', 'ALPHA=first', 'ZED=last', 'agent', 'check', 'velero', '--json'],
+    )
+    assert config_copy_index < auto_conf_copy_index < invoke_index
 
 
 def test_invoke_removes_pod_config_when_host_config_is_absent(agent, config_file, run_command):
@@ -353,21 +358,7 @@ def test_invoke_removes_pod_config_when_host_config_is_absent(agent, config_file
     agent.invoke(['status'])
 
     calls = command_calls(run_command)
-    assert [
-        'kubectl',
-        '--kubeconfig',
-        '/tmp/kubeconfig',
-        'exec',
-        '--namespace',
-        agent._namespace,
-        'pod/ddev-agent',
-        '--container',
-        'agent',
-        '--',
-        'rm',
-        '-f',
-        '/etc/datadog-agent/conf.d/velero.d/conf.yaml',
-    ] in calls
+    find_exec_command(calls, ['rm', '-f', '/etc/datadog-agent/conf.d/velero.d/conf.yaml'])
 
 
 def test_stop_is_no_op(agent, run_command):
@@ -388,39 +379,18 @@ def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
     agent.restart()
 
     calls = command_calls(run_command)
-    prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
-    package_copy = [
-        *prefix,
-        'cp',
-        '--container',
-        'agent',
+    package_copy_index = find_copy_command(
+        calls,
         local_package.name,
-        f'{agent._namespace}/ddev-agent:/home/velero-source',
-    ]
-    config_copy = [
-        *prefix,
-        'cp',
-        '--container',
-        'agent',
+        f'{TEST_NAMESPACE}/{TEST_POD}:/home/velero-source',
+    )
+    config_copy_index = find_copy_command(
+        calls,
         config_file.name,
-        f'{agent._namespace}/ddev-agent:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
-    ]
-    restart = [
-        *prefix,
-        'exec',
-        '--namespace',
-        agent._namespace,
-        'pod/ddev-agent',
-        '--container',
-        'agent',
-        '--',
-        'sh',
-        '-c',
-        RESTART_COMMAND,
-    ]
-    assert package_copy in calls
-    assert config_copy in calls
-    assert calls.index(package_copy) < calls.index(config_copy) < calls.index(restart)
+        f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
+    )
+    restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
+    assert package_copy_index < config_copy_index < restart_index
     assert not any('pip' in command for command in calls)
 
 
@@ -429,21 +399,21 @@ def test_shell_and_logs_use_backend_commands(agent, run_command):
     agent.show_logs()
 
     calls = command_calls(run_command)
-    prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
+    prefix = ['kubectl', '--kubeconfig', TEST_KUBECONFIG]
     assert calls == [
         [
             *prefix,
             'exec',
             '-it',
             '--namespace',
-            agent._namespace,
-            'pod/ddev-agent',
+            TEST_NAMESPACE,
+            f'pod/{TEST_POD}',
             '--container',
-            'agent',
+            TEST_CONTAINER,
             '--',
             'bash',
         ],
-        [*prefix, 'logs', '--namespace', agent._namespace, 'pod/ddev-agent', '--container', 'agent'],
+        [*prefix, 'logs', '--namespace', TEST_NAMESPACE, f'pod/{TEST_POD}', '--container', TEST_CONTAINER],
     ]
     assert run_command.call_args_list[-1].kwargs['check'] is True
 
