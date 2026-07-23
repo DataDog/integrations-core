@@ -107,8 +107,16 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     assert resources['Pod']['spec']['containers'][0]['image'] == 'registry.example.com/datadog-agent:test'
     assert resources['Pod']['spec']['containers'][0]['imagePullPolicy'] == 'Always'
     assert resources['Pod']['spec']['serviceAccountName'] == 'ddev-agent'
-    for kind in ('Namespace', 'ServiceAccount', 'ClusterRole', 'ClusterRoleBinding', 'Pod'):
-        assert resources[kind]['metadata']['labels']['ddev.datadoghq.com/environment'] == 'test-owner'
+    resource_labels = {
+        'app.kubernetes.io/managed-by': 'ddev',
+        'ddev.datadoghq.com/environment': 'test-owner',
+    }
+    for kind in ('Namespace', 'ServiceAccount', 'ClusterRole', 'ClusterRoleBinding'):
+        assert resources[kind]['metadata']['labels'] == resource_labels
+    assert resources['Pod']['metadata']['labels'] == {
+        **resource_labels,
+        'app.kubernetes.io/name': 'ddev-agent',
+    }
     assert resources['ClusterRole']['rules'] == [
         {'apiGroups': [''], 'resources': ['nodes'], 'verbs': ['get', 'list', 'watch']},
         {

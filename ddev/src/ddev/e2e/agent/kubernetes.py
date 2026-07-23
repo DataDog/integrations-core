@@ -209,12 +209,7 @@ class KubernetesAgent(AgentInterface):
             ]
         )
 
-        extra_labels = self._kubernetes_metadata.get('pod_labels', {})
-        if not isinstance(extra_labels, dict) or not all(
-            isinstance(key, str) and isinstance(value, str) for key, value in extra_labels.items()
-        ):
-            raise ValueError('Kubernetes Agent `pod_labels` must be a mapping of strings to strings')
-        labels = {**extra_labels, **self._resource_labels, 'app.kubernetes.io/name': _POD_NAME}
+        labels = {**self._resource_labels, 'app.kubernetes.io/name': _POD_NAME}
 
         image_pull_policy = self._kubernetes_metadata.get('image_pull_policy', 'Always')
         if image_pull_policy not in {'Always', 'IfNotPresent', 'Never'}:
