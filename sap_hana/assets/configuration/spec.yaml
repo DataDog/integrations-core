@@ -67,6 +67,29 @@ files:
         value:
           type: boolean
           example: false
+      - name: database_identifier
+        display_priority: 0
+        description: |
+          Controls how the database is identified in Data Observability.
+
+          The default value is the host and port of the instance (`$host:$port`).
+
+          This value will be used as-is for the display name of the instance but will be normalized
+          when applied as the `database_instance` tag. See https://docs.datadoghq.com/getting_started/tagging/
+          for more details on Datadog tag normalization.
+        options:
+          - name: template
+            value:
+              type: string
+              display_default: "$host:$port"
+              example: "saphana_myorg_$env"
+            description: |
+              The template to use for the database identifier. The default value is `$host:$port`.
+              You can use the following variables, prefixed by `$` in the template:
+              - host: The provided host of the instance.
+              - port: The port number of the instance.
+              In addition, you can use any key from the `tags` section of the configuration.
+            fleet_configurable: false
       - name: batch_size
         description: The number of rows to return with each query result.
         fleet_configurable: true
