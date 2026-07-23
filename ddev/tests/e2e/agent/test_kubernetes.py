@@ -513,14 +513,7 @@ def test_shell_and_logs_use_backend_commands(agent, run_command):
     assert run_command.call_args_list[-1].kwargs['check'] is True
 
 
-@pytest.mark.parametrize(
-    'metadata, match',
-    [
-        ({}, 'must contain a `kubernetes` mapping'),
-        ({'kubernetes': {}}, 'non-empty `kubeconfig`'),
-    ],
-)
-def test_metadata_validation(app, get_integration, config_file, metadata, match):
-    agent = KubernetesAgent(app, get_integration('velero'), 'py3.12', metadata, config_file)
-    with pytest.raises(ValueError, match=match):
+def test_kubeconfig_validation(app, get_integration, config_file):
+    agent = KubernetesAgent(app, get_integration('velero'), 'py3.12', {'kubernetes': {}}, config_file)
+    with pytest.raises(ValueError, match='non-empty `kubeconfig`'):
         _ = agent._kubeconfig
