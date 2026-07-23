@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.bentoml import BentomlCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
@@ -46,9 +46,9 @@ def test_bentoml_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_respo
 def test_bentoml_mock_valid_endpoint_invalid_health(dd_run_check, aggregator, mock_http_response_per_endpoint):
     mock_http_response_per_endpoint(
         {
-            'http://bentoml:3000/metrics': [MockResponse(file_path=get_fixture_path('metrics.txt'))],
-            'http://bentoml:3000//livez': [MockResponse(status_code=500)],
-            'http://bentoml:3000//readyz': [MockResponse(status_code=500)],
+            'http://bentoml:3000/metrics': [MockHTTPResponse(file_path=get_fixture_path('metrics.txt'))],
+            'http://bentoml:3000//livez': [MockHTTPResponse(status_code=500)],
+            'http://bentoml:3000//readyz': [MockHTTPResponse(status_code=500)],
         }
     )
 

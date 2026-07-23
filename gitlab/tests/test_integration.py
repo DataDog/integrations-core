@@ -131,20 +131,23 @@ def test_check_submit_metadata(
     enable_metadata_collection,
     use_openmetrics,
 ):
-    with mock.patch('datadog_checks.base.utils.http.ResponseWrapper.json') as g:
-        # mock the api call so that it returns the given version
-        g.return_value = {"version": raw_version}
+    with mock.patch('datadog_checks.gitlab.gitlab.get_gitlab_version', return_value=raw_version) as legacy_get_version:
+        with mock.patch(
+            'datadog_checks.gitlab.gitlab_v2.get_gitlab_version', return_value=raw_version
+        ) as v2_get_version:
+            get_version = v2_get_version if use_openmetrics else legacy_get_version
+            unused_get_version = legacy_get_version if use_openmetrics else v2_get_version
 
-        datadog_agent.reset()
-        datadog_agent._config["enable_metadata_collection"] = enable_metadata_collection
+            datadog_agent.reset()
+            datadog_agent._config["enable_metadata_collection"] = enable_metadata_collection
 
-        dd_run_check(gitlab_check(get_auth_config(use_openmetrics)))
+            dd_run_check(gitlab_check(get_auth_config(use_openmetrics)))
 
-        # With use_openmetrics, we also have a request to get the service checks.
-        if enable_metadata_collection:
-            assert g.call_count == (2 if use_openmetrics else 1)
-            datadog_agent.assert_metadata('test:123', version_metadata)
-            datadog_agent.assert_metadata_count(5)
-        else:
-            assert g.call_count == (1 if use_openmetrics else 0)
-            datadog_agent.assert_metadata_count(0)
+            unused_get_version.assert_not_called()
+            if enable_metadata_collection:
+                get_version.assert_called_once()
+                datadog_agent.assert_metadata('test:123', version_metadata)
+                datadog_agent.assert_metadata_count(5)
+            else:
+                get_version.assert_not_called()
+                datadog_agent.assert_metadata_count(0)

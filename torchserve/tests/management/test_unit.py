@@ -13,8 +13,8 @@ from .common import METRICS
 pytestmark = pytest.mark.unit
 
 
-def test_check(dd_run_check, aggregator, check, mocked_management_instance, mocker):
-    mocker.patch('requests.Session.get', wraps=mock_http_responses())
+def test_check(dd_run_check, aggregator, check, mocked_management_instance, mock_http):
+    mock_http.get.side_effect = mock_http_responses()
     dd_run_check(check(mocked_management_instance))
 
     for metric in METRICS:
@@ -33,7 +33,7 @@ def test_check(dd_run_check, aggregator, check, mocked_management_instance, mock
     assert len(aggregator.events) == 0
 
 
-def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_management_instance, mocker):
+def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_management_instance, mock_http):
     def custom_mock_http_responses(url, **_params):
         if url in (
             'http://torchserve:8081/models/linear_regression_1_1/all',
@@ -43,7 +43,7 @@ def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_manage
 
         return mock_http_responses()(url)
 
-    mocker.patch('requests.Session.get', wraps=custom_mock_http_responses)
+    mock_http.get.side_effect = custom_mock_http_responses
     dd_run_check(check(mocked_management_instance))
 
     # We should not get anything for these models
@@ -155,9 +155,9 @@ def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_manage
     ],
 )
 def test_check_with_discovery(
-    dd_run_check, aggregator, check, mocked_management_instance, mocker, include, exclude, limit, expected_models
+    dd_run_check, aggregator, check, mocked_management_instance, mock_http, include, exclude, limit, expected_models
 ):
-    mocker.patch('requests.Session.get', wraps=mock_http_responses())
+    mock_http.get.side_effect = mock_http_responses()
     mocked_management_instance["limit"] = limit
     mocked_management_instance["exclude"] = exclude
     mocked_management_instance["include"] = include
@@ -302,19 +302,19 @@ def metric_should_be_exposed(metric, expected_models):
     ],
 )
 def test_check_with_events(
-    dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, mocker, new_response, expected_events
+    dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, mock_http, new_response, expected_events
 ):
     # We generate a cache to save the models, so clear it to make sure we won't get the data from a previous test.
     datadog_agent.reset()
 
     check_instance = check(mocked_management_instance)
-    mocker.patch('requests.Session.get', wraps=mock_http_responses())
+    mock_http.get.side_effect = mock_http_responses()
     dd_run_check(check_instance)
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0
 
-    mocker.patch('requests.Session.get', wraps=mock_http_responses(new_response))
+    mock_http.get.side_effect = mock_http_responses(new_response)
     dd_run_check(check_instance)
 
     for expected_event, actual_event in zip(expected_events, aggregator.events, strict=True):
@@ -332,19 +332,19 @@ def test_check_with_events(
         )
 
 
-def test_check_disable_events(dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, mocker):
+def test_check_disable_events(dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, mock_http):
     # We generate a cache to save the models, so clear it to make sure we won't get the data from a previous test.
     datadog_agent.reset()
     mocked_management_instance["submit_events"] = False
 
     check_instance = check(mocked_management_instance)
-    mocker.patch('requests.Session.get', wraps=mock_http_responses())
+    mock_http.get.side_effect = mock_http_responses()
     dd_run_check(check_instance)
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0
 
-    mocker.patch('requests.Session.get', wraps=mock_http_responses("management/events/models_all_dropped.json"))
+    mock_http.get.side_effect = mock_http_responses("management/events/models_all_dropped.json")
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0

@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.vault import Vault
@@ -68,36 +67,10 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_service_check_connect_ok_all_tags(self, aggregator, dd_run_check, global_tags, use_openmetrics, mock_http):
+    def test_service_check_connect_ok_all_tags(self, aggregator, dd_run_check, global_tags, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
-
-        # Keep a reference for use during mock
-        requests_get = requests.get
-
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
-                )
-            elif url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
-                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                        'cluster_name': 'vault-cluster-f5f44063',
-                        'initialized': True,
-                        'replication_dr_mode': 'disabled',
-                        'replication_performance_mode': 'disabled',
-                        'sealed': False,
-                        'server_time_utc': 1529357080,
-                        'standby': False,
-                        'version': '0.10.2',
-                    }
-                )
-            return requests_get(url, *args, **kwargs)
-
-        mock_http.get.side_effect = mock_requests_get
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=global_tags, count=1)
@@ -130,16 +103,16 @@ class TestVault:
             count=1,
         )
 
-    def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags, mock_http):
+    def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags):
         instance = {'use_openmetrics': False}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        mock_http.get.return_value = MockHTTPResponse(status_code=500)
-        with pytest.raises(
-            Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
-        ):
-            dd_run_check(c, extract_message=True)
+        with mock.patch.object(type(c.http), 'get', return_value=MockHTTPResponse(status_code=500)):
+            with pytest.raises(
+                Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
+            ):
+                dd_run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
 
@@ -161,17 +134,15 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, count=1)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_service_check_unsealed_ok_all_tags(
-        self, aggregator, dd_run_check, global_tags, use_openmetrics, mock_http
-    ):
+    def test_service_check_unsealed_ok_all_tags(self, aggregator, dd_run_check, global_tags, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -190,10 +161,10 @@ class TestVault:
                         'version': '0.10.2',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         expected_tags = [
             'is_leader:true',
@@ -206,15 +177,15 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, tags=expected_tags, count=1)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_service_check_unsealed_fail(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_service_check_unsealed_fail(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockHTTPResponse(
                     json_data={
@@ -230,10 +201,10 @@ class TestVault:
                     },
                     status_code=503,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.CRITICAL, count=1)
 
@@ -247,17 +218,15 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, count=1)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_service_check_initialized_ok_all_tags(
-        self, aggregator, dd_run_check, global_tags, use_openmetrics, mock_http
-    ):
+    def test_service_check_initialized_ok_all_tags(self, aggregator, dd_run_check, global_tags, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -276,10 +245,10 @@ class TestVault:
                         'version': '0.10.2',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         expected_tags = [
             'is_leader:true',
@@ -292,15 +261,15 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, tags=expected_tags, count=1)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_service_check_initialized_fail(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_service_check_initialized_fail(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockHTTPResponse(
                     json_data={
@@ -316,22 +285,22 @@ class TestVault:
                     },
                     status_code=501,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
 
-    def test_disable_legacy_cluster_tag(self, aggregator, dd_run_check, global_tags, mock_http):
+    def test_disable_legacy_cluster_tag(self, aggregator, dd_run_check, global_tags):
         instance = {'disable_legacy_cluster_tag': True, 'use_openmetrics': False}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -350,10 +319,10 @@ class TestVault:
                         'version': '0.10.2',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         expected_tags = [
             'is_leader:true',
@@ -364,15 +333,15 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, tags=expected_tags, count=1)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_replication_dr_mode(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_replication_dr_mode(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockHTTPResponse(
                     json_data={
@@ -389,27 +358,27 @@ class TestVault:
                     },
                     status_code=200,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
-        c.log.debug.assert_called_with(
-            "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
-        )
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
+            c.log.debug.assert_called_with(
+                "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
+            )
         aggregator.assert_metric('vault.is_leader', 1)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         assert_all_metrics(aggregator)
 
     @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
-    def test_replication_dr_mode_collect_secondary(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_replication_dr_mode_collect_secondary(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics, 'collect_secondary_dr': True}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockHTTPResponse(
                     json_data={
@@ -426,33 +395,33 @@ class TestVault:
                     },
                     status_code=200,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
         metric_collection = 'OpenMetrics' if use_openmetrics else 'Prometheus'
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
-        c.log.debug.assert_called_with(
-            "Detected vault in replication DR secondary mode but also detected that "
-            "`collect_secondary_dr` is enabled, %s metric collection will still occur." % metric_collection
-        )
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
+            c.log.debug.assert_called_with(
+                "Detected vault in replication DR secondary mode but also detected that "
+                "`collect_secondary_dr` is enabled, %s metric collection will still occur." % metric_collection
+            )
         aggregator.assert_metric('vault.is_leader', 1)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         assert_all_metrics(aggregator)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_replication_dr_mode_changed(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_replication_dr_mode_changed(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                if getattr(mock_requests_get, 'first_health_call', True):
-                    mock_requests_get.first_health_call = False
+                if getattr(mock_get, 'first_health_call', True):
+                    mock_get.first_health_call = False
                     replication_dr_mode = 'primary'
                 else:
                     replication_dr_mode = 'secondary'
@@ -472,28 +441,28 @@ class TestVault:
                     },
                     status_code=200,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
-        assert not c._skip_dr_metric_collection
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
-        aggregator.assert_metric('vault.is_leader', 1)
-        assert_all_metrics(aggregator)
-        aggregator.reset()
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
+            assert not c._skip_dr_metric_collection
+            aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
+            aggregator.assert_metric('vault.is_leader', 1)
+            assert_all_metrics(aggregator)
+            aggregator.reset()
 
-        dd_run_check(c)
-        c.log.debug.assert_called_with(
-            "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
-        )
-        assert c._skip_dr_metric_collection
-        aggregator.assert_metric('vault.is_leader', 1)
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
-        assert_all_metrics(aggregator)
+            dd_run_check(c)
+            c.log.debug.assert_called_with(
+                "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
+            )
+            assert c._skip_dr_metric_collection
+            aggregator.assert_metric('vault.is_leader', 1)
+            aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
+            assert_all_metrics(aggregator)
 
     @pytest.mark.parametrize("cluster", [True, False])
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_event_leader_change(self, aggregator, dd_run_check, cluster, use_openmetrics, mock_http):
+    def test_event_leader_change(self, aggregator, dd_run_check, cluster, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
@@ -505,10 +474,10 @@ class TestVault:
             c._previous_leader = Leader('foo', '')
             next_leader = Leader('bar', '')
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(
                     json_data={
@@ -518,10 +487,10 @@ class TestVault:
                         'leader_cluster_address': next_leader.leader_cluster_addr,
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         assert len(aggregator.events) > 0
 
@@ -539,17 +508,17 @@ class TestVault:
         assert c._previous_leader == next_leader
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_leader_change_not_self(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_leader_change_not_self(self, aggregator, dd_run_check, use_openmetrics):
         """The agent should only submit a leader change event when the monitored vault is the leader."""
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c._previous_leader = Leader('foo', '')
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(
                     json_data={
@@ -559,23 +528,23 @@ class TestVault:
                         'leader_cluster_address': '',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         assert len(aggregator.events) == 0
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_is_leader_metric_true(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_is_leader_metric_true(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(
                     json_data={
@@ -585,23 +554,23 @@ class TestVault:
                         'leader_cluster_address': '',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_is_leader_metric_false(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_is_leader_metric_false(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(
                     json_data={
@@ -611,26 +580,24 @@ class TestVault:
                         'leader_cluster_address': '',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 0)
 
     @pytest.mark.parametrize('status_code', [200, 429, 472, 473, 501, 503])
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_sys_health_non_standard_status_codes(
-        self, aggregator, dd_run_check, status_code, use_openmetrics, mock_http
-    ):
+    def test_sys_health_non_standard_status_codes(self, aggregator, dd_run_check, status_code, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockHTTPResponse(
                     json_data={
@@ -647,30 +614,30 @@ class TestVault:
                     },
                     status_code=status_code,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
         assert_all_metrics(aggregator)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_sys_leader_non_standard_status_codes(self, aggregator, dd_run_check, use_openmetrics, mock_http):
+    def test_sys_leader_non_standard_status_codes(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        mock_http.get.side_effect = mock_requests_get
-        dd_run_check(c)
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
+            dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', count=0)
 
@@ -807,18 +774,19 @@ class TestVault:
 
 
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics, mock_openmetrics_http):
+def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
     c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-    def mock_requests_get(url, *args, **kwargs):
-        assert mock_openmetrics_http.options['headers'].get('X-Vault-Request') == 'true'
-        if url == instance['api_url'] + '/sys/leader':
+    # Return canned responses so the assertion targets the header, not the live metrics endpoint.
+    def mock_get(url, *args, **kwargs):
+        assert c.http.options['headers'].get('X-Vault-Request') == 'true'
+        if url.endswith('/sys/leader'):
             return MockHTTPResponse(
                 json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
             )
-        if url == instance['api_url'] + '/sys/health':
+        if url.endswith('/sys/health'):
             return MockHTTPResponse(
                 json_data={
                     'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
@@ -834,5 +802,7 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics, 
             )
         return MockHTTPResponse(content='', status_code=200)
 
-    mock_openmetrics_http.get.side_effect = mock_requests_get
-    dd_run_check(c)
+    with mock.patch.object(type(c.http), 'get', side_effect=mock_get) as mock_get_call:
+        dd_run_check(c)
+
+    assert mock_get_call.call_count > 0
