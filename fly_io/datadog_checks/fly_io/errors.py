@@ -14,7 +14,7 @@ def handle_error(f):
             return result
         except (HTTPRequestError, HTTPStatusError) as e:
             check.log.debug(
-                "Encountered an HTTP error in '%s' [%s]: %s",
+                "Encountered a RequestException in '%s' [%s]: %s",
                 f.__name__,
                 type(e),
                 e,
