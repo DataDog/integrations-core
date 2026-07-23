@@ -281,21 +281,31 @@ class HanaSchemaCollector(SchemaCollector):
                     pass
                 return [{'name': db_name, 'description': description}]
         except Exception as e:
+            # A dead HANA connection surfaces here rather than propagating, so drop our
+            # reference to signal the owning job to reconnect on the next cycle.
+            if isinstance(e, HanaError):
+                self._conn = None
             self._log.warning("Could not determine current HANA database; skipping schema collection: %s", e)
             return []
 
     @contextlib.contextmanager
     def _get_cursor(self, _database_name):
         conn = self._active_conn()
-        self._query_builder.ensure_stats_permission(conn)
-        query, params = self._query_builder.build()
-        with closing(conn.cursor()) as cursor:
-            cursor.execute(query, params)
-            self._pending_row = cursor.fetchone()
-            try:
-                yield cursor
-            finally:
-                self._pending_row = None
+        try:
+            self._query_builder.ensure_stats_permission(conn)
+            query, params = self._query_builder.build()
+            with closing(conn.cursor()) as cursor:
+                cursor.execute(query, params)
+                self._pending_row = cursor.fetchone()
+                try:
+                    yield cursor
+                finally:
+                    self._pending_row = None
+        except HanaError:
+            # collect_schemas() swallows this per-database error, so signal the dead
+            # connection to the owning job by dropping our reference; it reconnects next cycle.
+            self._conn = None
+            raise
 
     def _get_next(self, cursor):
         """Assemble one table/view from consecutive cursor rows sharing the same (schema, table) key."""
@@ -399,6 +409,15 @@ class HanaSchemaCollectionJob(DBMAsyncJob):
             self._schema_collector._conn = conn
             self._schema_collector.collect_schemas()
         except HanaError:
-            self._job_conn = None
-            self._schema_collector._conn = None
+            self._reset_conn()
             raise
+        # collect_schemas() swallows per-database HANA errors internally, so a transient
+        # disconnect never reaches the except above. The collector drops its connection
+        # reference in that case; close ours too so the next cycle reconnects instead of
+        # reusing a dead handle forever.
+        if self._schema_collector._conn is None:
+            self._reset_conn()
+
+    def _reset_conn(self) -> None:
+        self._shutdown()
+        self._schema_collector._conn = None

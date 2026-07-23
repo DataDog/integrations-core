@@ -230,6 +230,35 @@ class TestHanaSchemaCollector:
         assert job._job_conn is None
         assert job._schema_collector._conn is None
 
+    def test_schema_job_resets_conn_on_swallowed_error(self):
+        # collect_schemas() swallows per-database HANA errors and returns normally after
+        # dropping the collector's connection reference; the job must still reconnect.
+        check = _make_check({'collect_schemas': {'enabled': True, 'run_sync': True}})
+        job = check._schema_collection_job
+        conn = mock.MagicMock()
+        job._job_conn = conn
+
+        def swallow():
+            job._schema_collector._conn = None
+
+        job._schema_collector.collect_schemas = mock.MagicMock(side_effect=swallow)
+
+        job.run_job()
+
+        conn.close.assert_called_once()
+        assert job._job_conn is None
+        assert job._schema_collector._conn is None
+
+    def test_cancel_cancels_schema_collection_job(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._schema_collection_job.cancel = mock.MagicMock()
+        check.data_observability.cancel = mock.MagicMock()
+
+        check.cancel()
+
+        check._schema_collection_job.cancel.assert_called_once()
+        check.data_observability.cancel.assert_called_once()
+
     def test_schema_job_disabled_does_not_run(self):
         check = _make_check()
         job = check._schema_collection_job
