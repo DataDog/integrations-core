@@ -82,7 +82,7 @@ def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_
 
 
 class DockerAgent(AgentInterface):
-    build_config_keys = ('docker',)
+    build_config_key = 'docker'
 
     @cached_property
     def _isatty(self) -> bool:
