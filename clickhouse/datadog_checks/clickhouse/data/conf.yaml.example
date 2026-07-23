@@ -212,6 +212,7 @@ instances:
 
         ## @param max_samples_per_collection - integer - optional - default: 1000
         ## Maximum number of flush records to collect in a single run (applies LIMIT in SQL).
+        ## Minimum of 1.
         #
         # max_samples_per_collection: 1000
 

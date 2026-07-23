@@ -30,7 +30,7 @@ class AsyncInsertFlushes(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
-    max_samples_per_collection: Optional[int] = None
+    max_samples_per_collection: Optional[int] = Field(None, ge=1)
 
 
 class CollectSchemas(BaseModel):
