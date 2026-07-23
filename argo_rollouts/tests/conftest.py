@@ -2,13 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from contextlib import ExitStack
 
 import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
@@ -27,10 +25,11 @@ def setup_argo_rollouts():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_argo_rollouts], sleep=30) as kubeconfig, ExitStack() as stack:
-        argo_rollouts_host, argo_rollouts_port = stack.enter_context(
-            port_forward(kubeconfig, 'argo-rollouts', 8090, 'deployment', 'argo-rollouts')
-        )
-        instances = [{'openmetrics_endpoint': f'http://{argo_rollouts_host}:{argo_rollouts_port}/metrics'}]
+    with kind_run(conditions=[setup_argo_rollouts], sleep=30) as kubeconfig:
+        instances = [
+            {'openmetrics_endpoint': 'http://argo-rollouts-metrics.argo-rollouts.svc.cluster.local:8090/metrics'}
+        ]
 
-        yield {'instances': instances}
+        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
+
+        yield {'instances': instances}, metadata
