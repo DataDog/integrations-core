@@ -46,10 +46,9 @@ function). The script then writes the JSON.
 ## Metrics declared in source but not emitted at runtime
 
 Some `system.metrics` entries are declared in ClickHouse's source but only
-emitted once their subsystem is first used (for example the bcrypt cache), so a
-fresh server never reports them and the `at_least=1` test assertion fails. List
-their `metric_name()` in the `NEVER_REQUIRED` set in `generate_metrics.py` to
-demote them from required to optional, then regenerate.
+emitted after their subsystem is used for the first time (for example, the bcrypt cache). Until then, a
+new server does not report these metrics and the `at_least=1` test assertion fails. To demote the metrics from required to optional, list
+their `metric_name()` in the `NEVER_REQUIRED` setting in `generate_metrics.py`, and then regenerate.
 
 To find them against a running server, set `DIFF_VERSION` to a version from the
 matrix and run the diff, which prints a ready-to-paste `NEVER_REQUIRED` block:
