@@ -33,7 +33,7 @@ VERSIONS = "24.8,25.3,25.8,26.3"
 generate = "python scripts/generate_metrics.py"
 # Diff generated metrics against a live server, e.g. `DIFF_VERSION=25.8 hatch run metrics:diff`.
 diff = [
-    "- ddev env start --dev clickhouse py3.13-{env:DIFF_VERSION}",
-    "python scripts/diff_metrics.py --version {env:DIFF_VERSION}",
-    "ddev env stop clickhouse py3.13-{env:DIFF_VERSION}",
+    "- ddev env start --dev clickhouse py3.13-{env:DIFF_VERSION:}",
+    "python scripts/diff_metrics.py --version {env:DIFF_VERSION:}",
+    "ddev env stop clickhouse py3.13-{env:DIFF_VERSION:}",
 ]
