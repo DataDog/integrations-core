@@ -483,7 +483,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             elapsed_ms,
         )
 
-    def _collect_buffer_snapshot(self):
+    def _collect_buffer_snapshot(self) -> None:
         """
         Run the async insert buffer snapshot on its own collection interval
         """
@@ -494,7 +494,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             self._emit_buffer_events(buffer_snapshot)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _query_buffer_snapshot(self):
+    def _query_buffer_snapshot(self) -> list[dict]:
         """Query system.asynchronous_inserts for pending buffers."""
         query = BUFFER_SNAPSHOT_QUERY.format(
             asynchronous_inserts_table=self._check.get_system_table('asynchronous_inserts'),
@@ -541,7 +541,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             )
         return result
 
-    def _obfuscate_buffer_query(self, query_text):
+    def _obfuscate_buffer_query(self, query_text: str) -> dict | None:
         try:
             statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
             obfuscated_query = statement['query']
@@ -563,7 +563,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             )
             return None
 
-    def _create_buffer_event(self, buffer_snapshot):
+    def _create_buffer_event(self, buffer_snapshot: list[dict]) -> dict:
         """
         Create a database monitoring buffer snapshot event payload.
         """
@@ -601,7 +601,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             "clickhouse_async_insert_buffers": buffers,
         }
 
-    def _emit_buffer_events(self, buffer_snapshot):
+    def _emit_buffer_events(self, buffer_snapshot: list[dict]) -> None:
         if not buffer_snapshot:
             return
 
