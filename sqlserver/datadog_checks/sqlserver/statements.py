@@ -270,7 +270,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(self._config.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
             shutdown_callback=self._close_db_conn,

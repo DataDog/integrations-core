@@ -36,6 +36,7 @@ def build_summary(
     dry_run: bool,
     was_dispatched: bool,
     footer: str = "",
+    new_tags: list[str] | None = None,
 ) -> str:
     """Return the full Markdown summary for GITHUB_STEP_SUMMARY.
 
@@ -48,6 +49,7 @@ def build_summary(
         dry_run:       Whether this was a dry run.
         was_dispatched: Whether wheel-build events were actually dispatched.
         footer:        Optional extra paragraph appended after the package table.
+        new_tags:      Tags created by this run, if any.
     """
     by_package = {r["package"]: r for r in results}
 
@@ -69,13 +71,25 @@ def build_summary(
         elif dry_run:
             footer = "> Dry run — no tags pushed, no builds triggered"
 
+    tags_section = ""
+    if new_tags:
+        tags_label = "Tags to push" if dry_run else "Tags pushed"
+        tags = "\n".join(f"- `{tag}`" for tag in new_tags)
+        tags_section = (
+            "<details>\n"
+            f"<summary><strong>{tags_label} ({len(new_tags)})</strong></summary>\n\n"
+            f"{tags}\n\n"
+            "</details>\n\n"
+        )
+
     return (
         "## Wheel Release\n\n"
         "| | |\n|---|---|\n"
         f"| **Mode** | {mode} |\n"
         f"| **Source** | {_source_link(source_repo, ref)} |\n"
         f"| **Dry run** | {'Yes' if dry_run else 'No'} |\n\n"
-        "| Package | Version | Status |\n"
+        + tags_section
+        + "| Package | Version | Status |\n"
         "|---------|---------|--------|\n"
         + "\n".join(rows)
         + (f"\n\n{footer}" if footer else "")

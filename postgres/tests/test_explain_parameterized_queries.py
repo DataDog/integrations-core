@@ -210,6 +210,12 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
             "SELECT * FROM pg_settings WHERE setting = $1 AND name = $1::int",
             DBExplainError.undefined_function,
         ),
+        # an untyped parameter makes the overloaded `unnest` call ambiguous ("function unnest(unknown)
+        # is not unique")
+        (
+            "SELECT * FROM unnest($1)",
+            DBExplainError.undefined_function,
+        ),
     ],
 )
 def test_parameterized_explain_type_resolution_failure_is_handled(
@@ -319,6 +325,28 @@ def test_create_prepared_statement_datatype_mismatch_maps_to_code(integration_ch
 
     assert result is not None
     assert result[0] == DBExplainError.datatype_mismatch
+
+
+@pytest.mark.unit
+@requires_over_12
+def test_create_prepared_statement_ambiguous_function_maps_to_code(integration_check, dbm_instance):
+    check = integration_check(dbm_instance)
+    epq = check.statement_samples._explain_parameterized_queries
+
+    with mock.patch.object(
+        epq,
+        '_execute_query',
+        side_effect=psycopg.errors.AmbiguousFunction("function unnest(unknown) is not unique"),
+    ):
+        result = epq._create_prepared_statement(
+            None,
+            "SELECT * FROM t WHERE id IN (SELECT id FROM unnest($1) AS p(id))",
+            "SELECT * FROM t WHERE id IN (SELECT id FROM unnest($1) AS p(id))",
+            "test_sig",
+        )
+
+    assert result is not None
+    assert result[0] == DBExplainError.undefined_function
 
 
 @pytest.mark.unit

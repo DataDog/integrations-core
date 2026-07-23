@@ -12,8 +12,9 @@ from typing import Any
 
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
-from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions, _conclusion_to_status
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, Platform, TestBatch
+from ddev.cli.ci.tests.status import Status, conclusion_to_status
+from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
@@ -40,7 +41,7 @@ def make_job(name: str = "job-1", environment: str = "py3.13") -> BatchJob:
         target="ntp",
         runner="ubuntu-latest",
         environment=environment,
-        platform="linux",
+        platform=Platform.LINUX,
         unit_tests=True,
         e2e_tests=False,
     )
@@ -148,25 +149,27 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
 
 
 # ---------------------------------------------------------------------------
-# _conclusion_to_status
+# conclusion_to_status
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
     ("conclusion", "expected"),
     [
-        ("success", "success"),
-        ("skipped", "skipped"),
-        ("failure", "failure"),
-        ("cancelled", "failure"),
-        ("timed_out", "failure"),
-        ("action_required", "failure"),
-        ("neutral", "failure"),
-        (None, "failure"),
+        ("success", Status.SUCCESS),
+        ("skipped", Status.SKIPPED),
+        ("failure", Status.FAILURE),
+        ("cancelled", Status.FAILURE),
+        ("timed_out", Status.FAILURE),
+        ("action_required", Status.FAILURE),
+        ("neutral", Status.FAILURE),
+        (None, Status.FAILURE),
     ],
 )
-def test_conclusion_to_status(conclusion: str | None, expected: str) -> None:
-    assert _conclusion_to_status(conclusion) == expected
+def test_conclusion_to_status(conclusion: str | None, expected: Status) -> None:
+    result = conclusion_to_status(conclusion)
+    assert result is expected
+    assert isinstance(result, Status)
 
 
 # ---------------------------------------------------------------------------
@@ -368,6 +371,24 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> No
 # ---------------------------------------------------------------------------
 # process_message — conclusions and resilience
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_path: Path) -> None:
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    fake.mock_response("list_workflow_jobs", RuntimeError("boom-list-jobs"))
+    runner = make_runner(fake, tmp_path)
+
+    # A failure listing jobs must not abort the batch: BatchFinished is still emitted, each
+    # correlated job carrying no workflow job.
+    await runner.process_message(make_batch())
+
+    finished = drain_queue(runner.queue)[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.status == "success"
+    assert all(result.workflow_job is None for result in finished.batch_jobs)
 
 
 @pytest.mark.asyncio

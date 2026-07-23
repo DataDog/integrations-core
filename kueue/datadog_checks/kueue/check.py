@@ -334,7 +334,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         priority = spec.get('priority')
         if priority is not None:
             tags.append(f'kueue_workload_priority:{priority}')
-        if priority_class := spec.get('priorityClassName'):
+        priority_class_ref = spec.get('priorityClassRef') or {}
+        priority_class = priority_class_ref.get('name') or spec.get('priorityClassName')
+        if priority_class:
             tags.append(f'kueue_workload_priority_class:{priority_class}')
 
         admission = status.get('admission', {})

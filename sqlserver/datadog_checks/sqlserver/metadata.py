@@ -73,7 +73,7 @@ class SqlserverMetadata(DBMAsyncJob):
             enabled=is_affirmative(self._config.settings_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(self.collection_interval),
             job_name="database-metadata",
             shutdown_callback=self._close_db_conn,
@@ -146,7 +146,7 @@ class SqlserverMetadata(DBMAsyncJob):
                     "host": self._check.reported_hostname,
                     "database_instance": self._check.database_identifier,
                     "agent_version": datadog_agent.get_version(),
-                    "dbms": "sqlserver",
+                    "dbms": self._check.dbms,
                     "kind": "sqlserver_configs",
                     "collection_interval": self.collection_interval,
                     'dbms_version': "{},{}".format(

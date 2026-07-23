@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from kubernetes import client, config
+from kubernetes.client.exceptions import ApiException
 
 
 class KubernetesAPIClient:
@@ -22,17 +23,25 @@ class KubernetesAPIClient:
             self.custom_obj_client = client.CustomObjectsApi()
 
     def list_workloads(self, namespace: str | None = None) -> list[dict]:
+        try:
+            return self.list_workloads_for_version('v1beta2', namespace)
+        except ApiException as e:
+            if e.status != 404:
+                raise
+            return self.list_workloads_for_version('v1beta1', namespace)
+
+    def list_workloads_for_version(self, version: str, namespace: str | None) -> list[dict]:
         if namespace:
             return self.custom_obj_client.list_namespaced_custom_object(
                 group='kueue.x-k8s.io',
-                version='v1beta1',
+                version=version,
                 namespace=namespace,
                 plural='workloads',
             )['items']
 
         return self.custom_obj_client.list_cluster_custom_object(
             group='kueue.x-k8s.io',
-            version='v1beta1',
+            version=version,
             plural='workloads',
         )['items']
 
