@@ -252,6 +252,7 @@ def test_assert_all_discovery_candidates_stable_uses_docker_run_metadata():
         with mock.patch('datadog_checks.dev.docker.run_command', side_effect=fake_run_command):
             assert_all_discovery_candidates_stable(mock.Mock(), DiscoveryCheck)
 
+    assert commands[0][:2] == ['docker', 'ps']
     assert 'label=com.docker.compose.project=project' in commands[0]
     assert 'label=com.docker.compose.service=service' in commands[0]
     assert DiscoveryCheck.service.id == 'service'
