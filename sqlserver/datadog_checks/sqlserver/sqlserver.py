@@ -27,6 +27,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.data_observability import SqlServerDataObservability
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAgentMetrics,
     SqlserverAoMetrics,
@@ -176,6 +177,7 @@ class SQLServer(DatabaseCheck):
         self.activity = SqlserverActivity(self, self._config)
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
+        self.data_observability = SqlServerDataObservability(self, self._config)
 
         # XE Session Handlers
         self.xe_session_handlers = []
@@ -215,6 +217,7 @@ class SQLServer(DatabaseCheck):
         self.sql_metadata.cancel()
         self.deadlocks.cancel()
         self.agent_history.cancel()
+        self.data_observability.cancel()
 
         # Cancel all XE session handlers
         for handler in self.xe_session_handlers:
@@ -902,6 +905,10 @@ class SQLServer(DatabaseCheck):
                         handler.run_job_loop(self.tag_manager.get_tags())
                     except Exception as e:
                         self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
+
+            # Data Observability does not require DBM — run independently.
+            if self._config.data_observability.enabled:
+                self.data_observability.run_job_loop(self.tag_manager.get_tags())
 
         else:
             self.log.debug("Skipping check")
