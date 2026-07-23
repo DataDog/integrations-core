@@ -527,14 +527,11 @@ class KubernetesAgent(AgentInterface):
             check=True,
         )
 
-    def _show_logs(self) -> None:
+    def _show_logs(self, *, check: bool = False) -> None:
         self._kubectl(
             ['logs', '--namespace', self._namespace, f'pod/{_POD_NAME}', '--container', _CONTAINER_NAME],
-            check=False,
+            check=check,
         )
 
     def show_logs(self) -> None:
-        self._kubectl(
-            ['logs', '--namespace', self._namespace, f'pod/{_POD_NAME}', '--container', _CONTAINER_NAME],
-            check=True,
-        )
+        self._show_logs(check=True)
