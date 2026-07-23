@@ -142,8 +142,6 @@ supervisor = ['BSD-3-Clause-Modification']
 prometheus-client = ['Apache-2.0']
 # https://github.com/GrahamDumpleton/wrapt/blob/develop/LICENSE
 wrapt = ['BSD-3-Clause']
-# https://github.com/MyPureCloud/platform-client-sdk-python/blob/master/LICENSE
-PureCloudPlatformClientV2 = ['MIT']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'

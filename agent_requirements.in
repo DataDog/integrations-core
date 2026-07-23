@@ -33,7 +33,6 @@ prometheus-client==0.25.0
 protobuf==7.35.1
 psutil==6.0.0
 psycopg[c,pool]==3.3.4
-purecloudplatformclientv2==262.0.0
 pyasn1==0.6.3
 pydantic==2.13.4
 pyjwt==2.13.0

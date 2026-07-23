@@ -295,9 +295,6 @@ services:
 - id: gearmand
   paths:
   - gearmand/datadog_checks/gearmand/
-- id: genesys
-  paths:
-  - genesys/datadog_checks/genesys/
 - id: gitlab
   paths:
   - gitlab/datadog_checks/gitlab/
