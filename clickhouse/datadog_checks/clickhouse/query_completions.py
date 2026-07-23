@@ -165,8 +165,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         self._last_completions_collection_time = now
         try:
             # Reset pending checkpoints at the start of each collection
-            self._current_checkpoint_microseconds = None
-            self._pending_node_checkpoints = {}
+            self._checkpoint.reset_pending()
 
             # Step 1: Collect rows (loads checkpoint internally)
             rows = self._collect_completed_queries()
