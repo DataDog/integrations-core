@@ -71,33 +71,7 @@ class TestVault:
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
-
-        # Keep a reference to the real client so unmocked endpoints hit the container
-        real_get = c.http.get
-
-        def mock_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
-                )
-            elif url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
-                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                        'cluster_name': 'vault-cluster-f5f44063',
-                        'initialized': True,
-                        'replication_dr_mode': 'disabled',
-                        'replication_performance_mode': 'disabled',
-                        'sealed': False,
-                        'server_time_utc': 1529357080,
-                        'standby': False,
-                        'version': '0.10.2',
-                    }
-                )
-            return real_get(url, *args, **kwargs)
-
-        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
-            dd_run_check(c)
+        dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=global_tags, count=1)
 
