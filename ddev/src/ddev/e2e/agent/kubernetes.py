@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 import time
@@ -19,17 +18,17 @@ if TYPE_CHECKING:
 
 _POD_NAME = 'ddev-agent'
 _CONTAINER_NAME = 'agent'
-_DEFAULT_NAMESPACE_PREFIX = 'ddev-agent'
+NAMESPACE = 'ddev-agent'
+CLUSTER_RESOURCE_NAME = 'ddev-agent'
 _DEFAULT_WAIT_TIMEOUT = 120
 _LOCAL_PACKAGES_METADATA = 'local_packages'
 
 
 class KubernetesAgent(AgentInterface):
-    """Run the E2E Agent inside a dedicated Kubernetes test cluster.
+    """Run the E2E Agent in a disposable, fixture-owned Kubernetes cluster.
 
-    Exactly one schedulable node is required, and the backend runs one Agent pod.
-    Cluster creation, image loading, and final teardown are the responsibility of
-    the environment provisioner (for example, ``kind_run``).
+    The backend currently supports clusters provisioned by ``kind_run``. It requires
+    exactly one schedulable node and runs one Agent pod in the cluster.
     """
 
     build_config_key = 'docker'
@@ -47,16 +46,11 @@ class KubernetesAgent(AgentInterface):
 
     @property
     def _namespace(self) -> str:
-        raw_id = super().get_id().lower()
-        normalized_id = re.sub(r'[^a-z0-9]+', '-', raw_id).strip('-')
-        digest = hashlib.sha256(raw_id.encode()).hexdigest()[:8]
-        # Leave room for the prefix, separators, and digest.
-        normalized_id = normalized_id[: 63 - len(_DEFAULT_NAMESPACE_PREFIX) - len(digest) - 2].rstrip('-')
-        return f'{_DEFAULT_NAMESPACE_PREFIX}-{normalized_id}-{digest}'
+        return NAMESPACE
 
     @property
     def _cluster_resource_name(self) -> str:
-        return self._namespace
+        return CLUSTER_RESOURCE_NAME
 
     @property
     def _resource_labels(self) -> dict[str, str]:
@@ -230,8 +224,8 @@ class KubernetesAgent(AgentInterface):
             ],
         }
 
-    def _create_payload(self, payload: dict[str, Any]) -> None:
-        process = self._captured_kubectl(['create', '-f', '-'], input=json.dumps(payload).encode())
+    def _create_manifest(self, manifest: dict[str, Any]) -> None:
+        process = self._captured_kubectl(['create', '-f', '-'], input=json.dumps(manifest).encode())
         if process.returncode:
             raise RuntimeError(f'Unable to create Kubernetes Agent resources: {self._process_output(process)}')
 
@@ -345,10 +339,9 @@ class KubernetesAgent(AgentInterface):
         agent_build = _normalize_agent_image_name(
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
         )
-        # Validate values needed by teardown before creating any resources.
         _ = self._wait_timeout
         self._validate_topology()
-        self._create_payload(self._manifest(agent_build, env_vars))
+        self._create_manifest(self._manifest(agent_build, env_vars))
         self._wait_for_pod()
         self._run_metadata_commands('start_commands')
         self._remember_local_packages(local_packages)
@@ -359,42 +352,7 @@ class KubernetesAgent(AgentInterface):
         self._restart_agent_process()
 
     def stop(self) -> None:
-        errors: list[Exception] = []
-
-        pod = self._captured_kubectl(
-            ['get', 'pod', _POD_NAME, '--namespace', self._namespace, '--ignore-not-found=true', '-o', 'name']
-        )
-        if pod.returncode == 0 and self._process_output(pod).strip():
-            try:
-                self._run_metadata_commands('stop_commands')
-            except Exception as e:
-                errors.append(e)
-
-        for args in (
-            [
-                'delete',
-                'namespace',
-                self._namespace,
-                '--ignore-not-found=true',
-                '--wait=true',
-                f'--timeout={self._wait_timeout}s',
-            ],
-            [
-                'delete',
-                'clusterrole,clusterrolebinding',
-                self._cluster_resource_name,
-                '--ignore-not-found=true',
-            ],
-        ):
-            process = self._captured_kubectl(args)
-            if process.returncode:
-                errors.append(
-                    RuntimeError(f'Unable to remove Kubernetes Agent resources: {self._process_output(process)}')
-                )
-
-        if errors:
-            details = '; '.join(str(error) for error in errors)
-            raise RuntimeError(f'Errors while stopping Kubernetes Agent: {details}') from errors[0]
+        """Leave cleanup to the fixture that deletes the disposable cluster."""
 
     def _restart_agent_process(self) -> None:
         # The Agent image's s6 finish handler normally shuts down the whole

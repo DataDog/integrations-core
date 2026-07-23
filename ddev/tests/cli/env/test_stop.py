@@ -66,6 +66,24 @@ def test_failed_agent_cleanup_preserves_environment_state(ddev, data_dir, mocker
     teardown.assert_called_once()
 
 
+def test_failed_kubernetes_fixture_teardown_preserves_environment_state(ddev, data_dir, mocker):
+    teardown = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=1))
+    stop = mocker.patch('ddev.e2e.agent.kubernetes.KubernetesAgent.stop')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+    metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': '/tmp/kubeconfig'}}
+    env_data.write_metadata(metadata)
+
+    result = ddev('env', 'stop', integration, environment)
+
+    assert result.exit_code == 1, result.output
+    assert env_data.read_metadata() == metadata
+    stop.assert_called_once_with()
+    teardown.assert_called_once()
+
+
 def test_stop_all(ddev, helpers, data_dir, mocker):
     mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
     stop = mocker.patch('ddev.e2e.agent.docker.DockerAgent.stop')

@@ -73,6 +73,6 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
                         if process.returncode:
                             app.abort(code=process.returncode)
 
-                # Keep the environment state when either cleanup stage fails so
-                # a later `ddev env stop` can retry the cleanup.
+                # Keep environment state when either cleanup stage fails so a
+                # later `ddev env stop` can retry the fixture teardown.
                 env_data.remove()
