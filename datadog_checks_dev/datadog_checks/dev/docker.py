@@ -114,13 +114,25 @@ def assert_all_discovery_candidates_stable(
 def _get_compose_container_id(
     compose_file: str | os.PathLike[str] | None, compose_service: str, *, project_name: str | None = None
 ) -> str:
-    compose_file = compose_file or _get_default_compose_file()
     project_name = project_name or _get_default_compose_project_name()
+    if not project_name:
+        raise AssertionError(
+            'Could not determine the Compose project name. '
+            'Pass project_name explicitly or use docker_run with a Compose file.'
+        )
 
-    command = ['docker', 'compose']
-    if project_name:
-        command.extend(['-p', project_name])
-    command.extend(['-f', os.fspath(compose_file), 'ps', '-q', compose_service])
+    command = [
+        'docker',
+        'ps',
+        '--quiet',
+        '--filter',
+        f'label=com.docker.compose.project={project_name}',
+        '--filter',
+        f'label=com.docker.compose.service={compose_service}',
+        '--filter',
+        # Exclude temporary containers created by `docker compose run` for the same project and service.
+        'label=com.docker.compose.oneoff=False',
+    ]
 
     container_id = run_command(command, capture='out', check=True).stdout.strip()
     if not container_id:
@@ -135,20 +147,6 @@ def _get_default_compose_service() -> str:
         return docker_metadata['service_name']
 
     return os.path.basename(find_check_root(depth=2))
-
-
-def _get_default_compose_file() -> str:
-    docker_metadata = get_state('docker_compose_metadata', {})
-    if docker_metadata.get('compose_file'):
-        return docker_metadata['compose_file']
-
-    compose_file = os.path.join(find_check_root(depth=3), 'tests', 'docker', 'docker-compose.yml')
-    if os.path.exists(compose_file):
-        return compose_file
-
-    raise AssertionError(
-        'Could not determine the compose file. Pass compose_file explicitly or use docker_run with a compose file.'
-    )
 
 
 def _get_default_compose_project_name() -> str | None:
