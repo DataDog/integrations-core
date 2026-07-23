@@ -73,6 +73,21 @@ class QueueMetricCollector(object):
                     if self.config.collect_reset_queue_metrics:
                         self.get_pcf_queue_reset_metrics(queue_manager, queue_name, enriched_tags, pcf=pcf)
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
+            except pymqi.MQMIError as e:
+                # Don't warn if no messages, see:
+                # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                    self.log.debug("No PCF messages available for queue %s", queue_name)
+                    self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
+                else:
+                    self.warning('Cannot connect to queue %s: %s', queue_name, e)
+                    self.service_check(
+                        self.QUEUE_SERVICE_CHECK,
+                        AgentCheck.CRITICAL,
+                        queue_tags,
+                        message=str(e),
+                        hostname=self.config.hostname,
+                    )
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
                 self.service_check(
