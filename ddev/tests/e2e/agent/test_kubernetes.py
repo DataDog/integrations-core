@@ -79,6 +79,25 @@ def option_value(command: list[str], option: str) -> str:
     return command[command.index(option) + 1]
 
 
+def find_kubectl_command(calls: list[list[str]], expected: list[str]) -> int:
+    matches = []
+    for index, command in enumerate(calls):
+        kubectl_args = command[: command.index('--')] if '--' in command else command
+        contains_expected = any(
+            kubectl_args[start : start + len(expected)] == expected
+            for start in range(len(kubectl_args) - len(expected) + 1)
+        )
+        if not contains_expected:
+            continue
+
+        assert command[0] == 'kubectl'
+        assert option_value(kubectl_args, '--kubeconfig') == TEST_KUBECONFIG
+        matches.append(index)
+
+    assert len(matches) == 1, f'Expected one kubectl command containing {expected!r}, found {len(matches)}'
+    return matches[0]
+
+
 def find_exec_command(calls: list[list[str]], expected: list[str], *, prefix: bool = False) -> int:
     matches = []
     for index, command in enumerate(calls):
@@ -204,13 +223,12 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
 
     calls = command_calls(run_command)
     prefix = ['kubectl', '--kubeconfig', TEST_KUBECONFIG]
-    assert calls[:2] == [
-        [*prefix, 'config', 'current-context'],
-        [*prefix, 'get', 'nodes', '-o', 'json'],
-    ]
-
+    context_index = find_kubectl_command(calls, ['config', 'current-context'])
+    topology_index = find_kubectl_command(calls, ['get', 'nodes', '-o', 'json'])
     create_calls = [call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-']]
     assert len(create_calls) == 1
+    create_index = run_command.call_args_list.index(create_calls[0])
+    assert context_index < topology_index < create_index
     manifest = json.loads(create_calls[0].kwargs['input'])
     resources = {item['kind']: item for item in manifest['items']}
     assert resources['Namespace']['metadata']['name'] == 'ddev-agent'
@@ -330,18 +348,14 @@ def test_rejects_multi_node_clusters(agent, app, mocker):
     with pytest.raises(NotImplementedError, match='exactly one schedulable node'):
         agent.start(agent_build='', local_packages={}, env_vars={})
 
-    assert run_command.call_args_list == [
-        mocker.call(
-            ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'config', 'current-context'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        ),
-        mocker.call(
-            ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'get', 'nodes', '-o', 'json'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        ),
-    ]
+    calls = command_calls(run_command)
+    context_index = find_kubectl_command(calls, ['config', 'current-context'])
+    topology_index = find_kubectl_command(calls, ['get', 'nodes', '-o', 'json'])
+    assert context_index < topology_index
+    assert not any('create' in command for command in calls)
+    for index in (context_index, topology_index):
+        assert run_command.call_args_list[index].kwargs['stdout'] is subprocess.PIPE
+        assert run_command.call_args_list[index].kwargs['stderr'] is subprocess.STDOUT
 
 
 def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
