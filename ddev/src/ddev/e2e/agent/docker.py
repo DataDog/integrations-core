@@ -175,11 +175,11 @@ class DockerAgent(AgentInterface):
             self._show_logs()
             raise RuntimeError(error_message)
 
-    def _show_logs(self) -> None:
-        self._run_command(['docker', 'logs', self._container_name])
+    def _show_logs(self, *, check: bool = False) -> None:
+        self._run_command(['docker', 'logs', self._container_name], check=check)
 
     def show_logs(self) -> None:
-        self._run_command(['docker', 'logs', self._container_name], check=True)
+        self._show_logs(check=True)
 
     def get_id(self) -> str:
         return self._container_name
