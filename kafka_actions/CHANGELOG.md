@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 2.7.2 / 2026-06-24
+## 2.8.0 / 2026-07-08
+
+***Added***:
+
+* Add earliest, latest, and timestamp-based offset support to the ``update_consumer_group_offsets`` action, along with an inactive-group precondition check and per-partition error reporting. ([#24165](https://github.com/DataDog/integrations-core/pull/24165))
+
+***Fixed***:
+
+* Reformat auto-generated `config_models` files following the migration of the model formatter from black to ruff. No behavior or type-contract change. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+
+## 2.7.2 / 2026-06-24 / Agent 7.81.0
 
 ***Fixed***:
 

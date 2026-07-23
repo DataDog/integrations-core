@@ -35,6 +35,7 @@ EXPECTED_PARAMETER_TYPE_ERRORS = (
     psycopg.errors.IndeterminateDatatype,
     psycopg.errors.UndefinedFunction,
     psycopg.errors.DatatypeMismatch,
+    psycopg.errors.AmbiguousFunction,
 )
 
 

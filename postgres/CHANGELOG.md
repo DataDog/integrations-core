@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 23.9.1 / 2026-06-16
+## 23.10.0 / 2026-07-08
+
+***Added***:
+
+* Run `diagnose` on check initialization, then emit any warnings and failures as Agent Health events. ([#23645](https://github.com/DataDog/integrations-core/pull/23645))
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Update the relations config comment to reflect the current number of metrics generated per relation. ([#24096](https://github.com/DataDog/integrations-core/pull/24096))
+* Cache parameterized-query explain failures caused by unresolvable parameter types so they aren't re-attempted on every collection. ([#24102](https://github.com/DataDog/integrations-core/pull/24102))
+* Migrate the Postgres check's tag handling to the shared `TagManager`. ([#24265](https://github.com/DataDog/integrations-core/pull/24265))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24270](https://github.com/DataDog/integrations-core/pull/24270))
+* Remove duplicated `database_identifier` logic now provided by the DatabaseCheck base class. ([#24278](https://github.com/DataDog/integrations-core/pull/24278))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 23.9.1 / 2026-06-16 / Agent 7.81.0
 
 ***Fixed***:
 

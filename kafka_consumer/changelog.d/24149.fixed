@@ -1,1 +1,0 @@
-Fix kafka.broker_offset and kafka.topic.message_rate not being collected when enable_cluster_monitoring is true and the consumer context count exceeds max_partition_contexts.
