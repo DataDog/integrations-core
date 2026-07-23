@@ -61,6 +61,8 @@ def successful_process(command, *, stdout=b''):
 @pytest.fixture
 def run_command(app, mocker):
     def run(command, **kwargs):
+        if command[-2:] == ['config', 'current-context']:
+            return successful_process(command, stdout=b'kind-test\n')
         if command[-4:] == ['get', 'nodes', '-o', 'json']:
             nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
             return successful_process(command, stdout=json.dumps(nodes).encode())
@@ -202,6 +204,10 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
 
     calls = command_calls(run_command)
     prefix = ['kubectl', '--kubeconfig', TEST_KUBECONFIG]
+    assert calls[:2] == [
+        [*prefix, 'config', 'current-context'],
+        [*prefix, 'get', 'nodes', '-o', 'json'],
+    ]
 
     create_calls = [call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-']]
     assert len(create_calls) == 1
@@ -294,28 +300,56 @@ def test_rejects_invalid_wait_timeout_before_creating_resources(agent, metadata,
     run_command.assert_not_called()
 
 
-def test_rejects_multi_node_clusters(agent, app, mocker):
-    nodes = {'items': [{'metadata': {'name': 'one'}, 'spec': {}}, {'metadata': {'name': 'two'}, 'spec': {}}]}
+def test_rejects_non_kind_context_before_inspecting_cluster(agent, app, mocker):
     run_command = mocker.patch.object(
         app.platform,
         'run_command',
-        return_value=successful_process([], stdout=json.dumps(nodes).encode()),
+        return_value=successful_process([], stdout=b'prod\n'),
     )
+
+    with pytest.raises(RuntimeError, match='non-Kind Kubernetes context `prod`'):
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+    run_command.assert_called_once_with(
+        ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'config', 'current-context'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def test_rejects_multi_node_clusters(agent, app, mocker):
+    nodes = {'items': [{'metadata': {'name': 'one'}, 'spec': {}}, {'metadata': {'name': 'two'}, 'spec': {}}]}
+
+    def run(command, **kwargs):
+        if command[-2:] == ['config', 'current-context']:
+            return successful_process(command, stdout=b'kind-test\n')
+        return successful_process(command, stdout=json.dumps(nodes).encode())
+
+    run_command = mocker.patch.object(app.platform, 'run_command', side_effect=run)
 
     with pytest.raises(NotImplementedError, match='exactly one schedulable node'):
         agent.start(agent_build='', local_packages={}, env_vars={})
 
-    run_command.assert_called_once_with(
-        ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'get', 'nodes', '-o', 'json'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
+    assert run_command.call_args_list == [
+        mocker.call(
+            ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'config', 'current-context'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        ),
+        mocker.call(
+            ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'get', 'nodes', '-o', 'json'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        ),
+    ]
 
 
 def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
     nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
 
     def run(command, **kwargs):
+        if command[-2:] == ['config', 'current-context']:
+            return successful_process(command, stdout=b'kind-test\n')
         if command[-4:] == ['get', 'nodes', '-o', 'json']:
             return successful_process(command, stdout=json.dumps(nodes).encode())
         if command[-3:] == ['create', '-f', '-']:
