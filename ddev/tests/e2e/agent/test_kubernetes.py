@@ -202,7 +202,6 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
 
     calls = command_calls(run_command)
     prefix = ['kubectl', '--kubeconfig', TEST_KUBECONFIG]
-    assert calls[0] == [*prefix, 'get', 'nodes', '-o', 'json']
 
     create_calls = [call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-']]
     assert len(create_calls) == 1
@@ -306,7 +305,11 @@ def test_rejects_multi_node_clusters(agent, app, mocker):
     with pytest.raises(NotImplementedError, match='exactly one schedulable node'):
         agent.start(agent_build='', local_packages={}, env_vars={})
 
-    run_command.assert_called_once()
+    run_command.assert_called_once_with(
+        ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'get', 'nodes', '-o', 'json'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
 
 
 def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
