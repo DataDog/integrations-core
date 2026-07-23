@@ -5,7 +5,6 @@ import copy
 from typing import Callable  # noqa: F401
 
 import pytest
-import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
@@ -29,20 +28,17 @@ def test_e2e(dd_agent_check):
 
 
 @pytest.mark.e2e
-def test_bad_url_e2e(e2e_instance, dd_agent_check):
+def test_bad_url_e2e(aggregator, e2e_instance, dd_agent_check):
     """
-    When giving a wrong url to `edge_hub_prometheus_url`, the redirection might cause SSL exception
-    Example: http://localhost:9601/metri -> https://localhost/metri
+    When an endpoint is unreachable, the run fails, that endpoint reports CRITICAL,
+    and the reachable endpoint reports OK.
     """
-    bad_url_hub_instance = copy.deepcopy(e2e_instance)
-    bad_url_hub_instance['edge_hub_prometheus_url'] = bad_url_hub_instance['edge_hub_prometheus_url'][:-2]
+    bad_instance = copy.deepcopy(e2e_instance)
+    # Nothing listens on this port, so scraping edge_agent fails with a connection error.
+    bad_instance['edge_agent_prometheus_url'] = 'http://localhost:9699/metrics'
 
-    bad_url_agent_instance = copy.deepcopy(e2e_instance)
-    bad_url_agent_instance['edge_agent_prometheus_url'] = bad_url_hub_instance['edge_agent_prometheus_url'][:-2]
+    with pytest.raises(Exception):
+        dd_agent_check(bad_instance, rate=True)
 
-    with pytest.raises(requests.exceptions.SSLError):
-        dd_agent_check(bad_url_hub_instance, rate=True)
-
-    aggregator = dd_agent_check(bad_url_agent_instance, rate=True)
-    aggregator.assert_service_check('azure.iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.CRITICAL)
     aggregator.assert_service_check('azure.iot_edge.edge_hub.prometheus.health', AzureIoTEdgeCheck.OK)
+    aggregator.assert_service_check('azure.iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.CRITICAL)

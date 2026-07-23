@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-from typing import Callable  # noqa: F401
+from typing import Any, Callable  # noqa: F401
 
 import pytest
 
@@ -10,7 +10,7 @@ from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.azure_iot_edge.types import Instance  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPSSLError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -108,3 +108,19 @@ def test_prometheus_endpoint_down(aggregator, mock_instance, option, url, servic
         check.check(instance)
 
     aggregator.assert_service_check(service_check, AzureIoTEdgeCheck.CRITICAL)
+
+
+def test_prometheus_endpoint_ssl_error(aggregator, mock_instance, mock_openmetrics_http):
+    # type: (AggregatorStub, Instance, Any) -> None
+    """
+    When scraping a Prometheus endpoint fails with an SSL error, it surfaces as
+    HTTPSSLError and no health service check is emitted.
+    """
+    mock_openmetrics_http.get.side_effect = HTTPSSLError('SSL validation failed')
+    check = AzureIoTEdgeCheck('azure_iot_edge', {}, [mock_instance])
+
+    # check() scrapes edge_hub first and raises there, never reaching edge_agent.
+    with pytest.raises(HTTPSSLError):
+        check.check(mock_instance)
+
+    aggregator.assert_service_check('azure.iot_edge.edge_hub.prometheus.health', count=0)
