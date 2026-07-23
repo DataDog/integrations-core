@@ -7,7 +7,7 @@ import hashlib
 import json
 import re
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from ddev.e2e.agent.docker import _normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
@@ -45,10 +45,7 @@ class KubernetesAgent(AgentInterface):
 
     @property
     def _kubernetes_metadata(self) -> dict[str, Any]:
-        metadata = self.metadata.get('kubernetes')
-        if not isinstance(metadata, dict):
-            raise ValueError('Kubernetes Agent metadata must contain a `kubernetes` mapping')
-        return metadata
+        return cast(dict[str, Any], self.metadata['kubernetes'])
 
     @property
     def _kubeconfig(self) -> str:
