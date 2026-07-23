@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.query_completions import ClickhouseQueryCompletions
+from datadog_checks.clickhouse.query_completions import DBM_TYPE_FLUSH, ClickhouseQueryCompletions
 
 pytestmark = pytest.mark.unit
 
@@ -350,3 +350,269 @@ def test_default_config_values():
     assert check.query_completions._config.samples_per_hour_per_query == 15
     assert check.query_completions._config.seen_samples_cache_maxsize == 10000
     assert check.query_completions._config.max_samples_per_collection == 1000
+
+
+# Async insert flush log collection tests
+@pytest.fixture
+def instance_with_flush():
+    """Return a ClickHouse instance configuration with the async insert flush log enabled"""
+    return {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'service': 'test-clickhouse-service',
+        'query_completions': {'enabled': True, 'collection_interval': 10},
+        'async_insert_flushes': {'enabled': True, 'collection_interval': 15, 'max_samples_per_collection': 500},
+        'tags': ['test:clickhouse'],
+    }
+
+
+@pytest.fixture
+def check_with_flush(instance_with_flush):
+    """Return a ClickHouse check instance with the async insert flush log enabled"""
+    check = ClickhouseCheck('clickhouse', {}, [instance_with_flush])
+    return check
+
+
+def test_flush_log_initialization(check_with_flush):
+    """Test that flush collection is set up with its own interval and checkpoint when enabled"""
+    from datadog_checks.clickhouse.query_completions import FLUSH_CHECKPOINT_CACHE_KEY
+
+    query_completions = check_with_flush.query_completions
+    assert query_completions._flush_enabled is True
+    assert query_completions._flush_collection_interval == 15
+    assert query_completions._flush_max_rows == 500
+    assert query_completions._flush_checkpoint is not None
+    assert query_completions._flush_checkpoint._cache_key == FLUSH_CHECKPOINT_CACHE_KEY
+
+
+def test_flush_log_disabled_by_default(check_with_dbm):
+    """Test that flush collection is disabled and never runs when there is no flush config"""
+    query_completions = check_with_dbm.query_completions
+    assert query_completions._flush_enabled is False
+
+    with mock.patch.object(query_completions, '_collect_and_submit_flush') as mock_collect:
+        query_completions._collect_flush()
+        mock_collect.assert_not_called()
+
+
+def test_flush_only_enables_job_and_skips_completions():
+    """Test that the shared job runs for the flush log when query completions is disabled"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_completions': {'enabled': False, 'collection_interval': 10},
+        'async_insert_flushes': {'enabled': True, 'collection_interval': 15},
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    query_completions = check.query_completions
+
+    # The shared job must be enabled so its loop runs and reaches flush collection.
+    assert query_completions._enabled is True
+    assert query_completions._flush_enabled is True
+
+    # run_job should collect the flush log but skip completed-query collection.
+    query_completions._tags = ['test:clickhouse']
+    with (
+        mock.patch.object(query_completions, '_collect_completed_queries') as mock_completions,
+        mock.patch.object(query_completions, '_collect_and_submit_flush') as mock_flush,
+    ):
+        query_completions.run_job()
+
+    mock_completions.assert_not_called()
+    mock_flush.assert_called_once()
+
+
+def test_collect_flush_runs_on_its_own_interval(check_with_flush):
+    """Test that flush collection runs once per its own interval, not on every query-completions tick"""
+    query_completions = check_with_flush.query_completions
+
+    with mock.patch.object(query_completions, '_collect_and_submit_flush') as mock_collect:
+        query_completions._collect_flush()  # first tick: runs
+        query_completions._collect_flush()  # second tick: should not run
+        assert mock_collect.call_count == 1
+
+
+def test_create_flush_event_structure(check_with_flush):
+    """Test creation of the async insert flush event payload structure"""
+    query_completions = check_with_flush.query_completions
+    query_completions._tags_no_db = ['test:clickhouse']
+
+    records = [
+        {'database': 'default', 'table': 'events', 'status': 'Ok', 'rows': 1, 'flush_latency_us': 500000},
+        {'database': 'default', 'table': 'events', 'status': 'Ok', 'rows': 2, 'flush_latency_us': 250000},
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = query_completions._create_flush_event(records)
+
+    assert payload['ddsource'] == 'clickhouse'
+    assert payload['dbm_type'] == DBM_TYPE_FLUSH
+    assert payload['collection_interval'] == query_completions._flush_collection_interval
+    assert 'timestamp' in payload
+    assert 'host' in payload
+    assert 'database_instance' in payload
+    assert payload['service'] == 'test-clickhouse-service'
+    assert payload['clickhouse_async_insert_flushes'] == records
+
+
+def test_flush_log_query_format():
+    """Test that the flush query uses server-side binding and reads the fields the event needs"""
+    from datadog_checks.clickhouse.query_completions import FLUSH_LOG_QUERY
+
+    # Structural placeholders (str.replace())
+    assert '{checkpoint_filter}' in FLUSH_LOG_QUERY
+    assert '{async_insert_log_table}' in FLUSH_LOG_QUERY
+
+    # Bound parameters (ClickHouse server-side)
+    assert '{max_flush_rows:UInt64}' in FLUSH_LOG_QUERY
+    assert '{min_checkpoint_us:UInt64}' in FLUSH_LOG_QUERY
+
+    # hostName() is included for per-node checkpoint tracking
+    assert 'hostName() AS server_node' in FLUSH_LOG_QUERY
+
+    # Upper bound so the window never runs past "now"
+    assert 'event_time_microseconds <= now64(6)' in FLUSH_LOG_QUERY
+
+    # Date bound so ClickHouse can prune old daily partitions
+    assert 'event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))' in FLUSH_LOG_QUERY
+
+    # Fields used to build flush records
+    assert 'database' in FLUSH_LOG_QUERY
+    assert 'table' in FLUSH_LOG_QUERY
+    assert 'format' in FLUSH_LOG_QUERY
+    assert 'status' in FLUSH_LOG_QUERY
+    assert 'exception' in FLUSH_LOG_QUERY
+    assert 'bytes' in FLUSH_LOG_QUERY
+    assert 'rows' in FLUSH_LOG_QUERY
+    assert 'query_id' in FLUSH_LOG_QUERY
+    assert 'query' in FLUSH_LOG_QUERY
+    assert 'event_time_microseconds' in FLUSH_LOG_QUERY
+    assert 'flush_time_microseconds' in FLUSH_LOG_QUERY
+
+
+def test_collect_flush_rows(check_with_flush):
+    """Test that rows map to flush records, latency clamps to 0 on clock skew, and the node is tracked"""
+    query_completions = check_with_flush.query_completions
+
+    # Column order matches FLUSH_LOG_QUERY's SELECT.
+    rows = [
+        (
+            'default',  # database
+            'events',  # table
+            'Values',  # format
+            'Ok',  # status
+            '',  # exception
+            'node-1',  # server_node
+            100,  # bytes
+            5,  # rows
+            'qid-1',  # query_id
+            'INSERT INTO events VALUES',  # query
+            1_000_000,  # event_time_microseconds
+            1_500_000,  # flush_time_microseconds
+        ),
+        (
+            # flush_time before event_time: cross-node clock skew, latency clamps to 0
+            'default',  # database
+            'events',  # table
+            'Values',  # format
+            'Ok',  # status
+            '',  # exception
+            'node-2',  # server_node
+            50,  # bytes
+            2,  # rows
+            'qid-2',  # query_id
+            'INSERT INTO events VALUES',  # query
+            2_000_000,  # event_time_microseconds
+            1_500_000,  # flush_time_microseconds
+        ),
+    ]
+    obfuscated = {
+        'query': 'INSERT INTO events VALUES',
+        'query_signature': 'sig-1',
+        'dd_tables': ['events'],
+        'dd_commands': ['INSERT'],
+        'dd_comments': [],
+    }
+
+    with (
+        mock.patch.object(query_completions._check, 'get_system_table', return_value='system.asynchronous_insert_log'),
+        mock.patch.object(
+            query_completions._flush_checkpoint, 'build_per_node_checkpoint_filter', return_value=('1=1', 0, {})
+        ),
+        mock.patch.object(query_completions, '_execute_query', return_value=rows),
+        mock.patch.object(query_completions, '_obfuscate_query', return_value=obfuscated),
+        mock.patch.object(query_completions._flush_checkpoint, 'track_node_checkpoint') as mock_track,
+        mock.patch.object(query_completions._flush_checkpoint, 'set_checkpoint_from_event_time'),
+    ):
+        records = query_completions._collect_flush_rows()
+
+    assert len(records) == 2
+    record = records[0]
+    assert record['database'] == 'default'
+    assert record['table'] == 'events'
+    assert record['status'] == 'Ok'
+    assert record['bytes'] == 100
+    assert record['rows'] == 5
+    assert record['query_id'] == 'qid-1'
+    assert record['query_signature'] == 'sig-1'
+    assert record['flush_latency_us'] == 500_000  # flush_time - event_time
+
+    # Skewed row: flush_time < event_time (cross-node clock skew) clamps latency to 0
+    assert records[1]['flush_latency_us'] == 0
+
+    mock_track.assert_any_call('node-1', 1_000_000)
+    mock_track.assert_any_call('node-2', 2_000_000)
+
+
+def test_flush_advances_checkpoint_on_success(check_with_flush):
+    """Test that a successful flush collection advances the checkpoint"""
+    query_completions = check_with_flush.query_completions
+    query_completions._tags_no_db = ['test:clickhouse']
+
+    with (
+        mock.patch.object(query_completions, '_collect_flush_rows', return_value=[{'table': 'events'}]),
+        mock.patch.object(query_completions, '_create_flush_event', return_value={'dbm_type': 'async_inserts_flush'}),
+        mock.patch.object(query_completions._check, 'database_monitoring_query_activity'),
+        mock.patch.object(query_completions._flush_checkpoint, 'reset_pending'),
+        mock.patch.object(query_completions._flush_checkpoint, 'advance_checkpoint') as mock_advance,
+    ):
+        query_completions._collect_and_submit_flush()
+        mock_advance.assert_called_once()
+
+
+def test_flush_does_not_advance_checkpoint_on_error(check_with_flush):
+    """Test that a failed load leaves the checkpoint unadvanced so the same window is retried"""
+    query_completions = check_with_flush.query_completions
+
+    with (
+        mock.patch.object(query_completions, '_collect_flush_rows', side_effect=Exception('load failed')),
+        mock.patch.object(query_completions._flush_checkpoint, 'reset_pending'),
+        mock.patch.object(query_completions._flush_checkpoint, 'advance_checkpoint') as mock_advance,
+    ):
+        query_completions._collect_and_submit_flush()
+        mock_advance.assert_not_called()
+
+
+def test_flush_advances_checkpoint_on_empty_window(check_with_flush):
+    """Test that an idle window with no rows still advances so the empty range is not rescanned forever"""
+    query_completions = check_with_flush.query_completions
+
+    with (
+        mock.patch.object(query_completions, '_collect_flush_rows', return_value=[]),
+        mock.patch.object(query_completions._flush_checkpoint, 'reset_pending'),
+        mock.patch.object(query_completions._flush_checkpoint, 'advance_checkpoint') as mock_advance,
+        mock.patch.object(query_completions, '_create_flush_event') as mock_create,
+    ):
+        query_completions._collect_and_submit_flush()
+        mock_advance.assert_called_once()
+        mock_create.assert_not_called()

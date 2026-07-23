@@ -110,9 +110,14 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.statement_samples = None
 
-        # Initialize query completions (from system.query_log - completed queries)
-        if self._config.dbm and self._config.query_completions.enabled:
-            self.query_completions = ClickhouseQueryCompletions(self, self._config.query_completions)
+        # Initialize query completions (from system.query_log - completed queries).
+        # The async insert flush log collection collapses into this job (shares its connection and loop),
+        # so its config is passed in here rather than run as its own DBMAsyncJob, which would add another
+        # concurrent connection to the check's capped DBM connection pool.
+        if self._config.dbm and (self._config.query_completions.enabled or self._config.async_insert_flushes.enabled):
+            self.query_completions = ClickhouseQueryCompletions(
+                self, self._config.query_completions, self._config.async_insert_flushes
+            )
         else:
             self.query_completions = None
 
