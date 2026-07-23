@@ -63,16 +63,10 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
                 metadata = env_data.read_metadata()
                 env_vars.update(metadata.get(E2EMetadata.ENV_VARS, {}))
 
-                skip_agent_stop = metadata.get(E2EMetadata.SKIP_AGENT_STOP, False)
-                agent = (
-                    None
-                    if skip_agent_stop
-                    else create_agent_interface(app, integration, env, metadata, env_data.config_file)
-                )
+                agent = create_agent_interface(app, integration, env, metadata, env_data.config_file)
 
                 try:
-                    if agent is not None:
-                        agent.stop()
+                    agent.stop()
                 finally:
                     with integration.path.as_cwd(env_vars=env_vars), runner.stop() as command:
                         process = app.platform.run_command(command)

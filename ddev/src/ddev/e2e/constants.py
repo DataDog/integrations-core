@@ -22,4 +22,3 @@ class E2EMetadata:
     AGENT_TYPE = 'agent_type'
     ENV_VARS = 'e2e_env_vars'
     DOCKER_VOLUMES = 'docker_volumes'
-    SKIP_AGENT_STOP = '_ddev_skip_agent_stop'
