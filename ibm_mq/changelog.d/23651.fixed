@@ -1,0 +1,1 @@
+Fix a ZeroDivisionError in the queue depth percent calculation when a queue's max depth is configured as 0.
