@@ -70,7 +70,7 @@ class SqlServerDataObservability(DBMAsyncJob):
             rate_limit=1 / float(collection_interval),
             run_sync=config.data_observability.run_sync,
             enabled=config.data_observability.enabled,
-            dbms="sqlserver",
+            dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=tuple(_EXPECTED_DB_EXCEPTIONS),
             job_name="data-observability",
