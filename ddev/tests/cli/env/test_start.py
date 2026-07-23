@@ -204,7 +204,6 @@ def test_kubernetes_agent_build_uses_configured_docker_image(ddev, config_file, 
 
     metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': '/tmp/kubeconfig'}}
     config = {}
-    mocker.patch('secrets.token_hex', return_value='test-owner')
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
     start = mocker.patch('ddev.e2e.agent.kubernetes.KubernetesAgent.start')
 
@@ -215,7 +214,7 @@ def test_kubernetes_agent_build_uses_configured_docker_image(ddev, config_file, 
     result = ddev('env', 'start', integration, environment)
 
     assert result.exit_code == 0, result.output
-    assert env_data.read_metadata() == {**metadata, '_kubernetes_owner_id': 'test-owner'}
+    assert env_data.read_metadata() == metadata
     start.assert_called_once_with(
         agent_build='registry.datadoghq.com/agent:7',
         local_packages={},
