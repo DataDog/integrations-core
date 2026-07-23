@@ -227,16 +227,20 @@ def mock_compatibility_methods(collector, global_compat='BACKWARD', subject_comp
     collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=subject_compat)
 
 
-def schema_ds_events(check):
-    """Return the parsed data-streams-message payloads with config_type 'schema' emitted by the check."""
+def ds_events_of_type(check, config_type):
+    """Return the parsed data-streams-message payloads with the given config_type emitted by the check."""
     events = []
     for call in check.event_platform_event.call_args_list:
         args = call[0]
         if len(args) > 1 and args[1] == 'data-streams-message':
             payload = json.loads(args[0])
-            if payload.get('config_type') == 'schema':
+            if payload.get('config_type') == config_type:
                 events.append(payload)
     return events
+
+
+def schema_ds_events(check):
+    return ds_events_of_type(check, 'schema')
 
 
 def _make_schema_registry_check(check, instance_overrides=None):
@@ -1699,7 +1703,7 @@ def _stub_consumer_groups(admin, describe_by_group):
 
 
 def _collect_groups(check, describe_result, group_id='test-group'):
-    """Run _collect_consumer_group_metadata against a single mocked consumer group.
+    """Run collect_all_metadata against a single mocked consumer group.
 
     Reuses the shared seed_mock_kafka_client wiring and only swaps in the
     consumer-group futures, so the admin-client mock setup is not duplicated.
@@ -1711,9 +1715,7 @@ def _collect_groups(check, describe_result, group_id='test-group'):
     _stub_consumer_groups(mock_client.kafka_client, {group_id: describe_result})
     kafka_consumer_check.metadata_collector.client = mock_client
 
-    metadata = mock.MagicMock()
-    metadata.cluster_id = 'test-cluster-id'
-    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    kafka_consumer_check.metadata_collector.collect_all_metadata({}, {}, {})
     return kafka_consumer_check
 
 
@@ -1727,9 +1729,7 @@ def _collect_groups_with_cache(check, describe_result, seed=None, group_id='test
     kafka_consumer_check.metadata_collector.client = mock_client
     _wire_cache(kafka_consumer_check, seed)
 
-    metadata = mock.MagicMock()
-    metadata.cluster_id = 'test-cluster-id'
-    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    kafka_consumer_check.metadata_collector.collect_all_metadata({}, {}, {})
     return kafka_consumer_check
 
 
@@ -1915,6 +1915,64 @@ def test_malformed_cache_does_not_abort_collection(check, aggregator):
     )
     aggregator.assert_metric('kafka.consumer_group.members', count=1)
     aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def consumer_membership_events(check):
+    return ds_events_of_type(check, 'consumer_membership')
+
+
+def test_consumer_membership_event_emitted(check):
+    """A consumer_membership event is emitted per group with the cluster id, group id and members."""
+    members = [_make_member(client_id='c1', host='h1'), _make_member(client_id='c2', host='h2')]
+    describe_result = _make_group_describe(members=members)
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 1
+    event = events[0]
+    assert event['kafka_cluster_id'] == 'test-cluster-id'
+    assert event['group_id'] == 'test-group'
+    assert event['member_ids'] == ['m-c1', 'm-c2']
+    # Per-member detail includes client_id, member_host and the assigned topic-partitions.
+    assert event['members'] == [
+        {
+            'member_id': 'm-c1',
+            'client_id': 'c1',
+            'member_host': 'h1',
+            'topic_partitions': [{'topic': 'test-topic', 'partition': 0}],
+        },
+        {
+            'member_id': 'm-c2',
+            'client_id': 'c2',
+            'member_host': 'h2',
+            'topic_partitions': [{'topic': 'test-topic', 'partition': 0}],
+        },
+    ]
+
+
+def test_consumer_membership_event_member_without_assignment(check):
+    """A member with no assignment yields an empty topic_partitions list."""
+    members = [_make_member(client_id='c1', host='h1', assignment_tps=None)]
+    describe_result = _make_group_describe(members=members)
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['members'] == [
+        {'member_id': 'm-c1', 'client_id': 'c1', 'member_host': 'h1', 'topic_partitions': []},
+    ]
+
+
+def test_consumer_membership_members_sorted_by_member_id(check):
+    """members and member_ids are sorted by member_id regardless of broker order."""
+    members = [_make_member(client_id='c2', host='h2'), _make_member(client_id='c1', host='h1')]
+    describe_result = _make_group_describe(members=members)
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['member_ids'] == ['m-c1', 'm-c2']
+    assert [m['member_id'] for m in events[0]['members']] == ['m-c1', 'm-c2']
 
 
 def test_heartbeat_connect_api_status_present_when_urls_configured(check):

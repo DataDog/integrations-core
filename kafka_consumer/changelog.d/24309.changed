@@ -1,0 +1,1 @@
+Redact Kafka Connect connector configuration with a known-safe allowlist instead of a sensitive-key denylist. Configuration keys not on the allowlist are now hidden in Kafka Connect configuration events.

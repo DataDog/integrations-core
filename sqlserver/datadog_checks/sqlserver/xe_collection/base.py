@@ -161,7 +161,7 @@ class XESessionBase(DBMAsyncJob):
             run_sync=is_affirmative(xe_config.get('run_sync', False)),
             enabled=True,
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(self.collection_interval),
             job_name=f"xe_{session_name}",
             shutdown_callback=self._close_db_conn,
