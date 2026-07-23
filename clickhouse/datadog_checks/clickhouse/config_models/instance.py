@@ -23,7 +23,7 @@ from . import defaults, validators
 SECURE_FIELD_NAMES = frozenset(['tls_ca_cert'])
 
 
-class AsyncInsertFlushes(BaseModel):
+class CollectAsyncInserts(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -164,7 +164,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    async_insert_flushes: Optional[AsyncInsertFlushes] = None
+    collect_async_inserts: Optional[CollectAsyncInserts] = None
     collect_schemas: Optional[CollectSchemas] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None

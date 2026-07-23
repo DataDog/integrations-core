@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
-    from datadog_checks.clickhouse.config_models.instance import AsyncInsertFlushes
+    from datadog_checks.clickhouse.config_models.instance import CollectAsyncInserts
 
 try:
     import datadog_agent
@@ -105,7 +105,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
     # Persistent cache key for storing the last collection timestamp
     CHECKPOINT_CACHE_KEY = "query_completions_last_checkpoint_microseconds"
 
-    def __init__(self, check: ClickhouseCheck, config, flush_config: AsyncInsertFlushes):
+    def __init__(self, check: ClickhouseCheck, config, flush_config: CollectAsyncInserts):
         # The shared job loop ticks at the GCD of the enabled sub-schedules' intervals, so each one
         # fires on time instead of being floored by (or stalled behind) the other's interval.
         enabled_intervals = []

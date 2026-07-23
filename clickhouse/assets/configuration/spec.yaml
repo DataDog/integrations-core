@@ -295,7 +295,7 @@ files:
             type: boolean
             example: false
           fleet_configurable: false
-    - name: async_insert_flushes
+    - name: collect_async_inserts
       description: Configure collection of async insert flush events from system.asynchronous_insert_log.
       options:
         - name: enabled

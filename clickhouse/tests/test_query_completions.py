@@ -343,7 +343,7 @@ def instance_with_flush():
         'dbm': True,
         'service': 'test-clickhouse-service',
         'query_completions': {'enabled': True, 'collection_interval': 10},
-        'async_insert_flushes': {'enabled': True, 'collection_interval': 15, 'max_samples_per_collection': 500},
+        'collect_async_inserts': {'enabled': True, 'collection_interval': 15, 'max_samples_per_collection': 500},
         'tags': ['test:clickhouse'],
     }
 
@@ -383,7 +383,7 @@ def test_flush_only_job_tick_interval_ignores_disabled_completions():
         'db': 'default',
         'dbm': True,
         'query_completions': {'enabled': False, 'collection_interval': 10},
-        'async_insert_flushes': {'enabled': True, 'collection_interval': 15},
+        'collect_async_inserts': {'enabled': True, 'collection_interval': 15},
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
@@ -420,7 +420,7 @@ def test_flush_only_enables_job_and_skips_completions():
         'db': 'default',
         'dbm': True,
         'query_completions': {'enabled': False, 'collection_interval': 10},
-        'async_insert_flushes': {'enabled': True, 'collection_interval': 15},
+        'collect_async_inserts': {'enabled': True, 'collection_interval': 15},
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])

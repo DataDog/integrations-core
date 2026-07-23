@@ -104,7 +104,7 @@ EXPECTED_DEFAULTS = {
         'stuck_replication_num_tries': 3,
     },
     # === DBM: Async insert flushes ===
-    'async_insert_flushes': {
+    'collect_async_inserts': {
         'enabled': False,
         'collection_interval': 60,
         'max_samples_per_collection': 1000,

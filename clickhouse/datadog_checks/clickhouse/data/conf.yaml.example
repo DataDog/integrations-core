@@ -195,7 +195,7 @@ instances:
 
     ## Configure collection of async insert flush events from system.asynchronous_insert_log.
     #
-    # async_insert_flushes:
+    # collect_async_inserts:
 
         ## @param enabled - boolean - optional - default: false
         ## Enable collection of async insert flushes. Requires `dbm: true`.
