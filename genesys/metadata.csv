@@ -421,3 +421,8 @@ genesys_cloud.voice.wait_count,count,,,,"Count of interactions over Voice waitin
 genesys_cloud.voice.wait_time_avg,count,,millisecond,,"The average time spent waiting in queue before an interaction was answered, abandoned, or flowed out of queue over Voice",0,genesys,Wait Time Avg over Voice,,
 genesys_cloud.voice.wait_time_max,count,,millisecond,,"The maximum time spent waiting in queue before an interaction was answered, abandoned, or flowed out of queue over Voice",0,genesys,Wait Time Max over Voice,,
 genesys_cloud.voice.wait_time_min,count,,millisecond,,"The minimum time spent waiting in queue before an interaction was answered, abandoned, or flowed out of queue over Voice",0,genesys,Wait Time Min over Voice,,
+genesys_mos.can_connect,gauge,,,,Returns 1 if the Datadog Agent can successfully authenticate with and query the Genesys Cloud Analytics API otherwise 0,0,genesys,Can Connect,,
+genesys_mos.conversation.below_threshold.count,gauge,,,,Number of conversations in the collection window with a MOS at or below the configured threshold,0,genesys,Conversations Below MOS Threshold,,
+genesys_mos.conversation.count,gauge,,,,Number of conversations with a MOS score observed in the collection window,0,genesys,Conversation Count,,
+genesys_mos.conversation.mos.avg,gauge,,,,Average MOS across conversations observed in the collection window,0,genesys,Average Conversation MOS,,
+genesys_mos.conversation.mos.min,gauge,,,,Minimum MOS across conversations observed in the collection window,0,genesys,Minimum Conversation MOS,,

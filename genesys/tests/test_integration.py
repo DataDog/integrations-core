@@ -18,9 +18,8 @@ https://developer.genesys.cloud/analyticsdatamanagement/analytics/detail/convers
 """
 
 import pytest
+from datadog_checks.genesys import GenesysMosCheck
 from mock import MagicMock, patch
-
-from datadog_checks.genesys_mos import GenesysMosCheck
 
 from .common import read_fixture
 
