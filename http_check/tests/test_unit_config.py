@@ -24,7 +24,7 @@ def test_from_instance():
 
     # defaults
     config = from_instance({'url': 'https://example.com', 'name': 'UpService'})
-    assert len(config) == 17
+    assert len(config) == 18
 
     # `url` is mandatory
     assert config.url == 'https://example.com'
@@ -46,6 +46,7 @@ def test_from_instance():
     assert config.check_hostname is True
     assert config.stream is False
     assert config.use_cert_from_response is False
+    assert config.disable_status_code_tag is False
 
     # headers
     config = from_instance(
