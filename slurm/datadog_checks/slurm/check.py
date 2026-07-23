@@ -52,6 +52,15 @@ def parse_duration(time_str):
         return None
 
 
+# Matches a sinfo GRES/GRES_USED gpu entry: legacy 'gpu:tesla:4', modern
+# 'gpu:<type>:8(S:0-1)' (socket affinity) and 'gpu:<type>:3(IDX:0,4-5)' (used indices),
+# and typeless 'gpu:8'. The trailing '(...)' is optional; '(null)' simply won't match.
+GPU_GRES_RE = re.compile(r'gpu:(?:(?P<type>[^:(]+):)?(?P<count>\d+)(?:\((?P<detail>[^)]*)\))?')
+
+# seff prints memory in whichever unit fits; normalize everything to MB for the metric.
+MEMORY_UNIT_TO_MB = {"B": 1 / 1024 / 1024, "KB": 1 / 1024, "MB": 1, "GB": 1024, "TB": 1024 * 1024}
+
+
 @dataclass
 class ProcessPidMatch:
     host_pid: str
@@ -320,7 +329,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 duration = 0
 
             self.gauge('sacct.job.duration', duration, tags=tags)
-            self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
+            if ave_cpu is not None:
+                self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
             if self.collect_seff_stats:
                 job_state = job_data[12].strip().upper()
@@ -358,10 +368,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 cpu_eff = float(match.group(1))
                 continue
 
-            # Memory Utilized: 0.00 MB (estimated maximum)
-            match = re.match(r'Memory Utilized: ([\d.]+) MB', line)
+            # Memory Utilized: 0.00 MB / 776.00 KB / 1.50 GB — normalize whatever unit to MB.
+            match = re.match(r'Memory Utilized: ([\d.]+)\s*([KMGT]?B)', line)
             if match:
-                mem_utilized = float(match.group(1))
+                mem_utilized = float(match.group(1)) * MEMORY_UNIT_TO_MB.get(match.group(2), 1)
                 continue
 
             # Memory Efficiency: 0.00% of 16.00 B (16.00 B/node)
@@ -480,41 +490,45 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge(f'{namespace}.cpu.other', other, tags)
             self.gauge(f'{namespace}.cpu.total', total, tags)
 
+    def _parse_gpu_gres(self, gres):
+        # Parse every gpu entry in a sinfo GRES/GRES_USED field into a list of
+        # (gpu_type, count, detail). Handles comma-separated multi-model nodes
+        # ('gpu:tesla:2,gpu:kepler:2'), the modern suffixes 'gpu:<type>:8(S:0-1)' /
+        # 'gpu:<type>:3(IDX:0,4-5)', legacy 'gpu:<type>:4', typeless 'gpu:8', and '(null)'.
+        if not gres:
+            return []
+        return [
+            (match.group('type') or "null", int(match.group('count')), match.group('detail'))
+            for match in GPU_GRES_RE.finditer(gres)
+        ]
+
     def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
-        used_gpu_used_idx = "null"
-        gpu_type = "null"
-        total_gpu = None
-        used_gpu_count = None
+        totals = self._parse_gpu_gres(gres)
+        used_by_type = {}
+        if gres_used is not None:
+            for gpu_type, count, detail in self._parse_gpu_gres(gres_used):
+                used_by_type[gpu_type] = (count, detail)
 
-        try:
-            # Always parse total GPU info
-            gres_total_parts = gres.split(':')
-            if len(gres_total_parts) == 3 and gres_total_parts[0] == "gpu":
-                _, gpu_type, total_gpu_part = gres_total_parts
-                total_gpu = int(total_gpu_part)
+        if not totals:
+            return [f"slurm_{namespace}_gpu_type:null"], [f"slurm_{namespace}_gpu_used_idx:null"]
 
-            # Only parse used GPU info if gres_used is not None
-            if gres_used is not None:
-                gres_used_parts = gres_used.split(':')
-                if len(gres_used_parts) == 4 and gres_used_parts[0] == "gpu":
-                    _, _, used_gpu_count_part, used_gpu_used_idx = gres_used_parts
-                    used_gpu_count = int(used_gpu_count_part.split('(')[0])
-                    used_gpu_used_idx = used_gpu_used_idx.rstrip(')')
-        except (ValueError, IndexError) as e:
-            self.log.debug(
-                "Invalid GPU data: gres:'%s', gres_used:'%s'. Skipping GPU metric submission. Error: %s",
-                gres,
-                gres_used,
-                e,
-            )
+        gpu_tags = []
+        gpu_info_tags = []
+        for gpu_type, total_gpu, _ in totals:
+            type_tag = f"slurm_{namespace}_gpu_type:{gpu_type}"
+            gpu_tags.append(type_tag)
+            metric_tags = tags + [type_tag]
+            if total_gpu is not None:
+                self.gauge(f'{namespace}.gpu_total', total_gpu, metric_tags)
 
-        gpu_tags = [f"slurm_{namespace}_gpu_type:{gpu_type}"]
-        gpu_info_tags = [f"slurm_{namespace}_gpu_used_idx:{used_gpu_used_idx}"]
-        _tags = tags + gpu_tags
-        if total_gpu is not None:
-            self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
-        if used_gpu_count is not None and gres_used is not None:
-            self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
+            used_count, used_detail = used_by_type.get(gpu_type, (None, None))
+            if used_count is not None:
+                self.gauge(f'{namespace}.gpu_used', used_count, metric_tags)
+
+            used_idx = "null"
+            if used_detail and used_detail.startswith("IDX:"):
+                used_idx = used_detail[len("IDX:") :]
+            gpu_info_tags.append(f"slurm_{namespace}_gpu_used_idx:{used_idx}")
 
         return gpu_tags, gpu_info_tags
 
