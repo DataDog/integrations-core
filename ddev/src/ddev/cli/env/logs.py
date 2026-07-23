@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 @click.pass_obj
 def logs(app: Application, *, intg_name: str, environment: str):
     """Show backend-specific diagnostics for the Agent."""
-    from ddev.e2e.agent import create_agent
+    from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
 
     integration = app.repo.integrations.get(intg_name)
@@ -27,7 +27,7 @@ def logs(app: Application, *, intg_name: str, environment: str):
         app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
     metadata = env_data.read_metadata()
-    agent = create_agent(app, integration, environment, metadata, env_data.config_file)
+    agent = create_agent_interface(app, integration, environment, metadata, env_data.config_file)
 
     try:
         agent.show_logs()

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ddev.utils.fs import Path
 
 
-def create_agent(
+def create_agent_interface(
     app: Application,
     integration: Integration,
     environment: str,

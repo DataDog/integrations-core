@@ -79,7 +79,7 @@ def agent(
     """
     import subprocess
 
-    from ddev.e2e.agent import create_agent
+    from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
     from ddev.utils.fs import Path
 
@@ -90,7 +90,7 @@ def agent(
         app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
     metadata = env_data.read_metadata()
-    agent = create_agent(app, integration, environment, metadata, env_data.config_file)
+    agent = create_agent_interface(app, integration, environment, metadata, env_data.config_file)
 
     full_args = list(args)
     trigger_run = False
