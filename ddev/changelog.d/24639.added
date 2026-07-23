@@ -1,1 +1,1 @@
-Add a Kubernetes Agent backend for running integration E2E checks and Autodiscovery tests inside a cluster.
+Add a Kubernetes Agent backend for running integration E2E checks and Autodiscovery tests inside disposable Kind clusters.

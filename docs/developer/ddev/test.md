@@ -93,9 +93,9 @@ Note: Vagrant environments are not supported in CI environments due to virtualiz
 
 ### Kubernetes Agent
 
-The Kubernetes Agent backend runs the Datadog Agent inside an existing Kubernetes test cluster. The cluster lifecycle
-remains the responsibility of an environment helper such as `kind_run`; the backend only requires a kubeconfig and uses
-standard `kubectl` operations, so it is not tied to Kind.
+The Kubernetes Agent backend runs the Datadog Agent only in a disposable Kubernetes cluster that is owned by the E2E
+fixture. The currently supported provisioner is `kind_run`, which creates the cluster before the fixture yields and deletes
+the whole cluster during fixture teardown. The backend is not designed for shared or pre-existing clusters.
 
 ```python
 @pytest.fixture(scope='session')
@@ -121,8 +121,9 @@ local packages requested by `--dev` or `--base`, and implements Agent commands t
 discovery E2E tests therefore continue to use `dd_agent_check` and `dd_agent_check_discovery`.
 
 Agent images default to the `Always` pull policy so mutable release and development tags are refreshed. Environments
-that import a local image into the cluster can set `image_pull_policy` to `IfNotPresent` or `Never`. The backend generates
-a namespace from the integration and environment names, then owns and deletes it and its cluster-scoped RBAC resources.
+that import a local image into the cluster can set `image_pull_policy` to `IfNotPresent` or `Never`. The backend creates
+one Agent in the fixed `ddev-agent` namespace with fixed cluster-scoped RBAC names. Resource cleanup happens when
+`kind_run` deletes the whole disposable cluster.
 
 The initial implementation supports exactly one schedulable Kubernetes node. It rejects multi-node clusters until
 Agent targeting or fan-out semantics are defined.
