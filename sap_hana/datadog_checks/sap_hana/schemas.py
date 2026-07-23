@@ -40,13 +40,19 @@ from __future__ import annotations
 
 import contextlib
 from contextlib import closing
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from datadog_checks.base.utils.db.schemas import DatabaseInfo, SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 if TYPE_CHECKING:
     from .config_models.instance import CollectSchemas
     from .sap_hana import SapHanaCheck
+
+try:
+    from hdbcli.dbapi import Error as HanaError
+except ImportError:
+    HanaError = Exception  # type: ignore[misc,assignment]
 
 # Flush a schema payload once this many columns have accumulated. The base SchemaCollector
 # chunks payloads by table count (`payload_chunk_size`, default 10,000 tables), but a HANA
@@ -233,6 +239,10 @@ class HanaSchemaCollector(SchemaCollector):
         super().__init__(check, HanaSchemaCollectorConfig(config))
         self._query_builder = HanaSchemaQueryBuilder(self._config, self._log)
         self._pending_row = None
+        self._conn: Any = None  # injected by HanaSchemaCollectionJob; falls back to check._conn
+
+    def _active_conn(self) -> Any:
+        return self._conn if self._conn is not None else self._check._conn
 
     def _reset(self) -> None:
         super()._reset()
@@ -254,7 +264,7 @@ class HanaSchemaCollector(SchemaCollector):
 
     def _get_databases(self) -> list[DatabaseInfo]:
         try:
-            with closing(self._check._conn.cursor()) as cursor:
+            with closing(self._active_conn().cursor()) as cursor:
                 cursor.execute(CURRENT_DATABASE_QUERY)
                 row = cursor.fetchone()
                 if not row:
@@ -276,7 +286,7 @@ class HanaSchemaCollector(SchemaCollector):
 
     @contextlib.contextmanager
     def _get_cursor(self, _database_name):
-        conn = self._check._conn
+        conn = self._active_conn()
         self._query_builder.ensure_stats_permission(conn)
         query, params = self._query_builder.build()
         with closing(conn.cursor()) as cursor:
@@ -343,3 +353,52 @@ class HanaSchemaCollector(SchemaCollector):
                 }
             ],
         }
+
+
+class HanaSchemaCollectionJob(DBMAsyncJob):
+    """Background job that runs HanaSchemaCollector on its own dedicated connection."""
+
+    def __init__(self, check: SapHanaCheck, config: CollectSchemas) -> None:
+        self._check = check
+        self._schema_collector = HanaSchemaCollector(check, config)
+        self._job_conn: Any = None
+        collection_interval = int(config.collection_interval or 600)
+        super().__init__(
+            check,
+            config_host=check._server,
+            rate_limit=1.0 / collection_interval,
+            run_sync=config.run_sync or False,
+            enabled=config.enabled or False,
+            dbms="saphana",
+            min_collection_interval=check.instance.get('min_collection_interval', 15),
+            expected_db_exceptions=(HanaError,),
+            shutdown_callback=self._shutdown,
+            job_name="schema-collection",
+        )
+
+    def _shutdown(self) -> None:
+        if self._job_conn is not None:
+            try:
+                self._job_conn.close()
+            except Exception:
+                pass
+            self._job_conn = None
+
+    def _get_conn(self) -> Any:
+        if self._job_conn is not None:
+            return self._job_conn
+        from hdbcli.dbapi import connect as hana_connect  # noqa: PLC0415
+
+        props = self._check._get_connection_properties()
+        self._job_conn = hana_connect(**props)
+        return self._job_conn
+
+    def run_job(self) -> None:
+        try:
+            conn = self._get_conn()
+            self._schema_collector._conn = conn
+            self._schema_collector.collect_schemas()
+        except HanaError:
+            self._job_conn = None
+            self._schema_collector._conn = None
+            raise

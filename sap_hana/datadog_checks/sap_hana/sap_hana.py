@@ -4,7 +4,6 @@
 from __future__ import division
 
 import functools
-import time
 from collections import defaultdict
 from contextlib import closing
 from datetime import datetime
@@ -32,7 +31,7 @@ from .config_models.instance import CollectSchemas, DataObservability
 from .data_observability import SapHanaDataObservability
 from .diagnose import run_diagnostics
 from .exceptions import OperationalError, QueryExecutionError
-from .schemas import HanaSchemaCollector
+from .schemas import HanaSchemaCollectionJob
 from .utils import compute_percent, positive
 
 
@@ -93,11 +92,9 @@ class SapHanaCheck(AgentCheck):
         # Save master database hostname to act as the default if `use_hana_hostnames` is true
         self._master_hostname = None
 
-        # Schema collection (DBM)
+        # Schema collection async job (DBM)
         collect_schemas = CollectSchemas(**(self.instance.get('collect_schemas') or {}))
-        self._schema_collector = HanaSchemaCollector(self, collect_schemas) if collect_schemas.enabled else None
-        self._schema_collection_interval = int(collect_schemas.collection_interval or 600)
-        self._last_schema_collection_time = 0
+        self._schema_collection_job = HanaSchemaCollectionJob(self, collect_schemas)
         self._dbms_version = None
 
         # Data Observability async job (RC-delivered queries)
@@ -131,7 +128,7 @@ class SapHanaCheck(AgentCheck):
                 except Exception as e:
                     self.log.exception('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
-            self._maybe_collect_schemas()
+            self._schema_collection_job.run_job_loop(self._tags)
             if self._do_config.enabled:
                 self.data_observability.run_job_loop(self._tags)
         finally:
@@ -237,17 +234,6 @@ class SapHanaCheck(AgentCheck):
     @property
     def cloud_metadata(self):
         return {}
-
-    def _maybe_collect_schemas(self):
-        if not self._schema_collector or not self._conn:
-            return
-        if time.time() - self._last_schema_collection_time < self._schema_collection_interval:
-            return
-        try:
-            self._schema_collector.collect_schemas()
-            self._last_schema_collection_time = time.time()
-        except Exception as e:
-            self.log.error('Error collecting HANA schemas: %s', e)
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
