@@ -394,8 +394,8 @@ def test_collection_interval_gcd():
     assert check.statement_samples._expected_collection_interval == 5
 
 
-def test_query_samples_independent_of_buffer():
-    """Test that query samples collect on their own interval, unaffected by buffer state piggybacking"""
+def test_query_samples_collection_interval():
+    """Test that query samples collect on their own interval, unaffected by buffer snapshot sharing the job"""
     instance = {
         'server': 'localhost',
         'port': 9000,
@@ -458,6 +458,41 @@ def test_buffer_only_skips_query_samples():
 
         mock_collect_samples.assert_not_called()
         mock_collect_buffer.assert_called_once()
+
+
+def test_buffer_collection_interval():
+    """Test that buffer snapshot collects on its own interval, unaffected by query samples sharing the job"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'asynchronous_insert_buffer_snapshot': {
+            'enabled': True,
+            'collection_interval': 15,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    with (
+        mock.patch.object(samples, '_query_buffer_snapshot', return_value=[]) as mock_query_buffer,
+        mock.patch.object(samples, '_emit_buffer_events') as mock_emit_buffer,
+    ):
+        for current_time in (15.0, 20.0, 30.0):
+            with mock.patch('datadog_checks.clickhouse.statement_samples.time.time', return_value=current_time):
+                samples._collect_buffer_snapshot()
+
+        assert mock_query_buffer.call_count == 2
+        assert mock_emit_buffer.call_count == 2
+        assert samples._last_buffer_snapshot_time == 30.0
 
 
 def test_buffer_snapshot_query_format():
