@@ -93,9 +93,10 @@ Note: Vagrant environments are not supported in CI environments due to virtualiz
 
 ### Kubernetes Agent
 
-The Kubernetes Agent backend runs the Datadog Agent inside an existing Kubernetes test cluster. The cluster lifecycle
-remains the responsibility of an environment helper such as `kind_run`; the backend only requires a kubeconfig and uses
-standard `kubectl` operations, so it is not tied to Kind.
+The Kubernetes Agent backend runs the Datadog Agent inside an existing Kubernetes test cluster as a Node Agent
+DaemonSet from a pinned version of the official Datadog Helm chart. The cluster lifecycle remains the responsibility of
+an environment helper such as `kind_run`; the backend consumes a kubeconfig and is not tied to Kind. Both `kubectl` and
+Helm must be installed on the host. Helm cache, configuration, and data are isolated within the environment's ddev state.
 
 ```python
 @pytest.fixture(scope='session')
@@ -118,11 +119,14 @@ def dd_environment():
 
 The backend uses the Agent image selected by `ddev env start --agent` or `DDEV_E2E_AGENT`, installs and synchronizes
 local packages requested by `--dev` or `--base`, and implements Agent commands through `kubectl exec`. Static and
-discovery E2E tests therefore continue to use `dd_agent_check` and `dd_agent_check_discovery`.
+discovery E2E tests therefore continue to use `dd_agent_check` and `dd_agent_check_discovery`. The chart deployment
+runs only the core Node Agent; the Operator, Cluster Agent, APM, logs, process collection, and other auxiliary workloads
+remain disabled for this E2E backend.
 
 Agent images default to the `Always` pull policy so mutable release and development tags are refreshed. Environments
 that import a local image into the cluster can set `image_pull_policy` to `IfNotPresent` or `Never`. A custom `namespace`
-must not already exist; the backend owns and deletes the namespace and its cluster-scoped RBAC resources.
+must not already exist. The backend owns the namespace and Helm release; teardown uninstalls the chart, including its
+cluster-scoped RBAC resources, before deleting the namespace.
 
 The initial implementation supports exactly one schedulable Kubernetes node. It rejects multi-node clusters until
 Agent targeting or fan-out semantics are defined.

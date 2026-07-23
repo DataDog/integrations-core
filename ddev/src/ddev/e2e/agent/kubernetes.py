@@ -12,23 +12,26 @@ from typing import TYPE_CHECKING, Any
 
 from ddev.e2e.agent.docker import _normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
+from ddev.e2e.agent.kubernetes_helm import CONTAINER_NAME, AgentPodSelectionError, HelmDaemonSetDeployment
 
 if TYPE_CHECKING:
     import subprocess
 
     from ddev.utils.fs import Path
 
-_POD_NAME = 'ddev-agent'
-_CONTAINER_NAME = 'agent'
 _DEFAULT_NAMESPACE_PREFIX = 'ddev-agent'
-_DEFAULT_WAIT_TIMEOUT = 120
+_DEFAULT_WAIT_TIMEOUT = 300
 _LOCAL_PACKAGES_METADATA = 'local_packages'
 _OWNER_ID_METADATA = '_kubernetes_owner_id'
-_OWNER_LABEL = 'ddev.datadoghq.com/environment'
+_PREPARED_MARKER = '/home/.ddev-agent-prepared'
+
+
+class AgentPodReplacedError(RuntimeError):
+    pass
 
 
 class KubernetesAgent(AgentInterface):
-    """Run the E2E Agent inside a Kubernetes test cluster.
+    """Run the E2E Agent in a Helm-managed Kubernetes DaemonSet.
 
     The initial implementation intentionally supports one schedulable node and
     one Agent pod. Cluster creation and image loading belong to the environment
@@ -62,7 +65,7 @@ class KubernetesAgent(AgentInterface):
     def _namespace(self) -> str:
         namespace = self._kubernetes_metadata.get('namespace')
         if namespace is not None:
-            if not isinstance(namespace, str) or not re.fullmatch(r'[a-z0-9]([-a-z0-9]*[a-z0-9])?', namespace):
+            if not isinstance(namespace, str) or not re.fullmatch(r'[a-z]([-a-z0-9]*[a-z0-9])?', namespace):
                 raise ValueError(f'Invalid Kubernetes Agent namespace: {namespace!r}')
             if len(namespace) > 63:
                 raise ValueError('Kubernetes Agent namespace must contain at most 63 characters')
@@ -76,10 +79,6 @@ class KubernetesAgent(AgentInterface):
         return f'{_DEFAULT_NAMESPACE_PREFIX}-{normalized_id}-{digest}'
 
     @cached_property
-    def _cluster_resource_name(self) -> str:
-        return self._namespace
-
-    @cached_property
     def _owner_id(self) -> str:
         owner_id = self.metadata.get(_OWNER_ID_METADATA)
         if not isinstance(owner_id, str) or not re.fullmatch(r'[a-z0-9]([-a-z0-9]*[a-z0-9])?', owner_id):
@@ -87,13 +86,6 @@ class KubernetesAgent(AgentInterface):
         if len(owner_id) > 63:
             raise ValueError('Kubernetes Agent internal owner ID must contain at most 63 characters')
         return owner_id
-
-    @cached_property
-    def _resource_labels(self) -> dict[str, str]:
-        return {
-            'app.kubernetes.io/managed-by': 'ddev',
-            _OWNER_LABEL: self._owner_id,
-        }
 
     @cached_property
     def _config_dir(self) -> str:
@@ -114,6 +106,18 @@ class KubernetesAgent(AgentInterface):
             raise ValueError('Kubernetes Agent `wait_timeout` must be a positive integer')
         return timeout
 
+    @cached_property
+    def _deployment(self) -> HelmDaemonSetDeployment:
+        return HelmDaemonSetDeployment(
+            platform=self.platform,
+            kubeconfig=self._kubeconfig,
+            namespace=self._namespace,
+            owner_id=self._owner_id,
+            kubernetes_metadata=self._kubernetes_metadata,
+            state_dir=self.config_file.parent.parent,
+            wait_timeout=self._wait_timeout,
+        )
+
     def _kubectl(self, args: list[str], **kwargs) -> subprocess.CompletedProcess:
         return self.platform.run_command([*self._kubectl_prefix, *args], **kwargs)
 
@@ -127,10 +131,13 @@ class KubernetesAgent(AgentInterface):
 
     @staticmethod
     def _process_output(process: subprocess.CompletedProcess) -> str:
-        output = process.stdout or b''
-        if isinstance(output, bytes):
-            return output.decode('utf-8', errors='replace')
-        return output
+        return HelmDaemonSetDeployment.process_output(process)
+
+    def _pod_name(self, *, ready: bool = True) -> str:
+        pod = self._deployment.agent_pod(ready=ready)
+        if pod is None:  # pragma: no cover - required=True guarantees a result
+            raise RuntimeError('Kubernetes Agent pod is unavailable')
+        return pod.name
 
     def _exec(
         self,
@@ -139,8 +146,11 @@ class KubernetesAgent(AgentInterface):
         env_vars: dict[str, str] | None = None,
         check: bool = True,
         capture: bool = False,
+        pod_ready: bool = True,
+        pod_name: str | None = None,
     ) -> subprocess.CompletedProcess:
-        args = ['exec', '--namespace', self._namespace, f'pod/{_POD_NAME}', '--container', _CONTAINER_NAME, '--']
+        pod_name = pod_name or self._pod_name(ready=pod_ready)
+        args = ['exec', '--namespace', self._namespace, f'pod/{pod_name}', '--container', CONTAINER_NAME, '--']
         if env_vars:
             args.append('env')
             args.extend(f'{key}={value}' for key, value in sorted(env_vars.items()))
@@ -149,29 +159,7 @@ class KubernetesAgent(AgentInterface):
             return self._captured_kubectl(args, check=check)
         return self._kubectl(args, check=check)
 
-    def _validate_resource_ownership(self) -> None:
-        resources = (
-            ('namespace', self._namespace),
-            ('clusterrole', self._cluster_resource_name),
-            ('clusterrolebinding', self._cluster_resource_name),
-        )
-        existing_resources = []
-        for resource, name in resources:
-            process = self._captured_kubectl(['get', resource, name, '--ignore-not-found=true', '-o', 'name'])
-            if process.returncode:
-                raise RuntimeError(
-                    f'Unable to inspect Kubernetes Agent {resource} `{name}`: {self._process_output(process)}'
-                )
-            if self._process_output(process).strip():
-                existing_resources.append(f'{resource}/{name}')
-
-        if existing_resources:
-            raise RuntimeError(
-                'Refusing to overwrite Kubernetes resources not owned by this environment: '
-                + ', '.join(existing_resources)
-            )
-
-    def _validate_topology(self) -> None:
+    def _validate_topology(self) -> str:
         process = self._captured_kubectl(['get', 'nodes', '-o', 'json'])
         if process.returncode:
             raise RuntimeError(f'Unable to inspect Kubernetes nodes: {self._process_output(process)}')
@@ -179,190 +167,70 @@ class KubernetesAgent(AgentInterface):
         try:
             node_data = json.loads(self._process_output(process))
             schedulable_nodes = [node for node in node_data['items'] if not node.get('spec', {}).get('unschedulable')]
+            node_names = [node['metadata']['name'] for node in schedulable_nodes]
         except (KeyError, TypeError, json.JSONDecodeError) as e:
             raise RuntimeError(f'Unable to parse Kubernetes node data: {e}') from e
 
-        if len(schedulable_nodes) != 1:
+        if len(node_names) != 1:
             raise NotImplementedError(
                 'KubernetesAgent currently requires exactly one schedulable node; '
-                f'found {len(schedulable_nodes)}. Multi-node execution needs an explicit Agent targeting policy.'
+                f'found {len(node_names)}. Multi-node execution needs an explicit Agent targeting policy.'
             )
+        return node_names[0]
 
-    def _manifest(self, agent_build: str, env_vars: dict[str, str]) -> dict[str, Any]:
-        env_vars = env_vars.copy()
-        env_vars.setdefault('DD_API_KEY', 'a' * 32)
-        env_vars.setdefault('DD_APM_ENABLED', 'false')
-        env_vars.setdefault('DD_AUTOCONFIG_FROM_ENVIRONMENT', 'true')
-        env_vars.setdefault('DD_HOSTNAME', self._namespace)
-        env_vars.setdefault('DD_KUBELET_TLS_VERIFY', 'false')
-
-        container_env: list[dict[str, Any]] = [{'name': key, 'value': value} for key, value in sorted(env_vars.items())]
-        container_env.extend(
-            [
-                {
-                    'name': 'DD_KUBERNETES_KUBELET_HOST',
-                    'valueFrom': {'fieldRef': {'fieldPath': 'status.hostIP'}},
-                },
-                {
-                    'name': 'DD_KUBERNETES_KUBELET_NODENAME',
-                    'valueFrom': {'fieldRef': {'fieldPath': 'spec.nodeName'}},
-                },
-            ]
-        )
-
-        extra_labels = self._kubernetes_metadata.get('pod_labels', {})
-        if not isinstance(extra_labels, dict) or not all(
-            isinstance(key, str) and isinstance(value, str) for key, value in extra_labels.items()
-        ):
-            raise ValueError('Kubernetes Agent `pod_labels` must be a mapping of strings to strings')
-        labels = {**extra_labels, **self._resource_labels, 'app.kubernetes.io/name': _POD_NAME}
-
-        image_pull_policy = self._kubernetes_metadata.get('image_pull_policy', 'Always')
-        if image_pull_policy not in {'Always', 'IfNotPresent', 'Never'}:
-            raise ValueError('Kubernetes Agent `image_pull_policy` must be Always, IfNotPresent, or Never')
-
-        role_rules = [
-            {'apiGroups': [''], 'resources': ['nodes'], 'verbs': ['get', 'list', 'watch']},
-            {
-                'apiGroups': [''],
-                'resources': ['nodes/metrics', 'nodes/spec', 'nodes/stats', 'nodes/proxy'],
-                'verbs': ['get'],
-            },
-            {
-                'apiGroups': [''],
-                'resources': ['pods', 'endpoints', 'services'],
-                'verbs': ['get', 'list', 'watch'],
-            },
-        ]
-
-        return {
-            'apiVersion': 'v1',
-            'kind': 'List',
-            'items': [
-                {
-                    'apiVersion': 'v1',
-                    'kind': 'Namespace',
-                    'metadata': {'name': self._namespace, 'labels': self._resource_labels},
-                },
-                {
-                    'apiVersion': 'v1',
-                    'kind': 'ServiceAccount',
-                    'metadata': {'name': _POD_NAME, 'namespace': self._namespace, 'labels': self._resource_labels},
-                },
-                {
-                    'apiVersion': 'rbac.authorization.k8s.io/v1',
-                    'kind': 'ClusterRole',
-                    'metadata': {'name': self._cluster_resource_name, 'labels': self._resource_labels},
-                    'rules': role_rules,
-                },
-                {
-                    'apiVersion': 'rbac.authorization.k8s.io/v1',
-                    'kind': 'ClusterRoleBinding',
-                    'metadata': {'name': self._cluster_resource_name, 'labels': self._resource_labels},
-                    'roleRef': {
-                        'apiGroup': 'rbac.authorization.k8s.io',
-                        'kind': 'ClusterRole',
-                        'name': self._cluster_resource_name,
-                    },
-                    'subjects': [
-                        {'kind': 'ServiceAccount', 'name': _POD_NAME, 'namespace': self._namespace},
-                    ],
-                },
-                {
-                    'apiVersion': 'v1',
-                    'kind': 'Pod',
-                    'metadata': {'name': _POD_NAME, 'namespace': self._namespace, 'labels': labels},
-                    'spec': {
-                        'serviceAccountName': _POD_NAME,
-                        'restartPolicy': 'Always',
-                        'terminationGracePeriodSeconds': 0,
-                        'tolerations': [{'operator': 'Exists'}],
-                        'containers': [
-                            {
-                                'name': _CONTAINER_NAME,
-                                'image': agent_build,
-                                'imagePullPolicy': image_pull_policy,
-                                'env': container_env,
-                            }
-                        ],
-                    },
-                },
-            ],
-        }
-
-    def _create_payload(self, payload: dict[str, Any]) -> None:
-        process = self._captured_kubectl(['create', '-f', '-'], input=json.dumps(payload).encode())
-        if process.returncode:
-            raise RuntimeError(f'Unable to create Kubernetes Agent resources: {self._process_output(process)}')
-
-    def _create_manifest(self, manifest: dict[str, Any]) -> None:
-        # Acquire the namespace as an atomic ownership lock before creating any
-        # other resource. `create`, unlike `apply`, fails rather than overwriting
-        # a namespace that appears after the ownership preflight.
-        namespace, *resources = manifest['items']
-        self._create_payload(namespace)
-        self._create_payload({'apiVersion': 'v1', 'kind': 'List', 'items': resources})
-
-    def _wait_for_pod(self) -> None:
-        process = self._captured_kubectl(
-            [
-                'wait',
-                '--namespace',
-                self._namespace,
-                '--for=condition=Ready',
-                f'pod/{_POD_NAME}',
-                f'--timeout={self._wait_timeout}s',
-            ]
-        )
-        if process.returncode:
-            self._show_logs()
-            raise RuntimeError(f'Kubernetes Agent pod did not become ready: {self._process_output(process)}')
-
-    def _wait_for_agent(self) -> None:
+    def _wait_for_agent(self, *, pod_name: str | None = None) -> None:
         deadline = time.monotonic() + self._wait_timeout
         last_output = ''
         while time.monotonic() < deadline:
-            process = self._exec(['agent', 'status'], check=False, capture=True)
+            process = self._exec(['agent', 'status'], check=False, capture=True, pod_ready=False, pod_name=pod_name)
             if process.returncode == 0:
+                self._deployment.wait_for_daemonset()
                 return
             last_output = self._process_output(process)
+            if pod_name:
+                current_pod = self._deployment.agent_pod(ready=False, required=False)
+                if current_pod is not None and current_pod.name != pod_name:
+                    raise AgentPodReplacedError(
+                        f'Kubernetes Agent pod `{pod_name}` was replaced by `{current_pod.name}`'
+                    )
             time.sleep(1)
 
         self._show_logs()
         raise RuntimeError(f'Kubernetes Agent did not become ready: {last_output}')
 
-    def _copy_file(self, source: str, destination: str) -> None:
+    def _copy_file(self, source: str, destination: str, *, pod_name: str | None = None) -> None:
         from ddev.utils.fs import Path
 
         source_path = Path(source).resolve()
+        pod_name = pod_name or self._pod_name()
         self._kubectl(
             [
                 'cp',
                 '--container',
-                _CONTAINER_NAME,
+                CONTAINER_NAME,
                 source_path.name,
-                f'{self._namespace}/{_POD_NAME}:{destination}',
+                f'{self._namespace}/{pod_name}:{destination}',
             ],
             check=True,
             cwd=source_path.parent,
         )
 
-    def _sync_config(self) -> None:
-        self._exec(['mkdir', '-p', self._config_dir])
+    def _sync_config(self, *, pod_name: str | None = None) -> None:
+        self._exec(['mkdir', '-p', self._config_dir], pod_name=pod_name)
         destination = f'{self._config_dir}/conf.yaml'
         if self.config_file.is_file():
-            self._copy_file(str(self.config_file), destination)
+            self._copy_file(str(self.config_file), destination, pod_name=pod_name)
         else:
-            self._exec(['rm', '-f', destination])
+            self._exec(['rm', '-f', destination], pod_name=pod_name)
 
-    def _sync_auto_conf(self) -> None:
+    def _sync_auto_conf(self, *, pod_name: str | None = None) -> None:
         auto_conf = self._kubernetes_metadata.get('auto_conf')
         if auto_conf is None:
             return
         if not isinstance(auto_conf, str) or not auto_conf:
             raise ValueError('Kubernetes Agent `auto_conf` must be a non-empty path')
-        self._exec(['mkdir', '-p', self._config_dir])
-        self._copy_file(auto_conf, f'{self._config_dir}/auto_conf.yaml')
+        self._exec(['mkdir', '-p', self._config_dir], pod_name=pod_name)
+        self._copy_file(auto_conf, f'{self._config_dir}/auto_conf.yaml', pod_name=pod_name)
 
     def _remember_local_packages(self, local_packages: dict[Path, str]) -> None:
         self._kubernetes_metadata[_LOCAL_PACKAGES_METADATA] = [
@@ -384,11 +252,11 @@ class KubernetesAgent(AgentInterface):
                 raise ValueError(f'Invalid Kubernetes Agent local package name: {spec["name"]!r}')
         return specs
 
-    def _sync_local_packages(self, *, install: bool = False) -> None:
+    def _sync_local_packages(self, *, install: bool = False, pod_name: str | None = None) -> None:
         for spec in self._local_package_specs():
             destination = f'/home/{spec["name"]}'
-            self._exec(['rm', '-rf', destination])
-            self._copy_file(spec['path'], destination)
+            self._exec(['rm', '-rf', destination], pod_name=pod_name)
+            self._copy_file(spec['path'], destination, pod_name=pod_name)
             if install:
                 self._exec(
                     [
@@ -399,15 +267,40 @@ class KubernetesAgent(AgentInterface):
                         '--disable-pip-version-check',
                         '-e',
                         f'{destination}{spec["features"]}',
-                    ]
+                    ],
+                    capture=True,
+                    pod_name=pod_name,
                 )
 
-    def _run_metadata_commands(self, key: str) -> None:
+    def _run_metadata_commands(self, key: str, *, capture: bool = False, pod_name: str | None = None) -> None:
         commands = self.metadata.get(key, [])
         if not isinstance(commands, list) or not all(isinstance(command, str) for command in commands):
             raise ValueError(f'Kubernetes Agent `{key}` must be a list of commands')
         for command in commands:
-            self._exec(self.platform.modules.shlex.split(command))
+            self._exec(self.platform.modules.shlex.split(command), capture=capture, pod_name=pod_name)
+
+    def _mark_prepared(self, *, pod_name: str | None = None) -> None:
+        self._exec(['touch', _PREPARED_MARKER], pod_name=pod_name)
+
+    def _is_prepared(self, *, pod_name: str | None = None) -> bool:
+        return (
+            self._exec(['test', '-f', _PREPARED_MARKER], check=False, capture=True, pod_name=pod_name).returncode == 0
+        )
+
+    def _prepare_container(self, *, capture_commands: bool = False, pod_name: str | None = None) -> None:
+        pod_name = pod_name or self._pod_name()
+        self._run_metadata_commands('start_commands', capture=capture_commands, pod_name=pod_name)
+        self._sync_local_packages(install=True, pod_name=pod_name)
+        self._sync_config(pod_name=pod_name)
+        self._sync_auto_conf(pod_name=pod_name)
+        self._run_metadata_commands('post_install_commands', capture=capture_commands, pod_name=pod_name)
+        self._restart_agent_process(pod_name=pod_name)
+        self._mark_prepared(pod_name=pod_name)
+
+    def _ensure_prepared(self) -> None:
+        pod_name = self._pod_name()
+        if not self._is_prepared(pod_name=pod_name):
+            self._prepare_container(pod_name=pod_name)
 
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         agent_build = _normalize_agent_image_name(
@@ -415,83 +308,60 @@ class KubernetesAgent(AgentInterface):
         )
         # Validate values needed by teardown before creating any resources.
         _ = self._owner_id, self._wait_timeout
-        self._validate_topology()
-        self._validate_resource_ownership()
-        self._create_manifest(self._manifest(agent_build, env_vars))
-        self._wait_for_pod()
-        self._run_metadata_commands('start_commands')
-        self._remember_local_packages(local_packages)
-        self._sync_local_packages(install=True)
-        self._sync_config()
-        self._sync_auto_conf()
-        self._run_metadata_commands('post_install_commands')
-        self._restart_agent_process()
-
-    def _resource_is_owned(self, resource: str, name: str) -> bool:
-        process = self._captured_kubectl(['get', resource, name, '--ignore-not-found=true', '-o', 'json'])
-        if process.returncode:
-            output = self._process_output(process)
-            raise RuntimeError(f'Unable to inspect Kubernetes Agent {resource} `{name}`: {output}')
-        if not self._process_output(process).strip():
-            return False
+        self._deployment.check_helm()
+        node_name = self._validate_topology()
+        values = self._deployment.values(agent_build, env_vars, node_name=node_name)
+        self._deployment.validate_namespace_absent()
+        self._deployment.create_namespace()
+        self._deployment.install(values)
         try:
-            data = json.loads(self._process_output(process))
-            return data.get('metadata', {}).get('labels', {}).get(_OWNER_LABEL) == self._owner_id
-        except (AttributeError, json.JSONDecodeError) as e:
-            raise RuntimeError(f'Unable to parse Kubernetes Agent {resource} `{name}`: {e}') from e
+            self._deployment.wait_for_daemonset()
+            pod = self._deployment.agent_pod()
+        except Exception:
+            self._show_logs()
+            raise
+        if pod is None or pod.node_name != node_name:
+            actual_node = '<none>' if pod is None else pod.node_name
+            raise RuntimeError(
+                f'Kubernetes Agent pod was scheduled on unexpected node {actual_node!r}; expected {node_name!r}'
+            )
+        self._remember_local_packages(local_packages)
+        self._prepare_container(pod_name=pod.name)
 
     def stop(self) -> None:
-        errors: list[Exception] = []
+        if not self._deployment.namespace_is_owned():
+            if self._deployment.owned_cluster_resources_exist():
+                raise RuntimeError(
+                    'Kubernetes Agent namespace ownership was lost while Helm-managed cluster-scoped resources remain; '
+                    'preserving environment state rather than deleting chart resources outside Helm'
+                )
+            return
 
-        # Do not execute commands in a namespace that merely happens to have
-        # the configured name. Startup may have failed because it was already
-        # owned by the cluster's caller.
+        errors: list[Exception] = []
         try:
-            namespace_owned = self._resource_is_owned('namespace', self._namespace)
+            if pod := self._deployment.agent_pod(ready=False, required=False):
+                self._run_metadata_commands('stop_commands', pod_name=pod.name)
         except Exception as e:
             errors.append(e)
-            namespace_owned = False
 
-        if namespace_owned:
-            pod = self._captured_kubectl(
-                ['get', 'pod', _POD_NAME, '--namespace', self._namespace, '--ignore-not-found=true', '-o', 'name']
-            )
-            if pod.returncode == 0 and self._process_output(pod).strip():
-                try:
-                    self._run_metadata_commands('stop_commands')
-                except Exception as e:
-                    errors.append(e)
+        try:
+            self._deployment.uninstall()
+        except Exception as e:
+            details = '; '.join(str(error) for error in [*errors, e])
+            raise RuntimeError(
+                f'Errors while stopping Kubernetes Agent; preserving the Helm release namespace for retry: {details}'
+            ) from e
 
-        selector = f'{_OWNER_LABEL}={self._owner_id}'
-        for args in (
-            [
-                'delete',
-                'namespace',
-                '--selector',
-                selector,
-                '--ignore-not-found=true',
-                '--wait=true',
-                f'--timeout={self._wait_timeout}s',
-            ],
-            [
-                'delete',
-                'clusterrole,clusterrolebinding',
-                '--selector',
-                selector,
-                '--ignore-not-found=true',
-            ],
-        ):
-            process = self._captured_kubectl(args)
-            if process.returncode:
-                errors.append(
-                    RuntimeError(f'Unable to remove Kubernetes Agent resources: {self._process_output(process)}')
-                )
+        try:
+            self._deployment.delete_namespace()
+        except Exception as e:
+            errors.append(e)
 
         if errors:
             details = '; '.join(str(error) for error in errors)
             raise RuntimeError(f'Errors while stopping Kubernetes Agent: {details}') from errors[0]
 
-    def _restart_agent_process(self) -> None:
+    def _restart_agent_process(self, *, pod_name: str | None = None) -> None:
         # The Agent image's s6 finish handler normally shuts down the whole
         # service tree when the main Agent exits. Remove it before killing the
         # process so s6 starts a fresh Agent in the same container, preserving
@@ -507,34 +377,75 @@ class KubernetesAgent(AgentInterface):
             'sleep 1; elapsed=$((elapsed + 1)); '
             'done'
         )
-        self._exec(['sh', '-c', restart_command])
-        self._wait_for_agent()
+        self._exec(['sh', '-c', restart_command], pod_name=pod_name)
+        self._wait_for_agent(pod_name=pod_name)
 
     def restart(self) -> None:
-        self._sync_local_packages()
-        self._sync_config()
-        self._sync_auto_conf()
-        self._restart_agent_process()
+        pod_name = self._pod_name()
+        if not self._is_prepared(pod_name=pod_name):
+            self._prepare_container(pod_name=pod_name)
+            return
+        self._sync_local_packages(pod_name=pod_name)
+        self._sync_config(pod_name=pod_name)
+        self._sync_auto_conf(pod_name=pod_name)
+        self._restart_agent_process(pod_name=pod_name)
+        self._mark_prepared(pod_name=pod_name)
 
     def sync_config(self) -> None:
         self._sync_config()
 
     def invoke(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
-        self._sync_local_packages()
-        self._sync_config()
-        self._sync_auto_conf()
-        self._exec(['agent', *args], env_vars=env_vars)
+        prepared_pod = None
+        for attempt in range(2):
+            try:
+                pod = self._deployment.wait_for_agent_pod()
+                if self._is_prepared(pod_name=pod.name):
+                    self._sync_local_packages(pod_name=pod.name)
+                    self._sync_config(pod_name=pod.name)
+                    self._sync_auto_conf(pod_name=pod.name)
+                else:
+                    # Container recovery happens inline with the Agent command. Do not
+                    # mix lifecycle command output into machine-readable Agent output.
+                    self._prepare_container(capture_commands=True, pod_name=pod.name)
+
+                current_pod = self._deployment.agent_pod()
+            except AgentPodSelectionError as e:
+                if attempt or e.candidate_count:
+                    raise
+                self._deployment.wait_for_agent_pod()
+                continue
+            except (AgentPodReplacedError, self.platform.modules.subprocess.CalledProcessError):
+                if attempt:
+                    raise
+                self._deployment.wait_for_agent_pod()
+                continue
+
+            if current_pod.uid == pod.uid and self._is_prepared(pod_name=current_pod.name):
+                prepared_pod = current_pod
+                break
+            self._deployment.wait_for_agent_pod()
+
+        if prepared_pod is None:
+            raise RuntimeError('Kubernetes Agent pod changed repeatedly while preparing the Agent command')
+
+        # The chart-generated Kubernetes settings produce startup log messages
+        # before `agent check --json`. Keep stdout machine-readable for the
+        # existing dd_agent_check replay path while preserving explicit overrides.
+        invocation_env = {'DD_LOG_LEVEL': 'off', **(env_vars or {})}
+        self._exec(['agent', *args], env_vars=invocation_env, pod_name=prepared_pod.name)
 
     def enter_shell(self) -> None:
+        self._ensure_prepared()
+        pod_name = self._pod_name()
         self._kubectl(
             [
                 'exec',
                 '-it',
                 '--namespace',
                 self._namespace,
-                f'pod/{_POD_NAME}',
+                f'pod/{pod_name}',
                 '--container',
-                _CONTAINER_NAME,
+                CONTAINER_NAME,
                 '--',
                 'bash',
             ],
@@ -542,13 +453,19 @@ class KubernetesAgent(AgentInterface):
         )
 
     def _show_logs(self) -> None:
-        self._kubectl(
-            ['logs', '--namespace', self._namespace, f'pod/{_POD_NAME}', '--container', _CONTAINER_NAME],
-            check=False,
-        )
+        try:
+            pod = self._deployment.agent_pod(ready=False, required=False)
+        except Exception:
+            return
+        if pod is not None:
+            self._kubectl(
+                ['logs', '--namespace', self._namespace, f'pod/{pod.name}', '--container', CONTAINER_NAME],
+                check=False,
+            )
 
     def show_logs(self) -> None:
+        pod_name = self._pod_name(ready=False)
         self._kubectl(
-            ['logs', '--namespace', self._namespace, f'pod/{_POD_NAME}', '--container', _CONTAINER_NAME],
+            ['logs', '--namespace', self._namespace, f'pod/{pod_name}', '--container', CONTAINER_NAME],
             check=True,
         )
