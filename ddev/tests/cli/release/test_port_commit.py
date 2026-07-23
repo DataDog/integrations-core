@@ -6,6 +6,7 @@ from __future__ import annotations
 from pathlib import Path as StdPath
 from unittest.mock import MagicMock, call
 
+import httpx
 import pytest
 from pytest_mock import MockerFixture
 
@@ -24,6 +25,7 @@ from ddev.cli.release.port_commit_workflow import (
 )
 from ddev.utils.git import GitCommit
 from ddev.utils.github_async.models import PullRequest
+from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 
@@ -504,7 +506,7 @@ def test_command_dry_run_makes_no_mutating_calls(
     fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_create_pull_request_step_reports_partial_failure_when_labeling_fails(
+def test_create_pull_request_step_propagates_authentication_failure_when_labeling_fails(
     app_mock: MagicMock, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
     import httpx
@@ -516,7 +518,13 @@ def test_create_pull_request_step_reports_partial_failure_when_labeling_fails(
     )
     fake_async_github.mock_response(
         'add_labels_to_issue',
-        httpx.HTTPStatusError('forbidden', request=httpx.Request('POST', 'https://x'), response=httpx.Response(403)),
+        GitHubAuthenticationError.from_http_status_error(
+            httpx.HTTPStatusError(
+                'forbidden',
+                request=httpx.Request('POST', 'https://x'),
+                response=httpx.Response(403),
+            )
+        ),
     )
 
     step = CreatePullRequestStep(
@@ -531,13 +539,16 @@ def test_create_pull_request_step_reports_partial_failure_when_labeling_fails(
         draft=False,
     )
 
-    with pytest.raises(PortStepError, match=r'created at https://github.com/x/pr/7 but labeling failed'):
+    with pytest.raises(GitHubAuthenticationError, match='ddev config set github.token'):
         step.execute()
 
     assert step.pr_url == 'https://github.com/x/pr/7'
+    app_mock.display_warning.assert_called_once_with(
+        'Pull request created at https://github.com/x/pr/7 but labeling failed. Add the labels manually on the PR.'
+    )
 
 
-def test_command_suppresses_worktree_warning_on_partial_pr_failure(
+def test_command_uses_central_handler_on_label_authentication_failure(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
     import httpx
@@ -549,7 +560,13 @@ def test_command_suppresses_worktree_warning_on_partial_pr_failure(
     )
     fake_async_github.mock_response(
         'add_labels_to_issue',
-        httpx.HTTPStatusError('forbidden', request=httpx.Request('POST', 'https://x'), response=httpx.Response(403)),
+        GitHubAuthenticationError.from_http_status_error(
+            httpx.HTTPStatusError(
+                'forbidden',
+                request=httpx.Request('POST', 'https://x'),
+                response=httpx.Response(403),
+            )
+        ),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -557,7 +574,9 @@ def test_command_suppresses_worktree_warning_on_partial_pr_failure(
     result = ddev('release', 'port-commit', '1234567890abcdef00')
 
     assert result.exit_code == 1, result.output
+    assert 'ddev config set github.token' in result.output
     assert 'Pull request created at https://github.com/x/pr/1 but labeling failed' in result.output
+    assert 'Add the labels manually on the PR' in result.output
     assert 'Worktree left at' not in result.output
 
 
@@ -844,6 +863,27 @@ def test_command_aborts_when_pr_input_has_no_token(
     assert 'GitHub token required to resolve a PR reference' in result.output
     assert '--no-pr does not skip this lookup' in result.output
     fake_async_github.assert_not_called('get_pull_request')
+
+
+def test_command_reports_actionable_github_authentication_error(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    error = httpx.HTTPStatusError(
+        'forbidden',
+        request=httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/pulls/23703'),
+        response=httpx.Response(403),
+    )
+    fake_async_github.mock_response(
+        'get_pull_request',
+        GitHubAuthenticationError.from_http_status_error(error),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--dry-run', 'PR-23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'GitHub denied the requested operation (HTTP 403)' in result.output
+    assert 'ddev config set github.token' in result.output
 
 
 def test_command_falls_back_to_commit_on_pr_not_found(

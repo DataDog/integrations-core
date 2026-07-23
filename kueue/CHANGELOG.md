@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.1 / 2026-07-17
+
+***Fixed***:
+
+* Use the current Kueue Workload API for workload event collection, with fallback support for older clusters. ([#24563](https://github.com/DataDog/integrations-core/pull/24563))
+
 ## 1.0.0 / 2026-07-08
 
 ***Added***:

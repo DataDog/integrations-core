@@ -1,1 +1,0 @@
-Route Cisco Catalyst 1200/1300/1300X and Cisco Business 350 (CBS350) devices to the ``cisco-sb`` SNMP profile, and add ``serial_number`` device metadata for them via ``entPhysicalSerialNum.67109120``.

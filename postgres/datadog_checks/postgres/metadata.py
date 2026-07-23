@@ -108,7 +108,7 @@ class PostgresMetadata(DBMAsyncJob):
             enabled=config.collect_settings.enabled
             or config.collect_schemas.enabled
             or config.collect_column_statistics.enabled,
-            dbms="postgres",
+            dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="database-metadata",
@@ -177,7 +177,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
                 "agent_version": datadog_agent.get_version(),
-                "dbms": "postgres",
+                "dbms": self._check.dbms,
                 "kind": "pg_extension",
                 "collection_interval": self.pg_extensions_collection_interval,
                 "dbms_version": payload_pg_version(self._check.version),
@@ -214,7 +214,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
                 "agent_version": datadog_agent.get_version(),
-                "dbms": "postgres",
+                "dbms": self._check.dbms,
                 "kind": "pg_settings",
                 "collection_interval": self.pg_settings_collection_interval,
                 "dbms_version": payload_pg_version(self._check.version),

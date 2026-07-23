@@ -1,0 +1,1 @@
+Add a `database_identifier.template` option to control how the database is identified in Data Observability.

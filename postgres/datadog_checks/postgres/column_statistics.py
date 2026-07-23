@@ -131,7 +131,7 @@ class PostgresColumnStatisticsCollector:
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
-            "dbms": "postgres",
+            "dbms": self._check.dbms,
             "dbms_version": payload_pg_version(self._check.version),
             "cloud_metadata": self._check.cloud_metadata,
             "dbm_type": "column_statistics",

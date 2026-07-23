@@ -3,9 +3,41 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import click
+import httpx
 import pytest
 
+from ddev.cli import ddev as ddev_command
+from ddev.cli.application import Application, DdevGroup
 from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow_property
+from ddev.utils.github_errors import GitHubAuthenticationError
+from tests.helpers.runner import CliRunner
+
+
+class HandledError(Exception):
+    pass
+
+
+class HandledChildError(HandledError):
+    pass
+
+
+def exception_cli(error: Exception) -> CliRunner:
+    @click.group(cls=DdevGroup)
+    @click.pass_context
+    def command(ctx: click.Context) -> None:
+        app = Application(ctx.exit, 0, False, False)
+        app.register_exception_handler(
+            HandledError,
+            lambda application, exception: application.display_error(f'Friendly error: {exception}'),
+        )
+        ctx.obj = app
+
+    @command.command()
+    def fail() -> None:
+        raise error
+
+    return CliRunner(command)
 
 
 @pytest.fixture
@@ -190,3 +222,45 @@ def test_annotate_display_queue_preserves_literal_percent_in_messages(app, capsy
     app.annotate_display_queue('file.py', queue)
 
     assert capsys.readouterr().out == '::error file=file.py,line=1::100%25 bad%0Anewline%0Ain message\n'
+
+
+def test_registered_exception_subclass_uses_application_error_output() -> None:
+    result = exception_cli(HandledChildError('details'))('fail')
+
+    assert result.exit_code == 1
+    assert result.output == 'Friendly error: details\n'
+    assert 'Traceback' not in result.output
+
+
+def test_nearest_registered_exception_handler_wins(app: Application) -> None:
+    handled: list[str] = []
+    app.register_exception_handler(HandledError, lambda application, error: handled.append('base'))
+    app.register_exception_handler(HandledChildError, lambda application, error: handled.append('child'))
+
+    assert app.handle_exception(HandledChildError('details'))
+    assert handled == ['child']
+
+
+def test_unregistered_exception_propagates() -> None:
+    with pytest.raises(RuntimeError, match='unexpected'):
+        exception_cli(RuntimeError('unexpected'))('fail')
+
+
+def test_github_authentication_error_uses_registered_cli_handler(ddev: CliRunner) -> None:
+    request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core')
+    error = httpx.HTTPStatusError('forbidden', request=request, response=httpx.Response(403))
+
+    @click.command('fail-github-auth')
+    def fail_github_auth() -> None:
+        raise GitHubAuthenticationError.from_http_status_error(error)
+
+    ddev_command.add_command(fail_github_auth)
+    try:
+        result = ddev('fail-github-auth')
+    finally:
+        ddev_command.commands.pop('fail-github-auth')
+
+    assert result.exit_code == 1
+    assert 'GitHub denied the requested operation (HTTP 403)' in result.output
+    assert 'ddev config set github.token' in result.output
+    assert 'Traceback' not in result.output

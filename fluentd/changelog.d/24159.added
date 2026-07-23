@@ -1,1 +1,0 @@
-Add the ``fluentd.tracked_file_count`` gauge from the in_tail plugin.
