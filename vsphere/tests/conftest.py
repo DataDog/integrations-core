@@ -23,14 +23,14 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
+    TOPOLOGY_TAG_ASSOCIATIONS,
     VM_INVALID_GATEWAY_PROPERTIES_EX,
     VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
     VSPHERE_VERSION,
-    MockHttpV6,
-    MockHttpV7,
+    configure_vsphere_rest_mock_http,
 )
-from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
+from .mocked_api import MockedAPI
 
 try:
     from contextlib import ExitStack
@@ -244,34 +244,17 @@ def service_instance(
         yield mock_si
 
 
-@pytest.fixture
-def mock_http_api(monkeypatch):
-    if VSPHERE_VERSION.startswith('7.'):
-        http = MockHttpV7()
-    else:
-        http = MockHttpV6()
-
-    def mock_get(*args, **kwargs):
-        return http.get(*args, **kwargs)
-
-    def mock_post(*args, **kwargs):
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.warning(args)
-
-        return http.post(*args, **kwargs)
-
-    monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=mock_get))
-    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=mock_post))
-    yield http
+def inject_rest_http_client(mock_http, mocker, tag_associations):
+    http = configure_vsphere_rest_mock_http(mock_http, tag_associations=tag_associations)
+    mocker.patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=http)
+    return http
 
 
 @pytest.fixture
-def mock_rest_api():
-    if VSPHERE_VERSION.startswith('7.'):
-        with patch('requests.Session.request', mock_http_rest_api_v7):
-            yield
-    else:
-        with patch('requests.Session.request', mock_http_rest_api_v6):
-            yield
+def mock_http_api(mock_http, mocker):
+    return inject_rest_http_client(mock_http, mocker, tag_associations=None)
+
+
+@pytest.fixture
+def mock_rest_api(mock_http, mocker):
+    return inject_rest_http_client(mock_http, mocker, tag_associations=TOPOLOGY_TAG_ASSOCIATIONS)

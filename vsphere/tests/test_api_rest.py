@@ -244,7 +244,7 @@ def test_create_session(realtime_instance):
     config = VSphereConfig(realtime_instance, {}, logger)
     mock_api = build_rest_api_client(config, logger)
 
-    assert mock_api._client._http.options['headers']['vmware-api-session-id'] == "dummy-token"
+    assert mock_api._client._http.get_header('vmware-api-session-id') == "dummy-token"
 
 
 @pytest.mark.usefixtures("mock_rest_api")
