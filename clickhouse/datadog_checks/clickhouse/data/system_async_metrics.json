@@ -46,6 +46,7 @@
       "LoadAverage1",
       "LoadAverage15",
       "LoadAverage5",
+      "LongestRunningMerge",
       "MMapCacheCells",
       "MarkCacheBytes",
       "MarkCacheFiles",
@@ -102,6 +103,10 @@
       "PageCachePinnedBytes",
       "PrimaryIndexCacheBytes",
       "PrimaryIndexCacheFiles",
+      "ProcessSignalQueueLimit",
+      "ProcessSignalQueueSize",
+      "QueriesMemoryUsage",
+      "QueriesPeakMemoryUsage",
       "QueryCacheBytes",
       "QueryCacheEntries",
       "ReplicasMaxAbsoluteDelay",
@@ -129,6 +134,7 @@
       "Uptime",
       "VMMaxMapCount",
       "VMNumMaps",
+      "ZooKeeperClientLastZXIDSeen",
       "jemalloc.epoch"
     ]
   }
