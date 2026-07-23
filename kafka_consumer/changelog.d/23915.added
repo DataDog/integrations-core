@@ -1,1 +1,0 @@
-Add consumer group rebalance detection and membership-change counting metrics, plus partition assignor, group type, simple-group, and static-membership tags, when cluster monitoring is enabled. (DSM only)

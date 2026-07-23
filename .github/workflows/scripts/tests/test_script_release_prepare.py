@@ -62,7 +62,8 @@ class TestTag:
     )
 
     def _run_tag(self, dry_run: bool, selected: str, side_effects):
-        with patch("release_prepare.subprocess.run", side_effect=side_effects) as mock_run:
+        with patch("release_prepare.subprocess.run", side_effect=side_effects) as mock_run, \
+             patch("release_prepare._tags_at_head", create=True, return_value=set()):
             release_prepare._tag(dry_run, selected)
         return mock_run
 
@@ -73,16 +74,25 @@ class TestTag:
             MagicMock(returncode=ddev_returncode),  # ddev release tag
         ]
 
-    @pytest.mark.parametrize("dry_run, expected_flag", [
-        (False, "--push"),
-        (True, "--no-push"),
-    ])
-    def test_push_flag(self, dry_run, expected_flag):
+    def test_tags_at_head(self):
+        result = MagicMock(stdout="postgres-1.0.0\nmysql-2.0.0\n")
+        with patch("release_prepare.subprocess.run", return_value=result) as mock_run:
+            tags = release_prepare._tags_at_head()
+        assert tags == {"postgres-1.0.0", "mysql-2.0.0"}
+        mock_run.assert_called_once_with(
+            ["git", "tag", "--points-at", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    @pytest.mark.parametrize("dry_run", [False, True])
+    def test_always_creates_local_tags(self, dry_run):
         mock_run = self._run_tag(dry_run, "", self._side_effects(0))
         assert mock_run.mock_calls == [
             self._GIT_NAME,
             self._GIT_EMAIL,
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", expected_flag]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push"]),
         ]
 
     def test_exit_code_3_retries_with_no_fetch(self):
@@ -96,9 +106,18 @@ class TestTag:
         assert mock_run.mock_calls == [
             self._GIT_NAME,
             self._GIT_EMAIL,
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push"]),
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push", "--no-fetch"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push", "--no-fetch"]),
         ]
+
+    def test_returns_only_new_tags(self):
+        with patch(
+            "release_prepare._tags_at_head",
+            create=True,
+            side_effect=[{"existing-1.0.0"}, {"existing-1.0.0", "new-2.0.0"}],
+        ), patch("release_prepare.subprocess.run", side_effect=self._side_effects()):
+            new_tags = release_prepare._tag(False, "")
+        assert new_tags == ["new-2.0.0"]
 
     @pytest.mark.parametrize("returncode", [0, 2])
     def test_success_exit_codes_do_not_exit(self, returncode):
@@ -117,14 +136,15 @@ class TestTag:
             MagicMock(returncode=1),  # retry with --no-fetch also fails
         ]
         with patch("release_prepare.subprocess.run", side_effect=side_effects) as mock_run, \
+             patch("release_prepare._tags_at_head", create=True, return_value=set()), \
              pytest.raises(SystemExit) as exc_info:
             release_prepare._tag(False, "")
         assert exc_info.value.code == 1
         assert mock_run.mock_calls == [
             self._GIT_NAME,
             self._GIT_EMAIL,
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push"]),
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push", "--no-fetch"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push", "--no-fetch"]),
         ]
 
 
@@ -220,12 +240,6 @@ class TestValidate:
 # ---------------------------------------------------------------------------
 
 class TestMain:
-    _GIT_NAME = call(["git", "config", "user.name", "github-actions[bot]"], check=True)
-    _GIT_EMAIL = call(
-        ["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"],
-        check=True,
-    )
-
     def _setup_env(self, monkeypatch, tmp_path, extra: dict | None = None):
         github_output = tmp_path / "github_output"
         github_output.write_text("")
@@ -258,64 +272,67 @@ class TestMain:
                 result[key] = value
         return result
 
-    def _git_side_effects(self, ddev_returncode: int = 0):
-        return [
-            MagicMock(returncode=0),  # git config user.name
-            MagicMock(returncode=0),  # git config user.email
-            MagicMock(returncode=ddev_returncode),  # ddev release tag
-        ]
-
-    def test_no_packages_writes_false_and_summary(self, monkeypatch, tmp_path):
+    def test_no_packages_disables_tag_push_and_writes_summary(self, monkeypatch, tmp_path):
         github_output, github_summary, _ = self._setup_env(monkeypatch, tmp_path)
-        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
+        with patch("release_prepare._tag", return_value=["unknown-1.0.0"]), \
              patch("release_prepare.get_all_packages", return_value=[]), \
              patch("release_prepare.resolve_packages", return_value=([], "auto-detect from tags at HEAD")):
             release_prepare.main()
         outputs = self._read_outputs(github_output)
         assert outputs["has_packages"] == "false"
+        assert outputs["has_new_tags"] == "false"
+        assert json.loads(outputs["new_tags"]) == ["unknown-1.0.0"]
         assert "No packages detected" in github_summary.read_text()
 
-    def test_packages_detected_writes_outputs(self, monkeypatch, tmp_path):
+    def test_packages_detected_writes_tag_outputs(self, monkeypatch, tmp_path):
         github_output, _, _ = self._setup_env(monkeypatch, tmp_path)
         pkgs = ["postgres"]
-        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
+        with patch("release_prepare._tag", return_value=["postgres-1.0.0"]), \
              patch("release_prepare.get_all_packages", return_value=pkgs), \
              patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
              patch("release_prepare.validate_packages", return_value=_stable_result()):
             release_prepare.main()
         outputs = self._read_outputs(github_output)
         assert outputs["has_packages"] == "true"
+        assert outputs["has_new_tags"] == "true"
         assert json.loads(outputs["packages"]) == pkgs
+        assert json.loads(outputs["new_tags"]) == ["postgres-1.0.0"]
+
+    def test_no_new_tags_disables_tag_push(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        about = tmp_path / "dummy" / "datadog_checks" / "dummy" / "__about__.py"
+        about.parent.mkdir(parents=True)
+        about.write_text('__version__ = "1.0.0"\n')
+
+        github_output, _, _ = self._setup_env(
+            monkeypatch,
+            tmp_path,
+            extra={"SELECTED_PACKAGES": '["dummy"]'},
+        )
+        monkeypatch.chdir(tmp_path)
+
+        with patch("release_prepare._tag", return_value=[]):
+            release_prepare.main()
+
+        outputs = self._read_outputs(github_output)
+        assert outputs["has_packages"] == "true"
+        assert outputs["has_new_tags"] == "false"
+        assert json.loads(outputs["new_tags"]) == []
 
     def test_tag_failure_exits_before_detect(self, monkeypatch, tmp_path):
         self._setup_env(monkeypatch, tmp_path)
-        side_effects = [
-            MagicMock(returncode=0),  # git config user.name
-            MagicMock(returncode=0),  # git config user.email
-            MagicMock(returncode=1),  # ddev release tag fails
-        ]
-        with patch("release_prepare.subprocess.run", side_effect=side_effects), \
+        with patch("release_prepare._tag", side_effect=SystemExit(1)), \
              patch("release_prepare.get_all_packages") as mock_detect, \
              pytest.raises(SystemExit):
             release_prepare.main()
         mock_detect.assert_not_called()
 
-    def test_dry_run_uses_no_push_flag(self, monkeypatch, tmp_path):
-        self._setup_env(monkeypatch, tmp_path, extra={"DRY_RUN": "true"})
-        pkgs = ["postgres"]
-        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()) as mock_run, \
-             patch("release_prepare.get_all_packages", return_value=pkgs), \
-             patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
-             patch("release_prepare.validate_packages", return_value=_stable_result()):
-            release_prepare.main()
-        ddev_call = mock_run.mock_calls[2]
-        assert "--no-push" in ddev_call.args[0]
-
     def test_validate_failure_exits_from_main(self, monkeypatch, tmp_path):
         self._setup_env(monkeypatch, tmp_path)
         pkgs = ["postgres"]
         fragment_result = [{"package": "postgres", "version": "1.0.0", "type": HAS_FRAGMENTS, "dispatch": False}]
-        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
+        with patch("release_prepare._tag", return_value=["postgres-1.0.0"]), \
              patch("release_prepare.get_all_packages", return_value=pkgs), \
              patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
              patch("release_prepare.validate_packages", return_value=fragment_result), \

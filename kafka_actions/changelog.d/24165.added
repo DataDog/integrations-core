@@ -1,1 +1,0 @@
-Added earliest, latest, and timestamp-based offset support to the ``update_consumer_group_offsets`` action, along with an inactive-group precondition check and per-partition error reporting.

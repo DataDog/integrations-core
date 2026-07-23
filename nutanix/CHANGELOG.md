@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 1.5.0 / 2026-06-10
+## 1.6.0 / 2026-07-08
+
+***Added***:
+
+* Add high availability (HA) support. ([#24161](https://github.com/DataDog/integrations-core/pull/24161))
+* Add the ``collect_resource_ids_as_tags`` option to tag infrastructure metrics with Nutanix resource extIds. ([#24303](https://github.com/DataDog/integrations-core/pull/24303))
+
+## 1.5.0 / 2026-06-10 / Agent 7.81.0
 
 ***Added***:
 
