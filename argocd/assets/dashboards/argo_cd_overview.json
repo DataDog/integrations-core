@@ -1772,7 +1772,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.repo_server.git.request.duration.seconds.bucket{request_type:fetch,kube_cluster_name,$host,$kube_cluster_name,$kube_namespace}.as_count()"
+                                            "query": "sum:argocd.repo_server.git.request.duration.seconds.bucket{request_type:fetch,$host,$kube_cluster_name,$kube_namespace}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
