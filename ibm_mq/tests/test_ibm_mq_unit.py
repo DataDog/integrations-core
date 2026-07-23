@@ -256,7 +256,7 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
             get_normal_connection.assert_called_with(config, logger)
             get_ssl_connection.assert_called_with(config, logger)
 
-    # no issue with normal connection
+    # no issue with normal connection: it must be disconnected since it was only used as a probe
     with (
         mock.patch('datadog_checks.ibm_mq.connection.get_normal_connection') as get_normal_connection,
         mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection,
@@ -264,6 +264,7 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
         get_queue_manager_connection(config, logger)
 
         get_normal_connection.assert_called_with(config, logger)
+        get_normal_connection.return_value.disconnect.assert_called_once()
         get_ssl_connection.assert_called_with(config, logger)
 
 
