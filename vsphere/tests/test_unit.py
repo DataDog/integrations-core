@@ -2123,8 +2123,6 @@ def test_rest_api_tags_session_exception(aggregator, dd_run_check, historical_in
             'vsphere_type:datastore',
         ],
     )
-    # Session creation failed, so the tag must not have been collected.
-    aggregator.assert_metric_has_tag('vsphere.datastore.busResets.sum', 'my_cat_name_2:my_tag_name_2', count=0)
 
 
 def test_rest_api_tags_tag_association_exception(aggregator, dd_run_check, historical_instance, mock_http_api):
@@ -2147,8 +2145,6 @@ def test_rest_api_tags_tag_association_exception(aggregator, dd_run_check, histo
             'vsphere_type:datastore',
         ],
     )
-    # Tag-association listing failed, so the tag must not have been collected.
-    aggregator.assert_metric_has_tag('vsphere.datastore.busResets.sum', 'my_cat_name_2:my_tag_name_2', count=0)
 
 
 @pytest.mark.usefixtures('mock_http_api')

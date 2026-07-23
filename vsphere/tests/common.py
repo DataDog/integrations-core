@@ -1086,13 +1086,12 @@ VM_INVALID_GATEWAY_PROPERTIES_EX = mock.MagicMock(
 )
 
 
-# REST mock tag associations; object IDs must match the moIds of the SOAP inventory each consuming test drives.
-HISTORICAL_TAG_ASSOCIATIONS = [
+TAG_ASSOCIATIONS = [
     {"object_id": {"id": "vm1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
     {"object_id": {"id": "host1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
     {"object_id": {"id": "ds1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
 ]
-REALTIME_TAG_ASSOCIATIONS = [
+TOPOLOGY_TAG_ASSOCIATIONS = [
     {"object_id": {"id": "VM4-4-1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
     {"object_id": {"id": "10.0.0.104-1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
     {"object_id": {"id": "NFS-Share-1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
@@ -1101,7 +1100,7 @@ REALTIME_TAG_ASSOCIATIONS = [
 
 def configure_vsphere_rest_mock_http(mock_http: Any, tag_associations: list[dict[str, Any]] | None = None) -> Any:
     mock_http.exceptions = {}
-    mock_http.tag_associations = HISTORICAL_TAG_ASSOCIATIONS if tag_associations is None else tag_associations
+    mock_http.tag_associations = TAG_ASSOCIATIONS if tag_associations is None else tag_associations
 
     if VSPHERE_VERSION.startswith('7.'):
         mock_http.get.side_effect = make_mock_http_v7_get(mock_http)

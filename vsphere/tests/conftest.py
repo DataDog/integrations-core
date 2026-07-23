@@ -23,7 +23,7 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
-    REALTIME_TAG_ASSOCIATIONS,
+    TOPOLOGY_TAG_ASSOCIATIONS,
     VM_INVALID_GATEWAY_PROPERTIES_EX,
     VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
@@ -257,4 +257,4 @@ def mock_http_api(mock_http, mocker):
 
 @pytest.fixture
 def mock_rest_api(mock_http, mocker):
-    return inject_rest_http_client(mock_http, mocker, tag_associations=REALTIME_TAG_ASSOCIATIONS)
+    return inject_rest_http_client(mock_http, mocker, tag_associations=TOPOLOGY_TAG_ASSOCIATIONS)
