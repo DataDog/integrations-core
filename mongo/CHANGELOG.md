@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 10.10.2 / 2026-06-09
+## 10.11.0 / 2026-07-08
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Remove server-side sort from MongoDB query metrics collection to avoid `queryStats` sort memory failures. ([#24140](https://github.com/DataDog/integrations-core/pull/24140))
+
+## 10.10.2 / 2026-06-09 / Agent 7.81.0
 
 ***Fixed***:
 

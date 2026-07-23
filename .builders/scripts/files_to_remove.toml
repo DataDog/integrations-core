@@ -40,4 +40,9 @@ excluded_paths = [
   "!botocore/data/rds",
   # Riakcs integration monitors s3.
   "!botocore/data/s3",
+
+  # --- Setuptools ---
+  # Windows script launcher templates used only by legacy setuptools script installation;
+  # not needed at Agent runtime.
+  "setuptools/*.exe",
 ]

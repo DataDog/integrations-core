@@ -7,6 +7,7 @@ import httpx
 import pytest
 from pytest_mock import MockerFixture
 
+from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 
@@ -16,6 +17,15 @@ EXPECTED_INPUTS = {
     'agent-image': 'registry.datadoghq.com/agent:7.80.0-rc.3',
     'agent-image-windows': 'registry.datadoghq.com/agent:7.80.0-rc.3-servercore',
 }
+
+
+def github_authentication_error() -> GitHubAuthenticationError:
+    error = httpx.HTTPStatusError(
+        'forbidden',
+        request=httpx.Request('POST', 'https://api.github.com/'),
+        response=httpx.Response(403),
+    )
+    return GitHubAuthenticationError.from_http_status_error(error)
 
 
 @pytest.fixture(autouse=True)
@@ -293,11 +303,7 @@ def test_partial_dispatch_failure_surfaces_sibling_url(
     failing_label: str,
 ) -> None:
     """When only one dispatch fails, the surviving side's URL must appear in the error message."""
-    err = httpx.HTTPStatusError(
-        'forbidden',
-        request=httpx.Request('POST', 'https://api.github.com/'),
-        response=httpx.Response(403),
-    )
+    err = github_authentication_error()
     fake_async_github.mock_response('create_workflow_dispatch', err, workflow_id=failing_workflow)
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
@@ -305,20 +311,17 @@ def test_partial_dispatch_failure_surfaces_sibling_url(
     assert result.exit_code != 0, result.output
     assert f'{failing_label} dispatch failed' in result.output
     assert DEFAULT_DISPATCH_HTML_URL in result.output
+    assert 'ddev config set github.token' in result.output
 
 
 def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient) -> None:
     """Both-fail must announce itself explicitly and surface both error reprs, not just substrings.
 
-    Asserting on `forbidden` appearing twice catches the previous regression where `add_note`
-    was used to attach the Windows error — `str(exc)` does not include notes, so the Windows
-    side was silently dropped from the abort message.
+    Asserting on the token guidance appearing twice catches the previous regression where
+    `add_note` was used to attach the Windows error — `str(exc)` does not include notes, so
+    the Windows side was silently dropped from the abort message.
     """
-    err = httpx.HTTPStatusError(
-        'forbidden',
-        request=httpx.Request('POST', 'https://api.github.com/'),
-        response=httpx.Response(403),
-    )
+    err = github_authentication_error()
     fake_async_github.mock_response('create_workflow_dispatch', err)
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
@@ -327,7 +330,7 @@ def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_githu
     assert 'Both dispatches failed' in result.output
     assert 'Linux:' in result.output
     assert 'Windows:' in result.output
-    assert result.output.count('forbidden') == 2
+    assert result.output.count('ddev config set github.token') == 2
 
 
 def test_missing_github_token_aborts(ddev: CliRunner, mocker: MockerFixture, config_file) -> None:
