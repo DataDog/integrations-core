@@ -36,9 +36,24 @@ syntax, so there's no "do not edit" header inside the files themselves; the
 warning lives here. Any hand-edit is overwritten on the next run of:
 
 ```shell
-cd clickhouse && VERSIONS=24.8,25.3,25.8 hatch run metrics:generate
+cd clickhouse && VERSIONS=24.8,25.3,25.8,26.3 hatch run metrics:generate
 ```
 
 If you need to add a metric type or a new scale, edit `generate_metrics.py`
 (specifically the `DD_VALUE_TYPES` mapping and the `generate_queries`
 function). The script then writes the JSON.
+
+## Metrics declared in source but not emitted at runtime
+
+Some `system.metrics` entries are declared in ClickHouse's source but only
+emitted once their subsystem is first used (for example the bcrypt cache), so a
+fresh server never reports them and the `at_least=1` test assertion fails. List
+their `metric_name()` in the `NEVER_REQUIRED` set in `generate_metrics.py` to
+demote them from required to optional, then regenerate.
+
+To find them against a running server, set `DIFF_VERSION` to a version from the
+matrix and run the diff, which prints a ready-to-paste `NEVER_REQUIRED` block:
+
+```shell
+cd clickhouse && DIFF_VERSION=25.8 hatch run metrics:diff
+```

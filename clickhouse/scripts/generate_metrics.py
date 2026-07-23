@@ -11,7 +11,7 @@ import json
 import os
 import pprint
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Iterable
 
@@ -65,6 +65,12 @@ VALUE_TYPE_POSTFIX_24_8 = {
     'Milliseconds': VALUE_TYPE_MILLISECONDS,
     'Microseconds': VALUE_TYPE_MICROSECONDS,
     'Nanoseconds': VALUE_TYPE_NANOSECONDS,
+}
+
+# Declared in source but not emitted by a fresh server, so demoted from required to optional
+NEVER_REQUIRED = {
+    'metrics.BcryptCacheBytes',
+    'metrics.BcryptCacheSize',
 }
 
 
@@ -388,6 +394,14 @@ class CalculatedMetrics:
     common: set[str]
     unique: dict[str, set[str]]
     optional: bool = False
+    never_required: dict[str, set[str]] = field(default_factory=dict)
+
+    def get_never_required_metrics(self) -> dict[str, set[str]]:
+        result = {}
+        for version, metrics in self.never_required.items():
+            result[version] = self.get_metrics_names(metrics)
+
+        return result
 
     def get_metrics_names(self, metrics: set[str]) -> set[str]:
         result = set()
@@ -448,7 +462,24 @@ def calculate_metrics(generator: MetricsGenerator) -> CalculatedMetrics:
     for version in versions():
         diff[version] = versioned_metrics[version].difference(common)
 
-    return CalculatedMetrics(all=all_metrics, common=common, unique=diff, optional=generator.is_optional)
+    # move NEVER_REQUIRED metrics out of common/diff into the optional map
+    never_required: dict[str, set[str]] = {}
+    demoted = set(NEVER_REQUIRED).intersection(all_metrics)
+    if demoted:
+        common = common.difference(demoted)
+        for version in versions():
+            diff[version] = diff[version].difference(demoted)
+            present = demoted.intersection(versioned_metrics[version])
+            if present:
+                never_required[version] = present
+
+    return CalculatedMetrics(
+        all=all_metrics,
+        common=common,
+        unique=diff,
+        optional=generator.is_optional,
+        never_required=never_required,
+    )
 
 
 def generate_test_data(metrics_data: list[CalculatedMetrics]):
@@ -500,6 +531,7 @@ def generate_test_data(metrics_data: list[CalculatedMetrics]):
         else:
             base_metrics.extend(common)
             versioned_base_metrics = deep_merge(versioned_base_metrics, versioned)
+        versioned_optional_metrics = deep_merge(versioned_optional_metrics, data.get_never_required_metrics())
 
     config = {
         'versions': ', '.join(versions()),
