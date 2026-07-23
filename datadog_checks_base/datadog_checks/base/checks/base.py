@@ -117,6 +117,17 @@ GLOBAL_SECURE_FIELDS = frozenset(
         'nagios_perf_cfg',
         'nagios_log',
         'ca_certs',
+        # Legacy HTTP_CONFIG_REMAPPER cert/key aliases remapped to tls_* fields. They are
+        # raw instance keys rather than model fields, so only this fallback can gate them:
+        # http_check reads client_cert/client_key, consul reads client_cert_file/
+        # private_key_file/ca_bundle_file, and riak reads cacert, each loaded as a cert or
+        # key file for the TLS connection.
+        'client_cert',
+        'client_key',
+        'client_cert_file',
+        'private_key_file',
+        'ca_bundle_file',
+        'cacert',
     ]
 )
 

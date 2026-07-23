@@ -1,1 +1,1 @@
-Gate legacy raw config aliases (ssl_* certificate paths, nagios_perf_cfg, nagios_log, and ca_certs) behind trusted-provider checks so they cannot bypass protection on their canonical fields.
+Gate legacy raw config aliases (ssl_* certificate paths, nagios_perf_cfg, nagios_log, ca_certs, and the HTTP_CONFIG_REMAPPER cert/key aliases client_cert, client_key, client_cert_file, private_key_file, ca_bundle_file, and cacert) behind trusted-provider checks so they cannot bypass protection on their canonical fields.

@@ -121,6 +121,21 @@ def test_fallback_legacy_raw_alias_blocked_from_untrusted_provider(dd_run_check)
         dd_run_check(check)
 
 
+@pytest.mark.parametrize(
+    'field_name',
+    ['client_cert', 'client_key', 'client_cert_file', 'private_key_file', 'ca_bundle_file', 'cacert'],
+)
+def test_fallback_legacy_remapper_alias_blocked_from_untrusted_provider(dd_run_check, field_name):
+    """Legacy HTTP_CONFIG_REMAPPER cert/key aliases are caught by the GLOBAL_SECURE_FIELDS fallback."""
+    instance = {field_name: '/etc/ssl/cert.pem'}
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(Exception, match=f"(?s)ConfigurationError.*{field_name}.*not allowed from untrusted provider"):
+        dd_run_check(check)
+
+
 def test_secure_field_allowed_via_allowlist(dd_run_check):
     """Secure fields with paths in the allowlist are allowed."""
     instance = {'tls_cert': '/etc/ssl/cert.pem'}
