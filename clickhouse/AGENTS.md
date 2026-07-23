@@ -50,7 +50,7 @@ emitted after their subsystem is used for the first time (for example, the bcryp
 new server does not report these metrics and the `at_least=1` test assertion fails. To demote the metrics from required to optional, list
 their `metric_name()` in the `NEVER_REQUIRED` setting in `generate_metrics.py`, and then regenerate.
 
-To find them against a running server, set `DIFF_VERSION` to a version from the
+To find these metrics against a running server, set `DIFF_VERSION` to a version from the
 matrix and run the diff, which prints a ready-to-paste `NEVER_REQUIRED` block:
 
 ```shell
