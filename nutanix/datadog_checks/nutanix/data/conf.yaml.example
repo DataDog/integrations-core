@@ -204,6 +204,11 @@ instances:
     #
     # hostname_transform: <HOSTNAME_TRANSFORM>
 
+    ## @param infrastructure_mode - string - optional - default: full
+    ## The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
+    #
+    # infrastructure_mode: full
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

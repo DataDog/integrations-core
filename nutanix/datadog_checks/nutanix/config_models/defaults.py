@@ -60,6 +60,10 @@ def instance_exclude_filtered_resources_from_cluster_capacity():
     return False
 
 
+def instance_infrastructure_mode():
+    return 'full'
+
+
 def instance_kerberos_auth():
     return 'disabled'
 
