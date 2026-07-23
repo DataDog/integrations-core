@@ -8,6 +8,7 @@ import os
 from copy import deepcopy
 
 import mock
+import openstack.exceptions
 import pytest
 from mock import ANY
 
@@ -26,6 +27,13 @@ pytestmark = [
         reason='Legacy test',
     ),
 ]
+
+
+def sdk_http_exception(status_code: int | None = None) -> openstack.exceptions.HttpException:
+    if status_code is None:
+        return openstack.exceptions.HttpException()
+
+    return openstack.exceptions.HttpException(response=mock.Mock(status_code=status_code, headers={}, request=None))
 
 
 def test_parse_uptime_string(aggregator):
@@ -139,6 +147,18 @@ def test_check_with_config_file(mock_api, aggregator):
     aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.OK)
     mock_api.assert_called_with(ANY, common.CONFIG_FILE_INSTANCE, ANY)
+
+
+def test_send_api_service_checks_handles_sdk_http_exception(aggregator):
+    check = OpenStackControllerLegacyCheck("test", {'ssl_verify': False}, [common.CONFIG_FILE_INSTANCE])
+
+    with mock.patch.object(check, 'get_nova_endpoint', side_effect=sdk_http_exception(500)):
+        with mock.patch.object(check, 'get_neutron_endpoint', side_effect=sdk_http_exception(500)):
+            check._send_api_service_checks('http://10.0.2.15:5000', ['tag'])
+
+    tags = ['keystone_server: http://10.0.2.15:5000', 'tag']
+    aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.CRITICAL, tags=tags)
+    aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.CRITICAL, tags=tags)
 
 
 def get_server_details_response(params):
@@ -371,11 +391,17 @@ def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggr
     'datadog_checks.openstack_controller.legacy.openstack_controller_legacy.OpenStackControllerLegacyCheck.get_os_aggregates',
     return_value=OS_AGGREGATES_RESPONSE,
 )
-def test_collect_server_diagnostic_metrics_404_is_debug_logged(os_aggregates, aggregator, caplog):
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(HTTPStatusError('not found', response=mock.Mock(status_code=404)), id='agnostic_status_error'),
+        pytest.param(sdk_http_exception(404), id='sdk_http_exception'),
+    ],
+)
+def test_collect_server_diagnostic_metrics_404_is_debug_logged(os_aggregates, error, aggregator, caplog):
     check = OpenStackControllerLegacyCheck(
         "test", {'ssl_verify': False, 'paginated_server_limit': 1}, [common.KEYSTONE_INSTANCE]
     )
-    error = HTTPStatusError('not found', response=mock.Mock(status_code=404))
     with mock.patch.object(check, 'get_server_diagnostics', side_effect=error):
         with mock.patch.object(check, 'warning') as warning:
             with caplog.at_level(logging.DEBUG):
@@ -391,18 +417,18 @@ def test_collect_server_diagnostic_metrics_404_is_debug_logged(os_aggregates, ag
     return_value=OS_AGGREGATES_RESPONSE,
 )
 @pytest.mark.parametrize(
-    'response',
+    'error',
     [
-        mock.Mock(status_code=500),
-        None,
+        pytest.param(HTTPStatusError('boom', response=mock.Mock(status_code=500)), id='agnostic_status_500'),
+        pytest.param(HTTPStatusError('boom'), id='agnostic_missing_response'),
+        pytest.param(sdk_http_exception(500), id='sdk_status_500'),
+        pytest.param(sdk_http_exception(), id='sdk_missing_response'),
     ],
-    ids=['status_500', 'missing_response'],
 )
-def test_collect_server_diagnostic_metrics_non_404_warns(os_aggregates, response, aggregator):
+def test_collect_server_diagnostic_metrics_non_404_warns(os_aggregates, error, aggregator):
     check = OpenStackControllerLegacyCheck(
         "test", {'ssl_verify': False, 'paginated_server_limit': 1}, [common.KEYSTONE_INSTANCE]
     )
-    error = HTTPStatusError('boom', response=response)
     with mock.patch.object(check, 'get_server_diagnostics', side_effect=error):
         with mock.patch.object(check, 'warning') as warning:
             check.collect_server_diagnostic_metrics({'server_id': 'srv-1', 'server_name': 'srv-1'})
@@ -421,8 +447,19 @@ def test_collect_server_diagnostic_metrics_non_404_warns(os_aggregates, response
         (HTTPStatusError('server error', response=mock.Mock(status_code=500)), True),
         (HTTPStatusError('no response'), True),
         (HTTPConnectionError('connection refused'), True),
+        (sdk_http_exception(400), False),
+        (sdk_http_exception(500), True),
+        (sdk_http_exception(), True),
     ],
-    ids=['status_lt_500_warns', 'status_ge_500_backs_off', 'missing_response_backs_off', 'connection_error_backs_off'],
+    ids=[
+        'status_lt_500_warns',
+        'status_ge_500_backs_off',
+        'missing_response_backs_off',
+        'connection_error_backs_off',
+        'sdk_status_lt_500_warns',
+        'sdk_status_ge_500_backs_off',
+        'sdk_missing_response_backs_off',
+    ],
 )
 def test_check_nova_api_error_backoff(mock_api, error, expect_backoff):
     check = OpenStackControllerLegacyCheck("test", {'ssl_verify': False}, [common.KEYSTONE_INSTANCE])
