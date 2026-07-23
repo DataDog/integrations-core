@@ -142,6 +142,15 @@ def start(
 
     agent_class = get_agent_interface(agent_type)
     if running_on_ci() and not agent_class.supports_ci:
+        from ddev.cli.env.stop import stop
+
+        # The pytest fixture has already provisioned its environment by the time it returns Agent
+        # metadata. Persist enough state for `stop` to tear the fixture down, while recording that
+        # no Agent backend was started. If teardown fails, a later `ddev env stop` can safely retry.
+        metadata[E2EMetadata.SKIP_AGENT_STOP] = True
+        env_data.write_metadata(metadata)
+        env_data.write_config(result['config'])
+        ctx.invoke(stop, intg_name=intg_name, environment=environment)
         app.abort(text=f'{agent_type.capitalize()} is not supported on CI', code=0)
 
     agent = agent_class(app, integration, environment, metadata, env_data.config_file)

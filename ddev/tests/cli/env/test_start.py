@@ -98,6 +98,66 @@ def test_stop_on_error(ddev, helpers, data_dir, write_result_file, mocker):
     stop.assert_called_once()
 
 
+def test_unsupported_agent_on_ci_cleans_up_environment(ddev, data_dir, write_result_file, mocker):
+    metadata = {'agent_type': 'vagrant'}
+    config = {}
+    run = mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
+    mocker.patch('ddev.cli.env.start.running_on_ci', return_value=True)
+    stop_agent = mocker.patch('ddev.e2e.agent.vagrant.VagrantAgent.stop')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+
+    result = ddev('env', 'start', integration, environment)
+
+    assert result.exit_code == 0, result.output
+    assert 'Starting: py3.12' in result.output
+    assert 'Stopping: postgres:py3.12' in result.output
+    assert 'Vagrant is not supported on CI' in result.output
+    assert not env_data.exists()
+    assert run.call_count == 2
+    stop_agent.assert_not_called()
+
+
+def test_unsupported_agent_failed_cleanup_can_be_retried(ddev, data_dir, write_result_file, mocker):
+    metadata = {'agent_type': 'vagrant'}
+    config = {}
+    write_result = write_result_file({'metadata': metadata, 'config': config})
+    call_count = 0
+
+    def run_command(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        result = write_result(*args, **kwargs)
+        if call_count == 2:
+            result.returncode = 1
+        return result
+
+    run = mocker.patch('subprocess.run', side_effect=run_command)
+    mocker.patch('ddev.cli.env.start.running_on_ci', return_value=True)
+    stop_agent = mocker.patch('ddev.e2e.agent.vagrant.VagrantAgent.stop')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+
+    result = ddev('env', 'start', integration, environment)
+
+    assert result.exit_code == 1, result.output
+    assert env_data.exists()
+    assert env_data.read_metadata() == {**metadata, E2EMetadata.SKIP_AGENT_STOP: True}
+    stop_agent.assert_not_called()
+
+    run.side_effect = None
+    run.return_value = mocker.MagicMock(returncode=0)
+    result = ddev('env', 'stop', integration, environment)
+
+    assert result.exit_code == 0, result.output
+    assert not env_data.exists()
+    stop_agent.assert_not_called()
+
+
 def test_basic(ddev, helpers, data_dir, write_result_file, mocker):
     metadata = {}
     config = {}
