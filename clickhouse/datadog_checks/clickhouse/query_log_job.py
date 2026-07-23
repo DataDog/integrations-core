@@ -17,6 +17,7 @@ Both jobs share:
 
 from __future__ import annotations
 
+import math
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
@@ -51,6 +52,11 @@ INTERNAL_CLOUD_USERS = frozenset(
 def agent_check_getter(self):
     """Helper function for @tracked_method decorator to get the check instance."""
     return self._check
+
+
+def collection_interval_gcd(*intervals: float | int) -> int:
+    """Helper function for computing the outer-loop collection interval for jobs with multiple sub-schedules."""
+    return math.gcd(*(int(i) for i in intervals))
 
 
 class NodeCheckpoint:
@@ -318,6 +324,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         config,
         job_name: str,
         enabled: bool | None = None,
+        collection_interval: float | None = None,
     ):
         """
         Initialize the query log job.
@@ -329,8 +336,13 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             enabled: Override whether the job loop runs. Defaults to config.enabled;
                 subclasses that host additional collections pass their combined enabled state
                 so the shared job still runs when only the collapsed collection is enabled.
+            collection_interval: Override the interval used for the job loop's rate limiter.
+                Defaults to config.collection_interval; subclasses that host an additional
+                collection on its own interval pass the GCD of both intervals so that
+                sub-schedule fires on time instead of being floored by this job's interval.
         """
-        collection_interval = float(config.collection_interval)
+        job_collection_interval = float(config.collection_interval)
+        loop_collection_interval = collection_interval if collection_interval is not None else job_collection_interval
         super().__init__(
             check,
             run_sync=config.run_sync,
@@ -338,11 +350,11 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             expected_db_exceptions=(Exception,),
             min_collection_interval=check.check_interval if hasattr(check, 'check_interval') else 15,
             dbms="clickhouse",
-            rate_limit=1 / float(collection_interval),
+            rate_limit=1 / float(loop_collection_interval),
             job_name=job_name,
         )
         self._check = check
-        self._collection_interval = collection_interval
+        self._collection_interval = job_collection_interval
         self._config = config
 
         # Tags (set in run_job before collection)

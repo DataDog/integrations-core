@@ -367,6 +367,39 @@ def test_flush_log_initialization(check_with_flush):
     assert query_completions._flush_checkpoint._cache_key == FLUSH_CHECKPOINT_CACHE_KEY
 
 
+def test_flush_log_job_tick_interval_uses_gcd(check_with_flush):
+    """Test that the shared job loop ticks at the GCD of the completions and flush intervals"""
+    query_completions = check_with_flush.query_completions
+    assert query_completions._expected_collection_interval == 5
+
+
+def test_flush_only_job_tick_interval_ignores_disabled_completions():
+    """Test that the shared job loop ticks at the flush interval alone when completions is disabled"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_completions': {'enabled': False, 'collection_interval': 10},
+        'async_insert_flushes': {'enabled': True, 'collection_interval': 15},
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check.query_completions._expected_collection_interval == 15
+
+
+def test_completions_collection_limited_to_its_own_interval(check_with_flush):
+    """Test that completed-query collection only runs once per its own interval"""
+    query_completions = check_with_flush.query_completions
+
+    with mock.patch.object(query_completions, '_collect_completed_queries', return_value=[]) as mock_collect:
+        query_completions._collect_and_submit()  # first tick: runs
+        query_completions._collect_and_submit()  # second tick: within interval, should not run again
+        assert mock_collect.call_count == 1
+
+
 def test_flush_log_disabled_by_default(check_with_dbm):
     """Test that flush collection is disabled and never runs when there is no flush config"""
     query_completions = check_with_dbm.query_completions

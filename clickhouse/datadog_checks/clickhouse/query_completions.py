@@ -19,7 +19,12 @@ from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_jso
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.clickhouse.explain_plans import ClickhouseExplainPlans
-from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, NodeCheckpoint, agent_check_getter
+from datadog_checks.clickhouse.query_log_job import (
+    ClickhouseQueryLogJob,
+    NodeCheckpoint,
+    agent_check_getter,
+    collection_interval_gcd,
+)
 
 # Query to fetch individual completed queries from system.query_log.
 # Unlike statements.py which aggregates, this returns individual query executions.
@@ -101,6 +106,16 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
     CHECKPOINT_CACHE_KEY = "query_completions_last_checkpoint_microseconds"
 
     def __init__(self, check: ClickhouseCheck, config, flush_config: AsyncInsertFlushes):
+        # The shared job loop ticks at the GCD of the enabled sub-schedules' intervals, so each one
+        # fires on time instead of being floored by (or stalled behind) the other's interval.
+        enabled_intervals = []
+        if config.enabled:
+            enabled_intervals.append(config.collection_interval)
+        if flush_config.enabled:
+            enabled_intervals.append(flush_config.collection_interval)
+        loop_collection_interval = (
+            collection_interval_gcd(*enabled_intervals) if enabled_intervals else config.collection_interval
+        )
         super().__init__(
             check=check,
             config=config,
@@ -108,6 +123,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Run the shared job when either collection is enabled, so flush logs are still
             # collected when query completions is disabled.
             enabled=config.enabled or flush_config.enabled,
+            collection_interval=loop_collection_interval,
         )
 
         # Rate limiting: limit samples per query signature
@@ -120,6 +136,9 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         self._max_samples_per_collection = int(config.max_samples_per_collection)
 
         self._explain_plans = ClickhouseExplainPlans(check, config, self._execute_query)
+
+        # Last collection time for completions
+        self._last_completions_collection_time = 0.0
 
         # Async insert flush log collection collapses into this job. It keeps its own independent
         # checkpoint (separate from the query_log completions checkpoint) and runs on its own interval.
@@ -140,6 +159,10 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         # completed-query collection when query completions is disabled.
         if not self._config.enabled:
             return
+        now = time.time()
+        if now - self._last_completions_collection_time < self._collection_interval:
+            return
+        self._last_completions_collection_time = now
         try:
             # Reset pending checkpoints at the start of each collection
             self._current_checkpoint_microseconds = None
