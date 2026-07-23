@@ -128,6 +128,12 @@ GLOBAL_SECURE_FIELDS = frozenset(
         'private_key_file',
         'ca_bundle_file',
         'cacert',
+        # custom_queries (instance) and global_custom_queries (init_config) are read straight from the
+        # raw config by QueryManager and executed as raw SQL. Gate them here so an untrusted provider
+        # (e.g. Kubernetes pod annotations) cannot inject arbitrary queries; unlike the path fields
+        # above they have no allowlist escape, so any list value from an untrusted provider is blocked.
+        'custom_queries',
+        'global_custom_queries',
     ]
 )
 

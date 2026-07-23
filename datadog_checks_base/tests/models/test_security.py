@@ -257,6 +257,72 @@ def test_auth_token_oauth_allowed_from_untrusted_provider(dd_run_check):
     assert check.config.auth_token.reader['type'] == 'oauth'
 
 
+def test_custom_queries_blocked_from_untrusted_provider(dd_run_check):
+    """custom_queries is read as raw SQL by QueryManager, so it is blocked from untrusted providers."""
+    instance = {'custom_queries': [{'query': 'SELECT usename, passwd FROM pg_shadow', 'columns': []}]}
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*custom_queries.*not allowed from untrusted provider"):
+        dd_run_check(check)
+
+
+def test_custom_queries_allowed_from_trusted_provider(dd_run_check):
+    """custom_queries from a trusted provider is allowed since it has no allowlist escape."""
+    instance = {'custom_queries': [{'query': 'SELECT 1', 'columns': []}]}
+    security_config = SecurityConfig(check_name='test', provider='file', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+
+def test_global_custom_queries_blocked_from_untrusted_provider(dd_run_check):
+    """global_custom_queries lives in init_config and is blocked from untrusted providers."""
+    init_config = {'global_custom_queries': [{'query': 'SELECT 1', 'columns': []}]}
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', init_config, [{}], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(
+        Exception, match="(?s)ConfigurationError.*global_custom_queries.*not allowed from untrusted provider"
+    ):
+        dd_run_check(check)
+
+
+def test_global_custom_queries_allowed_from_trusted_provider(dd_run_check):
+    """global_custom_queries from a trusted provider is allowed."""
+    init_config = {'global_custom_queries': [{'query': 'SELECT 1', 'columns': []}]}
+    security_config = SecurityConfig(check_name='test', provider='file', ignore_untrusted_file_params=True)
+    check = Check('test', init_config, [{}], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+
+def test_custom_queries_allowed_when_security_disabled(dd_run_check):
+    """custom_queries from an untrusted provider is allowed when enforcement is disabled."""
+    instance = {'custom_queries': [{'query': 'SELECT usename, passwd FROM pg_shadow', 'columns': []}]}
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=False)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+
+def test_custom_queries_allowed_when_check_excluded(dd_run_check):
+    """custom_queries from an untrusted provider is allowed when the check is excluded."""
+    instance = {'custom_queries': [{'query': 'SELECT usename, passwd FROM pg_shadow', 'columns': []}]}
+    security_config = SecurityConfig(
+        check_name='test', provider='kubernetes', ignore_untrusted_file_params=True, excluded_checks=['test']
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+
 def test_secure_field_allowed_when_check_excluded(dd_run_check):
     """Secure fields are allowed when the check is in the excluded list."""
     instance = {'tls_cert': '/etc/ssl/cert.pem'}
