@@ -171,7 +171,7 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
     dd_run_check(check)
 
     assert (
-        "Encountered a RequestException in '_collect_volumes_for_app'"
+        "Encountered an HTTP error in '_collect_volumes_for_app'"
         " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]: "
         "404 Client Error" in caplog.text
     )
@@ -223,7 +223,7 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
         pytest.param(
             {'http_error': {'/v1/apps/example-app-2': MockHTTPResponse(status_code=404)}},
             [
-                "RequestException in '_get_app_status'"
+                "Encountered an HTTP error in '_get_app_status'"
                 " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
                 " 404 Client Error"
             ],
@@ -237,10 +237,10 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
                 }
             },
             [
-                "RequestException in '_get_app_status'"
+                "Encountered an HTTP error in '_get_app_status'"
                 " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
                 " 404 Client Error",
-                "RequestException in '_get_app_status'"
+                "Encountered an HTTP error in '_get_app_status'"
                 " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
                 " 500 Server Error",
             ],

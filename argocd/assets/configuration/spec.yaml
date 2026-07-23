@@ -95,7 +95,7 @@ files:
         When set, the collector adds ``Authorization: Bearer <token>`` to
         each REST request. Leave unset to inherit the request authentication
         configured on the instance (for example, the structured ``auth_token``
-        config object handled by the HTTP wrapper).
+        config object handled by the HTTP client).
       secret: true
       value:
         display_default: null
