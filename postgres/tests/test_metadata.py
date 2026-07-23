@@ -124,6 +124,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
         "personsdup10",
         "personsdup11",
         "personsdup12",
+        "fk_table_1",
+        "fk_table_2",
         "pgtable",
         "pg_newtable",
         "cities",
