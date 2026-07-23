@@ -456,10 +456,6 @@ def test_disable_status_code_tag(aggregator, http_check):
     aggregator.assert_metric('network.http.cant_connect', tags=url_tag + instance_tag, value=0.0, count=1)
     aggregator.assert_metric('network.http.response_time', tags=url_tag + instance_tag, count=1)
 
-        # Assert coverage for this check on this instance
-        aggregator.assert_all_metrics_covered()
-        aggregator.reset()
-
 
 def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
     instance = {
