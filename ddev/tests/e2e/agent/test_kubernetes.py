@@ -50,7 +50,6 @@ def auto_conf(temp_dir):
 @pytest.fixture
 def metadata(auto_conf):
     return {
-        '_kubernetes_owner_id': 'test-owner',
         'kubernetes': {
             'kubeconfig': '/tmp/kubeconfig',
             'auto_conf': str(auto_conf),
@@ -114,18 +113,13 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
     assert calls[0] == [*prefix, 'get', 'nodes', '-o', 'json']
 
-    create_calls = [call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-']]
-    namespace = json.loads(create_calls[0].kwargs['input'])
-    manifest = json.loads(create_calls[1].kwargs['input'])
-    resources = {item['kind']: item for item in [namespace, *manifest['items']]}
-    assert namespace['kind'] == 'Namespace'
+    create_call = next(call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-'])
+    manifest = json.loads(create_call.kwargs['input'])
+    resources = {item['kind']: item for item in manifest['items']}
     assert resources['Pod']['spec']['containers'][0]['image'] == 'registry.example.com/datadog-agent:test'
     assert resources['Pod']['spec']['containers'][0]['imagePullPolicy'] == 'Always'
     assert resources['Pod']['spec']['serviceAccountName'] == 'ddev-agent'
-    resource_labels = {
-        'app.kubernetes.io/managed-by': 'ddev',
-        'ddev.datadoghq.com/environment': 'test-owner',
-    }
+    resource_labels = {'app.kubernetes.io/managed-by': 'ddev'}
     for kind in ('Namespace', 'ServiceAccount', 'ClusterRole', 'ClusterRoleBinding'):
         assert resources[kind]['metadata']['labels'] == resource_labels
     assert resources['Pod']['metadata']['labels'] == {
@@ -238,25 +232,7 @@ def test_rejects_multi_node_clusters(agent, app, mocker):
     run_command.assert_called_once()
 
 
-def test_rejects_preexisting_owned_resources(agent, app, mocker):
-    nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
-
-    def run(command, **kwargs):
-        if command[-4:] == ['get', 'nodes', '-o', 'json']:
-            return successful_process(command, stdout=json.dumps(nodes).encode())
-        if 'namespace' in command and '--ignore-not-found=true' in command:
-            return successful_process(command, stdout=f'namespace/{agent._namespace}\n'.encode())
-        return successful_process(command)
-
-    run_command = mocker.patch.object(app.platform, 'run_command', side_effect=run)
-
-    with pytest.raises(RuntimeError, match='Refusing to overwrite Kubernetes resources'):
-        agent.start(agent_build='', local_packages={}, env_vars={})
-
-    assert not any(call.args[0][-3:] == ['create', '-f', '-'] for call in run_command.call_args_list)
-
-
-def test_creation_fails_if_a_resource_appears_after_preflight(agent, app, mocker):
+def test_creation_failure_stops_startup(agent, app, mocker):
     nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
 
     def run(command, **kwargs):
@@ -374,15 +350,23 @@ def test_stop_is_idempotent_when_pod_is_absent(agent, run_command):
 
     calls = command_calls(run_command)
     prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
-    selector = 'ddev.datadoghq.com/environment=test-owner'
     assert calls == [
-        [*prefix, 'get', 'namespace', agent._namespace, '--ignore-not-found=true', '-o', 'json'],
+        [
+            *prefix,
+            'get',
+            'pod',
+            'ddev-agent',
+            '--namespace',
+            agent._namespace,
+            '--ignore-not-found=true',
+            '-o',
+            'name',
+        ],
         [
             *prefix,
             'delete',
             'namespace',
-            '--selector',
-            selector,
+            agent._namespace,
             '--ignore-not-found=true',
             '--wait=true',
             '--timeout=120s',
@@ -391,31 +375,10 @@ def test_stop_is_idempotent_when_pod_is_absent(agent, run_command):
             *prefix,
             'delete',
             'clusterrole,clusterrolebinding',
-            '--selector',
-            selector,
+            agent._cluster_resource_name,
             '--ignore-not-found=true',
         ],
     ]
-
-
-def test_stop_does_not_enter_or_delete_another_environment_namespace(agent, app, mocker):
-    namespace = {'metadata': {'labels': {'ddev.datadoghq.com/environment': 'another-owner'}}}
-
-    def run(command, **kwargs):
-        if command[-1:] == ['json'] and 'namespace' in command:
-            return successful_process(command, stdout=json.dumps(namespace).encode())
-        return successful_process(command)
-
-    run_command = mocker.patch.object(app.platform, 'run_command', side_effect=run)
-
-    agent.stop()
-
-    calls = command_calls(run_command)
-    assert not any('pod' in command for command in calls)
-    delete_calls = [command for command in calls if 'delete' in command]
-    assert len(delete_calls) == 2
-    assert all('ddev.datadoghq.com/environment=test-owner' in command for command in delete_calls)
-    assert all('another-owner' not in command for command in delete_calls)
 
 
 def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
@@ -470,9 +433,6 @@ def test_stop_cleans_resources_after_stop_command_failure(agent, app, mocker):
     agent.metadata['stop_commands'] = ['false']
 
     def run(command, **kwargs):
-        if command[-1:] == ['json'] and 'namespace' in command:
-            namespace = {'metadata': {'labels': {'ddev.datadoghq.com/environment': 'test-owner'}}}
-            return successful_process(command, stdout=json.dumps(namespace).encode())
         if command[-1:] == ['name'] and 'pod' in command:
             return successful_process(command, stdout=b'pod/ddev-agent\n')
         if command[-1:] == ['false']:

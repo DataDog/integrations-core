@@ -150,8 +150,6 @@ def start(
         app.abort(text=f'{agent_type.capitalize()} is not supported on CI', code=0)
 
     agent = agent_class(app, integration, environment, metadata, env_data.config_file)
-    agent.prepare_start()
-    env_data.write_metadata(metadata)
 
     if not agent_build:
         configured_agent_build = agent.get_configured_build(app.config.agent.config)

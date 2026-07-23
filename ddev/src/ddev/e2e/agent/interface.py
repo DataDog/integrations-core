@@ -68,9 +68,6 @@ class AgentInterface(ABC):
     def get_id(self) -> str:
         return f'{self.integration.name}_{self.env}'
 
-    def prepare_start(self) -> None:
-        """Populate backend state that must be persisted before startup."""
-
     def get_configured_build(self, config: Mapping[str, str]) -> str | None:
         if self.build_config_key is None:
             return None
