@@ -3,6 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
+from datadog_checks.argocd.resources_constants import (
+    GENRESOURCES_API_UP_METRIC,
+    GENRESOURCES_STREAM_EVENTS_METRIC,
+    GENRESOURCES_STREAM_UP_METRIC,
+)
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -42,3 +47,19 @@ def test_e2e_openmetrics_v1(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+def test_e2e_genresources(dd_agent_check, genresources_instance):
+    aggregator = dd_agent_check(genresources_instance, rate=True)
+
+    # REST collection reachable + authenticated for each resource type.
+    for resource_type in ('argocd_application', 'argocd_cluster', 'argocd_repository'):
+        aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=1, tags=['resource_type:{}'.format(resource_type)])
+
+    # The application watch stream ran; on connect it replays current Applications (our sample app).
+    aggregator.assert_metric(GENRESOURCES_STREAM_UP_METRIC)
+    aggregator.assert_metric(GENRESOURCES_STREAM_EVENTS_METRIC, at_least=1)
+
+    # collect_openmetrics is disabled -> the OpenMetrics scrape does not run.
+    aggregator.assert_metric('argocd.app_controller.app.info', count=0)
