@@ -45,7 +45,6 @@ files:
     - template: instances/default
       overrides:
         min_collection_interval.value.example: 300
-        min_collection_interval.value.display_default: 300
         min_collection_interval.description: |
           The interval in seconds between check runs. This also sets the length of the
           trailing query window, so consecutive runs cover approximately disjoint
