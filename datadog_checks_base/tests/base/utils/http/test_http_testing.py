@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import codecs
+
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -92,6 +94,13 @@ def test_mock_response_normalize_leading_newline_with_indent():
     """
     response = MockHTTPResponse(content=content)
     assert response.text == "line one\nline two\n"
+
+
+def test_mock_response_text_uses_explicit_encoding():
+    response = MockHTTPResponse(content='café'.encode('latin-1'))
+    response.encoding = 'latin-1'
+
+    assert response.text == 'café'
 
 
 def test_mock_response_headers_case_insensitive():
@@ -214,6 +223,19 @@ def test_mock_response_iter_content_decode_unicode():
     assert list(MockHTTPResponse(content='ab').iter_content(chunk_size=1, decode_unicode=True)) == ['a', 'b']
 
 
+def test_mock_response_iter_content_decode_unicode_uses_explicit_encoding():
+    response = MockHTTPResponse(content='café'.encode('latin-1'))
+    response.encoding = 'latin-1'
+
+    assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == ['c', 'a', 'f', 'é']
+
+
+def test_mock_response_iter_content_decode_unicode_handles_split_code_points():
+    response = MockHTTPResponse(content='café')
+
+    assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == ['c', 'a', 'f', 'é']
+
+
 def test_mock_response_default_iteration():
     # __iter__ mirrors requests.Response: delegates to iter_content(128).
     assert list(MockHTTPResponse(content='abc')) == [b'abc']
@@ -227,6 +249,32 @@ def test_mock_response_iter_lines_custom_delimiter():
 def test_mock_response_iter_lines_decode_unicode():
     response = MockHTTPResponse(content='line1\nline2')
     assert list(response.iter_lines(decode_unicode=True)) == ['line1', 'line2']
+
+
+def test_mock_response_iter_lines_decode_unicode_uses_explicit_encoding():
+    response = MockHTTPResponse(content='café\nmañana'.encode('latin-1'))
+    response.encoding = 'latin-1'
+
+    assert list(response.iter_lines(decode_unicode=True)) == ['café', 'mañana']
+
+
+@pytest.mark.parametrize('delimiter', [None, '\n'])
+def test_mock_response_iter_lines_decode_unicode_handles_multibyte_encoding(delimiter):
+    response = MockHTTPResponse(content='café\nmañana'.encode('utf-16'))
+    response.encoding = 'utf-16'
+
+    assert list(response.iter_lines(decode_unicode=True, delimiter=delimiter)) == ['café', 'mañana']
+
+
+def test_mock_response_iter_lines_byte_mode_handles_multibyte_encoding():
+    response = MockHTTPResponse(content='café\nmañana'.encode('utf-16'))
+    response.encoding = 'utf-16'
+
+    lines = list(response.iter_lines(delimiter='\n'))
+    decoder = codecs.getincrementaldecoder('utf-16')()
+    decoded_lines = [decoder.decode(line, final=index == len(lines) - 1) for index, line in enumerate(lines)]
+
+    assert decoded_lines == ['café', 'mañana']
 
 
 def test_mock_response_history_passthrough():

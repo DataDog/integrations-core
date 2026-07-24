@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import codecs
 import json
 import re
 from collections.abc import Iterator, Mapping
@@ -106,7 +107,10 @@ class MockHTTPResponseImpl:
 
     @property
     def text(self) -> str:
-        return self._content.decode('utf-8')
+        return self._decode(self._content)
+
+    def _decode(self, content: bytes) -> str:
+        return content.decode(self.encoding or 'utf-8', errors='replace')
 
     @property
     def ok(self) -> bool:
@@ -162,9 +166,15 @@ class MockHTTPResponseImpl:
         # chunk_size=None means return the entire content as a single chunk (matches requests behavior)
         chunk_size = chunk_size if chunk_size is not None else len(self._content) or 1
         self._stream.seek(0)
+        decoder = codecs.getincrementaldecoder(self.encoding or 'utf-8')(errors='replace') if decode_unicode else None
         while chunk := self._stream.read(chunk_size):
-            # Decode to string when decode_unicode=True (matches requests behavior)
-            yield chunk.decode('utf-8') if decode_unicode else chunk
+            if decoder is None:
+                yield chunk
+            elif decoded_chunk := decoder.decode(chunk):
+                yield decoded_chunk
+
+        if decoder is not None and (decoded_chunk := decoder.decode(b'', final=True)):
+            yield decoded_chunk
 
     def __iter__(self) -> Iterator[bytes | str]:
         # requests.Response.__iter__ delegates to iter_content(128); mirror that.
@@ -173,22 +183,26 @@ class MockHTTPResponseImpl:
     def iter_lines(
         self, chunk_size: int | None = None, decode_unicode: bool = False, delimiter: bytes | str | None = None
     ) -> Iterator[bytes | str]:
-        # Handle string delimiter by converting to bytes
-        if isinstance(delimiter, str):
-            delimiter = delimiter.encode('utf-8')
-        delimiter = delimiter or b'\n'
-
         self._stream.seek(0)
-        lines = self._stream.read().split(delimiter)
-        # bytes.split() produces a trailing empty element when content ends with the
-        # delimiter (e.g. b'a\nb\n'.split(b'\n') == [b'a', b'b', b'']). requests uses
-        # splitlines() for the default case which does not have this behavior, so we
-        # strip the trailing empty element to match.
+        content = self._stream.read()
+        if decode_unicode:
+            decoded_content = self._decode(content)
+            decoded_delimiter = self._decode(delimiter) if isinstance(delimiter, bytes) else delimiter
+            lines = (
+                decoded_content.splitlines() if decoded_delimiter is None else decoded_content.split(decoded_delimiter)
+            )
+        else:
+            if isinstance(delimiter, str):
+                encoder = codecs.getincrementalencoder(self.encoding or 'utf-8')()
+                encoder.encode('', final=False)
+                encoded_delimiter = encoder.encode(delimiter, final=True)
+            else:
+                encoded_delimiter = delimiter
+            lines = content.splitlines() if encoded_delimiter is None else content.split(encoded_delimiter)
+
         if lines and not lines[-1]:
             lines.pop()
-        for line in lines:
-            # Decode to string when decode_unicode=True (matches requests behavior)
-            yield line.decode('utf-8') if decode_unicode else line
+        yield from lines
 
     def close(self) -> None:
         # No-op: requests.Response.close() releases the network connection, but
