@@ -638,12 +638,6 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             tags=self.tags + self._get_debug_tags(),
             raw=True,
         )
-        self._check.count(
-            "dd.clickhouse.async_inserts_buffer.bytes_submitted.count",
-            sum(row.get('total_bytes', 0) for row in buffer_snapshot),
-            tags=self.tags + self._get_debug_tags(),
-            raw=True,
-        )
 
     def run_job(self):
         """
