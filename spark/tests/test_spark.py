@@ -1391,7 +1391,7 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check, expe
             tags=tags,
         )
 
-    assert 'No running apps found. No metrics will be collected.' in caplog.text
+    assert 'No running apps found. No application metrics will be collected.' in caplog.text
 
 
 @pytest.mark.unit

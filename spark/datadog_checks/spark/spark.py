@@ -104,7 +104,7 @@ class SparkCheck(AgentCheck):
         spark_apps = self._get_running_apps()
 
         if not spark_apps:
-            self.log.warning('No running apps found. No metrics will be collected.')
+            self.log.warning('No running apps found. No application metrics will be collected.')
             return
 
         # Get the job metrics

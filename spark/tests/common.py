@@ -14,6 +14,9 @@ CLUSTER_TAGS = [
 ]
 
 EXPECTED_E2E_METRICS = [
+    # Emitted unconditionally by the standalone master (even with zero running apps) so that
+    # config discovery's probe, which requires at least one metric, can accept an idle master.
+    'spark.master.worker_count',
     'spark.driver.total_shuffle_read',
     'spark.stage.num_active_tasks',
     'spark.streaming.statistics.num_inactive_receivers',
