@@ -54,17 +54,42 @@ class QueueMetricCollector(object):
                 if regex.match(queue_name):
                     queue_tags.extend(q_tags)
 
+            pcf = None
             try:
-                enriched_tags = self.queue_stats(queue_manager, queue_name, queue_tags)
+                # Reuse a single PCFExecute (and its dynamic reply queue) across all PCF
+                # commands issued for this queue, instead of opening/closing one per command.
+                # Each PCFExecute() does a real MQOPEN against the queue manager and disconnect()
+                # an MQCLOSE, so doing this per-command tripled the MQI round-trips per queue.
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
+                enriched_tags = self.queue_stats(queue_manager, queue_name, queue_tags, pcf=pcf)
                 # some system queues don't have PCF metrics
                 # so we don't collect those metrics from those queues
                 if queue_name not in self.config.DISALLOWED_QUEUES:
-                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, enriched_tags)
+                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, enriched_tags, pcf=pcf)
 
                     # if collect queue reset metrics is disabled, skip this
                     if self.config.collect_reset_queue_metrics:
-                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, enriched_tags)
+                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, enriched_tags, pcf=pcf)
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
+            except pymqi.MQMIError as e:
+                # Don't warn if no messages, see:
+                # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                    self.log.debug("No PCF messages available for queue %s", queue_name)
+                    self.service_check(
+                        self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname
+                    )
+                else:
+                    self.warning('Cannot connect to queue %s: %s', queue_name, e)
+                    self.service_check(
+                        self.QUEUE_SERVICE_CHECK,
+                        AgentCheck.CRITICAL,
+                        queue_tags,
+                        message=str(e),
+                        hostname=self.config.hostname,
+                    )
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
                 self.service_check(
@@ -74,6 +99,9 @@ class QueueMetricCollector(object):
                     message=str(e),
                     hostname=self.config.hostname,
                 )
+            finally:
+                if pcf is not None:
+                    pcf.disconnect()
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
@@ -247,17 +275,20 @@ class QueueMetricCollector(object):
                     hostname=self.config.hostname,
                 )
 
-    def queue_stats(self, queue_manager, queue_name, tags):
+    def queue_stats(self, queue_manager, queue_name, tags, pcf=None):
         """
         Grab stats from queues
         """
         enriched_tags = list(tags)
-        pcf = None
+        # Reuse the caller's PCFExecute (and its reply queue) if one was passed in, otherwise
+        # open a standalone one for compatibility with any external callers of this method.
+        owns_pcf = pcf is None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
-            pcf = pymqi.PCFExecute(
-                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
-            )
+            if owns_pcf:
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
@@ -283,7 +314,7 @@ class QueueMetricCollector(object):
 
                 self._submit_queue_stats(queue_info, queue_name, enriched_tags)
         finally:
-            if pcf is not None:
+            if owns_pcf and pcf is not None:
                 pcf.disconnect()
 
         return enriched_tags
@@ -304,17 +335,18 @@ class QueueMetricCollector(object):
                 else:
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
-    def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
-        pcf = None
+    def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags, pcf=None):
+        owns_pcf = pcf is None
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
                 pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
-            pcf = pymqi.PCFExecute(
-                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
-            )
+            if owns_pcf:
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
@@ -354,16 +386,17 @@ class QueueMetricCollector(object):
                         msg = "Unable to get metric {} from queue {}. Error is {}.".format(metric_name, queue_name, e)
                         self.log.warning(msg)
         finally:
-            if pcf is not None:
+            if owns_pcf and pcf is not None:
                 pcf.disconnect()
 
-    def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
-        pcf = None
+    def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags, pcf=None):
+        owns_pcf = pcf is None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
-            pcf = pymqi.PCFExecute(
-                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
-            )
+            if owns_pcf:
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
             response = pcf.MQCMD_RESET_Q_STATS(args)
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
@@ -379,5 +412,5 @@ class QueueMetricCollector(object):
                 prefix = "{}.queue".format(metrics.METRIC_PREFIX)
                 self.send_metrics_from_properties(queue_info, metrics_map, prefix, tags)
         finally:
-            if pcf is not None:
+            if owns_pcf and pcf is not None:
                 pcf.disconnect()
