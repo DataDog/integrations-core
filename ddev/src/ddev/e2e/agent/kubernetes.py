@@ -359,6 +359,9 @@ class KubernetesAgent(AgentInterface):
         """Leave cleanup to the fixture that deletes the disposable cluster."""
 
     def _restart_agent_process(self) -> None:
+        # Pod readiness does not guarantee that s6 has started the Agent process.
+        self._wait_for_agent()
+
         # The Agent image's s6 finish handler normally shuts down the whole
         # service tree when the main Agent exits. Remove it before killing the
         # process so s6 starts a fresh Agent in the same container, preserving

@@ -195,7 +195,9 @@ def test_restart_command_preserves_s6_and_timeout_contract(agent, metadata, mock
 
     agent._restart_agent_process()
 
-    operations.assert_has_calls([mocker.call.execute(mocker.ANY), mocker.call.wait_for_agent()])
+    operations.assert_has_calls(
+        [mocker.call.wait_for_agent(), mocker.call.execute(mocker.ANY), mocker.call.wait_for_agent()]
+    )
     command = execute.call_args.args[0]
     assert command[:2] == ['sh', '-c']
     script = command[2]
