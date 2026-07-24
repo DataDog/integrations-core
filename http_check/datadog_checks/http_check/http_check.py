@@ -14,7 +14,6 @@ import socks
 from cryptography import x509
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.http import should_bypass_proxy
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
 
@@ -403,11 +402,7 @@ class HTTPCheck(AgentCheck):
 
         sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
         proxies = self.http.options.get('proxies', {})
-        if (
-            proxies
-            and (proxy_url := proxies.get("https"))
-            and not should_bypass_proxy(url, self.http.no_proxy_uris or [])
-        ):
+        if proxies and (proxy_url := proxies.get("https")) and not self.http.should_bypass_proxy(url):
             proxy = parse_proxy_url(proxy_url)
             sock.set_proxy(**proxy)
 

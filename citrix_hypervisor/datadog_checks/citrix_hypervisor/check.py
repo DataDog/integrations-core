@@ -14,10 +14,10 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from .metrics import build_metric
 
 if TYPE_CHECKING:
-    from datadog_checks.base.utils.http import ResponseWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 
-def _safely_process_metrics_response(data: ResponseWrapper) -> dict[str, dict]:
+def _safely_process_metrics_response(data: HTTPResponse) -> dict[str, dict]:
     # Responses can be wrongly formatted for older versions of the hypervisor,
     # it's missing double quotes " around the field names. Use yaml to parse the response
     # if json parsing fails.

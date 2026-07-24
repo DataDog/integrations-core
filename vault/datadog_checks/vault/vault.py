@@ -284,7 +284,7 @@ class Vault(OpenMetricsBaseCheck):
             # Send histograms & summaries counts as monotonic_counter
             instance['send_distribution_counts_as_monotonic'] = True
 
-            # Remap important options until OpenMetricsBaseCheck uses the RequestsWrapper
+            # Remap important options until OpenMetricsBaseCheck uses the HTTP client
             instance['ssl_verify'] = instance.pop('tls_verify', None)
             instance['ssl_cert'] = instance.pop('tls_cert', None)
             instance['ssl_private_key'] = instance.pop('tls_private_key', None)
