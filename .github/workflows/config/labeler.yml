@@ -121,6 +121,10 @@ integration/apache:
 - changed-files:
   - any-glob-to-any-file:
     - apache/**/*
+integration/apm_config_audit:
+- changed-files:
+  - any-glob-to-any-file:
+    - apm_config_audit/**/*
 integration/appgate_sdp:
 - changed-files:
   - any-glob-to-any-file:
