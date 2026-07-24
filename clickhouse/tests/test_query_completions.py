@@ -601,6 +601,37 @@ def test_flush_advances_checkpoint_on_success(check_with_flush):
         mock_advance.assert_called_once()
 
 
+def test_flush_records_counts(check_with_flush):
+    """Test that a successful flush collection reports submitted event count and byte size metrics"""
+    query_completions = check_with_flush.query_completions
+    query_completions._tags_no_db = ['test:clickhouse']
+    query_completions.tags = ['test:clickhouse']
+    records = [{'table': 'events', 'bytes': 100}, {'table': 'events', 'bytes': 250}]
+
+    with (
+        mock.patch.object(query_completions, '_collect_flush_rows', return_value=records),
+        mock.patch.object(query_completions, '_create_flush_event', return_value={'dbm_type': 'async_inserts_flush'}),
+        mock.patch.object(query_completions._check, 'database_monitoring_query_activity'),
+        mock.patch.object(query_completions._flush_checkpoint, 'reset_pending'),
+        mock.patch.object(query_completions._flush_checkpoint, 'advance_checkpoint'),
+        mock.patch.object(query_completions._check, 'count') as mock_count,
+    ):
+        query_completions._collect_and_submit_flush()
+
+    mock_count.assert_any_call(
+        "dd.clickhouse.async_inserts_flush.events_submitted.count",
+        2,
+        tags=['test:clickhouse'],
+        raw=True,
+    )
+    mock_count.assert_any_call(
+        "dd.clickhouse.async_inserts_flush.bytes_submitted.count",
+        350,
+        tags=['test:clickhouse'],
+        raw=True,
+    )
+
+
 def test_flush_does_not_advance_checkpoint_on_error(check_with_flush):
     """Test that a failed load leaves the checkpoint unadvanced so the same window is retried"""
     query_completions = check_with_flush.query_completions

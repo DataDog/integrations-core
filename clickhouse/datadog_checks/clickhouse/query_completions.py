@@ -416,7 +416,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             self._collect_flush()
         except Exception:
             self._log.exception("Failed to collect async insert flush log")
-            self._flush_error_count("collect-flush-log")
+            self._record_flush_error_count("collect-flush-log")
 
     def _collect_flush(self):
         """
@@ -441,7 +441,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             records = self._collect_flush_rows()
         except Exception:
             self._log.exception("Failed to load async insert flush log")
-            self._flush_error_count("load-flush-log")
+            self._record_flush_error_count("load-flush-log")
             return  # do not advance checkpoint; retry this window next time
 
         if not records:
@@ -454,11 +454,26 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             self._check.database_monitoring_query_activity(json.dumps(event, default=default_json_event_encoding))
         except Exception:
             self._log.exception("Failed to submit async insert flush payload")
-            self._flush_error_count("submit-flush-log")
+            self._record_flush_error_count("submit-flush-log")
             return  # do not advance checkpoint; retry this window next time
 
+        self._record_flush_counts(records)
         self._flush_checkpoint.advance_checkpoint()
         self._log.debug("Submitted %d async insert flush records", len(records))
+
+    def _record_flush_counts(self, records):
+        self._check.count(
+            "dd.clickhouse.async_inserts_flush.events_submitted.count",
+            len(records),
+            tags=self.tags,
+            raw=True,
+        )
+        self._check.count(
+            "dd.clickhouse.async_inserts_flush.bytes_submitted.count",
+            sum(record.get('bytes', 0) for record in records),
+            tags=self.tags,
+            raw=True,
+        )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_flush_rows(self):
@@ -542,7 +557,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             'clickhouse_async_insert_flushes': records,
         }
 
-    def _flush_error_count(self, error_label):
+    def _record_flush_error_count(self, error_label):
         self._check.count(
             "dd.clickhouse.async_inserts_flush.error",
             1,
