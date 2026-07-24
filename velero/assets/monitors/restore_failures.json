@@ -18,10 +18,9 @@
 			},
 			"notify_audit": false,
 			"require_full_window": false,
-			"notify_no_data": true,
+			"on_missing_data": "show_and_notify_no_data",
 			"include_tags": true,
-			"evaluation_delay": 300,
-			"no_data_timeframe": 30
+			"evaluation_delay": 300
 		},
 		"priority": 1
 	},
