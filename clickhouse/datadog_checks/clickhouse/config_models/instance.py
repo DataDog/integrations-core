@@ -30,7 +30,7 @@ class CollectAsyncInserts(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
-    max_samples_per_collection: Optional[int] = Field(None, ge=1)
+    max_samples_per_collection: Optional[int] = None
 
 
 class CollectSchemas(BaseModel):

@@ -250,6 +250,15 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"collect_async_inserts.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    max_samples_per_collection = _safefloat(args.get('collect_async_inserts', {}).get('max_samples_per_collection'))
+    if max_samples_per_collection < 1 or max_samples_per_collection != int(max_samples_per_collection):
+        default_value = dict_defaults.instance_collect_async_inserts().max_samples_per_collection
+        args['collect_async_inserts']['max_samples_per_collection'] = default_value
+        validation_result.add_warning(
+            f"collect_async_inserts.max_samples_per_collection must be an integer greater than 0, "
+            f"defaulting to {default_value}."
+        )
+
     _pm_defaults = dict_defaults.instance_parts_and_merges()
     for _field in (
         'max_parts_rows',

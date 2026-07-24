@@ -318,11 +318,9 @@ files:
         - name: max_samples_per_collection
           description: |
             Maximum number of flush records to collect in a single run (applies LIMIT in SQL).
-            Minimum of 1.
           value:
             type: integer
             example: 1000
-            minimum: 1
           fleet_configurable: false
     - name: query_errors
       description: Configure collection of query errors from system.query_log
