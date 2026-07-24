@@ -2,20 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.http import http_get, http_put
 from datadog_checks.twemproxy import Twemproxy
 
 from . import common
 
 
 def setup_post_data():
-    requests.put('http://{}:2379/v2/keys/services/redis/01'.format(common.HOST), data={'value': 'redis1:6101'})
-    requests.put('http://{}:2379/v2/keys/services/redis/02'.format(common.HOST), data={'value': 'redis2:6102'})
-    requests.put('http://{}:2379/v2/keys/services/twemproxy/port'.format(common.HOST), data={'value': '6100'})
-    requests.put('http://{}:2379/v2/keys/services/twemproxy/host'.format(common.HOST), data={'value': 'localhost'})
+    http_put('http://{}:2379/v2/keys/services/redis/01'.format(common.HOST), data={'value': 'redis1:6101'})
+    http_put('http://{}:2379/v2/keys/services/redis/02'.format(common.HOST), data={'value': 'redis2:6102'})
+    http_put('http://{}:2379/v2/keys/services/twemproxy/port'.format(common.HOST), data={'value': '6100'})
+    http_put('http://{}:2379/v2/keys/services/twemproxy/host'.format(common.HOST), data={'value': 'localhost'})
 
 
 @pytest.fixture(scope="session")
@@ -49,6 +49,6 @@ def setup_request():
     """
     url = "http://{}:{}".format(common.HOST, common.PORT)
     try:
-        requests.get(url)
+        http_get(url)
     except Exception:
         pass

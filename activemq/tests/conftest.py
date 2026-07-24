@@ -6,10 +6,10 @@ import os
 import time
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitForPortListening
+from datadog_checks.dev.http import dev_http_client, http_post
 from datadog_checks.dev.utils import load_jmx_config
 
 from .common import (
@@ -34,9 +34,7 @@ def populate_server():
     time.sleep(3)
 
     if IS_ARTEMIS:
-        s = requests.Session()
-        s.auth = TEST_AUTH
-        s.headers = {'accept': 'application/json', 'origin': BASE_URL}
+        s = dev_http_client(persist=True, auth=TEST_AUTH, headers={'accept': 'application/json', 'origin': BASE_URL})
         data = s.get(ARTEMIS_URL + '/list')
         channels = data.json()['value']['org.apache.activemq.artemis']
         broker = [k for k in channels.keys() if k.startswith('broker') and ',' not in k][0]
@@ -59,11 +57,11 @@ def populate_server():
     else:
         for queue in TEST_QUEUES:
             url = '{}/{}?type=queue'.format(ACTIVEMQ_URL, queue)
-            requests.post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
+            http_post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
 
         for topic in TEST_TOPICS:
             url = '{}/{}?type=topic'.format(ACTIVEMQ_URL, topic)
-            requests.post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
+            http_post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
 
 
 @pytest.fixture(scope="session")

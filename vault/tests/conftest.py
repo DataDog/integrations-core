@@ -6,12 +6,12 @@ import os
 import time
 
 import pytest
-import requests
 
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.fs import create_file
+from datadog_checks.dev.http import http_get
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
@@ -163,7 +163,7 @@ class WaitAndUnsealVault(WaitFor):
 
 
 def api_working(api_endpoint):
-    response = requests.get(api_endpoint, timeout=1).json()
+    response = http_get(api_endpoint, timeout=1).json()
     if response:
         return True
     return False

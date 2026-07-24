@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import requests
+from datadog_checks.dev.http import http_post, http_put
 
 from .common import INFERENCE_API_URL, MANAGEMENT_API_URL
 
@@ -11,7 +11,7 @@ from .common import INFERENCE_API_URL, MANAGEMENT_API_URL
 
 def run_prediction(model):
     try:
-        response = requests.post(
+        response = http_post(
             f"{INFERENCE_API_URL}/predictions/{model}",
             data='{"input": 2.0}',
             headers={'Content-Type': 'application/json'},
@@ -25,7 +25,7 @@ def run_prediction(model):
 
 def set_model_default_version(model, version):
     try:
-        response = requests.put(
+        response = http_put(
             f"{MANAGEMENT_API_URL}/models/{model}/{version}/set-default",
         )
         response.raise_for_status()
@@ -37,7 +37,7 @@ def set_model_default_version(model, version):
 
 def update_workers(model, min, max):
     try:
-        response = requests.put(
+        response = http_put(
             f"{MANAGEMENT_API_URL}/models/{model}",
             params={
                 "min_worker": min,
@@ -53,7 +53,7 @@ def update_workers(model, min, max):
 
 def register_model(model):
     try:
-        response = requests.post(f"{MANAGEMENT_API_URL}/models", params={"url": model})
+        response = http_post(f"{MANAGEMENT_API_URL}/models", params={"url": model})
         response.raise_for_status()
     except Exception:
         return False

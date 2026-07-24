@@ -5,9 +5,9 @@
 import os
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.http import http_get, http_put
 
 from .common import DEFAULT_INSTANCE, HERE, URL
 
@@ -28,7 +28,7 @@ def dd_environment():
         headers = {'X-Kt-Mode': 'set'}
 
         for _ in range(100):
-            requests.put(URL, data=data, headers=headers)
-            requests.get(URL)
+            http_put(URL, data=data, headers=headers)
+            http_get(URL)
 
         yield DEFAULT_INSTANCE

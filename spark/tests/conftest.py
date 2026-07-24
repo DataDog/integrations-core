@@ -4,11 +4,11 @@
 import os
 
 import pytest
-import requests
 from datadog_test_libs.utils.mock_dns import mock_local
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.http import http_get
 
 from .common import HERE, HOST, HOSTNAME_TO_PORT_MAPPING, INSTANCE_STANDALONE
 
@@ -36,7 +36,7 @@ def dd_environment():
 
 def check_metrics_available():
     endpoint = 'http://{}:4050/metrics/json'.format(HOST)
-    r = requests.get(endpoint)
+    r = http_get(endpoint)
     return r.text.count("driver.spark.streaming") >= 6
 
 
@@ -49,11 +49,11 @@ def check_executors_registered():
     # of the two apps can own a non-driver executor at a time; either app having one is
     # enough for `test_integration_standalone` to observe executor metrics.
     for port in (4040, 4050):
-        apps = requests.get('http://{}:{}/api/v1/applications'.format(HOST, port)).json()
+        apps = http_get('http://{}:{}/api/v1/applications'.format(HOST, port)).json()
         if not apps:
             continue
         app_id = apps[0]['id']
-        executors = requests.get('http://{}:{}/api/v1/applications/{}/executors'.format(HOST, port, app_id)).json()
+        executors = http_get('http://{}:{}/api/v1/applications/{}/executors'.format(HOST, port, app_id)).json()
         if any(executor.get('id') != 'driver' for executor in executors):
             return True
     return False

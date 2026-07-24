@@ -4,11 +4,10 @@
 import os
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse, http_post
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
 from datadog_checks.harbor.common import (
@@ -58,7 +57,7 @@ def dd_environment(e2e_instance):
 
 
 def create_simple_user():
-    requests.post(
+    http_post(
         URL + USERS_PATH,
         auth=("admin", "Harbor12345"),
         json={

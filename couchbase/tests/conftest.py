@@ -8,12 +8,11 @@ import time
 from copy import deepcopy
 
 import pytest
-import requests
 
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.dev.http import MockHTTPResponse  # noqa: F401
+from datadog_checks.dev.http import MockHTTPResponse, http_get, http_post, http_put  # noqa: F401
 
 from .common import (
     BUCKET_NAME,
@@ -180,8 +179,8 @@ def couchbase_init():
     ]
     subprocess.check_call(init_args)
 
-    r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
-    return r.status_code == requests.codes.ok
+    r = http_get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
+    return r.status_code == 200
 
 
 def load_sample_bucket():
@@ -192,7 +191,7 @@ def load_sample_bucket():
     # Resources used:
     # https://docs.couchbase.com/server/current/manage/manage-settings/install-sample-buckets.html
 
-    r = requests.post(
+    r = http_post(
         '{}/sampleBuckets/install'.format(URL),
         auth=(USER, PASSWORD),
         json=["gamesim-sample"],
@@ -225,7 +224,7 @@ def load_sample_bucket():
 
     while True:
         # Loop until the task ID is gone, meaning the task is done.
-        r = requests.get(
+        r = http_get(
             '{}/pools/default/tasks'.format(URL),
             auth=(USER, PASSWORD),
         )
@@ -243,7 +242,7 @@ def load_sample_bucket():
 
 def gamesim_primary_index_ready():
     """Wait until every gamesim_primary keyspace reports initial_build_progress == 100."""
-    r = requests.get(
+    r = http_get(
         '{}/api/v1/stats'.format(INDEX_STATS_URL),
         auth=(USER, PASSWORD),
     )
@@ -283,7 +282,7 @@ def create_syncgw_database():
         payload["index"] = {"num_replicas": payload["num_index_replicas"]}
         del payload["num_index_replicas"]
 
-    r = requests.put(
+    r = http_put(
         '{}/sync_gateway/'.format(SG_URL),
         auth=(USER, PASSWORD),
         json=payload,
@@ -295,7 +294,7 @@ def node_stats():
     """
     Wait for couchbase to generate node stats
     """
-    r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
+    r = http_get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     r.raise_for_status()
     stats = r.json()
     return all(len(stats['interestingStats']) > 0 for stats in stats['nodes'])
@@ -305,7 +304,7 @@ def bucket_stats():
     """
     Wait for couchbase to generate bucket stats
     """
-    r = requests.get('{}/pools/default/buckets/{}/stats'.format(URL, BUCKET_NAME), auth=(USER, PASSWORD))
+    r = http_get('{}/pools/default/buckets/{}/stats'.format(URL, BUCKET_NAME), auth=(USER, PASSWORD))
     r.raise_for_status()
     stats = r.json()
     return stats['op']['lastTStamp'] != 0

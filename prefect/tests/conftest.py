@@ -7,10 +7,10 @@ from pathlib import Path
 from typing import Callable
 
 import pytest
-import requests
 
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.docker import docker_run, get_docker_hostname, get_e2e_discovery_metadata
+from datadog_checks.dev.http import http_post
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.prefect import PrefectCheck
 
@@ -23,12 +23,12 @@ E2E_METADATA = {
 
 def _check_task_runs_available(prefect_url: str):
     """Verify that the Prefect API has task runs and task-run events queryable."""
-    resp = requests.post(f"{prefect_url}/task_runs/filter", json={}, timeout=1)
+    resp = http_post(f"{prefect_url}/task_runs/filter", json={}, timeout=1)
     resp.raise_for_status()
     task_runs = resp.json()
     assert task_runs, "No task runs available in Prefect API yet"
 
-    resp = requests.post(
+    resp = http_post(
         f"{prefect_url}/events/filter",
         json={"filter": {"event": {"prefix": ["prefect.task-run"]}}},
         timeout=1,

@@ -6,11 +6,11 @@ import os
 from copy import deepcopy
 
 import pytest
-import requests
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
+from datadog_checks.dev.http import http_get, http_post, http_put
 
 from . import common
 
@@ -120,10 +120,10 @@ def enable_cluster():
 
     resp_data = None
     for data in requests_data:
-        resp = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
+        resp = http_post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
         resp_data = resp.json()
 
-    resp = requests.get("{}/_membership".format(common.URL), auth=auth, headers=headers)
+    resp = http_get("{}/_membership".format(common.URL), auth=auth, headers=headers)
     membership = resp.json()
 
     expected_nb_nodes = 3
@@ -145,9 +145,9 @@ def generate_data(couch_version):
     headers = {'Accept': 'text/json'}
 
     # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    http_put("{}/kennel".format(common.URL), auth=auth, headers=headers)
     for i in range(5):
-        requests.put("{}/db{}".format(common.URL, i), auth=auth, headers=headers)
+        http_put("{}/db{}".format(common.URL, i), auth=auth, headers=headers)
 
     # Populate the database
     data = {
@@ -157,7 +157,7 @@ def generate_data(couch_version):
             "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
         },
     }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
+    http_put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
 
 
 def check_node_stats():
@@ -166,7 +166,7 @@ def check_node_stats():
     # Check all nodes have stats
     for node in common.ALL_NODES:
         url = "{}/_node/{}/_stats".format(common.URL, node['name'])
-        res = requests.get(url, auth=auth, headers=headers)
+        res = http_get(url, auth=auth, headers=headers)
         data = res.json()
         assert "global_changes" in data, "Invalid stats. Get stats url: {}".format(url)
 
@@ -188,7 +188,7 @@ def send_replication():
         body = replication_body.copy()
         body['_id'] = 'my_replication_id_{}'.format(i)
         body['target'] = body['target'] + str(i)
-        r = requests.post(
+        r = http_post(
             replicator_url,
             auth=(common.NODE1['user'], common.NODE1['password']),
             headers={'Content-Type': 'application/json'},
@@ -203,7 +203,7 @@ def get_replication():
     """
     task_url = "{}/_active_tasks".format(common.NODE1['server'])
 
-    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
+    r = http_get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
     r.raise_for_status()
     active_tasks = r.json()
     count = len(active_tasks)

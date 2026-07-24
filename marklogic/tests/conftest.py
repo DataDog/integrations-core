@@ -9,6 +9,7 @@ import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.dev.http import http_post
 
 from .common import (
     ADMIN_PASSWORD,
@@ -53,7 +54,7 @@ def setup_admin_user():
     # type: () -> None
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
     # Reset admin user password (useful for cluster setup)
-    requests.post(
+    http_post(
         'http://localhost:8001/admin/v1/instance-admin',
         data={
             "admin-username": ADMIN_USERNAME,

@@ -8,12 +8,11 @@ from contextlib import contextmanager
 from time import sleep
 
 import pytest
-import requests
 
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse, http_get
 from datadog_checks.gitlab import GitlabCheck
 
 from .common import (
@@ -84,7 +83,7 @@ def dd_environment():
     ):
         # run pre-test commands
         for _ in range(100):
-            requests.get(GITLAB_URL)
+            http_get(GITLAB_URL)
         sleep(2)
 
         yield {

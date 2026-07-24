@@ -5,9 +5,9 @@ import os
 import subprocess
 
 import pytest
-import requests
 
 from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev.http import http_get
 from datadog_checks.dev.utils import ON_WINDOWS
 
 from .common import ATHOST, CONFIG_FILE, HERE, URL
@@ -19,7 +19,7 @@ COREDNS_VERSION = [int(i) for i in os.environ['COREDNS_VERSION'].split(".")]
 
 
 def init_coredns():
-    res = requests.get(URL)
+    res = http_get(URL)
     if not ON_WINDOWS:
         # create some metrics by using dig
         subprocess.check_call(DIG_ARGS)

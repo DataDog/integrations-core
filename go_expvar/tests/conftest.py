@@ -8,9 +8,9 @@ import os
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.http import dev_http_client
 from datadog_checks.go_expvar import GoExpvar
 
 from . import common
@@ -35,8 +35,9 @@ def dd_environment():
     """
 
     with docker_run(os.path.join(common.HERE, 'compose', 'docker-compose.yaml'), endpoints=[common.URL]):
+        client = dev_http_client(persist=True)
         for _ in range(9):
-            requests.get(common.URL + "?user=123456")
+            client.get(common.URL + "?user=123456")
         yield common.INSTANCE
 
 
