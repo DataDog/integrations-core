@@ -83,7 +83,7 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     mock_http_response(status_code=404)
     check = QuarkusCheck('quarkus', {}, [instance])
     # When
-    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+    with pytest.raises(Exception, match="HTTPStatusError"):
         dd_run_check(check)
     # Then
     aggregator.assert_service_check('quarkus.openmetrics.health', QuarkusCheck.CRITICAL)

@@ -2,29 +2,27 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from unittest import mock
-
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.vllm import vLLMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
+def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance, mock_http):
     check = vLLMCheck("vLLM", {}, [instance])
     check.check_id = "test:123"
 
     mock_responses = [
-        MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
-        MockResponse(file_path=get_fixture_path("vllm_version.json")),
+        MockHTTPResponse(file_path=get_fixture_path("vllm_metrics.txt")),
+        MockHTTPResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
-        dd_run_check(check)
+    mock_http.get.side_effect = mock_responses
+    dd_run_check(check)
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)
@@ -38,17 +36,17 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
     datadog_agent.assert_metadata("test:123", version_metadata)
 
 
-def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_instance):
+def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_instance, mock_http):
     check = vLLMCheck("vLLM", {}, [ray_instance])
     check.check_id = "test:123"
 
     mock_responses = [
-        MockResponse(file_path=get_fixture_path("ray_vllm_metrics.txt")),
-        MockResponse(file_path=get_fixture_path("vllm_version.json")),
+        MockHTTPResponse(file_path=get_fixture_path("ray_vllm_metrics.txt")),
+        MockHTTPResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
-        dd_run_check(check)
+    mock_http.get.side_effect = mock_responses
+    dd_run_check(check)
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)
@@ -81,7 +79,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     """
     mock_http_response(status_code=404)
     check = vLLMCheck("vllm", {}, [instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPStatusError'):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()

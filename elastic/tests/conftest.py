@@ -11,7 +11,7 @@ from packaging import version
 
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.elastic import ESCheck
 
 from .common import (
@@ -140,15 +140,17 @@ def mock_es_endpoints(mock_http_response_per_endpoint):
     def setup(overrides=None):
         responses = {
             # `_get_es_version` probes the base URL.
-            URL: [MockResponse(json_data={'version': {'number': '8.8.0'}})],
+            URL: [MockHTTPResponse(json_data={'version': {'number': '8.8.0'}})],
             # Node stats: the local URL is used by default, the cluster-wide one when `cluster_stats` is on.
-            '{}/_nodes/_local/stats'.format(URL): [MockResponse(file_path=get_fixture_path('stats_v8.json'))],
-            '{}/_nodes/stats'.format(URL): [MockResponse(file_path=get_fixture_path('stats_v8.json'))],
-            '{}/_cat/templates?format=json'.format(URL): [MockResponse(file_path=get_fixture_path('templates.json'))],
+            '{}/_nodes/_local/stats'.format(URL): [MockHTTPResponse(file_path=get_fixture_path('stats_v8.json'))],
+            '{}/_nodes/stats'.format(URL): [MockHTTPResponse(file_path=get_fixture_path('stats_v8.json'))],
+            '{}/_cat/templates?format=json'.format(URL): [
+                MockHTTPResponse(file_path=get_fixture_path('templates.json'))
+            ],
             # A single-node cluster reports `yellow`; `green` would make the health service check OK, and the
             # aggregator stub rejects an OK service check that carries a message.
             '{}/_cluster/health'.format(URL): [
-                MockResponse(
+                MockHTTPResponse(
                     json_data={
                         'cluster_name': 'test-cluster',
                         'status': 'yellow',
@@ -164,9 +166,9 @@ def mock_es_endpoints(mock_http_response_per_endpoint):
                 )
             ],
             # `pending_task_stats` defaults to on, so the check always hits this endpoint.
-            '{}/_cluster/pending_tasks'.format(URL): [MockResponse(json_data={'tasks': []})],
+            '{}/_cluster/pending_tasks'.format(URL): [MockHTTPResponse(json_data={'tasks': []})],
             # The default `instance` fixture ships a `/_search` custom query.
-            '{}/_search'.format(URL): [MockResponse(json_data={'hits': {'total': {'value': 0, 'relation': 'eq'}}})],
+            '{}/_search'.format(URL): [MockHTTPResponse(json_data={'hits': {'total': {'value': 0, 'relation': 'eq'}}})],
         }
         if overrides:
             responses.update(overrides)

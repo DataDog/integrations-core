@@ -13,7 +13,6 @@ from typing import List  # noqa: F401
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
@@ -23,7 +22,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
 
 class OpenMetricsScraper:
@@ -217,18 +216,10 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http = self.check.http
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
-        if self._use_latest_spec:
-            accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
-        else:
-            accept_header = 'text/plain'
-
-        # Request the appropriate exposition format
-        if self.http.options['headers'].get('Accept') == '*/*':
-            self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
@@ -414,7 +405,12 @@ class OpenMetricsScraper:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        except ConnectionError as e:
+        except (HTTPConnectionError, HTTPTimeoutError) as e:
+            # HTTPTimeoutError is included because requests' ConnectTimeout (previously caught by the raw
+            # ConnectionError) now translates to HTTPTimeoutError, a sibling of HTTPConnectionError. The
+            # agnostic hierarchy does not distinguish connect from read timeouts, so a mid-stream ReadTimeout
+            # is now swallowed here too under ignore_connection_errors. That is intentional: an unresponsive
+            # endpoint is exactly what the flag is meant to tolerate.
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:
@@ -465,6 +461,17 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
+        # Negotiate the OpenMetrics exposition format, but never clobber an Accept header the user
+        # explicitly configured. get_default_headers() seeds Accept with '*/*', so that value (or an
+        # absent header) means "unset" and is safe to replace.
+        extra_headers = kwargs.get('extra_headers', {})
+        if self.http.options['headers'].get('Accept') in (None, '*/*') and 'Accept' not in extra_headers:
+            if self._use_latest_spec:
+                accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+            else:
+                accept_header = 'text/plain'
+            extra_headers['Accept'] = accept_header
+            kwargs['extra_headers'] = extra_headers
         return self.http.get(self.endpoint, **kwargs)
 
     def set_dynamic_tags(self, *tags):

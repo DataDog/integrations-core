@@ -5,6 +5,7 @@ import pytest
 from mock.mock import MagicMock
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
@@ -173,3 +174,17 @@ def test_parse_readiness_service_checks(
         )
 
     assert len(aggregator.service_check_names) == 13
+
+
+@pytest.mark.unit
+def test_prometheus_scrape_timeout_reports_critical(aggregator, gitlab_check, get_config):
+    # A connect timeout surfaces as HTTPTimeoutError, a sibling of HTTPConnectionError. The prometheus
+    # endpoint service check must still report CRITICAL rather than letting the error escape check().
+    check = gitlab_check(get_config(use_openmetrics=False))
+    check.process = MagicMock(side_effect=HTTPTimeoutError("connect timed out"))
+    check._check_health_endpoint = MagicMock()
+    check.submit_version = MagicMock()
+
+    check.check(None)
+
+    aggregator.assert_service_check(check.PROMETHEUS_SERVICE_CHECK_NAME, status=AgentCheck.CRITICAL)

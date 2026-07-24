@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from functools import wraps
 
-import requests
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPStatusError
 
 
 def handle_error(f):
@@ -12,9 +12,9 @@ def handle_error(f):
         try:
             result = f(check, *args, **kwargs)
             return result
-        except requests.exceptions.RequestException as e:
+        except (HTTPRequestError, HTTPStatusError) as e:
             check.log.debug(
-                "Encountered a RequestException in '%s' [%s]: %s",
+                "Encountered an HTTP error in '%s' [%s]: %s",
                 f.__name__,
                 type(e),
                 e,

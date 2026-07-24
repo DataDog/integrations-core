@@ -4,9 +4,8 @@
 from copy import copy
 from datetime import datetime
 
-import requests
-
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
 from datadog_checks.base.utils.time import get_timestamp
 
 AIRFLOW_STATUS_OK = "OK"
@@ -137,10 +136,10 @@ class AirflowCheck(AgentCheck):
             resp = self.http.get(url)
             resp.raise_for_status()
             return resp.json()
-        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+        except (HTTPStatusError, HTTPConnectionError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
-        except requests.exceptions.Timeout as e:
+        except HTTPTimeoutError as e:
             self.warning("Connection timeout when connecting to %s: %s", url, e)
         return None

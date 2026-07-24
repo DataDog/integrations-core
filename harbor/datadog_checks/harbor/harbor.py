@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 
 from .api import HarborAPI
 from .common import HEALTHY
@@ -29,8 +29,8 @@ class HarborCheck(AgentCheck):
         try:
             registries = api.registries()
             self.log.debug("Found %d registries", len(registries))
-        except HTTPError as e:
-            if e.response.status_code in (401, 403):
+        except HTTPStatusError as e:
+            if e.response is not None and e.response.status_code in (401, 403):
                 # Forbidden, user is not admin
                 self.log.info(
                     "Provided user in harbor integration config is not an admin user. Ignoring registries health checks"
@@ -49,7 +49,7 @@ class HarborCheck(AgentCheck):
                 try:
                     api.registry_health(registry['id'])
                     self.service_check(REGISTRY_STATUS, AgentCheck.OK, tags=tags)
-                except HTTPError as e:
+                except HTTPStatusError as e:
                     self.log.debug(e, exc_info=True)
                     self.service_check(REGISTRY_STATUS, AgentCheck.CRITICAL, tags=tags)
 
@@ -61,8 +61,8 @@ class HarborCheck(AgentCheck):
     def _submit_disk_metrics(self, api, base_tags):
         try:
             volume_info = api.volume_info()
-        except HTTPError as e:
-            if e.response.status_code in (401, 403):
+        except HTTPStatusError as e:
+            if e.response is not None and e.response.status_code in (401, 403):
                 # Forbidden, user is not admin
                 self.log.warning(
                     "Provided user in harbor integration config is not an admin user. Ignoring volume metrics"

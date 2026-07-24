@@ -4,12 +4,15 @@
 import json
 import os
 from typing import Optional  # noqa: F401
+from unittest import mock
 
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.check import VoltDBCheck
+from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.config import Config
 from datadog_checks.voltdb.types import Instance  # noqa: F401
 
@@ -71,6 +74,123 @@ def test_default_port(url, netloc):
     # type: (str, tuple) -> None
     config = Config({'url': url, 'username': 'doggo', 'password': 'doggopass'})
     assert config.netloc == netloc
+
+
+CREDENTIAL_CASES = [
+    pytest.param(False, 'Password', 'Hashedpassword', id='plain'),
+    pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
+]
+
+
+def test_check_disables_http_auth():
+    # type: () -> None
+    # VoltDB authenticates via query params, so the check disables HTTP-level auth (config-derived and .netrc).
+    instance = {'url': 'http://localhost:8080', 'username': 'doggo', 'password': 'doggopass'}
+    fake = mock.MagicMock()
+
+    with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
+        VoltDBCheck('voltdb', {}, [instance])
+
+    fake.disable_auth.assert_called_once_with()
+
+
+def test_raise_for_status_includes_response_details():
+    # type: () -> None
+    # HTTP errors are enriched with VoltDB's statusstring detail from the response body.
+    instance = {'url': 'http://localhost:8080', 'username': 'admin', 'password': 'secret'}
+    check = VoltDBCheck('voltdb', {}, [instance])
+    response = MockHTTPResponse(status_code=400, json_data={'statusstring': 'Bad procedure'})
+
+    with pytest.raises(Exception, match='details: Bad procedure'):
+        check._raise_for_status_with_details(response)
+
+
+@pytest.mark.parametrize('password_hashed, password_field, absent_field', CREDENTIAL_CASES)
+def test_request_builds_query_params(password_hashed, password_field, absent_field):
+    # type: (bool, str, str) -> None
+    captured = {}
+
+    def fake_get(url, **options):
+        captured['params'] = options['params']
+        return mock.MagicMock()
+
+    client = Client(
+        url='http://localhost:8080',
+        http_get=fake_get,
+        username='admin',
+        password='secret',
+        password_hashed=password_hashed,
+    )
+    client.request('Hero.insert', parameters=[0, 'Bits'])
+
+    params = captured['params']
+    assert params['Procedure'] == 'Hero.insert'
+    assert params['User'] == 'admin'
+    assert params[password_field] == 'secret'
+    assert absent_field not in params
+
+
+@pytest.mark.parametrize(
+    'parameters, expected_value',
+    [
+        pytest.param([0, 'Bits'], '[0, "Bits"]', id='list-json-encoded'),
+        pytest.param('[MEMORY]', '[MEMORY]', id='str-passthrough'),
+        pytest.param(None, None, id='none-omitted'),
+        pytest.param([], None, id='empty-omitted'),
+    ],
+)
+def test_request_encodes_parameters(parameters, expected_value):
+    # type: (object, Optional[str]) -> None
+    captured = {}
+
+    def fake_get(url, **options):
+        captured['params'] = options['params']
+        return mock.MagicMock()
+
+    client = Client(url='http://localhost:8080', http_get=fake_get, username='admin', password='secret')
+    client.request('Hero.insert', parameters=parameters)
+
+    params = captured['params']
+    if expected_value is None:
+        assert 'Parameters' not in params
+    else:
+        assert params['Parameters'] == expected_value
+
+
+@pytest.mark.parametrize('password_hashed, password_field, absent_field', CREDENTIAL_CASES)
+def test_check_wires_credentials_into_query_params(password_hashed, password_field, absent_field):
+    # type: (bool, str, str) -> None
+    # Only the through-the-check path proves config.password_hashed selects the right field, with no per-call auth.
+    instance = {
+        'url': 'http://localhost:8080',
+        'username': 'admin',
+        'password': 'secret',
+        'password_hashed': password_hashed,
+    }
+
+    class FakeHTTPClient:
+        def __init__(self):
+            self.options = {'auth': ('admin', 'secret')}
+            self.captured = {}
+
+        def disable_auth(self):
+            self.options['auth'] = None
+
+        def get(self, url, **options):
+            self.captured = options
+            return mock.MagicMock()
+
+    fake = FakeHTTPClient()
+    with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
+        check = VoltDBCheck('voltdb', {}, [instance])
+        check._client.request('@SystemInformation', parameters=['OVERVIEW'])
+
+    assert fake.options['auth'] is None  # disable_auth() cleared the config Basic-auth tuple
+    assert 'auth' not in fake.captured  # and no per-call auth override is sent
+    params = fake.captured['params']
+    assert params['User'] == 'admin'
+    assert params[password_field] == 'secret'
+    assert absent_field not in params
 
 
 def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance_all):

@@ -14,8 +14,7 @@ from datadog_checks.argocd.resources_constants import (
     GENRESOURCES_API_UP_METRIC,
     REPOSITORY_INCLUDE,
 )
-from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import MockHTTPResponse
 
 from . import common
 
@@ -53,8 +52,8 @@ def _repository(repo: str, *, username: str = "", password: str = "", ssh_key: s
     return {"repo": repo, "username": username, "password": password, "sshPrivateKey": ssh_key, "type": "git"}
 
 
-def _items_response(items: list[dict], status_code: int = 200) -> MockResponse:
-    return MockResponse(json_data={"items": items}, status_code=status_code)
+def _items_response(items: list[dict], status_code: int = 200) -> MockHTTPResponse:
+    return MockHTTPResponse(json_data={"items": items}, status_code=status_code)
 
 
 def build_check(**overrides):
@@ -639,23 +638,23 @@ def test_collector_warns_when_ttl_shorter_than_longest_scrape_interval(caplog):
     assert any("shorter than the longest scrape interval" in rec.message for rec in caplog.records)
 
 
-def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved():
+def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved(mock_http):
     check = build_check(genresources_auth_token="tok")
-    with patch.object(RequestsWrapper, "get", return_value=MockResponse(json_data={"items": []})) as get:
-        check._resource_collector._fetch("/api/v1/applications")
+    mock_http.get.return_value = MockHTTPResponse(json_data={"items": []})
+    check._resource_collector._fetch("/api/v1/applications")
 
-    kwargs = get.call_args.kwargs
-    assert kwargs.get("extra_headers") == {"Authorization": "Bearer tok"}  # merged into the wrapper's headers
-    assert "headers" not in kwargs  # never pass `headers`; it would shadow the wrapper's configured auth
+    kwargs = mock_http.get.call_args.kwargs
+    assert kwargs.get("extra_headers") == {"Authorization": "Bearer tok"}  # merged into configured headers
+    assert "headers" not in kwargs  # never pass `headers`; it would shadow the HTTP client's configured auth
 
 
-def test_fetch_inherits_wrapper_auth_when_no_genresources_token():
+def test_fetch_inherits_http_client_auth_when_no_genresources_token(mock_http):
     check = build_check(genresources_auth_token=None)  # rely on the instance's HTTP auth (headers / auth_token)
-    with patch.object(RequestsWrapper, "get", return_value=MockResponse(json_data={"items": []})) as get:
-        check._resource_collector._fetch("/api/v1/applications")
+    mock_http.get.return_value = MockHTTPResponse(json_data={"items": []})
+    check._resource_collector._fetch("/api/v1/applications")
 
-    kwargs = get.call_args.kwargs
-    assert "headers" not in kwargs  # must not clobber the wrapper's configured headers
+    kwargs = mock_http.get.call_args.kwargs
+    assert "headers" not in kwargs  # must not clobber the HTTP client's configured headers
     assert (
         "extra_headers" not in kwargs
     )  # omit entirely -- even empty extra_headers would drop the inherited auth_token

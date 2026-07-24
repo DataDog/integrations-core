@@ -6,8 +6,9 @@ import copy
 from os import environ
 from urllib.parse import urljoin
 
-import requests
 from openstack import connection
+
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
 
 from .exceptions import (
     AuthenticationNeeded,
@@ -288,7 +289,7 @@ class SimpleApi(AbstractApi):
         try:
             resp = self.http.get(url, params=params)
             resp.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except HTTPStatusError as e:
             self.logger.debug("Error contacting openstack endpoint: %s", e)
             if resp.status_code == 401:
                 self.logger.info('Need to reauthenticate before next check')
@@ -371,7 +372,7 @@ class SimpleApi(AbstractApi):
                 try:
                     resp = self._make_request(url, params=query_params)
                     break
-                except requests.exceptions.HTTPError as e:
+                except HTTPStatusError as e:
                     # Only catch HTTPErrors to enable the retry mechanism.
                     # Other exceptions raised by _make_request (e.g. AuthenticationNeeded) should be caught downstream
                     self.logger.debug(
@@ -500,7 +501,7 @@ class Authenticator(object):
             logger.debug("url: %s || response: %s", auth_url, resp.json())
             return resp
 
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        except (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError):
             safe_identity = copy.deepcopy(identity)
             safe_identity['password']['user']['password'] = '********'
             msg = "Failed Keystone auth with identity:{identity} scope:{scope} @{url}".format(
@@ -520,7 +521,7 @@ class Authenticator(object):
             logger.debug("url: %s || response: %s", auth_url, jresp)
             projects = jresp.get('projects')
             return projects
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+        except (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError) as e:
             msg = "unable to retrieve project list from Keystone auth with identity: @{url}: {ex}".format(
                 url=auth_url, ex=e
             )

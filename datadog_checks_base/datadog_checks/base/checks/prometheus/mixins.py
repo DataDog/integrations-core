@@ -8,13 +8,13 @@ from collections import defaultdict
 from fnmatch import fnmatchcase
 from math import isinf, isnan
 
-import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import create_http_client
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
 from datadog_checks.base.utils.prometheus import metrics_pb2
 
 
@@ -464,7 +464,7 @@ class PrometheusScraperMixin(object):
             http_config['ssl_ignore_warning'] = True
             http_config['ssl_verify'] = False
 
-        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
+        http_handler = self._http_handlers[endpoint] = create_http_client(
             http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
 
@@ -545,15 +545,15 @@ class PrometheusScraperMixin(object):
         the PrometheusFormat class.
         Custom headers can be added to the default headers.
 
-        Returns a valid requests.Response, raise requests.HTTPError if the status code of the requests.Response
+        Returns a valid response, raise HTTPStatusError if the status code of the response
         isn't valid - see response.raise_for_status()
 
-        The caller needs to close the requests.Response
+        The caller needs to close the response
 
         :param endpoint: string url endpoint
         :param pFormat: the preferred format defined in PrometheusFormat
         :param headers: extra headers
-        :return: requests.Response
+        :return: the response object
         """
         if headers is None:
             headers = {}
@@ -573,10 +573,10 @@ class PrometheusScraperMixin(object):
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)
-        except requests.exceptions.SSLError:
+        except HTTPSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        except IOError:
+        except (IOError, HTTPRequestError):
             if self.health_service_check:
                 self._submit_service_check(
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"),
@@ -591,7 +591,7 @@ class PrometheusScraperMixin(object):
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"), AgentCheck.OK, tags=["endpoint:" + endpoint]
                 )
             return response
-        except requests.HTTPError:
+        except HTTPStatusError:
             response.close()
             if self.health_service_check:
                 self._submit_service_check(

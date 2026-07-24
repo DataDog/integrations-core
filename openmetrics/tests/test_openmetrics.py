@@ -33,12 +33,9 @@ instance_unavailable = {
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
 def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
-
     request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
-    scraper = OpenMetricsScraper(check, instance_new)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -63,19 +60,13 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     )
     aggregator.assert_all_metrics_covered()
 
-    assert check.http.options['headers']['Accept'] == '*/*'
-    assert scraper.http.options['headers']['Accept'] == 'text/plain'
 
-
-def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
-
+def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http, mock_response, openmetrics_payload, caplog):
     # We want to make sure that when `use_latest_spec` is enabled, we use the OpenMetrics parser
     # even when the response's `Content-Type` doesn't declare the appropriate media type.
-    mock_http_response(openmetrics_payload, normalize_content=False)
+    mock_http.get.return_value = mock_response(openmetrics_payload, normalize_content=False)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new_strict])
-    scraper = OpenMetricsScraper(check, instance_new_strict)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -95,15 +86,14 @@ def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_respons
     )
     aggregator.assert_all_metrics_covered()
 
-    assert check.http.options['headers']['Accept'] == '*/*'
     assert caplog.text == ''
-    assert scraper.http.options['headers']['Accept'] == (
+    assert mock_http.get.call_args.kwargs['extra_headers']['Accept'] == (
         'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
     )
 
 
-def test_openmetrics_empty_response(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
-    mock_http_response("")
+def test_openmetrics_empty_response(aggregator, dd_run_check, mock_http, mock_response, openmetrics_payload, caplog):
+    mock_http.get.return_value = mock_response("")
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
     dd_run_check(check)

@@ -5,8 +5,8 @@ import logging
 
 import pytest
 from packaging import version
-from requests import HTTPError
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -86,7 +86,7 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
     got_error_403 = False
     try:
         consul_check.check(None)
-    except HTTPError as e:
+    except HTTPStatusError as e:
         if e.response.status_code == 403:
             got_error_403 = True
 

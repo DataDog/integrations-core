@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
 from .common import get_gitlab_version, get_tags
 from .gitlab_v2 import GitlabCheckV2
@@ -63,8 +62,10 @@ class GitlabCheck(OpenMetricsBaseCheck):
         try:
             self.process(scraper_config)
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, self._tags)
-        except requests.exceptions.ConnectionError as e:
-            # Unable to connect to the metrics endpoint
+        except (HTTPConnectionError, HTTPTimeoutError) as e:
+            # Unable to connect to the metrics endpoint. HTTPTimeoutError is included because a connect
+            # timeout (requests' ConnectTimeout) now translates to HTTPTimeoutError, a sibling of
+            # HTTPConnectionError; without it a connect timeout would escape as a hard collection error.
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
@@ -152,7 +153,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             else:
                 r.raise_for_status()
 
-        except requests.exceptions.Timeout:
+        except HTTPTimeoutError:
             # If there's a timeout
             self.service_check(
                 service_check_name,

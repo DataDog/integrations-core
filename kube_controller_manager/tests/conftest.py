@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from unittest import mock
 
 import pytest
 
@@ -18,3 +19,10 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return deepcopy(INSTANCE)
+
+
+@pytest.fixture
+def mock_healthcheck_wrapper():
+    # _healthcheck_http_handler builds its own client via create_http_client, outside self.http
+    with mock.patch('datadog_checks.base.checks.base.AgentCheck.create_http_client'):
+        yield

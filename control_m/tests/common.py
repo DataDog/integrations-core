@@ -8,8 +8,8 @@ from typing import Any
 from unittest.mock import Mock
 
 from pytest import MonkeyPatch
-from requests.exceptions import HTTPError
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.control_m import ControlMCheck
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
@@ -26,7 +26,7 @@ def _respond(data: Any, status_code: int = 200) -> Mock:
         resp.raise_for_status = Mock()
     else:
         resp.text = f"Error {status_code}"
-        resp.raise_for_status = Mock(side_effect=HTTPError(f"{status_code} Server Error", response=resp))
+        resp.raise_for_status = Mock(side_effect=HTTPStatusError(f"{status_code} Server Error", response=resp))
     return resp
 
 

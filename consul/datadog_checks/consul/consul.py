@@ -11,11 +11,10 @@ from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 from urllib.parse import urljoin
 
-import requests
 from cachetools import TTLCache
-from requests import HTTPError
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError, HTTPTimeoutError
 from datadog_checks.base.utils.serialization import json
 
 from .common import (
@@ -168,7 +167,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
             resp.raise_for_status()
 
-        except requests.exceptions.Timeout as e:
+        except HTTPTimeoutError as e:
             msg = 'Consul request to {} timed out'.format(url)
             self.log.exception(msg)
             self.service_check(
@@ -723,7 +722,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
                 str(e),
             )
-        except HTTPError as e:
+        except HTTPStatusError as e:
             if e.response.status_code == 404:
                 self.log.warning(
                     "This Consul version (< 1.1.0) does not support the prometheus endpoint. "

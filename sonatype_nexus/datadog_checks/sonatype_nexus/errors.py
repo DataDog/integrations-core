@@ -4,13 +4,13 @@
 from collections.abc import Callable
 from typing import Any
 
-import requests
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPRequestError, HTTPTimeoutError
 
 
 class APIError(Exception):
     default_message = "An unknown API error occurred."
 
-    def __init__(self, message: str = None, response: requests.Response = None):
+    def __init__(self, message: str = None, response: Any = None):
         self.response = response
         super().__init__(message or self.default_message)
 
@@ -80,15 +80,15 @@ def handle_errors(method: Callable) -> Callable:
 
             return response
 
-        except requests.exceptions.Timeout as ex:
+        except HTTPTimeoutError as ex:
             self.log.error("TimeoutError: Timeout while requesting data from the API.")
             raise APIError("Timeout while requesting data from the API.") from ex
 
-        except requests.exceptions.ConnectionError as ex:
+        except HTTPConnectionError as ex:
             self.log.error("ConnectionError: Error while connecting to the API.")
             raise APIError("Error while connecting to the API.") from ex
 
-        except requests.exceptions.RequestException as ex:
+        except HTTPRequestError as ex:
             self.log.error("RequestError: General request error occurred.")
             raise APIError("General request error occurred.") from ex
 

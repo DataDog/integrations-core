@@ -107,6 +107,17 @@ def test_from_config():
         assert scope.service_catalog.nova_endpoint == 'http://10.0.2.15:8773/test_project_id'
 
 
+def test_keystone_auth_ssl_verify_default():
+    """The HTTP client verifies TLS by default and honors an explicit ``ssl_verify: false`` opt-out."""
+    base_init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
+
+    default_check = OpenStackCheck('openstack', base_init_config, instances=[{'name': 'test'}])
+    assert default_check.http.options['verify'] is True
+
+    opt_out_check = OpenStackCheck('openstack', {**base_init_config, 'ssl_verify': False}, instances=[{'name': 'test'}])
+    assert opt_out_check.http.options['verify'] is False
+
+
 def test_unscoped_from_config():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
 

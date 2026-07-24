@@ -5,8 +5,8 @@ from copy import deepcopy
 
 import mock
 import pytest
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPTimeoutError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
@@ -21,7 +21,6 @@ from .common import (
     EXT_AUTHZ_METRICS,
     EXT_PROC_METRICS,
     FLAVOR,
-    HOST,
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
@@ -138,35 +137,20 @@ def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
         pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
+def test_config(extra_config, expected_http_kwargs, check):
     instance = deepcopy(INSTANCES['main'])
     instance.update(extra_config)
     check = check(instance)
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 @pytest.mark.parametrize(
     'exception, log_call_parameters',
     [
         pytest.param(
-            requests.exceptions.Timeout(),
+            HTTPTimeoutError('timed out'),
             ('Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)),
             id="timeout",
         ),
@@ -176,7 +160,7 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
             id="index error",
         ),
         pytest.param(
-            requests.exceptions.RequestException('Req Exception'),
+            HTTPRequestError('Req Exception'),
             (
                 'Error collecting Envoy version with url=`%s`. Error: %s',
                 'http://localhost:8001/server_info',
@@ -186,18 +170,16 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
         ),
     ],
 )
-def test_metadata_with_exception(
-    datadog_agent, fixture_path, mock_http_response, check, exception, log_call_parameters
-):
+def test_metadata_with_exception(datadog_agent, check, exception, log_call_parameters, mock_http):
     instance = INSTANCES['main']
     check = check(instance)
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    with mock.patch('requests.Session.get', side_effect=exception):
-        check._collect_metadata()
-        datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with(*log_call_parameters)
+    mock_http.get.side_effect = exception
+    check._collect_metadata()
+    datadog_agent.assert_metadata_count(0)
+    check.log.warning.assert_called_with(*log_call_parameters)
 
 
 @pytest.mark.parametrize(

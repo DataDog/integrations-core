@@ -5,12 +5,12 @@ import copy
 from typing import Callable  # noqa: F401
 
 import pytest
-import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.azure_iot_edge.types import Instance  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -104,7 +104,7 @@ def test_prometheus_endpoint_down(aggregator, mock_instance, option, url, servic
 
     check = AzureIoTEdgeCheck('azure_iot_edge', {}, [instance])
 
-    with pytest.raises(requests.ConnectionError):
+    with pytest.raises(HTTPConnectionError):
         check.check(instance)
 
     aggregator.assert_service_check(service_check, AzureIoTEdgeCheck.CRITICAL)

@@ -8,8 +8,7 @@ from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
-from requests.exceptions import HTTPError
-
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.nutanix.resource_filters import should_collect_activity, should_collect_resource
 
@@ -132,7 +131,7 @@ class ActivityMonitor:
         """Run a collection function with standard error handling."""
         try:
             return collect_fn()
-        except HTTPError as e:
+        except HTTPStatusError as e:
             self.check.log.error(
                 "[%s] Failed to collect %ss: HTTP %s",
                 self._pc_label,
@@ -273,7 +272,7 @@ class ActivityMonitor:
             # which only exist on the post-resolution payload.
             try:
                 resolved = self._get_alert(ext_id)
-            except HTTPError:
+            except HTTPStatusError:
                 # Transient HTTP failure (already logged in _get_alert). Restore tracking
                 # so we retry on the next cycle rather than misclassifying as deleted.
                 self._open_alerts[ext_id] = cached
@@ -352,7 +351,7 @@ class ActivityMonitor:
             return cached
         try:
             alert = self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
-        except HTTPError as e:
+        except HTTPStatusError as e:
             if e.response is not None and e.response.status_code == 404:
                 self.check.log.debug("[%s] Alert %s not found (404).", self._pc_label, alert_ext_id)
                 return None
@@ -672,7 +671,7 @@ class ActivityMonitor:
             if entity_type == "monitoring:serviceability:alert":
                 try:
                     alert = self._get_alert(entity.get("extId", ""))
-                except HTTPError:
+                except HTTPStatusError:
                     alert = None
                 if alert:
                     title = alert.get("title", "")

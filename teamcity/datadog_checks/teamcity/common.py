@@ -6,7 +6,7 @@ import time
 from copy import deepcopy
 from urllib.parse import urlparse
 
-import requests
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 
 from .constants import BUILD_EVENT, DEPLOYMENT_EVENT, RESOURCE_URL_MAP, STATUS_MAP
 
@@ -121,7 +121,7 @@ def get_response(check, resource, **kwargs):
         else:
             check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
             return json_payload
-    except requests.exceptions.HTTPError:
+    except HTTPStatusError:
         if resp.status_code in (401, 403):
             check.log.error("Access denied. Enable guest authentication or check user permissions.")
         check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, resp.status_code)

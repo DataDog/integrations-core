@@ -4,15 +4,18 @@
 
 import os
 
-import mock
 import pytest
-import requests
 
 from datadog_checks.apache import Apache
+from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import AUTO_STATUS_URL, BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
+
+# Library-agnostic HTTP client shared by the e2e helpers and fixtures below.
+http_client = create_http_client({}, {})
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +36,7 @@ def dd_environment():
 
 def generate_metrics():
     for _ in range(0, 100):
-        requests.get(BASE_URL)
+        http_client.get(BASE_URL)
 
 
 def check_status_page_ready():
@@ -41,26 +44,26 @@ def check_status_page_ready():
     Some status info we need for metrics do not appear immediately.
     This check help waiting for the full status page.
     """
-    resp = requests.get(AUTO_STATUS_URL)
+    resp = http_client.get(AUTO_STATUS_URL)
     data = resp.content.decode('utf-8')
     assert 'ReqPerSec: ' in data
     assert 'CPULoad: ' in data
 
 
 @pytest.fixture
-def mock_hide_server_version():
-    req = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
+def mock_hide_server_version(mock_http):
+    def filter_server_version(url, *args, **kwargs):
+        r = http_client.get(url, **kwargs)
+        content = '\n'.join(line for line in r.text.splitlines() if 'ServerVersion' not in line)
+        return MockHTTPResponse(
+            content=content,
+            status_code=r.status_code,
+            headers=dict(r.headers),
+            url=r.url,
+        )
 
-        def mock_requests_get_headers(*args, **kwargs):
-            r = requests.get(*args, **kwargs)
-            old_iter = r.iter_lines
-            r.iter_lines = mock.MagicMock()
-            r.iter_lines.return_value = (l for l in old_iter(decode_unicode=True) if 'ServerVersion' not in l)
-            return r
-
-        req.get = mock_requests_get_headers
-        yield
+    mock_http.get.side_effect = filter_server_version
+    yield
 
 
 @pytest.fixture

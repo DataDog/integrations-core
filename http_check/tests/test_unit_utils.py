@@ -9,6 +9,7 @@ import pytest
 import socks
 
 from datadog_checks.dev import temp_dir
+from datadog_checks.http_check import HTTPCheck
 from datadog_checks.http_check.utils import _get_ca_certs_paths, get_ca_certs_path, parse_proxy_url
 
 
@@ -120,3 +121,32 @@ def test_parse_proxy_url():
         assert not parse_proxy_url("http://localhost:65536")
     except ValueError as e:
         assert e.args == ('Invalid port component for proxy http://localhost:65536, Port out of range 0-65535',)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'bypass, expect_proxy_set',
+    [
+        pytest.param(False, True, id='proxy applied when not bypassed'),
+        pytest.param(True, False, id='proxy skipped when url bypasses proxy'),
+    ],
+)
+def test_fetch_cert_honors_proxy_bypass(bypass, expect_proxy_set):
+    # _fetch_cert must route the cert socket through the configured proxy only when the URL is not
+    # covered by the client's no_proxy rules (self.http.should_bypass_proxy).
+    instance = {'name': 'cert', 'url': 'https://valid.mock:443'}
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+    check.http.options['proxies'] = {'https': 'http://proxy.example:3128'}
+
+    mock_sock = mock.MagicMock()
+    tls_context = mock.MagicMock()
+    tls_context.wrap_socket.return_value.getpeercert.return_value = b'cert'
+
+    with (
+        mock.patch('datadog_checks.http_check.http_check.socks.socksocket', return_value=mock_sock),
+        mock.patch.object(type(check.http), 'should_bypass_proxy', return_value=bypass),
+        mock.patch.object(check, 'get_tls_context', return_value=tls_context),
+    ):
+        check._fetch_cert(instance, 1, 'ca')
+
+    assert mock_sock.set_proxy.called is expect_proxy_set

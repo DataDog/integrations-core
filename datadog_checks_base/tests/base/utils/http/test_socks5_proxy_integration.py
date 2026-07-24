@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from requests.exceptions import ConnectTimeout, ProxyError
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.ci import running_on_ci, running_on_windows_ci
 
@@ -61,18 +61,18 @@ def test_no_proxy_domain_fail(socks5_proxy):
 
     # no_proxy not match: .google.com
     # ".y.com" matches "x.y.com" but not "y.com"
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://google.com', timeout=1)
 
     # no_proxy not match: example or example.com
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://notexample.com', timeout=1)
 
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://example.org', timeout=1)
 
     # no_proxy not match: 9
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://127.0.0.99', timeout=1)
 
 
@@ -117,24 +117,24 @@ def test_no_proxy_ip_fail(socks5_proxy):
     http = RequestsWrapper(instance, init_config)
 
     # no_proxy not match: 127.0.0.1
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://127.0.0.11', timeout=1)
 
     # no_proxy not match: 127.0.0.2/32
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://127.0.0.22', timeout=1)
 
     # no_proxy not match: IP outside 127.1.0.0/25 subnet - cidr bits format
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://127.1.0.150', timeout=1)
         http.get('http://127.1.0.200', timeout=1)
 
     # no_proxy not match: IP outside 127.1.1.0/255.255.255.128 subnet - net mask format
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://127.1.1.150', timeout=1)
         http.get('http://127.1.1.200', timeout=1)
 
     # no_proxy not match: IP outside 127.1.2.0/0.0.0.127 subnet - host mask format
-    with pytest.raises((ConnectTimeout, ProxyError)):
+    with pytest.raises((HTTPTimeoutError, HTTPConnectionError)):
         http.get('http://127.1.2.150', timeout=1)
         http.get('http://127.1.2.200', timeout=1)

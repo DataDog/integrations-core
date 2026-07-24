@@ -3,20 +3,25 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
 import socket
 import warnings
 from collections import ChainMap
+from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
+from typing import TYPE_CHECKING
 from urllib.parse import quote, urlparse, urlunparse
 
 import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
+from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
@@ -28,8 +33,22 @@ from datadog_checks.base.utils import _http_utils
 
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+
+# Re-export HTTP exceptions for single import location
+from .http_exceptions import (  # noqa: F401
+    HTTPConnectionError,
+    HTTPError,
+    HTTPInvalidURLError,
+    HTTPRequestError,
+    HTTPSSLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
+
+if TYPE_CHECKING:
+    from .http_protocol import HTTPClient, HTTPResponse  # noqa: F401
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -197,6 +216,51 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
+def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
+    """Translate a requests exception into the library-agnostic equivalent.
+
+    Order is significant. Several requests types subclass others, so the most
+    specific must be tested first.
+
+    ``response`` is supplied only by the ``raise_for_status`` seam, which passes the
+    agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
+    """
+    message = str(exc) or exc.__class__.__name__
+    request = getattr(exc, 'request', None)
+    if isinstance(
+        exc,
+        (
+            requests_exceptions.InvalidURL,
+            requests_exceptions.MissingSchema,
+            requests_exceptions.InvalidSchema,
+            requests_exceptions.URLRequired,
+        ),
+    ):
+        return HTTPInvalidURLError(message, request=request)
+    if isinstance(exc, requests_exceptions.SSLError):
+        return HTTPSSLError(message, request=request)
+    if isinstance(exc, requests_exceptions.Timeout):
+        return HTTPTimeoutError(message, request=request)
+    if isinstance(exc, requests_exceptions.ConnectionError):
+        return HTTPConnectionError(message, request=request)
+    if isinstance(exc, requests_exceptions.ContentDecodingError):
+        return HTTPRequestError(message, request=request)
+    if isinstance(exc, requests_exceptions.HTTPError):
+        return HTTPStatusError(message, request=request, response=response)
+    if isinstance(exc, requests_exceptions.RequestException):
+        return HTTPRequestError(message, request=request)
+    return HTTPError(message)
+
+
+@contextmanager
+def _translate_http_errors() -> Iterator[None]:
+    """Re-raise requests exceptions as their library-agnostic equivalents."""
+    try:
+        yield
+    except requests_exceptions.RequestException as exc:
+        raise _translate_requests_exception(exc) from exc
+
+
 class ResponseWrapper(ObjectProxy):
     def __init__(self, response, default_chunk_size):
         super(ResponseWrapper, self).__init__(response)
@@ -204,25 +268,79 @@ class ResponseWrapper(ObjectProxy):
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
 
+    def raise_for_status(self):
+        try:
+            self.__wrapped__.raise_for_status()
+        except requests_exceptions.HTTPError as exc:
+            raise _translate_requests_exception(exc, response=self) from exc
+
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+        with _translate_http_errors():
+            yield from self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+        with _translate_http_errors():
+            yield from self.__wrapped__.iter_lines(
+                chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
+            )
+
+    def __iter__(self):
+        # requests.Response.__iter__ delegates to the raw iter_content, so route direct iteration
+        # through the translating override instead of the wrapt-forwarded raw one.
+        return self.iter_content(128)
+
+    @property
+    def content(self):
+        with _translate_http_errors():
+            return self.__wrapped__.content
+
+    @property
+    def text(self):
+        with _translate_http_errors():
+            return self.__wrapped__.text
+
+    def json(self, **kwargs):
+        with _translate_http_errors():
+            try:
+                return self.__wrapped__.json(**kwargs)
+            except requests_exceptions.JSONDecodeError as exc:
+                raise json.JSONDecodeError(exc.msg, exc.doc, exc.pos) from exc
+
+    def get_peer_cert(self, binary_form=False):
+        raw = getattr(self.__wrapped__, 'raw', None)
+        connection = getattr(raw, 'connection', None)
+        sock = getattr(connection, 'sock', None)
+        # sock is None once the connection is released, and a bare (non-TLS) socket has no getpeercert,
+        # so a plain http:// request lands here. Either way there is no peer certificate to report.
+        getpeercert = getattr(sock, 'getpeercert', None)
+        if getpeercert is None:
+            return None
+        return getpeercert(binary_form=binary_form)
+
+    @property
+    def history(self):
+        # Wrap redirect responses so history items satisfy the protocol too, never leaking a raw backend object.
+        return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
 
     def __enter__(self):
         return self
 
 
+def suppress_default_auth(request):
+    """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
+    return request
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        '_trust_env',
         '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
@@ -414,6 +532,11 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
+        # Whether to trust environment configuration (proxies, auth, CA bundles).
+        # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
+        # value so the reported state matches it.
+        self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
+
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
@@ -433,6 +556,59 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    @property
+    def trust_env(self) -> bool:
+        """Whether the client trusts environment config (proxies, auth, CA bundles)."""
+        return self._trust_env
+
+    @trust_env.setter
+    def trust_env(self, value: bool) -> None:
+        self._trust_env = value
+        if self._session is not None:
+            self._session.trust_env = value
+
+    def close(self) -> None:
+        """Close any open connections. Idempotent; the client stays usable and lazily rebuilds a default
+        session on the next request. An injected session is not restored after being closed."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Look up a cookie by name on the persistent session, returning its value, or default if absent or ambiguous.
+
+        Only cookies retained on the persistent session are visible. Requests made without persistence
+        (the default unless persist_connections is set or persist=True is passed) use a throwaway session
+        whose cookies are discarded, so a cookie set by such a request is not found here.
+        """
+        try:
+            return self.session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
+
+    def should_bypass_proxy(self, url: str) -> bool:
+        """Whether url should bypass any configured proxy under the client's no_proxy rules."""
+        return should_bypass_proxy(url, self.no_proxy_uris or [])
+
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Look up a request header by name. Lookup is case-insensitive."""
+        for key, value in self.options['headers'].items():
+            if key.lower() == name.lower():
+                return value
+        return default
+
+    def set_header(self, name: str, value: str) -> None:
+        for key in self.options['headers']:
+            if key.lower() == name.lower():
+                self.options['headers'][key] = value
+                return
+        self.options['headers'][name] = value
+
+    def disable_auth(self) -> None:
+        """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
+        # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
+        self.options['auth'] = suppress_default_auth
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -505,22 +681,23 @@ class RequestsWrapper(object):
             return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
-        try:
-            response = request_method(url, **new_options)
-        except SSLError as e:
-            # fetch the intermediate certs
-            parsed_url = urlparse(url)
-            hostname = parsed_url.hostname
-            port = parsed_url.port
-            certs = self.fetch_intermediate_certs(hostname, port)
-            if not certs:
-                raise e
-            session = self.session if persist else self._create_session()
-            if parsed_url.scheme == "https":
-                self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
-            request_method = getattr(session, method)
-            response = request_method(url, **new_options)
-        return response
+        with _translate_http_errors():
+            try:
+                response = request_method(url, **new_options)
+            except SSLError as e:
+                # fetch the intermediate certs
+                parsed_url = urlparse(url)
+                hostname = parsed_url.hostname
+                port = parsed_url.port
+                certs = self.fetch_intermediate_certs(hostname, port)
+                if not certs:
+                    raise e
+                session = self.session if persist else self._create_session()
+                if parsed_url.scheme == "https":
+                    self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
+                request_method = getattr(session, method)
+                response = request_method(url, **new_options)
+            return response
 
     def fetch_intermediate_certs(self, hostname, port=443):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
@@ -608,6 +785,7 @@ class RequestsWrapper(object):
         # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
+        session.trust_env = self._trust_env
         return session
 
     @property
@@ -620,7 +798,8 @@ class RequestsWrapper(object):
 
     def handle_auth_token(self, **request):
         if self.auth_token_handler is not None:
-            self.auth_token_handler.poll(**request)
+            with _translate_http_errors():
+                self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
         try:
@@ -661,6 +840,13 @@ class RequestsWrapper(object):
         # Cache the adapter for reuse
         self._https_adapters[tls_config_key] = https_adapter
         session.mount('https://', https_adapter)
+
+
+def create_http_client(
+    instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
+) -> HTTPClient:
+    """Build the agnostic HTTP client from explicit config, confining the concrete backend to one place."""
+    return RequestsWrapper(instance or {}, init_config, remapper, logger)
 
 
 @contextmanager

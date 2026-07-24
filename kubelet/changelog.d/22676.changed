@@ -1,0 +1,1 @@
+Migrate the legacy cAdvisor probe off the ``requests`` library to the Agent's backend-agnostic HTTP interface. Configured proxy and ``extra_headers`` now apply to the probe.

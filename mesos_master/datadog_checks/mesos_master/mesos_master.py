@@ -9,10 +9,9 @@ Collects metrics from mesos master node, only the leader is sending metrics.
 
 from urllib.parse import urlparse
 
-import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 
 class MesosMaster(AgentCheck):
@@ -183,8 +182,7 @@ class MesosMaster(AgentCheck):
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at {} ".format(url)
-        except requests.exceptions.Timeout:
-            # If there's a timeout
+        except HTTPTimeoutError:
             msg = "{} seconds timeout when hitting {}".format(self.http.options['timeout'], url)
             status = AgentCheck.CRITICAL
         except Exception as e:

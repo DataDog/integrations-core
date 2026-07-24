@@ -8,9 +8,9 @@ from typing import Any
 
 import pytest
 from pytest import MonkeyPatch
-from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
@@ -45,7 +45,7 @@ def test_connect_server_error_emits_critical(
     check = _make_check(instance)
     _mock_api(check, monkeypatch, server_status=500)
 
-    with pytest.raises(HTTPError, match="500"):
+    with pytest.raises(HTTPStatusError, match="500"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
@@ -71,7 +71,7 @@ def test_connect_session_login_failure_emits_critical(
     check = _make_check(session_instance)
     _mock_api(check, monkeypatch, login_status=401)
 
-    with pytest.raises(HTTPError, match="401"):
+    with pytest.raises(HTTPStatusError, match="401"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_login", value=0, count=1)

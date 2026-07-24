@@ -4,7 +4,7 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM
 
@@ -115,4 +115,4 @@ def mock_http_responses(url, **_params):
         raise Exception("url `{url}` not registered".format(url=url))
 
     with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockResponse(content=f.read(), headers={"content-type": "application/json"})
+        return MockHTTPResponse(content=f.read(), headers={"content-type": "application/json"})

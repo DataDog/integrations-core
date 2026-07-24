@@ -64,6 +64,16 @@ class ApiSdk(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
+    def _build_keystone_session(self, auth):
+        # keystoneauth builds its own transport; mirror the TLS config and headers from our HTTP
+        # client via the backend-neutral protocol surface instead of handing it the requests session.
+        return session.Session(
+            auth=auth,
+            verify=self.http.options['verify'],
+            cert=self.http.options['cert'],
+            additional_headers=self.http.options['headers'],
+        )
+
     def authorize_user(self):
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
@@ -71,7 +81,7 @@ class ApiSdk(Api):
             password=self.cloud_config.get_auth_args().get('password'),
             user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
         )
-        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        keystone_session = self._build_keystone_session(v3_auth)
         self.connection = connection.Connection(
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )
@@ -88,7 +98,7 @@ class ApiSdk(Api):
             user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
             system_scope="all",
         )
-        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        keystone_session = self._build_keystone_session(v3_auth)
         self.connection = connection.Connection(
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )
@@ -106,7 +116,7 @@ class ApiSdk(Api):
             project_id=project_id,
             project_domain_name=self.cloud_config.get_auth_args().get('project_domain_name', DEFAULT_DOMAIN_ID),
         )
-        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        keystone_session = self._build_keystone_session(v3_auth)
         self.connection = connection.Connection(
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )

@@ -10,7 +10,6 @@ from math import isinf, isnan
 from os.path import isfile
 from re import compile
 
-import requests
 from prometheus_client.samples import Sample
 
 from datadog_checks.base.agent import datadog_agent
@@ -19,7 +18,8 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import create_http_client
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
 
 
 class OpenMetricsScraperMixin(object):
@@ -392,7 +392,7 @@ class OpenMetricsScraperMixin(object):
         if scraper_config['ssl_verify'] is False:
             scraper_config.setdefault('tls_ignore_warning', True)
 
-        http_handler = self._http_handlers[prometheus_url] = RequestsWrapper(
+        http_handler = self._http_handlers[prometheus_url] = create_http_client(
             scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
 
@@ -818,10 +818,10 @@ class OpenMetricsScraperMixin(object):
 
     def poll(self, scraper_config, headers=None):
         """
-        Returns a valid `requests.Response`, otherwise raise requests.HTTPError if the status code of the
+        Returns a valid response, otherwise raise HTTPStatusError if the status code of the
         response isn't valid - see `response.raise_for_status()`
 
-        The caller needs to close the requests.Response.
+        The caller needs to close the response.
 
         Custom headers can be added to the default headers.
         """
@@ -835,10 +835,10 @@ class OpenMetricsScraperMixin(object):
 
         try:
             response = self.send_request(endpoint, scraper_config, headers)
-        except requests.exceptions.SSLError:
+        except HTTPSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        except IOError:
+        except (IOError, HTTPRequestError):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
@@ -847,7 +847,7 @@ class OpenMetricsScraperMixin(object):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
             return response
-        except requests.HTTPError:
+        except HTTPStatusError:
             response.close()
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
