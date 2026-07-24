@@ -21,6 +21,7 @@ NAMESPACE = 'ddev-agent'
 CLUSTER_RESOURCE_NAME = 'ddev-agent'
 _DEFAULT_WAIT_TIMEOUT = 120
 _LOCAL_PACKAGES_METADATA = 'local_packages'
+_PREPARED_MARKER = '/home/.ddev-agent-prepared'
 
 
 class KubernetesAgent(AgentInterface):
@@ -338,6 +339,14 @@ class KubernetesAgent(AgentInterface):
         for command in commands:
             self._exec(self.platform.modules.shlex.split(command))
 
+    def _require_prepared(self) -> None:
+        process = self._exec(['test', '-f', _PREPARED_MARKER], check=False)
+        if process.returncode:
+            raise RuntimeError(
+                'The Kubernetes Agent container is no longer prepared and may have restarted. '
+                'Recreate the environment with `ddev env stop` followed by `ddev env start`.'
+            )
+
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         agent_build = _normalize_agent_image_name(
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
@@ -354,6 +363,7 @@ class KubernetesAgent(AgentInterface):
         self._sync_auto_conf()
         self._run_metadata_commands('post_install_commands')
         self._restart_agent_process()
+        self._exec(['touch', _PREPARED_MARKER])
 
     def stop(self) -> None:
         """Leave cleanup to the fixture that deletes the disposable cluster."""
@@ -382,18 +392,22 @@ class KubernetesAgent(AgentInterface):
 
     def restart(self) -> None:
         self._sync_local_packages()
+        self._require_prepared()
         self._sync_config()
         self._sync_auto_conf()
         self._restart_agent_process()
+        self._require_prepared()
 
     def sync_config(self) -> None:
         self._sync_config()
 
     def invoke(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
         self._sync_local_packages()
+        self._require_prepared()
         self._sync_config()
         self._sync_auto_conf()
         self._exec(['agent', *args], env_vars=env_vars)
+        self._require_prepared()
 
     def enter_shell(self) -> None:
         self._kubectl(

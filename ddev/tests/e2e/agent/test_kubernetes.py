@@ -14,6 +14,7 @@ TEST_KUBECONFIG = '/tmp/kubeconfig'
 TEST_NAMESPACE = 'ddev-agent'
 TEST_POD = 'ddev-agent'
 TEST_CONTAINER = 'agent'
+TEST_PREPARED_MARKER = '/home/.ddev-agent-prepared'
 
 
 @pytest.fixture(scope='module')
@@ -96,6 +97,14 @@ def find_kubectl_command(calls: list[list[str]], expected: list[str]) -> int:
 
     assert len(matches) == 1, f'Expected one kubectl command containing {expected!r}, found {len(matches)}'
     return matches[0]
+
+
+def exec_command_indices(calls: list[list[str]], expected: list[str]) -> list[int]:
+    return [
+        index
+        for index, command in enumerate(calls)
+        if '--' in command and command[command.index('--') + 1 :] == expected
+    ]
 
 
 def find_exec_command(calls: list[list[str]], expected: list[str], *, prefix: bool = False) -> int:
@@ -201,6 +210,19 @@ def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
     ]
 
 
+def test_rejects_container_that_lost_prepared_state(agent, mocker):
+    execute = mocker.patch.object(
+        agent,
+        '_exec',
+        return_value=subprocess.CompletedProcess([], 1),
+    )
+
+    with pytest.raises(RuntimeError, match='may have restarted'):
+        agent._require_prepared()
+
+    execute.assert_called_once_with(['test', '-f', TEST_PREPARED_MARKER], check=False)
+
+
 def test_start_uses_selected_image_rbac_config_and_local_packages(
     agent, metadata, config_file, auto_conf, temp_dir, run_command
 ):
@@ -295,7 +317,8 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
         f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
     )
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
-    assert start_index < post_install_index < restart_index
+    prepared_index = find_exec_command(calls, ['touch', TEST_PREPARED_MARKER])
+    assert start_index < post_install_index < restart_index < prepared_index
     assert metadata['kubernetes']['local_packages'] == {
         str(local_base): '[kube]',
         str(integration): '[deps]',
@@ -396,7 +419,9 @@ def test_invoke_synchronizes_config_and_environment(agent, config_file, auto_con
         calls,
         ['env', 'ALPHA=first', 'ZED=last', 'agent', 'check', 'velero', '--json'],
     )
-    assert config_copy_index < auto_conf_copy_index < invoke_index
+    prepared_indices = exec_command_indices(calls, ['test', '-f', TEST_PREPARED_MARKER])
+    assert len(prepared_indices) == 2
+    assert prepared_indices[0] < config_copy_index < auto_conf_copy_index < invoke_index < prepared_indices[1]
 
 
 def test_invoke_removes_pod_config_when_host_config_is_absent(agent, config_file, run_command):
@@ -435,7 +460,9 @@ def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
         f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
     )
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
-    assert package_copy_index < config_copy_index < restart_index
+    prepared_indices = exec_command_indices(calls, ['test', '-f', TEST_PREPARED_MARKER])
+    assert len(prepared_indices) == 2
+    assert package_copy_index < prepared_indices[0] < config_copy_index < restart_index < prepared_indices[1]
     assert not any('pip' in command for command in calls)
 
 
