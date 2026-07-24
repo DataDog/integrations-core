@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
 import logging
 import ssl
 
 import mock
 import pytest
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -15,6 +20,33 @@ from datadog_checks.dev.utils import ON_WINDOWS
 pytestmark = [pytest.mark.unit]
 
 TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
+
+
+def _generate_self_signed_der_cert(aia_uri=None):
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'test')])
+    builder = (
+        x509.CertificateBuilder()
+        .subject_name(name)
+        .issuer_name(name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.datetime.now(datetime.timezone.utc))
+        .not_valid_after(datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1))
+    )
+    if aia_uri:
+        builder = builder.add_extension(
+            x509.AuthorityInformationAccess(
+                [
+                    x509.AccessDescription(
+                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
+                    )
+                ]
+            ),
+            critical=False,
+        )
+    cert = builder.sign(key, hashes.SHA256())
+    return cert.public_bytes(serialization.Encoding.DER)
 
 
 class TestCert:
@@ -332,6 +364,46 @@ class TestAIAChasing:
                 all_calls = mock_load_verify_locations.mock_calls
                 # Assert that the last call contains the intermediate CA certs
                 assert all_calls[-1].kwargs["cadata"] == "\n".join(instance['tls_intermediate_ca_certs'])
+
+    def test_load_intermediate_certs_converts_der_to_pem(self):
+        """CA Issuers URIs serve DER-encoded certs; they must be converted to PEM before being stored."""
+        issuer_der = _generate_self_signed_der_cert()
+        leaf_der = _generate_self_signed_der_cert(aia_uri='http://ca.example.com/issuer.crt')
+
+        http = RequestsWrapper({}, {})
+        mock_response = mock.MagicMock(content=issuer_der)
+        with mock.patch('requests.Session.get', return_value=mock_response):
+            certs = []
+            http.load_intermediate_certs(leaf_der, certs)
+
+        assert len(certs) == 1
+        pem_cert = certs[0]
+        assert isinstance(pem_cert, str)
+        assert pem_cert.startswith('-----BEGIN CERTIFICATE-----')
+        roundtrip_der = x509.load_pem_x509_certificate(pem_cert.encode('ascii')).public_bytes(
+            serialization.Encoding.DER
+        )
+        assert roundtrip_der == issuer_der
+
+    def test_load_intermediate_certs_falls_back_to_pem(self):
+        """DER is the RFC 5280 convention for CA Issuers responses, but some issuers serve PEM directly."""
+        issuer_der = _generate_self_signed_der_cert()
+        issuer_pem = x509.load_der_x509_certificate(issuer_der).public_bytes(serialization.Encoding.PEM)
+        leaf_der = _generate_self_signed_der_cert(aia_uri='http://ca.example.com/issuer.crt')
+
+        http = RequestsWrapper({}, {})
+        mock_response = mock.MagicMock(content=issuer_pem)
+        with mock.patch('requests.Session.get', return_value=mock_response):
+            certs = []
+            http.load_intermediate_certs(leaf_der, certs)
+
+        assert len(certs) == 1
+        pem_cert = certs[0]
+        assert isinstance(pem_cert, str)
+        roundtrip_der = x509.load_pem_x509_certificate(pem_cert.encode('ascii')).public_bytes(
+            serialization.Encoding.DER
+        )
+        assert roundtrip_der == issuer_der
 
 
 class TestSSLContext:

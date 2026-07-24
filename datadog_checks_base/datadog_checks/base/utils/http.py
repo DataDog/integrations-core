@@ -11,6 +11,7 @@ import warnings
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
+from typing import TYPE_CHECKING
 from urllib.parse import quote, urlparse, urlunparse
 
 import lazy_loader
@@ -30,6 +31,9 @@ from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
+
+if TYPE_CHECKING:
+    from cryptography.x509 import Certificate
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -103,6 +107,14 @@ PROXY_SETTINGS_DISABLED = {
 KERBEROS_STRATEGIES = {}
 
 UDS_SCHEME = 'unix'
+
+
+def load_x509_certificate(data: bytes) -> Certificate:
+    """Load a certificate that may be DER (the RFC 5280 convention for AIA responses) or PEM encoded."""
+    try:
+        return _http_utils.cryptography_x509_load_certificate(data)
+    except ValueError:
+        return _http_utils.cryptography_x509_load_pem_certificate(data)
 
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
@@ -556,7 +568,7 @@ class RequestsWrapper(object):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
         try:
-            cert = _http_utils.cryptography_x509_load_certificate(der_cert)
+            cert = load_x509_certificate(der_cert)
         except Exception as e:
             self.logger.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
             return
@@ -589,7 +601,19 @@ class RequestsWrapper(object):
             else:
                 intermediate_cert = response.content
 
-            certs.append(intermediate_cert)
+            # CA Issuers URIs conventionally serve DER-encoded certificates, but downstream TLS
+            # config (`tls_intermediate_ca_certs`) expects PEM strings, so convert here.
+            try:
+                pem_cert = (
+                    load_x509_certificate(intermediate_cert)
+                    .public_bytes(_http_utils.cryptography_serialization.Encoding.PEM)
+                    .decode('ascii')
+                )
+            except Exception as e:
+                self.logger.error('Error while deserializing intermediate certificate from `%s`: %s', uri, e)
+                continue
+
+            certs.append(pem_cert)
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
 
