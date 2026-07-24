@@ -577,8 +577,8 @@ files:
           description: |
             Enable collection of asynchronous insert buffer snapshots from system.asynchronous_inserts.
             Requires `dbm: true`. Sends per-buffer records as DBM events (dbm_type="async_inserts_buffer")
-            including the query text, showing bytes pending, pending entry count, and oldest
-            entry age per buffer.
+            including the query text, showing bytes pending, pending entry count, and scheduled
+            flush deadline per buffer.
           value:
             type: boolean
             example: false
