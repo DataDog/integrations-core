@@ -1,0 +1,1 @@
+Add metrics from Cilium 1.17-1.19: node health connectivity, hive jobs, identity cache timers, clustermesh remote endpoints, IPsec, service implementation delay, BPF ratelimit, MTU/fragment drops, endpoint restoration, NAT, workqueue work duration, identity GC, and operator doublewrite/unmanaged-pods/clustermesh/MCS-API/CID-controller/k8s-workqueue metrics.
