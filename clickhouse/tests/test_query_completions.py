@@ -175,6 +175,53 @@ def test_create_batched_payload_query_details(check_with_dbm):
     assert query_details['metadata']['commands'] == ['SELECT']
 
 
+def test_create_batched_payload_carries_clickhouse_node(check_with_dbm):
+    """The per-node identity (from hostName()) is surfaced as clickhouse_node in query_details."""
+    query_completions = check_with_dbm.query_completions
+    query_completions._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM users',
+            'query_signature': 'abc123',
+            'query_duration_ms': 100.0,
+            'databases': 'default',
+            'user': 'default',
+            'clickhouse_node': 'ch-node-1',
+        }
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = query_completions._create_batched_payload(rows)
+
+    query_details = payload['clickhouse_query_completions'][0]['query_details']
+    assert query_details['clickhouse_node'] == 'ch-node-1'
+
+
+def test_create_batched_payload_clickhouse_node_defaults_empty(check_with_dbm):
+    """A row without a node identity emits an empty clickhouse_node rather than raising."""
+    query_completions = check_with_dbm.query_completions
+    query_completions._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT 1',
+            'query_signature': 'abc123',
+            'query_duration_ms': 100.0,
+            'databases': 'default',
+            'user': 'default',
+        }
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = query_completions._create_batched_payload(rows)
+
+    query_details = payload['clickhouse_query_completions'][0]['query_details']
+    assert query_details['clickhouse_node'] == ''
+
+
 def test_create_batched_payload_structure(check_with_dbm):
     """Test creation of batched query completion payload structure"""
     query_completions = check_with_dbm.query_completions

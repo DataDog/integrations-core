@@ -1,0 +1,1 @@
+Add ClickHouse node-level data across DBM checks: a `server_node` field on query metrics, node identity on query samples, completions, and errors (`@clickhouse.clickhouse_node`), and a `clickhouse_node` tag on parts/merges and view-refresh metrics.
