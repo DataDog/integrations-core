@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -190,7 +191,7 @@ def test_start_installs_pinned_helm_chart_and_prepares_selected_agent(
     assert values['datadog']['dogstatsd']['useSocketVolume'] is False
     assert values['datadog']['operator']['enabled'] is False
     assert values['clusterAgent']['enabled'] is False
-    assert helm_call.kwargs['env']['HELM_CACHE_HOME'].endswith('/helm/cache')
+    assert Path(helm_call.kwargs['env']['HELM_CACHE_HOME']).parts[-2:] == ('helm', 'cache')
 
     assert [
         *prefix,
