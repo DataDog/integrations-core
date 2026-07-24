@@ -7,7 +7,7 @@ repo_url: https://github.com/DataDog/integrations-core
 edit_uri: blob/master/docs/developer
 copyright: 'Copyright &copy; Datadog, Inc. 2020-present'
 
-docs_dir: docs/developer
+docs_dir: docs/developer-build
 site_dir: site
 theme:
   name: material
@@ -106,8 +106,6 @@ plugins:
   # Built-in
   - search:
   # Extra
-  - minify:
-      minify_html: true
   - git-revision-date-localized:
       type: date
       strict: false
@@ -121,11 +119,6 @@ plugins:
             show_root_heading: true
             show_source: true
             docstring_style: google
-  - pdf-export:
-      enabled_if_env: ENABLE_PDF_SITE_EXPORT
-
-hooks:
-  - docs/developer/.hooks/ddev_version.py
 
 markdown_extensions:
   # Built-in
@@ -139,8 +132,6 @@ markdown_extensions:
       permalink: true
   # Extra
   - mkdocs-click:
-  - mkpatcher:
-      location: docs/developer/.scripts
   - pymdownx.arithmatex:
   - pymdownx.betterem:
       smart_enable: all
