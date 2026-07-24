@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import shlex
 
 import pytest
 
@@ -12,6 +13,13 @@ KUMA_NAMESPACE = 'kuma-system'
 KUMA_SERVICE = 'kuma-control-plane'
 KUMA_STARTUP_TIMEOUT = 600
 KUMA_METRICS_ENDPOINT = f'http://{KUMA_SERVICE}.{KUMA_NAMESPACE}.svc.cluster.local:5680/metrics'
+KUMA_SOURCE_COMMAND = shlex.join(
+    [
+        '/opt/datadog-agent/embedded/bin/python3',
+        '-c',
+        "import datadog_checks.kuma; print('Resolved Kuma module source:', datadog_checks.kuma.__file__)",
+    ]
+)
 
 
 def setup_kuma():
@@ -58,6 +66,7 @@ def dd_environment(dd_save_state):
             'kubernetes': {
                 'kubeconfig': kubeconfig,
             },
+            'post_install_commands': [KUMA_SOURCE_COMMAND],
         }
 
         dd_save_state('kuma_instance', instance)
