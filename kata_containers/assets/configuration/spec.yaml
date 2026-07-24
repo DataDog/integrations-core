@@ -1,0 +1,45 @@
+name: Kata Containers
+files:
+- name: kata_containers.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: sandbox_storage_paths
+      description: |
+        List of directories where Kata Containers stores sandbox runtime state.
+        The check scans each directory for subdirectories containing a
+        shim-monitor.sock file and scrapes Prometheus metrics from each.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - /host/run/vc/sbs
+        - /host/run/kata
+    - name: rename_labels
+      description: |
+        Map of Prometheus label names to rename when building Datadog tags.
+        Applied to all metrics collected from shim sockets.
+      value:
+        type: object
+        example:
+          version: go_version
+    - name: exclude_labels
+      description: |
+        List of Prometheus label names to drop when building Datadog tags.
+      value:
+        type: array
+        items:
+          type: string
+        example: []
+    - name: tags
+      description: |
+        List of tags to attach to all metrics emitted by this check instance.
+      value:
+        type: array
+        items:
+          type: string
+        example: []
