@@ -1,0 +1,1 @@
+Add the `azure.resource_id` option to declare the Azure Resource Manager resource ID used to correlate Azure SQL resource logs in DBM.

@@ -173,6 +173,38 @@ def test_server_tag_(disable_generic_tags, expected_tags, pg_instance, integrati
 
 
 @pytest.mark.parametrize(
+    'resource_id',
+    [
+        pytest.param(
+            '/subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/example-resource-group'
+            '/providers/Microsoft.DBforPostgreSQL/flexibleServers/example-pg-server',
+            id='resource_id_set',
+        ),
+        pytest.param(None, id='resource_id_unset'),
+    ],
+)
+def test_azure_resource_id_emitted_as_tag(pg_instance, integration_check, resource_id):
+    instance = copy.deepcopy(pg_instance)
+    azure = {
+        'deployment_type': 'flexible_server',
+        'fully_qualified_domain_name': 'example-pg-server.postgres.database.azure.com',
+    }
+    if resource_id is not None:
+        azure['resource_id'] = resource_id
+    instance['azure'] = azure
+
+    check = integration_check(instance)
+    tags = check.tag_manager.get_tags()
+
+    if resource_id is not None:
+        # Emitted verbatim (canonical case) as a regular tag so it survives to the
+        # database_instance metadata for Azure log correlation.
+        assert 'azure_resource_id:{}'.format(resource_id) in tags
+    else:
+        assert not any(tag.startswith('azure_resource_id:') for tag in tags)
+
+
+@pytest.mark.parametrize(
     'disable_generic_tags, expected_hostname', [(True, 'resolved.hostname'), (False, 'resolved.hostname')]
 )
 def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance, integration_check):

@@ -1321,6 +1321,19 @@ files:
             type: string
             example: my-postgres-database.database.windows.net
           fleet_configurable: false
+        - name: resource_id
+          description: |
+            The full Azure Resource Manager (ARM) resource ID of this PostgreSQL server, for example
+            /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.DBforPostgreSQL/flexibleServers/<server>.
+
+            Set this when the automatic mapping from the fully qualified domain name to the Azure
+            resource cannot be made (for example, proxy connections, a custom `reported_hostname`, or
+            when the Azure resource is not crawled), so that DBM can correlate Azure resource logs to
+            this database instance.
+          value:
+            type: string
+            example: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/my-server
+          fleet_configurable: false
         - name: managed_authentication
           description: |
             Configuration section used for Azure AD Authentication.

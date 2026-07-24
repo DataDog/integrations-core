@@ -46,6 +46,7 @@ class Azure(BaseModel):
     aggregate_sql_databases: Optional[bool] = None
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+    resource_id: Optional[str] = None
 
 
 class CollectDeadlocks(BaseModel):

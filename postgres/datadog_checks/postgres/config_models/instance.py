@@ -85,6 +85,7 @@ class Azure(BaseModel):
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
     managed_authentication: Optional[ManagedAuthentication1] = None
+    resource_id: Optional[str] = None
 
 
 class CollectColumnStatistics(BaseModel):
