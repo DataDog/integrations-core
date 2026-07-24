@@ -9,14 +9,8 @@ import pytest
 from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 
 from .common import HERE, LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
 
 
 def setup_linkerd_cluster():
@@ -32,22 +26,42 @@ def setup_linkerd_cluster():
     run_command(['cat', '/tmp/kubeconfig.yaml'], check=True, shell=True)
 
 
+def get_linkerd_container_ip(compose_file: str) -> str:
+    result = run_command(['docker', 'compose', '-f', compose_file, 'ps', '-q', 'linkerd'], capture='out', check=True)
+    container_id = result.stdout.strip()
+    docker_network_template = (
+        '{{range $name, $network := .NetworkSettings.Networks}}'
+        '{{if eq $name "kind"}}{{$network.IPAddress}}{{end}}'
+        '{{end}}'
+    )
+    result = run_command(
+        [
+            'docker',
+            'inspect',
+            '-f',
+            docker_network_template,
+            container_id,
+        ],
+        capture='out',
+        check=True,
+    )
+    return result.stdout.strip()
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_linkerd_cluster]) as kubeconfig:
-        compose_file = os.path.join(HERE, "compose", "docker-compose.yaml")
+    kind_config = os.path.join(HERE, 'kind', 'kind-linkerd.yaml')
+    with kind_run(conditions=[setup_linkerd_cluster], kind_config=kind_config):
+        compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
         with docker_run(
             compose_file=compose_file,
+            build=True,
             conditions=[CheckDockerLogs(compose_file, 'LINKERD DEPLOY COMPLETE', wait=5, attempts=120)],
             attempts=2,
         ):
-            with ExitStack() as stack:
-                ip, port = stack.enter_context(
-                    port_forward(kubeconfig, 'linkerd', 4191, 'deployment', 'linkerd-controller')
-                )
-
+            ip = get_linkerd_container_ip(compose_file)
             instance = {
-                'prometheus_url': 'http://{ip}:{port}/metrics'.format(ip=ip, port=port),
+                'prometheus_url': 'http://{}:4191/metrics'.format(ip),
                 'metrics': [LINKERD_FIXTURE_METRICS],
                 'type_overrides': LINKERD_FIXTURE_TYPES,
             }
