@@ -628,6 +628,22 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
         buffer_event = self._create_buffer_event(buffer_snapshot)
         self._check.database_monitoring_query_activity(json.dumps(buffer_event, default=default_json_event_encoding))
+        self._record_buffer_counts(buffer_snapshot)
+
+    def _record_buffer_counts(self, buffer_snapshot: list[dict]) -> None:
+        """Track the size of the returned buffer snapshot data."""
+        self._check.count(
+            "dd.clickhouse.async_inserts_buffer.buffers_submitted.count",
+            len(buffer_snapshot),
+            tags=self.tags + self._get_debug_tags(),
+            raw=True,
+        )
+        self._check.count(
+            "dd.clickhouse.async_inserts_buffer.bytes_submitted.count",
+            sum(row.get('total_bytes', 0) for row in buffer_snapshot),
+            tags=self.tags + self._get_debug_tags(),
+            raw=True,
+        )
 
     def run_job(self):
         """

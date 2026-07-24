@@ -577,3 +577,35 @@ def test_emit_buffer_events_empty_snapshot(check_with_dbm):
         samples._emit_buffer_events([])
 
     mock_submit.assert_not_called()
+
+
+def test_record_buffer_counts(check_with_dbm):
+    """Test that a successful buffer snapshot emission reports submitted buffer count and byte size metrics"""
+    samples = check_with_dbm.statement_samples
+    samples.tags = ['test:clickhouse']
+    samples._tags_no_db = ['server:localhost']
+
+    buffer_snapshot = [
+        {'database': 'default', 'table': 'events', 'total_bytes': 100},
+        {'database': 'default', 'table': 'events', 'total_bytes': 250},
+    ]
+
+    with (
+        mock.patch.object(samples, '_create_buffer_event', return_value={'dbm_type': DBM_TYPE}),
+        mock.patch.object(check_with_dbm, 'database_monitoring_query_activity'),
+        mock.patch.object(check_with_dbm, 'count') as mock_count,
+    ):
+        samples._emit_buffer_events(buffer_snapshot)
+
+    mock_count.assert_any_call(
+        "dd.clickhouse.async_inserts_buffer.buffers_submitted.count",
+        2,
+        tags=['test:clickhouse', 'server:localhost'],
+        raw=True,
+    )
+    mock_count.assert_any_call(
+        "dd.clickhouse.async_inserts_buffer.bytes_submitted.count",
+        350,
+        tags=['test:clickhouse', 'server:localhost'],
+        raw=True,
+    )
