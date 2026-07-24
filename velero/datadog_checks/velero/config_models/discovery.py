@@ -12,8 +12,9 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Any
 
-from datadog_checks.base.utils.discovery import Service, candidate_ports_by_name
+from datadog_checks.base.utils.discovery import Service
 from datadog_checks.velero.config_models import discovery_overrides
+from datadog_checks.velero.config_models.discovery_strategies import from_named_ports
 from datadog_checks.velero.config_models.instance import InstanceConfig
 from datadog_checks.velero.config_models.shared import SharedConfig
 
@@ -22,9 +23,8 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
     shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
         by_alias=True, mode='json', exclude_none=True
     )
-    # discovery[0]: from_named_ports
-    for port in candidate_ports_by_name(service, ['http-monitoring', 'metrics']):
-        ctx = {'port': port}
+    # discovery[0]: local:from_named_ports
+    for ctx in from_named_ports(service, port_names=['http-monitoring', 'metrics']):
         instance_data = {
             'openmetrics_endpoint': 'http://{service.host}:{port.number}/metrics'.format(service=service, **ctx),
         }
