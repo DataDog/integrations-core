@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import re
 import time
 from typing import TYPE_CHECKING, Any, cast
 
@@ -22,6 +21,7 @@ NAMESPACE = 'ddev-agent'
 CLUSTER_RESOURCE_NAME = 'ddev-agent'
 _DEFAULT_WAIT_TIMEOUT = 120
 _LOCAL_PACKAGES_METADATA = 'local_packages'
+_PREPARED_MARKER = '/home/.ddev-agent-prepared'
 
 
 class KubernetesAgent(AgentInterface):
@@ -300,30 +300,25 @@ class KubernetesAgent(AgentInterface):
         self._copy_file(auto_conf, f'{self._config_dir}/auto_conf.yaml')
 
     def _remember_local_packages(self, local_packages: dict[Path, str]) -> None:
-        self._kubernetes_metadata[_LOCAL_PACKAGES_METADATA] = [
-            {'path': str(local_package), 'name': local_package.name, 'features': features}
-            for local_package, features in local_packages.items()
-        ]
+        self._kubernetes_metadata[_LOCAL_PACKAGES_METADATA] = {
+            str(local_package): features for local_package, features in local_packages.items()
+        }
 
-    def _local_package_specs(self) -> list[dict[str, str]]:
-        specs = self._kubernetes_metadata.get(_LOCAL_PACKAGES_METADATA, [])
-        if not isinstance(specs, list):
-            raise ValueError('Kubernetes Agent `local_packages` must be a list')
+    def _local_packages(self) -> dict[Path, str]:
+        from ddev.utils.fs import Path
 
-        for spec in specs:
-            if not isinstance(spec, dict) or not all(
-                isinstance(spec.get(key), str) for key in ('path', 'name', 'features')
-            ):
-                raise ValueError('Kubernetes Agent local package entries must define path, name, and features strings')
-            if not re.fullmatch(r'[A-Za-z0-9_.-]+', spec['name']) or spec['name'] in {'.', '..'}:
-                raise ValueError(f'Invalid Kubernetes Agent local package name: {spec["name"]!r}')
-        return specs
+        local_packages = cast(dict[str, str], self._kubernetes_metadata.get(_LOCAL_PACKAGES_METADATA, {}))
+        return {Path(path): features for path, features in local_packages.items()}
 
     def _sync_local_packages(self, *, install: bool = False) -> None:
-        for spec in self._local_package_specs():
-            destination = f'/home/{spec["name"]}'
+        for local_package, features in self._local_packages().items():
+            name = local_package.name
+            if not name or name in {'.', '..'}:
+                raise ValueError(f'Invalid Kubernetes Agent local package path: {local_package}')
+
+            destination = f'/home/{name}'
             self._exec(['rm', '-rf', destination])
-            self._copy_file(spec['path'], destination)
+            self._copy_file(str(local_package), destination)
             if install:
                 self._exec(
                     [
@@ -333,7 +328,7 @@ class KubernetesAgent(AgentInterface):
                         'install',
                         '--disable-pip-version-check',
                         '-e',
-                        f'{destination}{spec["features"]}',
+                        f'{destination}{features}',
                     ]
                 )
 
@@ -343,6 +338,14 @@ class KubernetesAgent(AgentInterface):
             raise ValueError(f'Kubernetes Agent `{key}` must be a list of commands')
         for command in commands:
             self._exec(self.platform.modules.shlex.split(command))
+
+    def _require_prepared(self) -> None:
+        process = self._exec(['test', '-f', _PREPARED_MARKER], check=False)
+        if process.returncode:
+            raise RuntimeError(
+                'The Kubernetes Agent container is no longer prepared and may have restarted. '
+                'Recreate the environment with `ddev env stop` followed by `ddev env start`.'
+            )
 
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         agent_build = _normalize_agent_image_name(
@@ -360,11 +363,15 @@ class KubernetesAgent(AgentInterface):
         self._sync_auto_conf()
         self._run_metadata_commands('post_install_commands')
         self._restart_agent_process()
+        self._exec(['touch', _PREPARED_MARKER])
 
     def stop(self) -> None:
         """Leave cleanup to the fixture that deletes the disposable cluster."""
 
     def _restart_agent_process(self) -> None:
+        # Pod readiness does not guarantee that s6 has started the Agent process.
+        self._wait_for_agent()
+
         # The Agent image's s6 finish handler normally shuts down the whole
         # service tree when the main Agent exits. Remove it before killing the
         # process so s6 starts a fresh Agent in the same container, preserving
@@ -385,18 +392,22 @@ class KubernetesAgent(AgentInterface):
 
     def restart(self) -> None:
         self._sync_local_packages()
+        self._require_prepared()
         self._sync_config()
         self._sync_auto_conf()
         self._restart_agent_process()
+        self._require_prepared()
 
     def sync_config(self) -> None:
         self._sync_config()
 
     def invoke(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
         self._sync_local_packages()
+        self._require_prepared()
         self._sync_config()
         self._sync_auto_conf()
         self._exec(['agent', *args], env_vars=env_vars)
+        self._require_prepared()
 
     def enter_shell(self) -> None:
         self._kubectl(

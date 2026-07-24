@@ -14,6 +14,7 @@ TEST_KUBECONFIG = '/tmp/kubeconfig'
 TEST_NAMESPACE = 'ddev-agent'
 TEST_POD = 'ddev-agent'
 TEST_CONTAINER = 'agent'
+TEST_PREPARED_MARKER = '/home/.ddev-agent-prepared'
 
 
 @pytest.fixture(scope='module')
@@ -77,6 +78,33 @@ def command_calls(run_command):
 
 def option_value(command: list[str], option: str) -> str:
     return command[command.index(option) + 1]
+
+
+def find_kubectl_command(calls: list[list[str]], expected: list[str]) -> int:
+    matches = []
+    for index, command in enumerate(calls):
+        kubectl_args = command[: command.index('--')] if '--' in command else command
+        contains_expected = any(
+            kubectl_args[start : start + len(expected)] == expected
+            for start in range(len(kubectl_args) - len(expected) + 1)
+        )
+        if not contains_expected:
+            continue
+
+        assert command[0] == 'kubectl'
+        assert option_value(kubectl_args, '--kubeconfig') == TEST_KUBECONFIG
+        matches.append(index)
+
+    assert len(matches) == 1, f'Expected one kubectl command containing {expected!r}, found {len(matches)}'
+    return matches[0]
+
+
+def exec_command_indices(calls: list[list[str]], expected: list[str]) -> list[int]:
+    return [
+        index
+        for index, command in enumerate(calls)
+        if '--' in command and command[command.index('--') + 1 :] == expected
+    ]
 
 
 def find_exec_command(calls: list[list[str]], expected: list[str], *, prefix: bool = False) -> int:
@@ -166,8 +194,7 @@ def test_copy_file_builds_scoped_command(agent, config_file, run_command):
     )
 
 
-def test_restart_command_preserves_s6_and_timeout_contract(agent, metadata, mocker):
-    metadata['kubernetes']['wait_timeout'] = 17
+def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
     operations = mocker.Mock()
     execute = mocker.patch.object(agent, '_exec')
     wait_for_agent = mocker.patch.object(agent, '_wait_for_agent')
@@ -176,14 +203,24 @@ def test_restart_command_preserves_s6_and_timeout_contract(agent, metadata, mock
 
     agent._restart_agent_process()
 
-    operations.assert_has_calls([mocker.call.execute(mocker.ANY), mocker.call.wait_for_agent()])
-    command = execute.call_args.args[0]
-    assert command[:2] == ['sh', '-c']
-    script = command[2]
-    assert 'pidof agent' in script
-    assert 'rm -f /var/run/s6/services/agent/finish' in script
-    assert 'kill "$old_pid"' in script
-    assert '[ "$elapsed" -ge 17 ]' in script
+    assert operations.mock_calls == [
+        mocker.call.wait_for_agent(),
+        mocker.call.execute(mocker.ANY),
+        mocker.call.wait_for_agent(),
+    ]
+
+
+def test_rejects_container_that_lost_prepared_state(agent, mocker):
+    execute = mocker.patch.object(
+        agent,
+        '_exec',
+        return_value=subprocess.CompletedProcess([], 1),
+    )
+
+    with pytest.raises(RuntimeError, match='may have restarted'):
+        agent._require_prepared()
+
+    execute.assert_called_once_with(['test', '-f', TEST_PREPARED_MARKER], check=False)
 
 
 def test_start_uses_selected_image_rbac_config_and_local_packages(
@@ -204,13 +241,12 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
 
     calls = command_calls(run_command)
     prefix = ['kubectl', '--kubeconfig', TEST_KUBECONFIG]
-    assert calls[:2] == [
-        [*prefix, 'config', 'current-context'],
-        [*prefix, 'get', 'nodes', '-o', 'json'],
-    ]
-
+    context_index = find_kubectl_command(calls, ['config', 'current-context'])
+    topology_index = find_kubectl_command(calls, ['get', 'nodes', '-o', 'json'])
     create_calls = [call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-']]
     assert len(create_calls) == 1
+    create_index = run_command.call_args_list.index(create_calls[0])
+    assert context_index < topology_index < create_index
     manifest = json.loads(create_calls[0].kwargs['input'])
     resources = {item['kind']: item for item in manifest['items']}
     assert resources['Namespace']['metadata']['name'] == 'ddev-agent'
@@ -281,11 +317,12 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
         f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
     )
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
-    assert start_index < post_install_index < restart_index
-    assert metadata['kubernetes']['local_packages'] == [
-        {'path': str(local_base), 'name': 'datadog_checks_base', 'features': '[kube]'},
-        {'path': str(integration), 'name': 'velero', 'features': '[deps]'},
-    ]
+    prepared_index = find_exec_command(calls, ['touch', TEST_PREPARED_MARKER])
+    assert start_index < post_install_index < restart_index < prepared_index
+    assert metadata['kubernetes']['local_packages'] == {
+        str(local_base): '[kube]',
+        str(integration): '[deps]',
+    }
     local_base_copy = run_command.call_args_list[local_base_copy_index]
     assert local_base_copy.kwargs['cwd'] == local_base.resolve().parent
 
@@ -330,18 +367,14 @@ def test_rejects_multi_node_clusters(agent, app, mocker):
     with pytest.raises(NotImplementedError, match='exactly one schedulable node'):
         agent.start(agent_build='', local_packages={}, env_vars={})
 
-    assert run_command.call_args_list == [
-        mocker.call(
-            ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'config', 'current-context'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        ),
-        mocker.call(
-            ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'get', 'nodes', '-o', 'json'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        ),
-    ]
+    calls = command_calls(run_command)
+    context_index = find_kubectl_command(calls, ['config', 'current-context'])
+    topology_index = find_kubectl_command(calls, ['get', 'nodes', '-o', 'json'])
+    assert context_index < topology_index
+    assert not any('create' in command for command in calls)
+    for index in (context_index, topology_index):
+        assert run_command.call_args_list[index].kwargs['stdout'] is subprocess.PIPE
+        assert run_command.call_args_list[index].kwargs['stderr'] is subprocess.STDOUT
 
 
 def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
@@ -386,7 +419,9 @@ def test_invoke_synchronizes_config_and_environment(agent, config_file, auto_con
         calls,
         ['env', 'ALPHA=first', 'ZED=last', 'agent', 'check', 'velero', '--json'],
     )
-    assert config_copy_index < auto_conf_copy_index < invoke_index
+    prepared_indices = exec_command_indices(calls, ['test', '-f', TEST_PREPARED_MARKER])
+    assert len(prepared_indices) == 2
+    assert prepared_indices[0] < config_copy_index < auto_conf_copy_index < invoke_index < prepared_indices[1]
 
 
 def test_invoke_removes_pod_config_when_host_config_is_absent(agent, config_file, run_command):
@@ -409,9 +444,7 @@ def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
 ):
     local_package = temp_dir / 'velero-source'
     local_package.ensure_dir_exists()
-    metadata['kubernetes']['local_packages'] = [
-        {'path': str(local_package), 'name': 'velero-source', 'features': '[deps]'}
-    ]
+    metadata['kubernetes']['local_packages'] = {str(local_package): '[deps]'}
 
     agent.restart()
 
@@ -427,8 +460,19 @@ def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
         f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/conf.yaml',
     )
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
-    assert package_copy_index < config_copy_index < restart_index
+    prepared_indices = exec_command_indices(calls, ['test', '-f', TEST_PREPARED_MARKER])
+    assert len(prepared_indices) == 2
+    assert package_copy_index < prepared_indices[0] < config_copy_index < restart_index < prepared_indices[1]
     assert not any('pip' in command for command in calls)
+
+
+def test_restart_rejects_unsafe_local_package_destination(agent, metadata, run_command):
+    metadata['kubernetes']['local_packages'] = {'..': '[deps]'}
+
+    with pytest.raises(ValueError, match='local package path'):
+        agent.restart()
+
+    run_command.assert_not_called()
 
 
 def test_shell_and_logs_use_backend_commands(agent, run_command):

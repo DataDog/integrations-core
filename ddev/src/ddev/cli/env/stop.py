@@ -68,11 +68,9 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
                 try:
                     agent.stop()
                 finally:
+                    env_data.remove()
+
                     with integration.path.as_cwd(env_vars=env_vars), runner.stop() as command:
                         process = app.platform.run_command(command)
                         if process.returncode:
                             app.abort(code=process.returncode)
-
-                # Keep environment state when either cleanup stage fails so a
-                # later `ddev env stop` can retry the fixture teardown.
-                env_data.remove()

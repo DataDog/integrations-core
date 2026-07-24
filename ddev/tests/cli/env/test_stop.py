@@ -48,7 +48,7 @@ def test_basic(ddev, helpers, data_dir, mocker):
     stop.assert_called_once()
 
 
-def test_failed_agent_cleanup_preserves_environment_state(ddev, data_dir, mocker):
+def test_failed_agent_cleanup_removes_environment_state(ddev, data_dir, mocker):
     teardown = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
     stop = mocker.patch('ddev.e2e.agent.docker.DockerAgent.stop', side_effect=RuntimeError('cleanup failed'))
 
@@ -61,12 +61,12 @@ def test_failed_agent_cleanup_preserves_environment_state(ddev, data_dir, mocker
     with pytest.raises(RuntimeError, match='cleanup failed'):
         ddev('env', 'stop', integration, environment)
 
-    assert env_data.read_metadata() == metadata
+    assert not env_data.exists()
     stop.assert_called_once_with()
     teardown.assert_called_once()
 
 
-def test_failed_kubernetes_fixture_teardown_preserves_environment_state(ddev, data_dir, mocker):
+def test_failed_kubernetes_fixture_teardown_removes_environment_state(ddev, data_dir, mocker):
     teardown = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=1))
     stop = mocker.patch('ddev.e2e.agent.kubernetes.KubernetesAgent.stop')
 
@@ -79,7 +79,7 @@ def test_failed_kubernetes_fixture_teardown_preserves_environment_state(ddev, da
     result = ddev('env', 'stop', integration, environment)
 
     assert result.exit_code == 1, result.output
-    assert env_data.read_metadata() == metadata
+    assert not env_data.exists()
     stop.assert_called_once_with()
     teardown.assert_called_once()
 
