@@ -193,11 +193,11 @@ files:
            - Microsoft-Windows-Ntfs
            - Service Control Manager
           type:
-           - Error
-           - Warning
-           - Information
-           - Success Audit
-           - Failure Audit
+           - error
+           - warning
+           - information
+           - success audit
+           - failure audit
           id:
            - 9000
       fleet_configurable: true
