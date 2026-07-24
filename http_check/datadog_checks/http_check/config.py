@@ -31,6 +31,7 @@ Config = namedtuple(
         'check_hostname',
         'stream',
         'use_cert_from_response',
+        'disable_status_code_tag',
     ],
 )
 
@@ -72,6 +73,7 @@ def from_instance(instance, default_ca_certs=None):
     use_cert_from_response = is_affirmative(instance.get('use_cert_from_response', False))
     if use_cert_from_response:
         stream = True
+    disable_status_code_tag = is_affirmative(instance.get('disable_status_code_tag', False))
 
     return Config(
         url,
@@ -91,4 +93,5 @@ def from_instance(instance, default_ca_certs=None):
         check_hostname,
         stream,
         use_cert_from_response,
+        disable_status_code_tag,
     )

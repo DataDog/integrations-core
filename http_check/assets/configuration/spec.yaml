@@ -109,6 +109,19 @@ files:
       value:
         type: boolean
         example: true
+    - name: disable_status_code_tag
+      description: |
+        By default, the check tags `network.http.can_connect`, `network.http.cant_connect`, and
+        `network.http.response_time` with the HTTP status code of the response (`http_status_code`).
+        This creates a separate metric context per status code, which can change the behavior of
+        existing monitors that group by tags other than `http_status_code` (since each status code
+        context is aggregated as its own series rather than as individual data points).
+
+        Set this option to true to restore the pre-12.7.0 behavior and omit the `http_status_code` tag.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
     - name: check_certificate_expiration
       description: |
         The check_certificate_expiration will instruct the check

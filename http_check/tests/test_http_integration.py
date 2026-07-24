@@ -15,6 +15,7 @@ from datadog_checks.http_check import HTTPCheck
 from .common import (
     CONFIG_CUSTOM_NAME,
     CONFIG_DATA_METHOD,
+    CONFIG_DISABLE_STATUS_CODE_TAG,
     CONFIG_DONT_CHECK_EXP,
     CONFIG_EXPIRED_SSL,
     CONFIG_HTTP_ALLOW_REDIRECTS,
@@ -441,9 +442,19 @@ def test_data_methods(aggregator, http_check):
         )
         aggregator.assert_metric('network.http.response_time', tags=url_tag + instance_tag + http_status_tag, count=1)
 
-        # Assert coverage for this check on this instance
-        aggregator.assert_all_metrics_covered()
-        aggregator.reset()
+
+@pytest.mark.usefixtures("dd_environment")
+def test_disable_status_code_tag(aggregator, http_check):
+    instance = CONFIG_DISABLE_STATUS_CODE_TAG['instances'][0]
+    http_check.check(instance)
+
+    url_tag = ['url:{}'.format(instance.get('url'))]
+    instance_tag = ['instance:{}'.format(instance.get('name'))]
+
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.OK, tags=url_tag + instance_tag, count=1)
+    aggregator.assert_metric('network.http.can_connect', tags=url_tag + instance_tag, value=1.0, count=1)
+    aggregator.assert_metric('network.http.cant_connect', tags=url_tag + instance_tag, value=0.0, count=1)
+    aggregator.assert_metric('network.http.response_time', tags=url_tag + instance_tag, count=1)
 
 
 def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
