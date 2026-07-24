@@ -69,6 +69,7 @@ marklogic.forests.compressed_tree_cache_hit_rate,gauge,,hit,second,"The average 
 marklogic.forests.compressed_tree_cache_miss_rate,gauge,,miss,second,"The average number of misses on the compressed cache.",0,marklogic,forest tree cache miss,
 marklogic.forests.compressed_tree_cache_ratio,gauge,,percent,,"The compressed cache ratio",0,marklogic,forest tree cache ratio,
 marklogic.forests.current_foreign_master_cluster,gauge,,unit,,"The cluster ID coupled with the local cluster.",0,marklogic,forest foreign master cluster,
+marklogic.forests.current_foreign_master_database,gauge,,unit,,"The database ID coupled with the local cluster.",0,marklogic,forest foreign master database,
 marklogic.forests.current_foreign_master_fsn,gauge,,unit,,"The ID of the last journal frame received from the foreign master",0,marklogic,forest foreign master fsn,
 marklogic.forests.current_master_fsn,gauge,,unit,,"The journal frame ID of the local master",0,marklogic,forest master fsn,
 marklogic.forests.database_replication_receive_load,gauge,,,,"Time threads spent receiving data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication recv load,
