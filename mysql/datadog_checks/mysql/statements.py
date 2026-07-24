@@ -75,10 +75,7 @@ def _row_state_key(row):
     :return: a tuple uniquely identifying the cumulative database counter
     """
     if row.get('_dd_statement_id') is not None:
-        # `object_instance_begin` is a memory address that MySQL can reuse for a
-        # different prepared statement once the old one is deallocated. Include
-        # the query_signature so a reused address doesn't merge two different
-        # statements' cumulative counters before diffing.
+        # `object_instance_begin` is a reusable address, so key on the signature too.
         return PREPARED_STATEMENT_SOURCE, row['schema_name'], row['_dd_statement_id'], row['query_signature']
 
     return DIGEST_STATEMENT_SOURCE, row['schema_name'], row['digest']

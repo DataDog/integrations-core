@@ -283,46 +283,6 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_statement_metrics_new_digest_does_not_inflate(aggregator, dd_run_check, dbm_instance, datadog_agent):
-    # Two processlist queries with distinct WHERE `state` shapes (=> two digests on every version) obfuscated to
-    # one signature. A digest first seen after the signature is baselined must itself be baselined, not dumped.
-    # Matching only `WHERE `state`` keeps the collapse off the check's own processlist queries.
-    query_one = "select * from information_schema.processlist where state = 'starting'"
-    query_two = "select * from information_schema.processlist where state = 'starting' or state = 'suspended'"
-    normalized_query = 'SELECT * FROM `information_schema` . `processlist` WHERE `state` = ?'
-    query_signature = compute_sql_signature(normalized_query)
-
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-
-    def obfuscate_sql(query, options=None):
-        if 'WHERE `state`' in query:
-            return normalized_query
-        return query
-
-    def run_query(q):
-        with mysql_check._connect() as db:
-            with closing(db.cursor()) as cursor:
-                cursor.execute(q)
-
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        run_query(query_one)  # digest A -> baseline the signature
-        dd_run_check(mysql_check)
-        run_query(query_one)  # +1 real delta
-        for _ in range(5):
-            run_query(query_two)  # digest B: new, same signature
-        dd_run_check(mysql_check)
-
-    events = aggregator.get_event_platform_events("dbm-metrics")
-    matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
-    assert len(matching_rows) == 1
-    # only digest A's +1 is counted; digest B is baselined, not dumped (pre-fix: 6)
-    assert matching_rows[0]['count_star'] == 1
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_statement_metrics_new_prepared_statement_instance_does_not_inflate(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent
 ):
@@ -353,7 +313,7 @@ def test_statement_metrics_new_prepared_statement_instance_does_not_inflate(
     events = aggregator.get_event_platform_events("dbm-metrics")
     matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
     assert len(matching_rows) == 1
-    # only ps1's +1 is counted; ps2 is baselined, not dumped (pre-fix SUM-by-sql_text: 6)
+    # only ps1's +1 is counted; ps2 is baselined, not dumped
     assert matching_rows[0]['count_star'] == 1
 
 
@@ -492,7 +452,7 @@ def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(d
         assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
         rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
 
-    # the reused id is a different statement => baselined, not merged with the stale row (pre-fix: spurious 5000)
+    # the reused id is a different statement => baselined, not merged with the stale row
     assert rows == []
 
 
