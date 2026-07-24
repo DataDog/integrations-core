@@ -14,7 +14,7 @@ import socks
 from cryptography import x509
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError
 from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -133,8 +133,7 @@ class HTTPCheck(AgentCheck):
             )
         except (
             socket.timeout,
-            HTTPConnectionError,
-            HTTPTimeoutError,
+            HTTPRequestError,
         ) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)

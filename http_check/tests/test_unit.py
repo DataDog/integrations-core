@@ -4,6 +4,7 @@
 
 import mock
 
+from datadog_checks.base.utils.http_exceptions import HTTPInvalidURLError, HTTPRequestError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.http_check import HTTPCheck, http_check
 
@@ -80,6 +81,28 @@ def test_message_when_content_is_disabled():
 
     assert message == error_message
     assert content not in message
+
+
+def test_invalid_url_submits_critical_service_check(aggregator, mock_http) -> None:
+    instance = {'name': 'invalid_url', 'url': 'https://example.com', 'check_certificate_expiration': False}
+    mock_http.get.side_effect = HTTPInvalidURLError('Invalid URL')
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    check.check(instance)
+
+    tags = ['url:https://example.com', 'instance:invalid_url']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=tags, count=1)
+
+
+def test_generic_request_error_submits_critical_service_check(aggregator, mock_http) -> None:
+    instance = {'name': 'request_error', 'url': 'https://example.com', 'check_certificate_expiration': False}
+    mock_http.get.side_effect = HTTPRequestError('Request failed')
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    check.check(instance)
+
+    tags = ['url:https://example.com', 'instance:request_error']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=tags, count=1)
 
 
 def test_use_cert_from_response_reads_peer_cert(aggregator, dd_run_check):
