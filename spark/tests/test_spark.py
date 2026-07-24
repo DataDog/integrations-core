@@ -943,7 +943,9 @@ def test_standalone_unit(aggregator, dd_run_check):
 
         # Fixture reports zero registered workers; still emitted so config discovery's
         # probe (which requires at least one metric) can accept an idle standalone master.
-        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
+        aggregator.assert_metric(
+            'spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS
+        )
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -995,7 +997,9 @@ def test_standalone_stage_disabled_unit(aggregator, dd_run_check):
 
         # Fixture reports zero registered workers; still emitted so config discovery's
         # probe (which requires at least one metric) can accept an idle standalone master.
-        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
+        aggregator.assert_metric(
+            'spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS
+        )
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -1052,7 +1056,9 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
 
         # Fixture reports zero registered workers; still emitted so config discovery's
         # probe (which requires at least one metric) can accept an idle standalone master.
-        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
+        aggregator.assert_metric(
+            'spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS
+        )
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -1109,7 +1115,9 @@ def test_standalone_pre20(aggregator, dd_run_check):
 
         # Fixture reports zero registered workers; still emitted so config discovery's
         # probe (which requires at least one metric) can accept an idle standalone master.
-        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
+        aggregator.assert_metric(
+            'spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS
+        )
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
