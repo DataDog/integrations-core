@@ -442,6 +442,47 @@ GVE_ETHTOOL_VALUES = {
 }
 
 
+MLX5_ETHTOOL_VALUES = {
+    'queue:0': {
+        'mlx5_core.queue.rx_arfs_err': 0,
+        'mlx5_core.queue.tx_dropped': 1,
+        'mlx5_core.queue.rx_packets': 5000,
+        'mlx5_core.queue.rx_bytes': 500000,
+        'mlx5_core.queue.tx_packets': 4000,
+        'mlx5_core.queue.tx_bytes': 400000,
+    },
+    'prio:0': {
+        'mlx5_core.prio.rx_packets': 1000,
+        'mlx5_core.prio.rx_bytes': 100000,
+        'mlx5_core.prio.rx_pause': 10,
+        'mlx5_core.prio.rx_pause_duration': 500,
+        'mlx5_core.prio.rx_buf_discard': 2,
+        'mlx5_core.prio.rx_cong_discard': 3,
+        'mlx5_core.prio.rx_marked': 50,
+        'mlx5_core.prio.tx_packets': 800,
+        'mlx5_core.prio.tx_pause': 8,
+    },
+    'prio:7': {
+        'mlx5_core.prio.rx_packets': 2000,
+        'mlx5_core.prio.rx_marked': 100,
+        'mlx5_core.prio.tx_pause': 20,
+    },
+    'global': {
+        'mlx5_core.rx_global_pause': 7,
+        'mlx5_core.rx_global_pause_duration': 300,
+        'mlx5_core.tx_global_pause': 6,
+        'mlx5_core.tx_global_pause_duration': 250,
+        'mlx5_core.rx_pci_signal_integrity': 0,
+        'mlx5_core.outbound_pci_stalled_rd_events': 5,
+        'mlx5_core.tx_pause_storm_error_events': 0,
+        'mlx5_core.rx_corrected_bits_phy': 42,
+        'mlx5_core.rx_bits_phy': 123456789,
+        'mlx5_core.rx_packets': 999999,
+        'mlx5_core.tx_packets': 888888,
+    },
+}
+
+
 def send_ethtool_ioctl_mock(iface, sckt, data):
     for input, result in common.ETHTOOL_IOCTL_INPUTS_OUTPUTS.items():
         if input == (iface, data.tobytes()):
@@ -610,6 +651,41 @@ def test_submit_gve_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check,
                 count=1,
                 value=value,
                 tags=['device:gve', 'driver_name:gve', 'driver_version:1.0.0', tag],
+            )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
+@mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_mlx5_core(is_linux, is_bsd, send_ethtool_ioctl, check):
+    check_instance = check(common.INSTANCE)
+    send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
+    driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('mlx5_core')
+    assert (driver_name, driver_version) == ('mlx5_core', '25.04-0.1.2.0')
+    assert ethtool.get_ethtool_metrics(driver_name, stats_names, stats) == MLX5_ETHTOOL_VALUES
+
+
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
+@mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_mlx5_core_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['collect_ethtool_metrics'] = True
+    check_instance = check(instance)
+
+    send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
+    check_instance._handle_ethtool_stats('mlx5_core', [])
+
+    for tag, metrics in MLX5_ETHTOOL_VALUES.items():
+        for metric_suffix, value in metrics.items():
+            aggregator.assert_metric(
+                'system.net.' + metric_suffix,
+                count=1,
+                value=value,
+                tags=['device:mlx5_core', 'driver_name:mlx5_core', 'driver_version:25.04-0.1.2.0', tag],
             )
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
