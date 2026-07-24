@@ -147,53 +147,6 @@ def find_copy_command(calls: list[list[str]], source: str, destination: str) -> 
     return matches[0]
 
 
-def test_exec_builds_scoped_command_and_sorts_environment(agent, run_command):
-    agent._exec(['agent', 'check', 'velero'], env_vars={'ZED': 'last', 'ALPHA': 'first'})
-
-    run_command.assert_called_once_with(
-        [
-            'kubectl',
-            '--kubeconfig',
-            TEST_KUBECONFIG,
-            'exec',
-            '--namespace',
-            TEST_NAMESPACE,
-            f'pod/{TEST_POD}',
-            '--container',
-            TEST_CONTAINER,
-            '--',
-            'env',
-            'ALPHA=first',
-            'ZED=last',
-            'agent',
-            'check',
-            'velero',
-        ],
-        check=True,
-    )
-
-
-def test_copy_file_builds_scoped_command(agent, config_file, run_command):
-    destination = '/tmp/conf.yaml'
-
-    agent._copy_file(str(config_file), destination)
-
-    run_command.assert_called_once_with(
-        [
-            'kubectl',
-            '--kubeconfig',
-            TEST_KUBECONFIG,
-            'cp',
-            '--container',
-            TEST_CONTAINER,
-            config_file.name,
-            f'{TEST_NAMESPACE}/{TEST_POD}:{destination}',
-        ],
-        check=True,
-        cwd=config_file.resolve().parent,
-    )
-
-
 def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
     operations = mocker.Mock()
     execute = mocker.patch.object(agent, '_exec')
@@ -324,6 +277,7 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
         str(integration): '[deps]',
     }
     local_base_copy = run_command.call_args_list[local_base_copy_index]
+    assert local_base_copy.kwargs['check'] is True
     assert local_base_copy.kwargs['cwd'] == local_base.resolve().parent
 
 
@@ -420,6 +374,7 @@ def test_invoke_synchronizes_config_and_environment(agent, config_file, auto_con
         ['env', 'ALPHA=first', 'ZED=last', 'agent', 'check', 'velero', '--json'],
     )
     prepared_indices = exec_command_indices(calls, ['test', '-f', TEST_PREPARED_MARKER])
+    assert run_command.call_args_list[invoke_index].kwargs['check'] is True
     assert len(prepared_indices) == 2
     assert prepared_indices[0] < config_copy_index < auto_conf_copy_index < invoke_index < prepared_indices[1]
 
@@ -475,28 +430,26 @@ def test_restart_rejects_unsafe_local_package_destination(agent, metadata, run_c
     run_command.assert_not_called()
 
 
-def test_shell_and_logs_use_backend_commands(agent, run_command):
+def test_enter_shell_starts_interactive_bash(agent, run_command):
     agent.enter_shell()
+
+    calls = command_calls(run_command)
+    shell_index = find_exec_command(calls, ['bash'])
+    kubectl_args = calls[shell_index][: calls[shell_index].index('--')]
+    assert '-it' in kubectl_args
+    assert run_command.call_args_list[shell_index].kwargs['check'] is True
+
+
+def test_show_logs_targets_agent_container(agent, run_command):
     agent.show_logs()
 
     calls = command_calls(run_command)
-    prefix = ['kubectl', '--kubeconfig', TEST_KUBECONFIG]
-    assert calls == [
-        [
-            *prefix,
-            'exec',
-            '-it',
-            '--namespace',
-            TEST_NAMESPACE,
-            f'pod/{TEST_POD}',
-            '--container',
-            TEST_CONTAINER,
-            '--',
-            'bash',
-        ],
-        [*prefix, 'logs', '--namespace', TEST_NAMESPACE, f'pod/{TEST_POD}', '--container', TEST_CONTAINER],
-    ]
-    assert run_command.call_args_list[-1].kwargs['check'] is True
+    logs_index = find_kubectl_command(calls, ['logs'])
+    command = calls[logs_index]
+    assert option_value(command, '--namespace') == TEST_NAMESPACE
+    assert f'pod/{TEST_POD}' in command
+    assert option_value(command, '--container') == TEST_CONTAINER
+    assert run_command.call_args_list[logs_index].kwargs['check'] is True
 
 
 def test_kubeconfig_validation(app, get_integration, config_file):
