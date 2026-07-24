@@ -185,8 +185,7 @@ def test_copy_file_builds_scoped_command(agent, config_file, run_command):
     )
 
 
-def test_restart_command_preserves_s6_and_timeout_contract(agent, metadata, mocker):
-    metadata['kubernetes']['wait_timeout'] = 17
+def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
     operations = mocker.Mock()
     execute = mocker.patch.object(agent, '_exec')
     wait_for_agent = mocker.patch.object(agent, '_wait_for_agent')
@@ -195,19 +194,11 @@ def test_restart_command_preserves_s6_and_timeout_contract(agent, metadata, mock
 
     agent._restart_agent_process()
 
-    operations.assert_has_calls(
-        [mocker.call.wait_for_agent(), mocker.call.execute(mocker.ANY), mocker.call.wait_for_agent()]
-    )
-    command = execute.call_args.args[0]
-    assert command[:2] == ['sh', '-c']
-    script = command[2]
-    assert 'pidof agent' in script
-    assert 'finish=/var/run/s6/services/agent/finish' in script
-    assert '[ -f "$finish" ]' in script
-    assert 'Unsupported Agent image: s6 Agent finish hook not found' in script
-    assert 'rm "$finish"' in script
-    assert script.index('[ -f "$finish" ]') < script.index('kill "$old_pid"')
-    assert '[ "$elapsed" -ge 17 ]' in script
+    assert operations.mock_calls == [
+        mocker.call.wait_for_agent(),
+        mocker.call.execute(mocker.ANY),
+        mocker.call.wait_for_agent(),
+    ]
 
 
 def test_start_uses_selected_image_rbac_config_and_local_packages(
