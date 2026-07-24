@@ -42,6 +42,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
+    def _on_metric_limit_reached(self) -> None:
+        self._emit_openmetrics_limit_telemetry()
+
     METRICS_MAP: tuple[MetricsMapping, ...] = ()
     """YAML files with metric name mappings to load automatically.
 

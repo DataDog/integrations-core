@@ -1610,6 +1610,10 @@ class AgentCheck(object):
             error_report = json.encode([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
+                reached_limit = self.metric_limiter.reached_limit
+                if reached_limit:
+                    self._on_metric_limit_reached()
+
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
                     debug_metrics = self.metric_limiter.get_debug_metrics()
 
@@ -1623,6 +1627,22 @@ class AgentCheck(object):
                 self.metric_limiter.reset()
 
         return error_report
+
+    def _on_metric_limit_reached(self) -> None:
+        pass
+
+    def _emit_openmetrics_limit_telemetry(self) -> None:
+        try:
+            emit_agent_telemetry = getattr(datadog_agent, 'emit_agent_telemetry', None)
+            if callable(emit_agent_telemetry):
+                emit_agent_telemetry(
+                    'openmetrics',
+                    'max_returned_metrics_reached',
+                    1,
+                    'counter',
+                )
+        except Exception:
+            self.log.debug('Failed to emit OpenMetrics metric limit telemetry', exc_info=True)
 
     def run_check_initializations(self):
         while self.check_initializations:

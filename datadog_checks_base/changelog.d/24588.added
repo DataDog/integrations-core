@@ -1,0 +1,1 @@
+Emit untagged OpenMetrics Agent telemetry when ``max_returned_metrics`` is reached.
