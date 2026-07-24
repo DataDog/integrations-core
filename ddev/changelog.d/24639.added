@@ -1,0 +1,1 @@
+Add a Kubernetes Agent interface for running the Agent in Kind-based E2E test clusters, alongside the existing Docker and Vagrant interfaces.

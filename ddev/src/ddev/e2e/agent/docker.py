@@ -45,7 +45,7 @@ def disable_integration_before_install(config_file):
     new.rename(config_file.parent / old)
 
 
-def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
+def normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
     if not agent_build:
         return 'registry.datadoghq.com/agent-dev:master-py3'
 
@@ -82,6 +82,8 @@ def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_
 
 
 class DockerAgent(AgentInterface):
+    build_config_key = 'docker'
+
     @cached_property
     def _isatty(self) -> bool:
         isatty: Callable[[], bool] | None = getattr(sys.stdout, 'isatty', None)
@@ -173,8 +175,11 @@ class DockerAgent(AgentInterface):
             self._show_logs()
             raise RuntimeError(error_message)
 
-    def _show_logs(self) -> None:
-        self._run_command(['docker', 'logs', self._container_name])
+    def _show_logs(self, *, check: bool = False) -> None:
+        self._run_command(['docker', 'logs', self._container_name], check=check)
+
+    def show_logs(self) -> None:
+        self._show_logs(check=True)
 
     def get_id(self) -> str:
         return self._container_name
@@ -182,7 +187,7 @@ class DockerAgent(AgentInterface):
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         from ddev.e2e.agent.constants import AgentEnvVars
 
-        agent_build = _normalize_agent_image_name(
+        agent_build = normalize_agent_image_name(
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
         )
 
