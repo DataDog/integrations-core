@@ -202,8 +202,11 @@ def test_restart_command_preserves_s6_and_timeout_contract(agent, metadata, mock
     assert command[:2] == ['sh', '-c']
     script = command[2]
     assert 'pidof agent' in script
-    assert 'rm -f /var/run/s6/services/agent/finish' in script
-    assert 'kill "$old_pid"' in script
+    assert 'finish=/var/run/s6/services/agent/finish' in script
+    assert '[ -f "$finish" ]' in script
+    assert 'Unsupported Agent image: s6 Agent finish hook not found' in script
+    assert 'rm "$finish"' in script
+    assert script.index('[ -f "$finish" ]') < script.index('kill "$old_pid"')
     assert '[ "$elapsed" -ge 17 ]' in script
 
 

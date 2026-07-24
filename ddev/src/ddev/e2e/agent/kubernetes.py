@@ -369,7 +369,9 @@ class KubernetesAgent(AgentInterface):
         restart_command = (
             'old_pid=$(pidof agent) || exit 1; '
             'set -- $old_pid; old_pid=$1; '
-            'rm -f /var/run/s6/services/agent/finish; '
+            'finish=/var/run/s6/services/agent/finish; '
+            '[ -f "$finish" ] || { echo "Unsupported Agent image: s6 Agent finish hook not found" >&2; exit 1; }; '
+            'rm "$finish" || exit 1; '
             'kill "$old_pid" || exit 1; '
             'elapsed=0; '
             'while kill -0 "$old_pid" 2>/dev/null; do '
