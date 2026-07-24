@@ -1162,10 +1162,30 @@ class LimitedCheck(AgentCheck):
             self.gauge('foo', i)
 
 
-class TelemetryLimitedCheck(LimitedCheck):
-    EMIT_OPENMETRICS_LIMIT_TELEMETRY = True
+class LimitedOpenMetricsV1Check(OpenMetricsBaseCheck):
+    def check(self, _instance: dict[str, Any]) -> None:
+        for i in range(5):
+            self.gauge('foo', i)
 
 
+class LimitedOpenMetricsV2Check(OpenMetricsBaseCheckV2):
+    def configure_scrapers(self) -> None:
+        pass
+
+    def check(self, _instance: dict[str, Any]) -> None:
+        for i in range(5):
+            self.gauge('foo', i)
+
+
+OPENMETRICS_CHECK_CLASSES = (
+    pytest.param(LimitedOpenMetricsV1Check, id='v1'),
+    pytest.param(LimitedOpenMetricsV2Check, id='v2'),
+)
+OPENMETRICS_INSTANCE = {
+    'prometheus_url': 'http://example.com',
+    'namespace': 'test',
+    'metrics': ['foo'],
+}
 OPENMETRICS_LIMIT_TELEMETRY = ('openmetrics', 'max_returned_metrics_reached', 1, 'counter')
 METRIC_LIMIT_WARNING = 'Check test exceeded limit of 3 metrics, ignoring next ones'
 
@@ -1282,8 +1302,10 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(aggregator.metrics("metric")) == 10
 
-    def test_openmetrics_limit_telemetry_emitted_once(self, aggregator):
-        check = TelemetryLimitedCheck('test', {}, [{'max_returned_metrics': 3}])
+    @pytest.mark.parametrize('openmetrics_check_class', OPENMETRICS_CHECK_CLASSES)
+    def test_openmetrics_limit_telemetry_emitted_once(self, aggregator, openmetrics_check_class):
+        instance = {**OPENMETRICS_INSTANCE, 'max_returned_metrics': 3}
+        check = openmetrics_check_class('test', {}, [instance])
 
         with patch('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry') as emit_agent_telemetry:
             assert check.run() == ''
@@ -1292,8 +1314,10 @@ class TestLimits:
         assert check.get_warnings() == [METRIC_LIMIT_WARNING]
         assert len(aggregator.metrics('foo')) == 3
 
-    def test_openmetrics_limit_telemetry_not_emitted_before_limit(self, aggregator):
-        check = TelemetryLimitedCheck('test', {}, [{'max_returned_metrics': 5}])
+    @pytest.mark.parametrize('openmetrics_check_class', OPENMETRICS_CHECK_CLASSES)
+    def test_openmetrics_limit_telemetry_not_emitted_before_limit(self, aggregator, openmetrics_check_class):
+        instance = {**OPENMETRICS_INSTANCE, 'max_returned_metrics': 5}
+        check = openmetrics_check_class('test', {}, [instance])
 
         with patch('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry') as emit_agent_telemetry:
             assert check.run() == ''
@@ -1304,7 +1328,6 @@ class TestLimits:
 
     def test_generic_check_does_not_emit_openmetrics_limit_telemetry(self, aggregator):
         check = LimitedCheck('test', {}, [{'max_returned_metrics': 3}])
-        assert check.EMIT_OPENMETRICS_LIMIT_TELEMETRY is False
 
         with patch('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry') as emit_agent_telemetry:
             assert check.run() == ''
@@ -1313,8 +1336,12 @@ class TestLimits:
         assert check.get_warnings() == [METRIC_LIMIT_WARNING]
         assert len(aggregator.metrics('foo')) == 3
 
-    def test_missing_agent_telemetry_method_is_ignored(self, aggregator, datadog_agent, monkeypatch):
-        check = TelemetryLimitedCheck('test', {}, [{'max_returned_metrics': 3}])
+    @pytest.mark.parametrize('openmetrics_check_class', OPENMETRICS_CHECK_CLASSES)
+    def test_missing_agent_telemetry_method_is_ignored(
+        self, aggregator, datadog_agent, monkeypatch, openmetrics_check_class
+    ):
+        instance = {**OPENMETRICS_INSTANCE, 'max_returned_metrics': 3}
+        check = openmetrics_check_class('test', {}, [instance])
         monkeypatch.delattr(type(datadog_agent), 'emit_agent_telemetry')
 
         assert check.run() == ''
@@ -1322,8 +1349,10 @@ class TestLimits:
         assert len(aggregator.metrics('foo')) == 3
         assert check.metric_limiter.get_status() == (0, 3, False)
 
-    def test_agent_telemetry_exception_is_ignored(self, aggregator, caplog):
-        check = TelemetryLimitedCheck('test', {}, [{'max_returned_metrics': 3}])
+    @pytest.mark.parametrize('openmetrics_check_class', OPENMETRICS_CHECK_CLASSES)
+    def test_agent_telemetry_exception_is_ignored(self, aggregator, caplog, openmetrics_check_class):
+        instance = {**OPENMETRICS_INSTANCE, 'max_returned_metrics': 3}
+        check = openmetrics_check_class('test', {}, [instance])
         caplog.set_level(logging.DEBUG)
 
         with patch(
@@ -1341,8 +1370,10 @@ class TestLimits:
             for record in caplog.records
         )
 
-    def test_openmetrics_limit_telemetry_emitted_once_per_run(self, aggregator):
-        check = TelemetryLimitedCheck('test', {}, [{'max_returned_metrics': 3}])
+    @pytest.mark.parametrize('openmetrics_check_class', OPENMETRICS_CHECK_CLASSES)
+    def test_openmetrics_limit_telemetry_emitted_once_per_run(self, aggregator, openmetrics_check_class):
+        instance = {**OPENMETRICS_INSTANCE, 'max_returned_metrics': 3}
+        check = openmetrics_check_class('test', {}, [instance])
 
         with patch('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry') as emit_agent_telemetry:
             assert check.run() == ''
@@ -1353,9 +1384,14 @@ class TestLimits:
         assert check.get_warnings() == [METRIC_LIMIT_WARNING, METRIC_LIMIT_WARNING]
         assert len(aggregator.metrics('foo')) == 6
 
-    def test_debug_metrics_do_not_emit_extra_openmetrics_limit_telemetry(self, aggregator):
-        instance = {'debug_metrics': {'metric_contexts': True}, 'max_returned_metrics': 3}
-        check = TelemetryLimitedCheck('test', {}, [instance])
+    @pytest.mark.parametrize('openmetrics_check_class', OPENMETRICS_CHECK_CLASSES)
+    def test_debug_metrics_do_not_emit_extra_openmetrics_limit_telemetry(self, aggregator, openmetrics_check_class):
+        instance = {
+            **OPENMETRICS_INSTANCE,
+            'debug_metrics': {'metric_contexts': True},
+            'max_returned_metrics': 3,
+        }
+        check = openmetrics_check_class('test', {}, [instance])
 
         with patch('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry') as emit_agent_telemetry:
             assert check.run() == ''
@@ -1363,16 +1399,6 @@ class TestLimits:
         emit_agent_telemetry.assert_called_once_with(*OPENMETRICS_LIMIT_TELEMETRY)
         aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 3)
         aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
-
-    @pytest.mark.parametrize(
-        'openmetrics_base',
-        [
-            pytest.param(OpenMetricsBaseCheck, id='v1'),
-            pytest.param(OpenMetricsBaseCheckV2, id='v2'),
-        ],
-    )
-    def test_openmetrics_base_enables_limit_telemetry(self, openmetrics_base):
-        assert openmetrics_base.EMIT_OPENMETRICS_LIMIT_TELEMETRY is True
 
     def test_debug_metrics_under_limit(self, aggregator, dd_run_check):
         instance = {'debug_metrics': {'metric_contexts': True}}
