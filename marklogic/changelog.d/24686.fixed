@@ -1,0 +1,1 @@
+Add the missing `marklogic.forests.current_foreign_master_database` metric to `metadata.csv`.
