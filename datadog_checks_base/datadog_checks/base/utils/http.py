@@ -246,7 +246,10 @@ def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapp
     if isinstance(exc, requests_exceptions.ContentDecodingError):
         return HTTPRequestError(message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):
-        return HTTPStatusError(message, request=request, response=response)
+        status_code = getattr(response, 'status_code', None)
+        if status_code is None:
+            status_code = getattr(getattr(exc, 'response', None), 'status_code', None)
+        return HTTPStatusError(message, request=request, response=response, status_code=status_code)
     if isinstance(exc, requests_exceptions.RequestException):
         return HTTPRequestError(message, request=request)
     return HTTPError(message)

@@ -26,7 +26,9 @@ class HTTPRequestError(HTTPError):
 
 
 class HTTPStatusError(HTTPError):
-    pass
+    def __init__(self, message: str, response: Any = None, request: Any = None, status_code: int | None = None):
+        super().__init__(message, response=response, request=request)
+        self.status_code = status_code
 
 
 class HTTPTimeoutError(HTTPRequestError):

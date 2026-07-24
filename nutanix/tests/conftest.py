@@ -283,7 +283,7 @@ def mock_http_get(mocker, mock_http):
             else:
                 mock_resp.status_code = 404
                 mock_resp.raise_for_status = mocker.Mock(
-                    side_effect=HTTPStatusError('404 Client Error', response=mock_resp)
+                    side_effect=HTTPStatusError('404 Client Error', response=mock_resp, status_code=404)
                 )
             return mock_resp
 
@@ -316,7 +316,9 @@ def mock_http_get(mocker, mock_http):
 
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
         mock_resp.status_code = 404
-        mock_resp.raise_for_status = mocker.Mock(side_effect=HTTPStatusError('404 Client Error', response=mock_resp))
+        mock_resp.raise_for_status = mocker.Mock(
+            side_effect=HTTPStatusError('404 Client Error', response=mock_resp, status_code=404)
+        )
         return mock_resp
 
     mock_http.get.side_effect = mock_response

@@ -932,7 +932,7 @@ class OpenStackCheck(AgentCheck):
             self.log.debug("Server %s is powered off and cannot be monitored", server_id)
             del self.server_details_by_id[server_id]
         except HTTPStatusError as e:
-            if e.response.status_code == 404:
+            if e.status_code == 404:
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
                 del self.server_details_by_id[server_id]
             else:
@@ -1232,7 +1232,7 @@ class OpenStackCheck(AgentCheck):
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")
         except HTTPStatusError as e:
-            if e.response.status_code >= 500:
+            if e.status_code is not None and e.status_code >= 500:
                 # exponential backoff
                 self.do_backoff(instance)
                 self.warning("There were some problems reaching the nova API - applying exponential backoff")

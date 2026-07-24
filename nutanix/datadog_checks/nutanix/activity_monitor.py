@@ -136,7 +136,7 @@ class ActivityMonitor:
                 "[%s] Failed to collect %ss: HTTP %s",
                 self._pc_label,
                 activity_kind,
-                e.response.status_code if e.response else "error",
+                e.status_code if e.status_code is not None else "error",
             )
             return 0
         except Exception:
@@ -352,7 +352,7 @@ class ActivityMonitor:
         try:
             alert = self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
         except HTTPStatusError as e:
-            if e.response is not None and e.response.status_code == 404:
+            if e.status_code == 404:
                 self.check.log.debug("[%s] Alert %s not found (404).", self._pc_label, alert_ext_id)
                 return None
             self.check.log.warning("[%s] Transient HTTP error fetching alert %s: %s", self._pc_label, alert_ext_id, e)
