@@ -254,6 +254,16 @@ class SparkCheck(AgentCheck):
         if metrics_json is None:
             return {}
 
+        # Always report worker capacity, even with zero active apps: it's the only
+        # metric this check can emit while idle, which config discovery's probe
+        # requires to accept a standalone-master candidate (it rejects configs that
+        # produce a service check but no metrics).
+        self.gauge(
+            'spark.master.worker_count',
+            len(metrics_json.get('workers', [])),
+            tags=['url:%s' % self.master_address] + tags,
+        )
+
         running_apps = {}
         version_set = False
 
