@@ -11,14 +11,16 @@ class Limiter(object):
     that can be set by an instance.
     """
 
-    def __init__(self, check_name, object_name, object_limit, warning_func=None):
+    def __init__(self, check_name, object_name, object_limit, warning_func=None, on_limit_reached_func=None):
         """
         :param check_name: name of the check using this limiter
         :param object_name: (plural) name of counted objects for warning wording
         :param object_limit: maximum number of objects to accept before limiting
         :param warning_func: callback function, called with a string when limit is exceeded
+        :param on_limit_reached_func: callback function, called when limit is first exceeded
         """
         self.warning = warning_func
+        self.on_limit_reached = on_limit_reached_func
         self.name = object_name
         self.limit = object_limit
         self.check_name = check_name
@@ -70,6 +72,8 @@ class Limiter(object):
                     "Check %s exceeded limit of %s %s, ignoring next ones", self.check_name, self.limit, self.name
                 )
             self.reached_limit = True
+            if self.on_limit_reached:
+                self.on_limit_reached()
             return True
         return False
 

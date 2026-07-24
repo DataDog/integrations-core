@@ -41,6 +41,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 2000
+    OPENMETRICS_MAX_RETURNED_METRICS_TELEMETRY = True
 
     METRICS_MAP: tuple[MetricsMapping, ...] = ()
     """YAML files with metric name mappings to load automatically.

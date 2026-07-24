@@ -1162,6 +1162,10 @@ class LimitedCheck(AgentCheck):
             self.gauge('foo', i)
 
 
+class OpenMetricsTelemetryCheck(LimitedCheck):
+    OPENMETRICS_MAX_RETURNED_METRICS_TELEMETRY = True
+
+
 class TestLimits:
     def test_context_uid(self, aggregator):
         check = LimitedCheck()
@@ -1207,6 +1211,141 @@ class TestLimits:
             check.count("metric", 0, hostname="host-{}".format(i))
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 29
+
+    def test_openmetrics_metric_limit_telemetry(self, aggregator, monkeypatch):
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [{'max_returned_metrics': 2}])
+
+        check.gauge('metric', 0)
+        check.gauge('metric', 0)
+        emit_agent_telemetry.assert_not_called()
+        assert len(aggregator.metrics('metric')) == 2
+
+        check.gauge('metric', 0)
+        check.gauge('metric', 0)
+
+        emit_agent_telemetry.assert_called_once_with(
+            'openmetrics',
+            'max_returned_metrics_reached',
+            1,
+            'counter',
+            {'check_name': 'canonical_openmetrics'},
+        )
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('metric')) == 2
+
+    def test_openmetrics_metric_limit_telemetry_aggregates_same_check_name(self, monkeypatch):
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        first_check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [{'max_returned_metrics': 1}])
+        second_check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [{'max_returned_metrics': 1}])
+
+        first_check.gauge('metric', 0)
+        first_check.gauge('metric', 0)
+        second_check.gauge('metric', 0)
+        second_check.gauge('metric', 0)
+
+        assert emit_agent_telemetry.call_args_list == [
+            mock.call(
+                'openmetrics', 'max_returned_metrics_reached', 1, 'counter', {'check_name': 'canonical_openmetrics'}
+            ),
+            mock.call(
+                'openmetrics', 'max_returned_metrics_reached', 1, 'counter', {'check_name': 'canonical_openmetrics'}
+            ),
+        ]
+
+    def test_openmetrics_metric_limit_telemetry_uid_dedup(self, aggregator, monkeypatch):
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [{'max_returned_metrics': 2}])
+
+        for _ in range(5):
+            check.count('metric', 0, hostname='same-host')
+        assert len(aggregator.metrics('metric')) == 5
+        emit_agent_telemetry.assert_not_called()
+
+        check.count('metric', 0, hostname='second-host')
+        check.count('metric', 0, hostname='third-host')
+        check.count('metric', 0, hostname='fourth-host')
+
+        emit_agent_telemetry.assert_called_once_with(
+            'openmetrics',
+            'max_returned_metrics_reached',
+            1,
+            'counter',
+            {'check_name': 'canonical_openmetrics'},
+        )
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('metric')) == 6
+
+    def test_metric_limit_telemetry_skips_non_openmetrics(self, aggregator, monkeypatch):
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        check = LimitedCheck('generic_check', {}, [{'max_returned_metrics': 1}])
+
+        check.gauge('metric', 0)
+        check.gauge('metric', 0)
+
+        emit_agent_telemetry.assert_not_called()
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('metric')) == 1
+
+    def test_openmetrics_metric_limit_telemetry_skips_without_labeled_bridge(self, aggregator, monkeypatch):
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.delattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels', raising=False
+        )
+        monkeypatch.setattr('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry', emit_agent_telemetry)
+        check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [{'max_returned_metrics': 1}])
+
+        check.gauge('metric', 0)
+        check.gauge('metric', 0)
+
+        emit_agent_telemetry.assert_not_called()
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('metric')) == 1
+
+    def test_openmetrics_metric_limit_telemetry_bridge_failure(self, aggregator, caplog, monkeypatch):
+        emit_agent_telemetry = mock.MagicMock(side_effect=Exception('bridge failed'))
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        caplog.set_level(logging.DEBUG)
+        check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [{'max_returned_metrics': 1}])
+
+        check.gauge('metric', 0)
+        check.gauge('metric', 0)
+        check.gauge('metric', 0)
+
+        emit_agent_telemetry.assert_called_once_with(
+            'openmetrics',
+            'max_returned_metrics_reached',
+            1,
+            'counter',
+            {'check_name': 'canonical_openmetrics'},
+        )
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('metric')) == 1
+        assert 'Unable to emit OpenMetrics max_returned_metrics Agent telemetry' in caplog.text
 
     def test_metric_limit_instance_config(self, aggregator):
         instances = [{"max_returned_metrics": 42}]
@@ -1293,6 +1432,114 @@ class TestLimits:
         assert len(aggregator.metrics('foo')) == 3
         aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 3)
         aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+
+    @pytest.mark.parametrize('debug_metrics', [False, True])
+    def test_openmetrics_metric_limit_telemetry_once_per_run(
+        self, aggregator, dd_run_check, debug_metrics, monkeypatch
+    ):
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        instance = {'max_returned_metrics': 3}
+        if debug_metrics:
+            instance['debug_metrics'] = {'metric_contexts': True}
+        check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [instance])
+
+        dd_run_check(check)
+        dd_run_check(check)
+
+        assert emit_agent_telemetry.call_args_list == [
+            mock.call(
+                'openmetrics', 'max_returned_metrics_reached', 1, 'counter', {'check_name': 'canonical_openmetrics'}
+            ),
+            mock.call(
+                'openmetrics', 'max_returned_metrics_reached', 1, 'counter', {'check_name': 'canonical_openmetrics'}
+            ),
+        ]
+        assert len(aggregator.metrics('foo')) == 6
+        if debug_metrics:
+            aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 3)
+            aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+
+    def test_openmetrics_metric_limit_telemetry_not_emitted_for_debug_metrics(
+        self, aggregator, dd_run_check, monkeypatch
+    ):
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        instance = {'debug_metrics': {'metric_contexts': True}, 'max_returned_metrics': 1}
+        check = OpenMetricsTelemetryCheck('canonical_openmetrics', {}, [instance])
+
+        dd_run_check(check)
+
+        emit_agent_telemetry.assert_called_once_with(
+            'openmetrics',
+            'max_returned_metrics_reached',
+            1,
+            'counter',
+            {'check_name': 'canonical_openmetrics'},
+        )
+        assert len(aggregator.metrics('foo')) == 1
+        aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 1)
+
+    @pytest.mark.parametrize(
+        'openmetrics_version, instance',
+        [
+            pytest.param(
+                'v1',
+                {
+                    'prometheus_url': 'http://example.com/metrics',
+                    'namespace': 'test',
+                    'metrics': [],
+                    'max_returned_metrics': 1,
+                },
+                id='v1',
+            ),
+            pytest.param(
+                'v2',
+                {
+                    'openmetrics_endpoint': 'http://example.com/metrics',
+                    'namespace': 'test',
+                    'metrics': [],
+                    'max_returned_metrics': 1,
+                },
+                id='v2',
+            ),
+        ],
+    )
+    def test_openmetrics_base_classes_opt_in_to_metric_limit_telemetry(
+        self, aggregator, openmetrics_version, instance, monkeypatch
+    ):
+        from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
+        from datadog_checks.base.checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
+
+        check_class = OpenMetricsBaseCheck if openmetrics_version == 'v1' else OpenMetricsBaseCheckV2
+        emit_agent_telemetry = mock.MagicMock()
+        monkeypatch.setattr(
+            'datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry_with_labels',
+            emit_agent_telemetry,
+            raising=False,
+        )
+        check = check_class('canonical_openmetrics', {}, [instance])
+
+        check.gauge('metric', 0)
+        check.gauge('metric', 0)
+
+        emit_agent_telemetry.assert_called_once_with(
+            'openmetrics',
+            'max_returned_metrics_reached',
+            1,
+            'counter',
+            {'check_name': 'canonical_openmetrics'},
+        )
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('metric')) == 1
 
 
 class TestCheckInitializations:

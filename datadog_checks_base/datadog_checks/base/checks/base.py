@@ -171,6 +171,7 @@ class AgentCheck(object):
     # be sent to the aggregator, the rest are dropped. The state is reset after each run.
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
+    OPENMETRICS_MAX_RETURNED_METRICS_TELEMETRY = False
 
     # Allow tracing for classic integrations
     def __init_subclass__(cls, *args, **kwargs):
@@ -391,9 +392,29 @@ class AgentCheck(object):
             # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.limiter import Limiter
 
-            return Limiter(name, 'metrics', limit, self.warning)
+            on_limit_reached = None
+            if self.OPENMETRICS_MAX_RETURNED_METRICS_TELEMETRY:
+                on_limit_reached = self._emit_openmetrics_max_returned_metrics_reached
+
+            return Limiter(name, 'metrics', limit, self.warning, on_limit_reached_func=on_limit_reached)
 
         return None
+
+    def _emit_openmetrics_max_returned_metrics_reached(self):
+        emit_agent_telemetry_with_labels = getattr(datadog_agent, 'emit_agent_telemetry_with_labels', None)
+        if not callable(emit_agent_telemetry_with_labels):
+            return
+
+        try:
+            emit_agent_telemetry_with_labels(
+                "openmetrics",
+                "max_returned_metrics_reached",
+                1,
+                "counter",
+                {"check_name": self.name},
+            )
+        except Exception:
+            self.log.debug("Unable to emit OpenMetrics max_returned_metrics Agent telemetry", exc_info=True)
 
     def _get_metric_limit(self, instance=None):
         # type: (InstanceType) -> int
@@ -1617,8 +1638,13 @@ class AgentCheck(object):
                     self.metric_limiter.reset()
 
                     tags = self.get_debug_metric_tags()
-                    for metric_name, value in debug_metrics:
-                        self.gauge(metric_name, value, tags=tags, raw=True)
+                    on_limit_reached = self.metric_limiter.on_limit_reached
+                    self.metric_limiter.on_limit_reached = None
+                    try:
+                        for metric_name, value in debug_metrics:
+                            self.gauge(metric_name, value, tags=tags, raw=True)
+                    finally:
+                        self.metric_limiter.on_limit_reached = on_limit_reached
 
                 self.metric_limiter.reset()
 
