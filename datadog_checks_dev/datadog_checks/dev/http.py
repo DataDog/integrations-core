@@ -15,8 +15,7 @@ from unittest.mock import MagicMock
 from requests import Response
 
 if TYPE_CHECKING:
-    # Re-exported at runtime via the module-level __getattr__ below; imported here only so static
-    # analyzers can resolve ``from datadog_checks.dev.http import HTTPStatusError`` and friends.
+    # Imported for static analyzers; runtime access goes through module-level __getattr__.
     from datadog_checks.base.utils.http_exceptions import (  # noqa: F401
         HTTPConnectionError,
         HTTPError,
@@ -133,8 +132,7 @@ class MockHTTPResponseImpl:
             headers = dict(headers) if headers is not None else {}
             headers.setdefault('Content-Type', 'application/json')
         elif file_path is not None:
-            # Open in binary mode to handle both text and binary files correctly
-            # This prevents encoding errors and platform-specific newline translation
+            # Open binary files unchanged across encodings and platform newlines.
             with open(file_path, 'rb') as f:
                 content = f.read()
 
@@ -167,8 +165,7 @@ class MockHTTPResponseImpl:
 
     @property
     def ok(self) -> bool:
-        # Transitional: mirrors requests.Response.ok for current production code.
-        # httpx uses is_success/is_client_error/is_server_error instead.
+        # Mirrors requests.Response.ok until production code adopts httpx success helpers.
         return self.status_code < 400
 
     @property
@@ -237,10 +234,8 @@ class MockHTTPResponseImpl:
 
         self._stream.seek(0)
         lines = self._stream.read().split(delimiter)
-        # bytes.split() produces a trailing empty element when content ends with the
-        # delimiter (e.g. b'a\nb\n'.split(b'\n') == [b'a', b'b', b'']). requests uses
-        # splitlines() for the default case which does not have this behavior, so we
-        # strip the trailing empty element to match.
+        # bytes.split leaves a trailing empty element when content ends with the delimiter.
+        # Strip it to match requests' default splitlines behavior.
         if lines and not lines[-1]:
             lines.pop()
         for line in lines:
@@ -248,9 +243,7 @@ class MockHTTPResponseImpl:
             yield line.decode('utf-8') if decode_unicode else line
 
     def close(self) -> None:
-        # No-op: requests.Response.close() releases the network connection, but
-        # content is already buffered in memory. Matching that behaviour here
-        # so the same instance can be returned by a mock multiple times.
+        # No-op because buffered mock responses can be reused after close.
         pass
 
     def __enter__(self) -> 'MockHTTPResponseImpl':
@@ -309,9 +302,7 @@ class MockHTTPResponse:
         return iter(self.__wrapped__)
 
 
-# Agnostic HTTP exceptions re-exported from datadog_checks_base so test setup code has a single import
-# site (``from datadog_checks.dev.http import HTTPTimeoutError``). Resolved lazily to avoid forcing a
-# base import when this module is loaded only for its mock helpers.
+# Re-export agnostic HTTP exceptions lazily so test setup has one import site without forcing base imports.
 AGNOSTIC_EXCEPTIONS = frozenset(
     {
         'HTTPError',
@@ -337,21 +328,13 @@ def __getattr__(name: str) -> Any:
 
 
 def dev_http_client(persist: bool = False, **options: Any) -> 'HTTPClient':
-    """Build a real (non-mock) agnostic HTTP client for test fixtures, ``dd_environment`` conditions,
-    and dev scripts.
+    """Build a real agnostic HTTP client for test fixtures and dev scripts.
 
-    Routes through the same ``create_http_client`` factory the Agent uses, so real test traffic runs on
-    the production HTTP backend and follows it across the ``requests`` -> ``httpx`` cutover. Use this
-    instead of calling ``requests`` directly in test setup code.
+    Traffic uses create_http_client, matching the Agent backend across the requests to httpx cutover.
+    Prefer this to direct requests calls in test setup code.
 
-    Options passed here become client-level defaults that are forwarded to every request, so they must
-    be valid request options (for example ``headers``, ``auth``, ``verify``, ``timeout``). An
-    unrecognized key, or one that is only valid per call, raises on the first request rather than at
-    construction.
-
-    :param persist: Reuse a single connection across calls, replacing a ``requests.Session``.
-    :param options: Client-level request defaults (for example ``headers``, ``auth``, ``verify``,
-        ``timeout``). Per-call keyword arguments on the verb methods override these.
+    :param persist: Reuse one connection across calls, replacing requests.Session.
+    :param options: Client-level request defaults; per-call verb options override these.
     """
     try:
         from datadog_checks.base.utils.http import create_http_client
@@ -366,34 +349,30 @@ def dev_http_client(persist: bool = False, **options: Any) -> 'HTTPClient':
 
 
 def http_get(url: str, **options: Any) -> 'HTTPResponse':
-    """One-shot agnostic GET mirroring ``requests.get`` ergonomics. See :func:`dev_http_client`.
-
-    Each one-shot helper builds a fresh client per call, so connections are not reused across calls.
-    For cross-call connection reuse, use ``dev_http_client(persist=True)`` and call its verb methods.
-    """
+    """One-shot agnostic GET. Use dev_http_client(persist=True) for cross-call connection reuse."""
     return dev_http_client().get(url, **options)
 
 
 def http_post(url: str, **options: Any) -> 'HTTPResponse':
-    """One-shot agnostic POST mirroring ``requests.post`` ergonomics. See :func:`dev_http_client`."""
+    """One-shot agnostic POST. See dev_http_client."""
     return dev_http_client().post(url, **options)
 
 
 def http_head(url: str, **options: Any) -> 'HTTPResponse':
-    """One-shot agnostic HEAD. See :func:`dev_http_client`."""
+    """One-shot agnostic HEAD. See dev_http_client."""
     return dev_http_client().head(url, **options)
 
 
 def http_put(url: str, **options: Any) -> 'HTTPResponse':
-    """One-shot agnostic PUT. See :func:`dev_http_client`."""
+    """One-shot agnostic PUT. See dev_http_client."""
     return dev_http_client().put(url, **options)
 
 
 def http_patch(url: str, **options: Any) -> 'HTTPResponse':
-    """One-shot agnostic PATCH. See :func:`dev_http_client`."""
+    """One-shot agnostic PATCH. See dev_http_client."""
     return dev_http_client().patch(url, **options)
 
 
 def http_delete(url: str, **options: Any) -> 'HTTPResponse':
-    """One-shot agnostic DELETE. See :func:`dev_http_client`."""
+    """One-shot agnostic DELETE. See dev_http_client."""
     return dev_http_client().delete(url, **options)

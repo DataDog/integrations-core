@@ -42,8 +42,7 @@ class TestClose:
         assert http._session is None
 
     def test_request_succeeds_after_close(self):
-        # The documented contract is that the client stays usable after close(): a subsequent request
-        # transparently rebuilds the session and goes through.
+        # After close(), a subsequent request should rebuild the session and succeed.
         http = RequestsWrapper({}, {})
         http.persist_connections = True
         with mock.patch('requests.Session.get') as get:
@@ -127,8 +126,7 @@ class TestCookies:
 
     def test_get_cookie_conflict_returns_default(self):
         http = RequestsWrapper({}, {})
-        # Same cookie name on multiple domains makes RequestsCookieJar.get raise
-        # CookieConflictError. get_cookie must still honor its value-or-default contract.
+        # Cookie name conflicts raise in RequestsCookieJar.get; get_cookie must return the default.
         http.session.cookies.set('dup', 'a', domain='a.example.com')
         http.session.cookies.set('dup', 'b', domain='b.example.com')
         assert http.get_cookie('dup', 'fallback') == 'fallback'

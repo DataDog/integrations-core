@@ -1073,8 +1073,7 @@ def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
 
 
 def test_report_node_metrics_kubernetes1_18_httpstatuserror(monkeypatch, aggregator):
-    # In production, the check HTTP client returns a response whose raise_for_status()
-    # raises the agnostic HTTPStatusError.
+    # Production HTTP clients raise agnostic HTTPStatusError from response.raise_for_status().
     check = KubeletCheck('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
     check.node_spec_url = "http://localhost:10255/spec"

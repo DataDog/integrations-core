@@ -539,17 +539,9 @@ class PrometheusScraperMixin(object):
             self.log.debug("Unable to handle metric: %s - error: %s", message.name, err)
 
     def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None, instance=None):
-        """
-        Polls the metrics from the prometheus metrics endpoint provided.
-        Defaults to the protobuf format, but can use the formats specified by
-        the PrometheusFormat class.
-        Custom headers can be added to the default headers.
+        """Poll the Prometheus endpoint and return a valid response.
 
-        Returns a valid response, raise HTTPStatusError if the status code of the response
-        isn't valid - see response.raise_for_status()
-
-        The caller needs to close the response
-
+        Headers can extend defaults; caller must close the response.
         :param endpoint: string url endpoint
         :param pFormat: the preferred format defined in PrometheusFormat
         :param headers: extra headers

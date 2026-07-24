@@ -1,12 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the real (non-mock) HTTP client seam in ``datadog_checks.dev.http``.
-
-These live in the base test suite because base's environment installs both ``datadog_checks_base``
-(which provides ``create_http_client`` and the agnostic exceptions) and ``datadog_checks_dev`` (which
-defines the seam), mirroring the existing ``MockHTTPResponse`` tests in ``test_http_testing.py``.
-"""
+"""Tests for the real HTTP client seam across datadog_checks_base and datadog_checks_dev."""
 
 import json
 import socket
@@ -45,8 +40,7 @@ class _EchoHandler(BaseHTTPRequestHandler):
                 'path': self.path,
                 'headers': {key.lower(): value for key, value in self.headers.items()},
                 'body': body.decode('utf-8'),
-                # Source port of the client connection. Equal across two calls only when the
-                # underlying TCP connection is reused (keep-alive), so it makes reuse observable.
+                # Source port makes keep-alive connection reuse observable.
                 'client_port': self.client_address[1],
             }
         ).encode('utf-8')
@@ -91,8 +85,7 @@ class _EchoHandler(BaseHTTPRequestHandler):
 
 @pytest.fixture
 def http_server():
-    # ThreadingHTTPServer handles each connection on its own daemon thread, so a held-open
-    # keep-alive connection cannot starve accept() on the single serve_forever thread.
+    # Use per-connection daemon threads so keep-alive sockets do not block serve_forever.
     server = ThreadingHTTPServer(('127.0.0.1', 0), _EchoHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -107,12 +100,9 @@ def http_server():
 
 @pytest.fixture
 def refused_url():
-    # Bind an ephemeral port to learn a free one, then release it so connects are refused
-    # (RST) deterministically. Holding the socket bound-but-not-listening would eliminate the
-    # port-reassignment TOCTOU, but on macOS that makes the kernel drop the SYN so the connect
-    # times out (HTTPTimeoutError) instead of being refused. Releasing the port is the robust
-    # choice: it refuses instantly and cross-platform, at the cost of a negligible reuse window
-    # on a loopback ephemeral port within a single test.
+    # Release a probed ephemeral port so connects are refused quickly and cross-platform.
+    # Holding it bound avoids reuse races but makes macOS drop SYNs and time out instead.
+    # The loopback reuse window is negligible within this test.
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]

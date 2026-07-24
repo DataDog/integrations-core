@@ -89,7 +89,5 @@ def test_use_cert_from_response_reads_peer_cert(aggregator, dd_run_check):
     with mock.patch.object(type(check.http), 'get', return_value=MockHTTPResponse(status_code=200)):
         dd_run_check(check)
 
-    # The mock's `get_peer_cert` return value isn't a parsable certificate, so cert inspection
-    # reports UNKNOWN rather than raising. The point here is that no AttributeError is raised
-    # from accessing `.raw`, which the protocol-enforcing mock no longer exposes.
+    # Mock cert inspection should report UNKNOWN without touching the removed raw attribute.
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, count=1)

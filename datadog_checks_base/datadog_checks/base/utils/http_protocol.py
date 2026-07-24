@@ -7,10 +7,8 @@ from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from typing import Any, Protocol
 
-# Provisional backend-neutral HTTP surface (stabilizes once the httpx backend lands). RequestsWrapper
-# implements it on requests today; a future HTTPX2Wrapper implements the same surface on httpx. Do not
-# change existing methods, attributes, or their semantics without coordinating both backends.
-# Capabilities expose behavior, never a backend object (no requests or httpx type is returned).
+# Provisional backend-neutral HTTP surface; requests and future httpx backends must preserve this API.
+# Capabilities expose behavior, never backend objects.
 
 
 class HTTPResponse(Protocol):
@@ -72,7 +70,7 @@ class HTTPClient(Protocol):
     def put(self, url: str, **options: Any) -> HTTPResponse: ...
     def patch(self, url: str, **options: Any) -> HTTPResponse: ...
     def delete(self, url: str, **options: Any) -> HTTPResponse: ...
-    # The HTTP OPTIONS verb. Suffixed because ``options`` above is the request-defaults dict.
+    # The HTTP OPTIONS verb, suffixed because options above is the request-defaults dict.
     def options_method(self, url: str, **options: Any) -> HTTPResponse: ...
     def get_header(self, name: str, default: str | None = None) -> str | None: ...
     def set_header(self, name: str, value: str) -> None: ...
@@ -80,13 +78,10 @@ class HTTPClient(Protocol):
     # Suppress all HTTP-level auth (config-derived and environment/.netrc) for later requests, leaving trust_env intact.
     def disable_auth(self) -> None: ...
 
-    # Close any open connections. Idempotent (safe to call repeatedly or before any connection was
-    # opened); the client stays usable and reconnects on the next request.
+    # Close open connections; the client stays usable and reconnects on the next request.
     def close(self) -> None: ...
 
-    # Look up a persisted cookie by name, returning its value as a plain string, or default when the
-    # cookie is absent or its name is ambiguous (the same name set for multiple domains or paths). A
-    # backend must return default in the ambiguous case rather than raising.
+    # Return a persisted cookie value, or default when absent or ambiguous across domains/paths.
     def get_cookie(self, name: str, default: str | None = None) -> str | None: ...
 
     # Whether url should bypass any configured proxy under the client's no_proxy rules, False if none match.

@@ -645,7 +645,7 @@ def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved(moc
 
     kwargs = mock_http.get.call_args.kwargs
     assert kwargs.get("extra_headers") == {"Authorization": "Bearer tok"}  # merged into configured headers
-    assert "headers" not in kwargs  # never pass `headers`; it would shadow the HTTP client's configured auth
+    assert "headers" not in kwargs  # never pass headers; it would shadow the HTTP client's configured auth
 
 
 def test_fetch_inherits_http_client_auth_when_no_genresources_token(mock_http):

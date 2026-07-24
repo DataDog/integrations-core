@@ -33,8 +33,7 @@ class Client(object):
                 parameters = json.dumps(parameters)
             params['Parameters'] = parameters
 
-        # VoltDB expects credentials as query params.
-        # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
+        # VoltDB expects credentials as query params: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
         params['User'] = self._username
         params[self._password_field] = self._password
 

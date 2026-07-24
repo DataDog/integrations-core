@@ -55,7 +55,6 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
 
     def __init__(self, instance):
         # type: (Instance) -> None
-        # Reuse the check's backend-neutral HTTP client factory. Admin creds are needed to seed data and snapshots.
         admin_instance = dict(instance, username='admin', password='admin')
         self._client = VoltDBCheck('voltdb', {}, [admin_instance])._client
 

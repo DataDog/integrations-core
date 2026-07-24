@@ -9,8 +9,7 @@ import pytest
 from datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper import OpenMetricsScraper
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
-# A raw requests ConnectTimeout translates to HTTPTimeoutError, a sibling of HTTPConnectionError, so both
-# must be swallowed under ignore_connection_errors to preserve the pre-migration ConnectionError coverage.
+# Both connection errors must be swallowed to preserve pre-migration ConnectTimeout coverage.
 AGNOSTIC_CONNECTION_ERRORS = [HTTPConnectionError, HTTPTimeoutError]
 
 

@@ -84,7 +84,6 @@ CREDENTIAL_CASES = [
 
 def test_check_disables_http_auth():
     # type: () -> None
-    # VoltDB authenticates via query params, so the check disables HTTP-level auth (config-derived and .netrc).
     instance = {'url': 'http://localhost:8080', 'username': 'doggo', 'password': 'doggopass'}
     fake = mock.MagicMock()
 
@@ -96,7 +95,6 @@ def test_check_disables_http_auth():
 
 def test_raise_for_status_includes_response_details():
     # type: () -> None
-    # HTTP errors are enriched with VoltDB's statusstring detail from the response body.
     instance = {'url': 'http://localhost:8080', 'username': 'admin', 'password': 'secret'}
     check = VoltDBCheck('voltdb', {}, [instance])
     response = MockHTTPResponse(status_code=400, json_data={'statusstring': 'Bad procedure'})
@@ -160,7 +158,6 @@ def test_request_encodes_parameters(parameters, expected_value):
 @pytest.mark.parametrize('password_hashed, password_field, absent_field', CREDENTIAL_CASES)
 def test_check_wires_credentials_into_query_params(password_hashed, password_field, absent_field):
     # type: (bool, str, str) -> None
-    # Only the through-the-check path proves config.password_hashed selects the right field, with no per-call auth.
     instance = {
         'url': 'http://localhost:8080',
         'username': 'admin',

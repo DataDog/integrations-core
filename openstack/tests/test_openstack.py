@@ -108,7 +108,7 @@ def test_from_config():
 
 
 def test_keystone_auth_ssl_verify_default():
-    """The HTTP client verifies TLS by default and honors an explicit ``ssl_verify: false`` opt-out."""
+    """The HTTP client verifies TLS by default and honors explicit ssl_verify: false."""
     base_init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     default_check = OpenStackCheck('openstack', base_init_config, instances=[{'name': 'test'}])

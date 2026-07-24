@@ -400,9 +400,7 @@ class ArgocdResourceCollector:
 
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
-        # Pass a dedicated genresources token only when set, via extra_headers (merges with configured
-        # headers). Omit it otherwise: even empty extra_headers forces a per-request header override before
-        # inherited auth headers are applied, which would drop that auth.
+        # Add genresources auth via extra_headers only when set; an empty override would drop inherited auth.
         kwargs: dict = {}
         headers = auth_headers(self._auth_token)
         if headers:

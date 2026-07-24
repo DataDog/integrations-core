@@ -817,14 +817,7 @@ class OpenMetricsScraperMixin(object):
             )
 
     def poll(self, scraper_config, headers=None):
-        """
-        Returns a valid response, otherwise raise HTTPStatusError if the status code of the
-        response isn't valid - see `response.raise_for_status()`
-
-        The caller needs to close the response.
-
-        Custom headers can be added to the default headers.
-        """
+        """Return a valid response, raising HTTPStatusError for bad status codes; caller closes it."""
         endpoint = scraper_config.get('prometheus_url')
 
         # Should we send a service check for when we make a request

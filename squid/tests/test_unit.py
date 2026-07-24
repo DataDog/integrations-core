@@ -67,8 +67,7 @@ def test_get_counters(check, mock_http):
         mock_http.get.return_value = MockHTTPResponse(content="client_http.requests=42\n\n")
         check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
         check.get_counters('host', 'port', [])
-        # we assert `parse_counter` was called only once despite the raw text
-        # containing multiple `\n` chars
+        # Assert parse_counter is called once despite multiple newline chars in the raw text.
         check.parse_counter.assert_called_once()
 
 

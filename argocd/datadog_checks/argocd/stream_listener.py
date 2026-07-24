@@ -127,9 +127,7 @@ class ArgocdApplicationStreamListener:
             "stream": True,
             "timeout": (CONNECT_TIMEOUT_SECONDS, self._read_timeout),
         }
-        # Pass a dedicated genresources token only when set, via extra_headers (merges with configured
-        # headers). Omit it otherwise: even empty extra_headers forces a per-request header override before
-        # inherited auth headers are applied, which would drop that auth.
+        # Add genresources auth via extra_headers only when set; an empty override would drop inherited auth.
         headers = auth_headers(self._auth_token)
         if headers:
             kwargs["extra_headers"] = headers

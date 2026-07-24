@@ -314,15 +314,7 @@ class TestSession:
             assert getattr(http.session, key) == value
 
     def test_timeout(self):
-        """
-        Respect the request timeout.
-
-        Here we test two things:
-        - We pass the timemout option correctly to the requests library.
-        - The timeout surfaces as the agnostic HTTPTimeoutError.
-
-        We trust requests to respect the timeout so we mock its response.
-        """
+        """Respect the request timeout and translate request timeout errors to HTTPTimeoutError."""
 
         mock_session = mock.create_autospec(requests.Session)
         mock_session.get.side_effect = requests.exceptions.Timeout()

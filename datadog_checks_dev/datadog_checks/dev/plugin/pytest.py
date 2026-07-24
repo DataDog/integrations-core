@@ -332,8 +332,7 @@ def mock_http(mocker):
     from datadog_checks.base.utils.http_protocol import HTTPClient
 
     client = create_autospec(HTTPClient)
-    # Protocol annotations are not picked up by create_autospec, so set data attributes explicitly;
-    # otherwise reading them off the mock raises AttributeError. Defaults mirror RequestsWrapper.
+    # create_autospec skips Protocol data attributes, so set RequestsWrapper-like defaults explicitly.
     client.options = {
         'auth': None,
         'cert': None,
@@ -369,12 +368,7 @@ def mock_http(mocker):
 
 @pytest.fixture
 def mock_openmetrics_http(mock_http, mocker):
-    """OpenMetrics HTTP mock with dual interception:
-
-    - v1 checks (OpenMetricsBaseCheck): patches OpenMetricsScraperMixin.get_http_handler to return mock_http.
-    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck.http PropertyMock; the
-      get_http_handler patch is unused on this path because v2 calls self.http.get(...) directly.
-    """
+    """OpenMetrics HTTP mock for v1 handler patching and v2 AgentCheck.http access."""
     mocker.patch(
         'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
         return_value=mock_http,

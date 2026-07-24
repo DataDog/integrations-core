@@ -157,8 +157,7 @@ def test_json_parse_error_converges_to_stdlib():
     assert exc_info.value.pos == 0
 
 
-# Group E: the auth-token seam. The poll runs before the main request (see handle_auth_token), so a
-# transport failure while fetching the token must surface as an agnostic type, not a raw requests one.
+# Group E: auth-token transport failures must surface as agnostic errors, not raw requests ones.
 def test_auth_token_fetch_error_maps_to_agnostic():
     http = RequestsWrapper({}, {})
     http.auth_token_handler = mock.MagicMock()
@@ -181,8 +180,7 @@ class IterableFailingResponse:
         return self.iter_content(128)
 
 
-# Group F: direct iteration. requests.Response.__iter__ delegates to iter_content, so `for chunk in
-# response` must translate mid-stream errors the same as an explicit iter_content() call.
+# Group F: direct for chunk in response iteration must translate mid-stream errors like iter_content.
 def test_direct_iteration_maps_mid_stream_exceptions():
     response = IterableFailingResponse(requests.exceptions.ConnectionError('dropped'))
     http = RequestsWrapper({}, {})

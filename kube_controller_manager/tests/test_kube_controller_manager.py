@@ -135,8 +135,7 @@ def generic_check_metrics(aggregator, check_deprecated):
 )
 def test_service_check(monkeypatch, mock_openmetrics_http, side_effect, expected_status, expected_message):
     instance = {'prometheus_url': 'http://localhost:10252/metrics'}
-    # mock_openmetrics_http satisfies detect_sli_endpoint during __init__
-    # the service-check path under test is driven by the seeded _http_handlers below
+    # mock_openmetrics_http handles detect_sli_endpoint; seeded _http_handlers drive this service-check path.
     mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
 
     check = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])

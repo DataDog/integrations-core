@@ -217,13 +217,9 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
 
 
 def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
-    """Translate a requests exception into the library-agnostic equivalent.
+    """Translate a requests exception into a backend-neutral HTTPError.
 
-    Order is significant. Several requests types subclass others, so the most
-    specific must be tested first.
-
-    ``response`` is supplied only by the ``raise_for_status`` seam, which passes the
-    agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
+    Order matters because requests exception classes overlap; response is only provided by raise_for_status.
     """
     message = str(exc) or exc.__class__.__name__
     request = getattr(exc, 'request', None)
@@ -291,8 +287,7 @@ class ResponseWrapper(ObjectProxy):
             )
 
     def __iter__(self):
-        # requests.Response.__iter__ delegates to the raw iter_content, so route direct iteration
-        # through the translating override instead of the wrapt-forwarded raw one.
+        # Route direct iteration through iter_content so mid-stream errors are translated.
         return self.iter_content(128)
 
     @property
@@ -316,8 +311,7 @@ class ResponseWrapper(ObjectProxy):
         raw = getattr(self.__wrapped__, 'raw', None)
         connection = getattr(raw, 'connection', None)
         sock = getattr(connection, 'sock', None)
-        # sock is None once the connection is released, and a bare (non-TLS) socket has no getpeercert,
-        # so a plain http:// request lands here. Either way there is no peer certificate to report.
+        # A released connection or plain HTTP socket has no peer certificate to report.
         getpeercert = getattr(sock, 'getpeercert', None)
         if getpeercert is None:
             return None
@@ -532,9 +526,7 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
-        # Whether to trust environment configuration (proxies, auth, CA bundles).
-        # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
-        # value so the reported state matches it.
+        # Trust environment config, mirroring requests.Session.trust_env and injected sessions.
         self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
 
         # Whether or not to log request information like method and url
@@ -569,19 +561,13 @@ class RequestsWrapper(object):
             self._session.trust_env = value
 
     def close(self) -> None:
-        """Close any open connections. Idempotent; the client stays usable and lazily rebuilds a default
-        session on the next request. An injected session is not restored after being closed."""
+        """Close open connections; next request rebuilds a default session, not an injected one."""
         if self._session is not None:
             self._session.close()
             self._session = None
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
-        """Look up a cookie by name on the persistent session, returning its value, or default if absent or ambiguous.
-
-        Only cookies retained on the persistent session are visible. Requests made without persistence
-        (the default unless persist_connections is set or persist=True is passed) use a throwaway session
-        whose cookies are discarded, so a cookie set by such a request is not found here.
-        """
+        """Return a persisted cookie value, or default if absent, ambiguous, or discarded after a throwaway request."""
         try:
             return self.session.cookies.get(name, default)
         except requests_cookies.CookieConflictError:

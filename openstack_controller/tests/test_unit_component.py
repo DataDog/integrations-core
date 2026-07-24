@@ -29,16 +29,14 @@ def component():
     return DummyComponent(mock.MagicMock())
 
 
-# Exceptions the decorator must treat as expected HTTP failures: swallowed, logged at DEBUG,
-# and (when the method reports a service check) surfaced as a CRITICAL service check.
+# Expected HTTP failures are swallowed, logged at DEBUG, and surfaced as CRITICAL service checks.
 CAUGHT_HTTP_EXCEPTIONS = [
     pytest.param(openstack.exceptions.HttpException(), id='sdk HttpException'),
     pytest.param(HTTPRequestError('boom'), id='agnostic HTTPRequestError'),
     pytest.param(HTTPStatusError('boom'), id='agnostic HTTPStatusError'),
 ]
 
-# Exceptions the decorator must let fall through to the generic handler: logged at ERROR,
-# with no service check reported. A non-HTTP SDKException is the case the catch narrowing hinges on.
+# Generic handler fallthroughs are logged at ERROR with no service check.
 FELL_THROUGH_EXCEPTIONS = [
     pytest.param(openstack.exceptions.SDKException(), id='non-http SDKException'),
     pytest.param(ValueError('boom'), id='unrelated exception'),

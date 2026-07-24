@@ -406,11 +406,8 @@ class OpenMetricsScraper:
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
         except (HTTPConnectionError, HTTPTimeoutError) as e:
-            # HTTPTimeoutError is included because requests' ConnectTimeout (previously caught by the raw
-            # ConnectionError) now translates to HTTPTimeoutError, a sibling of HTTPConnectionError. The
-            # agnostic hierarchy does not distinguish connect from read timeouts, so a mid-stream ReadTimeout
-            # is now swallowed here too under ignore_connection_errors. That is intentional: an unresponsive
-            # endpoint is exactly what the flag is meant to tolerate.
+            # ConnectTimeout now maps to HTTPTimeoutError; ignore_connection_errors should tolerate
+            # any unresponsive endpoint, including mid-stream timeouts.
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:

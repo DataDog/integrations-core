@@ -65,8 +65,7 @@ class ApiSdk(Api):
         return self._catalog.has_component(component_types)
 
     def _build_keystone_session(self, auth):
-        # keystoneauth builds its own transport; mirror the TLS config and headers from our HTTP
-        # client via the backend-neutral protocol surface instead of handing it the requests session.
+        # Mirror TLS config and headers through the backend-neutral protocol surface for keystoneauth.
         return session.Session(
             auth=auth,
             verify=self.http.options['verify'],
