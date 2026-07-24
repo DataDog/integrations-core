@@ -195,6 +195,18 @@ def get_histogram(check, metric_name, modifiers, global_options):
                         flush_first_value=flush_first_value,
                     )
 
+    histogram_percentiles = global_options['histogram_percentiles']
+    if histogram_percentiles:
+        from datadog_checks.base.checks.openmetrics.v2.utils import compute_histogram_percentiles
+
+        gauge_method = check.gauge
+        _base_histogram = histogram
+
+        def histogram(metric, sample_data, runtime_data):
+            sample_data_list = list(sample_data)
+            _base_histogram(metric, iter(sample_data_list), runtime_data)
+            compute_histogram_percentiles(gauge_method, metric_name, sample_data_list, histogram_percentiles)
+
     del check
     del modifiers
     del global_options

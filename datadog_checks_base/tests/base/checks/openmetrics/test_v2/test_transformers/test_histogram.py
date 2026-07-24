@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 
 from ..utils import get_check
 
@@ -589,3 +590,93 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+PERCENTILE_PAYLOAD = """
+    # HELP test_hist_seconds Test histogram.
+    # TYPE test_hist_seconds histogram
+    test_hist_seconds_bucket{le="1.0"} 1
+    test_hist_seconds_bucket{le="2.0"} 2
+    test_hist_seconds_bucket{le="+Inf"} 2
+    test_hist_seconds_sum 1.5
+    test_hist_seconds_count 2
+    """
+
+
+def test_percentiles_basic(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(PERCENTILE_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'histogram_percentiles': [50, 95, 99]})
+    dd_run_check(check)
+
+    # p50: target=1.0, bucket le=1.0 has count=1 >= 1.0, fraction=(1-0)/(1-0)=1.0, estimate=1.0
+    aggregator.assert_metric(
+        'test.test_hist_seconds.percentile',
+        1.0,
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'percentile:p50'],
+    )
+    # p95: target=1.9, interpolated between le=1.0 (count=1) and le=2.0 (count=2), estimate=1.9
+    aggregator.assert_metric(
+        'test.test_hist_seconds.percentile',
+        1.9,
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'percentile:p95'],
+    )
+    # p99: target=1.98, interpolated similarly, estimate=1.98
+    aggregator.assert_metric(
+        'test.test_hist_seconds.percentile',
+        1.98,
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'percentile:p99'],
+    )
+
+
+def test_percentiles_avg(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(PERCENTILE_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'histogram_percentiles': ['avg']})
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.test_hist_seconds.percentile',
+        0.75,
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'percentile:avg'],
+    )
+
+
+def test_percentiles_p100(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(PERCENTILE_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'histogram_percentiles': [100]})
+    dd_run_check(check)
+
+    # p100 returns the last finite bucket upper bound
+    aggregator.assert_metric(
+        'test.test_hist_seconds.percentile',
+        2.0,
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'percentile:p100'],
+    )
+
+
+def test_percentiles_zero_count(aggregator, dd_run_check, mock_http_response):
+    payload = """
+        # HELP test_zero_seconds Test empty histogram.
+        # TYPE test_zero_seconds histogram
+        test_zero_seconds_bucket{le="1.0"} 0
+        test_zero_seconds_bucket{le="2.0"} 0
+        test_zero_seconds_bucket{le="+Inf"} 0
+        test_zero_seconds_sum 0
+        test_zero_seconds_count 0
+        """
+    mock_http_response(payload)
+    check = get_check({'metrics': ['.+'], 'histogram_percentiles': [50, 'avg']})
+    dd_run_check(check)
+
+    assert len(aggregator.metrics('test.test_zero_seconds.percentile')) == 0
+
+
+def test_percentiles_invalid_value(dd_run_check, mock_http_response):
+    mock_http_response(PERCENTILE_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'histogram_percentiles': [42]})
+    with pytest.raises(Exception, match='Entry #1 of setting `histogram_percentiles`'):
+        dd_run_check(check)

@@ -5,8 +5,11 @@ import re
 from copy import deepcopy
 
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 
 from . import transformers
+
+ALLOWED_HISTOGRAM_PERCENTILES = frozenset({50, 75, 90, 95, 99, 100, 'avg'})
 
 DEFAULT_METRIC_TYPE = 'native'
 
@@ -28,6 +31,16 @@ class MetricTransformer:
         self.non_cumulative_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
             config.get('non_cumulative_histogram_buckets', False)
         )
+        histogram_percentiles_raw = config.get('histogram_percentiles', [])
+        if not isinstance(histogram_percentiles_raw, list):
+            raise ConfigurationError('Setting `histogram_percentiles` must be an array')
+        self.histogram_percentiles = []
+        for i, p in enumerate(histogram_percentiles_raw, 1):
+            if p not in ALLOWED_HISTOGRAM_PERCENTILES:
+                raise ConfigurationError(
+                    f'Entry #{i} of setting `histogram_percentiles` must be one of: 50, 75, 90, 95, 99, 100, "avg"'
+                )
+            self.histogram_percentiles.append(p)
 
         # Accessible to every transformer
         self.global_options = {
@@ -35,6 +48,7 @@ class MetricTransformer:
             'collect_histogram_buckets': self.collect_histogram_buckets,
             'histogram_buckets_as_distributions': self.histogram_buckets_as_distributions,
             'non_cumulative_histogram_buckets': self.non_cumulative_histogram_buckets,
+            'histogram_percentiles': self.histogram_percentiles,
         }
 
         metrics_config = deepcopy(self.normalize_metric_config(config))
