@@ -171,3 +171,59 @@ def test_trigger_run_inject_integration(ddev, data_dir, mocker):
     assert not result.output
 
     invoke.assert_called_once_with(['check', integration, '-l', 'debug'], env_vars=None)
+
+
+def test_temporary_config_is_restored_and_synchronized(ddev, data_dir, temp_dir, mocker):
+    invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
+    sync_config = mocker.patch('ddev.e2e.agent.docker.DockerAgent.sync_config')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+    env_data.write_metadata({})
+    original_config = {'instances': [{'host': 'original'}]}
+    env_data.write_config(original_config)
+    temporary_config = temp_dir / 'temporary.json'
+    temporary_config.write_text('{"instances": []}')
+
+    result = ddev(
+        'env',
+        'agent',
+        integration,
+        environment,
+        '--config-file',
+        str(temporary_config),
+        'check',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert env_data.read_config() == original_config
+    invoke.assert_called_once_with(['check', integration], env_vars=None)
+    sync_config.assert_called_once_with()
+
+
+def test_temporary_config_absence_is_restored_and_synchronized(ddev, data_dir, temp_dir, mocker):
+    invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
+    sync_config = mocker.patch('ddev.e2e.agent.docker.DockerAgent.sync_config')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+    env_data.write_metadata({})
+    temporary_config = temp_dir / 'temporary.json'
+    temporary_config.write_text('{"instances": []}')
+
+    result = ddev(
+        'env',
+        'agent',
+        integration,
+        environment,
+        '--config-file',
+        str(temporary_config),
+        'check',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert not env_data.config_file.exists()
+    invoke.assert_called_once_with(['check', integration], env_vars=None)
+    sync_config.assert_called_once_with()

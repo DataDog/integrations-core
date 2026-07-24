@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
@@ -11,16 +11,12 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.command('shell', short_help='Enter a shell alongside the Agent')
+@click.command('logs', short_help='Show logs for the Agent')
 @click.argument('intg_name', metavar='INTEGRATION')
 @click.argument('environment')
 @click.pass_obj
-def shell(app: Application, *, intg_name: str, environment: str):
-    """
-    Enter a shell alongside the Agent.
-    """
-    import subprocess
-
+def logs(app: Application, *, intg_name: str, environment: str):
+    """Show backend-specific diagnostics for the Agent."""
     from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
 
@@ -34,6 +30,6 @@ def shell(app: Application, *, intg_name: str, environment: str):
     agent = create_agent_interface(app, integration, environment, metadata, env_data.config_file)
 
     try:
-        agent.enter_shell()
-    except subprocess.CalledProcessError as e:
-        app.abort(code=e.returncode)
+        agent.show_logs()
+    except Exception as e:
+        app.abort(str(e))

@@ -20,9 +20,9 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
     """
     Stop environments. To stop all the running environments, use `all` as the integration name and the environment.
     """
-    from ddev.e2e.agent import get_agent_interface
+    from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
-    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EEnvVars, E2EMetadata
+    from ddev.e2e.constants import E2EEnvVars, E2EMetadata
     from ddev.e2e.run import E2EEnvironmentRunner
     from ddev.utils.fs import temp_directory
 
@@ -63,8 +63,7 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
                 metadata = env_data.read_metadata()
                 env_vars.update(metadata.get(E2EMetadata.ENV_VARS, {}))
 
-                agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-                agent = get_agent_interface(agent_type)(app, integration, env, metadata, env_data.config_file)
+                agent = create_agent_interface(app, integration, env, metadata, env_data.config_file)
 
                 try:
                     agent.stop()

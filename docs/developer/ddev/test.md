@@ -91,6 +91,43 @@ You can use the `%HOST%` template variable in your configuration instead of hard
 
 Note: Vagrant environments are not supported in CI environments due to virtualization constraints.
 
+### Kubernetes Agent
+
+The Kubernetes Agent backend runs the Datadog Agent only in a disposable Kubernetes cluster that is owned by the E2E
+fixture. The currently supported provisioner is `kind_run`, which creates the cluster before the fixture yields and deletes
+the whole cluster during fixture teardown. The backend is not designed for shared or pre-existing clusters.
+
+```python
+@pytest.fixture(scope='session')
+def dd_environment():
+    with kind_run(conditions=[setup_workload]) as kubeconfig:
+        yield {
+            'instances': [
+                # Use endpoints reachable from inside the cluster.
+                {'openmetrics_endpoint': 'http://my-service.default.svc.cluster.local:8080/metrics'},
+            ],
+        }, {
+            'agent_type': 'kubernetes',
+            'kubernetes': {
+                'kubeconfig': kubeconfig,
+                # Optional: install an Autodiscovery template for this integration.
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', CHECK_NAME, 'data', 'auto_conf.yaml'),
+            },
+        }
+```
+
+The backend uses the Agent image selected by `ddev env start --agent` or `DDEV_E2E_AGENT`, installs and synchronizes
+local packages requested by `--dev` or `--base`, and implements Agent commands through `kubectl exec`. Static and
+discovery E2E tests therefore continue to use `dd_agent_check` and `dd_agent_check_discovery`.
+
+Agent images default to the `Always` pull policy so mutable release and development tags are refreshed. Environments
+that import a local image into the cluster can set `image_pull_policy` to `IfNotPresent` or `Never`. The backend creates
+one Agent in the fixed `ddev-agent` namespace with fixed cluster-scoped RBAC names. Resource cleanup happens when
+`kind_run` deletes the whole disposable cluster.
+
+The initial implementation supports exactly one schedulable Kubernetes node. It rejects multi-node clusters until
+Agent targeting or fan-out semantics are defined.
+
 ### Terraform
 
 The `terraform_run` utility makes it easy to create services from a directory of [Terraform][terraform-home] files.
