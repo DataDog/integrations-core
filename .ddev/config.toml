@@ -59,6 +59,7 @@ control_m = "control_m."
 nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
+iris = "iris."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
