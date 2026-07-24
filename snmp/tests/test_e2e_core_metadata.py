@@ -856,7 +856,7 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         ],
         'vendor': 'netapp',
         'version': '9.3P7:',
-        'device_type': 'other',
+        'device_type': 'storage',
         'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
