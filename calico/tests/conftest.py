@@ -5,19 +5,46 @@ from os import path
 
 import pytest
 
-from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 from .common import EXTRA_METRICS
 
 NAMESPACE = "calico"
 HERE = path.dirname(path.abspath(__file__))
+FELIX_METRICS_ENDPOINT = 'http://felix-metrics-svc.kube-system.svc.cluster.local:9091/metrics'
 
 
 def _felix_config_default_exists():
     result = run_command(["kubectl", "get", "felixconfiguration", "default"], capture='both')
+    return result.code == 0
+
+
+def felix_metrics_available() -> bool:
+    result = run_command(
+        [
+            "kubectl",
+            "run",
+            "felix-metrics-readiness",
+            "--namespace",
+            "kube-system",
+            "--image=busybox:1.36.1",
+            "--restart=Never",
+            "--attach",
+            "--rm",
+            "--quiet",
+            "--",
+            "wget",
+            "-q",
+            "-T",
+            "2",
+            "-O",
+            "/dev/null",
+            FELIX_METRICS_ENDPOINT,
+        ],
+        capture='both',
+    )
     return result.code == 0
 
 
@@ -60,29 +87,23 @@ def setup_calico():
         check=True,
     )
 
+    # Check from a temporary pod because the host cannot resolve Kubernetes Service DNS.
+    WaitFor(felix_metrics_available, wait=2, attempts=100)()
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with (
-        kind_run(
-            conditions=[setup_calico], kind_config=path.join(HERE, 'kind', 'kind-calico.yaml'), sleep=10
-        ) as kubeconfig,
-        port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
-            calico_host,
-            calico_port,
-        ),
-    ):
-        endpoint = 'http://{}:{}/metrics'.format(calico_host, calico_port)
-
-        # We can't add this to `kind_run` because we don't know the URL at this moment
-        condition = CheckEndpoints(endpoint, wait=2, attempts=100)
-        condition()
-
-        yield {
-            "openmetrics_endpoint": endpoint,
+    with kind_run(
+        conditions=[setup_calico], kind_config=path.join(HERE, 'kind', 'kind-calico.yaml'), sleep=10
+    ) as kubeconfig:
+        instance = {
+            "openmetrics_endpoint": FELIX_METRICS_ENDPOINT,
             "namespace": NAMESPACE,
             "extra_metrics": EXTRA_METRICS,
         }
+        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
+
+        yield instance, metadata
 
 
 @pytest.fixture
