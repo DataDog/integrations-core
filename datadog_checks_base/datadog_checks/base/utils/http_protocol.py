@@ -17,6 +17,9 @@ class HTTPResponse(Protocol):
     status_code: int
     content: bytes
     text: str
+    # Response headers. Backends MUST expose these case-insensitively (a lookup by any casing
+    # succeeds), per HTTP semantics. Callers rely on it, e.g. 'content-length' in headers and
+    # headers.get('Content-Type'), so a backend returning a case-sensitive plain dict would regress them.
     headers: Mapping[str, str]
     # Character encoding used to decode text. None until determined. Writable to force a default.
     encoding: str | None
