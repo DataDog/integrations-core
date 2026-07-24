@@ -1,1 +1,1 @@
-Add a Kubernetes Agent backend for running integration E2E checks and Autodiscovery tests inside disposable Kind clusters.
+Add a Kubernetes Agent interface for running the Agent in Kind-based E2E test clusters, alongside the existing Docker and Vagrant interfaces.
