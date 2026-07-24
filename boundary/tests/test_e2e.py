@@ -5,19 +5,12 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.boundary import BoundaryCheck
-from datadog_checks.dev.docker import CONTAINER_STABILITY_LOG_PATTERNS, assert_all_discovery_candidates_stable
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import HEALTH_ENDPOINT, METRIC_ENDPOINT
 
 pytestmark = [pytest.mark.e2e]
-
-# The container's audit event sink continuously retries writing to a host-owned, non-writable
-# log file (the fixture bind-mounts a host tempfile that the container's non-root `boundary`
-# user can't write to), logging benign "error"-keyed retry/write-failure messages unrelated to
-# metrics collection. These take several different wordings but all stem from that one root
-# cause, so the generic "error" pattern is dropped in favor of the more specific crash indicators.
-DISCOVERY_STABILITY_LOG_PATTERNS = tuple(pattern for pattern in CONTAINER_STABILITY_LOG_PATTERNS if pattern != 'error')
 
 
 def test(dd_agent_check, instance):
@@ -61,4 +54,4 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
 
 def test_e2e_discovery_all_candidates(dd_agent_check):
-    assert_all_discovery_candidates_stable(dd_agent_check, BoundaryCheck, log_patterns=DISCOVERY_STABILITY_LOG_PATTERNS)
+    assert_all_discovery_candidates_stable(dd_agent_check, BoundaryCheck)
