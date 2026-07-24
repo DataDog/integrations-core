@@ -461,13 +461,17 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
+        # Negotiate the OpenMetrics exposition format, but never clobber an Accept header the user
+        # explicitly configured. get_default_headers() seeds Accept with '*/*', so that value (or an
+        # absent header) means "unset" and is safe to replace.
         extra_headers = kwargs.get('extra_headers', {})
-        if self._use_latest_spec:
-            accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
-        else:
-            accept_header = 'text/plain'
-        extra_headers['Accept'] = accept_header
-        kwargs['extra_headers'] = extra_headers
+        if self.http.options['headers'].get('Accept') in (None, '*/*') and 'Accept' not in extra_headers:
+            if self._use_latest_spec:
+                accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+            else:
+                accept_header = 'text/plain'
+            extra_headers['Accept'] = accept_header
+            kwargs['extra_headers'] = extra_headers
         return self.http.get(self.endpoint, **kwargs)
 
     def set_dynamic_tags(self, *tags):

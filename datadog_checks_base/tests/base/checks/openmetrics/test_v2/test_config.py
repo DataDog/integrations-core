@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
 
 from .utils import get_check
+
+LATEST_SPEC_ACCEPT = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
 
 
 class TestPrometheusEndpoint:
@@ -412,15 +415,34 @@ class TestShareLabels:
             dd_run_check(check, extract_message=True)
 
 
+def _accept_header_sent(scraper):
+    # RequestsWrapper uses __slots__, so patch ``get`` on the type rather than the instance.
+    with mock.patch.object(type(scraper.http), 'get') as mock_get:
+        scraper.send_request()
+    _, kwargs = mock_get.call_args
+    return kwargs.get('extra_headers', {}).get('Accept')
+
+
 class TestUseLatestSpec:
     def test_strict_latest_spec(self, dd_run_check):
         check = get_check({'use_latest_spec': True})
         check.configure_scrapers()
         scraper = check.scrapers['test']
         assert scraper._use_latest_spec is True
+        assert _accept_header_sent(scraper) == LATEST_SPEC_ACCEPT
 
     def test_dynamic_spec(self, dd_run_check):
         check = get_check({'use_latest_spec': False})
         check.configure_scrapers()
         scraper = check.scrapers['test']
         assert scraper._use_latest_spec is False
+        assert _accept_header_sent(scraper) == 'text/plain'
+
+    def test_user_accept_header_is_preserved(self, dd_run_check):
+        # A user-configured Accept header must not be overridden by the OpenMetrics format negotiation.
+        check = get_check({'use_latest_spec': True, 'headers': {'Accept': 'application/json'}})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        assert scraper.http.options['headers'].get('Accept') == 'application/json'
+        assert _accept_header_sent(scraper) != LATEST_SPEC_ACCEPT
