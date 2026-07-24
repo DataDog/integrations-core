@@ -8,6 +8,13 @@ from datadog_checks.argo_workflows import ArgoWorkflowsCheck
 from datadog_checks.base.stubs import aggregator as agg
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert ArgoWorkflowsCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 @pytest.fixture
 def instance():
