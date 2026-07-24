@@ -99,6 +99,7 @@ SHOW_METRIC_DATA = {
             'messages_rate_size',
         ],
         'tags': ['destination', 'user', 'component_type', 'conn'],
+        'aggregate': True,
     },
     'show stat producers': {
         'regex': re.compile(
@@ -119,6 +120,7 @@ SHOW_METRIC_DATA = {
             'messages_rate_size',
         ],
         'tags': ['destination', 'user', 'component_type', 'conn'],
+        'aggregate': True,
     },
     'show connections full': {
         'regex': re.compile(

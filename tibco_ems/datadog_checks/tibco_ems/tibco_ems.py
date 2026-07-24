@@ -80,7 +80,7 @@ class TibcoEMSCheck(AgentCheck):
             if command == 'show server':
                 self._submit_metrics_factory(metric_prefix, metric_info, metric_keys, tag_keys)
             else:
-                if command in {'show stat consumers', 'show stat producers'}:
+                if SHOW_METRIC_DATA[command].get('aggregate'):
                     metric_info = self._aggregate_metric_entries(metric_info, metric_keys, tag_keys)
                 for metric_entry in metric_info:
                     self._submit_metrics_factory(metric_prefix, metric_entry, metric_keys, tag_keys)
@@ -217,9 +217,10 @@ class TibcoEMSCheck(AgentCheck):
     ) -> list[dict[str, Any]]:
         aggregated_entries = {}
         for metric_entry in metric_entries:
-            tag_values = tuple((key, metric_entry[key]) for key in tag_keys if metric_entry.get(key))
+            present_keys = [key for key in tag_keys if key in metric_entry]
+            tag_values = tuple((key, metric_entry[key]) for key in present_keys)
             aggregated_entry = aggregated_entries.setdefault(
-                tag_values, {key: metric_entry[key] for key in tag_keys if key in metric_entry}
+                tag_values, {key: metric_entry[key] for key in present_keys}
             )
             for metric_name in metric_names:
                 metric_value = metric_entry[metric_name]
