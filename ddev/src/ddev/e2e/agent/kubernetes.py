@@ -15,13 +15,13 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
-_POD_NAME = 'ddev-agent'
-_CONTAINER_NAME = 'agent'
+POD_NAME = 'ddev-agent'
+CONTAINER_NAME = 'agent'
 NAMESPACE = 'ddev-agent'
 CLUSTER_RESOURCE_NAME = 'ddev-agent'
-_DEFAULT_WAIT_TIMEOUT = 120
-_LOCAL_PACKAGES_METADATA = 'local_packages'
-_PREPARED_MARKER = '/home/.ddev-agent-prepared'
+DEFAULT_WAIT_TIMEOUT = 120
+LOCAL_PACKAGES_METADATA = 'local_packages'
+PREPARED_MARKER = '/home/.ddev-agent-prepared'
 
 
 class KubernetesAgent(AgentInterface):
@@ -70,7 +70,7 @@ class KubernetesAgent(AgentInterface):
 
     @property
     def _wait_timeout(self) -> int:
-        timeout = self._kubernetes_metadata.get('wait_timeout', _DEFAULT_WAIT_TIMEOUT)
+        timeout = self._kubernetes_metadata.get('wait_timeout', DEFAULT_WAIT_TIMEOUT)
         if isinstance(timeout, bool) or not isinstance(timeout, int) or timeout <= 0:
             raise ValueError('Kubernetes Agent `wait_timeout` must be a positive integer')
         return timeout
@@ -101,7 +101,7 @@ class KubernetesAgent(AgentInterface):
         check: bool = True,
         capture: bool = False,
     ) -> subprocess.CompletedProcess:
-        args = ['exec', '--namespace', self._namespace, f'pod/{_POD_NAME}', '--container', _CONTAINER_NAME, '--']
+        args = ['exec', '--namespace', self._namespace, f'pod/{POD_NAME}', '--container', CONTAINER_NAME, '--']
         if env_vars:
             args.append('env')
             args.extend(f'{key}={value}' for key, value in sorted(env_vars.items()))
@@ -158,7 +158,7 @@ class KubernetesAgent(AgentInterface):
             ]
         )
 
-        labels = {**self._resource_labels, 'app.kubernetes.io/name': _POD_NAME}
+        labels = {**self._resource_labels, 'app.kubernetes.io/name': POD_NAME}
 
         image_pull_policy = self._kubernetes_metadata.get('image_pull_policy', 'Always')
         if image_pull_policy not in {'Always', 'IfNotPresent', 'Never'}:
@@ -190,7 +190,7 @@ class KubernetesAgent(AgentInterface):
                 {
                     'apiVersion': 'v1',
                     'kind': 'ServiceAccount',
-                    'metadata': {'name': _POD_NAME, 'namespace': self._namespace, 'labels': self._resource_labels},
+                    'metadata': {'name': POD_NAME, 'namespace': self._namespace, 'labels': self._resource_labels},
                 },
                 {
                     'apiVersion': 'rbac.authorization.k8s.io/v1',
@@ -208,21 +208,21 @@ class KubernetesAgent(AgentInterface):
                         'name': self._cluster_resource_name,
                     },
                     'subjects': [
-                        {'kind': 'ServiceAccount', 'name': _POD_NAME, 'namespace': self._namespace},
+                        {'kind': 'ServiceAccount', 'name': POD_NAME, 'namespace': self._namespace},
                     ],
                 },
                 {
                     'apiVersion': 'v1',
                     'kind': 'Pod',
-                    'metadata': {'name': _POD_NAME, 'namespace': self._namespace, 'labels': labels},
+                    'metadata': {'name': POD_NAME, 'namespace': self._namespace, 'labels': labels},
                     'spec': {
-                        'serviceAccountName': _POD_NAME,
+                        'serviceAccountName': POD_NAME,
                         'restartPolicy': 'Always',
                         'terminationGracePeriodSeconds': 0,
                         'tolerations': [{'operator': 'Exists'}],
                         'containers': [
                             {
-                                'name': _CONTAINER_NAME,
+                                'name': CONTAINER_NAME,
                                 'image': agent_build,
                                 'imagePullPolicy': image_pull_policy,
                                 'env': container_env,
@@ -245,7 +245,7 @@ class KubernetesAgent(AgentInterface):
                 '--namespace',
                 self._namespace,
                 '--for=condition=Ready',
-                f'pod/{_POD_NAME}',
+                f'pod/{POD_NAME}',
                 f'--timeout={self._wait_timeout}s',
             ]
         )
@@ -274,9 +274,9 @@ class KubernetesAgent(AgentInterface):
             [
                 'cp',
                 '--container',
-                _CONTAINER_NAME,
+                CONTAINER_NAME,
                 source_path.name,
-                f'{self._namespace}/{_POD_NAME}:{destination}',
+                f'{self._namespace}/{POD_NAME}:{destination}',
             ],
             check=True,
             cwd=source_path.parent,
@@ -300,14 +300,14 @@ class KubernetesAgent(AgentInterface):
         self._copy_file(auto_conf, f'{self._config_dir}/auto_conf.yaml')
 
     def _remember_local_packages(self, local_packages: dict[Path, str]) -> None:
-        self._kubernetes_metadata[_LOCAL_PACKAGES_METADATA] = {
+        self._kubernetes_metadata[LOCAL_PACKAGES_METADATA] = {
             str(local_package): features for local_package, features in local_packages.items()
         }
 
     def _local_packages(self) -> dict[Path, str]:
         from ddev.utils.fs import Path
 
-        local_packages = cast(dict[str, str], self._kubernetes_metadata.get(_LOCAL_PACKAGES_METADATA, {}))
+        local_packages = cast(dict[str, str], self._kubernetes_metadata.get(LOCAL_PACKAGES_METADATA, {}))
         return {Path(path): features for path, features in local_packages.items()}
 
     def _sync_local_packages(self, *, install: bool = False) -> None:
@@ -340,7 +340,7 @@ class KubernetesAgent(AgentInterface):
             self._exec(self.platform.modules.shlex.split(command))
 
     def _require_prepared(self) -> None:
-        process = self._exec(['test', '-f', _PREPARED_MARKER], check=False)
+        process = self._exec(['test', '-f', PREPARED_MARKER], check=False)
         if process.returncode:
             raise RuntimeError(
                 'The Kubernetes Agent container is no longer prepared and may have restarted. '
@@ -363,7 +363,7 @@ class KubernetesAgent(AgentInterface):
         self._sync_auto_conf()
         self._run_metadata_commands('post_install_commands')
         self._restart_agent_process()
-        self._exec(['touch', _PREPARED_MARKER])
+        self._exec(['touch', PREPARED_MARKER])
 
     def stop(self) -> None:
         """Leave cleanup to the fixture that deletes the disposable cluster."""
@@ -416,9 +416,9 @@ class KubernetesAgent(AgentInterface):
                 '-it',
                 '--namespace',
                 self._namespace,
-                f'pod/{_POD_NAME}',
+                f'pod/{POD_NAME}',
                 '--container',
-                _CONTAINER_NAME,
+                CONTAINER_NAME,
                 '--',
                 'bash',
             ],
@@ -427,7 +427,7 @@ class KubernetesAgent(AgentInterface):
 
     def _show_logs(self, *, check: bool = False) -> None:
         self._kubectl(
-            ['logs', '--namespace', self._namespace, f'pod/{_POD_NAME}', '--container', _CONTAINER_NAME],
+            ['logs', '--namespace', self._namespace, f'pod/{POD_NAME}', '--container', CONTAINER_NAME],
             check=check,
         )
 
