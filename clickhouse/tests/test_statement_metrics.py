@@ -562,6 +562,81 @@ def test_rows_are_not_merged_across_nodes(check_with_dbm):
     assert 'test:clickhouse' in payload['tags']
 
 
+def _raw_query_log_row(server_node, count=5, total_time=500.0, event_time_us=1700000000000000):
+    """Build a raw system.query_log tuple in the column order STATEMENTS_QUERY selects."""
+    return (
+        12345,  # normalized_query_hash
+        server_node,  # hostName() as server_node
+        'SELECT 1',  # query
+        'default',  # user
+        'Select',  # query_type
+        0,  # exception_code
+        ['default'],  # databases
+        ['events'],  # tables
+        count,  # execution_count
+        total_time,  # total_duration_ms
+        100,  # read_rows
+        1000,  # read_bytes
+        0,  # written_rows
+        0,  # written_bytes
+        10,  # result_rows
+        100,  # result_bytes
+        2048,  # memory_usage
+        3000,  # cpu_us
+        300,  # cpu_wait_us
+        4096,  # peak_memory_usage
+        event_time_us,  # max_event_time_microseconds
+    )
+
+
+def test_load_query_log_statements_emits_server_node_per_node(check_with_dbm):
+    """Each per-(query, node) query_log row is preserved with its server_node field, not merged."""
+    metrics = check_with_dbm.statement_metrics
+
+    raw_rows = [
+        _raw_query_log_row('node-1', count=5, total_time=500.0),
+        _raw_query_log_row('node-2', count=3, total_time=300.0),
+    ]
+
+    with (
+        mock.patch.object(
+            metrics, '_build_per_node_checkpoint_filter', return_value=('', 0, {})
+        ),
+        mock.patch.object(metrics, '_execute_query', return_value=raw_rows),
+        mock.patch.object(metrics, '_set_checkpoint_from_event_time'),
+        mock.patch.object(metrics, '_track_node_checkpoint'),
+    ):
+        result_rows = metrics._load_query_log_statements()
+
+    # Both node rows survive as distinct rows, each carrying its own server_node
+    assert len(result_rows) == 2
+    by_node = {r['server_node']: r for r in result_rows}
+    assert set(by_node) == {'node-1', 'node-2'}
+    assert by_node['node-1']['count'] == 5
+    assert by_node['node-2']['count'] == 3
+    # mean_time is computed per-node, not across the merged total
+    assert by_node['node-1']['mean_time'] == pytest.approx(100.0)
+    assert by_node['node-2']['mean_time'] == pytest.approx(100.0)
+
+
+def test_load_query_log_statements_missing_node_yields_empty_field(check_with_dbm):
+    """A row with no hostName() value emits an empty server_node rather than raising."""
+    metrics = check_with_dbm.statement_metrics
+
+    with (
+        mock.patch.object(
+            metrics, '_build_per_node_checkpoint_filter', return_value=('', 0, {})
+        ),
+        mock.patch.object(metrics, '_execute_query', return_value=[_raw_query_log_row('')]),
+        mock.patch.object(metrics, '_set_checkpoint_from_event_time'),
+        mock.patch.object(metrics, '_track_node_checkpoint'),
+    ):
+        result_rows = metrics._load_query_log_statements()
+
+    assert len(result_rows) == 1
+    assert result_rows[0]['server_node'] == ''
+
+
 def test_metrics_row_with_empty_values(check_with_dbm):
     """Test handling of rows with empty/null values"""
     metrics = check_with_dbm.statement_metrics

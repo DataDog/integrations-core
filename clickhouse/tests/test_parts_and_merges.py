@@ -584,6 +584,10 @@ def test_emit_gauges_parts(check):
 
     active = next(v for n, v, _ in emitted if n == 'table.parts.active')
     assert active == 287
+    # Every parts series carries the node identity as both server_node and clickhouse_node
+    for _, _, tags in emitted:
+        assert 'server_node:node-1' in tags
+        assert 'clickhouse_node:node-1' in tags
     level_zero = next(v for n, v, _ in emitted if n == 'table.parts.level_zero')
     assert level_zero == 12
     compact = next(v for n, v, _ in emitted if n == 'table.parts.compact')
@@ -603,6 +607,9 @@ def test_emit_gauges_detached_parts(check):
     job._emit_gauges([], [], [], [], _collected_detached())
 
     by_name = {n: v for n, v, _ in emitted if n.startswith('table.detached_parts.')}
+    for _, _, tags in emitted:
+        assert 'server_node:node-1' in tags
+        assert 'clickhouse_node:node-1' in tags
     assert by_name['table.detached_parts.count'] == 6
     assert by_name['table.detached_parts.manual'] == 3
     assert by_name['table.detached_parts.corrupted'] == 2
@@ -645,6 +652,9 @@ def test_emit_gauges_merges(check):
         'merges.avg_progress',
     } <= names
 
+    for _, _, tags in emitted:
+        assert 'server_node:node-1' in tags
+        assert 'clickhouse_node:node-1' in tags
     memory = next(v for n, v, _ in emitted if n == 'merges.memory_bytes')
     assert memory == 1_300_000_000
     total_bytes = next(v for n, v, _ in emitted if n == 'merges.total_bytes')
@@ -669,6 +679,9 @@ def test_emit_gauges_mutations(check):
         'mutations.oldest_age_seconds',
     } <= names
 
+    for _, _, tags in emitted:
+        assert 'server_node:node-1' in tags
+        assert 'clickhouse_node:node-1' in tags
     remaining = next(v for n, v, _ in emitted if n == 'mutations.parts_remaining')
     assert remaining == 47
 
@@ -713,6 +726,9 @@ def test_emit_gauges_replication(check):
 
     job._emit_gauges([], [], [], _collected_replication_aggregated(), [])
 
+    for _, _, tags in emitted:
+        assert 'server_node:node-1' in tags
+        assert 'clickhouse_node:node-1' in tags
     depth = next(v for n, v, _ in emitted if n == 'replication.queue_depth')
     stuck = next(v for n, v, _ in emitted if n == 'replication.stuck_tasks')
     assert depth == 2

@@ -165,6 +165,57 @@ def test_create_batched_payload_error_fields(check_with_dbm):
     assert query_details['cpu_wait_us'] == 35000
 
 
+def test_create_batched_payload_carries_clickhouse_node(check_with_dbm):
+    """The per-node identity (from hostName()) is surfaced as clickhouse_node in query_details."""
+    query_errors = check_with_dbm.query_errors
+    query_errors._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM nonexistent_table',
+            'query_signature': 'abc123',
+            'query_duration_ms': 0.0,
+            'databases': 'default',
+            'user': 'default',
+            'exception': 'Table does not exist.',
+            'exception_code': 60,
+            'clickhouse_node': 'ch-node-1',
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = query_errors._create_batched_payload(rows)
+
+    query_details = payload['clickhouse_query_errors'][0]['query_details']
+    assert query_details['clickhouse_node'] == 'ch-node-1'
+
+
+def test_create_batched_payload_clickhouse_node_defaults_empty(check_with_dbm):
+    """A row without a node identity emits an empty clickhouse_node rather than raising."""
+    query_errors = check_with_dbm.query_errors
+    query_errors._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM nonexistent_table',
+            'query_signature': 'abc123',
+            'query_duration_ms': 0.0,
+            'databases': 'default',
+            'user': 'default',
+            'exception': 'Table does not exist.',
+            'exception_code': 60,
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = query_errors._create_batched_payload(rows)
+
+    query_details = payload['clickhouse_query_errors'][0]['query_details']
+    assert query_details['clickhouse_node'] == ''
+
+
 def test_create_batched_payload_structure(check_with_dbm):
     """Test that payload uses dbm_type=query_error and key=clickhouse_query_errors"""
     query_errors = check_with_dbm.query_errors
