@@ -82,7 +82,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
-            dbms="mysql",
+            dbms=check.dbms,
             job_name="statement-metrics",
             shutdown_callback=self._close_db_conn,
         )

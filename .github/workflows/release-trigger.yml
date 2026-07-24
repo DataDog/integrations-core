@@ -108,4 +108,4 @@ jobs:
       is-stable-release: ${{ needs.context.outputs.is-stable-release }}
     permissions:
       id-token: write
-      contents: write
+      contents: read
