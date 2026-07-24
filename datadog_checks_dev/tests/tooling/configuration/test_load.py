@@ -370,7 +370,9 @@ def test_discovery_named_ports_valid():
           example_name: test.yaml.example
           discovery:
             strategies:
-            - strategy: from_named_ports
+            - strategy: local:from_named_ports
+              provides: [port]
+              inputs: {port_names: 'array[string]'}
               port_names:
               - metrics
               - http-monitoring
@@ -395,7 +397,9 @@ def test_discovery_rejects_non_string_port_names():
           example_name: test.yaml.example
           discovery:
             strategies:
-            - strategy: from_named_ports
+            - strategy: local:from_named_ports
+              provides: [port]
+              inputs: {port_names: 'array[string]'}
               port_names:
               - metrics
               - 8080
