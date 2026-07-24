@@ -397,10 +397,11 @@ instances:
         #
         # collection_interval: 10
 
-        ## @param payload_row_limit - integer - optional - default: 1000
-        ## Set the maximum number of buffers to include in each buffer snapshot.
+        ## @param max_samples_per_collection - integer - optional - default: 1000
+        ## Maximum number of buffers to collect in a single run (applies LIMIT in SQL).
+        ## Prevents overwhelming the agent with too many buffers at once.
         #
-        # payload_row_limit: 1000
+        # max_samples_per_collection: 1000
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

@@ -100,5 +100,5 @@ def instance_collect_pending_async_inserts():
     return instance.CollectPendingAsyncInserts(
         enabled=False,
         collection_interval=10,
-        payload_row_limit=1000,
+        max_samples_per_collection=1000,
     )

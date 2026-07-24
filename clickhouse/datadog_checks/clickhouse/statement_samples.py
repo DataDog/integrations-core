@@ -107,7 +107,7 @@ SELECT
     toUnixTimestamp64Micro(first_update) AS flush_deadline_us
 FROM {asynchronous_inserts_table}
 ORDER BY total_bytes DESC
-LIMIT {payload_row_limit}
+LIMIT {max_samples_per_collection}
 """
 
 
@@ -177,7 +177,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         # Async insert buffer snapshot collapses into this job
         self._buffer_enabled = buffer_config.enabled
         self._buffer_collection_interval = buffer_config.collection_interval
-        self._buffer_payload_row_limit = buffer_config.payload_row_limit
+        self._buffer_max_samples_per_collection = buffer_config.max_samples_per_collection
         self._last_buffer_snapshot_time = 0.0
 
     def cancel(self):
@@ -503,7 +503,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """Query system.asynchronous_inserts for pending buffers."""
         query = BUFFER_SNAPSHOT_QUERY.format(
             asynchronous_inserts_table=self._check.get_system_table('asynchronous_inserts'),
-            payload_row_limit=self._buffer_payload_row_limit,
+            max_samples_per_collection=self._buffer_max_samples_per_collection,
         )
         try:
             if self._db_client is None:

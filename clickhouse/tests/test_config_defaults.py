@@ -107,7 +107,7 @@ EXPECTED_DEFAULTS = {
     'collect_pending_async_inserts': {
         'enabled': False,
         'collection_interval': 10,
-        'payload_row_limit': 1000,
+        'max_samples_per_collection': 1000,
     },
     # === Tagging ===
     'tags': (),

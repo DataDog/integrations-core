@@ -591,9 +591,10 @@ files:
             type: number
             example: 10
           fleet_configurable: false
-        - name: payload_row_limit
+        - name: max_samples_per_collection
           description: |
-            Set the maximum number of buffers to include in each buffer snapshot.
+            Maximum number of buffers to collect in a single run (applies LIMIT in SQL).
+            Prevents overwhelming the agent with too many buffers at once.
           value:
             type: integer
             example: 1000

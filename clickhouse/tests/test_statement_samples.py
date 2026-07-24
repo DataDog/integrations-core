@@ -339,7 +339,7 @@ def test_buffer_defaults_applied():
     # Verify defaults are applied
     assert samples._buffer_enabled is True
     assert samples._buffer_collection_interval == 10
-    assert samples._buffer_payload_row_limit == 1000
+    assert samples._buffer_max_samples_per_collection == 1000
 
 
 def test_buffer_only_constructs_job():
@@ -357,7 +357,7 @@ def test_buffer_only_constructs_job():
         'collect_pending_async_inserts': {
             'enabled': True,
             'collection_interval': 15,
-            'payload_row_limit': 500,
+            'max_samples_per_collection': 500,
         },
         'tags': ['test:clickhouse'],
     }
@@ -367,7 +367,7 @@ def test_buffer_only_constructs_job():
     assert samples._config.enabled is False
     assert samples._buffer_enabled is True
     assert samples._buffer_collection_interval == 15
-    assert samples._buffer_payload_row_limit == 500
+    assert samples._buffer_max_samples_per_collection == 500
 
 
 def test_collection_interval_gcd():
@@ -501,7 +501,7 @@ def test_buffer_snapshot_query_format():
 
     # Verify query uses placeholders for the table and row limit
     assert '{asynchronous_inserts_table}' in BUFFER_SNAPSHOT_QUERY
-    assert '{payload_row_limit}' in BUFFER_SNAPSHOT_QUERY
+    assert '{max_samples_per_collection}' in BUFFER_SNAPSHOT_QUERY
 
     # Verify selected columns
     assert 'database' in BUFFER_SNAPSHOT_QUERY
