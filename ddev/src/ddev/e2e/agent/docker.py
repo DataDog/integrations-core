@@ -45,7 +45,7 @@ def disable_integration_before_install(config_file):
     new.rename(config_file.parent / old)
 
 
-def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
+def normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
     if not agent_build:
         return 'registry.datadoghq.com/agent-dev:master-py3'
 
@@ -187,7 +187,7 @@ class DockerAgent(AgentInterface):
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         from ddev.e2e.agent.constants import AgentEnvVars
 
-        agent_build = _normalize_agent_image_name(
+        agent_build = normalize_agent_image_name(
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
         )
 
