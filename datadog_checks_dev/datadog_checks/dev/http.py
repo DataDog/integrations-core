@@ -15,6 +15,17 @@ from unittest.mock import MagicMock
 from requests import Response
 
 if TYPE_CHECKING:
+    # Re-exported at runtime via the module-level __getattr__ below; imported here only so static
+    # analyzers can resolve ``from datadog_checks.dev.http import HTTPStatusError`` and friends.
+    from datadog_checks.base.utils.http_exceptions import (  # noqa: F401
+        HTTPConnectionError,
+        HTTPError,
+        HTTPInvalidURLError,
+        HTTPRequestError,
+        HTTPSSLError,
+        HTTPStatusError,
+        HTTPTimeoutError,
+    )
     from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPResponse
 
 
@@ -301,7 +312,7 @@ class MockHTTPResponse:
 # Agnostic HTTP exceptions re-exported from datadog_checks_base so test setup code has a single import
 # site (``from datadog_checks.dev.http import HTTPTimeoutError``). Resolved lazily to avoid forcing a
 # base import when this module is loaded only for its mock helpers.
-_AGNOSTIC_EXCEPTIONS = frozenset(
+AGNOSTIC_EXCEPTIONS = frozenset(
     {
         'HTTPError',
         'HTTPRequestError',
@@ -315,11 +326,14 @@ _AGNOSTIC_EXCEPTIONS = frozenset(
 
 
 def __getattr__(name: str) -> Any:
-    if name in _AGNOSTIC_EXCEPTIONS:
-        from datadog_checks.base.utils import http_exceptions
+    if name in AGNOSTIC_EXCEPTIONS:
+        try:
+            from datadog_checks.base.utils import http_exceptions
+        except ImportError:
+            raise ImportError('datadog-checks-base is not installed!')
 
         return getattr(http_exceptions, name)
-    raise AttributeError('module {!r} has no attribute {!r}'.format(__name__, name))
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
 
 
 def dev_http_client(persist: bool = False, **options: Any) -> 'HTTPClient':
@@ -330,11 +344,19 @@ def dev_http_client(persist: bool = False, **options: Any) -> 'HTTPClient':
     the production HTTP backend and follows it across the ``requests`` -> ``httpx`` cutover. Use this
     instead of calling ``requests`` directly in test setup code.
 
+    Options passed here become client-level defaults that are forwarded to every request, so they must
+    be valid request options (for example ``headers``, ``auth``, ``verify``, ``timeout``). An
+    unrecognized key, or one that is only valid per call, raises on the first request rather than at
+    construction.
+
     :param persist: Reuse a single connection across calls, replacing a ``requests.Session``.
     :param options: Client-level request defaults (for example ``headers``, ``auth``, ``verify``,
         ``timeout``). Per-call keyword arguments on the verb methods override these.
     """
-    from datadog_checks.base.utils.http import create_http_client
+    try:
+        from datadog_checks.base.utils.http import create_http_client
+    except ImportError:
+        raise ImportError('datadog-checks-base is not installed!')
 
     client = create_http_client({}, {})
     client.persist_connections = persist
@@ -344,7 +366,11 @@ def dev_http_client(persist: bool = False, **options: Any) -> 'HTTPClient':
 
 
 def http_get(url: str, **options: Any) -> 'HTTPResponse':
-    """One-shot agnostic GET mirroring ``requests.get`` ergonomics. See :func:`dev_http_client`."""
+    """One-shot agnostic GET mirroring ``requests.get`` ergonomics. See :func:`dev_http_client`.
+
+    Each one-shot helper builds a fresh client per call, so connections are not reused across calls.
+    For cross-call connection reuse, use ``dev_http_client(persist=True)`` and call its verb methods.
+    """
     return dev_http_client().get(url, **options)
 
 
