@@ -107,10 +107,10 @@ class ClickhouseCheck(DatabaseCheck):
         # loop) instead of running as its own DBMAsyncJob, which would open another concurrent
         # connection against the check's capped DBM connection pool.
         if self._config.dbm and (
-            self._config.query_samples.enabled or self._config.asynchronous_insert_buffer_snapshot.enabled
+            self._config.query_samples.enabled or self._config.collect_pending_async_inserts.enabled
         ):
             self.statement_samples = ClickhouseStatementSamples(
-                self, self._config.query_samples, self._config.asynchronous_insert_buffer_snapshot
+                self, self._config.query_samples, self._config.collect_pending_async_inserts
             )
         else:
             self.statement_samples = None

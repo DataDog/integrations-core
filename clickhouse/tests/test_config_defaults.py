@@ -104,7 +104,7 @@ EXPECTED_DEFAULTS = {
         'stuck_replication_num_tries': 3,
     },
     # === DBM: Async insert buffer snapshot ===
-    'asynchronous_insert_buffer_snapshot': {
+    'collect_pending_async_inserts': {
         'enabled': False,
         'collection_interval': 10,
         'payload_row_limit': 1000,

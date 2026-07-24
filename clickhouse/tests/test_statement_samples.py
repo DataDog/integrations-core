@@ -327,7 +327,7 @@ def test_buffer_defaults_applied():
         'password': '',
         'db': 'default',
         'dbm': True,
-        'asynchronous_insert_buffer_snapshot': {
+        'collect_pending_async_inserts': {
             'enabled': True,
         },
         'tags': ['test:clickhouse'],
@@ -354,7 +354,7 @@ def test_buffer_only_constructs_job():
         'query_samples': {
             'enabled': False,
         },
-        'asynchronous_insert_buffer_snapshot': {
+        'collect_pending_async_inserts': {
             'enabled': True,
             'collection_interval': 15,
             'payload_row_limit': 500,
@@ -383,7 +383,7 @@ def test_collection_interval_gcd():
             'enabled': True,
             'collection_interval': 10,
         },
-        'asynchronous_insert_buffer_snapshot': {
+        'collect_pending_async_inserts': {
             'enabled': True,
             'collection_interval': 15,
         },
@@ -407,7 +407,7 @@ def test_query_samples_collection_interval():
             'enabled': True,
             'collection_interval': 10,
         },
-        'asynchronous_insert_buffer_snapshot': {
+        'collect_pending_async_inserts': {
             'enabled': True,
             'collection_interval': 15,
         },
@@ -440,7 +440,7 @@ def test_buffer_only_skips_query_samples():
         'query_samples': {
             'enabled': False,
         },
-        'asynchronous_insert_buffer_snapshot': {
+        'collect_pending_async_inserts': {
             'enabled': True,
             'collection_interval': 15,
         },
@@ -472,7 +472,7 @@ def test_buffer_collection_interval():
         'query_samples': {
             'enabled': False,
         },
-        'asynchronous_insert_buffer_snapshot': {
+        'collect_pending_async_inserts': {
             'enabled': True,
             'collection_interval': 15,
         },

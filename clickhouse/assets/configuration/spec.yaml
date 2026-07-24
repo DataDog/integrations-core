@@ -570,7 +570,7 @@ files:
             type: boolean
             example: false
           fleet_configurable: false
-    - name: asynchronous_insert_buffer_snapshot
+    - name: collect_pending_async_inserts
       description: Configure asynchronous insert buffer snapshot monitoring
       options:
         - name: enabled

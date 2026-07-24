@@ -96,8 +96,8 @@ def instance_parts_and_merges():
     )
 
 
-def instance_asynchronous_insert_buffer_snapshot():
-    return instance.AsynchronousInsertBufferSnapshot(
+def instance_collect_pending_async_inserts():
+    return instance.CollectPendingAsyncInserts(
         enabled=False,
         collection_interval=10,
         payload_row_limit=1000,

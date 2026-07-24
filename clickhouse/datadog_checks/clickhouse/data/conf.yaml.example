@@ -381,7 +381,7 @@ instances:
 
     ## Configure asynchronous insert buffer snapshot monitoring
     #
-    # asynchronous_insert_buffer_snapshot:
+    # collect_pending_async_inserts:
 
         ## @param enabled - boolean - optional - default: false
         ## Enable collection of asynchronous insert buffer snapshots from system.asynchronous_inserts.

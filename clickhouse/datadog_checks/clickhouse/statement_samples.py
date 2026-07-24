@@ -17,7 +17,7 @@ from clickhouse_connect.driver.exceptions import DatabaseError, OperationalError
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
-    from datadog_checks.clickhouse.config_models.instance import AsynchronousInsertBufferSnapshot, QuerySamples
+    from datadog_checks.clickhouse.config_models.instance import CollectPendingAsyncInserts, QuerySamples
 
 try:
     import datadog_agent
@@ -127,7 +127,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self,
         check: ClickhouseCheck,
         config: QuerySamples,
-        buffer_config: AsynchronousInsertBufferSnapshot,
+        buffer_config: CollectPendingAsyncInserts,
     ):
         samples_collection_interval = config.collection_interval
 
