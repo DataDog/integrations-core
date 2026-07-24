@@ -7,7 +7,7 @@ import pytest
 import requests
 from datadog_test_libs.utils.mock_dns import mock_local
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
 from .common import HERE, HOST, HOSTNAME_TO_PORT_MAPPING, INSTANCE_STANDALONE
@@ -31,7 +31,7 @@ def dd_environment():
         ],
         attempts=2,
     ):
-        yield INSTANCE_STANDALONE, {'custom_hosts': get_custom_hosts()}
+        yield INSTANCE_STANDALONE, {'custom_hosts': get_custom_hosts(), **get_e2e_discovery_metadata()}
 
 
 def check_metrics_available():
