@@ -941,6 +941,10 @@ def test_standalone_unit(aggregator, dd_run_check):
             assert sc.status == SparkCheck.OK
             assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
 
+        # Fixture reports zero registered workers; still emitted so config discovery's
+        # probe (which requires at least one metric) can accept an idle standalone master.
+        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
+
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -988,6 +992,10 @@ def test_standalone_stage_disabled_unit(aggregator, dd_run_check):
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
             assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
+
+        # Fixture reports zero registered workers; still emitted so config discovery's
+        # probe (which requires at least one metric) can accept an idle standalone master.
+        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -1042,6 +1050,10 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
             assert sc.status == SparkCheck.OK
             assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
 
+        # Fixture reports zero registered workers; still emitted so config discovery's
+        # probe (which requires at least one metric) can accept an idle standalone master.
+        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
+
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -1094,6 +1106,10 @@ def test_standalone_pre20(aggregator, dd_run_check):
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
             assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
+
+        # Fixture reports zero registered workers; still emitted so config discovery's
+        # probe (which requires at least one metric) can accept an idle standalone master.
+        aggregator.assert_metric('spark.master.worker_count', value=0, tags=['url:http://localhost:8080'] + CLUSTER_TAGS)
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -1348,27 +1364,31 @@ def test_do_not_crash_on_single_app_failure():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "instance,service_check",
+    "instance,service_check,expect_worker_count_metric",
     [
-        (DRIVER_CONFIG, "driver"),
-        (YARN_CONFIG, "resource_manager"),
-        (MESOS_CONFIG, "mesos_master"),
-        (STANDALONE_CONFIG, "standalone_master"),
-        (STANDALONE_CONFIG_PRE_20, "standalone_master"),
+        (DRIVER_CONFIG, "driver", False),
+        (YARN_CONFIG, "resource_manager", False),
+        (MESOS_CONFIG, "mesos_master", False),
+        (STANDALONE_CONFIG, "standalone_master", True),
+        (STANDALONE_CONFIG_PRE_20, "standalone_master", True),
     ],
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
-def test_no_running_apps(aggregator, dd_run_check, instance, service_check, caplog):
+def test_no_running_apps(aggregator, dd_run_check, instance, service_check, expect_worker_count_metric, caplog):
     with mock.patch('requests.Session.get', return_value=MockResponse("{}")):
         with caplog.at_level(logging.WARNING):
             dd_run_check(SparkCheck('spark', {}, [instance]))
 
-        # no metrics sent in this case
+        tags = ['url:{}'.format(instance['spark_url'])] + CLUSTER_TAGS + instance.get('tags', [])
+        if expect_worker_count_metric:
+            # Standalone mode reports worker capacity from the master's own state even with
+            # no running apps; no other mode emits anything in this scenario.
+            aggregator.assert_metric('spark.master.worker_count', value=0, tags=tags)
         aggregator.assert_all_metrics_covered()
         aggregator.assert_service_check(
             'spark.{}.can_connect'.format(service_check),
             status=SparkCheck.OK,
-            tags=['url:{}'.format(instance['spark_url'])] + CLUSTER_TAGS + instance.get('tags', []),
+            tags=tags,
         )
 
     assert 'No running apps found. No metrics will be collected.' in caplog.text
@@ -1507,6 +1527,10 @@ def test_integration_standalone(aggregator, dd_run_check):
         'spark.standalone_master.can_connect',
         status=SparkCheck.OK,
         tags=['url:{}'.format('http://spark-master:8080')] + CLUSTER_TAGS,
+    )
+    # The compose environment registers at least one worker with the standalone master.
+    aggregator.assert_metric(
+        'spark.master.worker_count', at_least=1, tags=['url:http://spark-master:8080'] + CLUSTER_TAGS
     )
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
