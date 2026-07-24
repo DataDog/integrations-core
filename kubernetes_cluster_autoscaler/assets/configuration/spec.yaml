@@ -10,6 +10,7 @@ files:
       options:
         - template: instances/openmetrics
           overrides:
+            openmetrics_endpoint.display_priority: 3
             openmetrics_endpoint.required: true
             openmetrics_endpoint.value.example: http://localhost:8085/metrics
             openmetrics_endpoint.description: |
