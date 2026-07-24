@@ -468,12 +468,6 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             tags=self.tags,
             raw=True,
         )
-        self._check.count(
-            "dd.clickhouse.async_inserts_flush.bytes_submitted.count",
-            sum(record.get('bytes', 0) for record in records),
-            tags=self.tags,
-            raw=True,
-        )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_flush_rows(self):

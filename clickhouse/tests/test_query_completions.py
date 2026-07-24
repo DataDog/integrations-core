@@ -602,11 +602,11 @@ def test_flush_advances_checkpoint_on_success(check_with_flush):
 
 
 def test_flush_records_counts(check_with_flush):
-    """Test that a successful flush collection reports submitted event count and byte size metrics"""
+    """Test that a successful flush collection reports the submitted event count metric"""
     query_completions = check_with_flush.query_completions
     query_completions._tags_no_db = ['test:clickhouse']
     query_completions.tags = ['test:clickhouse']
-    records = [{'table': 'events', 'bytes': 100}, {'table': 'events', 'bytes': 250}]
+    records = [{'table': 'events'}, {'table': 'events'}]
 
     with (
         mock.patch.object(query_completions, '_collect_flush_rows', return_value=records),
@@ -621,12 +621,6 @@ def test_flush_records_counts(check_with_flush):
     mock_count.assert_any_call(
         "dd.clickhouse.async_inserts_flush.events_submitted.count",
         2,
-        tags=['test:clickhouse'],
-        raw=True,
-    )
-    mock_count.assert_any_call(
-        "dd.clickhouse.async_inserts_flush.bytes_submitted.count",
-        350,
         tags=['test:clickhouse'],
         raw=True,
     )
