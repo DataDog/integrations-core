@@ -246,6 +246,7 @@ class MockHTTPResponse:
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
+        self.close()
         return None
 
     def __iter__(self) -> Iterator[bytes | str]:

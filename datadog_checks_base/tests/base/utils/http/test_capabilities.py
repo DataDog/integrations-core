@@ -218,6 +218,16 @@ class TestResponseProtocolSurface:
     def test_get_peer_cert_declared(self):
         assert callable(HTTPResponse.get_peer_cert)
 
+    def test_context_manager_closes_underlying_response(self):
+        response = requests.Response()
+        response.close = mock.Mock()
+        wrapper = ResponseWrapper(response, 1024)
+
+        with wrapper as entered:
+            assert entered is wrapper
+
+        response.close.assert_called_once_with()
+
 
 class TestPeerCert:
     def test_returns_cert_from_connection_socket(self):

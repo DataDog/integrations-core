@@ -235,6 +235,16 @@ def test_mock_response_history_passthrough():
     assert response.history == [inner]
 
 
+def test_mock_response_context_manager_calls_close(mocker):
+    response = MockHTTPResponse()
+    response.close = mocker.Mock()
+
+    with response as entered:
+        assert entered is response
+
+    response.close.assert_called_once_with()
+
+
 def test_mock_response_satisfies_full_protocol_surface():
     from datadog_checks.dev.http import protocol_members
 
