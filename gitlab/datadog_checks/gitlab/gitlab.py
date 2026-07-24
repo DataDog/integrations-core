@@ -62,8 +62,10 @@ class GitlabCheck(OpenMetricsBaseCheck):
         try:
             self.process(scraper_config)
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, self._tags)
-        except HTTPConnectionError as e:
-            # Unable to connect to the metrics endpoint
+        except (HTTPConnectionError, HTTPTimeoutError) as e:
+            # Unable to connect to the metrics endpoint. HTTPTimeoutError is included because a connect
+            # timeout (requests' ConnectTimeout) now translates to HTTPTimeoutError, a sibling of
+            # HTTPConnectionError; without it a connect timeout would escape as a hard collection error.
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
