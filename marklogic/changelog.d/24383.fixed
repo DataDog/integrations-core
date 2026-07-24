@@ -1,0 +1,1 @@
+Stop submitting forest reference fields (``master-forest``, ``current-master-forest``, ``current-foreign-master-forest``, ``current-foreign-master-database``) as metrics since their values are entity IDs, not measurements.
