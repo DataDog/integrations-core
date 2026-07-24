@@ -9,6 +9,7 @@ files:
   - template: instances
     options:
     - name: use_openmetrics
+      display_priority: 3
       description: |
         Use the latest OpenMetrics implementation for more features and better performance.
         If running on Agent v6, you must set the `python_version` option in `datadog.yaml` to `"3"`.
@@ -19,12 +20,14 @@ files:
         type: boolean
       enabled: true
     - name: cluster_arn
+      display_priority: 5
       description: The Amazon Resource Name (ARN) that uniquely identifies the cluster.
       fleet_configurable: true
       required: true
       value:
         type: string
     - name: region_name
+      display_priority: 4
       description: |
         The name of the region to associate with the API client. By default, the region will be derived
         from the `cluster_arn`. Set explicitly to `null` to use additional fallback mechanisms, see:
@@ -33,6 +36,7 @@ files:
       value:
         type: string
     - name: assume_role
+      display_priority: 1
       description: |
         The ARN of the role to assume when retrieving MSK cluster metadata. If this is not set,
         the default permissions used by boto3 will follow the rules according to:
@@ -41,6 +45,7 @@ files:
       value:
         type: string
     - name: jmx_exporter_port
+      display_priority: 2
       description: |
         The port on which the JMX Exporter serves metrics.
         Set the port to 0 to disable.
@@ -49,6 +54,7 @@ files:
         type: integer
         example: 11001
     - name: node_exporter_port
+      display_priority: 2
       description: |
         The port on which the Node Exporter serves metrics.
         Set the port to 0 to disable.
@@ -57,6 +63,7 @@ files:
         type: integer
         example: 11002
     - name: prometheus_metrics_path
+      display_priority: 1
       description: |
         The path where Prometheus serves metrics.
       fleet_configurable: true
@@ -64,6 +71,7 @@ files:
         type: string
         example: /metrics
     - name: boto_config
+      display_priority: 0
       description: |
         Specify additional configuration options for the botocore Config object.
 

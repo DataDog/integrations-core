@@ -45,16 +45,10 @@ init_config:
 #
 instances:
 
-    ## @param use_openmetrics - boolean - optional - default: false
-    ## Use the latest OpenMetrics implementation for more features and better performance.
-    ## If running on Agent v6, you must set the `python_version` option in `datadog.yaml` to `"3"`.
-    #
-  - use_openmetrics: true
-
     ## @param cluster_arn - string - required
     ## The Amazon Resource Name (ARN) that uniquely identifies the cluster.
     #
-    cluster_arn: <CLUSTER_ARN>
+  - cluster_arn: <CLUSTER_ARN>
 
     ## @param region_name - string - optional
     ## The name of the region to associate with the API client. By default, the region will be derived
@@ -63,12 +57,11 @@ instances:
     #
     # region_name: <REGION_NAME>
 
-    ## @param assume_role - string - optional
-    ## The ARN of the role to assume when retrieving MSK cluster metadata. If this is not set,
-    ## the default permissions used by boto3 will follow the rules according to:
-    ## https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+    ## @param use_openmetrics - boolean - optional - default: false
+    ## Use the latest OpenMetrics implementation for more features and better performance.
+    ## If running on Agent v6, you must set the `python_version` option in `datadog.yaml` to `"3"`.
     #
-    # assume_role: <ASSUME_ROLE>
+    use_openmetrics: true
 
     ## @param jmx_exporter_port - integer - optional - default: 11001
     ## The port on which the JMX Exporter serves metrics.
@@ -81,6 +74,13 @@ instances:
     ## Set the port to 0 to disable.
     #
     # node_exporter_port: 11002
+
+    ## @param assume_role - string - optional
+    ## The ARN of the role to assume when retrieving MSK cluster metadata. If this is not set,
+    ## the default permissions used by boto3 will follow the rules according to:
+    ## https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+    #
+    # assume_role: <ASSUME_ROLE>
 
     ## @param prometheus_metrics_path - string - optional - default: /metrics
     ## The path where Prometheus serves metrics.
