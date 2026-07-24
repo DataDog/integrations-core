@@ -72,7 +72,7 @@ files:
       fleet_configurable: false
       description: |
         Enable the generic resources pilot collector that ships ArgoCD
-        Applications, Clusters, and Repositories to Datadog as generic
+        Applications, Clusters, Repositories, and Projects to Datadog as generic
         resources. Disabled by default.
       value:
         type: boolean
@@ -149,7 +149,7 @@ files:
         Maximum number of items emitted per resource type per check cycle.
         When an ArgoCD API endpoint returns more than this, the excess is
         dropped and a warning is logged. Applied independently to
-        Applications, Clusters, and Repositories.
+        Applications, Clusters, Repositories, and Projects.
       value:
         type: integer
         example: 10000
@@ -219,6 +219,28 @@ files:
       description: |
         Seconds between full Repository scrapes. Repositories are always polled
         (never streamed); each scrape re-submits every Repository to refresh its
+        time-to-live (TTL). Minimum of 1.
+      value:
+        type: integer
+        example: 300
+        minimum: 1
+    - name: genresources_collect_projects
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Collect ArgoCD AppProjects and ship them as generic resources. Enabled by
+        default; set to ``false`` to skip Project collection while still collecting
+        the other resource types. Only takes effect when ``collect_genresources``
+        is set to ``true``.
+      value:
+        type: boolean
+        example: true
+    - name: genresources_project_scrape_interval_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Seconds between full AppProject scrapes. Projects are always polled (never
+        streamed); each scrape re-submits every Project to refresh its
         time-to-live (TTL). Minimum of 1.
       value:
         type: integer

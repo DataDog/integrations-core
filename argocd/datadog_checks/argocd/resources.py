@@ -29,6 +29,7 @@ from .resources_constants import (
     GENRESOURCES_API_UP_METRIC,
     GENRESOURCES_STREAM_UP_METRIC,
     KEY_SEPARATOR,
+    PROJECT_INCLUDE,
     REPOSITORY_INCLUDE,
     URL_CREDENTIALS_PATTERN,
     auth_headers,
@@ -129,6 +130,11 @@ def _sanitize_item(item: dict, resource_type: str) -> None:
     elif resource_type == "argocd_repository":
         if isinstance(item.get("repo"), str):
             item["repo"] = _strip_url_userinfo(item["repo"])
+    elif resource_type == "argocd_project":
+        spec = item.get("spec") or {}
+        source_repos = spec.get("sourceRepos")
+        if isinstance(source_repos, list):
+            spec["sourceRepos"] = [_strip_url_userinfo(r) if isinstance(r, str) else r for r in source_repos]
     connection = item.get("connectionState")
     if isinstance(connection, dict) and isinstance(connection.get("message"), str):
         connection["message"] = _scrub_url_credentials(connection["message"])
@@ -166,6 +172,15 @@ def _repository_key(item: dict) -> str:
     return repo
 
 
+def _project_key(item: dict) -> str:
+    metadata = item.get("metadata") or {}
+    namespace = metadata.get("namespace") or "default"
+    name = metadata.get("name")
+    if not name:
+        raise ValueError("argocd_project is missing metadata.name")
+    return f"{namespace}{KEY_SEPARATOR}{name}"
+
+
 RESOURCE_TYPE_SPECS: tuple[ResourceTypeSpec, ...] = (
     ResourceTypeSpec(
         resource_type="argocd_application",
@@ -185,11 +200,18 @@ RESOURCE_TYPE_SPECS: tuple[ResourceTypeSpec, ...] = (
         include=REPOSITORY_INCLUDE,
         key_builder=_repository_key,
     ),
+    ResourceTypeSpec(
+        resource_type="argocd_project",
+        api_path="/api/v1/projects",
+        include=PROJECT_INCLUDE,
+        key_builder=_project_key,
+    ),
 )
 
 APPLICATION_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_application")
 CLUSTER_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_cluster")
 REPOSITORY_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_repository")
+PROJECT_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_project")
 
 
 def _is_excluded(path: str, exclude_paths: tuple[str, ...]) -> bool:
@@ -210,7 +232,7 @@ def _build_include(
 
 
 class ArgocdResourceCollector:
-    """Fetches ArgoCD Applications, Clusters, and Repositories and ships them as generic resources."""
+    """Fetches ArgoCD Applications, Clusters, Repositories, and Projects and ships them as generic resources."""
 
     def __init__(self, check: "ArgocdCheck") -> None:
         self.check = check
@@ -231,10 +253,13 @@ class ArgocdResourceCollector:
         self._app_full_scrape_interval: int = config.genresources_application_full_scrape_interval_seconds
         self._cluster_scrape_interval: int = config.genresources_cluster_scrape_interval_seconds
         self._repository_scrape_interval: int = config.genresources_repository_scrape_interval_seconds
+        self._collect_projects: bool = bool(config.genresources_collect_projects)
+        self._project_scrape_interval: int = config.genresources_project_scrape_interval_seconds
         self._last_app_poll: float = 0.0
         self._last_app_full: float = 0.0
         self._last_cluster_scrape: float = 0.0
         self._last_repository_scrape: float = 0.0
+        self._last_project_scrape: float = 0.0
         self._last_endpoint_warn: float = 0.0
         self._submitted_lock = threading.RLock()
         self._listener_lock = threading.Lock()
@@ -251,9 +276,14 @@ class ArgocdResourceCollector:
                     "nothing will be collected for it",
                     resource_type,
                 )
-        longest_scrape_interval = max(
-            self._app_full_scrape_interval, self._cluster_scrape_interval, self._repository_scrape_interval
-        )
+        scrape_intervals = [
+            self._app_full_scrape_interval,
+            self._cluster_scrape_interval,
+            self._repository_scrape_interval,
+        ]
+        if self._collect_projects:
+            scrape_intervals.append(self._project_scrape_interval)
+        longest_scrape_interval = max(scrape_intervals)
         if self._ttl_seconds < longest_scrape_interval:
             self.check.log.warning(
                 "genresources: genresources_ttl_seconds (%d) is shorter than the longest scrape "
@@ -278,12 +308,14 @@ class ArgocdResourceCollector:
         self._collect_due_types(now)
 
     def _report_endpoint_unavailable(self) -> None:
-        """Throttle a misconfiguration warning and emit api.up=0 for every resource type."""
+        """Throttle a misconfiguration warning and emit api.up=0 for every collected resource type."""
         now = int(time.time())
         if now - self._last_endpoint_warn >= self._app_poll_interval:
             self._last_endpoint_warn = now
             self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
         for spec in RESOURCE_TYPE_SPECS:
+            if spec is PROJECT_SPEC and not self._collect_projects:
+                continue
             self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=[f"resource_type:{spec.resource_type}"])
 
     def _collect_due_types(self, now: int) -> None:
@@ -298,13 +330,16 @@ class ArgocdResourceCollector:
         elif not self._stream_enabled and now - self._last_app_poll >= self._app_poll_interval:
             self._last_app_poll = now
             self._collect_type(APPLICATION_SPEC, seen_at=now, expire_at=expire_at, force_full=False)
-        # Clusters and Repositories are always polled (never streamed); each scrape is a full re-submit.
+        # Clusters, Repositories, and Projects are always polled (never streamed); each scrape is a full re-submit.
         if now - self._last_cluster_scrape >= self._cluster_scrape_interval:
             self._last_cluster_scrape = now
             self._collect_type(CLUSTER_SPEC, seen_at=now, expire_at=expire_at, force_full=True)
         if now - self._last_repository_scrape >= self._repository_scrape_interval:
             self._last_repository_scrape = now
             self._collect_type(REPOSITORY_SPEC, seen_at=now, expire_at=expire_at, force_full=True)
+        if self._collect_projects and now - self._last_project_scrape >= self._project_scrape_interval:
+            self._last_project_scrape = now
+            self._collect_type(PROJECT_SPEC, seen_at=now, expire_at=expire_at, force_full=True)
 
     def _ensure_listener(self) -> ArgocdApplicationStreamListener | None:
         with self._listener_lock:
