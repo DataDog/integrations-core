@@ -8,6 +8,7 @@ files:
   - template: instances
     options:
     - name: cadvisor_metrics_endpoint
+      display_priority: 5
       description: |
         1.7.6+ clusters expose container metrics in the prometheus format.
         This is the default setting. See next section for legacy clusters.
@@ -19,6 +20,7 @@ files:
         example: http://10.8.0.1:10255/metrics/cadvisor
       fleet_configurable: false
     - name: kubelet_metrics_endpoint
+      display_priority: 4
       description: |
         URL of the kubelet metrics prometheus endpoint
         Pass an empty string to disable kubelet metrics collection.
@@ -27,6 +29,7 @@ files:
         example: http://10.8.0.1:10255/metrics
       fleet_configurable: false
     - name: probes_metrics_endpoint
+      display_priority: 3
       description: |
         URL of the probe metrics prometheus endpoint
         Pass an empty string to disable probe metrics collection.
@@ -35,6 +38,7 @@ files:
         example: http://10.8.0.1:10255/metrics/probes
       fleet_configurable: false
     - name: cadvisor_port
+      display_priority: 1
       description: |
         Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
         This port is closed by default on k8s 1.7+ and OpenShift, enable it
@@ -46,6 +50,7 @@ files:
         example: 4194
       fleet_configurable: false
     - name: enabled_rates
+      display_priority: 2
       description: |
         Allow list of rate type metrics to collect from cadvisor.
       value:
@@ -57,6 +62,7 @@ files:
         - network.*
       fleet_configurable: false
     - name: enabled_gauges
+      display_priority: 2
       description: |
         Allow list of gauge type metrics to collect from cadvisor.
       value:
@@ -90,6 +96,7 @@ files:
     - template: instances
       options:
       - name: cadvisor_metrics_endpoint
+        display_priority: 5
         description: |
           1.7.6+ clusters expose container metrics in the prometheus format.
           This is the default setting. See next section for legacy clusters.
@@ -101,6 +108,7 @@ files:
           example: http://10.8.0.1:10255/metrics/cadvisor
         fleet_configurable: false
       - name: kubelet_metrics_endpoint
+        display_priority: 4
         description: |
           URL of the kubelet metrics prometheus endpoint
           Pass an empty string to disable kubelet metrics collection.
@@ -109,6 +117,7 @@ files:
           example: http://10.8.0.1:10255/metrics
         fleet_configurable: false
       - name: probes_metrics_endpoint
+        display_priority: 3
         description: |
           URL of the probe metrics prometheus endpoint
           Pass an empty string to disable probe metrics collection.
@@ -117,6 +126,7 @@ files:
           example: http://10.8.0.1:10255/metrics/probes
         fleet_configurable: false
       - name: cadvisor_port
+        display_priority: 1
         description: |
           Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
           This port is closed by default on k8s 1.7+ and OpenShift, enable it
@@ -128,6 +138,7 @@ files:
           example: 4194
         fleet_configurable: false
       - name: enabled_rates
+        display_priority: 2
         description: |
           Allow list of rate type metrics to collect from cadvisor.
         value:
@@ -139,6 +150,7 @@ files:
           - network.*
         fleet_configurable: false
       - name: enabled_gauges
+        display_priority: 2
         description: |
           Allow list of gauge type metrics to collect from cadvisor.
         value:
