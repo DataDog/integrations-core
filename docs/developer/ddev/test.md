@@ -125,8 +125,7 @@ that import a local image into the cluster can set `image_pull_policy` to `IfNot
 one Agent in the fixed `ddev-agent` namespace with fixed cluster-scoped RBAC names. Resource cleanup happens when
 `kind_run` deletes the whole disposable cluster.
 
-The initial implementation supports exactly one schedulable Kubernetes node. It rejects multi-node clusters until
-Agent targeting or fan-out semantics are defined.
+The current implementation supports exactly one schedulable Kubernetes node.
 
 ### Terraform
 
