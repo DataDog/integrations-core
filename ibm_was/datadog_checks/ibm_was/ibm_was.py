@@ -6,7 +6,7 @@ from xml.etree.ElementTree import ParseError
 from lxml import etree
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
 
 from . import metrics, validation
 
@@ -122,7 +122,7 @@ class IbmWasCheck(AgentCheck):
             resp = self.http.get(self.url)
             resp.raise_for_status()
             self.submit_service_checks(AgentCheck.OK)
-        except (HTTPStatusError, HTTPConnectionError) as e:
+        except (HTTPStatusError, HTTPConnectionError, HTTPTimeoutError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", self.url, e
             )

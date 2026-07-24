@@ -7,7 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 from datadog_checks.ibm_was import IbmWasCheck
 
 from . import common
@@ -90,6 +90,18 @@ def test_critical_service_check(instance, check, aggregator):
         check = check(instance)
         check.check(instance)
 
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+
+
+def test_make_request_catches_http_timeout_error(instance, check, aggregator, mock_http):
+    error = HTTPTimeoutError('request timed out')
+    mock_http.get.side_effect = error
+    check = check(instance)
+
+    with pytest.raises(HTTPTimeoutError, match='request timed out'):
+        check.make_request()
+
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
 
 
