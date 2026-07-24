@@ -20,7 +20,7 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
+SECURE_FIELD_NAMES = frozenset(['data_directory', 'ssl_cert', 'ssl_key', 'ssl_root_cert'])
 
 
 class AutomaticDiagnostics(BaseModel):

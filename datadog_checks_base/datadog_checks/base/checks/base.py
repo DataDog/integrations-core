@@ -96,6 +96,44 @@ GLOBAL_SECURE_FIELDS = frozenset(
         'trust_store_path',
         'key_store_path',
         'tools_jar_path',
+        # Legacy ssl_* aliases remapped to tls_* fields (via HTTP_CONFIG_REMAPPER or
+        # read directly from the raw instance by kafka_consumer/kafka_actions). Gate
+        # them like their tls_* equivalents so an alias cannot bypass the
+        # trusted-provider check on the canonical field.
+        'ssl_cert',
+        'ssl_certfile',
+        'ssl_key',
+        'ssl_keyfile',
+        'ssl_private_key',
+        'ssl_ca_cert',
+        'ssl_ca_certs',
+        'ssl_cafile',
+        'ssl_crlfile',
+        # Legacy raw-instance path aliases read directly from the instance dict rather
+        # than declared as spec/model fields, so only this raw-key fallback can gate
+        # them. nagios reads nagios_perf_cfg/nagios_log and opens them for parsing and
+        # tailing; http_check falls back to ca_certs for tls_ca_cert and passes it to
+        # SSLContext.load_verify_locations.
+        'nagios_perf_cfg',
+        'nagios_log',
+        'ca_certs',
+        # Legacy HTTP_CONFIG_REMAPPER cert/key aliases remapped to tls_* fields. They are
+        # raw instance keys rather than model fields, so only this fallback can gate them:
+        # http_check reads client_cert/client_key, consul reads client_cert_file/
+        # private_key_file/ca_bundle_file, and riak reads cacert, each loaded as a cert or
+        # key file for the TLS connection.
+        'client_cert',
+        'client_key',
+        'client_cert_file',
+        'private_key_file',
+        'ca_bundle_file',
+        'cacert',
+        # custom_queries (instance) and global_custom_queries (init_config) are read straight from the
+        # raw config by QueryManager and executed as raw SQL. Gate them here so an untrusted provider
+        # (e.g. Kubernetes pod annotations) cannot inject arbitrary queries; unlike the path fields
+        # above they have no allowlist escape, so any list value from an untrusted provider is blocked.
+        'custom_queries',
+        'global_custom_queries',
     ]
 )
 
