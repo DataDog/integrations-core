@@ -25,7 +25,7 @@ from ddev.utils.github_async.models import WorkflowJob
 def batch_job(
     name="job-1",
     target="ntp",
-    runner="ubuntu-latest",
+    runner_labels=("ubuntu-latest",),
     environment="py3.13",
     platform=Platform.LINUX,
     unit_tests=True,
@@ -34,7 +34,7 @@ def batch_job(
     return BatchJob(
         name=name,
         target=target,
-        runner=runner,
+        runner_labels=runner_labels,
         environment=environment,
         platform=platform,
         unit_tests=unit_tests,
@@ -42,14 +42,15 @@ def batch_job(
     )
 
 
-def test_artifact_name_built_from_target_env_platform() -> None:
+def test_artifact_name_built_from_target_env_platform():
     assert batch_job().artifact_name() == "ntp_py3.13_linux"
 
 
-@pytest.mark.parametrize("field", ["name", "runner", "unit_tests", "e2e_tests"])
-def test_artifact_name_ignores_non_identifying_fields(field: str) -> None:
-    # name / runner / unit_tests / e2e_tests are not part of the artifact name.
-    changed = {"name": "other-job", "runner": "windows-latest", "unit_tests": False, "e2e_tests": True}[field]
+@pytest.mark.parametrize("field", ["name", "runner_labels", "unit_tests", "e2e_tests"])
+def test_artifact_name_ignores_non_identifying_fields(field: str):
+    # The artifact identity is target + environment + platform; name/runner/facet flags are not part
+    # of it (a single job carries its facets, so facets never distinguish two jobs).
+    changed = {"name": "other-job", "runner_labels": ("windows-latest",), "unit_tests": False, "e2e_tests": True}[field]
     assert batch_job(**{field: changed}).artifact_name() == batch_job().artifact_name()
 
 
@@ -57,16 +58,23 @@ def test_artifact_name_ignores_non_identifying_fields(field: str) -> None:
     ("field", "value"),
     [("target", "kafka"), ("environment", "py3.12"), ("platform", Platform.WINDOWS)],
 )
-def test_artifact_name_varies_with_identifying_fields(field: str, value: str) -> None:
+def test_artifact_name_varies_with_identifying_fields(field, value):
     assert batch_job(**{field: value}).artifact_name() != batch_job().artifact_name()
 
 
-def test_artifact_name_sanitizes_disallowed_characters() -> None:
+def test_artifact_name_for_environmentless_job():
+    # An environmentless job omits the environment segment entirely (no empty "__" gap); it stays
+    # unique because such a target produces a single job per platform.
+    assert batch_job(environment="").artifact_name() == "ntp_linux"
+    assert batch_job(environment="", platform=Platform.WINDOWS).artifact_name() == "ntp_windows"
+
+
+def test_artifact_name_sanitizes_disallowed_characters():
     name = batch_job(target='a/b:c*d?e|f"g<h>i\\j', environment="x\r\ny").artifact_name()
     assert ARTIFACT_NAME_DISALLOWED.search(name) is None
 
 
-def test_correlate_matches_jobs_and_artifacts(tmp_path: Path) -> None:
+def test_correlate_matches_jobs_and_artifacts(tmp_path: Path):
     job = batch_job("j1")
     base = job.artifact_name()
     artifact_dir = tmp_path / base
@@ -83,7 +91,7 @@ def test_correlate_matches_jobs_and_artifacts(tmp_path: Path) -> None:
     assert result.coverage_artifact_name == f"coverage-{base}"
 
 
-def test_correlate_without_workflow_or_artifact_match() -> None:
+def test_correlate_without_workflow_or_artifact_match():
     # A job absent from the workflow API and with no matching artifact folder still yields a
     # well-formed result whose correlated facets are None.
     job = batch_job("j1")
@@ -95,7 +103,7 @@ def test_correlate_without_workflow_or_artifact_match() -> None:
     assert result.artifact_name_path is None
 
 
-def test_correlate_ignores_artifact_dir_missing_on_disk(tmp_path: Path) -> None:
+def test_correlate_ignores_artifact_dir_missing_on_disk(tmp_path: Path):
     # A mapped path that does not exist on disk is not recorded.
     job = batch_job("j1")
     base = job.artifact_name()
@@ -105,7 +113,7 @@ def test_correlate_ignores_artifact_dir_missing_on_disk(tmp_path: Path) -> None:
     assert result.artifact_name_path is None
 
 
-def test_job_result_defaults() -> None:
+def test_job_result_defaults():
     result = JobResult(integration="ntp", environment="py3.13", platform=Platform.LINUX, status=Status.SUCCESS)
     assert result.failed_steps == []
     assert result.reports == ()
@@ -128,7 +136,7 @@ def _workflow(batch_id: str, run_id: int, success: int, failed: int, skipped: in
     )
 
 
-def test_workflow_status_label() -> None:
+def test_workflow_status_label():
     assert _workflow("b1", 1, 2, 0, 0, []).status == Status.SUCCESS
     assert _workflow("b2", 2, 1, 1, 0, []).status == Status.FAILURE
     assert _workflow("b3", 3, 0, 0, 2, []).status == Status.SKIPPED
@@ -136,7 +144,7 @@ def test_workflow_status_label() -> None:
     assert _workflow("b4", 4, 3, 0, 1, []).status == Status.SUCCESS
 
 
-def test_update_pr_comment_aggregates() -> None:
+def test_update_pr_comment_aggregates():
     b1 = _workflow("b1", 1, 4, 0, 0, [_job("postgres", Status.SUCCESS)] * 4)
     b2 = _workflow("b2", 2, 3, 1, 0, [_job("mysql", Status.FAILURE)] + [_job("disk", Status.SUCCESS)] * 3)
     b3 = _workflow("b3", 3, 3, 0, 1, [_job("consul", Status.SKIPPED)] + [_job("nginx", Status.SUCCESS)] * 3)

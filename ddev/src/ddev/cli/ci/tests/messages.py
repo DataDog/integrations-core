@@ -36,11 +36,19 @@ ARTIFACT_NAME_SEPARATOR = "_"
 
 @dataclass
 class BatchJob:
-    """A single job entry in a TestBatch."""
+    """A single job entry in a TestBatch: one ``target + environment + platform`` execution.
+
+    A ``BatchJob`` is never duplicated into separate unit and E2E rows. Its logical identity is
+    ``target + environment + platform``; ``runner_labels`` (one runner selection: the labels a
+    single GitHub runner is chosen by) and the ``unit_tests``/``e2e_tests`` facet flags are
+    attributes of that identity, describing which test facets the one execution must produce.
+    ``environment`` is exactly one resolved Hatch environment, or the empty string for an
+    environmentless target.
+    """
 
     name: str
     target: str
-    runner: str
+    runner_labels: tuple[str, ...]
     environment: str
     platform: Platform
     unit_tests: bool
@@ -50,11 +58,14 @@ class BatchJob:
         """Deterministic artifact name built from the job's target, environment, and platform.
 
         Pure and deterministic. Each field is sanitized to GitHub's artifact-name constraints and
-        joined by the separator. Uniqueness within a batch relies on those three fields being
-        distinct per job.
+        joined by the separator. Because a job's identity is ``target + environment + platform``,
+        those fields are unique per job within a batch and give each job a unique artifact
+        identity. An environmentless job contributes no environment segment (so it reads
+        ``target_platform`` rather than leaving an empty ``target__platform`` gap); it stays unique
+        because such a target produces a single job per platform.
         """
-        fields = (self.target, self.environment, self.platform)
-        return ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields)
+        fields = (self.target, self.environment, str(self.platform))
+        return ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields if field)
 
 
 @dataclass
@@ -163,8 +174,13 @@ class WorkflowStatus:
 
 @dataclass
 class TestBatch(BaseMessage):
-    """Dispatched to trigger a matrix of test jobs."""
+    """Dispatched to trigger a matrix of test jobs.
 
+    ``batch_id`` is the Dispatcher-controlled logical identity (e.g. ``batch-01``) that downstream
+    processors correlate on; the inherited ``id`` is the message-instance identity and may differ.
+    """
+
+    batch_id: str
     job_list: list[BatchJob]
     jobs_count: int
     integrations: list[str]
@@ -172,8 +188,14 @@ class TestBatch(BaseMessage):
 
 @dataclass
 class BatchFinished(BaseMessage):
-    """Emitted when a GitHub Actions test workflow has completed."""
+    """Emitted when a GitHub Actions test workflow has completed.
 
+    ``batch_id`` carries the logical batch identity through from the dispatched ``TestBatch`` so the
+    gatherer correlates on it rather than on the message ``id``. ``run_id`` is the GitHub Actions
+    workflow run id (execution metadata), which is distinct from the logical batch identity.
+    """
+
+    batch_id: str
     status: Status
     run_id: int
     workflow_url: str

@@ -16,7 +16,14 @@ from pathlib import Path
 
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, JobResult, Platform, UpdatePRComment
+from ddev.cli.ci.tests.messages import (
+    BatchFinished,
+    BatchJob,
+    BatchJobResult,
+    JobResult,
+    Platform,
+    UpdatePRComment,
+)
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async.models import JobStep, WorkflowJob
@@ -50,7 +57,7 @@ def _batch_job(
     return BatchJob(
         name=name,
         target=target,
-        runner=runner,
+        runner_labels=(runner,),
         environment=environment,
         platform=platform,
         unit_tests=True,
@@ -110,6 +117,8 @@ def _batch_finished(artifacts_path: Path | str, **overrides) -> BatchFinished:
         "batch_jobs": [_batch_job_result(_batch_job("j1"))],
     }
     defaults.update(overrides)
+    # The logical batch id defaults to the message id unless a test sets them apart on purpose.
+    defaults.setdefault("batch_id", defaults["id"])
     return BatchFinished(**defaults)
 
 
@@ -146,7 +155,7 @@ def _find_result(update: UpdatePRComment, integration: str) -> JobResult:
 # ---------------------------------------------------------------------------
 
 
-def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path) -> None:
+def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
 
@@ -171,12 +180,13 @@ def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path) -> None
     assert status.skipped_count == 0
     assert len(status.results) == 1
 
-    assert (tmp_path / "out" / "coverage" / "ntp-py3.13-linux.xml").is_file()
-    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-test-unit-py3.13.xml").is_file()
-    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-test-e2e-py3.13.xml").is_file()
+    # Organized filenames are prefixed by the job's artifact identity (target_environment_platform).
+    assert (tmp_path / "out" / "coverage" / "ntp_py3.13_linux.xml").is_file()
+    assert (tmp_path / "out" / "test_results" / "ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
+    assert (tmp_path / "out" / "test_results" / "ntp_py3.13_linux-test-e2e-py3.13.xml").is_file()
 
 
-def test_failure_path_records_failed_steps_and_reports(tmp_path: Path) -> None:
+def test_failure_path_records_failed_steps_and_reports(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING, e2e=False)
 
@@ -204,7 +214,7 @@ def test_failure_path_records_failed_steps_and_reports(tmp_path: Path) -> None:
     assert _failed_ids(result) == [FAILING_TEST_ID]
 
 
-def test_full_report_keeps_passing_tests(tmp_path: Path) -> None:
+def test_full_report_keeps_passing_tests(tmp_path: Path):
     # The failing fixture holds one failing and one passing test; the registry keeps both, not just
     # the failure (dispatcher.md: full registry of everything that happened).
     artifacts = tmp_path / "artifacts" / "100"
@@ -228,7 +238,7 @@ def test_full_report_keeps_passing_tests(tmp_path: Path) -> None:
     assert statuses["nagios.tests.test_nagios.TestPerfDataTailer::test_host_perfdata"] == TestStatus.PASSED
 
 
-def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
+def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path)
     batch_jobs = [
         _batch_job_result(_batch_job("j1", environment="py3.12")),
@@ -241,7 +251,7 @@ def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
     assert {tuple(result.failed_steps) for result in status.results} == {("timed out",)}
 
 
-def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) -> None:
+def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     j1_dir = _make_job_tree(artifacts, "j1", environment="py3.12", junit=JUNIT_PASSING)
     j2_dir = _make_job_tree(artifacts, "j2", environment="py3.13", junit=JUNIT_FAILING)
@@ -262,7 +272,7 @@ def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) -> Non
     assert failed == ["kafka"]
 
 
-def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path) -> None:
+def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     j1_dir = _make_job_tree(artifacts, "j1", e2e=False)
     j2_dir = _make_job_tree(artifacts, "j2", e2e=False)
@@ -280,11 +290,43 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path) -
 
     # Both jobs share target+environment but differ by platform/runner: each keeps its own file.
     coverage_dir = tmp_path / "out" / "coverage"
-    assert (coverage_dir / "ntp-py3.13-linux.xml").is_file()
-    assert (coverage_dir / "ntp-py3.13-windows.xml").is_file()
+    assert (coverage_dir / "ntp_py3.13_linux.xml").is_file()
+    assert (coverage_dir / "ntp_py3.13_windows.xml").is_file()
 
 
-def test_emits_update_per_batch_done_on_last(tmp_path: Path) -> None:
+def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path):
+    # One job carries both facets (unit_tests and e2e_tests). Its bundle holds both a unit and an
+    # E2E JUnit report plus coverage; the organized outputs are distinguished by filename within
+    # the single artifact identity and never overwrite one another.
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "postgres-job", junit=JUNIT_PASSING, e2e=True)
+
+    combined_job = BatchJob(
+        name="postgres (py3.13)",
+        target="postgres",
+        runner_labels=("ubuntu-latest",),
+        environment="py3.13",
+        platform=Platform.LINUX,
+        unit_tests=True,
+        e2e_tests=True,
+    )
+
+    gatherer = _make_gatherer(tmp_path)
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            batch_jobs=[_batch_job_result(combined_job, _workflow_job("postgres (py3.13)", "success"), job_dir)],
+        )
+    )
+
+    assert (tmp_path / "out" / "coverage" / "postgres_py3.13_linux.xml").is_file()
+
+    test_results_dir = tmp_path / "out" / "test_results"
+    assert (test_results_dir / "postgres_py3.13_linux-test-unit-py3.13.xml").is_file()
+    assert (test_results_dir / "postgres_py3.13_linux-test-e2e-py3.13.xml").is_file()
+
+
+def test_emits_update_per_batch_done_on_last(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path, expected_batches=2)
 
     artifacts1 = tmp_path / "artifacts" / "100"
@@ -324,7 +366,7 @@ def test_emits_update_per_batch_done_on_last(tmp_path: Path) -> None:
     assert {status.id for status in second[0].workflows} == {100, 200}
 
 
-def test_multiple_failing_steps_all_collected(tmp_path: Path) -> None:
+def test_multiple_failing_steps_all_collected(tmp_path: Path):
     # A workflow can run on-failure steps, so more than one step may conclude in failure.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1", e2e=False)
@@ -352,7 +394,7 @@ def test_multiple_failing_steps_all_collected(tmp_path: Path) -> None:
     assert result.failed_steps == ["Run unit tests", "Upload logs on failure"]
 
 
-def test_per_job_status_comes_from_correlated_job(tmp_path: Path) -> None:
+def test_per_job_status_comes_from_correlated_job(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING, e2e=False)
     workflow_job = WorkflowJob(
@@ -379,7 +421,7 @@ def test_per_job_status_comes_from_correlated_job(tmp_path: Path) -> None:
     assert result.failed_steps == ["Run unit tests"]
 
 
-def test_missing_artifact_dir_is_skipped(tmp_path: Path) -> None:
+def test_missing_artifact_dir_is_skipped(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
 
     gatherer = _make_gatherer(tmp_path)
@@ -395,7 +437,7 @@ def test_missing_artifact_dir_is_skipped(tmp_path: Path) -> None:
     assert not (tmp_path / "out").exists()
 
 
-def test_malformed_junit_is_swallowed(tmp_path: Path) -> None:
+def test_malformed_junit_is_swallowed(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1", junit="<testsuite><testcase>", e2e=False)
 
@@ -411,7 +453,7 @@ def test_malformed_junit_is_swallowed(tmp_path: Path) -> None:
     assert result.reports == ()  # malformed junit skipped; coverage.xml is not a JUnit report
 
 
-def test_missing_workflow_job_raises(tmp_path: Path) -> None:
+def test_missing_workflow_job_raises(tmp_path: Path):
     # Correlation is the runner's job; a job without a workflow job on a non-timed-out batch is a bug.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
@@ -423,7 +465,7 @@ def test_missing_workflow_job_raises(tmp_path: Path) -> None:
         )
 
 
-def test_empty_batch_jobs_is_skipped(tmp_path: Path) -> None:
+def test_empty_batch_jobs_is_skipped(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished("", batch_jobs=[]))
 
@@ -432,7 +474,7 @@ def test_empty_batch_jobs_is_skipped(tmp_path: Path) -> None:
     assert gatherer._received_batches == 0
 
 
-def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
+def test_duplicate_batch_finished_is_ignored(tmp_path: Path):
     # A duplicate BatchFinished for a run_id already gathered must not re-count the batch or inflate
     # the revision (invariant 2: one revision per consumed batch).
     artifacts = tmp_path / "artifacts" / "100"
@@ -452,7 +494,46 @@ def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
     assert gatherer._received_batches == 1
 
 
-def test_no_emission_without_batch_finished(tmp_path: Path) -> None:
+def test_correlates_on_batch_id_not_message_id(tmp_path: Path):
+    # The gatherer keys its registry and workflow status on the logical batch_id, independent of
+    # the message id and of the GitHub run_id (execution metadata).
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1")
+
+    gatherer = _make_gatherer(tmp_path)
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            id="msg-uuid-1",
+            batch_id="batch-09",
+            run_id=555,
+            batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)],
+        )
+    )
+
+    assert set(gatherer._results_by_batch) == {"batch-09"}
+    status = _drain_queue(gatherer.queue)[0].workflows[0]
+    assert status.batch_id == "batch-09"
+    assert status.id == 555
+
+
+def test_duplicate_correlates_on_batch_id_across_reruns(tmp_path: Path):
+    # A re-run keeps the same logical batch_id but reports a new run_id; the duplicate must still
+    # be ignored because correlation is on batch_id, not run_id.
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1")
+    jobs = [_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)]
+
+    gatherer = _make_gatherer(tmp_path)
+    gatherer.process_message(_batch_finished(artifacts, id="msg-a", batch_id="batch-09", run_id=100, batch_jobs=jobs))
+    assert len(_drain_queue(gatherer.queue)) == 1
+
+    gatherer.process_message(_batch_finished(artifacts, id="msg-b", batch_id="batch-09", run_id=200, batch_jobs=jobs))
+    assert _drain_queue(gatherer.queue) == []
+    assert gatherer._received_batches == 1
+
+
+def test_no_emission_without_batch_finished(tmp_path: Path):
     # Invariant: the gatherer's state changes only when a BatchFinished is consumed.
     gatherer = _make_gatherer(tmp_path)
     assert _drain_queue(gatherer.queue) == []
@@ -460,7 +541,7 @@ def test_no_emission_without_batch_finished(tmp_path: Path) -> None:
     assert gatherer._received_batches == 0
 
 
-def test_build_update_message(tmp_path: Path) -> None:
+def test_build_update_message(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path)
     message = gatherer.build_update_message("final", revision=2, done=True)
     assert isinstance(message, UpdatePRComment)
@@ -492,7 +573,7 @@ def _scenario_job(
     return _batch_job_result(job, workflow_job, job_dir)
 
 
-def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
+def test_dispatcher_scenario_three_batches(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path, expected_batches=3)
 
     # Batch-01 (steps 10-11): 4 jobs pass.
@@ -560,7 +641,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     assert _find_result(final, "consul").status == "skipped"
 
 
-def test_dispatcher_scenario_revisions_are_monotonic(tmp_path: Path) -> None:
+def test_dispatcher_scenario_revisions_are_monotonic(tmp_path: Path):
     # Each consumed BatchFinished yields exactly one revision, strictly increasing (invariant #2).
     gatherer = _make_gatherer(tmp_path, expected_batches=3)
     revisions: list[int] = []
