@@ -2,6 +2,14 @@ name: Tekton
 fleet_configurable: true
 files:
 - name: tekton.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_named_ports
+      overrides:
+        port_names:
+        - metrics
+        candidates:
+        - pipelines_controller_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:
@@ -28,3 +36,10 @@ files:
       overrides:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.hidden: true
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - controller-10a3e32792f33651396d02b6855a6e36
+  - template: auto_conf/discovery
