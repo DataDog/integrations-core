@@ -15,13 +15,31 @@ if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
 
 
+class BatchingConfig(BaseModel):
+    """Policy for turning discovered test units into batched ``TestBatch`` plans.
+
+    Read from the ``[dispatcher.batching]`` table. ``max_jobs_per_batch`` caps every batch (256
+    GitHub job cap minus a 16-job setup buffer, the safe max). ``allow_integration_splitting``
+    permits a single integration whose job count exceeds ``max_jobs_per_batch`` to span multiple
+    capacity-bounded batches.
+
+    There is intentionally no environment- or facet-splitting option: the authoritative plan always
+    emits one concrete job per resolved environment, so such a knob could not alter the outcome.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    max_jobs_per_batch: int = Field(default=240, gt=0, le=240)
+    allow_integration_splitting: bool = False
+
+
 class DispatcherConfig(BaseModel):
     """Per-repository Dispatcher configuration."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    max_jobs_per_batch: int = Field(default=240, gt=0, le=240)  # 256 GitHub job cap - 16-job setup buffer; the safe max
     global_timeout_seconds: float = Field(default=10800.0, gt=0)  # 3 hours
+    batching: BatchingConfig = BatchingConfig()
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()
 
     @classmethod
