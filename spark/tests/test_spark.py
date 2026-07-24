@@ -1364,18 +1364,23 @@ def test_do_not_crash_on_single_app_failure():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "instance,service_check,expect_worker_count_metric",
+    "instance,service_check,expect_worker_count_metric,mock_response_body",
     [
-        (DRIVER_CONFIG, "driver", False),
-        (YARN_CONFIG, "resource_manager", False),
-        (MESOS_CONFIG, "mesos_master", False),
-        (STANDALONE_CONFIG, "standalone_master", True),
-        (STANDALONE_CONFIG_PRE_20, "standalone_master", True),
+        (DRIVER_CONFIG, "driver", False, "{}"),
+        (YARN_CONFIG, "resource_manager", False, "{}"),
+        (MESOS_CONFIG, "mesos_master", False, "{}"),
+        # A real standalone master's state response always includes `workers`, even when
+        # idle (see the non-list-vs-missing-`workers` distinction covered separately in
+        # test_standalone_ignores_non_master_json below).
+        (STANDALONE_CONFIG, "standalone_master", True, '{"workers": []}'),
+        (STANDALONE_CONFIG_PRE_20, "standalone_master", True, '{"workers": []}'),
     ],
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
-def test_no_running_apps(aggregator, dd_run_check, instance, service_check, expect_worker_count_metric, caplog):
-    with mock.patch('requests.Session.get', return_value=MockResponse("{}")):
+def test_no_running_apps(
+    aggregator, dd_run_check, instance, service_check, expect_worker_count_metric, mock_response_body, caplog
+):
+    with mock.patch('requests.Session.get', return_value=MockResponse(mock_response_body)):
         with caplog.at_level(logging.WARNING):
             dd_run_check(SparkCheck('spark', {}, [instance]))
 
@@ -1392,6 +1397,25 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check, expe
         )
 
     assert 'No running apps found. No application metrics will be collected.' in caplog.text
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "mock_response_body",
+    [
+        pytest.param("{}", id="no workers key at all"),
+        pytest.param('{"workers": "not-a-list"}', id="workers present but not a list"),
+    ],
+)
+def test_standalone_ignores_non_master_json(aggregator, dd_run_check, mock_response_body):
+    # Guards against config discovery's probe accepting a false-positive candidate: a
+    # container matched as spark but whose probed port isn't actually the master's state
+    # endpoint could still return *some* 200 JSON response. Only emit worker_count when
+    # `workers` is genuinely present as a list, i.e. the response really is master state.
+    with mock.patch('requests.Session.get', return_value=MockResponse(mock_response_body)):
+        dd_run_check(SparkCheck('spark', {}, [STANDALONE_CONFIG]))
+
+    aggregator.assert_metric('spark.master.worker_count', count=0)
 
 
 @pytest.mark.unit
