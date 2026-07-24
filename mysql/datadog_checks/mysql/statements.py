@@ -56,6 +56,10 @@ METRICS_COLUMNS = {
     'sum_select_range_check',
 }
 
+INTERNAL_COLUMNS = {'_dd_statement_id'}
+DIGEST_STATEMENT_SOURCE = 'events_statements_summary_by_digest'
+PREPARED_STATEMENT_SOURCE = 'prepared_statements_instances'
+
 
 def _row_key(row):
     """
@@ -63,6 +67,39 @@ def _row_key(row):
     :return: a tuple uniquely identifying this row
     """
     return row['schema_name'], row['query_signature']
+
+
+def _row_state_key(row):
+    """
+    :param row: a normalized row from a MySQL statement metrics source
+    :return: a tuple uniquely identifying the cumulative database counter
+    """
+    if row.get('_dd_statement_id') is not None:
+        # `object_instance_begin` is a memory address that MySQL can reuse for a
+        # different prepared statement once the old one is deallocated. Include
+        # the query_signature so a reused address doesn't merge two different
+        # statements' cumulative counters before diffing.
+        return PREPARED_STATEMENT_SOURCE, row['schema_name'], row['_dd_statement_id'], row['query_signature']
+
+    return DIGEST_STATEMENT_SOURCE, row['schema_name'], row['digest']
+
+
+def _strip_internal_columns(row):
+    return {k: v for k, v in row.items() if k not in INTERNAL_COLUMNS}
+
+
+def _merge_rows_by_query_signature(rows):
+    merged_rows = {}
+    for row in rows:
+        query_key = _row_key(row)
+        if query_key in merged_rows:
+            for metric in METRICS_COLUMNS:
+                if metric in row:
+                    merged_rows[query_key][metric] = merged_rows[query_key].get(metric, 0) + row[metric]
+        else:
+            merged_rows[query_key] = _strip_internal_columns(row)
+
+    return list(merged_rows.values())
 
 
 class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
@@ -197,7 +234,8 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         monotonic_rows = self._filter_query_rows(monotonic_rows)
         monotonic_rows = self._normalize_queries(monotonic_rows)
         monotonic_rows = self._add_associated_rows(monotonic_rows)
-        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
+        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_state_key)
+        rows = _merge_rows_by_query_signature(rows)
         return rows
 
     def _get_statement_count(self, tags):
@@ -233,7 +271,8 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         )
 
         sql_statement_summary = """\
-            SELECT `schema_name`,
+            SELECT NULL AS `_dd_statement_id`,
+                   `schema_name`,
                    `digest`,
                    `digest_text`,
                    `count_star`,
@@ -263,35 +302,36 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if collect_prepared_statements:
             # Every prepared statement object has a row in `performance_schema.prepared_statements_instances`.
-            # Group by `schema_name` and `digest_text` to get the totals for each statement.
+            # MySQL documents `object_instance_begin` as the table's primary key:
+            # https://dev.mysql.com/doc/refman/8.4/en/performance-schema-prepared-statements-instances-table.html
             prepared_sql_statement_summary = """\
-                SELECT  `owner_object_schema` AS `schema_name`,
+                SELECT  `object_instance_begin` AS `_dd_statement_id`,
+                        `owner_object_schema` AS `schema_name`,
                         NULL AS `digest`,
                         `sql_text` AS `digest_text`,
-                        sum(`count_execute`) AS `count_star`,
-                        sum(`sum_timer_execute`) AS `sum_timer_wait`,
-                        sum(`sum_lock_time`) AS `sum_lock_time`,
-                        sum(`sum_errors`) AS `sum_errors`,
-                        sum(`sum_rows_affected`) AS `sum_rows_affected`,
-                        sum(`sum_rows_sent`) AS `sum_rows_sent`,
-                        sum(`sum_rows_examined`) AS `sum_rows_examined`,
-                        sum(`sum_select_scan`) AS `sum_select_scan`,
-                        sum(`sum_select_full_join`) AS `sum_select_full_join`,
-                        sum(`sum_no_index_used`) AS `sum_no_index_used`,
-                        sum(`sum_no_good_index_used`) AS `sum_no_good_index_used`,
-                        sum(`sum_sort_rows`) AS `sum_sort_rows`,
-                        sum(`sum_sort_merge_passes`) AS `sum_sort_merge_passes`,
-                        sum(`sum_sort_range`) AS `sum_sort_range`,
-                        sum(`sum_sort_scan`) AS `sum_sort_scan`,
-                        sum(`sum_created_tmp_tables`) AS `sum_created_tmp_tables`,
-                        sum(`sum_created_tmp_disk_tables`) AS `sum_created_tmp_disk_tables`,
-                        sum(`sum_select_full_range_join`) AS `sum_select_full_range_join`,
-                        sum(`sum_select_range`) AS `sum_select_range`,
-                        sum(`sum_select_range_check`) AS `sum_select_range_check`,
+                        `count_execute` AS `count_star`,
+                        `sum_timer_execute` AS `sum_timer_wait`,
+                        `sum_lock_time` AS `sum_lock_time`,
+                        `sum_errors` AS `sum_errors`,
+                        `sum_rows_affected` AS `sum_rows_affected`,
+                        `sum_rows_sent` AS `sum_rows_sent`,
+                        `sum_rows_examined` AS `sum_rows_examined`,
+                        `sum_select_scan` AS `sum_select_scan`,
+                        `sum_select_full_join` AS `sum_select_full_join`,
+                        `sum_no_index_used` AS `sum_no_index_used`,
+                        `sum_no_good_index_used` AS `sum_no_good_index_used`,
+                        `sum_sort_rows` AS `sum_sort_rows`,
+                        `sum_sort_merge_passes` AS `sum_sort_merge_passes`,
+                        `sum_sort_range` AS `sum_sort_range`,
+                        `sum_sort_scan` AS `sum_sort_scan`,
+                        `sum_created_tmp_tables` AS `sum_created_tmp_tables`,
+                        `sum_created_tmp_disk_tables` AS `sum_created_tmp_disk_tables`,
+                        `sum_select_full_range_join` AS `sum_select_full_range_join`,
+                        `sum_select_range` AS `sum_select_range`,
+                        `sum_select_range_check` AS `sum_select_range_check`,
                         NOW() AS `last_seen`
                 FROM performance_schema.prepared_statements_instances
                 WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL
-                GROUP BY `owner_object_schema`, `sql_text`
                 """
 
             sql_statement_summary = f"""\
@@ -359,7 +399,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         for row in rows:
             key = (row['schema_name'], row['query_signature'])
             digest_rows = self._statement_rows.get(key, {})
-            digest_rows[row['digest']] = row
+            digest_rows[_row_state_key(row)] = row
             self._statement_rows[key] = digest_rows
 
         return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]

@@ -283,6 +283,221 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
+def test_statement_metrics_new_digest_does_not_inflate(aggregator, dd_run_check, dbm_instance, datadog_agent):
+    # Two processlist queries with distinct WHERE `state` shapes (=> two digests on every version) obfuscated to
+    # one signature. A digest first seen after the signature is baselined must itself be baselined, not dumped.
+    # Matching only `WHERE `state`` keeps the collapse off the check's own processlist queries.
+    query_one = "select * from information_schema.processlist where state = 'starting'"
+    query_two = "select * from information_schema.processlist where state = 'starting' or state = 'suspended'"
+    normalized_query = 'SELECT * FROM `information_schema` . `processlist` WHERE `state` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def obfuscate_sql(query, options=None):
+        if 'WHERE `state`' in query:
+            return normalized_query
+        return query
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_query(query_one)  # digest A -> baseline the signature
+        dd_run_check(mysql_check)
+        run_query(query_one)  # +1 real delta
+        for _ in range(5):
+            run_query(query_two)  # digest B: new, same signature
+        dd_run_check(mysql_check)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
+    assert len(matching_rows) == 1
+    # only digest A's +1 is counted; digest B is baselined, not dumped (pre-fix: 6)
+    assert matching_rows[0]['count_star'] == 1
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_metrics_new_prepared_statement_instance_does_not_inflate(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent
+):
+    if MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION_PARSED < parse_version('10.5.0'):
+        pytest.skip("prepared_statements_instances is unavailable on MariaDB < 10.5")
+
+    dbm_instance['query_metrics']['only_query_recent_statements'] = False
+    dbm_instance['query_metrics']['collect_prepared_statements'] = True
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    prepared_sql = DEFAULT_FQ_SUCCESS_QUERY
+    query_signature = compute_sql_signature(prepared_sql)
+
+    # one session so both instances stay live across the checks
+    with closing(bob_conn.cursor()) as cursor:
+        cursor.execute("PREPARE ps1 FROM '{}'".format(prepared_sql))
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)  # baseline the signature with ps1
+        cursor.execute("EXECUTE ps1")  # +1 real delta
+        # ps2: second instance, same sql_text, distinct object_instance_begin
+        cursor.execute("PREPARE ps2 FROM '{}'".format(prepared_sql))
+        for _ in range(5):
+            cursor.execute("EXECUTE ps2")
+        dd_run_check(mysql_check)
+        cursor.execute("DEALLOCATE PREPARE ps1")
+        cursor.execute("DEALLOCATE PREPARE ps2")
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
+    assert len(matching_rows) == 1
+    # only ps1's +1 is counted; ps2 is baselined, not dumped (pre-fix SUM-by-sql_text: 6)
+    assert matching_rows[0]['count_star'] == 1
+
+
+@pytest.mark.unit
+def test_statement_metrics_baselines_new_digest_before_merging_query_signature(dbm_instance, datadog_agent):
+    normalized_query = 'SELECT * FROM `employees` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def row(digest, digest_text, count_star):
+        return {
+            '_dd_statement_id': None,
+            'schema_name': 'personio',
+            'digest': digest,
+            'digest_text': digest_text,
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [row('digest-a', 'SELECT * FROM employees WHERE id = ?', 100)],
+            [
+                row('digest-a', 'SELECT * FROM employees WHERE id = ?', 110),
+                row('digest-b', 'SELECT * FROM employees WHERE id IN (?)', 5000),
+            ],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+
+    assert len(rows) == 1
+    assert rows[0]['query_signature'] == query_signature
+    assert rows[0]['count_star'] == 10
+    assert '_dd_statement_id' not in rows[0]
+
+
+@pytest.mark.unit
+def test_statement_metrics_baselines_new_prepared_statement_instance_before_merging_query_signature(
+    dbm_instance, datadog_agent
+):
+    # Two instances (distinct object_instance_begin), same sql_text => same signature. Prepared rows have a NULL
+    # digest, so they must be diffed per instance; a newly-seen instance is baselined, not dumped.
+    normalized_query = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def row(object_instance_begin, count_star):
+        return {
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [row(1001, 100)],
+            [
+                row(1001, 110),
+                row(2002, 5000),  # a newly-prepared instance of the same statement
+            ],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+
+    assert len(rows) == 1
+    assert rows[0]['query_signature'] == query_signature
+    # only 1001's delta (10) is counted; new instance 2002 is baselined, not dumped
+    assert rows[0]['count_star'] == 10
+    assert '_dd_statement_id' not in rows[0]
+
+
+@pytest.mark.unit
+def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(dbm_instance, datadog_agent):
+    # object_instance_begin is a reusable memory address: after a statement is deallocated its id can be handed to
+    # a different one. A recycled id (different sql_text/signature) must not merge with the stale cached row.
+    normalized_a = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    normalized_b = 'SELECT `name` FROM `dbm_user` WHERE `id` = ?'
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def row(object_instance_begin, digest_text, count_star):
+        return {
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': digest_text,
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [row(1001, 'SELECT id FROM dbm_order WHERE id = ?', 100)],
+            # 1001 deallocated, then reused by a different statement
+            [row(1001, 'SELECT name FROM dbm_user WHERE id = ?', 5000)],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        normalized = normalized_a if 'dbm_order' in query else normalized_b
+        return json.dumps({'query': normalized, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+
+    # the reused id is a different statement => baselined, not merged with the stale row (pre-fix: spurious 5000)
+    assert rows == []
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "input_cloud_metadata,output_cloud_metadata",
     [
