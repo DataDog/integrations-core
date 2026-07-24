@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.2 / 2026-07-23
+
+***Fixed***:
+
+* Call malloc_trim after each run to return librdkafka's per-arena free memory to the OS and curb agent memory growth. ([#24553](https://github.com/DataDog/integrations-core/pull/24553))
+* Keep the DSM broker_timestamps cache in memory and persist it at most every 5 minutes to reduce per-run allocation churn and memory growth. ([#24554](https://github.com/DataDog/integrations-core/pull/24554))
+
 ## 8.1.1 / 2026-07-17
 
 ***Fixed***:
