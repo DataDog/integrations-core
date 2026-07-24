@@ -99,10 +99,12 @@ def test_detect_sli_endpoint(aggregator, mock_metrics, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_detect_sli_endpoint_404(aggregator, instance, mock_http_response):
-    mock_http_response(status_code=404)
+def test_detect_sli_endpoint_404(aggregator, instance, mock_openmetrics_http, mock_response):
+    mock_openmetrics_http.get.side_effect = [
+        mock_response(status_code=404),
+        mock_response(status_code=200),
+    ]
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    mock_http_response(status_code=200)
     c.check(instance)
     SLIMetric = namedtuple("SLIMetric", ["name", "count"])
 
@@ -114,10 +116,12 @@ def test_detect_sli_endpoint_404(aggregator, instance, mock_http_response):
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count)
 
 
-def test_detect_sli_endpoint_403(aggregator, instance, mock_http_response):
-    mock_http_response(status_code=403)
+def test_detect_sli_endpoint_403(aggregator, instance, mock_openmetrics_http, mock_response):
+    mock_openmetrics_http.get.side_effect = [
+        mock_response(status_code=403),
+        mock_response(status_code=200),
+    ]
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    mock_http_response(status_code=200)
     c.check(instance)
     SLIMetric = namedtuple("SLIMetric", ["name", "count"])
 

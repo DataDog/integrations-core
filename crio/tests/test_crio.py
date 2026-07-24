@@ -13,8 +13,8 @@ NAMESPACE = 'crio'
 
 
 @pytest.fixture()
-def mock_data(mock_http_response):
-    mock_http_response(
+def mock_data(mock_openmetrics_http, mock_response):
+    mock_openmetrics_http.get.return_value = mock_response(
         file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt'),
         headers={'Content-Type': 'text/plain'},
     )

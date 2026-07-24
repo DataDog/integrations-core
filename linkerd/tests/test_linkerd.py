@@ -70,8 +70,10 @@ def test_linkerd_v2(aggregator, dd_run_check, mock_openmetrics_http):
     )
 
 
-def test_linkerd_v2_new(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('linkerd_v2.txt'))
+def test_linkerd_v2_new(aggregator, dd_run_check, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(
+        file_path=get_fixture_path('linkerd_v2.txt'), headers={'Content-Type': 'text/plain'}
+    )
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE_NEW])
     dd_run_check(check)
 

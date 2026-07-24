@@ -34,11 +34,11 @@ def test_check_falco(dd_run_check, aggregator, instance, mock_http):
     aggregator.assert_service_check("falco.openmetrics.health", ServiceCheck.OK)
 
 
-def test_version_metadata(datadog_agent, dd_run_check, mock_http_response, instance):
+def test_version_metadata(datadog_agent, dd_run_check, mock_http, instance):
     """
     Test metadata version collection with V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('falco_metrics.txt'))
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('falco_metrics.txt'))
     check = FalcoCheck('falco', {}, [instance])
     check.check_id = 'falco_test'
     dd_run_check(check)

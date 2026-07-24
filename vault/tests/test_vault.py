@@ -721,13 +721,16 @@ class TestVault:
         if use_openmetrics:
             aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=0)
 
-    def test_route_transform(self, aggregator, no_token_instance, global_tags, mock_http_response):
-        no_token_instance['use_openmetrics'] = False
-        c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
+    def test_route_transform(self, aggregator, no_token_instance, global_tags, mock_openmetrics_http):
+        instance = no_token_instance.copy()
+        instance['use_openmetrics'] = False
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         c.parse_config()
 
-        mock_http_response(file_path=get_fixture_path('route_transform_metrics.txt'))
+        mock_openmetrics_http.get.return_value = MockHTTPResponse(
+            file_path=get_fixture_path('route_transform_metrics.txt')
+        )
 
         c.process(c._scraper_config, c._metric_transformers)
 
@@ -754,11 +757,12 @@ class TestVault:
         aggregator.assert_all_metrics_covered()
         aggregator.assert_no_duplicate_metrics()
 
-    def test_wal_merkle_metrics(self, aggregator, instance, dd_run_check, global_tags, mock_http_response):
-        instance = instance()
+    def test_wal_merkle_metrics(self, aggregator, no_token_instance, global_tags, mock_openmetrics_http):
+        instance = no_token_instance.copy()
+        instance['use_openmetrics'] = False
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.parse_config()
-        mock_http_response(file_path=get_fixture_path('merkle_wal_metrics.txt'))
+        mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('merkle_wal_metrics.txt'))
 
         c.process(c._scraper_config, c._metric_transformers)
 

@@ -12,11 +12,11 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .common import EXPECTED_METRICS
 
 
-def test_critical_service_check(dd_run_check, aggregator, mock_http_response, check):
+def test_critical_service_check(dd_run_check, aggregator, mock_http, mock_response, check):
     """
     When we can't connect to dcgm-exporter for whatever reason we should only submit a CRITICAL service check.
     """
-    mock_http_response(status_code=404)
+    mock_http.get.return_value = mock_response(status_code=404)
     with pytest.raises(Exception, match="HTTPStatusError"):
         dd_run_check(check)
     aggregator.assert_service_check('dcgm.openmetrics.health', status=check.CRITICAL)
