@@ -1,0 +1,17 @@
+name: iris
+files:
+- name: iris.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://%%host%%:52773/api/monitor/metrics
+        openmetrics_endpoint.description: |
+          The URL of the IRIS built-in `/api/monitor/metrics` endpoint, which exposes
+          Prometheus/OpenMetrics telemetry. This endpoint is unauthenticated by default; use the
+          `auth_token`, `username`/`password`, or `headers` options below if the endpoint has been
+          secured.

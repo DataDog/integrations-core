@@ -1,0 +1,35 @@
+# Working Docker environment for the InterSystems IRIS integration.
+#
+# The Togo OpenMetrics flow copies this directory into the generated
+# integration's test assets (tests/docker/), so keep it minimal and idiomatic.
+#
+# IRIS exposes its built-in monitoring exposition (OpenMetrics text) at
+#   http://<host>:52773/api/monitor/metrics
+# unauthenticated by default. 1972 is the superserver port (not HTTP).
+#
+# Community Edition licenses expire ~13 months after the build's release date,
+# so pin IRIS_VERSION to a current tag and refresh periodically.
+#
+# The iris_interop_* families are runtime-gated: they only appear once an
+# interop-enabled namespace has a running production. init/iris-init.sh (wired
+# via the `--after` post-start hook) enables interop on USER, starts a minimal
+# demo production, and pushes test traffic so those metrics are present and
+# non-zero for the check to scrape. No license is required for this on CE.
+
+services:
+  iris:
+    image: "intersystems/iris-community:${IRIS_VERSION:-2026.1}"
+    container_name: iris
+    command: ["--after", "/opt/irisinit/iris-init.sh"]
+    volumes:
+      - "./init:/opt/irisinit:ro"
+    ports:
+      - "${IRIS_PORT}:52773"
+      - "1972:1972"
+    healthcheck:
+      # `curl` is not present in the iris-community image (only `wget`), so use that instead.
+      test: ["CMD-SHELL", "wget -qO- http://localhost:52773/api/monitor/metrics > /dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s

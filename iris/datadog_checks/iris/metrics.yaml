@@ -1,0 +1,140 @@
+# CPU metrics
+iris_cpu_pct: cpu.pct
+iris_cpu_usage: cpu.usage
+
+# Web Gateway (CSP), cache and database metrics
+iris_csp_activity: csp.activity
+iris_csp_actual_connections: csp.actual_connections
+iris_csp_gateway_latency: csp.gateway_latency
+iris_csp_in_use_connections: csp.in_use_connections
+iris_csp_private_connections: csp.private_connections
+iris_csp_sessions: csp.sessions
+iris_cache_efficiency: cache_efficiency
+iris_cached_query_by_ns: cached_query_by_ns
+iris_db_expansion_size_mb: db.expansion_size_mb
+iris_db_free_space: db.free_space
+iris_db_latency: db.latency
+iris_db_max_size_mb: db.max_size_mb
+iris_db_size_mb: db.size_mb
+iris_directory_space: directory_space
+iris_disk_percent_full: disk_percent_full
+
+# Journal, license, object and physical I/O metrics
+iris_jrn_block_per_sec: jrn.block_per_sec
+iris_jrn_entry_per_sec: jrn.entry_per_sec
+iris_jrn_free_space: jrn.free_space
+iris_jrn_size: jrn.size
+iris_license_available: license.available
+iris_license_consumed: license.consumed
+iris_license_days_remaining: license.days_remaining
+iris_license_percent_used: license.percent_used
+iris_log_reads_per_sec: log_reads_per_sec
+iris_mirror_member_type: mirror.member_type
+iris_obj_a_seize_per_sec: obj.a_seize_per_sec
+iris_obj_del_per_sec: obj.del_per_sec
+iris_obj_hit_per_sec: obj.hit_per_sec
+iris_obj_load_per_sec: obj.load_per_sec
+iris_obj_miss_per_sec: obj.miss_per_sec
+iris_obj_new_per_sec: obj.new_per_sec
+iris_obj_seize_per_sec: obj.seize_per_sec
+iris_page_space_percent_used: page_space_percent_used
+iris_phys_mem_percent_used: phys.mem_percent_used
+iris_phys_reads_per_sec: phys.reads_per_sec
+iris_phys_writes_per_sec: phys.writes_per_sec
+
+# Shared memory, SQL, system and transaction metrics
+iris_smh_available: smh.available
+iris_smh_percent_full: smh.percent_full
+iris_smh_total: smh.total
+iris_smh_total_percent_full: smh.total_percent_full
+iris_smh_used: smh.used
+iris_sql_commands_per_second: sql.commands_per_second
+iris_sql_queries_avg_runtime: sql.queries_avg_runtime
+iris_sql_queries_avg_runtime_std_dev: sql.queries_avg_runtime_std_dev
+iris_sql_queries_per_second: sql.queries_per_second
+iris_sql_row_count_per_second: sql.row_count_per_second
+iris_system_alerts: system.alerts
+iris_system_alerts_log: system.alerts_log
+iris_system_alerts_new: system.alerts_new
+iris_system_info:
+  name: system.info
+  type: gauge
+iris_system_state: system.state
+iris_trans_open_count: trans.open_count
+iris_trans_open_secs: trans.open_secs
+iris_trans_open_secs_max: trans.open_secs.max
+
+# Process, resource, routine and SAM sensor metrics
+iris_process: process
+iris_process_block_allocs: process.block_allocs
+iris_process_block_writes: process.block_writes
+iris_process_commands: process.commands
+iris_process_count: process.count
+iris_process_glo_refs: process.glo_refs
+iris_process_jrn_entries: process.jrn_entries
+iris_process_ppg_size_mb: process.ppg_size_mb
+iris_process_phys_reads: process.phys_reads
+iris_res_a_seize: res.a_seize
+iris_res_n_seize: res.n_seize
+iris_res_seize: res.seize
+iris_rtn_a_seize_per_sec: rtn.a_seize_per_sec
+iris_rtn_call_local_per_sec: rtn.call_local_per_sec
+iris_rtn_call_miss_per_sec: rtn.call_miss_per_sec
+iris_rtn_call_remote_per_sec: rtn.call_remote_per_sec
+iris_rtn_count_by_ns: rtn.count_by_ns
+iris_rtn_load_per_sec: rtn.load_per_sec
+iris_rtn_load_rem_per_sec: rtn.load_rem_per_sec
+iris_rtn_seize_per_sec: rtn.seize_per_sec
+iris_sam_get_db_sensors_seconds: sam.get_db_sensors_seconds
+iris_sam_get_interop_sensors_seconds: sam.get_interop_sensors_seconds
+iris_sam_get_jrn_sensors_seconds: sam.get_jrn_sensors_seconds
+iris_sam_get_sql_sensors_seconds: sam.get_sql_sensors_seconds
+iris_sam_get_wqm_sensors_seconds: sam.get_wqm_sensors_seconds
+
+# Write daemon, WIJ and Work Queue Manager metrics
+iris_wd_buffer_redirty: wd.buffer_redirty
+iris_wd_buffer_write: wd.buffer_write
+iris_wd_condition: wd.condition
+iris_wd_cycle_time: wd.cycle_time
+iris_wd_pass: wd.pass
+iris_wd_phase: wd.phase
+iris_wd_proc_in_global: wd.proc_in_global
+iris_wd_size_write: wd.size_write
+iris_wd_sleep: wd.sleep
+iris_wd_suspended: wd.suspended
+iris_wd_temp_queue: wd.temp_queue
+iris_wd_temp_write: wd.temp_write
+iris_wdwij_time: wdwij_time
+iris_wd_write_time: wd.write_time
+iris_wij_writes_per_sec: wij_writes_per_sec
+iris_wqm_active_worker_jobs: wqm.active_worker_jobs
+iris_wqm_commands_per_sec: wqm.commands_per_sec
+iris_wqm_globals_per_sec: wqm.globals_per_sec
+iris_wqm_max_active_worker_jobs: wqm.max_active_worker_jobs
+iris_wqm_max_work_queue_depth: wqm.max_work_queue_depth
+iris_wqm_waiting_worker_jobs: wqm.waiting_worker_jobs
+
+# ECP, global, journal-update and interoperability metrics
+iris_ecp_conn: ecp.conn
+iris_ecp_conn_max: ecp.conn_max
+iris_ecps_conn: ecps.conn
+iris_ecps_conn_max: ecps.conn_max
+iris_glo_a_seize_per_sec: glo.a_seize_per_sec
+iris_glo_n_seize_per_sec: glo.n_seize_per_sec
+iris_glo_ref_per_sec: glo.ref_per_sec
+iris_glo_ref_rem_per_sec: glo.ref_rem_per_sec
+iris_glo_seize_per_sec: glo.seize_per_sec
+iris_glo_update_per_sec: glo.update_per_sec
+iris_glo_update_rem_per_sec: glo.update_rem_per_sec
+iris_iju_count: iju.count
+iris_iju_lock: iju.lock
+iris_interop_alert_delay: interop.alert_delay
+iris_interop_hosts: interop.hosts
+iris_interop_last_activity: interop.last_activity
+iris_interop_messages: interop.messages
+iris_interop_messages_aborted: interop.messages.aborted
+iris_interop_messages_discarded: interop.messages.discarded
+iris_interop_messages_errored: interop.messages.errored
+iris_interop_messages_per_sec: interop.messages.per_sec
+iris_interop_messages_suspended: interop.messages.suspended
+iris_interop_queued: interop.queued

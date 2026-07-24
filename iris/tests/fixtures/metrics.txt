@@ -1,0 +1,947 @@
+# HELP iris_cpu_pct CPU usage (percentage) by process type
+# TYPE iris_cpu_pct gauge
+iris_cpu_pct{id="AUXWD"} 0
+iris_cpu_pct{id="CSPSRV"} 0
+iris_cpu_pct{id="GARCOL"} 0
+iris_cpu_pct{id="JRNDMN"} 0
+iris_cpu_pct{id="LICENSESRV"} 0
+iris_cpu_pct{id="WRTDMN"} 0
+# HELP iris_cpu_usage CPU usage (percentage) system-wide
+# TYPE iris_cpu_usage gauge
+iris_cpu_usage 0
+# HELP iris_csp_activity Web requests served by the Web Gateway Server since it was started
+# TYPE iris_csp_activity gauge
+iris_csp_activity{id="127.0.0.1:52773"} 14
+# HELP iris_csp_actual_connections Current connections to this server by the Web Gateway Server
+# TYPE iris_csp_actual_connections gauge
+iris_csp_actual_connections{id="127.0.0.1:52773"} 3
+# HELP iris_csp_gateway_latency Time (milliseconds) required to obtain a response from the Web Gateway Server when fetching metrics represented by Web sensors
+# TYPE iris_csp_gateway_latency gauge
+# UNIT iris_csp_gateway_latency milliseconds
+iris_csp_gateway_latency{id="127.0.0.1:52773"} .302
+# HELP iris_csp_in_use_connections Current connections to this server by the Web Gateway Server that are processing a Web request
+# TYPE iris_csp_in_use_connections gauge
+iris_csp_in_use_connections{id="127.0.0.1:52773"} 1
+# HELP iris_csp_private_connections Current connections to this server by the Web Gateway Server that are reserved for state-aware applications (Preserve mode 1)
+# TYPE iris_csp_private_connections gauge
+iris_csp_private_connections{id="127.0.0.1:52773"} 0
+# HELP iris_csp_sessions Currently active Web session IDs on this server
+# TYPE iris_csp_sessions gauge
+iris_csp_sessions 0
+# HELP iris_cache_efficiency Cache efficiency: global references / physical reads + writes (percentage)
+# TYPE iris_cache_efficiency gauge
+iris_cache_efficiency 166.385
+# HELP iris_cached_query_by_ns Total number of cached queries in each namespace
+# TYPE iris_cached_query_by_ns gauge
+iris_cached_query_by_ns{id="%SYS"} 84
+iris_cached_query_by_ns{id="USER"} 6
+# HELP iris_db_expansion_size_mb Default size (in megabytes) to expand a database when it fills
+# TYPE iris_db_expansion_size_mb gauge
+# UNIT iris_db_expansion_size_mb megabytes
+iris_db_expansion_size_mb{id="ENSLIB"} 0
+iris_db_expansion_size_mb{id="IRISAUDIT"} 0
+iris_db_expansion_size_mb{id="IRISLOCALDATA"} 0
+iris_db_expansion_size_mb{id="IRISMETRICS"} 0
+iris_db_expansion_size_mb{id="IRISSECURITY"} 0
+iris_db_expansion_size_mb{id="IRISSYS"} 0
+iris_db_expansion_size_mb{id="IRISTEMP"} 0
+iris_db_expansion_size_mb{id="USER"} 0
+# HELP iris_db_free_space Available space (in megabytes) in a database
+# TYPE iris_db_free_space gauge
+# UNIT iris_db_free_space megabytes
+iris_db_free_space{id="ENSLIB"} 8.9
+iris_db_free_space{id="IRISAUDIT"} 6.8
+iris_db_free_space{id="IRISLOCALDATA"} 8.8
+iris_db_free_space{id="IRISMETRICS"} .34
+iris_db_free_space{id="IRISSECURITY"} .32
+iris_db_free_space{id="IRISSYS"} 7.2
+iris_db_free_space{id="IRISTEMP"} 7.5
+iris_db_free_space{id="USER"} 9.1
+# HELP iris_db_latency Time to complete a random read from the database (milliseconds)
+# TYPE iris_db_latency gauge
+# UNIT iris_db_latency milliseconds
+iris_db_latency{id="ENSLIB"} 0.040
+iris_db_latency{id="IRISAUDIT"} 0.040
+iris_db_latency{id="IRISMETRICS"} 0.043
+iris_db_latency{id="IRISSECURITY"} 0.057
+iris_db_latency{id="IRISSYS"} 0.124
+iris_db_latency{id="IRISTEMP"} 0.047
+iris_db_latency{id="USER"} 0.041
+# HELP iris_db_max_size_mb Maximum size (in megabytes) allowed for a database, 0=unlimited
+# TYPE iris_db_max_size_mb gauge
+# UNIT iris_db_max_size_mb megabytes
+iris_db_max_size_mb{id="ENSLIB"} 0
+iris_db_max_size_mb{id="IRISAUDIT"} 0
+iris_db_max_size_mb{id="IRISLOCALDATA"} 0
+iris_db_max_size_mb{id="IRISMETRICS"} 0
+iris_db_max_size_mb{id="IRISSECURITY"} 0
+iris_db_max_size_mb{id="IRISSYS"} 0
+iris_db_max_size_mb{id="IRISTEMP"} 0
+iris_db_max_size_mb{id="USER"} 0
+# HELP iris_db_size_mb Current size (in megabytes) of a database
+# TYPE iris_db_size_mb gauge
+# UNIT iris_db_size_mb megabytes
+iris_db_size_mb{id="USER",dir="/usr/irissys/mgr/user/"} 11
+iris_db_size_mb{id="ENSLIB",dir="/usr/irissys/mgr/enslib/"} 151
+iris_db_size_mb{id="IRISSYS",dir="/usr/irissys/mgr/"} 70
+iris_db_size_mb{id="IRISTEMP",dir="/usr/irissys/mgr/iristemp/"} 11
+iris_db_size_mb{id="IRISAUDIT",dir="/usr/irissys/mgr/irisaudit/"} 11
+iris_db_size_mb{id="IRISMETRICS",dir="/usr/irissys/mgr/irismetrics/"} 1
+iris_db_size_mb{id="IRISSECURITY",dir="/usr/irissys/mgr/irissecurity/"} 1
+iris_db_size_mb{id="IRISLOCALDATA",dir="/usr/irissys/mgr/irislocaldata/"} 11
+# HELP iris_directory_space Free space (in megabytes) available on the database directory's storage volume
+# TYPE iris_directory_space gauge
+# UNIT iris_directory_space megabytes
+iris_directory_space{id="USER",dir="/usr/irissys/mgr/user/"} 28739
+iris_directory_space{id="ENSLIB",dir="/usr/irissys/mgr/enslib/"} 28739
+iris_directory_space{id="IRISSYS",dir="/usr/irissys/mgr/"} 28739
+iris_directory_space{id="IRISTEMP",dir="/usr/irissys/mgr/iristemp/"} 28739
+iris_directory_space{id="IRISAUDIT",dir="/usr/irissys/mgr/irisaudit/"} 28739
+iris_directory_space{id="IRISMETRICS",dir="/usr/irissys/mgr/irismetrics/"} 28739
+iris_directory_space{id="IRISSECURITY",dir="/usr/irissys/mgr/irissecurity/"} 28739
+# HELP iris_disk_percent_full Space in use (percentage) on the database directory's storage volume
+# TYPE iris_disk_percent_full gauge
+iris_disk_percent_full{id="USER",dir="/usr/irissys/mgr/user/"} 51.92
+iris_disk_percent_full{id="ENSLIB",dir="/usr/irissys/mgr/enslib/"} 51.92
+iris_disk_percent_full{id="IRISSYS",dir="/usr/irissys/mgr/"} 51.92
+iris_disk_percent_full{id="IRISTEMP",dir="/usr/irissys/mgr/iristemp/"} 51.92
+iris_disk_percent_full{id="IRISAUDIT",dir="/usr/irissys/mgr/irisaudit/"} 51.92
+iris_disk_percent_full{id="IRISMETRICS",dir="/usr/irissys/mgr/irismetrics/"} 51.92
+iris_disk_percent_full{id="IRISSECURITY",dir="/usr/irissys/mgr/irissecurity/"} 51.92
+# HELP iris_ecp_conn Total active ECP connections on this system as an ECP application server
+# TYPE iris_ecp_conn gauge
+iris_ecp_conn 0
+# HELP iris_ecp_conn_max Maximum active ECP connections from this system as an ECP application server
+# TYPE iris_ecp_conn_max gauge
+iris_ecp_conn_max 2
+# HELP iris_ecps_conn Total active client connections to this system as an ECP data server
+# TYPE iris_ecps_conn gauge
+iris_ecps_conn 0
+# HELP iris_ecps_conn_max Maximum active client connections to this system as an ECP data server
+# TYPE iris_ecps_conn_max gauge
+iris_ecps_conn_max 1
+# HELP iris_glo_a_seize_per_sec Global resource Aseizes (per second)
+# TYPE iris_glo_a_seize_per_sec gauge
+iris_glo_a_seize_per_sec 0
+# HELP iris_glo_n_seize_per_sec Global resource Nseizes (per second)
+# TYPE iris_glo_n_seize_per_sec gauge
+iris_glo_n_seize_per_sec 0
+# HELP iris_glo_ref_per_sec Global references, local databases (per second)
+# TYPE iris_glo_ref_per_sec gauge
+iris_glo_ref_per_sec 303
+# HELP iris_glo_ref_rem_per_sec Global references, remote databases (per second)
+# TYPE iris_glo_ref_rem_per_sec gauge
+iris_glo_ref_rem_per_sec 0
+# HELP iris_glo_seize_per_sec Global resource seizes (per second)
+# TYPE iris_glo_seize_per_sec gauge
+iris_glo_seize_per_sec 0
+# HELP iris_glo_update_per_sec Global updates, local SET and KILL (per second)
+# TYPE iris_glo_update_per_sec gauge
+iris_glo_update_per_sec 35
+# HELP iris_glo_update_rem_per_sec Global updates, remote local SET and KILL (per second)
+# TYPE iris_glo_update_rem_per_sec gauge
+iris_glo_update_rem_per_sec 0
+# HELP iris_iju_count Current count of updaters
+# TYPE iris_iju_count gauge
+iris_iju_count 0
+# HELP iris_iju_lock Flag to momentarily block updaters at beginning of write daemon pass
+# TYPE iris_iju_lock gauge
+iris_iju_lock 0
+# HELP iris_interop_alert_delay Count of Host Items that have triggered Alert for Message processing Delay
+# TYPE iris_interop_alert_delay gauge
+iris_interop_alert_delay{id="USER",production="Demo.MonitorProduction"} 0
+# HELP iris_interop_hosts Count of host items by Status
+# TYPE iris_interop_hosts gauge
+iris_interop_hosts{id="USER",status="OK",host="FileOut",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="Ens.Actor",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="Ens.Alarm",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="Ens.MonitorService",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="Ens.ScheduleHandler",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="Ens.ScheduleService",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="EnsLib.Testing.Process",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="EnsLib.Testing.Service",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="EnsLib.Background.Service",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="EnsLib.Background.Workflow.Operation",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="OK",host="EnsLib.Background.Process.ExportMessageSearch",production="Demo.MonitorProduction"} 1
+iris_interop_hosts{id="USER",status="Error",host="TestProcess",production="Demo.MonitorProduction"} 1
+# HELP iris_interop_last_activity Last Activity Time
+# TYPE iris_interop_last_activity gauge
+# UNIT iris_interop_last_activity Seconds
+iris_interop_last_activity{id="USER",host="FileOut",production="Demo.MonitorProduction"} 87769.782
+iris_interop_last_activity{id="USER",host="Ens.Actor",production="Demo.MonitorProduction"} 87769.782
+iris_interop_last_activity{id="USER",host="Ens.Alarm",production="Demo.MonitorProduction"} 87769.782
+iris_interop_last_activity{id="USER",host="TestProcess",production="Demo.MonitorProduction"} 87764.572
+iris_interop_last_activity{id="USER",host="Ens.ScheduleHandler",production="Demo.MonitorProduction"} 87769.722
+iris_interop_last_activity{id="USER",host="Ens.ScheduleService",production="Demo.MonitorProduction"} 87769.782
+iris_interop_last_activity{id="USER",host="EnsLib.Testing.Process",production="Demo.MonitorProduction"} 87769.782
+iris_interop_last_activity{id="USER",host="EnsLib.Testing.Service",production="Demo.MonitorProduction"} 87764.774
+iris_interop_last_activity{id="USER",host="EnsLib.Background.Service",production="Demo.MonitorProduction"} 87769.809
+iris_interop_last_activity{id="USER",host="EnsLib.Background.Workflow.Operation",production="Demo.MonitorProduction"} 87769.809
+iris_interop_last_activity{id="USER",host="EnsLib.Background.Process.ExportMessageSearch",production="Demo.MonitorProduction"} 87769.809
+# HELP iris_interop_messages Count of Messages processed since production started
+# TYPE iris_interop_messages counter
+iris_interop_messages{id="USER",host="FileOut",production="Demo.MonitorProduction"} 0
+iris_interop_messages{id="USER",host="Ens.Actor",production="Demo.MonitorProduction"} 0
+iris_interop_messages{id="USER",host="Ens.Alarm",production="Demo.MonitorProduction"} 0
+iris_interop_messages{id="USER",host="TestProcess",production="Demo.MonitorProduction"} 400
+iris_interop_messages{id="USER",host="Ens.ScheduleHandler",production="Demo.MonitorProduction"} 2
+iris_interop_messages{id="USER",host="Ens.ScheduleService",production="Demo.MonitorProduction"} 1
+iris_interop_messages{id="USER",host="EnsLib.Testing.Process",production="Demo.MonitorProduction"} 0
+iris_interop_messages{id="USER",host="EnsLib.Testing.Service",production="Demo.MonitorProduction"} 0
+iris_interop_messages{id="USER",host="EnsLib.Background.Service",production="Demo.MonitorProduction"} 0
+iris_interop_messages{id="USER",host="EnsLib.Background.Workflow.Operation",production="Demo.MonitorProduction"} 0
+iris_interop_messages{id="USER",host="EnsLib.Background.Process.ExportMessageSearch",production="Demo.MonitorProduction"} 0
+# HELP iris_interop_messages_aborted Count of Aborted messages since production started
+# TYPE iris_interop_messages_aborted gauge
+iris_interop_messages_aborted{id="USER",production="Demo.MonitorProduction"} 0
+# HELP iris_interop_messages_discarded Count of Discarded messages since production started
+# TYPE iris_interop_messages_discarded gauge
+iris_interop_messages_discarded{id="USER",production="Demo.MonitorProduction"} 0
+# HELP iris_interop_messages_errored Count of Errored message since production started
+# TYPE iris_interop_messages_errored gauge
+iris_interop_messages_errored{id="USER",host="TestProcess",production="Demo.MonitorProduction"} 200
+# HELP iris_interop_messages_per_sec Count of Messages processed since production started per second
+# TYPE iris_interop_messages_per_sec counter
+iris_interop_messages_per_sec{id="USER",host="FileOut",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="Ens.Actor",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="Ens.Alarm",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="TestProcess",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="Ens.ScheduleHandler",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="Ens.ScheduleService",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="EnsLib.Testing.Process",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="EnsLib.Testing.Service",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="EnsLib.Background.Service",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="EnsLib.Background.Workflow.Operation",production="Demo.MonitorProduction"} 0
+iris_interop_messages_per_sec{id="USER",host="EnsLib.Background.Process.ExportMessageSearch",production="Demo.MonitorProduction"} 0
+# HELP iris_interop_messages_suspended Count of Suspended messages since production started
+# TYPE iris_interop_messages_suspended gauge
+iris_interop_messages_suspended{id="USER",production="Demo.MonitorProduction"} 0
+# HELP iris_interop_queued Count of queued messages for hosts with Queue Count Alert value
+# TYPE iris_interop_queued gauge
+iris_interop_queued{id="USER",production="Demo.MonitorProduction"} 0
+# HELP iris_jrn_block_per_sec Journal blocks written to disk (per second)
+# TYPE iris_jrn_block_per_sec gauge
+iris_jrn_block_per_sec 0
+# HELP iris_jrn_entry_per_sec Journal records created (per second)
+# TYPE iris_jrn_entry_per_sec gauge
+iris_jrn_entry_per_sec 0
+# HELP iris_jrn_free_space Available space (in megabytes) for a journal directory
+# TYPE iris_jrn_free_space gauge
+# UNIT iris_jrn_free_space megabytes
+iris_jrn_free_space{id="WIJ",dir="default"} 25671.60
+iris_jrn_free_space{id="primary",dir="/usr/irissys/mgr/journal/"} 25671.60
+iris_jrn_free_space{id="secondary",dir="/usr/irissys/mgr/journal/"} 25671.60
+# HELP iris_jrn_size Current size of all journal files (in megabytes)
+# TYPE iris_jrn_size gauge
+# UNIT iris_jrn_size megabytes
+iris_jrn_size{id="WIJ"} 100
+iris_jrn_size{id="primary"} 1
+iris_jrn_size{id="secondary"} 0
+# HELP iris_license_available Licenses not in use
+# TYPE iris_license_available gauge
+iris_license_available 8
+# HELP iris_license_consumed Licenses in use
+# TYPE iris_license_consumed gauge
+iris_license_consumed 0
+# HELP iris_license_days_remaining The number of days left before a license expires
+# TYPE iris_license_days_remaining gauge
+# UNIT iris_license_days_remaining days
+iris_license_days_remaining 246.3
+# HELP iris_license_percent_used Licenses in use (percentage)
+# TYPE iris_license_percent_used gauge
+iris_license_percent_used 0
+# HELP iris_log_reads_per_sec Logical reads (per second)
+# TYPE iris_log_reads_per_sec gauge
+iris_log_reads_per_sec 141
+# HELP iris_mirror_member_type Mirror member type of this instance (1:Indeterminate, 2:Not Member, 3:Failover, 4:Async, 5:Disaster Recovery, 6:Read-Only Reporting, 7:Read-Write Reporting)
+# TYPE iris_mirror_member_type gauge
+iris_mirror_member_type 2
+# HELP iris_obj_a_seize_per_sec Object resource Aseizes (per second)
+# TYPE iris_obj_a_seize_per_sec gauge
+iris_obj_a_seize_per_sec 0
+# HELP iris_obj_del_per_sec Objecta deleted (per second)
+# TYPE iris_obj_del_per_sec gauge
+iris_obj_del_per_sec 0
+# HELP iris_obj_hit_per_sec Object references, in process memory (per second)
+# TYPE iris_obj_hit_per_sec gauge
+iris_obj_hit_per_sec 0
+# HELP iris_obj_load_per_sec Object loaded from disk, not in shared memory (per second)
+# TYPE iris_obj_load_per_sec gauge
+iris_obj_load_per_sec 0
+# HELP iris_obj_miss_per_sec Object references, not found in process memory (per second)
+# TYPE iris_obj_miss_per_sec gauge
+iris_obj_miss_per_sec 0
+# HELP iris_obj_new_per_sec Objects initialized (per second)
+# TYPE iris_obj_new_per_sec gauge
+iris_obj_new_per_sec 0
+# HELP iris_obj_seize_per_sec Object resource seizes (per second)
+# TYPE iris_obj_seize_per_sec gauge
+iris_obj_seize_per_sec 0
+# HELP iris_page_space_percent_used Page file space used (percentage of maximum allocated)
+# TYPE iris_page_space_percent_used gauge
+iris_page_space_percent_used 0
+# HELP iris_phys_mem_percent_used Physical memory (RAM) used (percentage)
+# TYPE iris_phys_mem_percent_used gauge
+iris_phys_mem_percent_used 7
+# HELP iris_phys_reads_per_sec Physical database block reads from disk (per second)
+# TYPE iris_phys_reads_per_sec gauge
+iris_phys_reads_per_sec 0
+# HELP iris_phys_writes_per_sec Physical database block writes to disk (per second)
+# TYPE iris_phys_writes_per_sec gauge
+iris_phys_writes_per_sec 0
+# HELP iris_process State of a process
+# TYPE iris_process gauge
+iris_process{id="11847",state="EVTW",waitstate="",jobtype="59",clientname="",namespace="%SYS",routine="%SYS.WorkQueueMgr"} 1
+iris_process{id="643",state="SEMW",waitstate="",jobtype="59",clientname="",namespace="%SYS",routine="%SYS.WorkQueueMgr"} 1
+iris_process{id="644",state="EVTW",waitstate="",jobtype="36",clientname="",namespace="%SYS",routine="%SYS.TaskSuper.1"} 1
+iris_process{id="645",state="EVTW",waitstate="",jobtype="42",clientname="",namespace="%SYS",routine="%SYS.Monitor.Control.1"} 1
+iris_process{id="646",state="SEMW",waitstate="",jobtype="59",clientname="",namespace="%SYS",routine="%SYS.WorkQueueMgr"} 1
+iris_process{id="664",state="EVTW",waitstate="",jobtype="2",clientname="",namespace="USER",routine="Ens.Queue.1"} 1
+iris_process{id="665",state="EVTW",waitstate="",jobtype="2",clientname="",namespace="USER",routine="Ens.Queue.1"} 1
+iris_process{id="666",state="EVTW",waitstate="",jobtype="2",clientname="",namespace="USER",routine="Ens.Queue.1"} 1
+iris_process{id="667",state="EVTW",waitstate="",jobtype="2",clientname="",namespace="USER",routine="Ens.Queue.1"} 1
+iris_process{id="668",state="EVTW",waitstate="",jobtype="2",clientname="",namespace="USER",routine="Ens.Queue.1"} 1
+iris_process{id="669",state="EVTW",waitstate="",jobtype="2",clientname="",namespace="USER",routine="Ens.Queue.1"} 1
+iris_process{id="670",state="EVTW",waitstate="",jobtype="2",clientname="",namespace="USER",routine="Ens.Queue.1"} 1
+iris_process{id="672",state="EVTW",waitstate="",jobtype="59",clientname="",namespace="%SYS",routine="%SYS.WorkQueueMgr"} 1
+iris_process{id="673",state="RUN",waitstate="",jobtype="27",clientname="localhost",namespace="%SYS",routine="SYS.Monitor.DashboardSensors.1"} 1
+iris_process{id="675",state="EVTW",waitstate="",jobtype="27",clientname="",namespace="%SYS",routine="%SYS.cspServer3"} 1
+iris_process{id="429",state="RUN",waitstate="",jobtype="4",clientname="",namespace="",routine="CONTROL"} 1
+iris_process{id="723",state="READ",waitstate="",jobtype="27",clientname="localhost",namespace="%SYS",routine="%SYS.cspServer2"} 1
+iris_process{id="470",state="RUNW",waitstate="",jobtype="5",clientname="",namespace="",routine="WRTDMN"} 1
+iris_process{id="471",state="RUNW",waitstate="",jobtype="6",clientname="",namespace="",routine="GARCOL"} 1
+iris_process{id="472",state="RUNW",waitstate="",jobtype="7",clientname="",namespace="",routine="JRNDMN"} 1
+iris_process{id="473",state="RUNW",waitstate="",jobtype="10",clientname="",namespace="",routine="AUXWD"} 1
+iris_process{id="474",state="RUNW",waitstate="",jobtype="10",clientname="",namespace="",routine="AUXWD"} 1
+iris_process{id="475",state="RUNW",waitstate="",jobtype="10",clientname="",namespace="",routine="AUXWD"} 1
+iris_process{id="476",state="RUNW",waitstate="",jobtype="10",clientname="",namespace="",routine="AUXWD"} 1
+iris_process{id="477",state="RUNW",waitstate="",jobtype="10",clientname="",namespace="",routine="AUXWD"} 1
+iris_process{id="478",state="RUNW",waitstate="",jobtype="10",clientname="",namespace="",routine="AUXWD"} 1
+iris_process{id="479",state="RUNW",waitstate="",jobtype="10",clientname="",namespace="",routine="AUXWD"} 1
+iris_process{id="480",state="RUNW",waitstate="",jobtype="30",clientname="",namespace="",routine="EXPDMN"} 1
+iris_process{id="482",state="EVTW",waitstate="",jobtype="41",clientname="",namespace="%SYS",routine="MONITOR"} 1
+iris_process{id="483",state="RUNW",waitstate="",jobtype="38",clientname="",namespace="%SYS",routine="CLNDMN"} 1
+iris_process{id="486",state="HANG",waitstate="",jobtype="13",clientname="",namespace="%SYS",routine="LMFMON"} 1
+iris_process{id="487",state="HANG",waitstate="",jobtype="21",clientname="",namespace="%SYS",routine="RECEIVE"} 1
+iris_process{id="490",state="READ",waitstate="",jobtype="24",clientname="",namespace="%SYS",routine="%SYS.SERVER"} 1
+# HELP iris_process_block_allocs Count of database blocks newly allocated by process
+# TYPE iris_process_block_allocs counter
+iris_process_block_allocs{id="11847"} 12
+iris_process_block_allocs{id="643"} 190
+iris_process_block_allocs{id="644"} 44
+iris_process_block_allocs{id="645"} 220
+iris_process_block_allocs{id="646"} 0
+iris_process_block_allocs{id="664"} 13
+iris_process_block_allocs{id="665"} 3
+iris_process_block_allocs{id="666"} 24
+iris_process_block_allocs{id="667"} 29
+iris_process_block_allocs{id="668"} 0
+iris_process_block_allocs{id="669"} 35
+iris_process_block_allocs{id="670"} 94
+iris_process_block_allocs{id="672"} 54
+iris_process_block_allocs{id="673"} 65
+iris_process_block_allocs{id="675"} 2
+iris_process_block_allocs{id="429"} 0
+iris_process_block_allocs{id="723"} 4
+iris_process_block_allocs{id="470"} 0
+iris_process_block_allocs{id="471"} 0
+iris_process_block_allocs{id="472"} 0
+iris_process_block_allocs{id="473"} 0
+iris_process_block_allocs{id="474"} 0
+iris_process_block_allocs{id="475"} 0
+iris_process_block_allocs{id="476"} 0
+iris_process_block_allocs{id="477"} 0
+iris_process_block_allocs{id="478"} 0
+iris_process_block_allocs{id="479"} 0
+iris_process_block_allocs{id="480"} 0
+iris_process_block_allocs{id="482"} 0
+iris_process_block_allocs{id="483"} 0
+iris_process_block_allocs{id="486"} 0
+iris_process_block_allocs{id="487"} 0
+iris_process_block_allocs{id="490"} 0
+# HELP iris_process_block_writes Count of database blocks queued for writing by process
+# TYPE iris_process_block_writes counter
+iris_process_block_writes{id="11847"} 1382
+iris_process_block_writes{id="643"} 3240
+iris_process_block_writes{id="644"} 480
+iris_process_block_writes{id="645"} 746
+iris_process_block_writes{id="646"} 0
+iris_process_block_writes{id="664"} 13
+iris_process_block_writes{id="665"} 3
+iris_process_block_writes{id="666"} 25
+iris_process_block_writes{id="667"} 28
+iris_process_block_writes{id="668"} 0
+iris_process_block_writes{id="669"} 35
+iris_process_block_writes{id="670"} 93
+iris_process_block_writes{id="672"} 2280
+iris_process_block_writes{id="673"} 80
+iris_process_block_writes{id="675"} 2
+iris_process_block_writes{id="429"} 0
+iris_process_block_writes{id="723"} 7
+iris_process_block_writes{id="470"} 0
+iris_process_block_writes{id="471"} 0
+iris_process_block_writes{id="472"} 0
+iris_process_block_writes{id="473"} 0
+iris_process_block_writes{id="474"} 0
+iris_process_block_writes{id="475"} 0
+iris_process_block_writes{id="476"} 0
+iris_process_block_writes{id="477"} 0
+iris_process_block_writes{id="478"} 0
+iris_process_block_writes{id="479"} 0
+iris_process_block_writes{id="480"} 1
+iris_process_block_writes{id="482"} 0
+iris_process_block_writes{id="483"} 0
+iris_process_block_writes{id="486"} 0
+iris_process_block_writes{id="487"} 0
+iris_process_block_writes{id="490"} 0
+# HELP iris_process_commands Count of ObjectScript commands executed by process
+# TYPE iris_process_commands counter
+iris_process_commands{id="11847"} 1276349
+iris_process_commands{id="643"} 7151182
+iris_process_commands{id="644"} 603260
+iris_process_commands{id="645"} 5588812
+iris_process_commands{id="646"} 243717
+iris_process_commands{id="664"} 144531
+iris_process_commands{id="665"} 1246
+iris_process_commands{id="666"} 8206834
+iris_process_commands{id="667"} 224286
+iris_process_commands{id="668"} 1266
+iris_process_commands{id="669"} 190106
+iris_process_commands{id="670"} 1249276
+iris_process_commands{id="672"} 2962800
+iris_process_commands{id="673"} 1680934
+iris_process_commands{id="675"} 14697
+iris_process_commands{id="429"} 0
+iris_process_commands{id="723"} 154065
+iris_process_commands{id="470"} 1459
+iris_process_commands{id="471"} 0
+iris_process_commands{id="472"} 7648
+iris_process_commands{id="473"} 3
+iris_process_commands{id="474"} 1
+iris_process_commands{id="475"} 3
+iris_process_commands{id="476"} 3
+iris_process_commands{id="477"} 1
+iris_process_commands{id="478"} 1
+iris_process_commands{id="479"} 1
+iris_process_commands{id="480"} 1
+iris_process_commands{id="482"} 26880
+iris_process_commands{id="483"} 698
+iris_process_commands{id="486"} 1128
+iris_process_commands{id="487"} 43211
+iris_process_commands{id="490"} 0
+# HELP iris_process_count Total number of active processes
+# TYPE iris_process_count gauge
+iris_process_count 33
+# HELP iris_process_glo_refs Count of global references by process
+# TYPE iris_process_glo_refs counter
+iris_process_glo_refs{id="11847"} 128858
+iris_process_glo_refs{id="643"} 749317
+iris_process_glo_refs{id="644"} 33691
+iris_process_glo_refs{id="645"} 456833
+iris_process_glo_refs{id="646"} 7403
+iris_process_glo_refs{id="664"} 13196
+iris_process_glo_refs{id="665"} 142
+iris_process_glo_refs{id="666"} 1102779
+iris_process_glo_refs{id="667"} 22258
+iris_process_glo_refs{id="668"} 133
+iris_process_glo_refs{id="669"} 19409
+iris_process_glo_refs{id="670"} 87611
+iris_process_glo_refs{id="672"} 311897
+iris_process_glo_refs{id="673"} 533123
+iris_process_glo_refs{id="675"} 2660
+iris_process_glo_refs{id="429"} 0
+iris_process_glo_refs{id="723"} 54714
+iris_process_glo_refs{id="470"} 7899
+iris_process_glo_refs{id="471"} 0
+iris_process_glo_refs{id="472"} 805
+iris_process_glo_refs{id="473"} 53
+iris_process_glo_refs{id="474"} 53
+iris_process_glo_refs{id="475"} 53
+iris_process_glo_refs{id="476"} 53
+iris_process_glo_refs{id="477"} 53
+iris_process_glo_refs{id="478"} 53
+iris_process_glo_refs{id="479"} 53
+iris_process_glo_refs{id="480"} 0
+iris_process_glo_refs{id="482"} 81
+iris_process_glo_refs{id="483"} 80
+iris_process_glo_refs{id="486"} 56
+iris_process_glo_refs{id="487"} 4070
+iris_process_glo_refs{id="490"} 17
+# HELP iris_process_jrn_entries Count of journal entries by process
+# TYPE iris_process_jrn_entries counter
+iris_process_jrn_entries{id="11847"} 2197
+iris_process_jrn_entries{id="643"} 0
+iris_process_jrn_entries{id="644"} 881
+iris_process_jrn_entries{id="645"} 2997
+iris_process_jrn_entries{id="646"} 0
+iris_process_jrn_entries{id="664"} 38
+iris_process_jrn_entries{id="665"} 13
+iris_process_jrn_entries{id="666"} 29
+iris_process_jrn_entries{id="667"} 119
+iris_process_jrn_entries{id="668"} 13
+iris_process_jrn_entries{id="669"} 185
+iris_process_jrn_entries{id="670"} 11432
+iris_process_jrn_entries{id="672"} 884
+iris_process_jrn_entries{id="673"} 45
+iris_process_jrn_entries{id="675"} 0
+iris_process_jrn_entries{id="429"} 0
+iris_process_jrn_entries{id="723"} 5
+iris_process_jrn_entries{id="470"} 0
+iris_process_jrn_entries{id="471"} 0
+iris_process_jrn_entries{id="472"} 0
+iris_process_jrn_entries{id="473"} 0
+iris_process_jrn_entries{id="474"} 0
+iris_process_jrn_entries{id="475"} 0
+iris_process_jrn_entries{id="476"} 0
+iris_process_jrn_entries{id="477"} 0
+iris_process_jrn_entries{id="478"} 0
+iris_process_jrn_entries{id="479"} 0
+iris_process_jrn_entries{id="480"} 0
+iris_process_jrn_entries{id="482"} 0
+iris_process_jrn_entries{id="483"} 0
+iris_process_jrn_entries{id="486"} 1
+iris_process_jrn_entries{id="487"} 0
+iris_process_jrn_entries{id="490"} 0
+# HELP iris_process_ppg_size_mb Process private global blocks in MB
+# TYPE iris_process_ppg_size_mb gauge
+# UNIT iris_process_ppg_size_mb mb
+iris_process_ppg_size_mb{id="11847"} 0.008
+iris_process_ppg_size_mb{id="643"} 0.000
+iris_process_ppg_size_mb{id="644"} 0.117
+iris_process_ppg_size_mb{id="645"} 0.266
+iris_process_ppg_size_mb{id="646"} 0.000
+iris_process_ppg_size_mb{id="664"} 0.063
+iris_process_ppg_size_mb{id="665"} 0.008
+iris_process_ppg_size_mb{id="666"} 0.055
+iris_process_ppg_size_mb{id="667"} 0.109
+iris_process_ppg_size_mb{id="668"} 0.000
+iris_process_ppg_size_mb{id="669"} 0.141
+iris_process_ppg_size_mb{id="670"} 0.172
+iris_process_ppg_size_mb{id="672"} 0.047
+iris_process_ppg_size_mb{id="673"} 0.008
+iris_process_ppg_size_mb{id="675"} 0.000
+iris_process_ppg_size_mb{id="429"} 0.000
+iris_process_ppg_size_mb{id="723"} 0.008
+iris_process_ppg_size_mb{id="470"} 0.000
+iris_process_ppg_size_mb{id="471"} 0.000
+iris_process_ppg_size_mb{id="472"} 0.000
+iris_process_ppg_size_mb{id="473"} 0.000
+iris_process_ppg_size_mb{id="474"} 0.000
+iris_process_ppg_size_mb{id="475"} 0.000
+iris_process_ppg_size_mb{id="476"} 0.000
+iris_process_ppg_size_mb{id="477"} 0.000
+iris_process_ppg_size_mb{id="478"} 0.000
+iris_process_ppg_size_mb{id="479"} 0.000
+iris_process_ppg_size_mb{id="480"} 0.000
+iris_process_ppg_size_mb{id="482"} 0.000
+iris_process_ppg_size_mb{id="483"} 0.000
+iris_process_ppg_size_mb{id="486"} 0.000
+iris_process_ppg_size_mb{id="487"} 0.008
+iris_process_ppg_size_mb{id="490"} 0.000
+# HELP iris_process_phys_reads Count of physical database block reads by process
+# TYPE iris_process_phys_reads counter
+iris_process_phys_reads{id="11847"} 31
+iris_process_phys_reads{id="643"} 0
+iris_process_phys_reads{id="644"} 383
+iris_process_phys_reads{id="645"} 4325
+iris_process_phys_reads{id="646"} 0
+iris_process_phys_reads{id="664"} 11
+iris_process_phys_reads{id="665"} 2
+iris_process_phys_reads{id="666"} 66
+iris_process_phys_reads{id="667"} 15
+iris_process_phys_reads{id="668"} 0
+iris_process_phys_reads{id="669"} 16
+iris_process_phys_reads{id="670"} 3
+iris_process_phys_reads{id="672"} 24
+iris_process_phys_reads{id="673"} 159
+iris_process_phys_reads{id="675"} 0
+iris_process_phys_reads{id="429"} 0
+iris_process_phys_reads{id="723"} 0
+iris_process_phys_reads{id="470"} 0
+iris_process_phys_reads{id="471"} 0
+iris_process_phys_reads{id="472"} 0
+iris_process_phys_reads{id="473"} 0
+iris_process_phys_reads{id="474"} 0
+iris_process_phys_reads{id="475"} 0
+iris_process_phys_reads{id="476"} 0
+iris_process_phys_reads{id="477"} 0
+iris_process_phys_reads{id="478"} 0
+iris_process_phys_reads{id="479"} 0
+iris_process_phys_reads{id="480"} 1
+iris_process_phys_reads{id="482"} 30
+iris_process_phys_reads{id="483"} 1
+iris_process_phys_reads{id="486"} 5
+iris_process_phys_reads{id="487"} 3
+iris_process_phys_reads{id="490"} 1
+# HELP iris_res_a_seize Resource Seize satisfied after a busy wait
+# TYPE iris_res_a_seize counter
+iris_res_a_seize{id="EVT"} 144
+iris_res_a_seize{id="IPQ"} 0
+iris_res_a_seize{id="LRU"} 1
+iris_res_a_seize{id="Pid"} 0
+iris_res_a_seize{id="RCT"} 0
+iris_res_a_seize{id="SEM"} 0
+iris_res_a_seize{id="Lock"} 0
+iris_res_a_seize{id="Misc"} 0
+iris_res_a_seize{id="OCSP"} 0
+iris_res_a_seize{id="Stat"} 0
+iris_res_a_seize{id="UUID"} 0
+iris_res_a_seize{id="ECP_C"} 0
+iris_res_a_seize{id="ECP_S"} 0
+iris_res_a_seize{id="Queue"} 0
+iris_res_a_seize{id="iKnow"} 0
+iris_res_a_seize{id="Dirset"} 0
+iris_res_a_seize{id="Expand"} 0
+iris_res_a_seize{id="Global"} 0
+iris_res_a_seize{id="IjcDev"} 0
+iris_res_a_seize{id="Mirror"} 0
+iris_res_a_seize{id="SatMap"} 0
+iris_res_a_seize{id="StrTab"} 0
+iris_res_a_seize{id="Journal"} 0
+iris_res_a_seize{id="LockDev"} 0
+iris_res_a_seize{id="LockLHB"} 80
+iris_res_a_seize{id="Per-BDB"} 1
+iris_res_a_seize{id="Routine"} 15
+iris_res_a_seize{id="TransCB"} 0
+iris_res_a_seize{id="TtyHash"} 0
+iris_res_a_seize{id="GfileTab"} 0
+iris_res_a_seize{id="GmemHeap"} 0
+iris_res_a_seize{id="LockHTAB"} 61
+iris_res_a_seize{id="ObjClass"} 28
+iris_res_a_seize{id="RUNLEVEL"} 0
+iris_res_a_seize{id="Volqueue"} 0
+iris_res_a_seize{id="ECP_ALL_C"} 0
+iris_res_a_seize{id="ECP_S_SES"} 0
+iris_res_a_seize{id="ECP_S_SFN"} 0
+iris_res_a_seize{id="JrnSFNTab"} 0
+iris_res_a_seize{id="SEM_WaitQ"} 28
+iris_res_a_seize{id="ECP_C_Mess"} 0
+iris_res_a_seize{id="ECP_C_PBLK"} 0
+iris_res_a_seize{id="ECP_C_PPNT"} 0
+iris_res_a_seize{id="ECP_S_Lock"} 0
+iris_res_a_seize{id="ECP_S_Read"} 0
+iris_res_a_seize{id="ECP_S_WORK"} 0
+iris_res_a_seize{id="StrTabHead"} 0
+iris_res_a_seize{id="BlkSrch_DEQ"} 0
+iris_res_a_seize{id="BlkSrch_ENQ"} 2
+iris_res_a_seize{id="ECP_S_ASYNC"} 0
+iris_res_a_seize{id="ECP_S_TRANS"} 0
+iris_res_a_seize{id="ECP_C_ANSBUF"} 0
+iris_res_a_seize{id="QUEUE_WAIT_Q"} 0
+iris_res_a_seize{id="ECP_S_BACKOBJ"} 0
+iris_res_a_seize{id="PIDTAB_Expand"} 0
+iris_res_a_seize{id="ECP_S_Purge_BigKill"} 0
+# HELP iris_res_n_seize Resource Seize not satisfied and had to hibernate
+# TYPE iris_res_n_seize counter
+iris_res_n_seize{id="EVT"} 1
+iris_res_n_seize{id="IPQ"} 0
+iris_res_n_seize{id="LRU"} 0
+iris_res_n_seize{id="Pid"} 0
+iris_res_n_seize{id="RCT"} 0
+iris_res_n_seize{id="SEM"} 0
+iris_res_n_seize{id="Lock"} 0
+iris_res_n_seize{id="Misc"} 0
+iris_res_n_seize{id="OCSP"} 0
+iris_res_n_seize{id="Stat"} 0
+iris_res_n_seize{id="UUID"} 0
+iris_res_n_seize{id="ECP_C"} 0
+iris_res_n_seize{id="ECP_S"} 0
+iris_res_n_seize{id="Queue"} 0
+iris_res_n_seize{id="iKnow"} 0
+iris_res_n_seize{id="Dirset"} 0
+iris_res_n_seize{id="Expand"} 0
+iris_res_n_seize{id="Global"} 0
+iris_res_n_seize{id="IjcDev"} 0
+iris_res_n_seize{id="Mirror"} 0
+iris_res_n_seize{id="SatMap"} 0
+iris_res_n_seize{id="StrTab"} 0
+iris_res_n_seize{id="Journal"} 0
+iris_res_n_seize{id="LockDev"} 0
+iris_res_n_seize{id="LockLHB"} 1
+iris_res_n_seize{id="Per-BDB"} 0
+iris_res_n_seize{id="Routine"} 0
+iris_res_n_seize{id="TransCB"} 0
+iris_res_n_seize{id="TtyHash"} 0
+iris_res_n_seize{id="GfileTab"} 1
+iris_res_n_seize{id="GmemHeap"} 0
+iris_res_n_seize{id="LockHTAB"} 1
+iris_res_n_seize{id="ObjClass"} 1
+iris_res_n_seize{id="RUNLEVEL"} 0
+iris_res_n_seize{id="Volqueue"} 0
+iris_res_n_seize{id="ECP_ALL_C"} 0
+iris_res_n_seize{id="ECP_S_SES"} 0
+iris_res_n_seize{id="ECP_S_SFN"} 0
+iris_res_n_seize{id="JrnSFNTab"} 0
+iris_res_n_seize{id="SEM_WaitQ"} 0
+iris_res_n_seize{id="ECP_C_Mess"} 0
+iris_res_n_seize{id="ECP_C_PBLK"} 0
+iris_res_n_seize{id="ECP_C_PPNT"} 0
+iris_res_n_seize{id="ECP_S_Lock"} 0
+iris_res_n_seize{id="ECP_S_Read"} 0
+iris_res_n_seize{id="ECP_S_WORK"} 0
+iris_res_n_seize{id="StrTabHead"} 0
+iris_res_n_seize{id="BlkSrch_DEQ"} 0
+iris_res_n_seize{id="BlkSrch_ENQ"} 0
+iris_res_n_seize{id="ECP_S_ASYNC"} 0
+iris_res_n_seize{id="ECP_S_TRANS"} 0
+iris_res_n_seize{id="ECP_C_ANSBUF"} 0
+iris_res_n_seize{id="QUEUE_WAIT_Q"} 0
+iris_res_n_seize{id="ECP_S_BACKOBJ"} 0
+iris_res_n_seize{id="PIDTAB_Expand"} 0
+iris_res_n_seize{id="ECP_S_Purge_BigKill"} 0
+# HELP iris_res_seize Resource Seize
+# TYPE iris_res_seize counter
+iris_res_seize{id="EVT"} 240226
+iris_res_seize{id="IPQ"} 0
+iris_res_seize{id="LRU"} 21259
+iris_res_seize{id="Pid"} 0
+iris_res_seize{id="RCT"} 0
+iris_res_seize{id="SEM"} 60
+iris_res_seize{id="Lock"} 5869
+iris_res_seize{id="Misc"} 664
+iris_res_seize{id="OCSP"} 0
+iris_res_seize{id="Stat"} 2
+iris_res_seize{id="UUID"} 27
+iris_res_seize{id="ECP_C"} 0
+iris_res_seize{id="ECP_S"} 0
+iris_res_seize{id="Queue"} 0
+iris_res_seize{id="iKnow"} 40
+iris_res_seize{id="Dirset"} 2
+iris_res_seize{id="Expand"} 11
+iris_res_seize{id="Global"} 1726
+iris_res_seize{id="IjcDev"} 0
+iris_res_seize{id="Mirror"} 0
+iris_res_seize{id="SatMap"} 0
+iris_res_seize{id="StrTab"} 0
+iris_res_seize{id="Journal"} 0
+iris_res_seize{id="LockDev"} 0
+iris_res_seize{id="LockLHB"} 287579
+iris_res_seize{id="Per-BDB"} 3374
+iris_res_seize{id="Routine"} 5202
+iris_res_seize{id="TransCB"} 207631
+iris_res_seize{id="TtyHash"} 0
+iris_res_seize{id="GfileTab"} 2138
+iris_res_seize{id="GmemHeap"} 1126
+iris_res_seize{id="LockHTAB"} 142801
+iris_res_seize{id="ObjClass"} 17076
+iris_res_seize{id="RUNLEVEL"} 0
+iris_res_seize{id="Volqueue"} 0
+iris_res_seize{id="ECP_ALL_C"} 0
+iris_res_seize{id="ECP_S_SES"} 0
+iris_res_seize{id="ECP_S_SFN"} 0
+iris_res_seize{id="JrnSFNTab"} 6
+iris_res_seize{id="SEM_WaitQ"} 240013
+iris_res_seize{id="ECP_C_Mess"} 0
+iris_res_seize{id="ECP_C_PBLK"} 0
+iris_res_seize{id="ECP_C_PPNT"} 0
+iris_res_seize{id="ECP_S_Lock"} 0
+iris_res_seize{id="ECP_S_Read"} 0
+iris_res_seize{id="ECP_S_WORK"} 0
+iris_res_seize{id="StrTabHead"} 1647
+iris_res_seize{id="BlkSrch_DEQ"} 21201
+iris_res_seize{id="BlkSrch_ENQ"} 18559
+iris_res_seize{id="ECP_S_ASYNC"} 0
+iris_res_seize{id="ECP_S_TRANS"} 289
+iris_res_seize{id="ECP_C_ANSBUF"} 0
+iris_res_seize{id="QUEUE_WAIT_Q"} 0
+iris_res_seize{id="ECP_S_BACKOBJ"} 0
+iris_res_seize{id="PIDTAB_Expand"} 0
+iris_res_seize{id="ECP_S_Purge_BigKill"} 0
+# HELP iris_rtn_a_seize_per_sec Routine resource Aseizes (per second)
+# TYPE iris_rtn_a_seize_per_sec gauge
+iris_rtn_a_seize_per_sec 0
+# HELP iris_rtn_call_local_per_sec Routine calls, local (per second)
+# TYPE iris_rtn_call_local_per_sec gauge
+iris_rtn_call_local_per_sec 29
+# HELP iris_rtn_call_miss_per_sec Routines calls not found in memory (per second)
+# TYPE iris_rtn_call_miss_per_sec gauge
+iris_rtn_call_miss_per_sec 0
+# HELP iris_rtn_call_remote_per_sec Routine calls, remote (per second)
+# TYPE iris_rtn_call_remote_per_sec gauge
+iris_rtn_call_remote_per_sec 0
+# HELP iris_rtn_count_by_ns Total number of routines in each namespace
+# TYPE iris_rtn_count_by_ns gauge
+iris_rtn_count_by_ns{id="%SYS"} 12101
+iris_rtn_count_by_ns{id="USER"} 14024
+# HELP iris_rtn_load_per_sec Routines locally loaded from or saved to disk (per second)
+# TYPE iris_rtn_load_per_sec gauge
+iris_rtn_load_per_sec 0
+# HELP iris_rtn_load_rem_per_sec Routines remotely loaded from or saved to disk (per second)
+# TYPE iris_rtn_load_rem_per_sec gauge
+iris_rtn_load_rem_per_sec 0
+# HELP iris_rtn_seize_per_sec Routine resource seizes (per second)
+# TYPE iris_rtn_seize_per_sec gauge
+iris_rtn_seize_per_sec 0
+# HELP iris_sam_get_db_sensors_seconds Time to fetch Database related metrics
+# TYPE iris_sam_get_db_sensors_seconds gauge
+# UNIT iris_sam_get_db_sensors_seconds seconds
+iris_sam_get_db_sensors_seconds .000338
+# HELP iris_sam_get_interop_sensors_seconds Time to fetch Interoperability related metrics
+# TYPE iris_sam_get_interop_sensors_seconds gauge
+# UNIT iris_sam_get_interop_sensors_seconds seconds
+iris_sam_get_interop_sensors_seconds .000121
+# HELP iris_sam_get_jrn_sensors_seconds Time to fetch Journal related metrics
+# TYPE iris_sam_get_jrn_sensors_seconds gauge
+# UNIT iris_sam_get_jrn_sensors_seconds seconds
+iris_sam_get_jrn_sensors_seconds .001147
+# HELP iris_sam_get_sql_sensors_seconds Time to fetch SQL related metrics
+# TYPE iris_sam_get_sql_sensors_seconds gauge
+# UNIT iris_sam_get_sql_sensors_seconds seconds
+iris_sam_get_sql_sensors_seconds .000354
+# HELP iris_sam_get_wqm_sensors_seconds Time to fetch Work Queue Manger related metrics
+# TYPE iris_sam_get_wqm_sensors_seconds gauge
+# UNIT iris_sam_get_wqm_sensors_seconds seconds
+iris_sam_get_wqm_sensors_seconds .000025
+# HELP iris_smh_available Shared memory available (bytes) by purpose
+# TYPE iris_smh_available gauge
+# UNIT iris_smh_available bytes
+iris_smh_available{id="Classes_Instantiated"} 17408
+iris_smh_available{id="DB_Name_&_Directory"} 64782
+iris_smh_available{id="Global_Mapping"} 43578
+iris_smh_available{id="Lock_Table"} 186128
+iris_smh_available{id="Routine_Buffer_In_Use_Table"} 54784
+iris_smh_available{id="Security_System"} 0
+iris_smh_available{id="Semaphores_objects"} 52736
+iris_smh_available{id="TTY_Hash_Table"} 32760
+# HELP iris_smh_percent_full Shared memory in use (percentage of allocated) by purpose
+# TYPE iris_smh_percent_full gauge
+iris_smh_percent_full{id="Classes_Instantiated"} 99
+iris_smh_percent_full{id="DB_Name_&_Directory"} 1
+iris_smh_percent_full{id="Global_Mapping"} 67
+iris_smh_percent_full{id="Lock_Table"} 5
+iris_smh_percent_full{id="Routine_Buffer_In_Use_Table"} 16
+iris_smh_percent_full{id="Semaphores_objects"} 20
+iris_smh_percent_full{id="TTY_Hash_Table"} 50
+# HELP iris_smh_total Shared memory allocated (bytes) for current instance
+# TYPE iris_smh_total gauge
+# UNIT iris_smh_total bytes
+iris_smh_total 3538944
+# HELP iris_smh_total_percent_full Shared memory in use (percentage of allocated) for current instance
+# TYPE iris_smh_total_percent_full gauge
+iris_smh_total_percent_full 1
+# HELP iris_smh_used Shared memory in use (bytes) by purpose
+# TYPE iris_smh_used gauge
+# UNIT iris_smh_used bytes
+iris_smh_used{id="Classes_Instantiated"} 1686528
+iris_smh_used{id="DB_Name_&_Directory"} 754
+iris_smh_used{id="Global_Mapping"} 87494
+iris_smh_used{id="Lock_Table"} 10480
+iris_smh_used{id="Routine_Buffer_In_Use_Table"} 10752
+iris_smh_used{id="Security_System"} 65536
+iris_smh_used{id="Semaphores_objects"} 12800
+iris_smh_used{id="TTY_Hash_Table"} 32776
+# HELP iris_sql_commands_per_second Average number of ObjectScript commands executed by SQL queries (per second)
+# TYPE iris_sql_commands_per_second gauge
+iris_sql_commands_per_second{id="%SYS"} 33.93333333333333333
+iris_sql_commands_per_second{id="all"} 33.93333333333333333
+# HELP iris_sql_queries_avg_runtime Average SQL statement runtime in seconds
+# TYPE iris_sql_queries_avg_runtime gauge
+# UNIT iris_sql_queries_avg_runtime seconds
+iris_sql_queries_avg_runtime{id="%SYS"} .00002661111111111111111
+iris_sql_queries_avg_runtime{id="all"} .00002661111111111111111
+# HELP iris_sql_queries_avg_runtime_std_dev Standard deviation for SQL statement runtime
+# TYPE iris_sql_queries_avg_runtime_std_dev gauge
+iris_sql_queries_avg_runtime_std_dev{id="%SYS"} .00004135550480622595155
+iris_sql_queries_avg_runtime_std_dev{id="all"} .00004135550480622595155
+# HELP iris_sql_queries_per_second Average number of SQL statements per second
+# TYPE iris_sql_queries_per_second gauge
+iris_sql_queries_per_second{id="%SYS"} .3
+iris_sql_queries_per_second{id="all"} .3
+# HELP iris_sql_row_count_per_second Average number of SQL rows returned per second
+# TYPE iris_sql_row_count_per_second gauge
+iris_sql_row_count_per_second{id="%SYS"} .01666666666666666667
+iris_sql_row_count_per_second{id="all"} .01666666666666666667
+# HELP iris_system_alerts Number of system alerts posted since startup
+# TYPE iris_system_alerts gauge
+iris_system_alerts 1
+# HELP iris_system_alerts_log Number of alerts recorded in the alerts.log file
+# TYPE iris_system_alerts_log gauge
+iris_system_alerts_log 1
+# HELP iris_system_alerts_new A boolean value indicating that alerts have been posted since the last time the Alerts API was called
+# TYPE iris_system_alerts_new gauge
+iris_system_alerts_new 0
+# HELP iris_system_info Key system information, including version, platform, product name, and other relevant details
+# TYPE iris_system_info untyped
+iris_system_info{id="IRIS",product="IRIS for UNIX",platform="Ubuntu Server LTS for ARM64 Containers",version="2026.1",build_number="234",build_date="67656"} 1
+# HELP iris_system_state An integer representing the overal state of the system (-1: Hung, 0: OK, 1: Warning, 2: Alert)
+# TYPE iris_system_state gauge
+iris_system_state 0
+# HELP iris_trans_open_count Open transactions on the current instance
+# TYPE iris_trans_open_count gauge
+iris_trans_open_count 0
+# HELP iris_trans_open_secs Duration (seconds) of all open  transactions on the current instance
+# TYPE iris_trans_open_secs gauge
+# UNIT iris_trans_open_secs seconds
+iris_trans_open_secs 0
+# HELP iris_trans_open_secs_max Duration (seconds) of longest currently open  transaction on the current instance
+# TYPE iris_trans_open_secs_max gauge
+# UNIT iris_trans_open_secs_max seconds
+iris_trans_open_secs_max 0
+# HELP iris_wd_buffer_redirty Number of database buffers written during most recent write daemon cycle that were also written in prior cycle
+# TYPE iris_wd_buffer_redirty gauge
+iris_wd_buffer_redirty 4
+# HELP iris_wd_buffer_write Number of database buffers written during most recent write daemon cycle
+# TYPE iris_wd_buffer_write gauge
+iris_wd_buffer_write 4
+# HELP iris_wd_condition A flag indicating that some set/kill operations may be blocked
+# TYPE iris_wd_condition gauge
+iris_wd_condition 0
+# HELP iris_wd_cycle_time Time (milliseconds) for most recent write daemon cycle to complete
+# TYPE iris_wd_cycle_time gauge
+# UNIT iris_wd_cycle_time milliseconds
+iris_wd_cycle_time 6
+# HELP iris_wd_pass Current pass of the write daemon since startup
+# TYPE iris_wd_pass gauge
+iris_wd_pass 1459
+# HELP iris_wd_phase Current phase of the write daemon
+# TYPE iris_wd_phase gauge
+iris_wd_phase 0
+# HELP iris_wd_proc_in_global Number of processes actively holding global buffers at start of most recent write daemon cycle
+# TYPE iris_wd_proc_in_global gauge
+iris_wd_proc_in_global 0
+# HELP iris_wd_size_write Size (kilobytes) of database buffers written during most recent write daemon cycle
+# TYPE iris_wd_size_write gauge
+# UNIT iris_wd_size_write kilobytes
+iris_wd_size_write 32
+# HELP iris_wd_sleep Time (milliseconds) that write daemon was inactive before most recent write daemon cycle began
+# TYPE iris_wd_sleep gauge
+# UNIT iris_wd_sleep milliseconds
+iris_wd_sleep 10005
+# HELP iris_wd_suspended Indicates WD is suspended.
+# TYPE iris_wd_suspended gauge
+iris_wd_suspended 0
+# HELP iris_wd_temp_queue In-memory buffers used at start of most recent write daemon cycle
+# TYPE iris_wd_temp_queue gauge
+iris_wd_temp_queue 307
+# HELP iris_wd_temp_write In-memory buffers written during most recent write daemon cycle (typically none)
+# TYPE iris_wd_temp_write gauge
+iris_wd_temp_write 0
+# HELP iris_wdwij_time Time (milliseconds) write daemon spent writing to WIJ file during most recent cycle
+# TYPE iris_wdwij_time gauge
+# UNIT iris_wdwij_time milliseconds
+iris_wdwij_time 5
+# HELP iris_wd_write_time Time (milliseconds) write daemon spent writing buffers to  databases during most recent cycle
+# TYPE iris_wd_write_time gauge
+# UNIT iris_wd_write_time milliseconds
+iris_wd_write_time 1
+# HELP iris_wij_writes_per_sec WIJ physical block writes (per second)
+# TYPE iris_wij_writes_per_sec gauge
+iris_wij_writes_per_sec 0
+# HELP iris_wqm_active_worker_jobs Average number of worker jobs running logic that are not blocked
+# TYPE iris_wqm_active_worker_jobs gauge
+iris_wqm_active_worker_jobs{id="SYS"} 0
+# HELP iris_wqm_commands_per_sec Average number of commands executed per second
+# TYPE iris_wqm_commands_per_sec gauge
+iris_wqm_commands_per_sec{id="SYS"} 280
+# HELP iris_wqm_globals_per_sec Average number of global references per second
+# TYPE iris_wqm_globals_per_sec gauge
+iris_wqm_globals_per_sec{id="SYS"} 21
+# HELP iris_wqm_max_active_worker_jobs Max number of active workers since last log entry
+# TYPE iris_wqm_max_active_worker_jobs gauge
+iris_wqm_max_active_worker_jobs{id="SYS"} 0
+# HELP iris_wqm_max_work_queue_depth Max number of work queue entries since last log entry (tasks waiting for workers to service them)
+# TYPE iris_wqm_max_work_queue_depth gauge
+iris_wqm_max_work_queue_depth{id="SYS"} 0
+# HELP iris_wqm_waiting_worker_jobs Average number of worker jobs waiting for a group to connect to (currently idle but available to do work)
+# TYPE iris_wqm_waiting_worker_jobs gauge
+iris_wqm_waiting_worker_jobs{id="SYS"} 2
