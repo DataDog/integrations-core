@@ -104,6 +104,64 @@ def test_show_metrics(dd_run_check, aggregator, instance, output, expected_metri
 
 
 @pytest.mark.parametrize(
+    "command, metric_prefix",
+    [
+        pytest.param("show stat consumers", "consumer", id="consumers"),
+        pytest.param("show stat producers", "producer", id="producers"),
+    ],
+)
+def test_stat_metrics_are_aggregated_by_tags(dd_run_check, aggregator, instance, command, metric_prefix):
+    output = f"""Command: {command}
+                                      Total Count      Rate/Second
+User       Conn  T  Destination       Msgs   Size      Msgs   Size
+admin         2  Q  sample.queue         1    2.4 Kb      3    0.6 Kb
+admin         2  Q  sample.queue         4    0.5 Mb      5    0.4 Kb
+admin         2  Q  other.queue          6    1.0 Kb      7    2.0 Kb
+admin         0  Q  sample.queue         9    3.0 Kb     10    4.0 Kb
+""".encode()
+    tags = [
+        'destination:sample.queue',
+        'user:admin',
+        'component_type:Q',
+        'conn:2',
+        'optional:tag1',
+    ]
+    other_tags = [
+        'destination:other.queue',
+        'user:admin',
+        'component_type:Q',
+        'conn:2',
+        'optional:tag1',
+    ]
+    # conn=0 parses falsy and is dropped at submission by _submit_metrics_factory's
+    # own truthy tag filter, same as it would be for a single, unaggregated row.
+    falsy_conn_tags = [
+        'destination:sample.queue',
+        'user:admin',
+        'component_type:Q',
+        'optional:tag1',
+    ]
+    check = TibcoEMSCheck('tibco_ems', {}, [instance])
+    check.run_tibco_command = MagicMock(return_value=output)
+
+    dd_run_check(check)
+
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.total_messages', value=5, tags=tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.total_messages_size', value=502_400, tags=tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.messages_rate', value=8, tags=tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.messages_rate_size', value=1_000, tags=tags, count=1)
+
+    # A different destination must stay a separate series, not fold into the group above.
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.total_messages', value=6, tags=other_tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.messages_rate', value=7, tags=other_tags, count=1)
+
+    # conn=0 is still its own aggregation group (grouping now keys on presence,
+    # not truthiness), even though the tag itself is dropped at submission.
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.total_messages', value=9, tags=falsy_conn_tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.messages_rate', value=10, tags=falsy_conn_tags, count=1)
+
+
+@pytest.mark.parametrize(
     "expected_result, data, regex",
     [
         pytest.param(
