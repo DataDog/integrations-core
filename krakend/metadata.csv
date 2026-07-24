@@ -10,6 +10,7 @@ krakend.api.go.gc_gomemlimit_bytes,gauge,,byte,,"Go runtime memory limit configu
 krakend.api.go.goroutines,gauge,,,,Number of goroutines that currently exist.,0,krakend,,,
 krakend.api.go.info,gauge,,,,Information about the Go environment.,0,krakend,,,
 krakend.api.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,krakend,,,
+krakend.api.go.memstats.alloc_bytes.count,count,,byte,,Total number of bytes allocated even if freed.,0,krakend,,,
 krakend.api.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,krakend,,,
 krakend.api.go.memstats.frees.count,count,,,,Total number of frees.,0,krakend,,,
 krakend.api.go.memstats.gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata.,0,krakend,,,
