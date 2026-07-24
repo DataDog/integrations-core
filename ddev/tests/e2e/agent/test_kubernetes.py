@@ -300,10 +300,10 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     )
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
     assert start_index < post_install_index < restart_index
-    assert metadata['kubernetes']['local_packages'] == [
-        {'path': str(local_base), 'name': 'datadog_checks_base', 'features': '[kube]'},
-        {'path': str(integration), 'name': 'velero', 'features': '[deps]'},
-    ]
+    assert metadata['kubernetes']['local_packages'] == {
+        str(local_base): '[kube]',
+        str(integration): '[deps]',
+    }
     local_base_copy = run_command.call_args_list[local_base_copy_index]
     assert local_base_copy.kwargs['cwd'] == local_base.resolve().parent
 
@@ -423,9 +423,7 @@ def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
 ):
     local_package = temp_dir / 'velero-source'
     local_package.ensure_dir_exists()
-    metadata['kubernetes']['local_packages'] = [
-        {'path': str(local_package), 'name': 'velero-source', 'features': '[deps]'}
-    ]
+    metadata['kubernetes']['local_packages'] = {str(local_package): '[deps]'}
 
     agent.restart()
 
@@ -443,6 +441,15 @@ def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
     assert package_copy_index < config_copy_index < restart_index
     assert not any('pip' in command for command in calls)
+
+
+def test_restart_rejects_unsafe_local_package_destination(agent, metadata, run_command):
+    metadata['kubernetes']['local_packages'] = {'..': '[deps]'}
+
+    with pytest.raises(ValueError, match='local package path'):
+        agent.restart()
+
+    run_command.assert_not_called()
 
 
 def test_shell_and_logs_use_backend_commands(agent, run_command):
