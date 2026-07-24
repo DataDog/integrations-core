@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 
 from .common import DEFAULT_INSTANCE, FLUENTD_CONTAINER_NAME, FLUENTD_IMAGE_TAG, HERE, URL
 
@@ -34,7 +34,7 @@ def dd_environment():
         endpoints=[URL],
         env_vars=env,
     ):
-        yield DEFAULT_INSTANCE
+        yield DEFAULT_INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
