@@ -337,12 +337,17 @@ class ModelConsumer:
             *shared_line,
         ]
 
+        candidate_fields = {
+            key for stanza in strategies for candidate in stanza.get('candidates', []) for key in candidate
+        }
+
         for index, stanza in enumerate(strategies):
             strategy_name = stanza['strategy']
             lines.append(f'    # discovery[{index}]: {strategy_name}')
             lines.extend(self._emit_strategy_loop(stanza, strategy_name))
             for candidate in stanza.get('candidates', []):
-                lines.extend(self._emit_candidate_body(candidate))
+                sibling_keys = candidate_fields - set(candidate)
+                lines.extend(self._emit_candidate_body(candidate, sibling_keys))
 
         lines.extend(
             [
@@ -393,8 +398,14 @@ class ModelConsumer:
         return REGISTRY[strategy_name].emit_context(stanza)
 
     @staticmethod
-    def _emit_candidate_body(candidate: dict[str, Any]) -> list[str]:
-        """Emit the model-backed candidate construction for one candidate mapping."""
+    def _emit_candidate_body(candidate: dict[str, Any], sibling_keys: set[str] = frozenset()) -> list[str]:
+        """Emit the model-backed candidate construction for one candidate mapping.
+
+        `sibling_keys` are field names set by *other* candidates anywhere in the discovery spec,
+        across all strategy stanzas. Those fields still get filled with their own default by
+        `InstanceConfig`'s validator (it fills any field not in `configured_fields`), so they must
+        be popped explicitly or a candidate would carry a phantom default for a field it never set.
+        """
         lines = ['        instance_data = {']
         for field_name, value in candidate.items():
             rendered = ModelConsumer._render_candidate_value(value)
@@ -403,6 +414,8 @@ class ModelConsumer:
         lines.append('        instance = InstanceConfig.model_validate(')
         lines.append("            instance_data, context={'configured_fields': frozenset(instance_data)}")
         lines.append("        ).model_dump(by_alias=True, mode='json', exclude_none=True)")
+        for key in sorted(sibling_keys):
+            lines.append(f'        instance.pop({key!r}, None)')
         lines.append("        yield {'init_config': shared, 'instances': [instance]}")
         return lines
 

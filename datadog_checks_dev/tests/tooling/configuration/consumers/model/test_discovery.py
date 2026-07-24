@@ -287,6 +287,137 @@ def test_custom_files_are_stubbed():
     assert 'candidates(service, default)' in files['discovery_overrides.py'][0]
 
 
+def test_multiple_candidates_pop_sibling_defaults():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints: [9090]
+              candidates:
+              - endpoint_a: http://{service.host}:{port.number}/a
+              - endpoint_b: http://{service.host}:{port.number}/b
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint_a
+              description: words
+              required: false
+              value:
+                type: string
+                default: http://localhost:80/a
+            - name: endpoint_b
+              description: words
+              required: false
+              value:
+                type: string
+                default: http://localhost:80/b
+        """
+    )
+
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+
+    # Each candidate's InstanceConfig.model_validate(...) fills in a concrete default for
+    # every field not explicitly set, including the sibling candidate's field, since both
+    # `endpoint_a` and `endpoint_b` have non-None defaults. Without popping the sibling key,
+    # every candidate would end up carrying a phantom default for a field it never set.
+    endpoint_a_block, endpoint_b_block = (
+        discovery_contents.split("'endpoint_a':")[1],
+        discovery_contents.split("'endpoint_b':")[1],
+    )
+    assert "instance.pop('endpoint_b', None)" in endpoint_a_block.split('yield')[0]
+    assert "instance.pop('endpoint_a', None)" in endpoint_b_block.split('yield')[0]
+
+
+def test_candidates_across_stanzas_pop_sibling_defaults():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints: [9090]
+              candidates:
+              - endpoint_a: http://{service.host}:{port.number}/a
+            - strategy: from_ports
+              port_hints: [9091]
+              candidates:
+              - endpoint_b: http://{service.host}:{port.number}/b
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint_a
+              description: words
+              required: false
+              value:
+                type: string
+                default: http://localhost:80/a
+            - name: endpoint_b
+              description: words
+              required: false
+              value:
+                type: string
+                default: http://localhost:80/b
+        """
+    )
+
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+
+    # `endpoint_a` and `endpoint_b` are declared in two different strategy stanzas, not two
+    # candidates within the same stanza. Sibling-key popping must still span across stanzas,
+    # or each candidate would carry a phantom default for the other stanza's field.
+    endpoint_a_block, endpoint_b_block = (
+        discovery_contents.split("'endpoint_a':")[1],
+        discovery_contents.split("'endpoint_b':")[1],
+    )
+    assert "instance.pop('endpoint_b', None)" in endpoint_a_block.split('yield')[0]
+    assert "instance.pop('endpoint_a', None)" in endpoint_b_block.split('yield')[0]
+
+
+def test_single_candidate_no_sibling_pop():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints: [9090]
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/m
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    assert 'instance.pop(' not in discovery_contents
+
+
 def test_no_init_config_section():
     consumer = get_model_consumer(
         """
