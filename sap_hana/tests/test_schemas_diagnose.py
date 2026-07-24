@@ -84,7 +84,7 @@ def _collect_payloads(check):
     # suppress internal metrics so tests don't need a live aggregator
     check.histogram = mock.MagicMock()
     check.gauge = mock.MagicMock()
-    check._schema_collector.collect_schemas()
+    check._schema_collection_job._schema_collector.collect_schemas()
     return payloads
 
 
@@ -94,11 +94,11 @@ def _collect_payloads(check):
 class TestHanaSchemaCollector:
     def test_disabled_by_default(self):
         check = _make_check()
-        assert check._schema_collector is None
+        assert not check._schema_collection_job._enabled
 
     def test_enabled_creates_collector(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        assert check._schema_collector is not None
+        assert check._schema_collection_job._schema_collector is not None
 
     def test_payload_structure(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
@@ -154,7 +154,7 @@ class TestHanaSchemaCollector:
 
     def test_system_schemas_excluded_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        query, params = check._schema_collector._query_builder.build()
+        query, params = check._schema_collection_job._schema_collector._query_builder.build()
         assert "NOT IN ('SYS', 'SYSTEM', 'PUBLIC')" in query
         assert r"NOT LIKE '\_SYS\_%' ESCAPE '\'" in query
         assert 'SYS.M_TABLES' in query
@@ -166,14 +166,14 @@ class TestHanaSchemaCollector:
 
     def test_exclude_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'exclude_schemas': ['EXCL']}})
-        query, params = check._schema_collector._query_builder.build()
+        query, params = check._schema_collection_job._schema_collector._query_builder.build()
         assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
         assert 'AND v.SCHEMA_NAME NOT IN (?)' in query
         assert params == ('EXCL', 'EXCL')
 
     def test_include_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'include_schemas': ['ONLY']}})
-        query, params = check._schema_collector._query_builder.build()
+        query, params = check._schema_collection_job._schema_collector._query_builder.build()
         assert 'AND t.SCHEMA_NAME IN (?)' in query
         assert 'AND v.SCHEMA_NAME IN (?)' in query
         assert params == ('ONLY', 'ONLY')
@@ -194,57 +194,75 @@ class TestHanaSchemaCollector:
 
     def test_max_tables_limit_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'max_tables': 3}})
-        query, _ = check._schema_collector._query_builder.build()
+        query, _ = check._schema_collection_job._schema_collector._query_builder.build()
         assert 'LIMIT 3' in query
 
     def test_max_views_limit_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'max_views': 7}})
-        query, _ = check._schema_collector._query_builder.build()
+        query, _ = check._schema_collection_job._schema_collector._query_builder.build()
         assert 'LIMIT 7' in query
 
-    def test_maybe_collect_schemas_time_gated(self):
-        check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 600}})
-        check._conn, _ = _make_cursor_mock([_joined_row('S', 'T', column_name='C1')])
-        check.database_monitoring_metadata = mock.MagicMock()
-        check.histogram = mock.MagicMock()
-        check.gauge = mock.MagicMock()
+    def test_schema_job_run_job_calls_collect_schemas(self):
+        check = _make_check({'collect_schemas': {'enabled': True, 'run_sync': True}})
+        job = check._schema_collection_job
+        job._schema_collector.collect_schemas = mock.MagicMock()
+        job._job_conn = mock.MagicMock()
 
-        # First call triggers collection (last time = 0)
-        check._maybe_collect_schemas()
-        assert check.database_monitoring_metadata.call_count == 1
+        job.run_job()
 
-        # Immediate second call is gated
-        check._maybe_collect_schemas()
-        assert check.database_monitoring_metadata.call_count == 1
+        job._schema_collector.collect_schemas.assert_called_once()
+        assert job._schema_collector._conn is job._job_conn
 
-    def test_maybe_collect_schemas_failure_does_not_advance_timestamp(self):
-        check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 600}})
-        check._conn = mock.MagicMock()
-        check._schema_collector.collect_schemas = mock.MagicMock(side_effect=Exception('transient'))
+    def test_schema_job_resets_conn_on_hana_error(self):
+        try:
+            from hdbcli.dbapi import Error as HanaError
+        except ImportError:
+            HanaError = Exception
 
-        check._maybe_collect_schemas()
-        # A failed collection must not advance the schedule, so the next run retries promptly.
-        assert check._last_schema_collection_time == 0
-        check._maybe_collect_schemas()
-        assert check._schema_collector.collect_schemas.call_count == 2
+        check = _make_check({'collect_schemas': {'enabled': True, 'run_sync': True}})
+        job = check._schema_collection_job
+        job._job_conn = mock.MagicMock()
+        job._schema_collector.collect_schemas = mock.MagicMock(side_effect=HanaError('connection lost'))
 
-    def test_maybe_collect_schemas_success_advances_timestamp(self):
-        check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 600}})
-        check._conn = mock.MagicMock()
-        check._schema_collector.collect_schemas = mock.MagicMock(return_value=True)
+        with pytest.raises(HanaError):
+            job.run_job()
 
-        check._maybe_collect_schemas()
-        assert check._last_schema_collection_time > 0
-        # Within the interval the next call is gated.
-        check._maybe_collect_schemas()
-        assert check._schema_collector.collect_schemas.call_count == 1
+        assert job._job_conn is None
+        assert job._schema_collector._conn is None
 
-    def test_maybe_collect_schemas_skips_without_connection(self):
+    def test_schema_job_resets_conn_on_swallowed_error(self):
+        # collect_schemas() swallows per-database HANA errors and returns normally after
+        # dropping the collector's connection reference; the job must still reconnect.
+        check = _make_check({'collect_schemas': {'enabled': True, 'run_sync': True}})
+        job = check._schema_collection_job
+        conn = mock.MagicMock()
+        job._job_conn = conn
+
+        def swallow():
+            job._schema_collector._conn = None
+
+        job._schema_collector.collect_schemas = mock.MagicMock(side_effect=swallow)
+
+        job.run_job()
+
+        conn.close.assert_called_once()
+        assert job._job_conn is None
+        assert job._schema_collector._conn is None
+
+    def test_cancel_cancels_schema_collection_job(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        check._conn = None
-        check.database_monitoring_metadata = mock.MagicMock()
-        check._maybe_collect_schemas()
-        check.database_monitoring_metadata.assert_not_called()
+        check._schema_collection_job.cancel = mock.MagicMock()
+        check.data_observability.cancel = mock.MagicMock()
+
+        check.cancel()
+
+        check._schema_collection_job.cancel.assert_called_once()
+        check.data_observability.cancel.assert_called_once()
+
+    def test_schema_job_disabled_does_not_run(self):
+        check = _make_check()
+        job = check._schema_collection_job
+        assert not job._enabled
 
     def test_column_field_mapping(self):
         COLUMNS = [
@@ -311,7 +329,7 @@ class TestHanaSchemaCollector:
         cursor.fetchone.side_effect = [('PROD_DB',), ('Production instance',)]
         check._conn = conn
 
-        result = check._schema_collector._get_databases()
+        result = check._schema_collection_job._schema_collector._get_databases()
         assert result == [{'name': 'PROD_DB', 'description': 'Production instance'}]
 
     def test_get_databases_description_query_fails(self):
@@ -328,7 +346,7 @@ class TestHanaSchemaCollector:
         cursor.execute.side_effect = raise_on_description
         check._conn = conn
 
-        result = check._schema_collector._get_databases()
+        result = check._schema_collection_job._schema_collector._get_databases()
         assert result == [{'name': 'PROD_DB', 'description': ''}]
 
     def test_get_databases_execute_exception_skips_collection(self):
@@ -340,7 +358,7 @@ class TestHanaSchemaCollector:
         check._conn = conn
 
         # No hostname fallback: an unreadable current database skips collection entirely.
-        result = check._schema_collector._get_databases()
+        result = check._schema_collection_job._schema_collector._get_databases()
         assert result == []
 
     def test_get_databases_no_rows_skips_collection(self):
@@ -351,7 +369,7 @@ class TestHanaSchemaCollector:
         cursor.fetchone.return_value = None
         check._conn = conn
 
-        result = check._schema_collector._get_databases()
+        result = check._schema_collection_job._schema_collector._get_databases()
         assert result == []
 
     def test_is_column_table_false(self):
@@ -372,7 +390,7 @@ class TestHanaSchemaCollector:
 
     def test_include_and_exclude_combined(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'include_schemas': ['A'], 'exclude_schemas': ['B']}})
-        query, params = check._schema_collector._query_builder.build()
+        query, params = check._schema_collection_job._schema_collector._query_builder.build()
         assert 'AND t.SCHEMA_NAME IN (?)' in query
         assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
         assert 'AND v.SCHEMA_NAME IN (?)' in query
@@ -428,15 +446,15 @@ class TestHanaSchemaCollector:
 
     def test_stats_join_when_available(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        check._schema_collector._query_builder._has_table_statistics = True
-        query, _ = check._schema_collector._query_builder.build()
+        check._schema_collection_job._schema_collector._query_builder._has_table_statistics = True
+        query, _ = check._schema_collection_job._schema_collector._query_builder.build()
         assert 'SYS.M_TABLE_STATISTICS' in query
         assert 'ts.LAST_MODIFY_TIME' in query
 
     def test_stats_join_omitted_when_unavailable(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        check._schema_collector._query_builder._has_table_statistics = False
-        query, _ = check._schema_collector._query_builder.build()
+        check._schema_collection_job._schema_collector._query_builder._has_table_statistics = False
+        query, _ = check._schema_collection_job._schema_collector._query_builder.build()
         assert 'SYS.M_TABLE_STATISTICS' not in query
         assert 'NULL AS LAST_UPDATED_ON' in query
 
@@ -456,7 +474,7 @@ class TestHanaSchemaCollector:
             _joined_row('S', 'T3', column_name='C3', position=3),
         ]
         check = _make_check({'collect_schemas': {'enabled': True}})
-        check._schema_collector._config.payload_column_chunk_size = 5
+        check._schema_collection_job._schema_collector._config.payload_column_chunk_size = 5
         check._conn, _ = _make_cursor_mock(rows)
 
         payloads = _collect_payloads(check)
