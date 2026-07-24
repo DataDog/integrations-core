@@ -51,7 +51,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     already downloaded to ``BatchFinished.artifacts_path``.
     """
 
-    def __init__(self, name: str, output_base_path: Path, expected_batches: int) -> None:
+    def __init__(self, name: str, output_base_path: Path, expected_batches: int):
         super().__init__(name)
         self._output_base_path = output_base_path
         self._expected_batches = expected_batches
@@ -61,7 +61,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         self._lock = threading.Lock()
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
-    def process_message(self, message: BatchFinished) -> None:
+    def process_message(self, message: BatchFinished):
         if not message.batch_jobs:
             self._logger.warning("BatchFinished carried no jobs; nothing to gather", extra={"run_id": message.run_id})
             return
@@ -73,20 +73,21 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         # Register the batch, bump the revision, and emit the update all under the lock so two batches
         # finishing at once cannot build a comment from half-updated shared state.
         with self._lock:
-            # Keyed by batch id (stable across retries; run_id changes on a re-run). A duplicate is
-            # ignored so it can't re-count the batch and inflate the revision — this check is
-            # authoritative only inside the lock. (Retry-replace semantics come with the retry work.)
-            if message.id in self._results_by_batch:
+            # Keyed by the logical batch id (stable across retries; run_id changes on a re-run). A
+            # duplicate is ignored so it can't re-count the batch and inflate the revision — this
+            # check is authoritative only inside the lock. (Retry-replace semantics come with the
+            # retry work.)
+            if message.batch_id in self._results_by_batch:
                 self._logger.warning(
-                    "Duplicate BatchFinished ignored", extra={"batch_id": message.id, "run_id": message.run_id}
+                    "Duplicate BatchFinished ignored", extra={"batch_id": message.batch_id, "run_id": message.run_id}
                 )
                 return
-            self._results_by_batch[message.id] = results
-            self._status_by_batch[message.id] = status
+            self._results_by_batch[message.batch_id] = results
+            self._status_by_batch[message.batch_id] = status
             self._received_batches += 1
             revision = self._received_batches
             done = revision >= self._expected_batches
-            self.submit_message(self.build_update_message(message.id, revision, done))
+            self.submit_message(self.build_update_message(message.batch_id, revision, done))
 
         self._logger.info(
             "Batch gathered, UpdatePRComment revision %s emitted (done=%s)",
@@ -147,13 +148,15 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         failed_steps = [step.name for step in workflow_job.steps if step.conclusion == WorkflowJobConclusion.FAILURE]
         return (conclusion_to_status(workflow_job.conclusion), failed_steps)
 
-    def _organize_artifacts(self, job_artifacts_path: Path, batch_job: BatchJob) -> None:
+    def _organize_artifacts(self, job_artifacts_path: Path, batch_job: BatchJob):
         """Copy coverage and JUnit files into the organized output tree with unique names.
 
-        The prefix is the job's target/environment/platform — the same fields as
-        ``BatchJob.artifact_name`` and the uniqueness key for a job within a batch.
+        The prefix is the job's ``BatchJob.artifact_name`` — the same facet-aware identity used to
+        name the uploaded artifact and to key uniqueness within a batch. Deriving the prefix from
+        that single source keeps split unit and E2E jobs for the same target/environment/platform
+        from copying their coverage and JUnit files to the same organized filenames.
         """
-        prefix = f"{batch_job.target}-{batch_job.environment}-{batch_job.platform}"
+        prefix = batch_job.artifact_name()
 
         coverage_dir = self._output_base_path / "coverage"
         for index, coverage_file in enumerate(sorted(job_artifacts_path.rglob(COVERAGE_GLOB))):
@@ -164,7 +167,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         for junit_file in sorted(job_artifacts_path.rglob(JUNIT_GLOB)):
             self._copy(junit_file, test_results_dir / f"{prefix}-{junit_file.stem}.xml")
 
-    def _copy(self, source: Path, destination: Path) -> None:
+    def _copy(self, source: Path, destination: Path):
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
         self._logger.debug("Organized artifact %s -> %s", source, destination)
@@ -175,7 +178,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         failed_count = sum(1 for result in results if result.status == Status.FAILURE)
         skipped_count = sum(1 for result in results if result.status == Status.SKIPPED)
         return WorkflowStatus(
-            batch_id=message.id,
+            batch_id=message.batch_id,
             url=message.workflow_url,
             id=message.run_id,
             success_count=success_count,

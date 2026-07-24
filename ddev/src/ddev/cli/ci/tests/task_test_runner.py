@@ -39,15 +39,15 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     and emits a ``BatchFinished``.
     """
 
-    def __init__(self, name: str, client: AsyncGitHubClient, options: TestRunnerOptions) -> None:
+    def __init__(self, name: str, client: AsyncGitHubClient, options: TestRunnerOptions):
         super().__init__(name)
         self._client = client
         self._options = options
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
-    async def process_message(self, message: TestBatch) -> None:
+    async def process_message(self, message: TestBatch):
         inputs = self._build_inputs(message)
-        log_extra: dict[str, Any] = {"batch_id": message.id}
+        log_extra: dict[str, Any] = {"batch_id": message.batch_id}
 
         dispatch = await self._client.create_workflow_dispatch(
             self._options.owner,
@@ -68,7 +68,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         check = await self._client.create_check_run(
             self._options.owner,
             self._options.repo,
-            name=f"test-batch/{message.id}",
+            name=f"test-batch/{message.batch_id}",
             head_sha=self._options.base_sha,
             status="in_progress",
             details_url=workflow_url,
@@ -98,6 +98,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
             finished = BatchFinished(
                 id=message.id,
+                batch_id=message.batch_id,
                 status=conclusion_to_status(raw),
                 run_id=run_id,
                 workflow_url=workflow_url,
@@ -142,7 +143,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
         return {
-            "batch_id": message.id,
+            "batch_id": message.batch_id,
             "checkout_sha": self._options.checkout_sha,
             "integrations": json.dumps(message.integrations),
             "job_list": json.dumps([self._job_input(job) for job in message.job_list]),
