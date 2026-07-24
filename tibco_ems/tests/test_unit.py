@@ -104,6 +104,38 @@ def test_show_metrics(dd_run_check, aggregator, instance, output, expected_metri
 
 
 @pytest.mark.parametrize(
+    "command, metric_prefix",
+    [
+        pytest.param("show stat consumers", "consumer", id="consumers"),
+        pytest.param("show stat producers", "producer", id="producers"),
+    ],
+)
+def test_stat_metrics_are_aggregated_by_tags(dd_run_check, aggregator, instance, command, metric_prefix):
+    output = f"""Command: {command}
+                                      Total Count      Rate/Second
+User       Conn  T  Destination       Msgs   Size      Msgs   Size
+admin         2  Q  sample.queue         1    2.4 Kb      3    0.6 Kb
+admin         2  Q  sample.queue         4    0.5 Mb      5    0.4 Kb
+""".encode()
+    tags = [
+        'destination:sample.queue',
+        'user:admin',
+        'component_type:Q',
+        'conn:2',
+        'optional:tag1',
+    ]
+    check = TibcoEMSCheck('tibco_ems', {}, [instance])
+    check.run_tibco_command = MagicMock(return_value=output)
+
+    dd_run_check(check)
+
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.total_messages', value=5, tags=tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.total_messages_size', value=502_400, tags=tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.messages_rate', value=8, tags=tags, count=1)
+    aggregator.assert_metric(f'tibco_ems.{metric_prefix}.messages_rate_size', value=1_000, tags=tags, count=1)
+
+
+@pytest.mark.parametrize(
     "expected_result, data, regex",
     [
         pytest.param(
