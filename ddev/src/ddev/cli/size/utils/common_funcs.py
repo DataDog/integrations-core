@@ -869,6 +869,7 @@ def send_metrics_to_dd(
     org: str | None,
     key: str | None,
     compressed: bool,
+    branch: str,
 ) -> None:
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
@@ -907,6 +908,7 @@ def send_metrics_to_dd(
                     "team:agent-integrations",
                     f"compression:{size_type}",
                     f"metrics_version:{METRIC_VERSION}",
+                    f"branch:{branch}",
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                     f"commit_message:{message}",
@@ -943,6 +945,7 @@ def send_metrics_to_dd(
                     f"python_version:{py_version}",
                     "team:agent-integrations",
                     f"metrics_version:{METRIC_VERSION}",
+                    f"branch:{branch}",
                 ],
             }
         )
@@ -957,6 +960,7 @@ def send_metrics_to_dd(
                     f"python_version:{py_version}",
                     "team:agent-integrations",
                     f"metrics_version:{METRIC_VERSION}",
+                    f"branch:{branch}",
                 ],
             }
         )

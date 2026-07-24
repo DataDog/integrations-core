@@ -26,6 +26,7 @@ from ddev.cli.size.utils.common_funcs import (
     save_csv,
     save_json,
     save_markdown,
+    send_metrics_to_dd,
 )
 from ddev.utils.fs import Path
 
@@ -452,3 +453,39 @@ def test_get_dependencies_from_json():
         mock_path.read_text.return_value = dep_size_dict
         result = get_dependencies_from_json(mock_path, "linux-x86_64", "3.12", True)
     assert result == expected
+
+
+def test_send_metrics_to_dd_adds_branch_tag():
+    app = MagicMock()
+    app.config.orgs = {}
+    modules = [
+        {
+            "Name": "module1",
+            "Version": "1.2.3",
+            "Size_Bytes": 123,
+            "Size": "123 B",
+            "Type": "Integration",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.13",
+        },
+        {
+            "Name": "dep1",
+            "Version": "4.5.6",
+            "Size_Bytes": 456,
+            "Size": "456 B",
+            "Type": "Dependency",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.13",
+        },
+    ]
+
+    with (
+        patch("ddev.cli.size.utils.common_funcs.get_commit_data", return_value=(1234567890, "message", [""], [""])),
+        patch("ddev.cli.size.utils.common_funcs.initialize"),
+        patch("ddev.cli.size.utils.common_funcs.api.Metric.send") as metric_send,
+    ):
+        send_metrics_to_dd(app, "abcdef123", modules, None, "test-key", False, "feature/branch")
+
+    for call in metric_send.call_args_list:
+        for metric in call.kwargs["metrics"]:
+            assert "branch:feature/branch" in metric["tags"]
