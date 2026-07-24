@@ -33,6 +33,21 @@ from .utils import _get_superconn, _wait_for_value, requires_over_10
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
+def _wait_for_wal_replay(pg_replica_instance: dict[str, object], target_lsn: str, attempts: int = 10) -> None:
+    conn = _get_superconn(pg_replica_instance)
+    try:
+        for _ in range(attempts):
+            with conn.cursor() as cur:
+                cur.execute("SELECT pg_wal_lsn_diff(pg_last_wal_replay_lsn(), %s::pg_lsn) >= 0", (target_lsn,))
+                if cur.fetchone()[0]:
+                    return
+            time.sleep(0.1)
+    finally:
+        conn.close()
+
+    pytest.fail(f'Replica did not replay WAL up to {target_lsn}')
+
+
 @requires_over_10
 def test_common_replica_metrics(aggregator, integration_check, metrics_cache_replica, pg_replica_instance):
     check = integration_check(pg_replica_instance)
@@ -90,38 +105,42 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
     check = integration_check(pg_replica_instance)
     check._connect()
     check.initialize_is_aurora()
+    wal_change_started = time.monotonic()
     with _get_superconn(pg_instance) as conn:
         with conn.cursor() as cur:
             # Ask for a new txid to force a WAL change
             cur.execute('select txid_current();')
-            cur.fetchall()
-    # Wait for 200ms for WAL sender to send message
-    time.sleep(0.2)
+            cur.execute('select pg_current_wal_lsn();')
+            target_lsn = cur.fetchone()[0]
+    _wait_for_wal_replay(pg_replica_instance, target_lsn)
 
     check.check(pg_replica_instance)
     expected_tags = _get_expected_replication_tags(check, pg_replica_instance, status='streaming')
     aggregator.assert_metric('postgresql.wal_receiver.last_msg_send_age', count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.wal_receiver.last_msg_receipt_age', count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.wal_receiver.latest_end_age', count=1, tags=expected_tags)
-    # All ages should have been updated within the last second
+    higher_bound = time.monotonic() - wal_change_started
     assert_metric_at_least(
         aggregator,
         'postgresql.wal_receiver.last_msg_send_age',
-        higher_bound=1,
+        lower_bound=0,
+        higher_bound=higher_bound,
         tags=expected_tags,
         count=1,
     )
     assert_metric_at_least(
         aggregator,
         'postgresql.wal_receiver.last_msg_receipt_age',
-        higher_bound=1,
+        lower_bound=0,
+        higher_bound=higher_bound,
         tags=expected_tags,
         count=1,
     )
     assert_metric_at_least(
         aggregator,
         'postgresql.wal_receiver.latest_end_age',
-        higher_bound=1,
+        lower_bound=0,
+        higher_bound=higher_bound,
         tags=expected_tags,
         count=1,
     )
