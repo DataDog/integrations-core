@@ -14,7 +14,7 @@ import pytest
 import requests
 from packaging import version
 
-from datadog_checks.dev import TempDir, WaitFor, docker_run
+from datadog_checks.dev import TempDir, WaitFor, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
@@ -50,7 +50,7 @@ def dd_environment():
             yield e
     else:
         with docker_run(compose_file=os.path.join(HERE, 'docker', 'haproxy.yaml'), endpoints=[ENDPOINT_PROMETHEUS]):
-            yield INSTANCE
+            yield INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')

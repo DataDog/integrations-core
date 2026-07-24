@@ -195,6 +195,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
       - name: sasl_kerberos_principal
         description: |
           Kerberos principal to use.
@@ -387,6 +388,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
           example: /path/to/ca_cert.pem
       - name: schema_registry_tls_cert
         description: |
@@ -395,6 +397,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
           example: /path/to/client_cert.pem
       - name: schema_registry_tls_key
         description: |
@@ -403,6 +406,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
           example: /path/to/client_key.pem
       - name: schema_registry_oauth_token_provider
         description: |
@@ -517,6 +521,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
       - name: kafka_connect_tls_cert
         description: |
           Path to the client certificate file for Kafka Connect mutual TLS authentication.
@@ -524,6 +529,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
       - name: kafka_connect_tls_key
         description: |
           Path to the client private key file for Kafka Connect mutual TLS authentication.
@@ -531,6 +537,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
       - name: kafka_connect_oauth_token_provider
         description: |
           OAuth token provider settings for Kafka Connect authentication.

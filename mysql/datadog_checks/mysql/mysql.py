@@ -102,6 +102,8 @@ except ImportError:
 
 
 class MySql(DatabaseCheck):
+    DBMS = 'mysql'
+
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
@@ -582,7 +584,9 @@ class MySql(DatabaseCheck):
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
-        if self.global_variables.log_bin_enabled:
+        if self.global_variables.log_bin_enabled and is_affirmative(
+            self._config.options.get('binlog_size_metrics', True)
+        ):
             with tracked_query(self, operation="binary_log_metrics"):
                 results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
@@ -1398,7 +1402,7 @@ class MySql(DatabaseCheck):
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "mysql",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.version.version + '+' + self.version.build,

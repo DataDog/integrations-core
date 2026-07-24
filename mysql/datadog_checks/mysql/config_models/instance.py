@@ -143,6 +143,7 @@ class Options(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    binlog_size_metrics: Optional[bool] = None
     disable_innodb_metrics: Optional[bool] = None
     extra_innodb_metrics: Optional[bool] = None
     extra_performance_metrics: Optional[bool] = None

@@ -1,0 +1,92 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6de6fbc2-a74f-49e2-b786-253160163366",
+  "app_id": "idira-endpoint-privilege-manager",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Idira Endpoint Privilege Manager logs",
+    "title": "Idira Endpoint Privilege Manager by Palo Alto Networks",
+    "media": [
+      {
+        "caption": "Idira EPM Overview",
+        "image_url": "images/idira_epm_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Idira EPM Overview",
+        "image_url": "images/idira_epm_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Idira EPM Raw Events",
+        "image_url": "images/idira_epm_raw_events_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Idira EPM Raw Events",
+        "image_url": "images/idira_epm_raw_events_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Idira EPM Policy Audit Events",
+        "image_url": "images/idira_epm_policy_audit_events_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Idira EPM Policy Audit Events",
+        "image_url": "images/idira_epm_policy_audit_events_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Idira EPM Set & Account Admin Activities",
+        "image_url": "images/idira_epm_set_and_account_admin_audit_events_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Idira EPM Set & Account Admin Activities",
+        "image_url": "images/idira_epm_set_and_account_admin_audit_events_dark.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::SIEM",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 82886371,
+      "source_type_name": "Idira Endpoint Privilege Manager by Palo Alto Networks",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Idira EPM Overview": "assets/dashboards/idira_epm_overview.json",
+      "Idira EPM Raw Events": "assets/dashboards/idira_epm_raw_events.json",
+      "Idira EPM Policy Audit Events": "assets/dashboards/idira_epm_policy_audit_events.json",
+      "Idira EPM Set & Account Admin Activities": "assets/dashboards/idira_epm_set_and_account_admin_activities.json"
+    },
+    "logs": {
+      "source": "idira-endpoint-privilege-manager"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

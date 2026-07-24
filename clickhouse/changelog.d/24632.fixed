@@ -1,0 +1,1 @@
+Fixes query completions payload always reporting a null service.
