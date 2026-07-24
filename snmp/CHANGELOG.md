@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 13.1.1 / 2026-07-23
+
+***Fixed***:
+
+* Rename mem_pool_index tag to mem in cisco-firepower-asa profile. ([#24582](https://github.com/DataDog/integrations-core/pull/24582))
+
 ## 13.1.0 / 2026-07-08
 
 ***Added***:
