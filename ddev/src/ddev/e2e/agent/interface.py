@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class AgentInterface(ABC):
-    build_config_keys: tuple[str, ...] = ()
+    build_config_key: str | None = None
     supports_ci = True
 
     def __init__(
@@ -68,15 +68,11 @@ class AgentInterface(ABC):
     def get_id(self) -> str:
         return f'{self.integration.name}_{self.env}'
 
-    def prepare_start(self) -> None:
-        """Populate backend state that must be persisted before startup."""
-
     def get_configured_build(self, config: Mapping[str, str]) -> str | None:
-        for key in self.build_config_keys:
-            if agent_build := config.get(key):
-                return agent_build
+        if self.build_config_key is None:
+            return None
 
-        return None
+        return config.get(self.build_config_key)
 
     @abstractmethod
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None: ...

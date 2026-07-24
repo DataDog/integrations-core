@@ -20,7 +20,7 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
     """
     Stop environments. To stop all the running environments, use `all` as the integration name and the environment.
     """
-    from ddev.e2e.agent import create_agent
+    from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import E2EEnvVars, E2EMetadata
     from ddev.e2e.run import E2EEnvironmentRunner
@@ -63,18 +63,14 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
                 metadata = env_data.read_metadata()
                 env_vars.update(metadata.get(E2EMetadata.ENV_VARS, {}))
 
-                skip_agent_stop = metadata.get(E2EMetadata.SKIP_AGENT_STOP, False)
-                agent = None if skip_agent_stop else create_agent(app, integration, env, metadata, env_data.config_file)
+                agent = create_agent_interface(app, integration, env, metadata, env_data.config_file)
 
                 try:
-                    if agent is not None:
-                        agent.stop()
+                    agent.stop()
                 finally:
+                    env_data.remove()
+
                     with integration.path.as_cwd(env_vars=env_vars), runner.stop() as command:
                         process = app.platform.run_command(command)
                         if process.returncode:
                             app.abort(code=process.returncode)
-
-                # Keep the owner metadata when either cleanup stage fails so a
-                # later `ddev env stop` can safely retry resource deletion.
-                env_data.remove()

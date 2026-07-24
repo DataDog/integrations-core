@@ -8,7 +8,7 @@ def test_nonexistent(ddev, helpers, mocker):
     show_logs = mocker.patch('ddev.e2e.agent.docker.DockerAgent.show_logs')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
 
     result = ddev('env', 'logs', integration, environment)
 
@@ -25,7 +25,7 @@ def test_basic(ddev, data_dir, mocker):
     show_logs = mocker.patch('ddev.e2e.agent.docker.DockerAgent.show_logs')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
     env_data.write_metadata({})
 
@@ -42,7 +42,7 @@ def test_log_failure_is_propagated(ddev, data_dir, mocker):
     )
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     EnvDataStorage(data_dir).get(integration, environment).write_metadata({})
 
     result = ddev('env', 'logs', integration, environment)

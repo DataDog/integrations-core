@@ -1,1 +1,1 @@
-Add Kubernetes discovery candidate-stability checks and backend-neutral Agent log retrieval for E2E tests.
+Add backend-neutral Agent log retrieval for E2E test diagnostics.

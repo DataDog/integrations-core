@@ -19,7 +19,7 @@ def reload_command(app: Application, *, intg_name: str, environment: str):
     """
     Restart the Agent to detect environment changes.
     """
-    from ddev.e2e.agent import create_agent
+    from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
 
     integration = app.repo.integrations.get(intg_name)
@@ -29,7 +29,7 @@ def reload_command(app: Application, *, intg_name: str, environment: str):
         app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
     metadata = env_data.read_metadata()
-    agent = create_agent(app, integration, environment, metadata, env_data.config_file)
+    agent = create_agent_interface(app, integration, environment, metadata, env_data.config_file)
 
     try:
         agent.restart()
