@@ -26,7 +26,7 @@ def get_queue_manager_connection(config, logger):
         # Details: https://github.com/dsuch/pymqi/issues/208
         if config.try_basic_auth:
             try:
-                get_normal_connection(config, logger)
+                get_normal_connection(config, logger).disconnect()
             except pymqi.MQMIError as e:
                 logger.debug(
                     "Tried basic authentication before SSL connection to ensure channel exists."

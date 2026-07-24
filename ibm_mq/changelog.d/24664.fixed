@@ -1,0 +1,1 @@
+Disconnect the probe connection used to test channel existence before establishing an SSL connection, instead of leaking it.
