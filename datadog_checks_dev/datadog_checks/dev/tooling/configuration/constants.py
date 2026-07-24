@@ -46,5 +46,7 @@ ALLOWED_FORMATS = {
     'java_jvm_options',
     'path',
     'port',
+    'secret',
+    'tag',
     'url',
 }

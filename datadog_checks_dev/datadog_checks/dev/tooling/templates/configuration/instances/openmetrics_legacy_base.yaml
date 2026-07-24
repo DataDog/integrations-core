@@ -3,6 +3,7 @@
   required: true
   description: The URL where your application metrics are exposed by Prometheus.
   fleet_configurable: true
+  formats: ["url"]
   value:
     type: string
 - name: namespace

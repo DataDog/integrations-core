@@ -1291,7 +1291,7 @@ def test_option_formats_unknown_value():
 
     assert (
         'test, test.yaml, instances, foo: Attribute `formats` contains unknown value(s): '
-        'made_up_format, valid values are java_jvm_options | path | port | url'
+        'made_up_format, valid values are java_jvm_options | path | port | secret | tag | url'
     ) in spec.errors
 
 
@@ -1370,7 +1370,7 @@ def test_value_type_object_property_formats_invalid():
 
     assert (
         'test, test.yaml, instances, foo: Attribute `formats` for property `bar` contains unknown value(s): '
-        'unknown, valid values are java_jvm_options | path | port | url'
+        'unknown, valid values are java_jvm_options | path | port | secret | tag | url'
     ) in spec.errors
 
 
@@ -3279,7 +3279,11 @@ def test_template_mapping():
     assert options[0]['name'] == 'foo'
     assert options[1] == {
         'name': 'tags',
-        'value': {'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'], 'type': 'array', 'items': {'type': 'string'}},
+        'value': {
+            'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'],
+            'type': 'array',
+            'items': {'type': 'string', 'formats': ['tag']},
+        },
         'description': (
             'A list of tags to attach to every metric and service check emitted by this instance.\n'
             '\n'

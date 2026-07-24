@@ -22,6 +22,7 @@
   legacy: true
   required: false
   secret: true
+  formats: ["secret"]
   description: The password from the credentials needed to connect to the host.
   fleet_configurable: true
   value:
