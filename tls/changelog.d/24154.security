@@ -1,0 +1,1 @@
+Fetch AIA intermediate certificates with a fresh credential-free HTTP session, trying TLS first and then plain HTTP fallback.
