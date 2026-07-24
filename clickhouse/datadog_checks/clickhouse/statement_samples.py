@@ -133,10 +133,12 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             enabled_intervals.append(samples_collection_interval)
         if buffer_config.enabled:
             enabled_intervals.append(buffer_config.collection_interval)
-        # Floor at 1s: gcd truncates sub-second intervals to 0, which would make rate_limit divide by zero.
         collection_interval = (
-            max(math.gcd(*(int(i) for i in enabled_intervals)), 1) if enabled_intervals else samples_collection_interval
+            math.gcd(*(int(i) for i in enabled_intervals)) if enabled_intervals else samples_collection_interval
         )
+        # int() truncates intervals below 1s to 0, which would zero out the gcd and make rate_limit divide by zero.
+        if enabled_intervals and collection_interval < 1:
+            collection_interval = min(enabled_intervals)
 
         super(ClickhouseStatementSamples, self).__init__(
             check,
