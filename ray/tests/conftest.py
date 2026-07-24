@@ -8,11 +8,11 @@ from contextlib import contextmanager
 from urllib.parse import urljoin
 
 import pytest
-import requests
 
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.http import http_post
 from datadog_checks.ray import RayCheck
 
 from .common import (
@@ -111,7 +111,7 @@ def mocked_worker_instance():
 
 def run_add():
     try:
-        response = requests.post(
+        response = http_post(
             urljoin(SERVE_URL, "add"),
             data='{"a": 1, "b": 2}',
             headers={'Content-Type': 'application/json'},

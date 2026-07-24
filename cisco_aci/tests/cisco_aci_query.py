@@ -4,7 +4,7 @@
 
 import json
 
-import requests
+from datadog_checks.dev.http import http_get, http_post
 
 # This is a python script that you can use to query a specific
 # tenant metric endpoint and includes the login and logout requests.
@@ -25,7 +25,7 @@ def apic_login(apic, username, password):
     json_credentials = json.dumps(credentials)
     base_url = 'https://' + apic + '/api/aaaLogin.json'
 
-    login_response = requests.post(base_url, data=json_credentials, verify=False)
+    login_response = http_post(base_url, data=json_credentials, verify=False)
 
     login_response_json = json.loads(login_response.text)
     token = login_response_json['imdata'][0]['aaaLogin']['attributes']['token']
@@ -37,7 +37,7 @@ def apic_query(apic, path, cookie):
     """APIC 'GET' query and return response"""
     base_url = 'https://' + apic + path
 
-    get_response = requests.get(base_url, cookies=cookie, verify=False)
+    get_response = http_get(base_url, cookies=cookie, verify=False)
 
     return get_response
 
@@ -46,7 +46,7 @@ def apic_logout(apic, cookie):
     """APIC logout and return response"""
     base_url = 'https://' + apic + '/api/aaaLogout.json'
 
-    post_response = requests.post(base_url, cookies=cookie, verify=False)
+    post_response = http_post(base_url, cookies=cookie, verify=False)
 
     return post_response
 

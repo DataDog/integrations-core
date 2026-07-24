@@ -5,7 +5,8 @@ import os
 import re
 
 import pytest
-import requests
+
+from datadog_checks.dev.http import http_get
 
 # Make sure this expected metrics list is up to date with:
 # - `dogstatsd_mapper_profiles` configuration from README.md
@@ -132,7 +133,7 @@ def test_check_metrics_up_to_date():  # pragma: no cover
         'docs/apache-airflow/administration-and-deployment/logging-monitoring/metrics.rst'
     )
 
-    resp = requests.get(url)
+    resp = http_get(url)
     content = resp.content.decode('utf-8')
     matches = METRIC_PATTERN.findall(content)
 

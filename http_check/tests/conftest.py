@@ -5,12 +5,12 @@ import os
 import sys
 
 import pytest
-import requests
 from datadog_test_libs.utils.mock_dns import mock_local
 from mock import patch
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitFor
+from datadog_checks.dev.http import http_get
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.http_check import HTTPCheck
 
@@ -37,7 +37,7 @@ def dd_environment(mock_local_http_dns):
 
 
 def call_endpoint(url):
-    response = requests.get(url, verify=False)
+    response = http_get(url, verify=False)
     response.raise_for_status()
     return True
 

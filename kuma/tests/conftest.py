@@ -6,8 +6,8 @@ import time
 from contextlib import ExitStack
 
 import pytest
-import requests
 
+from datadog_checks.dev.http import HTTPError, HTTPTimeoutError, http_get
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
@@ -44,11 +44,11 @@ def wait_for_kuma_readiness(api_url, api_port, max_wait=600):
 
     while time.monotonic() - start_time < max_wait:
         try:
-            response = requests.get(config_url, timeout=5)
+            response = http_get(config_url, timeout=5)
             if response.ok:
                 print(f"Kuma control plane is ready at {config_url} (took {time.monotonic() - start_time} seconds)")
                 return
-        except (requests.exceptions.RequestException, requests.exceptions.Timeout):
+        except (HTTPError, HTTPTimeoutError):
             pass
 
         print(f"Waiting for Kuma control plane to be ready at {config_url}...")

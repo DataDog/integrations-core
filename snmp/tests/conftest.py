@@ -8,12 +8,12 @@ import socket
 from copy import deepcopy
 
 import pytest
-import requests
 import yaml
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.http import http_get
 
 from .common import (
     ACTIVE_ENV_NAME,
@@ -55,7 +55,7 @@ def dd_environment():
         if not os.path.exists(data_dir):
             shutil.copytree(os.path.join(COMPOSE_DIR, 'data'), data_dir)
             for data_file in FILES:
-                response = requests.get(data_file)
+                response = http_get(data_file)
                 with open(os.path.join(data_dir, data_file.rsplit('/', 1)[1]), 'wb') as output:
                     output.write(response.content)
 

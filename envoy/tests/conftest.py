@@ -7,9 +7,9 @@ import threading
 import time
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.http import HTTPError, http_get
 from datadog_checks.envoy import Envoy
 
 from .common import DEFAULT_INSTANCE, DOCKER_DIR, FIXTURE_DIR, HOST, URL
@@ -63,9 +63,9 @@ def exercise_envoy():
     def fire_loop():
         while not stop.is_set():
             try:
-                requests.get('http://{}:8000/service/1'.format(HOST))
-                requests.get('http://{}:8000/service/2'.format(HOST))
-            except requests.RequestException:
+                http_get('http://{}:8000/service/1'.format(HOST))
+                http_get('http://{}:8000/service/2'.format(HOST))
+            except HTTPError:
                 pass
             stop.wait(ENVOY_STATS_FLUSH_INTERVAL / 10)
 

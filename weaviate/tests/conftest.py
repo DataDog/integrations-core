@@ -7,9 +7,9 @@ import time
 from contextlib import ExitStack
 
 import pytest
-import requests
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import HTTPError, http_get, http_post
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
@@ -65,7 +65,7 @@ def make_weaviate_request(instance):
         headers.update(instance['headers'])
 
     if ready_check(weaviate_api_endpoint, 300):
-        requests.post(weaviate_batch_endpoint, headers=headers, data=json.dumps(BATCH_OBJECTS))
+        http_post(weaviate_batch_endpoint, headers=headers, data=json.dumps(BATCH_OBJECTS))
 
 
 def ready_check(endpoint, timeout=300):
@@ -75,10 +75,10 @@ def ready_check(endpoint, timeout=300):
     endpoint = f'{endpoint}{DEFAULT_LIVENESS_ENDPOINT}'
     while time.time() < stop_time:
         try:
-            response = requests.get(endpoint, timeout=5)
+            response = http_get(endpoint, timeout=5)
             if response.ok:
                 return True
-        except requests.RequestException as e:
+        except HTTPError as e:
             print(f'Request failed: {e}')
 
         time.sleep(1)

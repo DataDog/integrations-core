@@ -6,12 +6,11 @@ import os
 
 import mock
 import pytest
-import requests
 from packaging import version
 
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse, http_put
 from datadog_checks.elastic import ESCheck
 
 from .common import (
@@ -62,7 +61,7 @@ def ping_elastic():
     as soon as ES is available. This is just one possible ping strategy but it's needed
     as a fixture for tests that require that index to exist in order to pass.
     """
-    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
+    response = http_put('{}/testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
     response.raise_for_status()
 
 
@@ -71,7 +70,7 @@ def create_slm():
         return
 
     create_backup_body = {"type": "fs", "settings": {"location": "data"}}
-    response = requests.put(
+    response = http_put(
         '{}/_snapshot/my_repository?pretty'.format(INSTANCE['url']),
         json=create_backup_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
@@ -86,7 +85,7 @@ def create_slm():
         "config": {"indices": ["data-*", "important"], "ignore_unavailable": False, "include_global_state": False},
         "retention": {"expire_after": "30d", "min_count": 5, "max_count": 50},
     }
-    response = requests.put(
+    response = http_put(
         '{}/_slm/policy/daily-snapshots?pretty'.format(INSTANCE['url']),
         json=create_slm_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
@@ -96,7 +95,7 @@ def create_slm():
 
 
 def index_starts_with_dot():
-    create_dot_testindex = requests.put('{}/.testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
+    create_dot_testindex = http_put('{}/.testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
     create_dot_testindex.raise_for_status()
 
 

@@ -10,10 +10,10 @@ from pathlib import Path
 from typing import Any, Iterator
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.http import HTTPError, http_get
 
 from . import common
 
@@ -37,7 +37,7 @@ def _docker_exec(*cmd: str) -> str:
 
 def _n8n_healthy() -> None:
     """WaitFor predicate: succeeds once /healthz returns 200, retries on connection errors or non-2xx."""
-    requests.get(f'http://{common.HOST}:{common.MAIN_PORT}/healthz', timeout=2).raise_for_status()
+    http_get(f'http://{common.HOST}:{common.MAIN_PORT}/healthz', timeout=2).raise_for_status()
 
 
 def _test_webhook_registered() -> None:
@@ -48,7 +48,7 @@ def _test_webhook_registered() -> None:
     to make ``_generate_workflow_traffic`` race the registration and observe a 404. Polling the
     webhook itself closes the race.
     """
-    response = requests.get(f'http://{common.HOST}:{common.MAIN_PORT}{WEBHOOK_OK_PATH}', timeout=5)
+    response = http_get(f'http://{common.HOST}:{common.MAIN_PORT}{WEBHOOK_OK_PATH}', timeout=5)
     if response.status_code == 404:
         raise RuntimeError(f'Webhook {WEBHOOK_OK_PATH} not yet registered (status 404)')
 
@@ -107,18 +107,18 @@ def _generate_workflow_traffic(iterations: int = 5) -> None:
     last_exc: Exception | None = None
     for _ in range(iterations):
         try:
-            ok = requests.get(f'{base_url}{WEBHOOK_OK_PATH}', timeout=5)
+            ok = http_get(f'{base_url}{WEBHOOK_OK_PATH}', timeout=5)
             last_status = ok.status_code
             # 4xx means the webhook responded but didn't execute the workflow (e.g. not yet
             # registered after restart); only 200 proves the workflow body ran end-to-end.
             if ok.status_code == 200:
                 ok_responses += 1
-        except requests.RequestException as exc:
+        except HTTPError as exc:
             last_exc = exc
         # Webhook fail is *expected* to error out — that's the point of triggering it.
         for path in (WEBHOOK_FAIL_PATH, *api_paths):
-            with suppress(requests.RequestException):
-                requests.get(f'{base_url}{path}', timeout=5)
+            with suppress(HTTPError):
+                http_get(f'{base_url}{path}', timeout=5)
     if ok_responses == 0:
         raise RuntimeError(
             f'Test webhook returned no 200 responses (last_status={last_status}, last_exc={last_exc!r}); '
@@ -134,7 +134,7 @@ def _workflow_started_non_zero() -> None:
     Parses the metric value as a float so that ``0.0`` / ``0e+0`` are recognised as zero and
     ``# HELP``/``# TYPE`` comment lines that happen to share the prefix are skipped.
     """
-    payload = requests.get(common.MAIN_INSTANCE['openmetrics_endpoint'], timeout=3).text
+    payload = http_get(common.MAIN_INSTANCE['openmetrics_endpoint'], timeout=3).text
     matching: list[str] = []
     for line in payload.splitlines():
         if line.startswith('#') or not line.startswith('n8n_workflow_started_total'):

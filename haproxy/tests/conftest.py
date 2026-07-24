@@ -11,11 +11,10 @@ from copy import deepcopy
 
 import mock
 import pytest
-import requests
 from packaging import version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse, http_get
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
@@ -126,12 +125,12 @@ def prometheus_metricsv2(prometheus_metrics):
 
 
 def wait_for_haproxy():
-    res = requests.get(STATS_URL, auth=(USERNAME, PASSWORD))
+    res = http_get(STATS_URL, auth=(USERNAME, PASSWORD))
     res.raise_for_status()
 
 
 def wait_for_haproxy_open():
-    res_open = requests.get(STATS_URL_OPEN)
+    res_open = http_get(STATS_URL_OPEN)
     res_open.raise_for_status()
 
 

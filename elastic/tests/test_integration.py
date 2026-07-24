@@ -4,9 +4,9 @@
 import logging
 
 import pytest
-import requests
 from packaging import version
 
+from datadog_checks.dev.http import http_post, http_put
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.metrics import (
@@ -134,13 +134,13 @@ def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, agg
     version.parse(ELASTIC_VERSION) < version.parse('8.0.0'), reason='Test unavailable for Elasticsearch < 8.0.0'
 )
 def test_custom_queries_with_payload_multiterm(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
-    response = requests.put(
+    response = http_put(
         "{}/multiterm_test".format(instance['url']),
         json={"mappings": {"properties": {"field0": {"type": "keyword"}, "field1": {"type": "keyword"}}}},
     )
     response.raise_for_status()
 
-    response = requests.post(
+    response = http_post(
         "{}/multiterm_test/_doc?refresh=wait_for".format(instance['url']), json={"field0": "foo", "field1": "bar"}
     )
     response.raise_for_status()
@@ -440,7 +440,7 @@ def test_health_event(dd_environment, aggregator):
     es_version = elastic_check._get_es_version()
 
     # Should be yellow at first
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
+    http_put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
 
     elastic_check.check(None)
 
@@ -468,7 +468,7 @@ def test_health_event_disabled(dd_environment, aggregator):
     elastic_check._get_es_version()
 
     # Should be yellow at first
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
+    http_put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
 
     elastic_check.check(None)
 

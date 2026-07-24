@@ -6,9 +6,9 @@ import os
 import subprocess
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run, temp_dir
+from datadog_checks.dev.http import http_get, http_put
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import CHECK_NAME, CONFIG, HERE, HOST, OPENMETRICS_CONFIG, PORT, RABBITMQ_METRICS_PLUGIN
@@ -38,7 +38,7 @@ def dd_environment():
 def setup_rabbitmq():
     with temp_dir() as tmpdir:
         url = 'http://{}:{}/cli/rabbitmqadmin'.format(HOST, PORT)
-        res = requests.get(url)
+        res = http_get(url)
         res.raise_for_status()
 
         rabbitmq_admin_script = os.path.join(tmpdir, 'rabbitmqadmin')
@@ -51,7 +51,7 @@ def setup_rabbitmq():
 
         # Set cluster name
         url = "http://{}:{}/api/cluster-name".format(HOST, PORT)
-        res = requests.put(
+        res = http_put(
             url, data='{"name": "rabbitmqtest"}', auth=("guest", "guest"), headers={"Content-Type": "application/json"}
         )
         res.raise_for_status()

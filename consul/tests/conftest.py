@@ -4,9 +4,9 @@
 import os
 
 import pytest
-import requests
 
 from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev.http import http_get
 
 from . import common
 
@@ -20,7 +20,7 @@ def ping_cluster():
     """
     Wait for the slave to connect to the master
     """
-    response = requests.get('{}/v1/status/peers'.format(common.URL))
+    response = http_get('{}/v1/status/peers'.format(common.URL))
     response.raise_for_status()
 
     # Wait for all 3 agents to join the cluster

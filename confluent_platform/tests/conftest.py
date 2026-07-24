@@ -5,10 +5,10 @@ import json
 import os
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.dev.http import http_post
 
 from .common import CHECK_CONFIG, HERE
 
@@ -42,8 +42,8 @@ def create_connectors():
         },
     }
 
-    requests.post('http://localhost:8083/connectors', data=json.dumps(data_sink), headers=headers)
-    requests.post('http://localhost:8083/connectors', data=json.dumps(data), headers=headers)
+    http_post('http://localhost:8083/connectors', data=json.dumps(data_sink), headers=headers)
+    http_post('http://localhost:8083/connectors', data=json.dumps(data), headers=headers)
 
 
 @pytest.fixture(scope="session")

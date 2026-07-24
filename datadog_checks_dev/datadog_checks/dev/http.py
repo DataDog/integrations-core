@@ -9,10 +9,13 @@ from functools import lru_cache
 from http.client import responses as http_responses
 from io import BytesIO
 from textwrap import dedent
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 
 from requests import Response
+
+if TYPE_CHECKING:
+    from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPResponse
 
 
 class MockResponse(Response):
@@ -293,3 +296,78 @@ class MockHTTPResponse:
 
     def __iter__(self) -> Iterator[bytes | str]:
         return iter(self.__wrapped__)
+
+
+# Agnostic HTTP exceptions re-exported from datadog_checks_base so test setup code has a single import
+# site (``from datadog_checks.dev.http import HTTPTimeoutError``). Resolved lazily to avoid forcing a
+# base import when this module is loaded only for its mock helpers.
+_AGNOSTIC_EXCEPTIONS = frozenset(
+    {
+        'HTTPError',
+        'HTTPRequestError',
+        'HTTPStatusError',
+        'HTTPTimeoutError',
+        'HTTPConnectionError',
+        'HTTPInvalidURLError',
+        'HTTPSSLError',
+    }
+)
+
+
+def __getattr__(name: str) -> Any:
+    if name in _AGNOSTIC_EXCEPTIONS:
+        from datadog_checks.base.utils import http_exceptions
+
+        return getattr(http_exceptions, name)
+    raise AttributeError('module {!r} has no attribute {!r}'.format(__name__, name))
+
+
+def dev_http_client(persist: bool = False, **options: Any) -> 'HTTPClient':
+    """Build a real (non-mock) agnostic HTTP client for test fixtures, ``dd_environment`` conditions,
+    and dev scripts.
+
+    Routes through the same ``create_http_client`` factory the Agent uses, so real test traffic runs on
+    the production HTTP backend and follows it across the ``requests`` -> ``httpx`` cutover. Use this
+    instead of calling ``requests`` directly in test setup code.
+
+    :param persist: Reuse a single connection across calls, replacing a ``requests.Session``.
+    :param options: Client-level request defaults (for example ``headers``, ``auth``, ``verify``,
+        ``timeout``). Per-call keyword arguments on the verb methods override these.
+    """
+    from datadog_checks.base.utils.http import create_http_client
+
+    client = create_http_client({}, {})
+    client.persist_connections = persist
+    if options:
+        client.options.update(options)
+    return client
+
+
+def http_get(url: str, **options: Any) -> 'HTTPResponse':
+    """One-shot agnostic GET mirroring ``requests.get`` ergonomics. See :func:`dev_http_client`."""
+    return dev_http_client().get(url, **options)
+
+
+def http_post(url: str, **options: Any) -> 'HTTPResponse':
+    """One-shot agnostic POST mirroring ``requests.post`` ergonomics. See :func:`dev_http_client`."""
+    return dev_http_client().post(url, **options)
+
+
+def http_head(url: str, **options: Any) -> 'HTTPResponse':
+    """One-shot agnostic HEAD. See :func:`dev_http_client`."""
+    return dev_http_client().head(url, **options)
+
+
+def http_put(url: str, **options: Any) -> 'HTTPResponse':
+    """One-shot agnostic PUT. See :func:`dev_http_client`."""
+    return dev_http_client().put(url, **options)
+
+
+def http_patch(url: str, **options: Any) -> 'HTTPResponse':
+    """One-shot agnostic PATCH. See :func:`dev_http_client`."""
+    return dev_http_client().patch(url, **options)
+
+
+def http_delete(url: str, **options: Any) -> 'HTTPResponse':
+    """One-shot agnostic DELETE. See :func:`dev_http_client`."""
+    return dev_http_client().delete(url, **options)

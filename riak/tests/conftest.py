@@ -6,22 +6,22 @@ import os
 from copy import deepcopy
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.http import http_get, http_post
 from datadog_checks.riak import Riak
 
 from . import common
 
 
 def populate():
-    post = requests.post(
+    post = http_post(
         "{}/riak/bucket/german".format(common.BASE_URL),
         headers={"Content-Type": "text/plain"},
         data='herzlich willkommen',
     )
-    get = requests.get("{}/riak/bucket/german".format(common.BASE_URL))
+    get = http_get("{}/riak/bucket/german".format(common.BASE_URL))
     return post.ok and get.ok
 
 

@@ -5,10 +5,10 @@ import random
 import time
 from contextlib import contextmanager
 
-import requests
 from datadog_test_libs.utils.mock_dns import mock_local
 
 from datadog_checks.dev import get_docker_hostname, get_here, run_command
+from datadog_checks.dev.http import http_get
 from datadog_checks.mapreduce import MapReduceCheck
 
 HERE = get_here()
@@ -69,7 +69,7 @@ def setup_mapreduce():
 
     # Called in WaitFor which catches initial exceptions when containers aren't ready
     for _ in range(15):
-        r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
+        r = http_get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
         res = r.json()
         if res.get("apps", None) is not None and res.get("apps"):
             return True
