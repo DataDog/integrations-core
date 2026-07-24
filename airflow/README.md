@@ -460,6 +460,8 @@ webserver:
       }
 ```
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: airflow`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][28].
+
 Adjust the `ad.datadoghq.com/<CONTAINER_NAME>.checks` annotation accordingly if your container name differs.
 
 ##### Connect Airflow to DogStatsD
@@ -608,3 +610,4 @@ Need help? Contact [Datadog support][11].
 [25]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/index.html
 [26]: https://airflow.apache.org/docs/docker-stack/entrypoint.html#installing-additional-requirements
 [27]: https://docs.datadoghq.com/developers/dogstatsd/?tab=cgroups#origin-detection
+[28]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

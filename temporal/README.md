@@ -93,6 +93,8 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
   } 
 ```
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: temporal`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
+
 ##### Log collection
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][18] or [Kubernetes Log Collection][17].
@@ -174,3 +176,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://docs.datadoghq.com/containers/guide/ad_identifiers/
 [17]: https://docs.datadoghq.com/agent/kubernetes/log/
 [18]: https://docs.datadoghq.com/containers/docker/log/
+[19]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

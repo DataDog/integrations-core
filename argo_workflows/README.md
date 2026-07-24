@@ -20,6 +20,8 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 The Argo Workflows Workflow Controller has [Prometheus-formatted metrics][11] available at `/metrics` on port `9090`. For the Agent to start collecting metrics, the Workflow Controller pod needs to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample argo_workflows.d/conf.yaml][4].
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: argo_workflows`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][13].
+
 The only parameter required for configuring the Argo Workflows check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `9090`. In containerized environments, `%%host%%` should be used for [host autodetection][3].
 
@@ -100,3 +102,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://argo-workflows.readthedocs.io/en/stable/metrics/
 [12]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
+[13]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

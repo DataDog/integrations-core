@@ -226,6 +226,8 @@ spec:
 # (...)
 ```
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: torchserve`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][17].
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -308,3 +310,4 @@ Need help? Contact [Datadog support][9].
 [14]: https://pytorch.org/serve/inference_api.html
 [15]: https://pytorch.org/serve/metrics_api.html
 [16]: https://pytorch.org/serve/logging.html?highlight=logs
+[17]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

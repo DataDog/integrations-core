@@ -55,6 +55,8 @@ spec:
 # (...)
 ```
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: fluxcd`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
+
 #### Log collection
 
 _Available for Agent versions >6.0_
@@ -110,3 +112,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
+[14]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

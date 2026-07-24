@@ -26,6 +26,8 @@ No additional installation is needed on your server.
 Make sure that the Prometheus-formatted metrics are exposed in your `kubernetes_cluster_autoscaler` cluster. 
 For the Agent to start collecting metrics, the `kubernetes_cluster_autoscaler` pods need to be annotated.
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: kubernetes_cluster_autoscaler`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][12].
+
 [Kubernetes Cluster Autoscaler][11] has metrics and livenessProbe endpoints that can be accessed on port `8085`. These endpoints are located under `/metrics` and `/health-check` and provide valuable information about the state of your cluster during scaling operations.
 
 **Note**: To change the default port, use the `--address` flag.
@@ -116,3 +118,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
 [11]: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-monitor-cluster-autoscaler
+[12]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

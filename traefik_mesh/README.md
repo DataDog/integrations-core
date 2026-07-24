@@ -37,6 +37,8 @@ In addition, a small subset of metrics can be collected by communicating with di
 
 Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh cluster. You can configure and customize this by following the instructions on the [Observability page in the official Traefik Mesh documentation][10]. In order for the Agent to start collecting metrics, the Traefik Mesh pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [`traefik_mesh.d/conf.yaml` sample][4].
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: traefik_mesh`, and set `containerName` to match each component's container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][13].
+
 **Note**: The following metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed.
 
 When configuring the Traefik Mesh check, you can use the following parameters:
@@ -142,3 +144,4 @@ Need help? Contact [Datadog support][9].
 [10]: https://doc.traefik.io/traefik/observability/metrics/overview/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/
 [12]: https://docs.datadoghq.com/containers/kubernetes/log/
+[13]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

@@ -277,6 +277,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][17] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][18].
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: elastic`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+
 **Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
@@ -488,3 +490,4 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 [28]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
 [29]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html
 [30]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

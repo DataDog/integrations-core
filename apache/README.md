@@ -113,6 +113,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][10] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][11].
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: apache`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][23].
+
 **Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
@@ -284,3 +286,4 @@ Additional helpful documentation, links, and articles:
 [20]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
 [21]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
 [22]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog
+[23]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

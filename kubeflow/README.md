@@ -31,6 +31,8 @@ No additional installation is needed on your server.
 Make sure that the Prometheus-formatted metrics are exposed for your `kubeflow` componenet. 
 For the Agent to start collecting metrics, the `kubeflow` pods need to be annotated.
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: kubeflow`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][10].
+
 Kubeflow has metrics endpoints that can be accessed on port `9090`. 
 
 To enable metrics exposure in kubeflow through prometheus, you might need to enable the prometheus service monitoring for the component in question.
@@ -140,3 +142,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubeflow/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/kubeflow/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

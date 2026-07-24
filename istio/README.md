@@ -90,6 +90,8 @@ This annotation specifies the container `discovery` to match the default contain
 
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: istio`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][33].
+
 ##### Ambient mode configuration
 
 Istio ambient mode, generally available in Istio v1.24, replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance. The check scrapes each endpoint that is set. Adjust the URLs in the example below to match your cluster's hostnames and ports.
@@ -310,3 +312,4 @@ Additional helpful documentation, links, and articles:
 [30]: https://docs.datadoghq.com/security/application_security/?source=istio-tile-overview
 [31]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=istio-tile-setup
 [32]: https://www.datadoghq.com/blog/app-api-protection-envoy-istio-nginx-haproxy/
+[33]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

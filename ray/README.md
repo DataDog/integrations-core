@@ -84,6 +84,8 @@ spec:
 # (...)
 ```
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: ray`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -157,7 +159,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
 
-
 **Annotations v1/v2**
 
 ```yaml
@@ -195,3 +196,4 @@ Need help? Contact [Datadog support][9].
 [12]: https://docs.ray.io/en/latest/ray-observability/user-guides/configure-logging.html
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
+[15]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

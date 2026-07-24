@@ -377,6 +377,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configure with a [file, configmap, or key-value store][14].
 
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: mongo`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][30].
+
 **Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
@@ -615,3 +617,4 @@ Additional helpful documentation, links, and articles:
 [27]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
 [28]: https://docs.datadoghq.com/database_monitoring/setup_mongodb/
 [29]: https://docs.datadoghq.com/database_monitoring/#mongodb
+[30]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

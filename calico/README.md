@@ -45,6 +45,8 @@ Using annotations:
        [....]
    ```
 
+   You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: openmetrics`, and set `containerName` to match the Prometheus container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
+
 You can find values for `<FELIX-SERVICE-IP>` and `<FELIX-SERVICE-PORT>` by running `kubectl get all -all-namespaces`.
 
 #### Installation with an OS-based Agent
@@ -162,3 +164,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [15]: https://www.datadoghq.com/blog/monitor-calico-with-datadog/
+[16]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
