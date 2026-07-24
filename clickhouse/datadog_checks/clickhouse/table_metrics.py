@@ -69,7 +69,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             rate_limit=1 / collection_interval,
             run_sync=config.run_sync,
             enabled=config.enabled,
-            dbms='clickhouse',
+            dbms=check.dbms,
             min_collection_interval=check._config.min_collection_interval,
             expected_db_exceptions=(Exception,),
             job_name='clickhouse-table-metrics',

@@ -107,7 +107,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             rate_limit=1 / collection_interval,
             run_sync=config.run_sync,
             enabled=config.enabled,
-            dbms="clickhouse",
+            dbms=check.dbms,
             min_collection_interval=check.check_interval if hasattr(check, 'check_interval') else 15,
             expected_db_exceptions=(Exception,),
             job_name="query-samples",

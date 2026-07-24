@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.connectors import CONNECTOR_EVENT_TOPICS_MAX, TOPICS_FETCH_MAX_PER_RUN
 
 from .common import CONNECT_URL
 from .conftest import SAMPLE_CONNECTORS_RESPONSE
@@ -88,7 +89,7 @@ def test_cluster_id_override_recorded_in_events(run_connect_check, aggregator):
     assert all('original_kafka_cluster_id' in event for event in events)
 
 
-def test_sensitive_keys_redacted_in_config_event(run_connect_check, aggregator):
+def test_config_only_allowlisted_keys_left_unredacted(run_connect_check, aggregator):
     connectors = {
         'my-sink': {
             'info': {
@@ -97,6 +98,10 @@ def test_sensitive_keys_redacted_in_config_event(run_connect_check, aggregator):
                     'connector.class': 'io.confluent.SomeSink',
                     'connection.password': 'secret123',
                     'sasl.jaas.config': 'org.apache.kafka.common.security.plain.PlainLoginModule ...',
+                    'db.host': 'db.internal.example.com',
+                    'transforms': 'insertField',
+                    'transforms.insertField.type': 'org.apache.kafka.connect.transforms.InsertField$Value',
+                    'transforms.insertField.static.value': 'not-framework-defined',
                     'tasks.max': '2',
                     'topics': 'orders',
                 },
@@ -111,9 +116,231 @@ def test_sensitive_keys_redacted_in_config_event(run_connect_check, aggregator):
     cfg = events[0]['config']
     assert cfg['connection.password'] == '[hidden]'
     assert cfg['sasl.jaas.config'] == '[hidden]'
+    assert cfg['db.host'] == '[hidden]'
+    assert cfg['transforms.insertField.static.value'] == '[hidden]'
     assert cfg['connector.class'] == 'io.confluent.SomeSink'
-    assert cfg['topics'] == 'orders'
     assert cfg['tasks.max'] == '2'
+    assert cfg['topics'] == 'orders'
+    assert cfg['transforms'] == 'insertField'
+    assert cfg['transforms.insertField.type'] == 'org.apache.kafka.connect.transforms.InsertField$Value'
+
+
+def test_config_allowlist_covers_known_connector_plugin_keys(run_connect_check, aggregator):
+    connectors = {
+        'debezium-source': {
+            'info': {
+                'type': 'source',
+                'config': {
+                    'connector.class': 'io.debezium.connector.postgresql.PostgresConnector',
+                    'database.hostname': 'postgres.internal.example.com',
+                    'database.port': '5432',
+                    'database.user': 'debezium',
+                    'database.password': 'super-secret',
+                    'table.include.list': 'public.orders,public.customers',
+                    'snapshot.mode': 'initial',
+                    's3.bucket.name': 'my-bucket',
+                    'insert.mode': 'upsert',
+                },
+            },
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        }
+    }
+    run_connect_check(connectors_response=connectors)
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    cfg = events[0]['config']
+    assert cfg['database.hostname'] == 'postgres.internal.example.com'
+    assert cfg['database.port'] == '5432'
+    assert cfg['table.include.list'] == 'public.orders,public.customers'
+    assert cfg['snapshot.mode'] == 'initial'
+    assert cfg['s3.bucket.name'] == 'my-bucket'
+    assert cfg['insert.mode'] == 'upsert'
+    assert cfg['database.user'] == '[hidden]'
+    assert cfg['database.password'] == '[hidden]'
+
+
+def test_config_sensitive_substring_overrides_allowlist(run_connect_check, aggregator):
+    connectors = {
+        'my-sink': {
+            'info': {
+                'type': 'sink',
+                # 'mode' is allowlisted, but a plugin author naming a secret key
+                # 'mode.secret.token' should still be hidden by the substring safety net.
+                'config': {'connector.class': 'io.confluent.SomeSink', 'mode.secret.token': 'abc123'},
+            },
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        }
+    }
+    run_connect_check(connectors_response=connectors)
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    assert events[0]['config']['mode.secret.token'] == '[hidden]'
+
+
+def test_failed_connector_and_task_trace_included_in_config_event(run_connect_check, aggregator):
+    connectors = {
+        'my-sink': {
+            'info': {
+                'type': 'sink',
+                'config': {'connector.class': 'io.confluent.SomeSink'},
+            },
+            'status': {
+                'connector': {'state': 'FAILED', 'trace': 'org.apache.kafka.connect.errors.ConnectException'},
+                'tasks': [
+                    {'id': 0, 'state': 'FAILED', 'trace': 'java.lang.NullPointerException'},
+                    {'id': 1, 'state': 'FAILED'},
+                    {'id': 2, 'state': 'RUNNING'},
+                ],
+            },
+        }
+    }
+    run_connect_check(connectors_response=connectors)
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    event = events[0]
+    assert event['connector_trace'] == 'org.apache.kafka.connect.errors.ConnectException'
+    assert event['task_traces'] == [{'task_id': 0, 'trace': 'java.lang.NullPointerException'}]
+
+
+def test_connector_trace_absent_when_running(run_connect_check, aggregator):
+    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+
+    events = dsm_events(aggregator, 'connector')
+    assert events
+    assert all(event['connector_trace'] is None for event in events)
+    assert all(event['task_traces'] == [] for event in events)
+
+
+def test_connector_topics_included_in_config_event(run_connect_check, aggregator):
+    run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        topics_response={'demo-source': ['demo-orders'], 'demo-heartbeat': []},
+    )
+
+    events = dsm_events(aggregator, 'connector')
+    source_event = next(event for event in events if event['connector'] == 'demo-source')
+    heartbeat_event = next(event for event in events if event['connector'] == 'demo-heartbeat')
+    assert source_event['topics'] == ['demo-orders']
+    assert heartbeat_event['topics'] == []
+
+
+def test_connector_topics_truncated_in_config_event(run_connect_check, aggregator):
+    topics = [f'topic-{i:04d}' for i in range(CONNECTOR_EVENT_TOPICS_MAX + 50)]
+    run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        topics_response={'demo-source': topics, 'demo-heartbeat': []},
+    )
+
+    events = dsm_events(aggregator, 'connector')
+    source_event = next(event for event in events if event['connector'] == 'demo-source')
+    assert source_event['topics'] == sorted(topics)[:CONNECTOR_EVENT_TOPICS_MAX]
+
+
+def test_connector_topics_requested_per_connector(run_connect_check):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+
+    requested_urls = [call.args[0] for call in http.get.call_args_list]
+    assert sum(url.endswith('/connectors/demo-source/topics') for url in requested_urls) == 1
+    assert sum(url.endswith('/connectors/demo-heartbeat/topics') for url in requested_urls) == 1
+
+
+def test_topics_not_refetched_within_refresh_interval(run_connect_check):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
+    assert len(topic_fetches) == 2, "topics should only be fetched once per connector across both runs"
+
+
+def test_connector_topics_fetch_capped_per_run(run_connect_check):
+    connector_count = TOPICS_FETCH_MAX_PER_RUN + 50
+    connectors = {
+        f'conn-{i}': {
+            'info': {'type': 'source', 'config': {'connector.class': 'org.example.Connector'}},
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        }
+        for i in range(connector_count)
+    }
+
+    _, http = run_connect_check(connectors_response=connectors, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
+    assert len(topic_fetches) == connector_count, "leftover connectors should be fetched on a later run"
+
+
+def test_config_event_survives_topics_fetch_failure(run_connect_check, aggregator):
+    def get(url, **kwargs):
+        if url.endswith('/topics'):
+            raise ConnectionError("refused")
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
+
+    run_connect_check(get_side_effect=get)
+
+    events = dsm_events(aggregator, 'connector')
+    assert events
+    assert all(event['topics'] == [] for event in events)
+
+
+class FakeHttpError(Exception):
+    """Stand-in for a requests HTTPError carrying an HTTP status code."""
+
+    def __init__(self, status_code):
+        super().__init__(f"HTTP {status_code}")
+        self.response = mock.MagicMock(status_code=status_code)
+
+
+def test_topics_transient_failure_retried_next_run(run_connect_check):
+    def get(url, **kwargs):
+        if url.endswith('/topics'):
+            raise ConnectionError("refused")
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
+
+    _, http = run_connect_check(get_side_effect=get, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
+    assert len(topic_fetches) == 4, "a transient topics failure should be retried on the next run, not backed off"
+
+
+def test_topics_unsupported_endpoint_backed_off(run_connect_check):
+    def get(url, **kwargs):
+        if url.endswith('/topics'):
+            raise FakeHttpError(404)
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
+
+    _, http = run_connect_check(get_side_effect=get, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
+    assert len(topic_fetches) == 2, "an unsupported (404) topics endpoint should be backed off after one attempt"
+
+
+def test_task_traces_sort_handles_missing_task_id(run_connect_check, aggregator):
+    connectors = {
+        'my-sink': {
+            'info': {'type': 'sink', 'config': {'connector.class': 'io.confluent.SomeSink'}},
+            'status': {
+                'connector': {'state': 'RUNNING'},
+                'tasks': [
+                    {'id': None, 'state': 'FAILED', 'trace': 'trace-a'},
+                    {'id': None, 'state': 'FAILED', 'trace': 'trace-b'},
+                    {'id': 2, 'state': 'FAILED', 'trace': 'trace-c'},
+                ],
+            },
+        }
+    }
+    run_connect_check(connectors_response=connectors)
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    # Mixed None/int task ids must not raise; the real integer id sorts ahead of the None ids.
+    assert [t['task_id'] for t in events[0]['task_traces']] == [2, None, None]
 
 
 def test_config_event_not_reemitted_when_unchanged(run_connect_check, aggregator):
@@ -373,7 +600,11 @@ def test_single_expand_sections_merged(run_connect_check, aggregator):
     assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
 
     # A supplementary /connectors fetch is issued because the combined call returns a null section.
-    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
     assert len(connectors_fetches) == 2
 
 
@@ -381,7 +612,11 @@ def test_oss_combined_response_makes_single_connectors_request(run_connect_check
     """When the combined call returns both sections, no supplementary fetch is issued."""
     _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
-    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
     assert len(connectors_fetches) == 1
 
 
@@ -427,5 +662,9 @@ def test_combined_expand_list_ignored_falls_back_to_single_expand(run_connect_ch
     assert events[0]['connector'] == 'my-conn'
     assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
 
-    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
     assert len(connectors_fetches) == 3

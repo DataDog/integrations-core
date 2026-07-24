@@ -9,26 +9,13 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch
+from ddev.cli.ci.tests.status import conclusion_to_status
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import WorkflowJob, WorkflowRun
-
-
-def _conclusion_to_status(conclusion: str | None) -> Literal["success", "failure", "skipped"]:
-    """Map a GitHub Actions conclusion string to a BatchFinished status.
-
-    Note: ``None`` maps to ``"failure"`` here while the check run reports ``"neutral"``
-    for the same input. The asymmetry is intentional — BatchFinished consumers want a
-    binary outcome, the check UI prefers an explicit ``"neutral"`` badge.
-    """
-    if conclusion == "success":
-        return "success"
-    if conclusion == "skipped":
-        return "skipped"
-    return "failure"
 
 
 @dataclass(frozen=True)
@@ -111,7 +98,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
             finished = BatchFinished(
                 id=message.id,
-                status=_conclusion_to_status(raw),
+                status=conclusion_to_status(raw),
                 run_id=run_id,
                 workflow_url=workflow_url,
                 artifacts_path=str(self._options.artifacts_base_path),
