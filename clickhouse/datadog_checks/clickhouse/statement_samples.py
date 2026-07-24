@@ -13,7 +13,7 @@ import math
 import time
 from typing import TYPE_CHECKING
 
-from clickhouse_connect.driver.exceptions import OperationalError
+from clickhouse_connect.driver.exceptions import DatabaseError, OperationalError
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
@@ -88,6 +88,9 @@ GROUP BY user, query_kind, current_database
 """
 
 DBM_TYPE = "async_inserts_buffer"
+
+# ClickHouse server error code for UNKNOWN_TABLE, raised when a queried table doesn't exist.
+UNKNOWN_TABLE_ERROR_CODE = 60
 
 # Query to get pending async insert buffers from system.asynchronous_inserts
 BUFFER_SNAPSHOT_QUERY = """
@@ -513,6 +516,22 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 "dd.clickhouse.async_inserts_buffer.error",
                 1,
                 tags=self.tags + ["error:collect-buffer-snapshot", "error_type:connection"] + self._get_debug_tags(),
+                raw=True,
+            )
+            return []
+        except DatabaseError as e:
+            if e.code == UNKNOWN_TABLE_ERROR_CODE:
+                self._log.warning(
+                    "system.asynchronous_inserts is not available on this ClickHouse version; "
+                    "async insert buffer snapshot collection will be skipped: %s",
+                    e,
+                )
+                return []
+            self._log.exception("Failed to collect buffer snapshot: %s", e)
+            self._check.count(
+                "dd.clickhouse.async_inserts_buffer.error",
+                1,
+                tags=self.tags + ["error:collect-buffer-snapshot"] + self._get_debug_tags(),
                 raw=True,
             )
             return []
