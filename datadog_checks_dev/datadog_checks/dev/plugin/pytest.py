@@ -420,7 +420,6 @@ def mock_http(mocker):
 
     client.get_header.side_effect = _get_header
     client.set_header.side_effect = _set_header
-    client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     return client
 

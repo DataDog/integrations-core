@@ -13,6 +13,14 @@ def test_mock_http_patches_agentcheck(mock_http):
     assert check.http is mock_http
 
 
+def test_mock_http_supports_options(mock_http):
+    response = MockHTTPResponse()
+    mock_http.options_method.return_value = response
+    check = AgentCheck('test', {}, [{}])
+
+    assert check.http.options_method('https://example.test') is response
+
+
 def test_mock_response_json_with_custom_headers():
     headers = {'X-Custom': 'value'}
     response = MockHTTPResponse(json_data={'key': 'value'}, headers=headers)
