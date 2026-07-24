@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.dev import http as http_testing
 from datadog_checks.dev.http import MockHTTPResponse
 
 
@@ -19,6 +20,10 @@ def test_mock_http_supports_options(mock_http):
     check = AgentCheck('test', {}, [{}])
 
     assert check.http.options_method('https://example.test') is response
+
+
+def test_legacy_mock_response_is_not_exposed():
+    assert not hasattr(http_testing, 'MockResponse')
 
 
 def test_mock_response_json_with_custom_headers():
