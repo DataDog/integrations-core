@@ -518,7 +518,7 @@ def root_conn():
 
 def init_slave():
     logger.debug("initializing slave")
-    pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
+    pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, password=common.PASS)
 
 
 def _add_dog_user(conn):
