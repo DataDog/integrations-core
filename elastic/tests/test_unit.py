@@ -260,8 +260,8 @@ def test_v8_process_stats_data(aggregator, instance, dd_run_check, mock_es_endpo
     )
 
 
-def test__get_index_metrics_empty_key(aggregator, instance, mock_http_response):
-    mock_http_response(
+def test__get_index_metrics_empty_key(aggregator, instance, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(
         json_data=[
             {
                 # 'docs.count' is missing

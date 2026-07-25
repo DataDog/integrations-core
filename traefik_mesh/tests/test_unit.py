@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from itertools import cycle
+
 import mock
 import pytest
 
@@ -8,6 +10,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError as _HTTPConnectionError
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError as _HTTPTimeoutError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 from datadog_checks.traefik_mesh import TraefikMeshCheck
 
@@ -23,8 +26,8 @@ from .common import (
 )
 
 
-def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
+def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -39,8 +42,8 @@ def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http
     assert_service_checks(aggregator)
 
 
-def test_check_mock_traefik_mesh_openmetrics_v3(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('traefik_proxy_v3.txt'))
+def test_check_mock_traefik_mesh_openmetrics_v3(dd_run_check, aggregator, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy_v3.txt'))
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -56,8 +59,8 @@ def test_check_mock_traefik_mesh_openmetrics_v3(dd_run_check, aggregator, mock_h
     assert_service_checks(aggregator)
 
 
-def test_check_mock_invalid_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_check_mock_invalid_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(status_code=503)
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception, match='There was an error scraping endpoint http://localhost:8080/metrics'):
         dd_run_check(check)
@@ -75,8 +78,8 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_submit_node_ready_status(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
+def test_submit_node_ready_status(aggregator, dd_run_check, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     with mock.patch(
@@ -95,25 +98,23 @@ def test_submit_node_ready_status(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_metric('traefik_mesh.node.ready', count=3)
 
 
-def test_valid_controller_service_check(aggregator, mock_http_response):
-    mock_http_response(status_code=200)
+def test_valid_controller_service_check(aggregator, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(status_code=200)
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     check.submit_controller_readiness_service_check()
     aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.OK)
 
 
-def test_invalid_controller_service_check(aggregator, mock_http_response):
-    mock_http_response(status_code=500)
+def test_invalid_controller_service_check(aggregator, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(status_code=500)
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     check.submit_controller_readiness_service_check()
     aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.CRITICAL)
 
 
-def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoint):
-    from datadog_checks.dev.http import MockHTTPResponse
-
+def test_get_version(datadog_agent, dd_run_check, mock_http):
     instance = {
         'openmetrics_endpoint': 'http://localhost:8080/metrics',
         'traefik_proxy_api_endpoint': 'http://localhost:8080',
@@ -122,14 +123,21 @@ def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoin
     check = TraefikMeshCheck('traefik_mesh', {}, [instance])
     check.check_id = 'test:123'
 
-    mock_http_response_per_endpoint(
-        {
-            'http://localhost:8080/metrics': [MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))],
-            'http://localhost:8080/api/version': [
-                MockHTTPResponse(file_path=get_fixture_path('mesh_proxy_version.json'))
-            ],
-        }
-    )
+    response_cycles = {
+        'http://localhost:8080/metrics': cycle([MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))]),
+        'http://localhost:8080/api/version': cycle(
+            [MockHTTPResponse(file_path=get_fixture_path('mesh_proxy_version.json'))]
+        ),
+    }
+
+    def get_response(url: str, **_kwargs: object) -> MockHTTPResponse:
+        try:
+            responses = response_cycles[url]
+        except KeyError:
+            raise ValueError(f"Endpoint {url} not found in mocked responses") from None
+        return next(responses)
+
+    mock_http.get.side_effect = get_response
     dd_run_check(check)
 
     datadog_agent.assert_metadata(
@@ -144,9 +152,9 @@ def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoin
     )
 
 
-def test_submit_version(datadog_agent, dd_run_check, mock_http_response):
+def test_submit_version(datadog_agent, dd_run_check, mock_http):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
-    mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))
 
     check.get_version = mock.MagicMock(return_value='2.6.7')
     check.check_id = 'test:123'

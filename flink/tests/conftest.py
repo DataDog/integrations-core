@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.flink import FlinkCheck
 
 JOBMANAGER_PORT = 9249
@@ -46,8 +47,8 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics(mock_http_response):
-    mock_http_response(
+def mock_metrics(mock_http):
+    mock_http.get.return_value = MockHTTPResponse(
         file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt'),
         headers={'Content-Type': 'text/plain'},
     )

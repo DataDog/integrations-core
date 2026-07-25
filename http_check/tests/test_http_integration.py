@@ -10,6 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.http_check import HTTPCheck
 
 from .common import (
@@ -446,7 +447,7 @@ def test_data_methods(aggregator, http_check):
         aggregator.reset()
 
 
-def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check, mock_http_response):
+def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check, mock_http):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -458,9 +459,10 @@ def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check, mock_ht
         'skip_proxy': 'false',
     }
 
-    mock_http_response()
+    mock_http.get.return_value = MockHTTPResponse()
     with mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning:
         check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+        check.get_tls_context()
         dd_run_check(check)
         mock_warning.assert_called()
         assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)

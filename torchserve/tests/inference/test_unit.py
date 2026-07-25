@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from ..common import get_fixture_path
@@ -26,8 +27,10 @@ def test_check(dd_run_check, aggregator, check, mocked_inference_instance, mock_
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_check_unhealthy(dd_run_check, aggregator, check, mocked_inference_instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('inference/unhealthy.json'), status_code=500)
+def test_check_unhealthy(dd_run_check, aggregator, check, mocked_inference_instance, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(
+        file_path=get_fixture_path('inference/unhealthy.json'), status_code=500
+    )
 
     with pytest.raises(Exception, match="500 Server Error"):
         dd_run_check(check(mocked_inference_instance))

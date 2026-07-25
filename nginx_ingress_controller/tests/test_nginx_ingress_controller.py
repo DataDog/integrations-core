@@ -5,6 +5,7 @@ import os
 
 import pytest
 
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx_ingress_controller import NginxIngressControllerCheck
 
@@ -15,8 +16,8 @@ NAMESPACE = 'nginx_ingress'
 
 
 @pytest.fixture()
-def mock_data(mock_http_response):
-    mock_http_response(
+def mock_data(mock_openmetrics_http):
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(
         file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt'),
         headers={'Content-Type': 'text/plain'},
     )

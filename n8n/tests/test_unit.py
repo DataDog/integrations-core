@@ -10,6 +10,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.n8n import N8nCheck
 
 from . import common
@@ -27,13 +28,13 @@ pytestmark = pytest.mark.unit
 def test_check_emits_metrics_as_in_metadata(
     dd_run_check: Callable[[N8nCheck], Any],
     aggregator: AggregatorStub,
-    mock_http_response: Callable[..., Any],
+    mock_http: Any,
     fixture: str,
     extra_instance: dict[str, Any],
 ):
     # The fixtures are a static capture of n8n@2.19.5; the assertion is version-pinned
     # to major=2 regardless of which hatch matrix leg runs the unit tier.
-    mock_http_response(file_path=common.get_fixture_path(fixture))
+    mock_http.get.return_value = MockHTTPResponse(file_path=common.get_fixture_path(fixture))
     instance: dict[str, Any] = {'openmetrics_endpoint': 'http://localhost:5678/metrics', **extra_instance}
     check = N8nCheck('n8n', {}, [instance])
     with mock.patch.object(N8nCheck, '_check_n8n_readiness', return_value=None):
@@ -97,10 +98,10 @@ def test_readiness_uses_endpoint_host_not_metrics_path(initialized_check: N8nChe
 def test_version_metadata(
     datadog_agent: DatadogAgentStub,
     dd_run_check: Callable[[N8nCheck], Any],
-    mock_http_response: Callable[..., Any],
+    mock_http: Any,
     instance: dict[str, Any],
 ):
-    mock_http_response(file_path=common.get_fixture_path('n8n.txt'))
+    mock_http.get.return_value = MockHTTPResponse(file_path=common.get_fixture_path('n8n.txt'))
     check = N8nCheck('n8n', {}, [instance])
     check.check_id = 'n8n_test'
     with mock.patch.object(N8nCheck, '_check_n8n_readiness', return_value=None):

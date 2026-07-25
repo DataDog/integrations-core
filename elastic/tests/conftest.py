@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+from itertools import cycle
 
 import mock
 import pytest
@@ -130,7 +131,7 @@ def instance():
 
 
 @pytest.fixture
-def mock_es_endpoints(mock_http_response_per_endpoint):
+def mock_es_endpoints(mock_http):
     """
     Mock every endpoint a default `ESCheck.check()` run hits, with representative data, so unit tests can
     exercise the whole check through `dd_run_check` and target specific behavior purely through the instance
@@ -172,7 +173,16 @@ def mock_es_endpoints(mock_http_response_per_endpoint):
         }
         if overrides:
             responses.update(overrides)
-        mock_http_response_per_endpoint(responses)
+        response_cycles = {url: cycle(endpoint_responses) for url, endpoint_responses in responses.items()}
+
+        def get_response(url: str, **_kwargs: object) -> MockHTTPResponse:
+            try:
+                endpoint_responses = response_cycles[url]
+            except KeyError:
+                raise ValueError(f"Endpoint {url} not found in mocked responses") from None
+            return next(endpoint_responses)
+
+        mock_http.get.side_effect = get_response
 
     return setup
 

@@ -6,6 +6,7 @@ import pytest
 
 from datadog_checks.argo_workflows import ArgoWorkflowsCheck
 from datadog_checks.base.stubs import aggregator as agg
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 
@@ -90,8 +91,8 @@ V3_6_METRICS = {
         ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
     ],
 )
-def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_response, fixture_file, description):
-    mock_http_response(file_path=fixture_file)
+def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http, fixture_file, description):
+    mock_http.get.return_value = MockHTTPResponse(file_path=fixture_file)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
 
@@ -132,8 +133,8 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_respo
     assert_service_checks(aggregator)
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(status_code=404)
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(status_code=404)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     with pytest.raises(Exception, match='HTTPStatusError'):
         dd_run_check(check)

@@ -23,12 +23,11 @@ def mock_from_file(filename):
         return f.read()
 
 
-def test_retrieve_pod_list_success(monkeypatch, mock_http_response):
+def test_retrieve_pod_list_success(mock_http):
     check = KubeletBase('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
-    monkeypatch.setattr(
-        check, 'perform_kubelet_query', mock_http_response(file_path=get_fixture_path('kubelet_base/pod_list_raw.dat'))
-    )
+    check.kubelet_credentials = KubeletCredentials({})
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('kubelet_base/pod_list_raw.dat'))
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.silk import SilkCheck
 
 from .common import BASE_TAGS, BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, SYSTEM_TAGS
@@ -33,9 +34,9 @@ def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expecte
             aggregator.assert_metric_has_tag(metric, tag)
 
 
-def test_error_msg_response(dd_run_check, aggregator, instance, mock_http_response):
+def test_error_msg_response(dd_run_check, aggregator, instance, mock_http):
     error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
-    mock_http_response(json_data=error_response)
+    mock_http.get.return_value = MockHTTPResponse(json_data=error_response)
     check = SilkCheck('silk', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check(

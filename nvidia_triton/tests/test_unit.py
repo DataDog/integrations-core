@@ -5,18 +5,19 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.nvidia_triton import NvidiaTritonCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics, mock_http_response):
+def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics, mock_http):
     """
     Use static files for the metrics and version tests.
     """
 
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance_metrics])
-    mock_http_response(file_path=get_fixture_path('metrics/metrics'))
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('metrics/metrics'))
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -27,13 +28,11 @@ def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics,
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.OK)
 
 
-def test_emits_critical_openemtrics_service_check_when_service_is_down(
-    dd_run_check, aggregator, instance, mock_http_response
-):
+def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http_response(status_code=404)
+    mock_http.get.return_value = MockHTTPResponse(status_code=404)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     with pytest.raises(Exception, match="HTTPStatusError"):
         dd_run_check(check)
@@ -42,19 +41,19 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.CRITICAL)
 
 
-def test_emits_critical_api_service_check_when_service_is_down(aggregator, instance, mock_http_response):
+def test_emits_critical_api_service_check_when_service_is_down(aggregator, instance, mock_http):
     """
     If we fail to reach the API endpoint the health service check should report as critical
     """
-    mock_http_response(status_code=404)
+    mock_http.get.return_value = MockHTTPResponse(status_code=404)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     check._check_server_health()
 
     aggregator.assert_service_check('nvidia_triton.health.status', ServiceCheck.CRITICAL)
 
 
-def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('info/v2'))
+def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('info/v2'))
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
 
     check.check_id = 'test:123'
