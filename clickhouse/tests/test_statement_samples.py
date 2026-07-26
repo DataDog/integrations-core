@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.statement_samples import DBM_TYPE, ClickhouseStatementSamples
+from datadog_checks.clickhouse.statement_samples import BUFFER_PAYLOAD_KIND, ClickhouseStatementSamples
 
 pytestmark = pytest.mark.unit
 
@@ -554,13 +554,14 @@ def test_create_buffer_event(check_with_dbm):
 
     # Verify event structure
     assert payload['ddsource'] == 'clickhouse'
-    assert payload['dbm_type'] == DBM_TYPE
-    assert payload['collection_interval'] == samples._buffer_collection_interval
+    assert payload['kind'] == BUFFER_PAYLOAD_KIND
+    assert payload['min_collection_interval'] == samples._buffer_collection_interval
+    assert payload['tags'] == samples._tags_no_db
 
     # Verify buffers payload
-    assert len(payload['clickhouse_async_insert_buffers']) == 1
+    assert len(payload['clickhouse_rows']) == 1
 
-    buffer = payload['clickhouse_async_insert_buffers'][0]
+    buffer = payload['clickhouse_rows'][0]
     assert buffer['database'] == 'default'
     assert buffer['table'] == 'events'
     assert buffer['total_bytes'] == 2048
@@ -573,7 +574,7 @@ def test_emit_buffer_events_empty_snapshot(check_with_dbm):
     """Test that no event is submitted when the buffer snapshot is empty"""
     samples = check_with_dbm.statement_samples
 
-    with mock.patch.object(check_with_dbm, 'database_monitoring_query_activity') as mock_submit:
+    with mock.patch.object(check_with_dbm, 'database_monitoring_query_metrics') as mock_submit:
         samples._emit_buffer_events([])
 
     mock_submit.assert_not_called()
@@ -591,8 +592,8 @@ def test_record_buffer_counts(check_with_dbm):
     ]
 
     with (
-        mock.patch.object(samples, '_create_buffer_event', return_value={'dbm_type': DBM_TYPE}),
-        mock.patch.object(check_with_dbm, 'database_monitoring_query_activity'),
+        mock.patch.object(samples, '_create_buffer_event', return_value={'kind': BUFFER_PAYLOAD_KIND}),
+        mock.patch.object(check_with_dbm, 'database_monitoring_query_metrics'),
         mock.patch.object(check_with_dbm, 'count') as mock_count,
     ):
         samples._emit_buffer_events(buffer_snapshot)

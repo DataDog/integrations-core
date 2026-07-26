@@ -87,7 +87,7 @@ WHERE query NOT LIKE '%system.processes%'
 GROUP BY user, query_kind, current_database
 """
 
-DBM_TYPE = "async_inserts_buffer"
+BUFFER_PAYLOAD_KIND = "buffer_metrics"
 
 # ClickHouse server error code for UNKNOWN_TABLE, raised when a queried table doesn't exist.
 UNKNOWN_TABLE_ERROR_CODE = 60
@@ -614,12 +614,12 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "clickhouse",
-            "dbm_type": DBM_TYPE,
-            "collection_interval": self._buffer_collection_interval,
-            "ddtags": self._tags_no_db,
+            "kind": BUFFER_PAYLOAD_KIND,
+            "min_collection_interval": self._buffer_collection_interval,
+            "tags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "clickhouse_version": self._check.dbms_version,
-            "clickhouse_async_insert_buffers": buffers,
+            "clickhouse_rows": buffers,
         }
 
     def _emit_buffer_events(self, buffer_snapshot: list[dict]) -> None:
@@ -627,7 +627,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             return
 
         buffer_event = self._create_buffer_event(buffer_snapshot)
-        self._check.database_monitoring_query_activity(json.dumps(buffer_event, default=default_json_event_encoding))
+        self._check.database_monitoring_query_metrics(json.dumps(buffer_event, default=default_json_event_encoding))
         self._record_buffer_counts(buffer_snapshot)
 
     def _record_buffer_counts(self, buffer_snapshot: list[dict]) -> None:
