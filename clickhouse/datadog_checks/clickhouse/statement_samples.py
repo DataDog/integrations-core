@@ -104,7 +104,9 @@ SELECT
     length(entries.query_id) AS entry_count,
     -- first_update is the scheduled flush deadline (queued as now + busy_timeout in ClickHouse's
     -- async insert queue), not the first insert time as the docs claim.
-    toUnixTimestamp64Micro(first_update) AS flush_deadline_us
+    toUnixTimestamp64Micro(first_update) AS flush_deadline_us,
+    -- Server clock, so the backend can subtract it from first_update without agent clock skew.
+    toUnixTimestamp64Micro(now64(6)) AS now_us
 FROM {asynchronous_inserts_table}
 ORDER BY total_bytes DESC
 LIMIT {max_samples_per_collection}
@@ -547,7 +549,17 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
         result = []
         for row in rows:
-            database, table, server_node, format_, query_text, total_bytes, entry_count, flush_deadline_us = row
+            (
+                database,
+                table,
+                server_node,
+                format_,
+                query_text,
+                total_bytes,
+                entry_count,
+                flush_deadline_us,
+                now_us,
+            ) = row
             result.append(
                 {
                     'database': database,
@@ -558,6 +570,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     'total_bytes': total_bytes,
                     'entry_count': entry_count,
                     'flush_deadline_us': flush_deadline_us,
+                    'now_us': now_us,
                 }
             )
         return result
@@ -618,6 +631,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             "min_collection_interval": self._buffer_collection_interval,
             "tags": self._tags_no_db,
             "timestamp": time.time() * 1000,
+            "now_us": buffer_snapshot[0]['now_us'],
             "clickhouse_version": self._check.dbms_version,
             "clickhouse_rows": buffers,
         }
