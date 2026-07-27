@@ -188,6 +188,29 @@ def test_discover_queues_disconnects_on_exception(
         assert pcf_mock.disconnect.called
 
 
+def test_collect_queue_metrics_survives_disconnect_failure(instance, get_check):
+    instance['auto_discover_queues'] = False
+    instance['queues'] = ['QUEUE.ONE', 'QUEUE.TWO']
+
+    check = get_check(instance)
+    collector = check.queue_metric_collector
+    queue_manager = Mock()
+
+    collector.queue_manager_stats = Mock()
+    collector.queue_stats = Mock(return_value=[])
+    collector.get_pcf_queue_status_metrics = Mock()
+    collector.get_pcf_queue_reset_metrics = Mock()
+
+    pcf_mock = Mock()
+    pcf_mock.disconnect.side_effect = pymqi.MQMIError(2, 2009)
+    with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
+        collector.collect_queue_metrics(queue_manager)
+
+    assert collector.queue_stats.call_count == 2
+    processed_queues = {call.args[1] for call in collector.queue_stats.call_args_list}
+    assert processed_queues == {'QUEUE.ONE', 'QUEUE.TWO'}
+
+
 @pytest.mark.parametrize(
     "auto_discover_queues_via_names, patch_method, return_value",
     [
