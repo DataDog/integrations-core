@@ -35,7 +35,7 @@ ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
 ARTIFACT_NAME_SEPARATOR = "_"
 
 
-@dataclass
+@dataclass(frozen=True)
 class BatchJob:
     """A single job entry in a TestBatch: one ``target + environment + platform`` execution.
 
@@ -45,6 +45,13 @@ class BatchJob:
     attributes of that identity, describing which test facets the one execution must produce.
     ``environment`` is exactly one resolved Hatch environment, or the empty string for an
     environmentless target.
+
+    ``python_version`` is the ``major.minor`` interpreter the runner sets up for this job.
+    ``agent_image`` is the Agent Docker image its E2E tests run against, and is ``None`` when the
+    job runs no E2E facet.
+
+    The whole pipeline treats a planned job as immutable, so this is frozen: it makes every job
+    hashable and lets a batch partition be validated by value rather than by object identity.
     """
 
     name: str
@@ -52,8 +59,10 @@ class BatchJob:
     runner_labels: tuple[str, ...]
     environment: str
     platform: Platform
+    python_version: str
     unit_tests: bool
     e2e_tests: bool
+    agent_image: str | None = None
 
     def artifact_name(self) -> str:
         """Deterministic artifact name built from the job's target, environment, and platform.

@@ -13,9 +13,8 @@ import pytest
 
 from ddev.cli.ci.tests.batching.build import build_test_batches, build_test_units, resolve_hatch_environments
 from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
-from ddev.cli.ci.tests.batching.git import ChangedFile, ChangeType
-from ddev.cli.ci.tests.batching.units import ResolvedEnvironment
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
+from tests.helpers.batching import DEFAULT_PYTHON_VERSION, env, modified
 
 
 class FakeManifest:
@@ -80,22 +79,15 @@ class FakeEnvironmentProvider:
         return list(self._environments.get(integration.name, []))
 
 
-def modified(path: str) -> ChangedFile:
-    return ChangedFile(change_type=ChangeType.MODIFIED, path=path)
-
-
-def env(name: str, platform: str = "linux", *, unit: bool = True, e2e: bool = False) -> ResolvedEnvironment:
-    return ResolvedEnvironment(name=name, platform=platform, test_available=unit, e2e_available=e2e)
-
-
 class EnvStub:
     """Minimal stand-in for ddev's Hatch ``Environment`` (no Hatch invocation)."""
 
-    def __init__(self, name, *, test_env=True, e2e_env=False, platforms=()):
+    def __init__(self, name, *, test_env=True, e2e_env=False, platforms=(), python=None):
         self.name = name
         self.test_env = test_env
         self.e2e_env = e2e_env
         self.platforms = list(platforms)
+        self.python = python
 
 
 def test_build_end_to_end_direct_and_broad_overlap():
@@ -118,29 +110,32 @@ def test_build_end_to_end_direct_and_broad_overlap():
         modified("datadog_checks_base/datadog_checks/base/utils/foo.py"),
     ]
 
-    units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+    )
 
     # Broad rule adds the full eligible set; direct rule adds postgres; deduped and then ordered
     # by the display-order override (datadog_checks_base first, then alphabetical).
-    assert [(u.target, u.name, [e.name for e in u.environments]) for u in units] == [
-        ("datadog_checks_base", "datadog_checks_base (py3.11)", ["py3.11"]),
-        ("mysql", "mysql (py3.11)", ["py3.11"]),
-        ("postgres", "postgres (py3.11)", ["py3.11"]),
+    assert [(u.target, u.name, u.environment.name) for u in units] == [
+        ("datadog_checks_base", "datadog_checks_base (py3.11)", "py3.11"),
+        ("mysql", "mysql (py3.11)", "py3.11"),
+        ("postgres", "postgres (py3.11)", "py3.11"),
     ]
 
 
-def test_build_split_false_runs_all_environments_together():
+def test_build_gives_every_environment_its_own_unit():
     repo = FakeRepo([FakeIntegration("postgres")])
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11", e2e=False), env("py3.12", e2e=True)]})
     changed = [modified("postgres/tests/test_a.py")]
 
-    units = build_test_units(repo, changed, environment_provider=provider, split_environments=False)
+    units = build_test_units(
+        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+    )
 
-    assert len(units) == 1
-    unit = units[0]
-    assert unit.target == "postgres"
-    assert [e.name for e in unit.environments] == ["py3.11", "py3.12"]
-    assert [e.name for e in unit.environments if e.e2e_available] == ["py3.12"]
+    assert [(u.environment.name, u.environment.e2e_available) for u in units] == [
+        ("py3.11", False),
+        ("py3.12", True),
+    ]
 
 
 def test_build_environmentless_target():
@@ -148,11 +143,14 @@ def test_build_environmentless_target():
     provider = FakeEnvironmentProvider({})  # no environments for ddev
     changed = [modified("ddev/src/ddev/foo.py")]
 
-    units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+    )
 
     assert len(units) == 1
     unit = units[0]
-    assert (unit.target, unit.name, unit.platform, unit.environments) == ("ddev", "ddev", "linux", ())
+    assert (unit.target, unit.name, unit.platform, unit.environment.name) == ("ddev", "ddev", "linux", "")
+    assert unit.environment.python_version == DEFAULT_PYTHON_VERSION
 
 
 def test_build_excludes_target_via_ci_override():
@@ -163,7 +161,9 @@ def test_build_excludes_target_via_ci_override():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "hyperv": [env("py3.11")]})
     changed = [modified("postgres/tests/test_a.py"), modified("hyperv/tests/test_b.py")]
 
-    units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+    )
 
     assert {u.target for u in units} == {"postgres"}
 
@@ -178,7 +178,9 @@ def test_build_applies_platform_and_runner_overrides():
     )
     changed = [modified("sqlserver/tests/test_a.py")]
 
-    units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+    )
 
     assert [(u.platform, u.name, u.runner_labels) for u in units] == [
         ("windows", "sqlserver on Windows (py3.13)", ("windows-2022",)),
@@ -194,7 +196,9 @@ def test_resolve_hatch_environments_includes_both_facets_and_excludes_neither():
         EnvStub("neither", test_env=False, e2e_env=False),
     ]
 
-    resolved = resolve_hatch_environments(environments, ["linux"])
+    resolved = resolve_hatch_environments(
+        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["linux"]
+    )
 
     assert [(r.name, r.test_available, r.e2e_available) for r in resolved] == [
         ("unit-only", True, False),
@@ -210,7 +214,9 @@ def test_resolve_hatch_environments_routes_constrained_platforms_without_crossin
         EnvStub("py3.13-windows", platforms=["windows"]),
     ]
 
-    resolved = resolve_hatch_environments(environments, ["windows", "linux"])
+    resolved = resolve_hatch_environments(
+        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["windows", "linux"]
+    )
 
     # Each environment lands only on its declared platform (intersected with the target's);
     # the Linux env never duplicates onto Windows and vice versa, and macos is dropped.
@@ -223,10 +229,32 @@ def test_resolve_hatch_environments_routes_constrained_platforms_without_crossin
 def test_resolve_hatch_environments_unconstrained_uses_single_default_platform():
     environments = [EnvStub("py3.11", platforms=[])]
 
-    resolved = resolve_hatch_environments(environments, ["linux", "windows"])
+    resolved = resolve_hatch_environments(
+        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["linux", "windows"]
+    )
 
     # No cross-product: an unconstrained env is routed only to the default (first) platform.
     assert [(r.name, r.platform) for r in resolved] == [("py3.11", "linux")]
+
+
+def test_resolve_hatch_environments_reads_the_python_version_from_hatch():
+    environments = [EnvStub("py3.11-1.23", python="3.11")]
+
+    resolved = resolve_hatch_environments(
+        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["linux"]
+    )
+
+    assert resolved[0].python_version == "3.11"
+
+
+def test_resolve_hatch_environments_falls_back_when_hatch_declares_no_python():
+    # Hatch omits `python` when the environment does not pin one; the name is not parsed as a
+    # substitute because it only encodes the version by convention.
+    environments = [EnvStub("py3.11-1.23", python=None)]
+
+    resolved = resolve_hatch_environments(environments, default_python_version="3.9", platforms=["linux"])
+
+    assert resolved[0].python_version == "3.9"
 
 
 def test_build_returns_nothing_for_irrelevant_changes():
@@ -234,7 +262,10 @@ def test_build_returns_nothing_for_irrelevant_changes():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11")]})
     changed = [modified("docs/readme.md")]
 
-    assert build_test_units(repo, changed, environment_provider=provider) == []
+    assert (
+        build_test_units(repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION)
+        == []
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -247,7 +278,13 @@ def test_build_batches_end_to_end_split_defaults():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11", unit=True, e2e=True)]})
     changed = [modified("postgres/tests/test_a.py")]
 
-    batches = build_test_batches(repo, changed, environment_provider=provider, config=BatchingConfig())
+    batches = build_test_batches(
+        repo,
+        changed,
+        environment_provider=provider,
+        config=BatchingConfig(),
+        default_python_version=DEFAULT_PYTHON_VERSION,
+    )
 
     assert len(batches) == 1
     batch = batches[0]
@@ -271,7 +308,13 @@ def test_build_batches_emits_one_job_per_resolved_environment():
     )
     changed = [modified("postgres/tests/test_a.py")]
 
-    batches = build_test_batches(repo, changed, environment_provider=provider, config=BatchingConfig())
+    batches = build_test_batches(
+        repo,
+        changed,
+        environment_provider=provider,
+        config=BatchingConfig(),
+        default_python_version=DEFAULT_PYTHON_VERSION,
+    )
 
     assert len(batches) == 1
     # Each concrete job carries exactly one real environment, never a joined label.
@@ -286,7 +329,16 @@ def test_build_batches_empty_input_returns_no_batches():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11")]})
     changed = [modified("docs/readme.md")]
 
-    assert build_test_batches(repo, changed, environment_provider=provider, config=BatchingConfig()) == []
+    assert (
+        build_test_batches(
+            repo,
+            changed,
+            environment_provider=provider,
+            config=BatchingConfig(),
+            default_python_version=DEFAULT_PYTHON_VERSION,
+        )
+        == []
+    )
 
 
 def test_build_batches_rejects_invalid_injected_strategy():
@@ -295,12 +347,17 @@ def test_build_batches_rejects_invalid_injected_strategy():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11"), env("py3.12")]})
     changed = [modified("postgres/tests/test_a.py")]
 
-    def dropping_strategy(jobs, *, capacity, config):
+    def dropping_strategy(jobs, *, config):
         return [list(jobs[:-1])]  # loses the last job
 
     with pytest.raises(BatchValidationError, match="exactly once"):
         build_test_batches(
-            repo, changed, environment_provider=provider, config=BatchingConfig(), strategy=dropping_strategy
+            repo,
+            changed,
+            environment_provider=provider,
+            config=BatchingConfig(),
+            default_python_version=DEFAULT_PYTHON_VERSION,
+            strategy=dropping_strategy,
         )
 
 
@@ -312,7 +369,9 @@ def test_build_batches_oversized_integration_fails_when_splitting_disabled():
     config = BatchingConfig(max_jobs_per_batch=1, allow_integration_splitting=False)
 
     with pytest.raises(PlanningError, match="exceeding the batch capacity"):
-        build_test_batches(repo, changed, environment_provider=provider, config=config)
+        build_test_batches(
+            repo, changed, environment_provider=provider, config=config, default_python_version=DEFAULT_PYTHON_VERSION
+        )
 
 
 def test_build_batches_numbering_is_deterministic_across_calls():
@@ -321,7 +380,17 @@ def test_build_batches_numbering_is_deterministic_across_calls():
     changed = [modified("postgres/tests/test_a.py"), modified("mysql/tests/test_b.py")]
     config = BatchingConfig(max_jobs_per_batch=1)
 
-    first = [b.batch_id for b in build_test_batches(repo, changed, environment_provider=provider, config=config)]
-    second = [b.batch_id for b in build_test_batches(repo, changed, environment_provider=provider, config=config)]
+    first = [
+        b.batch_id
+        for b in build_test_batches(
+            repo, changed, environment_provider=provider, config=config, default_python_version=DEFAULT_PYTHON_VERSION
+        )
+    ]
+    second = [
+        b.batch_id
+        for b in build_test_batches(
+            repo, changed, environment_provider=provider, config=config, default_python_version=DEFAULT_PYTHON_VERSION
+        )
+    ]
 
     assert first == second == ["batch-01", "batch-02"]

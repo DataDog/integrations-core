@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from ddev.cli.ci.tests.batching.assembly import create_test_batches
@@ -25,6 +27,7 @@ def jobs(target: str, count: int) -> list[BatchJob]:
             runner_labels=("ubuntu-22.04",),
             environment=f"env-{index}",
             platform=Platform.LINUX,
+            python_version="3.13",
             unit_tests=True,
             e2e_tests=False,
         )
@@ -46,18 +49,18 @@ def sizes(groups: list[list[BatchJob]]) -> list[int]:
 
 
 def test_empty_input_returns_no_groups():
-    assert default_strategy([], capacity=240, config=config()) == []
+    assert default_strategy([], config=config()) == []
 
 
 def test_single_integration_fits_in_one_batch():
-    groups = default_strategy(jobs("postgres", 100), capacity=240, config=config())
+    groups = default_strategy(jobs("postgres", 100), config=config())
     assert sizes(groups) == [100]
 
 
 def test_two_fitting_integrations_at_capacity_210_do_not_split():
     # 200 + 200 at capacity 210: two non-overflowing batches, neither integration split.
     all_jobs = jobs("postgres", 200) + jobs("mysql", 200)
-    groups = default_strategy(all_jobs, capacity=210, config=config(capacity=210))
+    groups = default_strategy(all_jobs, config=config(capacity=210))
 
     assert sizes(groups) == [200, 200]
     assert {job.target for job in groups[0]} == {"postgres"}
@@ -68,14 +71,14 @@ def test_fitting_integration_starts_new_batch_rather_than_filling_remainder():
     # postgres (100) fills the first batch; mysql (150) does not fit the 110-job remainder, so it
     # starts a new batch instead of being split to fill it.
     all_jobs = jobs("postgres", 100) + jobs("mysql", 150)
-    groups = default_strategy(all_jobs, capacity=210, config=config(capacity=210))
+    groups = default_strategy(all_jobs, config=config(capacity=210))
 
     assert sizes(groups) == [100, 150]
 
 
 def test_small_integrations_pack_together():
     all_jobs = jobs("a", 80) + jobs("b", 80) + jobs("c", 80) + jobs("d", 80)
-    groups = default_strategy(all_jobs, capacity=240, config=config())
+    groups = default_strategy(all_jobs, config=config())
 
     # a+b+c fill the first batch (240); d starts the next.
     assert sizes(groups) == [240, 80]
@@ -85,12 +88,12 @@ def test_small_integrations_pack_together():
 
 def test_oversized_integration_fails_when_splitting_disabled():
     with pytest.raises(PlanningError, match="exceeding the batch capacity"):
-        default_strategy(jobs("huge", 400), capacity=240, config=config(allow_integration_splitting=False))
+        default_strategy(jobs("huge", 400), config=config(allow_integration_splitting=False))
 
 
 def test_oversized_integration_spills_across_capacity_bounded_batches_when_enabled():
     # Canonical case: 400 jobs at capacity 240 occupy 240 then 160.
-    groups = default_strategy(jobs("huge", 400), capacity=240, config=config(allow_integration_splitting=True))
+    groups = default_strategy(jobs("huge", 400), config=config(allow_integration_splitting=True))
 
     assert sizes(groups) == [240, 160]
 
@@ -98,7 +101,7 @@ def test_oversized_integration_spills_across_capacity_bounded_batches_when_enabl
 def test_oversized_remainder_is_reusable_by_following_integrations():
     # The 80 free slots left in the second batch by the 400-job integration are used by the next.
     all_jobs = jobs("huge", 400) + jobs("small", 80)
-    groups = default_strategy(all_jobs, capacity=240, config=config(allow_integration_splitting=True))
+    groups = default_strategy(all_jobs, config=config(allow_integration_splitting=True))
 
     assert sizes(groups) == [240, 240]
     assert {job.target for job in groups[0]} == {"huge"}
@@ -114,32 +117,46 @@ def test_oversized_remainder_is_reusable_by_following_integrations():
 
 def test_validate_accepts_default_strategy_output():
     all_jobs = jobs("postgres", 200) + jobs("mysql", 100)
-    groups = default_strategy(all_jobs, capacity=240, config=config())
-    validate_batches(groups, all_jobs, capacity=240, config=config())  # does not raise
+    groups = default_strategy(all_jobs, config=config())
+    validate_batches(groups, all_jobs, config=config())  # does not raise
 
 
 def test_validate_rejects_empty_batch():
     all_jobs = jobs("postgres", 2)
     with pytest.raises(BatchValidationError, match="empty"):
-        validate_batches([all_jobs, []], all_jobs, capacity=240, config=config())
+        validate_batches([all_jobs, []], all_jobs, config=config())
 
 
 def test_validate_rejects_overfilled_batch():
     all_jobs = jobs("postgres", 5)
     with pytest.raises(BatchValidationError, match="capacity"):
-        validate_batches([all_jobs], all_jobs, capacity=4, config=config())
+        validate_batches([all_jobs], all_jobs, config=config(capacity=4))
 
 
 def test_validate_rejects_lost_job():
     all_jobs = jobs("postgres", 3)
     with pytest.raises(BatchValidationError, match="exactly once"):
-        validate_batches([all_jobs[:2]], all_jobs, capacity=240, config=config())
+        validate_batches([all_jobs[:2]], all_jobs, config=config())
 
 
-def test_validate_rejects_duplicated_job():
+def test_validate_rejects_a_job_duplicated_within_a_batch():
     all_jobs = jobs("postgres", 2)
-    with pytest.raises(BatchValidationError, match="duplicate"):
-        validate_batches([[all_jobs[0], all_jobs[0], all_jobs[1]]], all_jobs, capacity=240, config=config())
+    with pytest.raises(BatchValidationError, match="duplicate job names"):
+        validate_batches([[all_jobs[0], all_jobs[0], all_jobs[1]]], all_jobs, config=config())
+
+
+def test_validate_rejects_a_job_duplicated_across_batches():
+    all_jobs = jobs("postgres", 2)
+    with pytest.raises(BatchValidationError, match="exactly once"):
+        validate_batches([[all_jobs[0]], [all_jobs[0], all_jobs[1]]], all_jobs, config=config())
+
+
+def test_validate_compares_jobs_by_value_not_identity():
+    # A strategy is free to rebuild equal jobs rather than pass the original instances through.
+    all_jobs = jobs("postgres", 3)
+    rebuilt = [dataclasses.replace(job) for job in all_jobs]
+
+    validate_batches([rebuilt], all_jobs, config=config())  # does not raise
 
 
 def test_validate_rejects_duplicate_names_within_batch():
@@ -150,12 +167,13 @@ def test_validate_rejects_duplicate_names_within_batch():
         runner_labels=("ubuntu-22.04",),
         environment="py3.11",
         platform=Platform.LINUX,
+        python_version="3.11",
         unit_tests=True,
         e2e_tests=False,
     )
     all_jobs = [clash, twin]
     with pytest.raises(BatchValidationError, match="duplicate job name"):
-        validate_batches([[clash, twin]], all_jobs, capacity=240, config=config())
+        validate_batches([[clash, twin]], all_jobs, config=config())
 
 
 def test_validate_rejects_duplicate_artifact_identity_within_batch():
@@ -168,6 +186,7 @@ def test_validate_rejects_duplicate_artifact_identity_within_batch():
             runner_labels=("ubuntu-22.04",),
             environment="py3.11",
             platform=Platform.LINUX,
+            python_version="3.11",
             unit_tests=True,
             e2e_tests=False,
         )
@@ -177,28 +196,26 @@ def test_validate_rejects_duplicate_artifact_identity_within_batch():
     assert a.artifact_name() == b.artifact_name()
 
     with pytest.raises(BatchValidationError, match="duplicate artifact identities"):
-        validate_batches([[a, b]], [a, b], capacity=240, config=config())
+        validate_batches([[a, b]], [a, b], config=config())
 
 
 def test_validate_rejects_illegal_split_when_disabled():
     all_jobs = jobs("postgres", 4)
     with pytest.raises(BatchValidationError, match="split"):
-        validate_batches([all_jobs[:2], all_jobs[2:]], all_jobs, capacity=240, config=config())
+        validate_batches([all_jobs[:2], all_jobs[2:]], all_jobs, config=config())
 
 
 def test_validate_rejects_split_of_fitting_integration_even_when_enabled():
     # Splitting is enabled, but this integration fits capacity, so splitting it is still invalid.
     all_jobs = jobs("postgres", 4)
     with pytest.raises(BatchValidationError, match="fits in one batch"):
-        validate_batches(
-            [all_jobs[:2], all_jobs[2:]], all_jobs, capacity=240, config=config(allow_integration_splitting=True)
-        )
+        validate_batches([all_jobs[:2], all_jobs[2:]], all_jobs, config=config(allow_integration_splitting=True))
 
 
 def test_validate_allows_oversized_split_when_enabled():
     all_jobs = jobs("huge", 400)
-    groups = default_strategy(all_jobs, capacity=240, config=config(allow_integration_splitting=True))
-    validate_batches(groups, all_jobs, capacity=240, config=config(allow_integration_splitting=True))  # no raise
+    groups = default_strategy(all_jobs, config=config(allow_integration_splitting=True))
+    validate_batches(groups, all_jobs, config=config(allow_integration_splitting=True))  # no raise
 
 
 # ---------------------------------------------------------------------------

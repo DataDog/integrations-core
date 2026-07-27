@@ -67,6 +67,7 @@ def _batch_job(
         runner_labels=(runner,),
         environment=environment,
         platform=platform,
+        python_version="3.13",
         unit_tests=True,
         e2e_tests=False,
     )
@@ -349,8 +350,10 @@ def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path) -> None:
         runner_labels=("ubuntu-latest",),
         environment="py3.13",
         platform=Platform.LINUX,
+        python_version="3.13",
         unit_tests=True,
         e2e_tests=True,
+        agent_image="registry.datadoghq.com/agent-dev:master-py3",
     )
 
     gatherer = _make_gatherer(tmp_path, {"batch-1": [combined_job]})

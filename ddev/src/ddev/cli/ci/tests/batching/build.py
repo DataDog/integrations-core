@@ -55,13 +55,14 @@ def build_test_units(
     changed_files: Sequence[ChangedFile],
     *,
     environment_provider: EnvironmentProvider,
-    split_environments: bool = True,
+    default_python_version: str,
     rules: Sequence[TargetRule] | None = None,
 ) -> list[TestUnit]:
     """Turn a set of changed files into the complete, deterministic list of test units.
 
     When ``rules`` is ``None`` the default rule set is built from the repository, gating the
     repository-wide rule on whether ``repo`` is the core repository.
+    ``default_python_version`` is used for targets that define no environments.
     """
     if rules is None:
         rules = default_target_rules(is_core=repo.name == "core")
@@ -87,7 +88,7 @@ def build_test_units(
             )
         )
 
-    return expand_test_units(definitions, split_environments=split_environments)
+    return expand_test_units(definitions, default_python_version=default_python_version)
 
 
 def build_test_batches(
@@ -96,6 +97,7 @@ def build_test_batches(
     *,
     environment_provider: EnvironmentProvider,
     config: BatchingConfig,
+    default_python_version: str,
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
 ) -> list[TestBatch]:
@@ -112,11 +114,12 @@ def build_test_batches(
         repo,
         changed_files,
         environment_provider=environment_provider,
+        default_python_version=default_python_version,
         rules=rules,
     )
     jobs = expand_batch_jobs(units)
-    job_groups = strategy(jobs, capacity=config.max_jobs_per_batch, config=config)
-    validate_batches(job_groups, jobs, capacity=config.max_jobs_per_batch, config=config)
+    job_groups = strategy(jobs, config=config)
+    validate_batches(job_groups, jobs, config=config)
     return create_test_batches(job_groups)
 
 
@@ -135,21 +138,28 @@ def _supported_os(integration: Integration) -> list[str]:
 class HatchEnvironmentProvider:
     """An :class:`EnvironmentProvider` backed by ddev's Hatch integration.
 
-    Environment names and facet flags come from ddev's ``list_environments``; facet filtering
-    and platform routing are delegated to :func:`resolve_hatch_environments`.
+    Environment names, Python versions, and facet flags come from ddev's ``list_environments``;
+    facet filtering and platform routing are delegated to :func:`resolve_hatch_environments`.
     """
 
     platform: Platform
+    default_python_version: str
 
     def __call__(self, integration: Integration, platforms: Sequence[str]) -> list[ResolvedEnvironment]:
         from ddev.utils.hatch import list_environments
 
-        return resolve_hatch_environments(list_environments(self.platform, integration), platforms)
+        return resolve_hatch_environments(
+            list_environments(self.platform, integration),
+            platforms,
+            default_python_version=self.default_python_version,
+        )
 
 
 def resolve_hatch_environments(
     environments: Sequence[Environment],
     platforms: Sequence[str],
+    *,
+    default_python_version: str,
 ) -> list[ResolvedEnvironment]:
     """Map ddev ``Environment`` values onto target platforms, keeping both facet flags.
 
@@ -160,6 +170,10 @@ def resolve_hatch_environments(
     constraint with the target's platforms, so a Windows-only environment never lands on Linux.
     An unconstrained environment is routed to a single default platform (the target's first) and
     is never cross-produced across the target's platforms.
+
+    The Python version is read from Hatch's own ``python`` value rather than parsed out of the
+    environment name, which only encodes it by convention. An environment that declares no Python
+    falls back to ``default_python_version``.
     """
     if not platforms:
         return []
@@ -177,6 +191,7 @@ def resolve_hatch_environments(
                     ResolvedEnvironment(
                         name=environment.name,
                         platform=platform_id,
+                        python_version=environment.python or default_python_version,
                         test_available=environment.test_env,
                         e2e_available=environment.e2e_env,
                     )

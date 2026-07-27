@@ -16,15 +16,13 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable, Iterator, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from ddev.cli.ci.tests.batching.git import ChangedFile, ChangeType
 
 if TYPE_CHECKING:
     from ddev.repo.core import IntegrationRegistry
-
-AGENT_REQUIREMENTS_FILE = "agent_requirements.in"
 
 NON_TESTABLE_FILES = frozenset({"auto_conf.yaml"})
 
@@ -49,6 +47,11 @@ TESTABLE_PATH_PATTERN = re.compile(
 )
 
 # Repository-wide paths that, when changed, trigger the full eligible target set.
+#
+# This set is deliberately narrower than the `paths` filter of `.github/workflows/pr-all.yml`,
+# which also triggers on `ddev/src/**`, the three tooling `pyproject.toml` files, and the test
+# workflow/action definitions. Whether Dispatcher should match those is an open decision; until it
+# is made, this list only covers paths that demonstrably change how every target's tests run.
 #
 # TODO(manifest): these repository-wide triggers are hard-coded here as path patterns. Once ddev's
 # dependency on `manifest.json` is removed and replaced by per-integration tooling configuration,
@@ -170,16 +173,12 @@ class RepositoryWideRule:
 
     is_core: bool
     patterns: re.Pattern[str] = REPOSITORY_WIDE_PATTERNS
-    exempt_files: frozenset[str] = field(default_factory=lambda: frozenset({AGENT_REQUIREMENTS_FILE}))
 
     def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterator[str]:
         if not self.is_core:
             return
 
-        paths = [changed_file.path for changed_file in changed_files]
-        if any(path in self.exempt_files for path in paths):
-            return
-        if any(self.patterns.search(path) for path in paths):
+        if any(self.patterns.search(changed_file.path) for changed_file in changed_files):
             yield from facts.eligible_targets()
 
 

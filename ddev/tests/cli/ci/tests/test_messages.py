@@ -29,6 +29,7 @@ def batch_job(
     runner_labels=("ubuntu-latest",),
     environment="py3.13",
     platform=Platform.LINUX,
+    python_version="3.13",
     unit_tests=True,
     e2e_tests=False,
 ) -> BatchJob:
@@ -38,6 +39,7 @@ def batch_job(
         runner_labels=runner_labels,
         environment=environment,
         platform=platform,
+        python_version=python_version,
         unit_tests=unit_tests,
         e2e_tests=e2e_tests,
     )

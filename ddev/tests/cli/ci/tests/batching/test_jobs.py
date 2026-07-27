@@ -9,111 +9,104 @@ A ``BatchJob`` is one ``target + environment + platform`` execution carrying job
 
 from __future__ import annotations
 
+import pytest
+
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
-from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
 from ddev.cli.ci.tests.messages import Platform
+from ddev.e2e.agent_images import UnknownPythonVersion
+from tests.helpers.batching import env, make_unit
 
 
-def unit(
-    name: str,
-    *,
-    target: str = "postgres",
-    platform: str = "linux",
-    runner_labels: tuple[str, ...] = ("ubuntu-22.04",),
-    environments: tuple[ResolvedEnvironment, ...] = (),
-) -> TestUnit:
-    return TestUnit(
-        target=target,
-        name=name,
-        platform=platform,
-        runner_labels=runner_labels,
-        environments=environments,
-    )
-
-
-def env(name: str, *, unit: bool = True, e2e: bool = False, platform: str = "linux") -> ResolvedEnvironment:
-    return ResolvedEnvironment(name=name, platform=platform, test_available=unit, e2e_available=e2e)
+def fake_resolver(python_version: str, platform: str) -> str:
+    return f"agent:{python_version}-{platform}"
 
 
 def test_single_environment_unit_becomes_one_job_with_facet_flags():
     # An environment enabled for both facets yields ONE job carrying both flags (no unit/E2E rows).
-    units = [unit("postgres (py3.11)", environments=(env("py3.11", unit=True, e2e=True),))]
+    units = [make_unit(name="postgres (py3.11)", environment=env("py3.11", unit=True, e2e=True))]
 
-    jobs = expand_batch_jobs(units)
+    [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
 
-    assert len(jobs) == 1
-    job = jobs[0]
     assert (job.name, job.target, job.environment) == ("postgres (py3.11)", "postgres", "py3.11")
     assert (job.unit_tests, job.e2e_tests) == (True, True)
     assert job.artifact_name() == "postgres_py3.11_linux"
 
 
 def test_unit_only_environment_sets_only_unit_facet():
-    units = [unit("redis (py3.12)", target="redis", environments=(env("py3.12", unit=True, e2e=False),))]
+    units = [make_unit("redis", name="redis (py3.12)", environment=env("py3.12", unit=True, e2e=False))]
 
-    [job] = expand_batch_jobs(units)
+    [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
 
     assert (job.unit_tests, job.e2e_tests) == (True, False)
 
 
 def test_e2e_only_environment_sets_only_e2e_facet():
-    units = [unit("redis (py3.12)", target="redis", environments=(env("py3.12", unit=False, e2e=True),))]
+    units = [make_unit("redis", name="redis (py3.12)", environment=env("py3.12", unit=False, e2e=True))]
 
-    [job] = expand_batch_jobs(units)
+    [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
 
     assert (job.unit_tests, job.e2e_tests) == (False, True)
 
 
-def test_unsplit_unit_expands_to_one_job_per_real_environment():
-    # A unit covering several environments (as build_test_units can produce at the unit layer)
-    # expands into one job per resolved environment, each carrying a single real environment and
-    # its own facet flags — never a job spanning multiple environments.
-    units = [
-        unit(
-            "postgres",
-            environments=(
-                env("py3.11", unit=True, e2e=False),
-                env("py3.12", unit=True, e2e=True),
-                env("py3.13", unit=False, e2e=True),
-            ),
-        )
-    ]
-
-    jobs = expand_batch_jobs(units)
-
-    assert [(j.name, j.environment, j.unit_tests, j.e2e_tests) for j in jobs] == [
-        ("postgres (py3.11)", "py3.11", True, False),
-        ("postgres (py3.12)", "py3.12", True, True),
-        ("postgres (py3.13)", "py3.13", False, True),
-    ]
-    # Each job's environment is a single real environment and artifact identities stay unique.
-    assert [j.artifact_name() for j in jobs] == [
-        "postgres_py3.11_linux",
-        "postgres_py3.12_linux",
-        "postgres_py3.13_linux",
-    ]
-    assert len({j.artifact_name() for j in jobs}) == 3
-
-
 def test_environmentless_target_emits_single_unit_job():
-    [job] = expand_batch_jobs([unit("ddev", target="ddev", environments=())])
+    [job] = expand_batch_jobs([make_unit("ddev", environment=env(""))], agent_image_resolver=fake_resolver)
 
     assert (job.name, job.target, job.environment) == ("ddev", "ddev", "")
     assert (job.unit_tests, job.e2e_tests) == (True, False)
 
 
+def test_python_version_comes_from_the_environment():
+    units = [make_unit(environment=env("py3.11", python_version="3.11"))]
+
+    [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
+
+    assert job.python_version == "3.11"
+
+
+def test_e2e_job_carries_the_resolved_agent_image():
+    units = [make_unit(environment=env("py3.11", python_version="3.11", e2e=True))]
+
+    [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
+
+    assert job.agent_image == "agent:3.11-linux"
+
+
+def test_job_without_e2e_carries_no_agent_image():
+    units = [make_unit(environment=env("py3.11", e2e=False))]
+
+    [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
+
+    assert job.agent_image is None
+
+
+def test_unresolvable_agent_image_is_ignored_when_the_job_runs_no_e2e():
+    # A Python version with no Agent image only breaks planning for jobs that would have used it.
+    units = [make_unit(environment=env("py3.10", python_version="3.10", e2e=False))]
+
+    [job] = expand_batch_jobs(units)
+
+    assert job.agent_image is None
+
+
+def test_unresolvable_agent_image_fails_planning_for_an_e2e_job():
+    units = [make_unit(environment=env("py3.10", python_version="3.10", e2e=True))]
+
+    with pytest.raises(UnknownPythonVersion, match="3.10"):
+        expand_batch_jobs(units)
+
+
 def test_runner_labels_and_platform_are_preserved():
     units = [
-        unit(
-            "sqlserver on Windows (py3.13)",
-            target="sqlserver",
+        make_unit(
+            "sqlserver",
+            name="sqlserver on Windows (py3.13)",
             platform="windows",
             runner_labels=("windows-2022", "x-large"),
-            environments=(env("py3.13", platform="windows"),),
+            environment=env("py3.13", platform="windows"),
         )
     ]
 
-    [job] = expand_batch_jobs(units)
+    [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
 
     assert job.runner_labels == ("windows-2022", "x-large")
     assert job.platform == Platform.WINDOWS
@@ -121,15 +114,16 @@ def test_runner_labels_and_platform_are_preserved():
 
 def test_multiple_units_expand_in_order_one_job_each():
     units = [
-        unit("postgres (py3.11)", environments=(env("py3.11"),)),
-        unit("postgres (py3.12)", environments=(env("py3.12"),)),
-        unit("redis (py3.11)", target="redis", environments=(env("py3.11"),)),
+        make_unit(name="postgres (py3.11)", environment=env("py3.11")),
+        make_unit(name="postgres (py3.12)", environment=env("py3.12")),
+        make_unit("redis", name="redis (py3.11)", environment=env("py3.11")),
     ]
 
-    jobs = expand_batch_jobs(units)
+    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
 
     assert [(j.name, j.environment) for j in jobs] == [
         ("postgres (py3.11)", "py3.11"),
         ("postgres (py3.12)", "py3.12"),
         ("redis (py3.11)", "py3.11"),
     ]
+    assert len({j.artifact_name() for j in jobs}) == 3

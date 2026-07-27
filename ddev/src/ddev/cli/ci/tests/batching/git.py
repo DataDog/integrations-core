@@ -68,16 +68,17 @@ class SubprocessGitProvider:
     """Production :class:`GitProvider` that shells out to the real ``git`` executable."""
 
     def __call__(self, *args: str) -> str:
+        # Diagnostics are kept off stdout so they can never reach the strict diff parser.
         try:
             process = subprocess.run(
                 ["git", *args],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
+                stderr=subprocess.PIPE,
                 encoding="utf-8",
                 check=True,
             )
         except subprocess.CalledProcessError as e:
-            raise OSError(f"{str(e)[:-1]}:\n{e.output}") from None
+            raise OSError(f"{str(e)[:-1]}:\n{e.stderr}") from None
 
         return process.stdout
 

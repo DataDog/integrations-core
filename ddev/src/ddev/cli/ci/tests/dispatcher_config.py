@@ -23,8 +23,8 @@ class BatchingConfig(BaseModel):
     permits a single integration whose job count exceeds ``max_jobs_per_batch`` to span multiple
     capacity-bounded batches.
 
-    There is intentionally no environment- or facet-splitting option: the authoritative plan always
-    emits one concrete job per resolved environment, so such a knob could not alter the outcome.
+    Splitting a job's unit and E2E facets into separate jobs is not implemented yet; the plan
+    currently emits one job per resolved environment that produces both facets.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -39,6 +39,9 @@ class DispatcherConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     global_timeout_seconds: float = Field(default=10800.0, gt=0)  # 3 hours
+    # Used only where a Hatch environment declares no Python of its own, and for targets that
+    # define no environments at all.
+    default_python_version: str = Field(default="3.13", pattern=r"^\d+\.\d+$")
     batching: BatchingConfig = BatchingConfig()
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()
 
