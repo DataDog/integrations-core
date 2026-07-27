@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from ddev.integration.core import Integration
     from ddev.repo.core import Repository
     from ddev.utils.hatch import Environment
-    from ddev.utils.platform import Platform
+    from ddev.utils.platform import Platform, PlatformName
 
 
 def build_test_units(
@@ -77,7 +77,7 @@ def build_test_units(
             continue
 
         integration = repo.integrations.get(name)
-        platforms = resolve_platforms(ci_override.get("platforms", []), _supported_os(integration))
+        platforms = resolve_platforms(ci_override.get("platforms", []), _supported_os(integration), target=name)
         definitions.append(
             TargetDefinition(
                 name=name,
@@ -145,7 +145,7 @@ class HatchEnvironmentProvider:
     platform: Platform
     default_python_version: str
 
-    def __call__(self, integration: Integration, platforms: Sequence[str]) -> list[ResolvedEnvironment]:
+    def __call__(self, integration: Integration, platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]:
         from ddev.utils.hatch import list_environments
 
         return resolve_hatch_environments(
@@ -157,7 +157,7 @@ class HatchEnvironmentProvider:
 
 def resolve_hatch_environments(
     environments: Sequence[Environment],
-    platforms: Sequence[str],
+    platforms: Sequence[PlatformName],
     *,
     default_python_version: str,
 ) -> list[ResolvedEnvironment]:
@@ -178,22 +178,27 @@ def resolve_hatch_environments(
     if not platforms:
         return []
 
-    default_platform = platforms[0]
+    by_name = {str(platform): platform for platform in platforms}
     resolved: list[ResolvedEnvironment] = []
     for environment in environments:
         if not (environment.test_env or environment.e2e_env):
             continue
 
-        candidate_platforms = list(environment.platforms) if environment.platforms else [default_platform]
-        for platform_id in candidate_platforms:
-            if platform_id in platforms:
-                resolved.append(
-                    ResolvedEnvironment(
-                        name=environment.name,
-                        platform=platform_id,
-                        python_version=environment.python or default_python_version,
-                        test_available=environment.test_env,
-                        e2e_available=environment.e2e_env,
-                    )
+        if environment.platforms:
+            # Hatch's constraint is raw configuration, so a platform ddev does not target simply
+            # fails to intersect the target's platforms rather than failing the plan.
+            candidate_platforms = [by_name[name] for name in environment.platforms if name in by_name]
+        else:
+            candidate_platforms = [platforms[0]]
+
+        for platform in candidate_platforms:
+            resolved.append(
+                ResolvedEnvironment(
+                    name=environment.name,
+                    platform=platform,
+                    python_version=environment.python or default_python_version,
+                    test_available=environment.test_env,
+                    e2e_available=environment.e2e_env,
                 )
+            )
     return resolved

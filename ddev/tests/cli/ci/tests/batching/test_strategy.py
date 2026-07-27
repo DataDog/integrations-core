@@ -14,7 +14,8 @@ from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, Planning
 from ddev.cli.ci.tests.batching.strategy import default_strategy
 from ddev.cli.ci.tests.batching.validation import validate_batches
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
-from ddev.cli.ci.tests.messages import BatchJob, Platform
+from ddev.cli.ci.tests.messages import BatchJob
+from ddev.utils.platform import PlatformName
 
 
 def jobs(target: str, count: int) -> list[BatchJob]:
@@ -26,7 +27,7 @@ def jobs(target: str, count: int) -> list[BatchJob]:
             target=target,
             runner_labels=("ubuntu-22.04",),
             environment=f"env-{index}",
-            platform=Platform.LINUX,
+            platform=PlatformName.LINUX,
             python_version="3.13",
             unit_tests=True,
             e2e_tests=False,
@@ -166,7 +167,7 @@ def test_validate_rejects_duplicate_names_within_batch():
         target="mysql",
         runner_labels=("ubuntu-22.04",),
         environment="py3.11",
-        platform=Platform.LINUX,
+        platform=PlatformName.LINUX,
         python_version="3.11",
         unit_tests=True,
         e2e_tests=False,
@@ -185,7 +186,7 @@ def test_validate_rejects_duplicate_artifact_identity_within_batch():
             target="postgres",
             runner_labels=("ubuntu-22.04",),
             environment="py3.11",
-            platform=Platform.LINUX,
+            platform=PlatformName.LINUX,
             python_version="3.11",
             unit_tests=True,
             e2e_tests=False,

@@ -20,19 +20,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from ddev.cli.ci.tests.messages import BatchJob, Platform
+from ddev.cli.ci.tests.messages import BatchJob
 from ddev.e2e.agent_images import get_agent_image
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from ddev.cli.ci.tests.batching.units import TestUnit
+    from ddev.utils.platform import PlatformName
 
 
 class AgentImageResolver(Protocol):
     """Resolves the E2E Agent image for a Python version on a platform."""
 
-    def __call__(self, python_version: str, platform: str) -> str: ...
+    def __call__(self, python_version: str, platform: PlatformName) -> str: ...
 
 
 def expand_batch_jobs(
@@ -54,7 +55,7 @@ def expand_batch_jobs(
                 target=unit.target,
                 runner_labels=unit.runner_labels,
                 environment=environment.name,
-                platform=Platform(unit.platform),
+                platform=unit.platform,
                 python_version=environment.python_version,
                 unit_tests=environment.test_available,
                 e2e_tests=environment.e2e_available,

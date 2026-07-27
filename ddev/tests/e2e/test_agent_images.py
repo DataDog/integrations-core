@@ -8,28 +8,29 @@ import pytest
 from ddev.e2e.agent.docker import _normalize_agent_image_name
 from ddev.e2e.agent_images import (
     AGENT_IMAGES_BY_PYTHON,
-    LINUX,
-    WINDOWS,
     AgentImages,
     UnknownPythonVersion,
     UnsupportedAgentPlatform,
+    find_unpublished_images,
     get_agent_image,
+    parse_image_reference,
 )
+from ddev.utils.platform import PlatformName
 
 
-@pytest.mark.parametrize("platform", [LINUX, WINDOWS])
+@pytest.mark.parametrize("platform", [PlatformName.LINUX, PlatformName.WINDOWS])
 def test_every_known_python_version_resolves_on_every_platform(platform):
     for python_version in AGENT_IMAGES_BY_PYTHON:
         assert get_agent_image(python_version, platform)
 
 
 def test_linux_and_windows_images_differ():
-    assert get_agent_image('3.13', LINUX) != get_agent_image('3.13', WINDOWS)
+    assert get_agent_image('3.13', PlatformName.LINUX) != get_agent_image('3.13', PlatformName.WINDOWS)
 
 
 def test_current_line_tracks_the_development_build():
-    assert get_agent_image('3.13', LINUX) == 'registry.datadoghq.com/agent-dev:master-py3'
-    assert get_agent_image('3.13', WINDOWS) == 'registry.datadoghq.com/agent:7-rc-servercore'
+    assert get_agent_image('3.13', PlatformName.LINUX) == 'registry.datadoghq.com/agent-dev:master-py3'
+    assert get_agent_image('3.13', PlatformName.WINDOWS) == 'registry.datadoghq.com/agent:7-rc-servercore'
 
 
 @pytest.mark.parametrize(
@@ -40,11 +41,11 @@ def test_current_line_tracks_the_development_build():
     ],
 )
 def test_superseded_lines_are_pinned_to_their_final_release(python_version, expected):
-    assert get_agent_image(python_version, LINUX) == expected
+    assert get_agent_image(python_version, PlatformName.LINUX) == expected
 
 
 def test_windows_images_use_the_servercore_variant():
-    assert get_agent_image('3.12', WINDOWS) == 'registry.datadoghq.com/agent:7.71.1-servercore'
+    assert get_agent_image('3.12', PlatformName.WINDOWS) == 'registry.datadoghq.com/agent:7.71.1-servercore'
 
 
 @pytest.mark.parametrize(
@@ -56,7 +57,7 @@ def test_windows_images_use_the_servercore_variant():
 )
 def test_python_version_without_an_agent_is_rejected(python_version):
     with pytest.raises(UnknownPythonVersion, match="No Agent release embeds"):
-        get_agent_image(python_version, LINUX)
+        get_agent_image(python_version, PlatformName.LINUX)
 
 
 @pytest.mark.parametrize(
@@ -71,15 +72,15 @@ def test_python_version_without_an_agent_is_rejected(python_version):
 )
 def test_malformed_python_version_is_rejected_rather_than_guessed(python_version):
     with pytest.raises(UnknownPythonVersion, match="Invalid Python version"):
-        get_agent_image(python_version, LINUX)
+        get_agent_image(python_version, PlatformName.LINUX)
 
 
 def test_unsupported_platform_is_rejected():
     with pytest.raises(UnsupportedAgentPlatform, match="macos"):
-        get_agent_image('3.13', 'macos')
+        get_agent_image('3.13', PlatformName.MACOS)
 
 
-@pytest.mark.parametrize("platform", [LINUX, WINDOWS])
+@pytest.mark.parametrize("platform", [PlatformName.LINUX, PlatformName.WINDOWS])
 def test_images_survive_ddev_jmx_normalization(platform):
     """Every image must keep its identity when ddev appends the JMX suffix at E2E runtime.
 
@@ -93,22 +94,63 @@ def test_images_survive_ddev_jmx_normalization(platform):
         assert _normalize_agent_image_name(image, 3, True) == f'{image}-jmx'
 
 
-def test_for_platform_rejects_an_unknown_platform():
+def test_for_platform_rejects_a_platform_with_no_agent_image():
     images = AgentImages(linux='a', windows='b')
 
     with pytest.raises(UnsupportedAgentPlatform):
-        images.for_platform('freebsd')
+        images.for_platform(PlatformName.MACOS)
+
+
+@pytest.mark.parametrize(
+    "image, expected",
+    [
+        pytest.param(
+            'registry.datadoghq.com/agent:7.71.1-servercore',
+            ('registry.datadoghq.com', 'agent', '7.71.1-servercore'),
+            id="release",
+        ),
+        pytest.param(
+            'registry.datadoghq.com/agent-dev:master-py3',
+            ('registry.datadoghq.com', 'agent-dev', 'master-py3'),
+            id="dev",
+        ),
+        pytest.param('host/nested/repository:tag', ('host', 'nested/repository', 'tag'), id="nested-repository"),
+    ],
+)
+def test_parse_image_reference(image, expected):
+    assert parse_image_reference(image) == expected
+
+
+@pytest.mark.parametrize("image", ['agent:7.71.1', 'registry.datadoghq.com/agent', ''])
+def test_parse_image_reference_rejects_an_incomplete_reference(image):
+    with pytest.raises(ValueError, match="fully qualified"):
+        parse_image_reference(image)
+
+
+def test_find_unpublished_images_queries_each_distinct_image_once(monkeypatch):
+    queried: list[tuple[str, str]] = []
+
+    def fake_manifest_exists(repository, tag, *, host, **kwargs):
+        queried.append((repository, tag))
+        return tag != 'gone'
+
+    monkeypatch.setattr('ddev.utils.docker_registry.manifest_exists', fake_manifest_exists)
+
+    missing = find_unpublished_images(
+        ['host/agent:here', 'host/agent:gone', 'host/agent:here'],
+    )
+
+    assert missing == ['host/agent:gone']
+    assert queried == [('agent', 'here'), ('agent', 'gone')]
 
 
 @pytest.mark.requires_ci
-@pytest.mark.parametrize("platform", [LINUX, WINDOWS])
-def test_every_image_is_published(platform):
-    """Guard against a typo or a tag that has been removed from the registry."""
-    from ddev.utils.docker_registry import manifest_exists
+def test_every_image_in_the_manifest_is_published():
+    """Guard against a typo or a tag that has been withdrawn from the registry."""
+    images = [
+        get_agent_image(python_version, platform)
+        for python_version in AGENT_IMAGES_BY_PYTHON
+        for platform in (PlatformName.LINUX, PlatformName.WINDOWS)
+    ]
 
-    for python_version in AGENT_IMAGES_BY_PYTHON:
-        image = get_agent_image(python_version, platform)
-        _, _, remainder = image.partition('/')
-        repository, _, tag = remainder.partition(':')
-
-        assert manifest_exists(repository, tag), f'{image} is not published'
+    assert find_unpublished_images(images) == []

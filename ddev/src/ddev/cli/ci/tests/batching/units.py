@@ -21,21 +21,23 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar, NamedTuple, Protocol
 
+from ddev.utils.platform import PlatformName
+
 if TYPE_CHECKING:
     from ddev.integration.core import Integration
 
 
 class PlatformSpec(NamedTuple):
-    """Display name and default GitHub runner image for one test-matrix platform."""
+    """Display name and default GitHub runner image for one platform."""
 
     name: str
     image: str
 
 
-PLATFORMS: dict[str, PlatformSpec] = {
-    "linux": PlatformSpec("Linux", "ubuntu-22.04"),
-    "windows": PlatformSpec("Windows", "windows-2022"),
-    "macos": PlatformSpec("macOS", "macos-14-large"),
+PLATFORMS: dict[PlatformName, PlatformSpec] = {
+    PlatformName.LINUX: PlatformSpec("Linux", "ubuntu-22.04"),
+    PlatformName.WINDOWS: PlatformSpec("Windows", "windows-2022"),
+    PlatformName.MACOS: PlatformSpec("macOS", "macos-14-large"),
 }
 
 # Targets rendered before everything else, in this order.
@@ -69,7 +71,7 @@ class ResolvedEnvironment:
     """
 
     name: str
-    platform: str
+    platform: PlatformName
     python_version: str
     test_available: bool = True
     e2e_available: bool = False
@@ -82,7 +84,7 @@ class EnvironmentProvider(Protocol):
     implementations source environments from ddev's Hatch model; tests inject synthetic ones.
     """
 
-    def __call__(self, integration: Integration, platforms: Sequence[str]) -> list[ResolvedEnvironment]: ...
+    def __call__(self, integration: Integration, platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]: ...
 
 
 @dataclass(frozen=True)
@@ -96,7 +98,7 @@ class TargetDefinition:
 
     name: str
     display_name: str | None = None
-    platforms: tuple[str, ...] = ("linux",)
+    platforms: tuple[PlatformName, ...] = (PlatformName.LINUX,)
     runners: Mapping[str, Sequence[str]] = field(default_factory=dict)
     environments: tuple[ResolvedEnvironment, ...] = ()
 
@@ -116,7 +118,7 @@ class TestUnit:
 
     target: str
     name: str
-    platform: str
+    platform: PlatformName
     runner_labels: tuple[str, ...]
     environment: ResolvedEnvironment
 
@@ -126,27 +128,44 @@ def normalize_job_name(job_name: str) -> str:
     return JOB_NAME_RESERVED_PATTERN.sub("_", job_name)
 
 
-def resolve_platforms(platform_override: Sequence[str], supported_os: Sequence[str]) -> list[str]:
-    """Resolve the platforms a target runs on from CI overrides then its supported OS list."""
-    if platform_override:
-        return list(platform_override)
+def parse_platform_name(value: str, *, target: str) -> PlatformName:
+    """Convert a configured platform string into a `PlatformName`, naming the target on failure."""
+    try:
+        return PlatformName(value.lower())
+    except ValueError:
+        supported = ", ".join(sorted(PLATFORMS))
+        raise ValueError(f"Unsupported platform for `{target}`: {value} (expected one of {supported})") from None
 
-    platform_ids = [value.lower() for value in supported_os]
+
+def resolve_platforms(
+    platform_override: Sequence[str],
+    supported_os: Sequence[str],
+    *,
+    target: str,
+) -> list[PlatformName]:
+    """Resolve the platforms a target runs on from CI overrides then its supported OS list.
+
+    Raw configuration strings are parsed here so everything downstream holds a `PlatformName`.
+    """
+    if platform_override:
+        return [parse_platform_name(value, target=target) for value in platform_override]
+
+    platform_ids = [parse_platform_name(value, target=target) for value in supported_os]
     # A target that supports multiple operating systems runs on Linux only by default; a
     # Windows-exclusive target runs on Windows. Testing a multi-OS target on additional
     # platforms (e.g. Windows for path-handling coverage) is opt-in via the CI ``platforms``
     # override, which takes precedence above.
-    if platform_ids != ["windows"]:
-        platform_ids = ["linux"]
+    if platform_ids != [PlatformName.WINDOWS]:
+        platform_ids = [PlatformName.LINUX]
 
     return platform_ids
 
 
 def group_environments_by_platform(
     environments: Sequence[ResolvedEnvironment],
-) -> dict[str, list[ResolvedEnvironment]]:
+) -> dict[PlatformName, list[ResolvedEnvironment]]:
     """Group resolved environments by their target platform, preserving order."""
-    grouped: dict[str, list[ResolvedEnvironment]] = {}
+    grouped: dict[PlatformName, list[ResolvedEnvironment]] = {}
     for environment in environments:
         grouped.setdefault(environment.platform, []).append(environment)
     return grouped
@@ -171,9 +190,6 @@ def expand_test_units(targets: Sequence[TargetDefinition], *, default_python_ver
         environments_by_platform = group_environments_by_platform(target.environments)
 
         for platform_id in target.platforms:
-            if platform_id not in PLATFORMS:
-                raise ValueError(f"Unsupported platform for `{target.name}`: {platform_id}")
-
             platform = PLATFORMS[platform_id]
             base_name = display_name
             if len(target.platforms) > 1:

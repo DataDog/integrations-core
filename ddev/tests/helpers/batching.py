@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from ddev.cli.ci.tests.batching.git import ChangedFile, ChangeType
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
+from ddev.utils.platform import PlatformName
 
 DEFAULT_PYTHON_VERSION = "3.13"
 DEFAULT_RUNNER_LABELS = ("ubuntu-22.04",)
@@ -14,7 +15,7 @@ DEFAULT_RUNNER_LABELS = ("ubuntu-22.04",)
 
 def env(
     name: str,
-    platform: str = "linux",
+    platform: PlatformName = PlatformName.LINUX,
     *,
     python_version: str = DEFAULT_PYTHON_VERSION,
     unit: bool = True,
@@ -33,7 +34,7 @@ def make_unit(
     target: str = "postgres",
     *,
     name: str | None = None,
-    platform: str = "linux",
+    platform: PlatformName = PlatformName.LINUX,
     runner_labels: tuple[str, ...] = DEFAULT_RUNNER_LABELS,
     environment: ResolvedEnvironment | None = None,
 ) -> TestUnit:

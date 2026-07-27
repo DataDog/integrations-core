@@ -5,12 +5,12 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from enum import StrEnum, auto
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.junit import TestStatus
+from ddev.utils.platform import PlatformName
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -18,14 +18,6 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async.models import WorkflowJob
     from ddev.utils.junit import JUnitReport, JUnitTestCase
-
-
-class Platform(StrEnum):
-    """Operating system a test job runs on."""
-
-    LINUX = auto()
-    WINDOWS = auto()
-    MACOS = auto()
 
 
 # Characters GitHub disallows in an artifact name (plus CR/LF).
@@ -58,7 +50,7 @@ class BatchJob:
     target: str
     runner_labels: tuple[str, ...]
     environment: str
-    platform: Platform
+    platform: PlatformName
     python_version: str
     unit_tests: bool
     e2e_tests: bool
@@ -88,7 +80,7 @@ class JobResult:
 
     integration: str
     environment: str
-    platform: Platform
+    platform: PlatformName
     status: Status
     failed_steps: list[str] = field(default_factory=list)
     reports: tuple[JUnitReport, ...] = ()

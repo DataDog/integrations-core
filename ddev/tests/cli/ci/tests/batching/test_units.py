@@ -14,6 +14,7 @@ from ddev.cli.ci.tests.batching.units import (
     normalize_job_name,
     resolve_platforms,
 )
+from ddev.utils.platform import PlatformName
 from tests.helpers.batching import DEFAULT_PYTHON_VERSION, env
 
 expand = functools.partial(expand_test_units, default_python_version=DEFAULT_PYTHON_VERSION)
@@ -33,14 +34,20 @@ def test_normalize_job_name(raw, expected):
 @pytest.mark.parametrize(
     "platform_override, supported_os, expected",
     [
-        pytest.param(["linux", "windows"], ["Windows"], ["linux", "windows"], id="override-wins"),
-        pytest.param([], ["Windows"], ["windows"], id="windows-exclusive"),
-        pytest.param([], ["Linux", "Windows"], ["linux"], id="multi-os-defaults-linux"),
-        pytest.param([], [], ["linux"], id="no-info-defaults-linux"),
+        pytest.param(["linux", "windows"], ["Windows"], [PlatformName.LINUX, PlatformName.WINDOWS], id="override-wins"),
+        pytest.param([], ["Windows"], [PlatformName.WINDOWS], id="windows-exclusive"),
+        pytest.param([], ["Linux", "Windows"], [PlatformName.LINUX], id="multi-os-defaults-linux"),
+        pytest.param([], [], [PlatformName.LINUX], id="no-info-defaults-linux"),
     ],
 )
 def test_resolve_platforms(platform_override, supported_os, expected):
-    assert resolve_platforms(platform_override, supported_os) == expected
+    assert resolve_platforms(platform_override, supported_os, target="postgres") == expected
+
+
+@pytest.mark.parametrize("value", ["solaris", "Windows Server"])
+def test_resolve_platforms_rejects_an_unknown_platform(value):
+    with pytest.raises(ValueError, match="Unsupported platform for `postgres`"):
+        resolve_platforms([value], [], target="postgres")
 
 
 def test_expand_gives_each_environment_its_own_unit():
@@ -50,14 +57,14 @@ def test_expand_gives_each_environment_its_own_unit():
         TestUnit(
             target="postgres",
             name="postgres (py3.11)",
-            platform="linux",
+            platform=PlatformName.LINUX,
             runner_labels=("ubuntu-22.04",),
             environment=env("py3.11", e2e=True),
         ),
         TestUnit(
             target="postgres",
             name="postgres (py3.12)",
-            platform="linux",
+            platform=PlatformName.LINUX,
             runner_labels=("ubuntu-22.04",),
             environment=env("py3.12", e2e=True),
         ),
@@ -82,7 +89,7 @@ def test_expand_environmentless_target_gets_an_unnamed_environment():
         TestUnit(
             target="postgres",
             name="postgres",
-            platform="linux",
+            platform=PlatformName.LINUX,
             runner_labels=("ubuntu-22.04",),
             environment=env("", python_version=DEFAULT_PYTHON_VERSION),
         ),
@@ -114,11 +121,11 @@ def test_expand_multi_label_runner_is_a_single_selection():
 
 
 def test_expand_platform_override_adds_platform_suffix():
-    units = expand([TargetDefinition("postgres", platforms=("linux", "windows"))])
+    units = expand([TargetDefinition("postgres", platforms=(PlatformName.LINUX, PlatformName.WINDOWS))])
 
     assert [(u.platform, u.name, u.runner_labels) for u in units] == [
-        ("linux", "postgres on Linux", ("ubuntu-22.04",)),
-        ("windows", "postgres on Windows", ("windows-2022",)),
+        (PlatformName.LINUX, "postgres on Linux", ("ubuntu-22.04",)),
+        (PlatformName.WINDOWS, "postgres on Windows", ("windows-2022",)),
     ]
 
 
@@ -144,11 +151,6 @@ def test_expand_respects_display_order_override():
     assert [u.target for u in expand(targets)] == ["ddev", "datadog_checks_base", "postgres"]
 
 
-def test_expand_rejects_an_unsupported_platform():
-    with pytest.raises(ValueError, match="Unsupported platform"):
-        expand([TargetDefinition("postgres", platforms=("solaris",))])
-
-
 def test_expand_e2e_availability_is_per_environment():
     targets = [TargetDefinition("postgres", environments=(env("py3.11", e2e=True), env("py3.12", e2e=False)))]
 
@@ -163,14 +165,17 @@ def test_expand_e2e_availability_is_platform_specific():
     targets = [
         TargetDefinition(
             "postgres",
-            platforms=("linux", "windows"),
-            environments=(env("py3.11-linux", "linux", e2e=True), env("py3.11-windows", "windows", e2e=False)),
+            platforms=(PlatformName.LINUX, PlatformName.WINDOWS),
+            environments=(
+                env("py3.11-linux", PlatformName.LINUX, e2e=True),
+                env("py3.11-windows", PlatformName.WINDOWS, e2e=False),
+            ),
         ),
     ]
 
     assert [(u.platform, u.environment.name, u.environment.e2e_available) for u in expand(targets)] == [
-        ("linux", "py3.11-linux", True),
-        ("windows", "py3.11-windows", False),
+        (PlatformName.LINUX, "py3.11-linux", True),
+        (PlatformName.WINDOWS, "py3.11-windows", False),
     ]
 
 
@@ -180,14 +185,14 @@ def test_expand_platform_without_environments_still_gets_a_unit():
     targets = [
         TargetDefinition(
             "datadog_checks_base",
-            platforms=("linux", "windows"),
-            environments=(env("py3.13", "linux"),),
+            platforms=(PlatformName.LINUX, PlatformName.WINDOWS),
+            environments=(env("py3.13", PlatformName.LINUX),),
         ),
     ]
 
     assert [(u.platform, u.environment.name) for u in expand(targets)] == [
-        ("linux", "py3.13"),
-        ("windows", ""),
+        (PlatformName.LINUX, "py3.13"),
+        (PlatformName.WINDOWS, ""),
     ]
 
 
