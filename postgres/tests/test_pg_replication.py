@@ -28,24 +28,9 @@ from .common import (
     check_wait_event_metrics,
     check_wal_receiver_metrics,
 )
-from .utils import _get_superconn, _wait_for_value, requires_over_10
+from .utils import _force_wal_change, _get_superconn, _wait_for_value, _wait_for_wal_replay, requires_over_10
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-def _wait_for_wal_replay(pg_replica_instance: dict[str, object], target_lsn: str, attempts: int = 10) -> None:
-    conn = _get_superconn(pg_replica_instance)
-    try:
-        for _ in range(attempts):
-            with conn.cursor() as cur:
-                cur.execute("SELECT pg_wal_lsn_diff(pg_last_wal_replay_lsn(), %s::pg_lsn) >= 0", (target_lsn,))
-                if cur.fetchone()[0]:
-                    return
-            time.sleep(0.1)
-    finally:
-        conn.close()
-
-    pytest.fail(f'Replica did not replay WAL up to {target_lsn}')
 
 
 @requires_over_10
@@ -105,14 +90,10 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
     check = integration_check(pg_replica_instance)
     check._connect()
     check.initialize_is_aurora()
+    # The receiver ages are only bounded by something the test controls once the replica has
+    # received WAL generated here, so force a WAL record and wait for the replica to replay it.
     wal_change_started = time.monotonic()
-    with _get_superconn(pg_instance) as conn:
-        with conn.cursor() as cur:
-            # Ask for a new txid to force a WAL change
-            cur.execute('select txid_current();')
-            cur.execute('select pg_current_wal_lsn();')
-            target_lsn = cur.fetchone()[0]
-    _wait_for_wal_replay(pg_replica_instance, target_lsn)
+    _wait_for_wal_replay(pg_replica_instance, _force_wal_change(pg_instance))
 
     check.check(pg_replica_instance)
     expected_tags = _get_expected_replication_tags(check, pg_replica_instance, status='streaming')
