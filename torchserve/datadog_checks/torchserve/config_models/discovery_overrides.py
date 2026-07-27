@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import Any
 
 from datadog_checks.base.utils.discovery import Service
@@ -19,7 +19,7 @@ from datadog_checks.base.utils.discovery import Service
 NON_METRICS_PORTS = frozenset({8080, 8081, 7070, 7071})
 
 
-def candidates(service: Service, default) -> Iterator[dict[str, Any]]:
+def candidates(service: Service, default: Callable[[Service], Iterator[dict[str, Any]]]) -> Iterator[dict[str, Any]]:
     excluded_endpoints = {f'http://{service.host}:{port}/metrics' for port in NON_METRICS_PORTS}
     for candidate in default(service):
         endpoint = candidate['instances'][0].get('openmetrics_endpoint')
