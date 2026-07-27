@@ -2,16 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+from collections.abc import Iterator
 
 import mock
 import pytest
 import requests
+from urllib3.exceptions import ReadTimeoutError
 
-from datadog_checks.base.utils.http import RequestsWrapper, _translate_requests_exception
+from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper, _translate_requests_exception
 from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError,
+    HTTPConnectTimeoutError,
     HTTPError,
     HTTPInvalidURLError,
+    HTTPReadTimeoutError,
     HTTPRequestError,
     HTTPSSLError,
     HTTPStatusError,
@@ -22,8 +26,9 @@ from datadog_checks.base.utils.http_exceptions import (
 @pytest.mark.parametrize(
     'raised, expected',
     [
-        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPTimeoutError, id='connect-timeout'),
-        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPTimeoutError, id='read-timeout'),
+        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPConnectTimeoutError, id='connect-timeout'),
+        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPReadTimeoutError, id='read-timeout'),
+        pytest.param(requests.exceptions.Timeout('generic'), HTTPTimeoutError, id='generic-timeout'),
         pytest.param(requests.exceptions.ProxyError('proxy'), HTTPConnectionError, id='proxy-error'),
         pytest.param(requests.exceptions.ConnectionError('refused'), HTTPConnectionError, id='connection-error'),
         pytest.param(requests.exceptions.InvalidURL('bad-url'), HTTPInvalidURLError, id='invalid-url'),
@@ -33,8 +38,16 @@ from datadog_checks.base.utils.http_exceptions import (
 def test_transport_exception_mapping(raised, expected):
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', side_effect=raised):
-        with pytest.raises(expected):
+        with pytest.raises(expected) as exc_info:
             http.get('http://example.test/')
+
+    assert type(exc_info.value) is expected
+
+
+def test_phase_specific_timeouts_share_generic_base():
+    assert isinstance(HTTPConnectTimeoutError('connect'), HTTPTimeoutError)
+    assert isinstance(HTTPReadTimeoutError('read'), HTTPTimeoutError)
+    assert not isinstance(HTTPConnectTimeoutError('connect'), HTTPConnectionError)
 
 
 def test_ssl_error_maps_to_http_ssl_error():
@@ -66,7 +79,9 @@ def test_raise_for_status_maps_to_status_error():
         pytest.param(requests.exceptions.InvalidSchema('bad-scheme'), HTTPInvalidURLError, id='invalid-schema'),
         pytest.param(requests.exceptions.URLRequired('no-url'), HTTPInvalidURLError, id='url-required'),
         pytest.param(requests.exceptions.SSLError('cert'), HTTPSSLError, id='ssl'),
-        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPTimeoutError, id='connect-timeout'),
+        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPConnectTimeoutError, id='connect-timeout'),
+        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPReadTimeoutError, id='read-timeout'),
+        pytest.param(requests.exceptions.Timeout('generic'), HTTPTimeoutError, id='generic-timeout'),
         pytest.param(requests.exceptions.ConnectionError('refused'), HTTPConnectionError, id='connection-error'),
         pytest.param(requests.exceptions.ProxyError('proxy'), HTTPConnectionError, id='proxy-error'),
         pytest.param(requests.exceptions.ContentDecodingError('decode'), HTTPRequestError, id='content-decoding'),
@@ -94,7 +109,7 @@ def test_translate_does_not_leak_raw_response():
     'raised, expected',
     [
         pytest.param(requests.exceptions.ConnectionError('dropped'), HTTPConnectionError, id='connection-error'),
-        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPTimeoutError, id='read-timeout'),
+        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPReadTimeoutError, id='read-timeout'),
     ],
 )
 @pytest.mark.parametrize('iter_method', ['iter_content', 'iter_lines'])
@@ -106,6 +121,25 @@ def test_stream_seam_maps_mid_stream_exceptions(raised, expected, iter_method):
         wrapped = http.get('http://example.test/', stream=True)
         with pytest.raises(expected):
             list(getattr(wrapped, iter_method)())
+
+
+class TimeoutRawStream:
+    def stream(self, chunk_size: int, decode_content: bool = False) -> Iterator[bytes]:
+        assert chunk_size > 0
+        assert decode_content
+        yield b'first\n'
+        raise ReadTimeoutError(None, None, 'slow')
+
+
+def test_response_wrapper_maps_requests_wrapped_mid_stream_read_timeout() -> None:
+    response = requests.Response()
+    response.encoding = 'utf-8'
+    response.raw = TimeoutRawStream()
+    stream = ResponseWrapper(response, 1024).iter_lines(decode_unicode=True)
+
+    assert next(stream) == 'first'
+    with pytest.raises(HTTPReadTimeoutError, match='slow'):
+        next(stream)
 
 
 class FailingRead:

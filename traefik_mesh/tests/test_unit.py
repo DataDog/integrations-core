@@ -8,6 +8,8 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError as _HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError as _HTTPConnectTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPReadTimeoutError as _HTTPReadTimeoutError
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError as _HTTPTimeoutError
 from datadog_checks.dev.http import MockHTTPResponse
@@ -181,6 +183,32 @@ def test_get_json_handles_http_connection_error(mock_http):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     mock_http.get.side_effect = _HTTPConnectionError('Connection refused')
     assert check._get_json('http://example.com/api') is None
+
+
+@pytest.mark.parametrize(
+    'error_type, expected_warning',
+    [
+        pytest.param(
+            _HTTPConnectTimeoutError,
+            "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
+            id='connect-timeout',
+        ),
+        pytest.param(
+            _HTTPReadTimeoutError,
+            "Connection timeout when connecting to %s: %s",
+            id='read-timeout',
+        ),
+    ],
+)
+def test_get_json_timeout_warning(mock_http, error_type, expected_warning):
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    error = error_type('timed out')
+    mock_http.get.side_effect = error
+
+    with mock.patch.object(check, 'warning') as warning:
+        assert check._get_json('http://example.com/api') is None
+
+    warning.assert_called_once_with(expected_warning, 'http://example.com/api', error)
 
 
 def test_get_json_handles_http_timeout_error(mock_http):

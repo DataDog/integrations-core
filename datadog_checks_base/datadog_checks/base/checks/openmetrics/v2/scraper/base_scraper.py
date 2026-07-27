@@ -22,7 +22,11 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+)
 
 
 class OpenMetricsScraper:
@@ -403,18 +407,19 @@ class OpenMetricsScraper:
             with self.get_connection() as connection:
                 # Media type will be used to select parser dynamically
                 self._content_type = connection.headers.get('Content-Type', '')
-                for line in connection.iter_lines(decode_unicode=True):
-                    yield line
-        except (HTTPConnectionError, HTTPTimeoutError) as e:
-            # HTTPTimeoutError is included because requests' ConnectTimeout (previously caught by the raw
-            # ConnectionError) now translates to HTTPTimeoutError, a sibling of HTTPConnectionError. The
-            # agnostic hierarchy does not distinguish connect from read timeouts, so a mid-stream ReadTimeout
-            # is now swallowed here too under ignore_connection_errors. That is intentional: an unresponsive
-            # endpoint is exactly what the flag is meant to tolerate.
+                try:
+                    for line in connection.iter_lines(decode_unicode=True):
+                        yield line
+                except HTTPReadTimeoutError:
+                    if self.ignore_connection_errors:
+                        self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
+                    else:
+                        raise
+        except (HTTPConnectionError, HTTPConnectTimeoutError):
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:
-                raise e
+                raise
 
     def filter_connection_lines(self, line_streamer):
         """

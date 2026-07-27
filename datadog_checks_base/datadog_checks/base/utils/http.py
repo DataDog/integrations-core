@@ -24,6 +24,7 @@ from requests import cookies as requests_cookies
 from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
+from urllib3.exceptions import ReadTimeoutError as Urllib3ReadTimeoutError
 from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
@@ -37,8 +38,10 @@ from .headers import get_default_headers, update_headers
 # Re-export HTTP exceptions for single import location
 from .http_exceptions import (  # noqa: F401
     HTTPConnectionError,
+    HTTPConnectTimeoutError,
     HTTPError,
     HTTPInvalidURLError,
+    HTTPReadTimeoutError,
     HTTPRequestError,
     HTTPSSLError,
     HTTPStatusError,
@@ -239,8 +242,16 @@ def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapp
         return HTTPInvalidURLError(message, request=request)
     if isinstance(exc, requests_exceptions.SSLError):
         return HTTPSSLError(message, request=request)
+    if isinstance(exc, requests_exceptions.ConnectTimeout):
+        return HTTPConnectTimeoutError(message, request=request)
+    if isinstance(exc, requests_exceptions.ReadTimeout):
+        return HTTPReadTimeoutError(message, request=request)
     if isinstance(exc, requests_exceptions.Timeout):
         return HTTPTimeoutError(message, request=request)
+    if isinstance(exc, requests_exceptions.ConnectionError) and any(
+        isinstance(cause, Urllib3ReadTimeoutError) for cause in (exc.__context__, exc.args[0] if exc.args else None)
+    ):
+        return HTTPReadTimeoutError(message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError):
         return HTTPConnectionError(message, request=request)
     if isinstance(exc, requests_exceptions.ContentDecodingError):

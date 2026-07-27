@@ -8,6 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError, HTTPReadTimeoutError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
@@ -140,6 +141,46 @@ def test_get_template_metrics_raise_exception(aggregator, instance, dd_run_check
     dd_run_check(check)
 
     aggregator.assert_metric("elasticsearch.templates.count", count=0)
+
+
+@pytest.mark.parametrize(
+    'error, should_raise',
+    [
+        pytest.param(HTTPReadTimeoutError('slow read'), False, id='read-timeout-is-graceful'),
+        pytest.param(HTTPConnectTimeoutError('slow connect'), True, id='connect-timeout-propagates'),
+    ],
+)
+def test_pshard_graceful_timeout_is_read_specific(instance: dict, error: Exception, should_raise: bool) -> None:
+    instance = deepcopy(instance)
+    instance.update(
+        {
+            'cat_allocation_stats': False,
+            'custom_queries': [],
+            'index_stats': False,
+            'pending_task_stats': False,
+            'pshard_graceful_timeout': True,
+            'pshard_stats': True,
+            'slm_stats': False,
+        }
+    )
+    check = ESCheck('elastic', {}, instances=[instance])
+    check._get_es_version = mock.Mock(return_value=[7, 4, 0])
+    check._get_template_metrics = mock.Mock()
+    check._process_stats_data = mock.Mock()
+    check._process_health_data = mock.Mock()
+
+    def get_data(url: str, *_args: object, **_kwargs: object) -> dict:
+        if url.endswith('/_stats'):
+            raise error
+        return {'cluster_name': 'test', 'nodes': {}}
+
+    check._get_data = mock.Mock(side_effect=get_data)
+
+    if should_raise:
+        with pytest.raises(HTTPConnectTimeoutError, match='slow connect'):
+            check.check(instance)
+    else:
+        check.check(instance)
 
 
 @pytest.mark.parametrize(

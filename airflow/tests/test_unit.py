@@ -6,6 +6,7 @@ import pytest
 
 from datadog_checks.airflow import AirflowCheck
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError, HTTPReadTimeoutError
 
 from . import common
 
@@ -20,6 +21,32 @@ def test_service_checks_cannot_connect(aggregator):
     aggregator.assert_metric('airflow.can_connect', 0, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    'error_type, expected_warning',
+    [
+        pytest.param(
+            HTTPConnectTimeoutError,
+            "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
+            id='connect-timeout',
+        ),
+        pytest.param(
+            HTTPReadTimeoutError,
+            "Connection timeout when connecting to %s: %s",
+            id='read-timeout',
+        ),
+    ],
+)
+def test_get_json_timeout_warning(mock_http, error_type, expected_warning):
+    check = AirflowCheck('airflow', common.FULL_CONFIG, common.FULL_CONFIG['instances'])
+    error = error_type('timed out')
+    mock_http.get.side_effect = error
+
+    with mock.patch.object(check, 'warning') as warning:
+        assert check._get_json('http://localhost:8080/api') is None
+
+    warning.assert_called_once_with(expected_warning, 'http://localhost:8080/api', error)
 
 
 @pytest.mark.parametrize(

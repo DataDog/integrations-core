@@ -6,7 +6,12 @@ import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+    HTTPTimeoutError,
+)
 from datadog_checks.druid import DruidCheck
 
 pytestmark = pytest.mark.unit
@@ -34,6 +39,32 @@ def test_service_check_can_connect_success(aggregator, instance, mock_http):
         AgentCheck.OK,
         tags=['url:http://hello-world.com:8899/status/properties', 'foo:bar'],
     )
+
+
+@pytest.mark.parametrize(
+    'error_type, expected_warning',
+    [
+        pytest.param(
+            HTTPConnectTimeoutError,
+            "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
+            id='connect-timeout',
+        ),
+        pytest.param(
+            HTTPReadTimeoutError,
+            "Connection timeout when connecting to %s: %s",
+            id='read-timeout',
+        ),
+    ],
+)
+def test_make_request_timeout_warning(instance, mock_http, error_type, expected_warning):
+    check = DruidCheck('druid', {}, [instance])
+    error = error_type('timed out')
+    mock_http.get.side_effect = error
+
+    with mock.patch.object(check, 'warning') as warning:
+        assert check._make_request('http://hello-world.com:8899/status') is None
+
+    warning.assert_called_once_with(expected_warning, 'http://hello-world.com:8899/status', error)
 
 
 @pytest.mark.parametrize(

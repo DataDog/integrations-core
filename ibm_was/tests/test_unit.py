@@ -7,7 +7,11 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+)
 from datadog_checks.ibm_was import IbmWasCheck
 
 from . import common
@@ -93,16 +97,25 @@ def test_critical_service_check(instance, check, aggregator):
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
 
 
-def test_make_request_catches_http_timeout_error(instance, check, aggregator, mock_http):
-    error = HTTPTimeoutError('request timed out')
-    mock_http.get.side_effect = error
+def test_make_request_catches_connect_timeout(instance, check, aggregator, mock_http):
+    mock_http.get.side_effect = HTTPConnectTimeoutError('connect timed out')
     check = check(instance)
 
-    with pytest.raises(HTTPTimeoutError, match='request timed out'):
+    with pytest.raises(HTTPConnectTimeoutError, match='connect timed out'):
         check.make_request()
 
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+
+
+def test_make_request_does_not_catch_read_timeout(instance, check, aggregator, mock_http):
+    mock_http.get.side_effect = HTTPReadTimeoutError('read timed out')
+    check = check(instance)
+
+    with pytest.raises(HTTPReadTimeoutError, match='read timed out'):
+        check.make_request()
+
+    aggregator.assert_service_check('ibm_was.can_connect', count=0)
 
 
 def test_right_server_tag(instance, check, aggregator):
