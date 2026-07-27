@@ -31,13 +31,13 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 
 #### Generating New Code
 
-When generating python code, always add type hinting to the methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
+Add type hints to new functions and methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
 
-If a method yields a value but does not return anything or accept anything sent to the generator, type it as `Iterator` rather than `Generator`. This makes the method's contract explicit to the caller: something to iterate over, nothing more.
+Type simple generators as `Iterator[T]`. Use `Generator[YieldType, SendType, ReturnType]` when sent or returned values are part of their behavior.
 
 #### Refactoring Existing Code
 
-When refactoring existing code, never add type hints to a method that wasn't already type-hinted, unless explicitly asked to. This is one instance of a broader rule: keep diffs focused on the task at hand. Don't use a refactor as an opportunity to also add type hints, rename things, or otherwise "clean up" code you weren't asked to touch — it obscures the actual change under review and makes the diff harder to reason about.
+When refactoring existing code, add or update type hints when they support the change, but avoid unrelated annotation-only churn. More broadly, keep diffs focused on the task at hand rather than using a refactor to rename or otherwise clean up unrelated code.
 
 #### The Case of AnyStr
 
@@ -57,31 +57,27 @@ This way, `a` and `b` can each be `str` or `bytes`, but can't be mixed with each
 
 ### Naming: Leading Underscores
 
-Most code in this repository is not published as a public library API — it lives behind package boundaries, in integrations, in test suites, or in scripts nobody imports. "Not part of the public API" is the *default* state of almost everything here, so a leading underscore is not how we signal it. **Do not add a leading underscore to a method or variable name unless it matches one of the narrow exceptions below.** This applies everywhere, including test files, fixtures, internal tooling, and one-off scripts — not just files intended for external/public consumption.
+Most code in this repository belongs to applications rather than public libraries, so do not assume that every internal name needs a leading underscore. Use naming that communicates the role and intended scope of each name:
 
-This rule is about the single-leading-underscore privacy convention; it does not apply to dunder methods (`__init__`, `__repr__`, `__enter__`, `__exit__`, `__iter__`, and similar). Those are Python protocol hooks, not a privacy signal — implement them with their required names whenever the protocol calls for them.
+- Do not prefix class names or uppercase module constants with a leading underscore. For example, use `GitRemote` and `GIT_REMOTE_PATTERNS`, not `_GitRemote` and `_GIT_REMOTE_PATTERNS`.
+- A single leading underscore is appropriate for functions, methods, attributes, and module variables that are helpers or implementation state intended only for use within their defining module or class.
+- Do not add a leading underscore to framework callbacks, overridden methods, entry points, fixtures, or names imported and used by other modules.
+- For reusable library code, such as `datadog_checks.base` and `ddev`, consider the documented interface, existing `__all__` declarations, and actual call sites when deciding whether a name is internal.
+- Follow established naming in the surrounding code. Do not rename existing names solely to enforce this guidance.
+- A leading underscore communicates intended scope; it does not enforce privacy. It has no privacy meaning for ordinary local variables, although `_` or `_name` may identify intentionally unused values.
 
-**Methods** — a leading underscore is allowed only:
-
-1. On instance methods of a class, to flag that the method is not part of that class's public API.
-2. On functions in a module that is explicitly designed as a reusable library module, when the function has non-obvious side effects or behavior that its name alone doesn't make clear.
-
-In every other case — module-level/free functions, helpers in test files, functions in scripts, functions in files no one else will ever import — do **not** add a leading underscore, even if the function feels "internal" or "private". Internal is the default; it doesn't need marking.
-
-**Variables** — a leading underscore is allowed only for Pydantic model private attributes (e.g. `_cache: dict = PrivateAttr(default_factory=dict)`). That is the only case. This includes module constants: do not prefix uppercase module constants with a leading underscore (for example `_GIT_REMOTE_PATTERNS`); name them without the underscore instead (`GIT_REMOTE_PATTERNS`). The same applies to class attributes, instance attributes outside Pydantic models, and local variables.
-
-If you're unsure whether something qualifies, it doesn't — leave the underscore off.
+This rule concerns the single-leading-underscore convention. It does not apply to dunder methods (`__init__`, `__repr__`, `__enter__`, `__exit__`, `__iter__`, and similar), which must use their protocol-defined names.
 
 ### Docstrings and Comments
 
-- Use concise one-liner docstrings for most methods; method names should be self-descriptive enough that little else is needed.
-- Multi-line docstrings with Args/Returns are acceptable only for important public interface methods that genuinely need detailed documentation.
-- Avoid verbose docstrings for methods that are internal or not meant for outside callers. Note that "internal"/"private" here is a judgment call about who's expected to call the method — it has nothing to do with the leading-underscore naming rule above. Docstring verbosity and naming are two separate decisions; don't infer one from the other.
-- Prefer self-explanatory code over inline comments. If a comment is genuinely needed, keep it to one line — code clarity should come from descriptive names, not from comments compensating for unclear ones.
+- Use concise docstrings for straightforward behavior.
+- Use longer docstrings when a public or internal interface has a non-obvious contract, constraints, side effects, or error behavior.
+- Prefer self-explanatory code. Add comments to explain non-obvious reasoning, invariants, workarounds, or external constraints.
+- Keep comments concise, but use multiple lines when necessary for clarity.
 
 ### Avoiding Duplication
 
-Extract small, focused helper functions to eliminate duplicated logic rather than repeating code blocks or leaning on comments to explain repetition.
+Extract duplicated logic when it represents the same concept and a shared helper improves clarity or consistency. Do not introduce an abstraction merely because two small code blocks look similar.
 
 ## Configuration Models
 

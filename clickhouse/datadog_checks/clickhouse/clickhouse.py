@@ -36,6 +36,8 @@ DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 
 
 class ClickhouseCheck(DatabaseCheck):
+    DBMS = 'clickhouse'
+
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'
 
@@ -221,7 +223,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "clickhouse",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": DATABASE_INSTANCE_COLLECTION_INTERVAL,
                 "dbms_version": self._dbms_version,
@@ -366,10 +368,6 @@ class ClickhouseCheck(DatabaseCheck):
             "port": str(self._config.port),
             "db": str(self._config.db),
         }
-
-    @property
-    def dbms(self) -> str:
-        return "clickhouse"
 
     @property
     def dbms_version(self) -> str:
