@@ -46,7 +46,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(ProxmoxCheck, self).__init__(name, init_config, instances)
         self.all_resources = {}
-        self.last_event_collect_time = get_current_datetime()
+        self.initial_event_collect_time = get_current_datetime()
+        self.last_event_collect_times = {}
         self.resource_filters = self._parse_resource_filters(self.instance.get('resource_filters', []))
         self.check_initializations.append(self._parse_config)
 
@@ -409,15 +410,19 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 continue
 
             node_name = resource.get('hostname')
-            since = int(get_timestamp(self.last_event_collect_time))
+            last_collect_time = self.last_event_collect_times.get(node_name, self.initial_event_collect_time)
+            since = int(get_timestamp(last_collect_time))
             self.log.debug("Collecting events for node %s since %s", node_name, since)
 
-            now = get_current_datetime()
+            collection_time = get_current_datetime()
             params = {'since': since}
             url = f"{self.config.proxmox_server}/nodes/{node_name}/tasks"
-            response = self.http.get(url, params=params)
-            tasks = self._response_data(response, url, list, [])
-            self.last_event_collect_time = now
+            try:
+                response = self.http.get(url, params=params)
+                tasks = self._response_data(response, url, list, [])
+            except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, CheckException) as e:
+                self.log.warning("Failed to collect tasks for node %s; endpoint: %s; %s", node_name, url, e)
+                continue
 
             for task in tasks:
                 task_type = task.get('type')
@@ -429,6 +434,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 if event is not None:
                     self.log.debug("Submitting event %s", event)
                     self.event(event)
+
+            self.last_event_collect_times[node_name] = collection_time
 
     def check(self, _):
         try:
