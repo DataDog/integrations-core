@@ -1,0 +1,41 @@
+{
+  "name": "Unusual volume of NiFi flow configuration changes detected",
+  "partnerRuleId": "ext-nfi-aud",
+  "type": "log_detection",
+  "isEnabled": true,
+  "queries": [
+    {
+      "query": "source:nifi @logger.name:(*audit* OR *Auditor)",
+      "groupByFields": ["host"],
+      "hasOptionalGroupByFields": false,
+      "distinctFields": [],
+      "aggregation": "count",
+      "name": "a",
+      "dataSource": "logs"
+    }
+  ],
+  "options": {
+    "detectionMethod": "threshold",
+    "evaluationWindow": 600,
+    "maxSignalDuration": 7200,
+    "keepAlive": 3600
+  },
+  "cases": [
+    {
+      "name": "Very high volume of flow configuration changes",
+      "status": "high",
+      "notifications": [],
+      "condition": "a > 100"
+    },
+    {
+      "name": "Elevated volume of flow configuration changes",
+      "status": "medium",
+      "notifications": [],
+      "condition": "a > 50"
+    }
+  ],
+  "message": "## Unusual volume of NiFi flow configuration changes\n\nNiFi's audit loggers (`{{@logger.name}}`) recorded an unusually high number of flow and component modifications on host `{{host}}` within a short window. A burst of changes can be legitimate during planned flow development, but it can also indicate flow tampering, a compromised account making bulk modifications, or mass deletion or disabling of processors and controller services.\n\n**Details**\n- Host: `{{host}}`\n- Logger: `{{@logger.name}}`\n\nThe audit **message** text names the user who performed each action and the component affected (for example: `admin updated the name of Processor GenerateFlowFile`). These are not parsed into separate fields, so open the logs to read them.\n\n**Triage steps**\n1. Pivot to the Log Explorer with `source:nifi @logger.name:(*audit* OR *Auditor) host:{{host}}` and review the messages to identify the acting user(s) and the components changed.\n2. Confirm the activity corresponds to a planned or approved change window. Unplanned bursts — especially deletions, disables, or controller-service credential changes — warrant investigation.\n3. If the acting user is unexpected or the account may be compromised, revoke its access and review recent authentication activity for that user.\n4. Reconstruct the full sequence of changes using NiFi's built-in Flow Configuration History (Global Menu > Flow Configuration History).\n\n**Reference**\n- [Apache NiFi Documentation](https://nifi.apache.org/docs.html)",
+  "tags": ["source:nifi"],
+  "hasExtendedTitle": true,
+  "filters": []
+}
