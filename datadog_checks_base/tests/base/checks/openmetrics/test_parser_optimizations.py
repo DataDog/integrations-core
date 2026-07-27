@@ -193,8 +193,8 @@ def test_om_parse_sample_with_exemplar():
 def test_om_parse_full_labeled_metrics():
     """End-to-end test confirming the OpenMetrics monkey-patch is invoked in the production code path."""
     text = (
-        '# TYPE http_requests_total counter\n'
-        '# HELP http_requests_total Total requests.\n'
+        '# TYPE http_requests counter\n'
+        '# HELP http_requests Total requests.\n'
         'http_requests_total{method="GET",code="200"} 1027\n'
         '# EOF\n'
     )
