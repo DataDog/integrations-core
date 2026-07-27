@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2025-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Optimized replacements for prometheus_client parser hot-path functions.
