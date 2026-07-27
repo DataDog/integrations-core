@@ -1,0 +1,1 @@
+Handle null Proxmox API responses and isolate task collection failures by node.
