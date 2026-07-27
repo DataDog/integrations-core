@@ -525,6 +525,187 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
 
 
 @pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/ha/status/current': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='ha-disabled',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_ha_metrics_null_data(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('proxmox.ha.quorum', count=0)
+    aggregator.assert_metric('proxmox.ha.quorate', count=0)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(
+                        status_code=200,
+                        json_data={'data': {'data': None}},
+                    )
+                }
+            },
+            id='no-exported-metrics',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_performance_metrics_null_data(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    for metric in {'proxmox.cpu.current', 'proxmox.disk.total', 'proxmox.mem.total'}:
+        aggregator.assert_metric(metric, count=0)
+
+
+PERMISSION_DENIED_RESPONSE = {'data': None, 'message': 'Permission check failed (/ , Sys.Audit)'}
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='resources',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(
+                        status_code=403,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='performance-metrics',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/ha/status/current': MockResponse(
+                        status_code=200,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='ha',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_api_error_response(dd_run_check, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+
+    with pytest.raises(Exception, match=r'Permission check failed \(/ , Sys.Audit\)'):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='resources',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_required_null_data(dd_run_check, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+
+    with pytest.raises(Exception, match=r'Proxmox API returned null data for .*/cluster/resources'):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='no-tasks',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_tasks_null_data(dd_run_check, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+    assert aggregator.events == []
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                        status_code=200,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='tasks',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_tasks_api_error_response(dd_run_check, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    with pytest.raises(Exception, match=r'Permission check failed \(/ , Sys.Audit\)'):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
     ('collect_tasks, task_types, expected_events'),
     [
         pytest.param(
