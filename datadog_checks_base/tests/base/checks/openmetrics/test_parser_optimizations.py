@@ -3,7 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for the v0.21.1 parser optimizations."""
 
+from unittest.mock import patch
+
 import pytest
+from prometheus_client.openmetrics import parser as om_parser
+from prometheus_client.openmetrics.parser import text_string_to_metric_families as om_text_string_to_metric_families
+from prometheus_client.parser import text_string_to_metric_families as prom_text_string_to_metric_families
 
 from datadog_checks.base.checks.openmetrics.parser_optimizations import (
     _om_parse_sample,
@@ -103,22 +108,18 @@ def test_parse_sample_with_timestamp():
     ],
 )
 def test_parse_full_metric_text(text, expected_count):
-    from prometheus_client.parser import text_string_to_metric_families
-
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert len(families) == expected_count
 
 
 def test_parse_full_labeled_metrics():
-    from prometheus_client.parser import text_string_to_metric_families
-
     text = (
         '# HELP http_requests_total Total requests.\n'
         '# TYPE http_requests_total counter\n'
         'http_requests_total{method="GET",code="200"} 1027\n'
         'http_requests_total{method="POST",code="200"} 3\n'
     )
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert len(families) == 1
     assert len(families[0].samples) == 2
     assert families[0].samples[0].labels == {'method': 'GET', 'code': '200'}
@@ -127,8 +128,6 @@ def test_parse_full_labeled_metrics():
 
 
 def test_parse_full_histogram():
-    from prometheus_client.parser import text_string_to_metric_families
-
     text = (
         '# HELP rpc_duration_seconds RPC duration.\n'
         '# TYPE rpc_duration_seconds histogram\n'
@@ -138,34 +137,28 @@ def test_parse_full_histogram():
         'rpc_duration_seconds_sum 5000\n'
         'rpc_duration_seconds_count 3000\n'
     )
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert len(families) == 1
     assert families[0].type == 'histogram'
     assert len(families[0].samples) == 5
 
 
 def test_parse_full_escaped_label_value():
-    from prometheus_client.parser import text_string_to_metric_families
-
     text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="value with \\"quotes\\""} 1\n'
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert len(families) == 1
     assert families[0].samples[0].labels == {'label': 'value with "quotes"'}
 
 
 def test_parse_full_empty_label_value():
-    from prometheus_client.parser import text_string_to_metric_families
-
     text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label=""} 1\n'
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert families[0].samples[0].labels == {'label': ''}
 
 
 def test_parse_full_newline_in_label_value():
-    from prometheus_client.parser import text_string_to_metric_families
-
     text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="line1\\nline2"} 1\n'
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert families[0].samples[0].labels == {'label': 'line1\nline2'}
 
 
@@ -197,17 +190,32 @@ def test_om_parse_sample_with_exemplar():
     assert sample.exemplar is not None
 
 
+def test_om_parse_full_labeled_metrics():
+    """End-to-end test confirming the OpenMetrics monkey-patch is invoked in the production code path."""
+    text = (
+        '# TYPE http_requests_total counter\n'
+        '# HELP http_requests_total Total requests.\n'
+        'http_requests_total{method="GET",code="200"} 1027\n'
+        '# EOF\n'
+    )
+    with patch.object(om_parser, '_parse_sample', wraps=om_parser._parse_sample) as mock_parse:
+        families = list(om_text_string_to_metric_families(text))
+        mock_parse.assert_called_once()
+
+    assert len(families) == 1
+    assert families[0].samples[0].labels == {'method': 'GET', 'code': '200'}
+    assert families[0].samples[0].value == 1027
+
+
 def test_parse_full_closing_brace_in_label_value():
     """Regression test: '}' inside a quoted label value must not be mistaken for
     the label block end. Reproduces the cilium/azure_iot_edge CI failures."""
-    from prometheus_client.parser import text_string_to_metric_families
-
     text = (
         '# HELP k8s_api_calls Total API calls.\n'
         '# TYPE k8s_api_calls counter\n'
         'k8s_api_calls{method="DELETE",path="/apis/v1/namespaces/{namespace}/pods"} 5\n'
     )
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert len(families) == 1
     assert families[0].samples[0].labels == {
         'method': 'DELETE',
@@ -217,14 +225,12 @@ def test_parse_full_closing_brace_in_label_value():
 
 
 def test_parse_full_comma_in_label_value():
-    from prometheus_client.parser import text_string_to_metric_families
-
     text = (
         '# HELP apn_active_connections Active connections.\n'
         '# TYPE apn_active_connections gauge\n'
         'apn_active_connections{func="apn,gw",proto="tcp"} 8\n'
     )
-    families = list(text_string_to_metric_families(text))
+    families = list(prom_text_string_to_metric_families(text))
     assert len(families) == 1
     assert families[0].samples[0].labels == {'func': 'apn,gw', 'proto': 'tcp'}
     assert families[0].samples[0].value == 8
