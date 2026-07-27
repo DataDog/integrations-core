@@ -122,7 +122,7 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
                 "type": "tag",
             },
             # ADC - sys.availability_databases_cluster
-            "ADC.database_name": {"name": "database_name", "type": "tag"},
+            "ADC.database_name": {"name": "db", "type": "tag"},
             # DRS - sys.dm_hadr_database_replica_states
             "DRS.replica_id": {"name": "replica_id", "type": "tag"},
             "DRS.database_id": {"name": "database_id", "type": "tag"},

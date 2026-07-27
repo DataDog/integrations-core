@@ -27,7 +27,7 @@ DB_FRAGMENTATION_QUERY = {
         WHERE DDIPS.fragment_count is not null
     """,
     "columns": [
-        {"name": "database_name", "type": "tag"},
+        {"name": "db", "type": "tag"},
         {"name": "object_name", "type": "tag"},
         {"name": "schema", "type": "tag"},
         {"name": "index_id", "type": "tag"},

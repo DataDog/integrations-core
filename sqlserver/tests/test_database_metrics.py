@@ -220,7 +220,7 @@ def test_sqlserver_ao_metrics(
             )
             expected_tags = [
                 f'replica_role:{replica_role}',
-                f'database_name:{database_name}',
+                f'db:{database_name}',
                 f'availability_group:{availability_group}',
                 f'availability_group_name:{availability_group_name}',
                 f'replica_server_name:{replica_server_name}',
@@ -1286,7 +1286,6 @@ def test_sqlserver_db_fragmentation_metrics(
                 metrics = zip(db_fragmentation_metrics.metric_names()[0], metric_values)
                 expected_tags = [
                     f'db:{database_name}',
-                    f'database_name:{database_name}',
                     f'object_name:{object_name}',
                     f'schema:{schema}',
                     f'index_id:{index_id}',

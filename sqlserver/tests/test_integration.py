@@ -572,7 +572,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
         tags_by_key = dict([t.split(':', 1) for t in m.tags])
-        seen_databases.add(tags_by_key['database_name'])
+        seen_databases.add(tags_by_key['db'])
         assert tags_by_key['object_name'].lower() != 'none'
 
     assert 'master' in seen_databases
