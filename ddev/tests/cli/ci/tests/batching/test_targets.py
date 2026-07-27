@@ -115,14 +115,22 @@ def test_repository_wide_rule_triggers_full_eligible_set_in_core():
     ]
 
 
-def test_repository_wide_rule_ignores_when_only_exempt_file_changed():
+def test_repository_wide_rule_still_fires_alongside_a_dependency_bump():
+    # A dependency bump touching `agent_requirements.in` must not suppress the repository-wide
+    # expansion when the same change also edits the base package.
     rule = RepositoryWideRule(is_core=True)
     changed = [
         modified("agent_requirements.in"),
         modified("datadog_checks_base/datadog_checks/base/utils/foo.py"),
     ]
 
-    assert list(rule(changed, facts("postgres", "datadog_checks_base"))) == []
+    assert list(rule(changed, facts("postgres", "datadog_checks_base"))) == ["datadog_checks_base", "postgres"]
+
+
+def test_repository_wide_rule_ignores_a_dependency_bump_on_its_own():
+    rule = RepositoryWideRule(is_core=True)
+
+    assert list(rule([modified("agent_requirements.in")], facts("postgres", "datadog_checks_base"))) == []
 
 
 @pytest.mark.parametrize(

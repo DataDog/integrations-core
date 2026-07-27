@@ -42,6 +42,7 @@ def make_job(name: str = "job-1", environment: str = "py3.13") -> BatchJob:
         runner_labels=("ubuntu-latest",),
         environment=environment,
         platform=Platform.LINUX,
+        python_version="3.13",
         unit_tests=True,
         e2e_tests=False,
     )
@@ -209,8 +210,10 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                         "runner_labels": ["ubuntu-latest"],
                         "environment": "py3.13",
                         "platform": "linux",
+                        "python_version": "3.13",
                         "unit_tests": True,
                         "e2e_tests": False,
+                        "agent_image": None,
                         "artifact_name": "ntp_py3.13_linux",
                     },
                     {
@@ -219,8 +222,10 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                         "runner_labels": ["ubuntu-latest"],
                         "environment": "py3.13",
                         "platform": "linux",
+                        "python_version": "3.13",
                         "unit_tests": True,
                         "e2e_tests": False,
+                        "agent_image": None,
                         "artifact_name": "ntp_py3.13_linux",
                     },
                 ]

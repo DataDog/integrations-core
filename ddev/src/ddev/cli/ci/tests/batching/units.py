@@ -3,15 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Deterministic expansion of affected targets into typed test-planning units.
 
-A test unit is a planning unit — a target with one platform and an explicit environment
-selection. It is not a concrete CI job: downstream planning may expand a single unit into
-multiple facet jobs (a unit-test job for ``test_env`` environments and an E2E job for
-``e2e_env`` environments).
+A test unit is a planning unit: one target, on one platform, running one resolved environment (or
+none, for a target that defines no environments). It maps one-to-one onto the concrete job that
+:mod:`~ddev.cli.ci.tests.batching.jobs` builds from it, so a unit's name is already the final job
+display name.
 
 Environments are supplied pre-resolved through an :class:`EnvironmentProvider`, so this module
-does not compute the Hatch matrix. Each resolved environment carries both facet flags
-(``test_env`` and ``e2e_env``), so one target can emit both facets and callers can select the
-unit-only or E2E-only subset.
+does not compute the Hatch matrix. Each resolved environment carries the Python version it runs
+under and both facet flags (``test_env`` and ``e2e_env``), which become attributes of the single
+job the unit produces.
 """
 
 from __future__ import annotations
@@ -25,15 +25,17 @@ if TYPE_CHECKING:
     from ddev.integration.core import Integration
 
 
-class Platform(NamedTuple):
+class PlatformSpec(NamedTuple):
+    """Display name and default GitHub runner image for one test-matrix platform."""
+
     name: str
     image: str
 
 
-PLATFORMS: dict[str, Platform] = {
-    "linux": Platform("Linux", "ubuntu-22.04"),
-    "windows": Platform("Windows", "windows-2022"),
-    "macos": Platform("macOS", "macos-14-large"),
+PLATFORMS: dict[str, PlatformSpec] = {
+    "linux": PlatformSpec("Linux", "ubuntu-22.04"),
+    "windows": PlatformSpec("Windows", "windows-2022"),
+    "macos": PlatformSpec("macOS", "macos-14-large"),
 }
 
 # Targets rendered before everything else, in this order.
@@ -60,13 +62,15 @@ JOB_NAME_RESERVED_PATTERN = re.compile(r'[<>:"/\\|?*]')
 class ResolvedEnvironment:
     """A concrete environment resolved for a target: exactly what expansion consumes.
 
-    ``test_available`` is the unit-test facet (ddev's ``test_env``) and ``e2e_available`` is the
-    E2E facet (``e2e_env``). Both are kept so callers can create unit work only for
-    ``test_available`` environments and E2E work only for ``e2e_available`` environments.
+    ``python_version`` is the ``major.minor`` interpreter the environment runs under, used both to
+    set up Python on the runner and to select the E2E Agent image. ``test_available`` is the
+    unit-test facet (ddev's ``test_env``) and ``e2e_available`` is the E2E facet (``e2e_env``);
+    both are kept so a job can declare exactly which facets it must produce.
     """
 
     name: str
     platform: str
+    python_version: str
     test_available: bool = True
     e2e_available: bool = False
 
@@ -101,11 +105,10 @@ class TargetDefinition:
 class TestUnit:
     """A single deterministic test-planning unit produced from an affected target.
 
-    A unit is not a concrete CI job: downstream planning may expand it into multiple facet jobs
-    (unit and E2E). ``environments`` is the explicit, ordered selection this unit covers:
-    exactly one when environments are split, every environment for the platform when they are
-    not, and empty for targets without environment definitions. Each entry keeps its own facet
-    flags.
+    ``environment`` is the one resolved environment this unit covers. A target that defines no
+    environments on a platform gets an environment with an empty ``name``, meaning its tests run
+    without an environment selection, the way ``ci_matrix`` emits a job with no ``target-env``.
+    ``name`` is already unique across the plan, so downstream job construction reuses it verbatim.
     """
 
     # Prevent pytest from collecting this domain class as a test case.
@@ -115,7 +118,7 @@ class TestUnit:
     name: str
     platform: str
     runner_labels: tuple[str, ...]
-    environments: tuple[ResolvedEnvironment, ...]
+    environment: ResolvedEnvironment
 
 
 def normalize_job_name(job_name: str) -> str:
@@ -153,16 +156,12 @@ def _display_order_key(target: str) -> tuple[int, str]:
     return DISPLAY_ORDER_OVERRIDE.get(target, len(DISPLAY_ORDER_OVERRIDE)), target
 
 
-def expand_test_units(
-    targets: Sequence[TargetDefinition],
-    *,
-    split_environments: bool = True,
-) -> list[TestUnit]:
+def expand_test_units(targets: Sequence[TargetDefinition], *, default_python_version: str) -> list[TestUnit]:
     """Expand digested targets into deterministically ordered typed test units.
 
-    When ``split_environments`` is true each resolved environment becomes its own unit;
-    otherwise a single unit per target/platform covers every environment together. Targets
-    without environments always produce a single unit with an empty selection.
+    Each resolved environment becomes its own unit. A target with no environments on a platform
+    produces a single unit for that platform whose environment has an empty name and runs under
+    ``default_python_version``, since there is no environment to read a Python version from.
     """
     ordered_targets = sorted(targets, key=lambda target: _display_order_key(target.name))
 
@@ -182,29 +181,21 @@ def expand_test_units(
             job_name = normalize_job_name(base_name)
             runner_labels = tuple(target.runners.get(platform_id, [platform.image]))
 
-            platform_environments = environments_by_platform.get(platform_id, [])
-            if split_environments and platform_environments:
-                for environment in platform_environments:
-                    name = job_name if environment.name == target.name else f"{job_name} ({environment.name})"
-                    units.append(
-                        TestUnit(
-                            target=target.name,
-                            name=name,
-                            platform=platform_id,
-                            runner_labels=runner_labels,
-                            environments=(environment,),
-                        )
-                    )
-            else:
-                # A single unit covers every environment for this platform (or none for
-                # environmentless targets), keeping each environment's identity and E2E flag.
+            platform_environments = environments_by_platform.get(platform_id, []) or [
+                ResolvedEnvironment(name="", platform=platform_id, python_version=default_python_version)
+            ]
+            for environment in platform_environments:
+                if environment.name and environment.name != target.name:
+                    name = f"{job_name} ({environment.name})"
+                else:
+                    name = job_name
                 units.append(
                     TestUnit(
                         target=target.name,
-                        name=job_name,
+                        name=name,
                         platform=platform_id,
                         runner_labels=runner_labels,
-                        environments=tuple(platform_environments),
+                        environment=environment,
                     )
                 )
 

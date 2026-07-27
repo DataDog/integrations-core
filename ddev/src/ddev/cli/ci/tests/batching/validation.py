@@ -28,7 +28,6 @@ def validate_batches(
     job_groups: Sequence[Sequence[BatchJob]],
     jobs: Sequence[BatchJob],
     *,
-    capacity: int,
     config: BatchingConfig,
 ):
     """Enforce the batch-execution contract independently of the strategy that produced it.
@@ -42,6 +41,7 @@ def validate_batches(
     the same artifact, which would let their uploaded/organized files overwrite one another even
     though their names differ.
     """
+    capacity = config.max_jobs_per_batch
     for index, group in enumerate(job_groups):
         if not group:
             raise BatchValidationError(f"Batch at index {index} is empty.")
@@ -59,11 +59,14 @@ def validate_batches(
 
 
 def _validate_coverage(job_groups: Sequence[Sequence[BatchJob]], jobs: Sequence[BatchJob]):
-    planned = [job for group in job_groups for job in group]
-    planned_counts = Counter(id(job) for job in planned)
-    if any(count > 1 for count in planned_counts.values()):
-        raise BatchValidationError("Planned batches contain duplicate jobs.")
-    if set(planned_counts) != {id(job) for job in jobs}:
+    """Require the partition to contain every input job exactly once, compared by value.
+
+    Comparing by value rather than object identity lets a strategy rebuild equal jobs (by sorting,
+    copying, or round-tripping them) instead of being forced to pass the original instances through.
+    """
+    planned = Counter(job for group in job_groups for job in group)
+    expected = Counter(jobs)
+    if planned != expected:
         raise BatchValidationError("Planned batches must cover every input job exactly once.")
 
 

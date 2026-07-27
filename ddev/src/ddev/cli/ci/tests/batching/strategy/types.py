@@ -22,10 +22,4 @@ if TYPE_CHECKING:
 class BatchStrategy(Protocol):
     """Maps an ordered list of jobs to an ordered list of capacity-bounded job groups."""
 
-    def __call__(
-        self,
-        jobs: Sequence[BatchJob],
-        *,
-        capacity: int,
-        config: BatchingConfig,
-    ) -> list[list[BatchJob]]: ...
+    def __call__(self, jobs: Sequence[BatchJob], *, config: BatchingConfig) -> list[list[BatchJob]]: ...

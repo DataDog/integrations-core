@@ -24,23 +24,16 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.messages import BatchJob
 
 
-def default_strategy(
-    jobs: Sequence[BatchJob],
-    *,
-    capacity: int,
-    config: BatchingConfig,
-) -> list[list[BatchJob]]:
+def default_strategy(jobs: Sequence[BatchJob], *, config: BatchingConfig) -> list[list[BatchJob]]:
     """Pack jobs into batches, keeping each integration atomic unless it exceeds capacity.
 
     An integration that fits a batch is never split: it is appended to the current batch when it
     fits the remainder, otherwise a fresh batch is started for it. An integration whose job count
-    exceeds ``capacity`` raises :class:`PlanningError` unless ``allow_integration_splitting`` is
-    set, in which case it spills across capacity-bounded batches and its final partial batch stays
-    open for following integrations.
-
-    Accepts any ``Sequence`` at this public boundary; the input is normalized to a list once and
-    all internal grouping/chunking operates on lists.
+    exceeds ``config.max_jobs_per_batch`` raises :class:`PlanningError` unless
+    ``allow_integration_splitting`` is set, in which case it spills across capacity-bounded batches
+    and its final partial batch stays open for following integrations.
     """
+    capacity = config.max_jobs_per_batch
     batches: list[list[BatchJob]] = []
     current: list[BatchJob] = []
 
