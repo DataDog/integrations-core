@@ -257,7 +257,7 @@ class Vault(OpenMetricsBaseCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
         except HTTPTimeoutError:
-            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'][0])
+            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.default_timeout.connect)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
         except HTTPError as e:

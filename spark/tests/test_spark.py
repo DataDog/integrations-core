@@ -734,7 +734,7 @@ def test_yarn(aggregator, dd_run_check, mock_http):
 @pytest.mark.unit
 def test_auth_yarn_config():
     c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
-    assert c.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
+    assert c.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)
 
 
 @pytest.mark.unit

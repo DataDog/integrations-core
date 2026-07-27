@@ -80,10 +80,11 @@ class Apache(AgentCheck):
         if disable_generic_tags:
             service_check_tags = ['apache_host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
+            timeout = self.http.default_timeout
             self.log.debug(
                 'apache check initiating request, connect timeout %d receive %d',
-                self.http.options['timeout'][0],
-                self.http.options['timeout'][1],
+                timeout.connect,
+                timeout.read,
             )
 
             r = self.http.get(url)

@@ -12,7 +12,6 @@ from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
 from datadog_checks.base.utils.prometheus import metrics_pb2
@@ -468,16 +467,16 @@ class PrometheusScraperMixin(object):
             http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
 
-        headers = http_handler.options['headers']
-
         bearer_token = http_config.get('_bearer_token')
         if bearer_token is not None:
-            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+            http_handler.set_header('Authorization', 'Bearer {}'.format(bearer_token))
 
-        headers.setdefault('accept-encoding', 'gzip')
+        if http_handler.get_header('accept-encoding') is None:
+            http_handler.set_header('accept-encoding', 'gzip')
 
         # Explicitly set the content type we accept
-        headers.setdefault('accept', 'text/plain')
+        if http_handler.get_header('accept') is None:
+            http_handler.set_header('accept', 'text/plain')
 
         return http_handler
 
@@ -564,11 +563,7 @@ class PrometheusScraperMixin(object):
                 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
             )
         handler = self.get_http_handler(endpoint, instance)
-        if (
-            endpoint.startswith('https')
-            and not handler.ignore_tls_warning
-            and not is_affirmative(handler.options.get('ssl_verify', True))
-        ):
+        if endpoint.startswith('https') and not handler.ignore_tls_warning and not handler.tls_config.tls_verify:
             self.log.debug('An unverified HTTPS request is being made to %s', endpoint)
 
         try:

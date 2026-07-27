@@ -138,7 +138,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         }
 
         if 'acl_token' in self.instance:
-            self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+            self.http.set_header('X-Consul-Token', self.instance['acl_token'])
 
         cache_size = self.instance.get(
             'health_checks_cache_size',

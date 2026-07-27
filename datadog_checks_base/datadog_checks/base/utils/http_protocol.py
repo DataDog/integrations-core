@@ -7,10 +7,27 @@ from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from typing import Any, Protocol
 
+from datadog_checks.base.utils.tls import TlsConfig
+
 # Provisional backend-neutral HTTP surface (stabilizes once the httpx backend lands). RequestsWrapper
 # implements it on requests today; a future HTTPX2Wrapper implements the same surface on httpx. Do not
 # change existing methods, attributes, or their semantics without coordinating both backends.
 # Capabilities expose behavior, never a backend object (no requests or httpx type is returned).
+
+
+class HTTPTimeoutConfig:
+    """Provisional connect/read timeout pair for HTTP clients."""
+
+    __slots__ = ('connect', 'read')
+
+    def __init__(self, connect: float, read: float) -> None:
+        self.connect = float(connect)
+        self.read = float(read)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, HTTPTimeoutConfig):
+            return NotImplemented
+        return self.connect == other.connect and self.read == other.read
 
 
 class HTTPResponse(Protocol):
@@ -57,8 +74,6 @@ class HTTPResponse(Protocol):
 
 
 class HTTPClient(Protocol):
-    options: dict[str, Any]
-
     # Whether the client trusts environment config (proxies, auth, CA bundles).
     trust_env: bool
 
@@ -67,6 +82,12 @@ class HTTPClient(Protocol):
 
     # Reuse a single persistent connection across requests by default. Writable after construction.
     persist_connections: bool
+
+    @property
+    def default_timeout(self) -> HTTPTimeoutConfig: ...
+
+    @property
+    def tls_config(self) -> TlsConfig: ...
 
     # The verb methods also accept persist, overriding persist_connections for that single call.
     def get(self, url: str, **options: Any) -> HTTPResponse: ...
@@ -79,6 +100,14 @@ class HTTPClient(Protocol):
     def options_method(self, url: str, **options: Any) -> HTTPResponse: ...
     def get_header(self, name: str, default: str | None = None) -> str | None: ...
     def set_header(self, name: str, value: str) -> None: ...
+    def remove_header(self, name: str) -> None: ...
+    def clear_headers(self) -> None: ...
+    def update_headers(self, headers: Mapping[str, str]) -> None: ...
+    def get_headers(self) -> Mapping[str, str]: ...
+    def get_basic_auth(self) -> tuple[str | bytes, str | bytes] | None: ...
+
+    # Remove configured auth while leaving environment/.netrc auth available.
+    def clear_default_auth(self) -> None: ...
 
     # Suppress all HTTP-level auth (config-derived and environment/.netrc) for later requests, leaving trust_env intact.
     def disable_auth(self) -> None: ...
@@ -94,3 +123,6 @@ class HTTPClient(Protocol):
 
     # Whether url should bypass any configured proxy under the client's no_proxy rules, False if none match.
     def should_bypass_proxy(self, url: str) -> bool: ...
+
+    # Return the configured proxy URL for url's scheme, or None when no proxy applies.
+    def proxy_for_url(self, url: str) -> str | None: ...

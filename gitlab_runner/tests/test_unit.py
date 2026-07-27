@@ -8,7 +8,7 @@ import pytest
 from mock import MagicMock
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError, HTTPReadTimeoutError
+from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
@@ -31,7 +31,7 @@ def test_timeout(test_case, timeout_config, expected_timeout):
 
     gitlab_runner = GitlabRunnerCheck('gitlab_runner', common.CONFIG['init_config'], instances=config['instances'])
 
-    assert gitlab_runner.http.options['timeout'] == expected_timeout
+    assert gitlab_runner.http.default_timeout == HTTPTimeoutConfig(*expected_timeout)
 
 
 @pytest.mark.unit

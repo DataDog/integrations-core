@@ -13,7 +13,6 @@ from collections import ChainMap
 from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
-from typing import TYPE_CHECKING
 from urllib.parse import quote, urlparse, urlunparse
 
 import lazy_loader
@@ -47,11 +46,9 @@ from .http_exceptions import (  # noqa: F401
     HTTPStatusError,
     HTTPTimeoutError,
 )
+from .http_protocol import HTTPClient, HTTPResponse, HTTPTimeoutConfig  # noqa: F401
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
-
-if TYPE_CHECKING:
-    from .http_protocol import HTTPClient, HTTPResponse  # noqa: F401
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -348,6 +345,29 @@ def suppress_default_auth(request):
     return request
 
 
+def _normalize_timeout_value(timeout):
+    if isinstance(timeout, HTTPTimeoutConfig):
+        return (timeout.connect, timeout.read)
+    return timeout
+
+
+def _build_tls_config_snapshot(tls_fields, verify, cert):
+    data = dict(tls_fields)
+    if isinstance(verify, str):
+        data['tls_verify'] = True
+        data['tls_ca_cert'] = verify
+    elif isinstance(verify, bool):
+        data['tls_verify'] = verify
+
+    if isinstance(cert, str):
+        data['tls_cert'] = cert
+        data.pop('tls_private_key', None)
+    elif isinstance(cert, (tuple, list)) and len(cert) == 2:
+        data['tls_cert'], data['tls_private_key'] = cert[0], cert[1]
+
+    return TlsConfig(**{key: data[key] for key in TlsConfig.model_fields if key in data})
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
@@ -358,13 +378,13 @@ class RequestsWrapper(object):
         'log_requests',
         'logger',
         'no_proxy_uris',
-        'options',
+        '_options',
         'persist_connections',
         'request_hooks',
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
-        'tls_config',
+        '_tls_fields',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
@@ -511,7 +531,7 @@ class RequestsWrapper(object):
                 proxies = None
 
         # Default options
-        self.options = {
+        self._options = {
             'auth': auth,
             'cert': cert,
             'headers': headers,
@@ -565,7 +585,7 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
-        self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
+        self._tls_fields = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
 
     @property
@@ -602,24 +622,65 @@ class RequestsWrapper(object):
         """Whether url should bypass any configured proxy under the client's no_proxy rules."""
         return should_bypass_proxy(url, self.no_proxy_uris or [])
 
+    @property
+    def default_timeout(self) -> HTTPTimeoutConfig:
+        connect, read = self._options['timeout']
+        return HTTPTimeoutConfig(connect, read)
+
+    @property
+    def tls_config(self) -> TlsConfig:
+        return _build_tls_config_snapshot(self._tls_fields, self._options['verify'], self._options['cert'])
+
+    def get_headers(self) -> dict[str, str]:
+        return dict(self._options['headers'])
+
+    def clear_headers(self) -> None:
+        self._options['headers'].clear()
+
+    def update_headers(self, headers) -> None:
+        update_headers(self._options['headers'], headers)
+
+    def remove_header(self, name: str) -> None:
+        for key in list(self._options['headers']):
+            if key.lower() == name.lower():
+                del self._options['headers'][key]
+                return
+
+    def get_basic_auth(self) -> tuple[str | bytes, str | bytes] | None:
+        auth = self._options['auth']
+        if auth is None or auth is suppress_default_auth:
+            return None
+        if isinstance(auth, tuple) and len(auth) == 2:
+            return auth
+        return None
+
+    def clear_default_auth(self) -> None:
+        self._options['auth'] = None
+
+    def proxy_for_url(self, url: str) -> str | None:
+        if self.should_bypass_proxy(url):
+            return None
+        proxies = self._options.get('proxies') or {}
+        return proxies.get(urlparse(url).scheme)
+
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """Look up a request header by name. Lookup is case-insensitive."""
-        for key, value in self.options['headers'].items():
+        for key, value in self._options['headers'].items():
             if key.lower() == name.lower():
                 return value
         return default
 
     def set_header(self, name: str, value: str) -> None:
-        for key in self.options['headers']:
+        for key in self._options['headers']:
             if key.lower() == name.lower():
-                self.options['headers'][key] = value
+                self._options['headers'][key] = value
                 return
-        self.options['headers'][name] = value
+        self._options['headers'][name] = value
 
     def disable_auth(self) -> None:
         """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
         # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
-        self.options['auth'] = suppress_default_auth
+        self._options['auth'] = suppress_default_auth
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -653,7 +714,10 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
-        new_options = ChainMap(options, self.options)
+        if 'timeout' in options:
+            options['timeout'] = _normalize_timeout_value(options['timeout'])
+
+        new_options = ChainMap(options, self._options)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
             self.logger.debug('An unverified HTTPS request is being made to %s', url)
@@ -667,7 +731,7 @@ class RequestsWrapper(object):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
-        self.handle_auth_token(method=method, url=url, default_options=self.options)
+        self.handle_auth_token(method=method, url=url, default_options=self._options)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -675,7 +739,7 @@ class RequestsWrapper(object):
 
             session = self.session if persist else self._create_session()
             if url.startswith('https'):
-                self._mount_https_adapter(session, ChainMap(get_tls_config_from_options(new_options), self.tls_config))
+                self._mount_https_adapter(session, ChainMap(get_tls_config_from_options(new_options), self._tls_fields))
             request_method = getattr(session, method)
 
             if self.auth_token_handler:
@@ -684,7 +748,7 @@ class RequestsWrapper(object):
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
-                    self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                    self.handle_auth_token(method=method, url=url, default_options=self._options, error=str(e))
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
@@ -705,7 +769,7 @@ class RequestsWrapper(object):
                     raise e
                 session = self.session if persist else self._create_session()
                 if parsed_url.scheme == "https":
-                    self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
+                    self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self._tls_fields))
                 request_method = getattr(session, method)
                 response = request_method(url, **new_options)
             return response
@@ -722,7 +786,7 @@ class RequestsWrapper(object):
 
         with sock:
             try:
-                context = create_ssl_context(ChainMap({'tls_verify': False}, self.tls_config))
+                context = create_ssl_context(ChainMap({'tls_verify': False}, self._tls_fields))
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -794,7 +858,7 @@ class RequestsWrapper(object):
 
         # Options cannot be passed to the requests.Session init method
         # but can be set as attributes on an initialized Session instance.
-        for option, value in self.options.items():
+        for option, value in self._options.items():
             setattr(session, option, value)
         session.trust_env = self._trust_env
         return session
@@ -804,7 +868,7 @@ class RequestsWrapper(object):
         if self._session is None:
             # Create a new session if it doesn't exist and mount default HTTPS adapter.
             self._session = self._create_session()
-            self._mount_https_adapter(self._session, self.tls_config)
+            self._mount_https_adapter(self._session, self._tls_fields)
         return self._session
 
     def handle_auth_token(self, **request):

@@ -387,39 +387,78 @@ def mock_http(mocker):
     from unittest.mock import PropertyMock, create_autospec
 
     from datadog_checks.base.checks.base import AgentCheck
-    from datadog_checks.base.utils.http_protocol import HTTPClient
+    from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPTimeoutConfig
+    from datadog_checks.base.utils.tls import TlsConfig
 
     client = create_autospec(HTTPClient)
-    # Protocol annotations are not picked up by create_autospec, so set data attributes explicitly;
-    # otherwise reading them off the mock raises AttributeError. Defaults mirror RequestsWrapper.
-    client.options = {
-        'auth': None,
-        'cert': None,
-        'headers': {},
-        'proxies': None,
-        'timeout': (10.0, 10.0),
-        'verify': True,
-        'allow_redirects': True,
-    }
+    header_state: dict[str, str] = {}
+    auth_state = {'value': None}
+    proxy_state = {'https': None, 'no_proxy': []}
+
     client.trust_env = True
     client.ignore_tls_warning = False
     client.persist_connections = False
+    client.default_timeout = HTTPTimeoutConfig(10.0, 10.0)
+    client.tls_config = TlsConfig()
 
     def _get_header(name, default=None):
-        for key, value in client.options['headers'].items():
+        for key, value in header_state.items():
             if key.lower() == name.lower():
                 return value
         return default
 
     def _set_header(name, value):
-        for key in list(client.options['headers']):
+        for key in list(header_state):
             if key.lower() == name.lower():
-                client.options['headers'][key] = value
+                header_state[key] = value
                 return
-        client.options['headers'][name] = value
+        header_state[name] = value
+
+    def _remove_header(name):
+        for key in list(header_state):
+            if key.lower() == name.lower():
+                del header_state[key]
+                return
+
+    def _clear_headers():
+        header_state.clear()
+
+    def _update_headers(headers):
+        for key, value in headers.items():
+            _set_header(key, value)
+
+    def _get_headers():
+        return dict(header_state)
+
+    def _get_basic_auth():
+        return auth_state['value']
+
+    def _clear_default_auth():
+        auth_state['value'] = None
+
+    def _disable_auth():
+        auth_state['value'] = 'suppressed'
+
+    def _proxy_for_url(url):
+        from urllib.parse import urlparse
+
+        from datadog_checks.base.utils.http import should_bypass_proxy
+
+        if should_bypass_proxy(url, proxy_state['no_proxy']):
+            return None
+        return proxy_state.get(urlparse(url).scheme)
 
     client.get_header.side_effect = _get_header
     client.set_header.side_effect = _set_header
+    client.remove_header.side_effect = _remove_header
+    client.clear_headers.side_effect = _clear_headers
+    client.update_headers.side_effect = _update_headers
+    client.get_headers.side_effect = _get_headers
+    client.get_basic_auth.side_effect = _get_basic_auth
+    client.clear_default_auth.side_effect = _clear_default_auth
+    client.disable_auth.side_effect = _disable_auth
+    client.proxy_for_url.side_effect = _proxy_for_url
+    client.should_bypass_proxy.side_effect = lambda url: _proxy_for_url(url) is None and bool(proxy_state['no_proxy'])
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     return client
 

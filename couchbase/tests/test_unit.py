@@ -5,6 +5,7 @@ import mock
 import pytest
 
 from datadog_checks.couchbase import Couchbase
+from datadog_checks.dev.http import assert_http_capability
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS
@@ -87,10 +88,12 @@ def test_config(test_case, extra_config, expected_http_kwargs, instance):
         'proxies': mock.ANY,
         'timeout': mock.ANY,
         'verify': mock.ANY,
-        'allow_redirects': mock.ANY,
     }
     http_wargs.update(expected_http_kwargs)
-    assert check.http.options == http_wargs
+    for key, expected in http_wargs.items():
+        if expected is mock.ANY:
+            continue
+        assert_http_capability(check.http, key, expected)
 
 
 @pytest.mark.parametrize(

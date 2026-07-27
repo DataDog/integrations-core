@@ -98,10 +98,14 @@ def test__get_urls(instance, url_fix):
     ],
 )
 def test_aws_auth_url(instance, expected_aws_host, expected_aws_service):
-    check = ESCheck('elastic', {}, instances=[instance])
-
-    assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
-    assert getattr(check.http.options.get('auth'), 'service', None) == expected_aws_service
+    with mock.patch('datadog_checks.base.utils.http._http_utils.BotoAWSRequestsAuth') as boto_auth:
+        check = ESCheck('elastic', {}, instances=[instance])
+        check.http.get('http://example.com')
+        boto_auth.assert_called_once_with(
+            aws_host=expected_aws_host,
+            aws_region=instance['aws_region'],
+            aws_service=expected_aws_service,
+        )
 
     # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
     assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER

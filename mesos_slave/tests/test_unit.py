@@ -10,6 +10,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.mesos_slave import MesosSlave
 
 from .common import MESOS_SLAVE_VERSION, PARAMETERS
+from datadog_checks.dev.http import get_http_capability
+from datadog_checks.dev.http import assert_request_timeout
 
 
 def test_fixtures(check, instance, aggregator):
@@ -64,14 +66,14 @@ def test_default_timeout(check, instance):
     check = check({}, instance)
     check.check(instance)
 
-    assert check.http.options['timeout'] == (5, 5)
+    assert_request_timeout(check, (5, 5))
 
 
 def test_init_config_old_timeout(check, instance):
     # test init_config timeout
     check = check({'default_timeout': 2}, instance)
     check.check(instance)
-    assert check.http.options['timeout'] == (2, 2)
+    assert_request_timeout(check, (2, 2))
 
 
 def test_init_config_timeout(check, instance):
@@ -79,7 +81,7 @@ def test_init_config_timeout(check, instance):
     check = check({'timeout': 7}, instance)
     check.check(instance)
 
-    assert check.http.options['timeout'] == (7, 7)
+    assert_request_timeout(check, (7, 7))
 
 
 def test_instance_old_timeout(check, instance):
@@ -88,7 +90,7 @@ def test_instance_old_timeout(check, instance):
     check = check({'default_timeout': 9}, instance)
     check.check(instance)
 
-    assert check.http.options['timeout'] == (13, 13)
+    assert_request_timeout(check, (13, 13))
 
 
 def test_instance_timeout(check, instance):
@@ -97,7 +99,7 @@ def test_instance_timeout(check, instance):
     check = check({}, instance)
     check.check(instance)
 
-    assert check.http.options['timeout'] == (15, 15)
+    assert_request_timeout(check, (15, 15))
 
 
 @pytest.mark.parametrize(
@@ -115,7 +117,7 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     check = check({}, instance)
     check.check(instance)
 
-    actual = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
+    actual = {key: get_http_capability(check.http, key) for key in expected_http_kwargs}
 
     assert actual == expected_http_kwargs
 

@@ -13,6 +13,8 @@ from datadog_checks.base.utils.http_exceptions import HTTPSSLError
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
+from .common import cert_from_tls
+
 pytestmark = [pytest.mark.unit]
 
 TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
@@ -24,7 +26,7 @@ class TestCert:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['cert'] is None
+        assert cert_from_tls(http.tls_config) is None
 
     def test_config_cert(self):
         instance = {'tls_cert': 'cert'}
@@ -359,17 +361,18 @@ class TestSSLContextAdapter:
             with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached
-                default_config_key = TlsConfig(**http.tls_config)
+                default_config_key = http.tls_config
                 adapter = http.session.get_adapter('https://example.com')
                 assert http._https_adapters == {default_config_key: adapter}
-                mock_create_ssl_context.assert_called_once_with(http.tls_config)
+                mock_create_ssl_context.assert_called_once()
+                assert TlsConfig(**mock_create_ssl_context.call_args[0][0]) == http.tls_config
 
                 # Verify that the cached adapter is reused for the same TLS config
                 http.get('https://example.com')
 
                 assert http._https_adapters == {default_config_key: adapter}
                 assert http.session.get_adapter('https://example.com') is adapter
-                mock_create_ssl_context.assert_called_once_with(http.tls_config)
+                mock_create_ssl_context.assert_called_once()
 
     def test_adapter_caching_new_adapter(self):
         """A new _SSLContextAdapter should be created when a new TLS config is requested."""
@@ -378,20 +381,18 @@ class TestSSLContextAdapter:
             with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached for the default TLS config
-                default_config_key = TlsConfig(**http.tls_config)
+                default_config_key = http.tls_config
                 adapter = http.session.get_adapter('https://example.com')
                 assert http._https_adapters == {default_config_key: adapter}
-                mock_create_ssl_context.assert_called_once_with(http.tls_config)
+                mock_create_ssl_context.assert_called_once()
 
                 # Verify that a new adapter is created for a different TLS config
                 http.get('https://example.com', verify=False)
 
-                new_config = http.tls_config.copy()
-                new_config.update({'tls_verify': False})
-                new_config_key = TlsConfig(**new_config)
+                new_config_key = http.tls_config.model_copy(update={'tls_verify': False})
                 new_adapter = http.session.get_adapter('https://example.com')
                 assert new_adapter is not adapter
-                mock_create_ssl_context.assert_called_with(new_config)
+                assert TlsConfig(**mock_create_ssl_context.call_args[0][0]) == new_config_key
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
                 # Verify that no more adapters are created for the same configs
                 http.get('https://example.com', verify=False)

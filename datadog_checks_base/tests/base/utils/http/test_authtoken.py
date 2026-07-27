@@ -439,7 +439,7 @@ class TestAuthTokenReadFile:
                     allow_redirects=True,
                 )
 
-                assert http.options['headers'] == expected_headers
+                assert http.get_headers() == expected_headers
 
 
 class TestAuthTokenOAuth:
@@ -524,7 +524,7 @@ class TestAuthTokenOAuth:
                 allow_redirects=True,
             )
 
-            assert http.options['headers'] == expected_headers
+            assert http.get_headers() == expected_headers
             assert http.auth_token_handler.reader._expiration == expected_expiration
 
     def test_success_with_auth_params(self):
@@ -573,7 +573,7 @@ class TestAuthTokenOAuth:
                 allow_redirects=True,
             )
 
-            assert http.options['headers'] == expected_headers
+            assert http.get_headers() == expected_headers
 
 
 class TestAuthTokenDCOS:
@@ -651,7 +651,7 @@ class TestAuthTokenWriteHeader:
                     allow_redirects=True,
                 )
 
-                assert http.options['headers'] == expected_headers
+                assert http.get_headers() == expected_headers
 
 
 class TestAuthTokenFileReaderWithHeaderWriter:
@@ -684,7 +684,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     allow_redirects=True,
                 )
 
-                assert http.options['headers'] == expected_headers
+                assert http.get_headers() == expected_headers
 
                 # Should use cached token
                 write_file(token_file, '\nsecret2\n')
@@ -701,7 +701,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     allow_redirects=True,
                 )
 
-                assert http.options['headers'] == expected_headers
+                assert http.get_headers() == expected_headers
 
     def test_refresh_after_connection_error(self):
         with TempDir() as temp_dir:
@@ -746,7 +746,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     allow_redirects=True,
                 )
 
-                assert http.options['headers'] == expected_headers
+                assert http.get_headers() == expected_headers
 
     def test_refresh_after_bad_status_code(self):
         with TempDir() as temp_dir:
@@ -784,4 +784,4 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     allow_redirects=True,
                 )
 
-                assert http.options['headers'] == expected_headers
+                assert http.get_headers() == expected_headers

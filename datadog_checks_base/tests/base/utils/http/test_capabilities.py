@@ -6,9 +6,80 @@ import pytest
 import requests
 
 from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
-from datadog_checks.base.utils.http_protocol import HTTPResponse
+from datadog_checks.base.utils.http_protocol import HTTPResponse, HTTPTimeoutConfig
+from datadog_checks.base.utils.tls import TlsConfig
 
 pytestmark = [pytest.mark.unit]
+
+
+class TestHeaderCapabilities:
+    def test_get_headers_returns_detached_snapshot(self):
+        http = RequestsWrapper({}, {})
+        http.set_header('X-Test', 'one')
+        snapshot = http.get_headers()
+        snapshot['X-Other'] = 'two'
+        assert http.get_header('X-Other') is None
+
+    def test_clear_and_update_headers(self):
+        http = RequestsWrapper({}, {})
+        http.set_header('Accept', 'text/plain')
+        http.clear_headers()
+        http.update_headers({'X-Token': 'abc'})
+        assert http.get_headers() == {'X-Token': 'abc'}
+
+    def test_remove_header_is_case_insensitive(self):
+        http = RequestsWrapper({}, {})
+        http.set_header('Authorization', 'token')
+        http.remove_header('authorization')
+        assert http.get_header('Authorization') is None
+
+
+class TestTimeoutCapabilities:
+    def test_default_timeout_exposes_connect_and_read(self):
+        http = RequestsWrapper({'timeout': 7, 'connect_timeout': 3, 'read_timeout': 9}, {})
+        assert http.default_timeout == HTTPTimeoutConfig(3, 9)
+
+    def test_request_accepts_timeout_config(self):
+        http = RequestsWrapper({}, {})
+        with mock.patch('requests.Session.get') as get:
+            http.get('http://example.com', timeout=HTTPTimeoutConfig(1.5, 2.5))
+        assert get.call_args.kwargs['timeout'] == (1.5, 2.5)
+
+
+class TestAuthCapabilities:
+    def test_get_basic_auth_returns_configured_tuple(self):
+        http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
+        assert http.get_basic_auth() == ('user', 'pass')
+
+    def test_clear_default_auth_allows_netrc(self):
+        http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
+        http.clear_default_auth()
+        assert http.get_basic_auth() is None
+        assert http.get_basic_auth() is None
+
+
+class TestTlsAndProxyCapabilities:
+    def test_tls_config_reflects_verify_and_cert(self):
+        http = RequestsWrapper(
+            {
+                'tls_verify': True,
+                'tls_ca_cert': '/tmp/ca.pem',
+                'tls_cert': '/tmp/client.pem',
+                'tls_private_key': '/tmp/client.key',
+            },
+            {},
+        )
+        tls = http.tls_config
+        assert isinstance(tls, TlsConfig)
+        assert tls.tls_verify is True
+        assert tls.tls_ca_cert == '/tmp/ca.pem'
+        assert tls.tls_cert == '/tmp/client.pem'
+        assert tls.tls_private_key == '/tmp/client.key'
+
+    def test_proxy_for_url_honors_bypass_rules(self):
+        http = RequestsWrapper({'proxy': {'https': 'http://proxy:3128', 'no_proxy': 'example.com'}}, {})
+        assert http.proxy_for_url('https://example.com/path') is None
+        assert http.proxy_for_url('https://other.com/path') == 'http://proxy:3128'
 
 
 class TestClose:
@@ -59,11 +130,14 @@ class TestClose:
 class TestDisableAuth:
     def test_disable_auth_overrides_config_basic_auth(self):
         http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
-        assert http.options['auth'] == ('user', 'pass')
+        assert http.get_basic_auth() == ('user', 'pass')
         http.disable_auth()
-        # A truthy sentinel replaces the config-derived tuple so no Basic header is derived from config.
-        assert http.options['auth'] is not None
-        assert http.options['auth'] != ('user', 'pass')
+        assert http.get_basic_auth() is None
+        with mock.patch('requests.Session.get') as get:
+            http.get('http://example.com')
+            auth = get.call_args.kwargs['auth']
+            assert auth is not None
+            assert auth != ('user', 'pass')
 
     def test_disable_auth_preserves_trust_env(self):
         http = RequestsWrapper({}, {})
@@ -74,7 +148,7 @@ class TestDisableAuth:
     def test_netrc_header_injected_without_disable_auth(self):
         # Guards the regression: with auth=None and trust_env on, a matching .netrc entry injects Authorization.
         http = RequestsWrapper({}, {})
-        http.options['auth'] = None
+        http.clear_default_auth()
         captured = {}
 
         def fake_send(session_self, request, **kwargs):

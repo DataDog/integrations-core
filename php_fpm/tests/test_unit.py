@@ -4,6 +4,7 @@
 import mock
 import pytest
 
+from datadog_checks.dev.http import assert_http_capability
 from datadog_checks.php_fpm.php_fpm import BadConfigError, PHPFPMCheck
 
 
@@ -101,8 +102,4 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     check = PHPFPMCheck('php_fpm', {}, instances=[instance])
 
     for key, value in expected_http_kwargs.items():
-        if key == 'headers':
-            for h_key, h_value in value.items():
-                assert check.http.get_header(h_key) == h_value
-        else:
-            assert check.http.options[key] == value
+        assert_http_capability(check.http, key, value)

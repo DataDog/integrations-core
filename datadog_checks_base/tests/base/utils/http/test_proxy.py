@@ -11,6 +11,8 @@ from requests import Response, Session
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import EnvVars
 
+from .common import proxies_from_http
+
 pytestmark = [pytest.mark.unit]
 
 
@@ -29,7 +31,7 @@ def test_config_default():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.options['proxies'] is None
+    assert proxies_from_http(http) is None
     assert http.no_proxy_uris is None
 
 
@@ -42,7 +44,8 @@ def test_config_proxy_agent():
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
+        assert http.proxy_for_url('http://example.com') == 'http_host'
+        assert http.proxy_for_url('https://example.com') == 'https_host'
         assert http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
 
 
@@ -55,7 +58,8 @@ def test_config_proxy_init_config_override():
         init_config = {'proxy': {'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'}}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
+        assert http.proxy_for_url('http://example.com') == 'http_host'
+        assert http.proxy_for_url('https://example.com') == 'https_host'
         assert http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
 
 
@@ -68,7 +72,8 @@ def test_config_proxy_instance_override():
         init_config = {'proxy': {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
+        assert http.proxy_for_url('http://example.com') == 'http_host'
+        assert http.proxy_for_url('https://example.com') == 'https_host'
         assert http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
 
 
@@ -81,7 +86,8 @@ def test_config_no_proxy_as_list():
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
+        assert http.proxy_for_url('http://example.com') == 'http_host'
+        assert http.proxy_for_url('https://example.com') == 'https_host'
         assert http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
 
 
@@ -90,7 +96,7 @@ def test_config_proxy_skip():
     init_config = {'proxy': {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.options['proxies'] == {'http': '', 'https': ''}
+    assert proxies_from_http(http) == {'http': '', 'https': ''}
     assert http.no_proxy_uris is None
 
 
@@ -99,7 +105,7 @@ def test_config_proxy_skip_init_config():
     init_config = {'proxy': {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}, 'skip_proxy': True}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.options['proxies'] == {'http': '', 'https': ''}
+    assert proxies_from_http(http) == {'http': '', 'https': ''}
     assert http.no_proxy_uris is None
 
 

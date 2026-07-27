@@ -118,7 +118,7 @@ class FargateCheck(AgentCheck):
             request = self.http.get(metadata_endpoint)
         except HTTPTimeoutError:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(
-                metadata_endpoint, self.http.options['timeout']
+                metadata_endpoint, self.http.default_timeout.connect
             )
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
@@ -203,7 +203,7 @@ class FargateCheck(AgentCheck):
         try:
             request = self.http.get(stats_endpoint)
         except HTTPTimeoutError:
-            msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, self.http.options['timeout'])
+            msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, self.http.default_timeout.connect)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
             return

@@ -1930,10 +1930,12 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, mock_prom
 
 
 def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check, mock_http, mock_response, mocker):
+    from datadog_checks.base.utils.tls import TlsConfig
+
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
     mock_http.ignore_tls_warning = True
-    mock_http.options['ssl_verify'] = False
+    mock_http.tls_config = TlsConfig(tls_verify=False)
     mock_http.get.return_value = mock_response(content='httpbin.org')
     create_http_client = mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.create_http_client',

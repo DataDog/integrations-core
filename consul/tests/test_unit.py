@@ -5,6 +5,7 @@ import logging
 
 import pytest
 
+from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
 
@@ -684,12 +685,7 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
 
-    for key, value in expected_http_kwargs.items():
-        if key == 'headers':
-            for h_key, h_value in value.items():
-                assert check.http.get_header(h_key) == h_value
-        else:
-            assert check.http.options[key] == value
+    assert_http_client_config(check.http, expected_http_kwargs)
 
 
 def test_health_checks_cache_defaults():

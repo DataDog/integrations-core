@@ -142,8 +142,10 @@ def test_config(extra_config, expected_http_kwargs, check):
     instance.update(extra_config)
     check = check(instance)
 
-    for key, value in expected_http_kwargs.items():
-        assert check.http.options[key] == value
+    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
+
+
+    assert_http_client_config(check.http, expected_http_kwargs)
 
 
 @pytest.mark.parametrize(

@@ -38,4 +38,4 @@ def test_api_key_headers():
     expected_headers = {'X-API-Key': 'API_KEY', 'foo': 'bar'}
 
     check = PowerDNSRecursorCheck('powerdns_recursor', {}, instances=[instance])
-    assert expected_headers == check._http.options['headers']
+    assert expected_headers == check._http.get_headers()

@@ -444,5 +444,5 @@ class TestUseLatestSpec:
         check.configure_scrapers()
         scraper = check.scrapers['test']
 
-        assert scraper.http.options['headers'].get('Accept') == 'application/json'
+        assert scraper.http.get_header('Accept') == 'application/json'
         assert _accept_header_sent(scraper) != LATEST_SPEC_ACCEPT

@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.dev.http import assert_http_capability
 from datadog_checks.marathon import Marathon
 
 from .common import INSTANCE_INTEGRATION
@@ -108,4 +109,15 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
     check = Marathon('marathon', init_config, instances=[instance])
 
     for key, value in expected_http_kwargs.items():
-        assert check.http.options[key] == value
+        if key == 'timeout':
+            if isinstance(value, tuple):
+                assert (check._request_timeout.connect, check._request_timeout.read) == value
+            else:
+                assert check._request_timeout.connect == value
+        elif key == 'auth':
+            if value is None:
+                assert check._auth_body is None
+            else:
+                assert check._auth_body == {'uid': value[0], 'password': value[1]}
+        else:
+            assert_http_capability(check.http, key, value)

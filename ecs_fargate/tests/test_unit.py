@@ -283,5 +283,7 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = FargateCheck('ecs_fargate', {}, instances=[instance])
 
-    for key, value in expected_http_kwargs.items():
-        assert check.http.options[key] == value
+    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
+
+
+    assert_http_client_config(check.http, expected_http_kwargs)

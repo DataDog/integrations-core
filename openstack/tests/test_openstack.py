@@ -112,10 +112,10 @@ def test_keystone_auth_ssl_verify_default():
     base_init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     default_check = OpenStackCheck('openstack', base_init_config, instances=[{'name': 'test'}])
-    assert default_check.http.options['verify'] is True
+    assert default_check.http.tls_config.tls_verify is True
 
     opt_out_check = OpenStackCheck('openstack', {**base_init_config, 'ssl_verify': False}, instances=[{'name': 'test'}])
-    assert opt_out_check.http.options['verify'] is False
+    assert opt_out_check.http.tls_config.tls_verify is False
 
 
 def test_unscoped_from_config():

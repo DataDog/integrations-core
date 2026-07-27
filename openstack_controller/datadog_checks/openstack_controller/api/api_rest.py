@@ -62,7 +62,7 @@ class ApiRest(Api):
             }
         }
         # Testing purposes (we need this header to redirect requests correctly with caddy)
-        self.http.options['headers']['X-Auth-Type'] = "unscoped"
+        self.http.set_header('X-Auth-Type', "unscoped")
         self._authorize_data(data)
         self._current_project_id = None
 
@@ -83,7 +83,7 @@ class ApiRest(Api):
             }
         }
         # Testing purposes (we need this header to redirect requests correctly with caddy)
-        self.http.options['headers']['X-Auth-Type'] = "system"
+        self.http.set_header('X-Auth-Type', "system")
         self._authorize_data(data)
         self._current_project_id = None
 
@@ -104,7 +104,7 @@ class ApiRest(Api):
             }
         }
         # Testing purposes (we need this header to redirect requests correctly with caddy)
-        self.http.options['headers']['X-Auth-Type'] = project_id
+        self.http.set_header('X-Auth-Type', project_id)
         self._authorize_data(data)
         self._current_project_id = project_id
 
@@ -119,20 +119,20 @@ class ApiRest(Api):
             self._interface,
             self._region_id,
         )
-        self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
+        self.http.set_header('X-Auth-Token', response.headers['X-Subject-Token'])
 
     def _add_microversion_headers(self):
         if self.config.nova_microversion:
             self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
-            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
+            self.http.set_header('X-OpenStack-Nova-API-Version', self.config.nova_microversion)
 
         if self.config.ironic_microversion:
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
-            self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
+            self.http.set_header('X-OpenStack-Ironic-API-Version', self.config.ironic_microversion)
 
         if self.config.cinder_microversion:
             self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
-            self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
+            self.http.set_header('OpenStack-API-Version', self.config.cinder_microversion)
 
     def get_identity_regions(self):
         response = self.http.get(

@@ -45,15 +45,29 @@ class ApiSdk(Api):
     def _add_microversion_headers(self):
         if self.config.nova_microversion:
             self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
-            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
+            self.http.set_header('X-OpenStack-Nova-API-Version', self.config.nova_microversion)
 
         if self.config.ironic_microversion:
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
-            self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
+            self.http.set_header('X-OpenStack-Ironic-API-Version', self.config.ironic_microversion)
 
         if self.config.cinder_microversion:
             self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
-            self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
+            self.http.set_header('OpenStack-API-Version', self.config.cinder_microversion)
+
+    def _keystone_session_kwargs(self):
+        tls = self.http.tls_config
+        verify = tls.tls_ca_cert if tls.tls_ca_cert else tls.tls_verify
+        cert = None
+        if tls.tls_cert and tls.tls_private_key:
+            cert = (tls.tls_cert, tls.tls_private_key)
+        elif tls.tls_cert:
+            cert = tls.tls_cert
+        return {
+            'verify': verify,
+            'cert': cert,
+            'additional_headers': self.http.get_headers(),
+        }
 
     def auth_url(self):
         return self.cloud_config.get_auth_args().get('auth_url')
@@ -67,12 +81,7 @@ class ApiSdk(Api):
     def _build_keystone_session(self, auth):
         # keystoneauth builds its own transport; mirror the TLS config and headers from our HTTP
         # client via the backend-neutral protocol surface instead of handing it the requests session.
-        return session.Session(
-            auth=auth,
-            verify=self.http.options['verify'],
-            cert=self.http.options['cert'],
-            additional_headers=self.http.options['headers'],
-        )
+        return session.Session(auth=auth, **self._keystone_session_kwargs())
 
     def authorize_user(self):
         v3_auth = v3.Password(
@@ -88,7 +97,7 @@ class ApiSdk(Api):
         self._access = self.connection.session.auth.get_access(self.connection.session)
         self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
         self.connection.authorize()
-        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+        self.http.set_header('X-Auth-Token', self.connection.session.auth.get_token(self.connection.session))
 
     def authorize_system(self):
         v3_auth = v3.Password(
@@ -105,7 +114,7 @@ class ApiSdk(Api):
         self._access = self.connection.session.auth.get_access(self.connection.session)
         self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
         self.connection.authorize()
-        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+        self.http.set_header('X-Auth-Token', self.connection.session.auth.get_token(self.connection.session))
 
     def authorize_project(self, project_id):
         v3_auth = v3.Password(
@@ -123,7 +132,7 @@ class ApiSdk(Api):
         self._access = self.connection.session.auth.get_access(self.connection.session)
         self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
         self.connection.authorize()
-        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+        self.http.set_header('X-Auth-Token', self.connection.session.auth.get_token(self.connection.session))
 
     def get_response_time(self, endpoint_types, remove_project_id=True, is_heat=False):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types)

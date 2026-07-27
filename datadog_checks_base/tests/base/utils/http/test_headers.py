@@ -27,7 +27,7 @@ def test_config_default():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.options['headers'] == DEFAULT_OPTIONS['headers']
+    assert http.get_headers() == DEFAULT_OPTIONS['headers']
 
 
 def test_config_headers():
@@ -36,7 +36,7 @@ def test_config_headers():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert list(http.options['headers'].items()) == list(headers.items())
+    assert list(http.get_headers().items()) == list(headers.items())
 
 
 def test_config_headers_string_values():
@@ -44,7 +44,7 @@ def test_config_headers_string_values():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.options['headers'] == {'answer': '42'}
+    assert http.get_headers() == {'answer': '42'}
 
 
 def test_config_extra_headers():
@@ -55,7 +55,7 @@ def test_config_extra_headers():
 
     complete_headers = OrderedDict(DEFAULT_OPTIONS['headers'])
     complete_headers.update(headers)
-    assert list(http.options['headers'].items()) == list(complete_headers.items())
+    assert list(http.get_headers().items()) == list(complete_headers.items())
 
 
 def test_config_extra_headers_string_values():
@@ -65,7 +65,7 @@ def test_config_extra_headers_string_values():
 
     complete_headers = dict(DEFAULT_OPTIONS['headers'])
     complete_headers.update({'answer': '42'})
-    assert http.options['headers'] == complete_headers
+    assert http.get_headers() == complete_headers
 
 
 def test_extra_headers_on_http_method_call():
@@ -95,7 +95,7 @@ def test_extra_headers_on_http_method_call():
         )
 
     # make sure the original headers are not modified
-    assert http.options['headers'] == complete_headers
+    assert http.get_headers() == complete_headers
     assert extra_headers == {"foo": "bar"}
 
 
@@ -125,6 +125,6 @@ def test_set_header_case_insensitive():
     http.set_header('accept', 'application/json')
     # Overwrites the existing 'Accept' key (preserving original casing)
     assert http.get_header('Accept') == 'application/json'
-    assert http.options['headers']['Accept'] == 'application/json'
+    assert http.get_header('Accept') == 'application/json'
     # No duplicate key created
-    assert sum(1 for k in http.options['headers'] if k.lower() == 'accept') == 1
+    assert sum(1 for k in http.get_headers() if k.lower() == 'accept') == 1

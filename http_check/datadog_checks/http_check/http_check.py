@@ -61,9 +61,8 @@ class HTTPCheck(AgentCheck):
             self.ca_certs = get_ca_certs_path()
 
         if not self.instance.get("include_default_headers", True) and "headers" not in self.instance:
-            headers = self.http.options["headers"]
-            headers.clear()
-            headers.update(self.instance.get("extra_headers", {}))
+            self.http.clear_headers()
+            self.http.update_headers(self.instance.get("extra_headers", {}))
 
         if is_affirmative(self.instance.get('use_cert_from_response', False)):
             self.HTTP_CONFIG_REMAPPER['disable_ssl_validation']['default'] = False
@@ -88,7 +87,7 @@ class HTTPCheck(AgentCheck):
             stream,
             use_cert_from_response,
         ) = from_instance(instance, self.ca_certs)
-        timeout = self.http.options["timeout"][0]
+        timeout = self.http.default_timeout.connect
         start = time.time()
 
         def send_status_up(log_msg):
@@ -118,7 +117,7 @@ class HTTPCheck(AgentCheck):
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
             if method.upper() in DATA_METHODS and not headers.get("Content-Type"):
-                self.http.options["headers"]["Content-Type"] = "application/x-www-form-urlencoded"
+                self.http.set_header("Content-Type", "application/x-www-form-urlencoded")
 
             http_method = method.lower()
             if http_method == "options":
@@ -400,8 +399,7 @@ class HTTPCheck(AgentCheck):
         port = o.port or 443
 
         sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
-        proxies = self.http.options.get('proxies', {})
-        if proxies and (proxy_url := proxies.get("https")) and not self.http.should_bypass_proxy(url):
+        if (proxy_url := self.http.proxy_for_url(url)):
             proxy = parse_proxy_url(proxy_url)
             sock.set_proxy(**proxy)
 

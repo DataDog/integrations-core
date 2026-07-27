@@ -21,7 +21,9 @@ def test_config_kerberos_legacy():
 
     # Trigger lazy import
     http = RequestsWrapper(instance, init_config)
-    assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com')
+        assert isinstance(get.call_args.kwargs['auth'], requests_kerberos.HTTPKerberosAuth)
 
     with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
         RequestsWrapper(instance, init_config)
@@ -41,7 +43,9 @@ def test_config_kerberos():
 
     # Trigger lazy import
     http = RequestsWrapper(instance, init_config)
-    assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com')
+        assert isinstance(get.call_args.kwargs['auth'], requests_kerberos.HTTPKerberosAuth)
 
     with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
         RequestsWrapper(instance, init_config)
@@ -83,7 +87,9 @@ def test_config_kerberos_shortcut():
 
     # Trigger lazy import
     http = RequestsWrapper(instance, init_config)
-    assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com')
+        assert isinstance(get.call_args.kwargs['auth'], requests_kerberos.HTTPKerberosAuth)
 
     with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
         RequestsWrapper(instance, init_config)
@@ -182,7 +188,9 @@ def test_config_kerberos_legacy_remap():
 
     # Trigger lazy import
     http = RequestsWrapper(instance, init_config)
-    assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com')
+        assert isinstance(get.call_args.kwargs['auth'], requests_kerberos.HTTPKerberosAuth)
 
     with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
         RequestsWrapper(instance, init_config)

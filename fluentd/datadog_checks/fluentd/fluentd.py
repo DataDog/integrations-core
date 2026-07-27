@@ -7,6 +7,7 @@ import re
 from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
@@ -46,7 +47,9 @@ class Fluentd(AgentCheck):
                 or self.init_config.get('default_timeout')
                 or self.DEFAULT_TIMEOUT
             )
-            self.http.options['timeout'] = (timeout, timeout)
+            self._request_timeout = HTTPTimeoutConfig(timeout, timeout)
+        else:
+            self._request_timeout = None
 
         self._fluentd_command = self.instance.get('fluentd', init_config.get('fluentd', 'fluentd'))
 
@@ -76,9 +79,14 @@ class Fluentd(AgentCheck):
     {"plugins":[{"type": "monitor_agent", ...}, {"type": "forward", ...}]}
     """
 
+    def _http_get(self, url):
+        if self._request_timeout is not None:
+            return self.http.get(url, timeout=self._request_timeout)
+        return self.http.get(url)
+
     def check(self, _):
         try:
-            r = self.http.get(self.url)
+            r = self._http_get(self.url)
             r.raise_for_status()
             status = r.json()
 
@@ -115,7 +123,7 @@ class Fluentd(AgentCheck):
             return
 
         try:
-            r = self.http.get(self.config_url)
+            r = self._http_get(self.config_url)
             r.raise_for_status()
             config = r.json()
             raw_version = config.get('version')

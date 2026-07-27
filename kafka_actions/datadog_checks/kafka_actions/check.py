@@ -6,6 +6,7 @@ import json
 import time
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http import create_http_client
 
 from .config import KafkaActionsConfig
 from .kafka_client import KafkaActionsClient
@@ -55,6 +56,15 @@ class KafkaActionsCheck(AgentCheck):
 
     __NAMESPACE__ = 'kafka_actions'
 
+    SCHEMA_REGISTRY_HTTP_CONFIG_REMAPPER = {
+        'schema_registry_username': {'name': 'username'},
+        'schema_registry_password': {'name': 'password'},
+        'schema_registry_tls_verify': {'name': 'tls_verify'},
+        'schema_registry_tls_ca_cert': {'name': 'tls_ca_cert'},
+        'schema_registry_tls_cert': {'name': 'tls_cert'},
+        'schema_registry_tls_key': {'name': 'tls_private_key'},
+    }
+
     def __init__(self, name, init_config, instances):
         super(KafkaActionsCheck, self).__init__(name, init_config, instances)
 
@@ -67,10 +77,14 @@ class KafkaActionsCheck(AgentCheck):
 
         self.kafka_client = KafkaActionsClient(self.config, self.log)
 
+        self._schema_registry_http = None
         schema_registry = None
         schema_registry_url = self.instance.get('schema_registry_url')
         if schema_registry_url:
-            schema_registry = SchemaRegistryClient(self.http, schema_registry_url, self.log, self.instance)
+            self._schema_registry_http = self.create_schema_registry_http_client()
+            schema_registry = SchemaRegistryClient(
+                self._schema_registry_http, schema_registry_url, self.log, self.instance
+            )
 
         self.deserializer = MessageDeserializer(self.log, schema_registry=schema_registry)
 
@@ -119,6 +133,14 @@ class KafkaActionsCheck(AgentCheck):
             raise
         finally:
             self.kafka_client.close()
+            if self._schema_registry_http is not None:
+                self._schema_registry_http.close()
+
+    def create_schema_registry_http_client(self):
+        config = {
+            key: value for key, value in self.instance.items() if key.startswith('schema_registry_')
+        }
+        return create_http_client(config, self.init_config, self.SCHEMA_REGISTRY_HTTP_CONFIG_REMAPPER, self.log)
 
     def _verify_cluster_id(self):
         """Verify that the configured cluster matches the actual Kafka cluster ID.

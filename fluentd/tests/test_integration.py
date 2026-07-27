@@ -10,6 +10,7 @@ from datadog_checks.fluentd import Fluentd
 
 from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST
 from .util import _get_metrics_by_version
+from datadog_checks.dev.http import assert_request_timeout
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -86,14 +87,14 @@ def test_default_timeout(instance):
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check(None)
 
-    assert check.http.options['timeout'] == (5, 5)
+    assert_request_timeout(check, (5, 5))
 
 
 def test_init_config_old_timeout(instance):
     # test init_config timeout
     check = Fluentd(CHECK_NAME, {'default_timeout': 2}, [instance])
     check.check(None)
-    assert check.http.options['timeout'] == (2, 2)
+    assert_request_timeout(check, (2, 2))
 
 
 def test_init_config_timeout(instance):
@@ -101,7 +102,7 @@ def test_init_config_timeout(instance):
     check = Fluentd(CHECK_NAME, {'timeout': 7}, [instance])
     check.check(None)
 
-    assert check.http.options['timeout'] == (7, 7)
+    assert_request_timeout(check, (7, 7))
 
 
 def test_instance_old_timeout(instance):
@@ -110,7 +111,7 @@ def test_instance_old_timeout(instance):
     check = Fluentd(CHECK_NAME, {'default_timeout': 9}, [instance])
     check.check(None)
 
-    assert check.http.options['timeout'] == (13, 13)
+    assert_request_timeout(check, (13, 13))
 
 
 def test_instance_timeout(instance):
@@ -119,4 +120,4 @@ def test_instance_timeout(instance):
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check(None)
 
-    assert check.http.options['timeout'] == (15, 15)
+    assert_request_timeout(check, (15, 15))

@@ -9,6 +9,7 @@ from freezegun import freeze_time
 from mock import MagicMock
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
@@ -122,8 +123,7 @@ def test_config(aggregator, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
 
-    actual_options = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
-    assert expected_http_kwargs == actual_options
+    assert_http_client_config(check.http, expected_http_kwargs)
 
 
 @pytest.mark.e2e

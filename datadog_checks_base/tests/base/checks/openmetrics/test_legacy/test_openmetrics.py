@@ -2742,8 +2742,8 @@ def test_http_handler(mock_http, mocked_openmetrics_check_factory, mocker):
     http_handler = check.get_http_handler(scraper_config)
 
     assert http_handler is mock_http
-    assert mock_http.options['headers']['accept-encoding'] == 'gzip'
-    assert mock_http.options['headers']['accept'] == 'text/plain'
+    assert mock_http.get_header('accept-encoding') == 'gzip'
+    assert mock_http.get_header('accept') == 'text/plain'
 
 
 def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_check_factory):

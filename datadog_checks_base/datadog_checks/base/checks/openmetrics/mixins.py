@@ -396,17 +396,17 @@ class OpenMetricsScraperMixin(object):
             scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
 
-        headers = http_handler.options['headers']
-
         bearer_token = scraper_config['_bearer_token']
         if bearer_token is not None:
-            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+            http_handler.set_header('Authorization', 'Bearer {}'.format(bearer_token))
 
         # TODO: Determine if we really need this
-        headers.setdefault('accept-encoding', 'gzip')
+        if http_handler.get_header('accept-encoding') is None:
+            http_handler.set_header('accept-encoding', 'gzip')
 
         # Explicitly set the content type we accept
-        headers.setdefault('accept', 'text/plain')
+        if http_handler.get_header('accept') is None:
+            http_handler.set_header('accept', 'text/plain')
 
         return http_handler
 

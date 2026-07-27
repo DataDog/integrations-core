@@ -492,9 +492,9 @@ def test_instance_auth_token(dd_run_check):
     instance = {'url': 'https://valid.mock', 'name': 'UpService', "auth_token": auth_token}
     check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
     dd_run_check(check)
-    assert expected_headers == check.http.options['headers']
+    assert expected_headers == check.http.get_headers()
     dd_run_check(check)
-    assert expected_headers == check.http.options['headers']
+    assert expected_headers == check.http.get_headers()
 
 
 @pytest.mark.parametrize(
@@ -525,10 +525,10 @@ def test_instance_auth_token(dd_run_check):
 def test_expected_headers(dd_run_check, instance, expected_headers):
     check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
     dd_run_check(check)
-    assert expected_headers == check.http.options['headers']
+    assert expected_headers == check.http.get_headers()
 
     dd_run_check(check)
-    assert expected_headers == check.http.options['headers']
+    assert expected_headers == check.http.get_headers()
 
 
 @pytest.mark.parametrize(
@@ -609,9 +609,9 @@ def test_case_insensitive_header_content_type(dd_run_check, headers):
     dd_run_check(check)
 
     if headers == {}:
-        assert check.http.options["headers"] == default_headers
+        assert check.http.get_headers() == default_headers
     else:
-        assert check.http.options["headers"] == headers
+        assert check.http.get_headers() == headers
 
 
 def test_http_response_status_code_accepts_int_value(aggregator, dd_run_check):

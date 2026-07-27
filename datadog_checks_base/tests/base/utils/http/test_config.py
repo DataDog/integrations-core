@@ -6,6 +6,9 @@ import ssl
 import mock
 
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
+from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
+
+from .common import proxies_from_http
 
 
 class TestTimeout:
@@ -17,28 +20,28 @@ class TestTimeout:
         # Assert the timeout is slightly larger than a multiple of 3,
         # which is the default TCP packet retransmission window. See:
         # https://tools.ietf.org/html/rfc2988
-        assert 0 < http.options['timeout'][0] % 3 <= 1
+        assert 0 < http.default_timeout.connect % 3 <= 1
 
     def test_config_timeout(self):
         instance = {'timeout': 24.5}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == (24.5, 24.5)
+        assert http.default_timeout == HTTPTimeoutConfig(24.5, 24.5)
 
     def test_config_multiple_timeouts(self):
         instance = {'read_timeout': 4, 'connect_timeout': 10}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == (10, 4)
+        assert http.default_timeout == HTTPTimeoutConfig(10, 4)
 
     def test_config_init_config_override(self):
         instance = {}
         init_config = {'timeout': 16}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == (16, 16)
+        assert http.default_timeout == HTTPTimeoutConfig(16, 16)
 
 
 class TestRequestSize:
@@ -64,14 +67,14 @@ class TestVerify:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['verify'] is True
+        assert http.tls_config.tls_verify is True
 
     def test_config_verify(self):
         instance = {'tls_verify': False}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['verify'] is False
+        assert http.tls_config.tls_verify is False
 
     def test_config_ca_cert(self):
         instance = {'tls_ca_cert': 'ca_cert'}
@@ -92,7 +95,7 @@ class TestVerify:
             http = RequestsWrapper(instance, init_config)
 
             assert http.session.verify == 'ca_cert'  # The session attribute instantiates the SSLContext
-            assert http.options['verify'] == 'ca_cert'
+            assert http.tls_config.tls_ca_cert == 'ca_cert'
             assert mock_load_verify_locations.call_count == 1
             assert mock_load_verify_locations.call_args[1]['cafile'] == 'ca_cert'
 
@@ -103,7 +106,7 @@ class TestRemapper:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['proxies'] == {'http': '', 'https': ''}
+        assert proxies_from_http(http) == {'http': '', 'https': ''}
         assert http.no_proxy_uris is None
 
     def test_no_default(self):
@@ -112,7 +115,7 @@ class TestRemapper:
         remapper = {'prometheus_timeout': {'name': 'timeout'}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['timeout'] == (STANDARD_FIELDS['timeout'], STANDARD_FIELDS['timeout'])
+        assert http.default_timeout == HTTPTimeoutConfig(STANDARD_FIELDS['timeout'], STANDARD_FIELDS['timeout'])
 
     def test_invert(self):
         instance = {'disable_ssl_validation': False}
@@ -120,7 +123,7 @@ class TestRemapper:
         remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['verify'] is True
+        assert http.tls_config.tls_verify is True
 
     def test_invert_without_explicit_default(self):
         instance = {}
@@ -128,7 +131,7 @@ class TestRemapper:
         remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['verify'] is True
+        assert http.tls_config.tls_verify is True
 
     def test_standard_override(self):
         instance = {'disable_ssl_validation': True, 'tls_verify': False}
@@ -136,7 +139,7 @@ class TestRemapper:
         remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['verify'] is False
+        assert http.tls_config.tls_verify is False
 
     def test_unknown_name_default(self):
         instance = {}
@@ -144,7 +147,7 @@ class TestRemapper:
         remapper = {'verify_tls': {'name': 'verify', 'default': False}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['verify'] is True
+        assert http.tls_config.tls_verify is True
 
 
 class TestAllowRedirect:
@@ -152,10 +155,14 @@ class TestAllowRedirect:
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
-        assert http.options['allow_redirects'] is True
+        with mock.patch('requests.Session.get') as get:
+            http.get('http://example.com')
+            assert get.call_args.kwargs['allow_redirects'] is True
 
     def test_allow_redirect_override_default(self):
         instance = {'allow_redirects': False}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
-        assert http.options['allow_redirects'] is False
+        with mock.patch('requests.Session.get') as get:
+            http.get('http://example.com')
+            assert get.call_args.kwargs['allow_redirects'] is False

@@ -10,6 +10,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPStatusError,
     HTTPTimeoutError,
 )
+from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
 
 
 class Marathon(AgentCheck):
@@ -59,15 +60,17 @@ class Marathon(AgentCheck):
         )
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
-            self.http.options['timeout'] = timeout
+            self._request_timeout = HTTPTimeoutConfig(float(timeout), float(timeout))
         else:
-            self.http.options['timeout'] = (
+            self._request_timeout = HTTPTimeoutConfig(
                 float(self.instance.get('read_timeout', timeout)),
                 float(self.instance.get('connect_timeout', timeout)),
             )
         self._auth_body = None
-        if self.http.options['auth'] is not None:
-            self._auth_body = {'uid': self.http.options['auth'][0], 'password': self.http.options['auth'][1]}
+        username = self.instance.get('user')
+        password = self.instance.get('password')
+        if username is not None and password is not None:
+            self._auth_body = {'uid': username, 'password': password}
 
     def check(self, instance):
         try:
@@ -108,21 +111,21 @@ class Marathon(AgentCheck):
             # If the ACS token has not been set, go get it
             if not self.ACS_TOKEN:
                 self.refresh_acs_token(acs_url, tags)
-            self.http.options['headers']['authorization'] = 'token={}'.format(self.ACS_TOKEN)
+            self.http.set_header('authorization', 'token={}'.format(self.ACS_TOKEN))
 
         try:
-            r = self.http.get(url)
+            r = self.http.get(url, timeout=self._request_timeout)
             # If got unauthorized and using acs auth, refresh the token and try again
             if r.status_code == 401 and acs_url:
                 self.refresh_acs_token(acs_url, tags)
-                r = self.http.get(url)
+                r = self.http.get(url, timeout=self._request_timeout)
             r.raise_for_status()
         except HTTPTimeoutError:
             # If there's a timeout
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} timed out after {} seconds.".format(url, self.http.options['timeout'][0]),
+                message="{} timed out after {} seconds.".format(url, self._request_timeout.connect),
                 tags=["url:{}".format(url)] + tags,
             )
             raise Exception("Timeout when hitting {}".format(url))

@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.couch.couch import CouchDB2
+from datadog_checks.dev.http import assert_http_capability
 
 from . import common
 
@@ -29,8 +30,10 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
-    for key, value in expected_http_kwargs.items():
-        assert check.http.options[key] == value
+    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
+
+
+    assert_http_client_config(check.http, expected_http_kwargs)
 
 
 def test_new_version_system_metrics(load_test_data):

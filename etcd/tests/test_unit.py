@@ -22,5 +22,7 @@ def test_config(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
 
-    for key, value in expected_http_kwargs.items():
-        assert check.http.options[key] == value
+    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
+
+
+    assert_http_client_config(check.http, expected_http_kwargs)
