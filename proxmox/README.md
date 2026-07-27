@@ -16,7 +16,22 @@ Install the [Datadog Agent][2] and configure the Proxmox integration on one Prox
 
 ### Configuration
 
-1. Create an [API Token][10] in your Proxmox Management Interface. The [PVEAuditor][11] role can be associated with the token to provide access to the necessary API endpoints.
+1. Create a dedicated user and an [API Token][10] in your Proxmox Management Interface.
+   Assign the [PVEAuditor][11] role at the `/` path with propagation enabled. When token privilege separation is
+   enabled, assign the role to both the backing user and the token. Proxmox restricts a privilege-separated token
+   to the intersection of the user and token permissions.
+
+   Verify the effective permissions for both identities:
+
+   ```shell
+   pveum user permissions <USER>@<REALM>
+   pveum user token permissions <USER>@<REALM> <TOKEN_ID>
+   ```
+
+   The integration queries the QEMU Guest Agent for guest hostnames. That endpoint requires the `VM.Monitor`
+   privilege, which is not included in `PVEAuditor`. Without it, the integration safely uses the configured VM name
+   as the hostname. Only grant `VM.Monitor` through a custom role if guest hostnames are required and the broader
+   access is acceptable.
 2. Edit the `proxmox.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your proxmox performance data. See the [sample proxmox.d/conf.yaml][4] for all available configuration options. Ensure you have set the following parameters:
 
     ```
