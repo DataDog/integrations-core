@@ -92,7 +92,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             enabled=config.enabled,
             expected_db_exceptions=(Exception,),
             min_collection_interval=check.check_interval if hasattr(check, 'check_interval') else 15,
-            dbms="clickhouse",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name=job_name,
         )

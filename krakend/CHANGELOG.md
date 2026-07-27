@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.5.0 / 2026-07-08
+
+***Added***:
+
+* Add configuration discovery support. ([#24126](https://github.com/DataDog/integrations-core/pull/24126))
+
 ## 1.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

@@ -67,6 +67,29 @@ files:
         value:
           type: boolean
           example: false
+      - name: database_identifier
+        display_priority: 0
+        description: |
+          Controls how the database is identified in Data Observability.
+
+          The default value is the host and port of the instance (`$host:$port`).
+
+          This value will be used as-is for the display name of the instance but will be normalized
+          when applied as the `database_instance` tag. See https://docs.datadoghq.com/getting_started/tagging/
+          for more details on Datadog tag normalization.
+        options:
+          - name: template
+            value:
+              type: string
+              display_default: "$host:$port"
+              example: "saphana_myorg_$env"
+            description: |
+              The template to use for the database identifier. The default value is `$host:$port`.
+              You can use the following variables, prefixed by `$` in the template:
+              - host: The provided host of the instance.
+              - port: The port number of the instance.
+              In addition, you can use any key from the `tags` section of the configuration.
+            fleet_configurable: false
       - name: batch_size
         description: The number of rows to return with each query result.
         fleet_configurable: true
@@ -155,6 +178,105 @@ files:
                 type: string
               example:
                 - "TMP_SCHEMA"
+      - name: data_observability
+        hidden: true
+        display_priority: 0
+        fleet_configurable: true
+        description: |
+          Configure the Data Observability async job, which executes monitoring
+          queries delivered through Remote Configuration.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: Enable the Data Observability job.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+          - name: collection_interval
+            fleet_configurable: true
+            description: |
+              How often (in seconds) the job wakes up to check which queries are
+              due. Individual queries have their own interval_seconds.
+            value:
+              type: number
+              example: 10
+              display_default: 10
+          - name: run_sync
+            hidden: true
+            description: Run the job synchronously (for testing).
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+          - name: config_id
+            hidden: true
+            description: |
+              Unique identifier of the Remote Configuration payload that populated
+              this data_observability block. Set automatically by the Datadog Agent
+              Go RC handler; do not set this field manually.
+            value:
+              type: string
+            fleet_configurable: false
+          - name: queries
+            hidden: true
+            description: |
+              List of monitor queries to execute. Populated automatically by the
+              Datadog Agent Go RC handler; do not set this field manually.
+            value:
+              type: array
+              items:
+                type: object
+                required:
+                  - query
+                properties:
+                - name: monitor_id
+                  type: integer
+                - name: query
+                  type: string
+                - name: interval_seconds
+                  description: |
+                    How often (in seconds) to run this query. Ignored when schedule is set
+                    (see schedule for the precedence rule).
+                  type: integer
+                - name: schedule
+                  description: |
+                    A standard 5-field cron expression (minute hour dom month dow) specifying
+                    when to run this query. When both schedule and interval_seconds are set,
+                    schedule wins and interval_seconds is ignored. If neither is set, the
+                    query is skipped at runtime with a warning.
+                  type: string
+                - name: query_timeout
+                  description: |
+                    Statement timeout for this query in milliseconds. Applied as a connection-level
+                    statementTimeout when executing the query.
+                  type: integer
+                - name: dbname
+                  type: string
+                - name: type
+                  type: string
+                - name: entity
+                  type: object
+                  properties:
+                  - name: platform
+                    type: string
+                  - name: account
+                    type: string
+                  - name: database
+                    type: string
+                  - name: schema
+                    type: string
+                  - name: table
+                    type: string
+                - name: custom_sql_select_fields
+                  type: object
+                  properties:
+                  - name: metric_config_id
+                    type: integer
+                  - name: entity_id
+                    type: string
+            fleet_configurable: false
       - template: instances/default
   - template: logs
     example:

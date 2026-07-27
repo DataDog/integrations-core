@@ -1,0 +1,1 @@
+Add the `use_remote_config_profiles` option to the SNMP configuration spec so it is accepted by config validation and Remote Configuration.

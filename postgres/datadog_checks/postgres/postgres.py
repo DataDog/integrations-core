@@ -107,6 +107,8 @@ PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s
 class PostgreSql(DatabaseCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
+    DBMS = 'postgres'
+
     __NAMESPACE__ = 'postgresql'
 
     SOURCE_TYPE_NAME = 'postgresql'
@@ -244,11 +246,6 @@ class PostgreSql(DatabaseCheck):
     @property
     def tags_without_db(self):
         return self.tag_manager.get_tags(include_db=False)
-
-    @property
-    def dbms(self):
-        # Override the default to return "postgres" instead of "postgresql"
-        return "postgres"
 
     def add_core_tags(self):
         """
@@ -1183,7 +1180,7 @@ class PostgreSql(DatabaseCheck):
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "postgres",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.dbms_version,

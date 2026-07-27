@@ -1,1 +1,0 @@
-Add the ``collect_resource_ids_as_tags`` option to tag infrastructure metrics with Nutanix resource extIds.

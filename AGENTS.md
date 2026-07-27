@@ -31,13 +31,13 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 
 #### Generating New Code
 
-When generating python code, always add type hinting to the methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
+Add type hints to new functions and methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
 
-If a method yields a value but does not return anything or accept anything sent to the generator, type it as `Iterator` rather than `Generator`. This makes the method's contract explicit to the caller: something to iterate over, nothing more.
+Type simple generators as `Iterator[T]`. Use `Generator[YieldType, SendType, ReturnType]` when sent or returned values are part of their behavior.
 
 #### Refactoring Existing Code
 
-When refactoring existing code, never add type hints to a method that wasn't already type-hinted, unless explicitly asked to. This is one instance of a broader rule: keep diffs focused on the task at hand. Don't use a refactor as an opportunity to also add type hints, rename things, or otherwise "clean up" code you weren't asked to touch — it obscures the actual change under review and makes the diff harder to reason about.
+When refactoring existing code, add or update type hints when they support the change, but avoid unrelated annotation-only churn. More broadly, keep diffs focused on the task at hand rather than using a refactor to rename or otherwise clean up unrelated code.
 
 #### The Case of AnyStr
 
@@ -57,31 +57,27 @@ This way, `a` and `b` can each be `str` or `bytes`, but can't be mixed with each
 
 ### Naming: Leading Underscores
 
-Most code in this repository is not published as a public library API — it lives behind package boundaries, in integrations, in test suites, or in scripts nobody imports. "Not part of the public API" is the *default* state of almost everything here, so a leading underscore is not how we signal it. **Do not add a leading underscore to a method or variable name unless it matches one of the narrow exceptions below.** This applies everywhere, including test files, fixtures, internal tooling, and one-off scripts — not just files intended for external/public consumption.
+Most code in this repository belongs to applications rather than public libraries, so do not assume that every internal name needs a leading underscore. Use naming that communicates the role and intended scope of each name:
 
-This rule is about the single-leading-underscore privacy convention; it does not apply to dunder methods (`__init__`, `__repr__`, `__enter__`, `__exit__`, `__iter__`, and similar). Those are Python protocol hooks, not a privacy signal — implement them with their required names whenever the protocol calls for them.
+- Do not prefix class names or uppercase module constants with a leading underscore. For example, use `GitRemote` and `GIT_REMOTE_PATTERNS`, not `_GitRemote` and `_GIT_REMOTE_PATTERNS`.
+- A single leading underscore is appropriate for functions, methods, attributes, and module variables that are helpers or implementation state intended only for use within their defining module or class.
+- Do not add a leading underscore to framework callbacks, overridden methods, entry points, fixtures, or names imported and used by other modules.
+- For reusable library code, such as `datadog_checks.base` and `ddev`, consider the documented interface, existing `__all__` declarations, and actual call sites when deciding whether a name is internal.
+- Follow established naming in the surrounding code. Do not rename existing names solely to enforce this guidance.
+- A leading underscore communicates intended scope; it does not enforce privacy. It has no privacy meaning for ordinary local variables, although `_` or `_name` may identify intentionally unused values.
 
-**Methods** — a leading underscore is allowed only:
-
-1. On instance methods of a class, to flag that the method is not part of that class's public API.
-2. On functions in a module that is explicitly designed as a reusable library module, when the function has non-obvious side effects or behavior that its name alone doesn't make clear.
-
-In every other case — module-level/free functions, helpers in test files, functions in scripts, functions in files no one else will ever import — do **not** add a leading underscore, even if the function feels "internal" or "private". Internal is the default; it doesn't need marking.
-
-**Variables** — a leading underscore is allowed only for Pydantic model private attributes (e.g. `_cache: dict = PrivateAttr(default_factory=dict)`). That is the only case. This includes module constants: do not prefix uppercase module constants with a leading underscore (for example `_GIT_REMOTE_PATTERNS`); name them without the underscore instead (`GIT_REMOTE_PATTERNS`). The same applies to class attributes, instance attributes outside Pydantic models, and local variables.
-
-If you're unsure whether something qualifies, it doesn't — leave the underscore off.
+This rule concerns the single-leading-underscore convention. It does not apply to dunder methods (`__init__`, `__repr__`, `__enter__`, `__exit__`, `__iter__`, and similar), which must use their protocol-defined names.
 
 ### Docstrings and Comments
 
-- Use concise one-liner docstrings for most methods; method names should be self-descriptive enough that little else is needed.
-- Multi-line docstrings with Args/Returns are acceptable only for important public interface methods that genuinely need detailed documentation.
-- Avoid verbose docstrings for methods that are internal or not meant for outside callers. Note that "internal"/"private" here is a judgment call about who's expected to call the method — it has nothing to do with the leading-underscore naming rule above. Docstring verbosity and naming are two separate decisions; don't infer one from the other.
-- Prefer self-explanatory code over inline comments. If a comment is genuinely needed, keep it to one line — code clarity should come from descriptive names, not from comments compensating for unclear ones.
+- Use concise docstrings for straightforward behavior.
+- Use longer docstrings when a public or internal interface has a non-obvious contract, constraints, side effects, or error behavior.
+- Prefer self-explanatory code. Add comments to explain non-obvious reasoning, invariants, workarounds, or external constraints.
+- Keep comments concise, but use multiple lines when necessary for clarity.
 
 ### Avoiding Duplication
 
-Extract small, focused helper functions to eliminate duplicated logic rather than repeating code blocks or leaning on comments to explain repetition.
+Extract duplicated logic when it represents the same concept and a shared helper improves clarity or consistency. Do not introduce an abstraction merely because two small code blocks look similar.
 
 ## Configuration Models
 
@@ -200,13 +196,17 @@ For `datadog_checks_dev` and `ddev` we also need to track changelog entries even
 The valid types are defined in `ddev/src/ddev/release/constants.py` (`ENTRY_TYPES`):
 
 - `added` - New features. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0).
-- `changed` - Breaking changes or significant modifications. Bumps the **major** version (e.g., 1.0.0 → 2.0.0).
+- `changed` - Backward-incompatible changes only (e.g. removing or renaming a metric or service check, removing/renaming/retyping a config option, or changing default behavior in a way that alters emitted data). Bumps the **major** version (e.g., 1.0.0 → 2.0.0). Do **not** use for non-breaking improvements — those are `added` or `fixed`.
 - `deprecated` - Marks functionality as deprecated. Bumps the **minor** version.
 - `removed` - Removes functionality. Bumps the **major** version.
 - `fixed` - Bug fixes or internal modifications with no impact on outside users. These do not deserve a `changed` or `added` (major or minor) version bump. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1).
 - `security` - Security-related fixes. Bumps the **minor** version.
 
-#### Examples
+### Choosing `.changed`
+
+Before writing a `.changed` entry, stop and confirm the change is genuinely breaking for an existing user — something that would break their current configuration, dashboards, monitors, or ingested data. If you cannot name specifically what breaks, it is **not** a `.changed` entry: use `added` for new capability or `fixed` for a bug fix. When in doubt, prefer the non-breaking type or ask the reviewer rather than defaulting to `.changed`.
+
+### Examples
 
 ```shell
 # New feature for kafka_consumer in PR #23700
@@ -215,6 +215,13 @@ echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/cha
 # Bug fix for sqlserver in PR #23701
 echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
 ```
+
+## Review Guidelines
+
+These guidelines apply to automated code review (the Codex review bot). They do not relax any requirement above for code you author.
+
+- Do not raise findings for a missing changelog entry. Changelog files are named `<INTEGRATION>/changelog.d/<PR_NUMBER>.<TYPE>`, so they can only be created after the PR number is assigned; their absence when a PR is first opened is expected rather than a defect. The requirement is already enforced by the `check_changelog` job in `.github/workflows/pr-quick-check.yml`.
+- When a PR changes the `metric_type` column in `metadata.csv`, verify that the new type uses the correct in-app (backend) type, not the submission type. The submission-to-backend mapping is defined in `datadog_checks_base/datadog_checks/base/stubs/aggregator.py` (`METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP`). The valid in-app types for `metadata.csv` are `gauge`, `count`, and `rate`. The full mapping is: `gauge` → `gauge`, `rate` → `gauge`, `count` → `count`, `monotonic_count` → `count`, `counter` → `rate`, `histogram` → `rate`, `historate` → `rate`. For example, a metric submitted as a `rate` should appear as `gauge` in `metadata.csv`, and a metric submitted as a `monotonic_count` should appear as `count`.
 
 ## Pull Requests
 

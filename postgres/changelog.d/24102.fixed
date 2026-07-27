@@ -1,1 +1,0 @@
-Cache parameterized-query explain failures caused by unresolvable parameter types so they aren't re-attempted on every collection.
