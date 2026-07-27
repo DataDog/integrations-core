@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the v0.21.1 parser optimizations."""
 
 from unittest.mock import patch
 
