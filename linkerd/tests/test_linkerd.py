@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from types import SimpleNamespace
+from typing import Any
 
 import pytest
 import requests_mock
@@ -29,6 +31,36 @@ def get_response(filename):
     with open(metrics_file_path, 'r') as f:
         response = f.read()
     return response
+
+
+def assert_e2e_metrics(aggregator: Any) -> None:
+    for metric_name, metric_type in EXPECTED_METRICS_V2_E2E.items():
+        if metric_name in OPTIONAL_METRICS_V2_E2E:
+            aggregator.assert_metric(metric_name, metric_type=metric_type, at_least=0)
+        else:
+            aggregator.assert_metric(metric_name, metric_type=metric_type)
+    aggregator.assert_all_metrics_covered()
+
+
+def assert_discovery_metrics(aggregator: Any) -> None:
+    for metric_name in (
+        'linkerd.request.count',
+        'linkerd.response.count',
+        'linkerd.tcp.read_bytes.count',
+        'linkerd.tcp.write_bytes.count',
+    ):
+        aggregator.assert_metric(metric_name)
+
+
+def assert_discovery_container_tags(aggregator: Any) -> None:
+    tags = {
+        tag
+        for metric_name in aggregator.metric_names
+        for metric in aggregator.metrics(metric_name)
+        for tag in metric.tags or ()
+    }
+    assert 'image_name:cr.l5d.io/linkerd/proxy' in tags
+    assert 'short_image:proxy' in tags
 
 
 def test_linkerd(aggregator, dd_run_check):
@@ -94,11 +126,36 @@ def test_openmetrics_error(monkeypatch, dd_run_check):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
-    for metric_name, metric_type in EXPECTED_METRICS_V2_E2E.items():
-        if metric_name in OPTIONAL_METRICS_V2_E2E:
-            aggregator.assert_metric(metric_name, metric_type=metric_type, at_least=0)
-        else:
-            aggregator.assert_metric(metric_name, metric_type=metric_type)
-    aggregator.assert_all_metrics_covered()
+    assert_e2e_metrics(aggregator)
 
     aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, count=2)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check) -> None:
+    aggregator = dd_agent_check(
+        {'init_config': {}, 'instances': []},
+        check_rate=True,
+        discovery_min_instances=1,
+        discovery_timeout=60,
+    )
+    assert_discovery_metrics(aggregator)
+    assert_discovery_container_tags(aggregator)
+
+    aggregator.assert_service_check('linkerd.openmetrics.health', status=LinkerdCheck.OK, at_least=1)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check) -> None:
+    service = SimpleNamespace(
+        id='linkerd-controller-proxy',
+        host='linkerd-controller-proxy-metrics.linkerd.svc.cluster.local',
+        ports=(SimpleNamespace(number=4191, name='proxy-metrics'),),
+    )
+    candidates = tuple(LinkerdCheck.generate_configs(service))
+    assert candidates
+
+    for candidate in candidates:
+        aggregator = dd_agent_check(candidate, check_rate=True)
+        assert_discovery_metrics(aggregator)
+        aggregator.assert_service_check('linkerd.openmetrics.health', status=LinkerdCheck.OK, at_least=1)

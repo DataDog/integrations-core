@@ -2,6 +2,12 @@ name: Linkerd
 fleet_configurable: true
 files:
 - name: linkerd.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        - 4191
   options:
   - template: init_config
     options:
@@ -22,3 +28,16 @@ files:
       hidden: true
       overrides:
         prometheus_url.required: false
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - proxy
+  - template: auto_conf/cel_selector
+    overrides:
+      cel_selector.example:
+        containers:
+        - container.image.reference.contains("cr.l5d.io/linkerd/proxy")
+  - template: auto_conf/discovery
