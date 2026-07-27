@@ -15,6 +15,7 @@ from datadog_checks.dev.kind import kind_run
 from .common import HERE, LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
 
 LINKERD_CONTROLLER_POD_IP_STATE = 'linkerd_controller_pod_ip'
+LINKERD_KUBECONFIG_STATE = 'linkerd_kubeconfig'
 
 
 def setup_linkerd_cluster():
@@ -55,6 +56,7 @@ def save_linkerd_controller_pod_ip() -> None:
 def dd_environment():
     kind_config = os.path.join(HERE, 'kind', 'kind-linkerd.yaml')
     with kind_run(conditions=[setup_linkerd_cluster], kind_config=kind_config) as kubeconfig:
+        save_state(LINKERD_KUBECONFIG_STATE, kubeconfig)
         compose_file = os.path.join(HERE, "compose", "docker-compose.yaml")
         with docker_run(
             compose_file=compose_file,
@@ -73,7 +75,13 @@ def dd_environment():
             metadata = {
                 'agent_type': 'kubernetes',
                 'kubernetes': {
+                    'auto_conf': os.path.join(HERE, '..', 'datadog_checks', 'linkerd', 'data', 'auto_conf.yaml'),
                     'kubeconfig': kubeconfig,
                 },
             }
             yield instance, metadata
+
+
+@pytest.fixture(scope='session')
+def linkerd_kubeconfig() -> str:
+    return get_state(LINKERD_KUBECONFIG_STATE)
