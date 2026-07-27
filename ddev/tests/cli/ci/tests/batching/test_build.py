@@ -14,6 +14,7 @@ import pytest
 from ddev.cli.ci.tests.batching.build import build_test_batches, build_test_units, resolve_hatch_environments
 from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
+from ddev.utils.platform import PlatformName
 from tests.helpers.batching import DEFAULT_PYTHON_VERSION, env, modified
 
 
@@ -149,7 +150,12 @@ def test_build_environmentless_target():
 
     assert len(units) == 1
     unit = units[0]
-    assert (unit.target, unit.name, unit.platform, unit.environment.name) == ("ddev", "ddev", "linux", "")
+    assert (unit.target, unit.name, unit.platform, unit.environment.name) == (
+        "ddev",
+        "ddev",
+        PlatformName.LINUX,
+        "",
+    )
     assert unit.environment.python_version == DEFAULT_PYTHON_VERSION
 
 
@@ -174,7 +180,7 @@ def test_build_applies_platform_and_runner_overrides():
         ci={"sqlserver": {"platforms": ["windows", "linux"], "runners": {"windows": ["windows-2022"]}}},
     )
     provider = FakeEnvironmentProvider(
-        {"sqlserver": [env("py3.13", "windows"), env("py3.13", "linux")]},
+        {"sqlserver": [env("py3.13", PlatformName.WINDOWS), env("py3.13", PlatformName.LINUX)]},
     )
     changed = [modified("sqlserver/tests/test_a.py")]
 
@@ -183,8 +189,8 @@ def test_build_applies_platform_and_runner_overrides():
     )
 
     assert [(u.platform, u.name, u.runner_labels) for u in units] == [
-        ("windows", "sqlserver on Windows (py3.13)", ("windows-2022",)),
-        ("linux", "sqlserver on Linux (py3.13)", ("ubuntu-22.04",)),
+        (PlatformName.WINDOWS, "sqlserver on Windows (py3.13)", ("windows-2022",)),
+        (PlatformName.LINUX, "sqlserver on Linux (py3.13)", ("ubuntu-22.04",)),
     ]
 
 
@@ -197,7 +203,7 @@ def test_resolve_hatch_environments_includes_both_facets_and_excludes_neither():
     ]
 
     resolved = resolve_hatch_environments(
-        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["linux"]
+        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=[PlatformName.LINUX]
     )
 
     assert [(r.name, r.test_available, r.e2e_available) for r in resolved] == [
@@ -215,14 +221,16 @@ def test_resolve_hatch_environments_routes_constrained_platforms_without_crossin
     ]
 
     resolved = resolve_hatch_environments(
-        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["windows", "linux"]
+        environments,
+        default_python_version=DEFAULT_PYTHON_VERSION,
+        platforms=[PlatformName.WINDOWS, PlatformName.LINUX],
     )
 
     # Each environment lands only on its declared platform (intersected with the target's);
     # the Linux env never duplicates onto Windows and vice versa, and macos is dropped.
     assert [(r.name, r.platform) for r in resolved] == [
-        ("py3.13-linux", "linux"),
-        ("py3.13-windows", "windows"),
+        ("py3.13-linux", PlatformName.LINUX),
+        ("py3.13-windows", PlatformName.WINDOWS),
     ]
 
 
@@ -230,18 +238,20 @@ def test_resolve_hatch_environments_unconstrained_uses_single_default_platform()
     environments = [EnvStub("py3.11", platforms=[])]
 
     resolved = resolve_hatch_environments(
-        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["linux", "windows"]
+        environments,
+        default_python_version=DEFAULT_PYTHON_VERSION,
+        platforms=[PlatformName.LINUX, PlatformName.WINDOWS],
     )
 
     # No cross-product: an unconstrained env is routed only to the default (first) platform.
-    assert [(r.name, r.platform) for r in resolved] == [("py3.11", "linux")]
+    assert [(r.name, r.platform) for r in resolved] == [("py3.11", PlatformName.LINUX)]
 
 
 def test_resolve_hatch_environments_reads_the_python_version_from_hatch():
     environments = [EnvStub("py3.11-1.23", python="3.11")]
 
     resolved = resolve_hatch_environments(
-        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=["linux"]
+        environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=[PlatformName.LINUX]
     )
 
     assert resolved[0].python_version == "3.11"
@@ -252,7 +262,7 @@ def test_resolve_hatch_environments_falls_back_when_hatch_declares_no_python():
     # substitute because it only encodes the version by convention.
     environments = [EnvStub("py3.11-1.23", python=None)]
 
-    resolved = resolve_hatch_environments(environments, default_python_version="3.9", platforms=["linux"])
+    resolved = resolve_hatch_environments(environments, default_python_version="3.9", platforms=[PlatformName.LINUX])
 
     assert resolved[0].python_version == "3.9"
 

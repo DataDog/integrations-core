@@ -8,8 +8,9 @@ its own Python interpreter, so an E2E run is only meaningful against an Agent wh
 Python matches that version. This module owns that mapping and is the single place to change when
 a new Agent release line ships a new Python.
 
-Resolution is pure and offline: it never contacts a registry, so a test plan built from the same
-inputs is always identical.
+`get_agent_image` is pure and offline, so a test plan built from the same inputs is always
+identical. `find_unpublished_images` is the separate, explicitly-called check that the images a
+plan resolved actually exist in the registry.
 
 Images here are base tags. The ``-jmx`` variant is deliberately absent: whether an environment
 needs the JMX image is a per-environment runtime fact (``use_jmx`` in the E2E metadata) rather
@@ -21,16 +22,21 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from ddev.utils.platform import PlatformName
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 REGISTRY = 'registry.datadoghq.com'
-
-LINUX = 'linux'
-WINDOWS = 'windows'
 
 # Hatch reports an environment's Python as `major.minor`. Anything else (a bare major, a
 # free-threaded `3.13t`, an interpreter path) is rejected rather than guessed at, because
 # silently mapping it onto the wrong Agent would run E2E against a mismatched interpreter.
 PYTHON_VERSION_PATTERN = re.compile(r'^\d+\.\d+$')
+
+IMAGE_REFERENCE_PATTERN = re.compile(r'^(?P<host>[^/]+)/(?P<repository>.+):(?P<tag>[^:]+)$')
 
 
 class UnknownPythonVersion(Exception):
@@ -48,16 +54,13 @@ class AgentImages:
     linux: str
     windows: str
 
-    def for_platform(self, platform: str) -> str:
-        """Return the image for `platform`, one of the platform ids used by the test matrix."""
-        if platform == LINUX:
+    def for_platform(self, platform: PlatformName) -> str:
+        if platform is PlatformName.LINUX:
             return self.linux
-        if platform == WINDOWS:
+        if platform is PlatformName.WINDOWS:
             return self.windows
 
-        raise UnsupportedAgentPlatform(
-            f'No Agent Docker image is published for platform {platform!r}; expected {LINUX!r} or {WINDOWS!r}'
-        )
+        raise UnsupportedAgentPlatform(f'No Agent Docker image is published for platform {platform!r}')
 
 
 def released_images(version: str) -> AgentImages:
@@ -84,11 +87,10 @@ AGENT_IMAGES_BY_PYTHON: dict[str, AgentImages] = {
 }
 
 
-def get_agent_image(python_version: str, platform: str) -> str:
+def get_agent_image(python_version: str, platform: PlatformName) -> str:
     """Return the Agent Docker image to run E2E tests for `python_version` on `platform`.
 
-    `python_version` is a `major.minor` string as reported by Hatch (for example ``3.13``) and
-    `platform` is a test-matrix platform id (``linux`` or ``windows``). Raises
+    `python_version` is a `major.minor` string as reported by Hatch (for example ``3.13``). Raises
     :class:`UnknownPythonVersion` when no Agent line embeds that Python and
     :class:`UnsupportedAgentPlatform` when the line publishes no image for that platform.
     """
@@ -103,3 +105,31 @@ def get_agent_image(python_version: str, platform: str) -> str:
         raise UnknownPythonVersion(f'No Agent release embeds Python {python_version}; known versions: {supported}')
 
     return images.for_platform(platform)
+
+
+def parse_image_reference(image: str) -> tuple[str, str, str]:
+    """Split a fully qualified image into its registry host, repository, and tag."""
+    match = IMAGE_REFERENCE_PATTERN.match(image)
+    if match is None:
+        raise ValueError(f'Not a fully qualified `host/repository:tag` image reference: {image!r}')
+
+    return match.group('host'), match.group('repository'), match.group('tag')
+
+
+def find_unpublished_images(images: Iterable[str]) -> list[str]:
+    """Return the given images that the registry does not serve, in first-seen order.
+
+    Each distinct image is queried once. Callers use this as an explicit preflight so a bad or
+    withdrawn tag surfaces before any job runs, instead of failing every E2E job in the plan.
+    Registry errors other than a missing manifest propagate, so an unreachable registry is not
+    mistaken for a missing image.
+    """
+    from ddev.utils.docker_registry import manifest_exists
+
+    missing: list[str] = []
+    for image in dict.fromkeys(images):
+        host, repository, tag = parse_image_reference(image)
+        if not manifest_exists(repository, tag, host=host):
+            missing.append(image)
+
+    return missing

@@ -12,12 +12,12 @@ from __future__ import annotations
 import pytest
 
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
-from ddev.cli.ci.tests.messages import Platform
 from ddev.e2e.agent_images import UnknownPythonVersion
+from ddev.utils.platform import PlatformName
 from tests.helpers.batching import env, make_unit
 
 
-def fake_resolver(python_version: str, platform: str) -> str:
+def fake_resolver(python_version: str, platform: PlatformName) -> str:
     return f"agent:{python_version}-{platform}"
 
 
@@ -100,16 +100,16 @@ def test_runner_labels_and_platform_are_preserved():
         make_unit(
             "sqlserver",
             name="sqlserver on Windows (py3.13)",
-            platform="windows",
+            platform=PlatformName.WINDOWS,
             runner_labels=("windows-2022", "x-large"),
-            environment=env("py3.13", platform="windows"),
+            environment=env("py3.13", platform=PlatformName.WINDOWS),
         )
     ]
 
     [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
 
     assert job.runner_labels == ("windows-2022", "x-large")
-    assert job.platform == Platform.WINDOWS
+    assert job.platform == PlatformName.WINDOWS
 
 
 def test_multiple_units_expand_in_order_one_job_each():

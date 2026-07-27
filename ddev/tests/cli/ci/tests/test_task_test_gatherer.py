@@ -24,7 +24,6 @@ from ddev.cli.ci.tests.messages import (
     BatchJob,
     BatchJobResult,
     JobResult,
-    Platform,
     TestBatch,
     UpdatePRComment,
     WorkflowStatus,
@@ -35,6 +34,7 @@ from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async.models import JobStep, WorkflowJob
 from ddev.utils.junit import TestStatus
+from ddev.utils.platform import PlatformName
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -58,7 +58,7 @@ def _batch_job(
     name: str,
     target: str = "ntp",
     environment: str = "py3.13",
-    platform: Platform = Platform.LINUX,
+    platform: PlatformName = PlatformName.LINUX,
     runner: str = "ubuntu-latest",
 ) -> BatchJob:
     return BatchJob(
@@ -322,8 +322,8 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path):
     j1_dir = _make_job_tree(artifacts, "j1", e2e=False)
     j2_dir = _make_job_tree(artifacts, "j2", e2e=False)
 
-    j1 = _batch_job("j1", platform=Platform.LINUX, runner="ubuntu-latest")
-    j2 = _batch_job("j2", platform=Platform.WINDOWS, runner="windows-latest")
+    j1 = _batch_job("j1", platform=PlatformName.LINUX, runner="ubuntu-latest")
+    j2 = _batch_job("j2", platform=PlatformName.WINDOWS, runner="windows-latest")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]})
     batch_jobs = [
         _batch_job_result(j1, _workflow_job("j1", "success"), j1_dir),
@@ -349,7 +349,7 @@ def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path) -> None:
         target="postgres",
         runner_labels=("ubuntu-latest",),
         environment="py3.13",
-        platform=Platform.LINUX,
+        platform=PlatformName.LINUX,
         python_version="3.13",
         unit_tests=True,
         e2e_tests=True,
@@ -915,7 +915,7 @@ def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) 
 # ---------------------------------------------------------------------------
 
 
-def _scenario_batch_job(target: str, platform: Platform = Platform.LINUX, runner: str = "ubuntu-latest") -> BatchJob:
+def _scenario_batch_job(target: str, platform: PlatformName = PlatformName.LINUX, runner: str = "ubuntu-latest") -> BatchJob:
     return _batch_job(target, target=target, environment="py3.12", platform=platform, runner=runner)
 
 
@@ -926,7 +926,7 @@ def _scenario_job(
     junit: str | None,
     *,
     run_id: int,
-    platform: Platform = Platform.LINUX,
+    platform: PlatformName = PlatformName.LINUX,
     runner: str = "ubuntu-latest",
     failed_step: str | None = None,
 ) -> BatchJobResult:
@@ -942,7 +942,7 @@ def _scenario_plan() -> dict[str, list[BatchJob]]:
         "b1": [
             _scenario_batch_job("postgres"),
             _scenario_batch_job("redis"),
-            _scenario_batch_job("ntp", Platform.WINDOWS, "windows-latest"),
+            _scenario_batch_job("ntp", PlatformName.WINDOWS, "windows-latest"),
             _scenario_batch_job("kafka"),
         ],
         "b2": [_scenario_batch_job(target) for target in ("disk", "snmp", "http_check", "mysql")],
@@ -959,7 +959,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
         _scenario_job(a1, "postgres", "success", JUNIT_PASSING, run_id=1),
         _scenario_job(a1, "redis", "success", JUNIT_PASSING, run_id=1),
         _scenario_job(
-            a1, "ntp", "success", JUNIT_PASSING, run_id=1, platform=Platform.WINDOWS, runner="windows-latest"
+            a1, "ntp", "success", JUNIT_PASSING, run_id=1, platform=PlatformName.WINDOWS, runner="windows-latest"
         ),
         _scenario_job(a1, "kafka", "success", JUNIT_PASSING, run_id=1),
     ]

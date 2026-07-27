@@ -14,13 +14,13 @@ from ddev.cli.ci.tests.messages import (
     BatchJob,
     BatchJobResult,
     JobResult,
-    Platform,
     UpdatePRComment,
     WorkflowStatus,
 )
 from ddev.cli.ci.tests.progress import DispatcherProgress
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models import WorkflowJob
+from ddev.utils.platform import PlatformName
 
 
 def batch_job(
@@ -28,7 +28,7 @@ def batch_job(
     target="ntp",
     runner_labels=("ubuntu-latest",),
     environment="py3.13",
-    platform=Platform.LINUX,
+    platform=PlatformName.LINUX,
     python_version="3.13",
     unit_tests=True,
     e2e_tests=False,
@@ -59,7 +59,7 @@ def test_artifact_name_ignores_non_identifying_fields(field: str):
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("target", "kafka"), ("environment", "py3.12"), ("platform", Platform.WINDOWS)],
+    [("target", "kafka"), ("environment", "py3.12"), ("platform", PlatformName.WINDOWS)],
 )
 def test_artifact_name_varies_with_identifying_fields(field, value):
     assert batch_job(**{field: value}).artifact_name() != batch_job().artifact_name()
@@ -69,7 +69,7 @@ def test_artifact_name_for_environmentless_job():
     # An environmentless job omits the environment segment entirely (no empty "__" gap); it stays
     # unique because such a target produces a single job per platform.
     assert batch_job(environment="").artifact_name() == "ntp_linux"
-    assert batch_job(environment="", platform=Platform.WINDOWS).artifact_name() == "ntp_windows"
+    assert batch_job(environment="", platform=PlatformName.WINDOWS).artifact_name() == "ntp_windows"
 
 
 def test_artifact_name_sanitizes_disallowed_characters():
@@ -117,14 +117,14 @@ def test_correlate_ignores_artifact_dir_missing_on_disk(tmp_path: Path):
 
 
 def test_job_result_defaults():
-    result = JobResult(integration="ntp", environment="py3.13", platform=Platform.LINUX, status=Status.SUCCESS)
+    result = JobResult(integration="ntp", environment="py3.13", platform=PlatformName.LINUX, status=Status.SUCCESS)
     assert result.failed_steps == []
     assert result.reports == ()
     assert result.failed_tests == []
 
 
 def _job(integration: str, status: Status) -> JobResult:
-    return JobResult(integration=integration, environment="py3.13", platform=Platform.LINUX, status=status)
+    return JobResult(integration=integration, environment="py3.13", platform=PlatformName.LINUX, status=status)
 
 
 def _workflow(batch_id: str, run_id: int, success: int, failed: int, skipped: int, results: list) -> WorkflowStatus:
