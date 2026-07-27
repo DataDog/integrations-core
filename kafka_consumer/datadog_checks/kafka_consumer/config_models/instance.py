@@ -20,7 +20,21 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['tls_ca_cert', 'tls_cert', 'tls_crlfile', 'tls_private_key'])
+SECURE_FIELD_NAMES = frozenset(
+    [
+        'kafka_connect_tls_ca_cert',
+        'kafka_connect_tls_cert',
+        'kafka_connect_tls_key',
+        'sasl_kerberos_keytab',
+        'schema_registry_tls_ca_cert',
+        'schema_registry_tls_cert',
+        'schema_registry_tls_key',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_crlfile',
+        'tls_private_key',
+    ]
+)
 
 
 class KafkaConnectOauthTokenProvider(BaseModel):
