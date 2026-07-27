@@ -599,9 +599,7 @@ def test_load_query_log_statements_emits_server_node_per_node(check_with_dbm):
     ]
 
     with (
-        mock.patch.object(
-            metrics, '_build_per_node_checkpoint_filter', return_value=('', 0, {})
-        ),
+        mock.patch.object(metrics, '_build_per_node_checkpoint_filter', return_value=('', 0, {})),
         mock.patch.object(metrics, '_execute_query', return_value=raw_rows),
         mock.patch.object(metrics, '_set_checkpoint_from_event_time'),
         mock.patch.object(metrics, '_track_node_checkpoint'),
@@ -624,9 +622,7 @@ def test_load_query_log_statements_missing_node_yields_empty_field(check_with_db
     metrics = check_with_dbm.statement_metrics
 
     with (
-        mock.patch.object(
-            metrics, '_build_per_node_checkpoint_filter', return_value=('', 0, {})
-        ),
+        mock.patch.object(metrics, '_build_per_node_checkpoint_filter', return_value=('', 0, {})),
         mock.patch.object(metrics, '_execute_query', return_value=[_raw_query_log_row('')]),
         mock.patch.object(metrics, '_set_checkpoint_from_event_time'),
         mock.patch.object(metrics, '_track_node_checkpoint'),
