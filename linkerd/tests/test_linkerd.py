@@ -150,7 +150,7 @@ def test_e2e_discovery_all_candidates(dd_agent_check) -> None:
     service = SimpleNamespace(
         id='linkerd-controller-proxy',
         host='linkerd-controller-proxy-metrics.linkerd.svc.cluster.local',
-        ports=(SimpleNamespace(number=4191, name='proxy-metrics'),),
+        ports=(SimpleNamespace(number=4191, name='linkerd-admin'),),
     )
     candidates = tuple(LinkerdCheck.generate_configs(service))
     assert candidates
