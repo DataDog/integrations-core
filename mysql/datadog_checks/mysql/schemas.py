@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from datadog_checks.mysql.metadata import MySQLMetadata
 
 # JSON aggregation (JSON_ARRAYAGG / JSON_OBJECT grouped) is required for the single-query strategy.
-# It is available on MySQL >= 5.7.22 and MariaDB >= 10.5.0. Older versions fall back to the legacy
-# collector (see metadata.py).
+# It is available on MySQL >= 5.7.22 and MariaDB >= 10.5.0. Older versions use the chunked strategy,
+# which relies only on flat INFORMATION_SCHEMA queries and works on every supported version.
 MYSQL_MIN_JSON_VERSION = (5, 7, 22)
 MARIADB_MIN_JSON_VERSION = (10, 5, 0)
 
@@ -40,8 +40,10 @@ TABLES_CHUNK_SIZE = 500
 # Number of tables (rows) to buffer before flushing a metadata payload.
 DEFAULT_PAYLOAD_CHUNK_SIZE = 500
 
-# Collection strategies for the v2 collector. Both produce byte-identical payloads; they differ
-# only in how table detail is fetched, so the benchmark harness can compare them.
+# Collection strategies. Both produce byte-identical payloads; they differ only in how table detail
+# is fetched. single_query is the default on JSON-capable servers; chunked is the automatic fallback
+# for older versions and works everywhere. The strategy is normally chosen by server version; a
+# hidden ``collection_strategy`` config option can force one (an escape hatch for debugging).
 STRATEGY_SINGLE_QUERY = "single_query"  # shape A: one JSON-aggregation query per database
 STRATEGY_CHUNKED = "chunked"  # shape B: stream the table list, fetch detail per chunk
 
@@ -86,7 +88,7 @@ def _json_safe_create_time(value: Any) -> Any:
 
 
 def normalize_columns(rows: list[dict]) -> list[dict]:
-    """Build the per-table columns list, matching the legacy collector field-for-field."""
+    """Build the per-table columns list, matching the previously shipped collector field-for-field."""
     columns = []
     for row in sorted(rows, key=lambda r: r.get("ordinal_position") or 0):
         default = row.get("default")
@@ -105,7 +107,7 @@ def normalize_columns(rows: list[dict]) -> list[dict]:
 
 
 def group_indexes(rows: list[dict]) -> list[dict]:
-    """Group flat index key-part rows into per-index dicts, matching the legacy collector.
+    """Group flat index key-part rows into per-index dicts, matching the previously shipped collector.
 
     Each input row is one key part; rows are grouped by index name and key parts are ordered by
     ``seq_in_index`` (JSON_ARRAYAGG does not preserve order).
@@ -116,17 +118,21 @@ def group_indexes(rows: list[dict]) -> list[dict]:
         index_name = str(row.get("name"))
         index_data = by_index.get(index_name)
         if index_data is None:
-            cardinality = row.get("cardinality")
             index_data = {
                 "name": index_name,
-                # in-memory table BTREE indexes have no cardinality, so default to 0
-                # https://bugs.mysql.com/bug.php?id=58520
-                "cardinality": int(cardinality) if cardinality is not None else 0,
+                "cardinality": 0,
                 "index_type": str(row.get("index_type")),
                 "non_unique": bool(row.get("non_unique")),
             }
             by_index[index_name] = index_data
             order.append(index_name)
+
+        # STATISTICS lists cardinality per key part; the index cardinality is the full-index value at
+        # the highest seq_in_index. Rows are sorted by seq_in_index, so overwriting each part keeps
+        # the last value, matching the previously shipped collector.
+        # NULL cardinality (e.g. MEMORY-engine BTREE indexes, bug #58520) defaults to 0.
+        cardinality = row.get("cardinality")
+        index_data["cardinality"] = int(cardinality) if cardinality is not None else 0
 
         if row.get("expression"):
             index_data["expression"] = str(row.get("expression"))
@@ -150,7 +156,7 @@ def normalize_foreign_keys(rows: list[dict]) -> list[dict]:
 
 
 def group_partitions(rows: list[dict]) -> list[dict]:
-    """Group flat partition/subpartition rows into per-partition dicts, matching the legacy collector.
+    """Group flat partition/subpartition rows into per-partition dicts, matching the previously shipped collector.
 
     ``table_rows`` and ``data_length`` are summed across a partition's subpartition rows.
     """
@@ -198,11 +204,13 @@ class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
         super().__init__()
         self.collection_interval = schemas_config.get("collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
         self.payload_chunk_size = schemas_config.get("payload_chunk_size", DEFAULT_PAYLOAD_CHUNK_SIZE)
-        # Capped by the collection interval, matching the legacy collector.
+        # Capped by the collection interval, matching the previously shipped collector.
         self.max_execution_time = min(
             schemas_config.get("max_execution_time", DEFAULT_MAX_EXECUTION_TIME), self.collection_interval
         )
-        self.collection_strategy = schemas_config.get("collection_strategy", STRATEGY_SINGLE_QUERY)
+        # None means "choose by server version" (single_query when JSON is supported, else chunked).
+        # An explicit value forces that strategy regardless of version (hidden debugging escape hatch).
+        self.collection_strategy = schemas_config.get("collection_strategy")
 
 
 class _ChunkedTableCursor:
@@ -236,14 +244,23 @@ class MySqlSchemaCollector(SchemaCollector):
     def base_event(self):
         event = super().base_event
         # The MySQL schema payload carries the flavor and uses the bare version string (no build
-        # suffix) for dbms_version, matching the legacy collector.
+        # suffix) for dbms_version.
         event["dbms_version"] = self._check.version.version
         event["flavor"] = self._check.version.flavor
-        # Match the legacy collector, which tags with the async job's DBM tags (service check tags
-        # unioned with the check tags, e.g. including `port:`) rather than the bare check tags.
+        # Tag with the async job's DBM tags (service check tags unioned with the check tags, e.g.
+        # including `port:`) rather than the bare check tags.
         if getattr(self._metadata, "_tags", None):
             event["tags"] = self._metadata._tags
         return event
+
+    def _effective_strategy(self) -> str:
+        """Resolve the collection strategy: an explicit config value wins, otherwise pick by server
+        version -- single_query when JSON aggregation is available, chunked otherwise."""
+        if self._config.collection_strategy:
+            return self._config.collection_strategy
+        if supports_json_collection(self._check.version, self._check.is_mariadb):
+            return STRATEGY_SINGLE_QUERY
+        return STRATEGY_CHUNKED
 
     def _get_databases(self) -> list[dict]:
         with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
@@ -252,7 +269,7 @@ class MySqlSchemaCollector(SchemaCollector):
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name: str):
-        if self._config.collection_strategy == STRATEGY_CHUNKED:
+        if self._effective_strategy() == STRATEGY_CHUNKED:
             yield _ChunkedTableCursor(self._iter_chunked_tables(database_name))
             return
 
@@ -276,7 +293,7 @@ class MySqlSchemaCollector(SchemaCollector):
 
     def _map_row(self, database: dict, cursor_row: dict) -> dict:
         object = super()._map_row(database, cursor_row)
-        if self._config.collection_strategy == STRATEGY_CHUNKED:
+        if self._effective_strategy() == STRATEGY_CHUNKED:
             table = self._build_table(
                 cursor_row,
                 cursor_row.get("_columns") or [],
@@ -309,7 +326,7 @@ class MySqlSchemaCollector(SchemaCollector):
             "row_format": table_row.get("row_format"),
             "create_time": _json_safe_create_time(table_row.get("create_time")),
         }
-        # Only attach detail keys when present, matching the legacy collector's setdefault behavior.
+        # Only attach detail keys when present, matching the previously shipped collector's setdefault behavior.
         columns = normalize_columns(columns_flat)
         if columns:
             table["columns"] = columns

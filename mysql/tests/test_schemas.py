@@ -118,6 +118,42 @@ def test_group_indexes_groups_key_parts_and_functional_expression():
     assert indexes["functional_key_part_index"]["expression"] == "(`population` + 1)"
 
 
+def test_group_indexes_reports_full_index_cardinality():
+    # Index cardinality is the full-index value (highest seq_in_index), not the leading column's.
+    # Rows are supplied out of seq_in_index order to confirm the result is order-independent.
+    rows = [
+        {
+            "name": "composite_index",
+            "collation": "A",
+            "cardinality": 4947,
+            "index_type": "BTREE",
+            "seq_in_index": 2,
+            "column_name": "amount",
+            "sub_part": None,
+            "packed": None,
+            "nullable": "NO",
+            "non_unique": 1,
+            "expression": None,
+        },
+        {
+            "name": "composite_index",
+            "collation": "A",
+            "cardinality": 3158,
+            "index_type": "BTREE",
+            "seq_in_index": 1,
+            "column_name": "ref_id",
+            "sub_part": None,
+            "packed": None,
+            "nullable": "YES",
+            "non_unique": 1,
+            "expression": None,
+        },
+    ]
+    index = group_indexes(rows)[0]
+    assert index["cardinality"] == 4947
+    assert [c["name"] for c in index["columns"]] == ["ref_id", "amount"]
+
+
 def test_group_partitions_sums_subpartition_stats():
     rows = [
         {

@@ -8,8 +8,7 @@ from operator import attrgetter
 import pymysql
 
 from datadog_checks.mysql.cursor import CommenterDictCursor
-from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
-from datadog_checks.mysql.schemas import MySqlSchemaCollector, supports_json_collection
+from datadog_checks.mysql.schemas import DEFAULT_SCHEMAS_COLLECTION_INTERVAL, MySqlSchemaCollector
 
 from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
@@ -51,7 +50,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._databases_data_collection_interval = config.schemas_config.get(
-            "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
 
@@ -86,12 +85,10 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0
         self._db = None
-        # Legacy (v1) schema collector, always available as a fallback.
-        self._databases_data = DatabasesData(self, check, config)
-        # v2 schema collector, built lazily once the server version is known (see run_job).
+        # Schema collector, built lazily once the server version is known (see run_job). It selects
+        # single_query on JSON-capable servers and chunked on older ones; both emit the shared
+        # SchemaCollector snapshot markers.
         self._schema_collector = None
-        # Hidden escape hatch: force the legacy schema collector regardless of server version.
-        self._force_legacy_schema_collection = is_affirmative(config.schemas_config.get("use_legacy_collection", False))
         self._last_settings_collection_time = 0
         self._last_databases_collection_time = 0
 
@@ -164,26 +161,13 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                                 These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
-    def _use_v2_schema_collection(self) -> bool:
-        """The v2 collector is used when the server supports JSON aggregation and the legacy escape
-        hatch is not set."""
-        if self._force_legacy_schema_collection:
-            return False
-        return supports_json_collection(self._check.version, self._check.is_mariadb)
-
     def _get_schema_collector(self) -> MySqlSchemaCollector:
         if self._schema_collector is None:
             self._schema_collector = MySqlSchemaCollector(self._check, self)
         return self._schema_collector
 
     def _collect_schemas(self):
-        if self._use_v2_schema_collection():
-            self._get_schema_collector().collect_schemas()
-        else:
-            self._databases_data.collect_databases_data(self._tags)
-
-    def shut_down(self):
-        self._databases_data.shut_down()
+        self._get_schema_collector().collect_schemas()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
