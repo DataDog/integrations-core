@@ -24,6 +24,25 @@ def test_mock_http_supports_options(mock_http):
     assert check.http.options_method('https://example.test') is response
 
 
+def test_mock_http_rejects_off_protocol_attributes(mock_http):
+    with pytest.raises(AttributeError, match='session'):
+        mock_http.session = object()
+
+
+@pytest.mark.parametrize('default', [None, 'fallback'])
+def test_mock_http_absent_cookie_returns_default(mock_http, default):
+    assert mock_http.get_cookie('missing', default) == default
+
+
+def test_mock_http_get_cookie_accepts_keyword_arguments(mock_http):
+    assert mock_http.get_cookie(name='missing', default='fallback') == 'fallback'
+
+
+def test_mock_http_get_cookie_return_value_is_configurable(mock_http):
+    mock_http.get_cookie.return_value = 'token'
+    assert mock_http.get_cookie('csrftoken') == 'token'
+
+
 def test_legacy_mock_response_is_not_exposed():
     assert not hasattr(http_testing, 'MockResponse')
 

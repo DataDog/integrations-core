@@ -10,6 +10,7 @@ from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
+from unittest.mock import PropertyMock, create_autospec, seal
 
 import pytest
 
@@ -384,8 +385,6 @@ def mock_http_response(mocker, mock_response):
 
 @pytest.fixture
 def mock_http(mocker):
-    from unittest.mock import PropertyMock, create_autospec
-
     from datadog_checks.base.checks.base import AgentCheck
     from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPTimeoutConfig
     from datadog_checks.base.utils.tls import TlsConfig
@@ -394,6 +393,7 @@ def mock_http(mocker):
     header_state: dict[str, str] = {}
     auth_state = {'value': None}
     proxy_state = {'https': None, 'no_proxy': []}
+    cookie_return_value_unset = object()
 
     client.trust_env = True
     client.ignore_tls_warning = False
@@ -433,6 +433,10 @@ def mock_http(mocker):
     def _get_basic_auth():
         return auth_state['value']
 
+    def _get_cookie(name: str, default: str | None = None) -> str | None:
+        return_value = client.get_cookie.return_value
+        return default if return_value is cookie_return_value_unset else return_value
+
     def _clear_default_auth():
         auth_state['value'] = None
 
@@ -459,6 +463,10 @@ def mock_http(mocker):
     client.disable_auth.side_effect = _disable_auth
     client.proxy_for_url.side_effect = _proxy_for_url
     client.should_bypass_proxy.side_effect = lambda url: _proxy_for_url(url) is None and bool(proxy_state['no_proxy'])
+    client.get_cookie.return_value = cookie_return_value_unset
+    client.get_cookie.side_effect = _get_cookie
+    client.close.return_value = None
+    seal(client)
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     return client
 

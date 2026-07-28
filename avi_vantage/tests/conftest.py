@@ -4,7 +4,6 @@
 import json
 import os
 from typing import Any, AnyStr
-from unittest.mock import MagicMock
 from urllib.parse import urlparse
 
 import pytest
@@ -80,7 +79,6 @@ def mock_client(mock_http):
     def mock_post(url: AnyStr, *__: Any, **___: Any):
         return MockHTTPResponse(json_data={"results": []})
 
-    mock_http.session = MagicMock(cookies={})
     mock_http.get.side_effect = mock_get
     mock_http.post.side_effect = mock_post
     yield

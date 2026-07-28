@@ -245,9 +245,9 @@ def service_instance(
 
 
 def inject_rest_http_client(mock_http, mocker, tag_associations):
-    http = configure_vsphere_rest_mock_http(mock_http, tag_associations=tag_associations)
-    mocker.patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=http)
-    return http
+    state = configure_vsphere_rest_mock_http(mock_http, tag_associations=tag_associations)
+    mocker.patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=mock_http)
+    return state
 
 
 @pytest.fixture

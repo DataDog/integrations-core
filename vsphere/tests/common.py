@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 import re
+from dataclasses import dataclass
 from typing import Any, Callable
 from urllib.parse import urlparse
 
@@ -1098,34 +1099,44 @@ TOPOLOGY_TAG_ASSOCIATIONS = [
 ]
 
 
-def configure_vsphere_rest_mock_http(mock_http: Any, tag_associations: list[dict[str, Any]] | None = None) -> Any:
-    mock_http.exceptions = {}
-    mock_http.tag_associations = TAG_ASSOCIATIONS if tag_associations is None else tag_associations
+@dataclass
+class VSphereRestMockState:
+    exceptions: dict[str, Exception]
+    tag_associations: list[dict[str, Any]]
+
+
+def configure_vsphere_rest_mock_http(
+    mock_http: Any, tag_associations: list[dict[str, Any]] | None = None
+) -> VSphereRestMockState:
+    state = VSphereRestMockState(
+        exceptions={},
+        tag_associations=TAG_ASSOCIATIONS if tag_associations is None else tag_associations,
+    )
 
     if VSPHERE_VERSION.startswith('7.'):
-        mock_http.get.side_effect = make_mock_http_v7_get(mock_http)
-        mock_http.post.side_effect = make_mock_http_v7_post(mock_http)
+        mock_http.get.side_effect = make_mock_http_v7_get(state)
+        mock_http.post.side_effect = make_mock_http_v7_post(state)
     else:
-        mock_http.get.side_effect = make_mock_http_v6_get(mock_http)
-        mock_http.post.side_effect = make_mock_http_v6_post(mock_http)
+        mock_http.get.side_effect = make_mock_http_v6_get(state)
+        mock_http.post.side_effect = make_mock_http_v6_post(state)
 
-    return mock_http
+    return state
 
 
-def raise_if_rest_exception_configured(mock_http: Any, url: str) -> None:
+def raise_if_rest_exception_configured(state: VSphereRestMockState, url: str) -> None:
     parsed_url = urlparse(url)
     path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
     path_parts = path_and_args.split('/')
     subpath = os.path.join(*path_parts)
-    if subpath in mock_http.exceptions:
-        raise mock_http.exceptions[subpath]
+    if subpath in state.exceptions:
+        raise state.exceptions[subpath]
 
 
-def make_mock_http_v6_get(mock_http: Any) -> Callable[..., MockHTTPResponse]:
+def make_mock_http_v6_get(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
     def get(url: str, **kwargs: Any) -> MockHTTPResponse:
         if '/api/' in url:
             return MockHTTPResponse(json_data={}, status_code=404)
-        raise_if_rest_exception_configured(mock_http, url)
+        raise_if_rest_exception_configured(state, url)
         if re.match(r'.*/category/id:.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
@@ -1161,12 +1172,12 @@ def make_mock_http_v6_get(mock_http: Any) -> Callable[..., MockHTTPResponse]:
     return get
 
 
-def make_mock_http_v6_post(mock_http: Any) -> Callable[..., MockHTTPResponse]:
+def make_mock_http_v6_post(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
     def post(url: str, **kwargs: Any) -> MockHTTPResponse:
         if '/api/' in url:
             return MockHTTPResponse(json_data={}, status_code=404)
         assert kwargs['extra_headers']['Content-Type'] == 'application/json'
-        raise_if_rest_exception_configured(mock_http, url)
+        raise_if_rest_exception_configured(state, url)
         if re.match(r'.*/session$', url):
             return MockHTTPResponse(
                 json_data={"value": "dummy-token"},
@@ -1174,7 +1185,7 @@ def make_mock_http_v6_post(mock_http: Any) -> Callable[..., MockHTTPResponse]:
             )
         elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
             return MockHTTPResponse(
-                json_data={"value": mock_http.tag_associations},
+                json_data={"value": state.tag_associations},
                 status_code=200,
             )
         raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))
@@ -1182,9 +1193,9 @@ def make_mock_http_v6_post(mock_http: Any) -> Callable[..., MockHTTPResponse]:
     return post
 
 
-def make_mock_http_v7_get(mock_http: Any) -> Callable[..., MockHTTPResponse]:
+def make_mock_http_v7_get(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
     def get(url: str, **kwargs: Any) -> MockHTTPResponse:
-        raise_if_rest_exception_configured(mock_http, url)
+        raise_if_rest_exception_configured(state, url)
         if re.match(r'.*/category/.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
@@ -1216,10 +1227,10 @@ def make_mock_http_v7_get(mock_http: Any) -> Callable[..., MockHTTPResponse]:
     return get
 
 
-def make_mock_http_v7_post(mock_http: Any) -> Callable[..., MockHTTPResponse]:
+def make_mock_http_v7_post(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
     def post(url: str, **kwargs: Any) -> MockHTTPResponse:
         assert kwargs['extra_headers']['Content-Type'] == 'application/json'
-        raise_if_rest_exception_configured(mock_http, url)
+        raise_if_rest_exception_configured(state, url)
         if re.match(r'.*/session$', url):
             return MockHTTPResponse(
                 json_data="dummy-token",
@@ -1227,7 +1238,7 @@ def make_mock_http_v7_post(mock_http: Any) -> Callable[..., MockHTTPResponse]:
             )
         elif re.match(r'.*/tagging/tag-association\?action=list-attached-tags-on-objects$', url):
             return MockHTTPResponse(
-                json_data=mock_http.tag_associations,
+                json_data=state.tag_associations,
                 status_code=200,
             )
         raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))
