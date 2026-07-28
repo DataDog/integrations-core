@@ -65,26 +65,35 @@ jobs:
   # TODO: this notification currently runs before the approval gate, so it
   # announces a *pending* release. Once the `release` environment gate is removed
   # the release starts immediately — switch `needs` back to the release step and
-  # update the wording in notify_slack.py to "release starting".
+  # update the wording in notify_release.py to "release starting".
   notify:
     name: Notify pending release
     needs: context
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # federate a Datadog app key via dd-sts
+      contents: read
     steps:
       - name: Checkout notification script
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
           sparse-checkout: .github/workflows/scripts
-      - name: Notify Slack of pending release
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-core
+      - name: Notify pending release via Datadog workflow
         env:
-          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_RELEASE }}
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          DD_APP_KEY: ${{ steps.dd-sts.outputs.app_key }}
+          DD_WORKFLOW_ID: 8f4e31b8-8a2a-4e46-a0c3-9a25c989108e
           SOURCE_REPO: integrations-core
           REF: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
           PACKAGES: ${{ inputs.packages || '' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: python3 .github/workflows/scripts/notify_slack.py
+        run: python3 .github/workflows/scripts/notify_release.py
 
   approve:
     name: Await release approval
