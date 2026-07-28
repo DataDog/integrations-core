@@ -479,6 +479,7 @@ def test_buffer_collection_interval():
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
     samples = check.statement_samples
     samples._tags = ['test:clickhouse']
 
@@ -493,6 +494,96 @@ def test_buffer_collection_interval():
         assert mock_query_buffer.call_count == 2
         assert mock_emit_buffer.call_count == 2
         assert samples._last_buffer_snapshot_time == 30.0
+
+
+@pytest.mark.parametrize(
+    'server_version, expect_collection',
+    [
+        ('21.8.15.7', False),
+        ('21.10.6.2', False),
+        ('21.11.11.1', True),
+        ('24.8.4.13', True),
+    ],
+)
+def test_buffer_snapshot_skipped_below_min_version(server_version, expect_collection):
+    """Test that the buffer snapshot is only collected on servers that have system.asynchronous_inserts"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 10,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = server_version
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    with (
+        mock.patch.object(samples, '_query_buffer_snapshot', return_value=[]) as mock_query_buffer,
+        mock.patch.object(samples, '_emit_buffer_events') as mock_emit_buffer,
+        mock.patch('datadog_checks.clickhouse.statement_samples.time.time', return_value=10.0),
+    ):
+        samples._collect_buffer_snapshot()
+
+    assert mock_query_buffer.called is expect_collection
+    assert mock_emit_buffer.called is expect_collection
+
+
+def test_buffer_snapshot_stops_collecting_when_table_missing():
+    """Test that an unknown table error stops further buffer snapshot collection instead of retrying"""
+    from clickhouse_connect.driver.exceptions import DatabaseError
+
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 10,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    # Shaped like a real driver error: the code lives in the message text, not on the exception.
+    error = DatabaseError(
+        'HTTPDriver for https://host:8443 received ClickHouse error code 60\n'
+        " Code: 60. DB::Exception: Unknown table expression identifier 'system.asynchronous_inserts'. "
+        '(UNKNOWN_TABLE)'
+    )
+
+    db_client = mock.MagicMock()
+    db_client.query.side_effect = error
+    samples._db_client = db_client
+
+    with mock.patch.object(samples, '_emit_buffer_events') as mock_emit_buffer:
+        for current_time in (10.0, 20.0, 30.0):
+            with mock.patch('datadog_checks.clickhouse.statement_samples.time.time', return_value=current_time):
+                samples._collect_buffer_snapshot()
+
+    # The table is queried once, then collection is skipped for the rest of the check's lifetime
+    assert samples._buffer_unavailable is True
+    assert db_client.query.call_count == 1
+    assert mock_emit_buffer.call_count == 1
 
 
 def test_buffer_snapshot_query_format():

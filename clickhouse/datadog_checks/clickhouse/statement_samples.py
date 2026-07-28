@@ -89,8 +89,11 @@ GROUP BY user, query_kind, current_database
 
 BUFFER_PAYLOAD_KIND = "buffer_metrics"
 
-# ClickHouse server error code for UNKNOWN_TABLE, raised when a queried table doesn't exist.
-UNKNOWN_TABLE_ERROR_CODE = 60
+# Raised when a queried table doesn't exist. The driver only puts this in the message text, not on the exception.
+UNKNOWN_TABLE_ERROR = 'UNKNOWN_TABLE'
+
+# Async inserts landed in 21.11, so the table appears to date from there.
+ASYNC_INSERTS_TABLE_MIN_VERSION = '21.11'
 
 # Query to get pending async insert buffers from system.asynchronous_inserts
 BUFFER_SNAPSHOT_QUERY = """
@@ -181,6 +184,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._buffer_collection_interval = buffer_config.collection_interval
         self._buffer_max_samples_per_collection = buffer_config.max_samples_per_collection
         self._last_buffer_snapshot_time = 0.0
+        # Set once system.asynchronous_inserts is found to be missing, so we skip collection
+        self._buffer_unavailable = False
 
     def cancel(self):
         """Cancel the job and clean up the dedicated client."""
@@ -494,8 +499,21 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """
         Run the async insert buffer snapshot on its own collection interval
         """
+        if not self._buffer_enabled or self._buffer_unavailable:
+            return
+
+        # Skip collection if the server version is known and too old to support system.asynchronous_inserts
+        if not self._check.version_ge(ASYNC_INSERTS_TABLE_MIN_VERSION):
+            self._buffer_unavailable = True
+            self._log.debug(
+                "ClickHouse %s predates system.asynchronous_inserts (%s); skipping buffer snapshot collection",
+                self._check.dbms_version,
+                ASYNC_INSERTS_TABLE_MIN_VERSION,
+            )
+            return
+
         now = time.time()
-        if self._buffer_enabled and now - self._last_buffer_snapshot_time >= self._buffer_collection_interval:
+        if now - self._last_buffer_snapshot_time >= self._buffer_collection_interval:
             self._last_buffer_snapshot_time = now
             buffer_snapshot = self._query_buffer_snapshot()
             self._emit_buffer_events(buffer_snapshot)
@@ -503,8 +521,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_buffer_snapshot(self) -> list[dict]:
         """Query system.asynchronous_inserts for pending buffers."""
+        buffer_table = self._check.get_system_table('asynchronous_inserts')
         query = BUFFER_SNAPSHOT_QUERY.format(
-            asynchronous_inserts_table=self._check.get_system_table('asynchronous_inserts'),
+            asynchronous_inserts_table=buffer_table,
             max_samples_per_collection=self._buffer_max_samples_per_collection,
         )
         try:
@@ -522,10 +541,12 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             )
             return []
         except DatabaseError as e:
-            if e.code == UNKNOWN_TABLE_ERROR_CODE:
+            if UNKNOWN_TABLE_ERROR in str(e):
+                self._buffer_unavailable = True
                 self._log.warning(
-                    "system.asynchronous_inserts is not available on this ClickHouse version; "
+                    "%s is not available on this ClickHouse version; "
                     "async insert buffer snapshot collection will be skipped: %s",
+                    buffer_table,
                     e,
                 )
                 return []
@@ -546,6 +567,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 raw=True,
             )
             return []
+
+        self._log.debug("Loaded %s async insert buffer rows from %s", len(rows), buffer_table)
 
         result = []
         for row in rows:
