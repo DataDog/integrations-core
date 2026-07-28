@@ -1,0 +1,1 @@
+Persist trusted TUF metadata so the v2 checks downloader detects repository rollbacks across invocations.
