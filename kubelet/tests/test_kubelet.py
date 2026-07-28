@@ -563,6 +563,7 @@ def test_kubelet_credentials_update(monkeypatch, aggregator, mock_openmetrics_ht
         content=mock_from_file('kubelet_metrics_1_14.txt'),
         headers={'Content-Type': 'text/plain'},
     )
+    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
 
     with mock.patch(
         'datadog_checks.kubelet.kubelet.get_connection_info',

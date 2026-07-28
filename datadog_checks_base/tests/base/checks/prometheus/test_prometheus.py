@@ -1956,7 +1956,7 @@ def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check
         assert message != expected_message
 
 
-def test_prometheus_http_config(mock_http, mocker):
+def test_prometheus_http_config(mock_http, mock_response, mocker):
     instance_http = {
         'prometheus_endpoint': 'http://localhost:8080',
         'extra_headers': {'foo': 'bar'},
@@ -1971,6 +1971,7 @@ def test_prometheus_http_config(mock_http, mocker):
         'datadog_checks.base.checks.prometheus.mixins.create_http_client',
         return_value=mock_http,
     )
+    mock_http.get.return_value = mock_response()
 
     check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
     check.poll(instance_http['prometheus_endpoint'])

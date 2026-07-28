@@ -155,9 +155,10 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance, mocker, mock_http):
+def test_consul_request(aggregator, instance, mocker, mock_http, mock_response):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     mocker.patch("datadog_checks.base.utils.serialization.json.loads")
+    mock_http.get.return_value = mock_response()
 
     consul_check.consul_request("foo")
     url = "{}/{}".format(instance["url"], "foo")
