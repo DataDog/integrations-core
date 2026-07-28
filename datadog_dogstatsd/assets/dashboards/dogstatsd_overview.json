@@ -1,0 +1,500 @@
+{
+    "title": "Datadog DogStatsD",
+    "description": "Client-side telemetry emitted by Datadog's official DogStatsD client libraries (Go, Python, Ruby, Java, PHP, .NET).\n\nThis dashboard gives visibility into metric submission throughput, payload delivery health, drop causes, and client-side aggregation behavior.\n\nFor more information, see the [client-side telemetry documentation](https://docs.datadoghq.com/extend/dogstatsd/high_throughput/#client-side-telemetry).",
+    "widgets": [
+        {
+            "id": 1001,
+            "definition": {
+                "type": "group",
+                "title": "Overview",
+                "background_color": "blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1002,
+                        "definition": {
+                            "type": "query_value",
+                            "title": "Metrics Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.metrics{$client,$client_transport}.as_count()",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {"x": 0, "y": 0, "width": 3, "height": 2}
+                    },
+                    {
+                        "id": 1003,
+                        "definition": {
+                            "type": "query_value",
+                            "title": "Bytes Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.bytes_sent{$client,$client_transport}.as_count()",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {"x": 3, "y": 0, "width": 3, "height": 2}
+                    },
+                    {
+                        "id": 1004,
+                        "definition": {
+                            "type": "query_value",
+                            "title": "Packets Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.packets_sent{$client,$client_transport}.as_count()",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {"x": 6, "y": 0, "width": 3, "height": 2}
+                    },
+                    {
+                        "id": 1005,
+                        "definition": {
+                            "type": "query_value",
+                            "title": "Packet Drop Rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "autoscale": false,
+                            "precision": 2,
+                            "custom_unit": "%",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / (query1 + query2) * 100",
+                                            "conditional_formats": [
+                                                {"palette": "white_on_green", "value": 1, "comparator": "<"},
+                                                {"palette": "white_on_yellow", "value": 5, "comparator": "<"},
+                                                {"palette": "white_on_red", "value": 5, "comparator": ">="}
+                                            ]
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.packets_dropped{$client,$client_transport}.as_count()",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.dogstatsd.client.packets_sent{$client,$client_transport}.as_count()",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {"x": 9, "y": 0, "width": 3, "height": 2}
+                    }
+                ]
+            },
+            "layout": {"x": 0, "y": 0, "width": 12, "height": 4}
+        },
+        {
+            "id": 2001,
+            "definition": {
+                "type": "group",
+                "title": "Throughput",
+                "background_color": "green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2002,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Metrics Sent by Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Metrics"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.metrics_by_type{$client,$client_transport} by {metrics_type}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "dog_classic", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 0, "y": 0, "width": 12, "height": 3}
+                    },
+                    {
+                        "id": 2003,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Events & Service Checks Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Events"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.events{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "dog_classic", "line_type": "solid", "line_width": "normal"}
+                                },
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Service Checks"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.service_checks{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "cool", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 0, "y": 3, "width": 6, "height": 3}
+                    },
+                    {
+                        "id": 2004,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Bytes Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Bytes Sent"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.bytes_sent{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "area",
+                                    "style": {"palette": "dog_classic", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 6, "y": 3, "width": 6, "height": 3}
+                    },
+                    {
+                        "id": 2005,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Packets Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Packets Sent"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.packets_sent{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "dog_classic", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 0, "y": 6, "width": 12, "height": 3}
+                    }
+                ]
+            },
+            "layout": {"x": 0, "y": 4, "width": 12, "height": 13}
+        },
+        {
+            "id": 3001,
+            "definition": {
+                "type": "group",
+                "title": "Drops & Errors",
+                "background_color": "red",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3002,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Metrics Dropped on Receive (ChannelMode)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Dropped on Receive"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.metric_dropped_on_receive{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "warm", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 0, "y": 0, "width": 12, "height": 3}
+                    },
+                    {
+                        "id": 3003,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Packets Dropped by Cause",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Queue Full"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.packets_dropped_queue{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "warm", "line_type": "solid", "line_width": "normal"}
+                                },
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Writer Error"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.packets_dropped_writer{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "orange", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 0, "y": 3, "width": 6, "height": 3}
+                    },
+                    {
+                        "id": 3004,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Bytes Dropped by Cause",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Queue Full"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.bytes_dropped_queue{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "warm", "line_type": "solid", "line_width": "normal"}
+                                },
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Writer Error"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.bytes_dropped_writer{$client,$client_transport}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "orange", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 6, "y": 3, "width": 6, "height": 3}
+                    }
+                ]
+            },
+            "layout": {"x": 0, "y": 17, "width": 12, "height": 9}
+        },
+        {
+            "id": 4001,
+            "definition": {
+                "type": "group",
+                "title": "Client-Side Aggregation",
+                "background_color": "purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4002,
+                        "definition": {
+                            "type": "query_value",
+                            "title": "Aggregated Contexts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.aggregated_context{$client,$client_transport}.as_count()",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {"x": 0, "y": 0, "width": 3, "height": 3}
+                    },
+                    {
+                        "id": 4003,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Aggregated Contexts by Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": ["avg", "min", "max", "value", "sum"],
+                            "requests": [
+                                {
+                                    "formulas": [{"formula": "query1", "alias": "Contexts"}],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.dogstatsd.client.aggregated_context_by_type{$client,$client_transport} by {metrics_type}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "style": {"palette": "dog_classic", "line_type": "solid", "line_width": "normal"}
+                                }
+                            ],
+                            "yaxis": {"include_zero": true, "scale": "linear", "min": "auto", "max": "auto"},
+                            "markers": []
+                        },
+                        "layout": {"x": 3, "y": 0, "width": 9, "height": 3}
+                    }
+                ]
+            },
+            "layout": {"x": 0, "y": 26, "width": 12, "height": 5}
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "client",
+            "prefix": "client",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "client_transport",
+            "prefix": "client_transport",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "is_read_only": false,
+    "notify_list": []
+}
