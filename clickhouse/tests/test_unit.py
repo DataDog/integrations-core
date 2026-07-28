@@ -7,7 +7,13 @@ from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
-from datadog_checks.clickhouse.utils import cluster_aware_query
+from datadog_checks.clickhouse.utils import (
+    BUILTIN_SAMPLE_CLUSTERS,
+    CLUSTER_MACRO_QUERY,
+    CLUSTER_NAME_QUERY,
+    CLUSTER_TAG,
+    cluster_aware_query,
+)
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
@@ -455,3 +461,113 @@ def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advan
     check._server_version = '24.8'
 
     assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())
+
+
+def make_cluster_name_check(query_results):
+    """Build a check whose execute_query_raw replays query_results keyed by SQL."""
+    check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
+
+    def execute(query):
+        result = query_results[query]
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    check.execute_query_raw = mock.Mock(side_effect=execute)
+    return check
+
+
+def test_cluster_name_prefers_the_macro():
+    check = make_cluster_name_check({CLUSTER_MACRO_QUERY: [['macro_cluster']]})
+
+    assert check.cluster_name == 'macro_cluster'
+    # system.clusters must not be consulted once the macro answers.
+    check.execute_query_raw.assert_called_once_with(CLUSTER_MACRO_QUERY)
+
+
+@pytest.mark.parametrize(
+    'macro_result',
+    [
+        pytest.param([], id='no-rows'),
+        pytest.param([['']], id='empty-value'),
+        pytest.param(Error('No macro cluster in config'), id='macro-undefined'),
+    ],
+)
+def test_cluster_name_falls_back_to_system_clusters(macro_result):
+    check = make_cluster_name_check({CLUSTER_MACRO_QUERY: macro_result, CLUSTER_NAME_QUERY: [['prod_cluster']]})
+
+    assert check.cluster_name == 'prod_cluster'
+
+
+def test_cluster_name_query_excludes_builtin_sample_clusters():
+    """ClickHouse <=21.x ships test_* clusters in its default config.
+
+    They are is_local and would otherwise mislabel every stock instance, so the
+    fallback query filters them out by name rather than picking one.
+    """
+    for name in BUILTIN_SAMPLE_CLUSTERS:
+        assert f"'{name}'" in CLUSTER_NAME_QUERY
+
+    assert 'test_cluster_two_shards_localhost' in BUILTIN_SAMPLE_CLUSTERS
+    assert 'test_shard_localhost' in BUILTIN_SAMPLE_CLUSTERS
+
+
+def test_cluster_name_absent_when_both_sources_fail():
+    check = make_cluster_name_check(
+        {
+            CLUSTER_MACRO_QUERY: Error('No macro cluster in config'),
+            CLUSTER_NAME_QUERY: [],
+        }
+    )
+
+    # No 'default' fallback: a wrong cluster name is worse than an absent one.
+    assert check.cluster_name is None
+
+
+def test_cluster_name_is_cached_including_the_absent_case():
+    check = make_cluster_name_check({CLUSTER_MACRO_QUERY: [], CLUSTER_NAME_QUERY: []})
+
+    assert check.cluster_name is None
+    assert check.cluster_name is None
+
+    assert check.execute_query_raw.call_count == 2  # one attempt per source, not per access
+
+
+def test_check_tags_with_cluster(instance):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = 'prod_cluster'
+        with mock.patch('clickhouse_connect.get_client'):
+            check.check({})
+
+    assert f'{CLUSTER_TAG}:prod_cluster' in check.tags
+
+
+def test_can_connect_carries_cluster_tag_from_the_second_run(aggregator, instance):
+    """The tag needs a live client, so connect() on the first run predates it.
+
+    The tag persists on the tag manager afterwards, so every later run — and every
+    other surface on the first run, since they all follow the resolution point —
+    does carry it.
+    """
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = 'prod_cluster'
+        with mock.patch('clickhouse_connect.get_client'):
+            check.check({})
+            first_run_tags = list(check.tags)
+            check.check({})
+
+    assert f'{CLUSTER_TAG}:prod_cluster' not in aggregator.service_checks('clickhouse.can_connect')[0].tags
+    assert f'{CLUSTER_TAG}:prod_cluster' in first_run_tags
+    aggregator.assert_service_check('clickhouse.can_connect', tags=check.tags)
+
+
+def test_check_omits_cluster_tag_when_unresolved(instance):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = None
+        with mock.patch('clickhouse_connect.get_client'):
+            check.check({})
+
+    assert not any(tag.startswith(f'{CLUSTER_TAG}:') for tag in check.tags)
