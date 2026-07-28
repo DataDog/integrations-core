@@ -28,7 +28,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         instance_data = {
             'host': '{service.host}'.format(service=service, **ctx),
             'port': '{port.number}'.format(service=service, **ctx),
-            'name': 'squid-{service.host}'.format(service=service, **ctx),
+            'name': 'squid',
         }
         instance = InstanceConfig.model_validate(
             instance_data, context={'configured_fields': frozenset(instance_data)}
