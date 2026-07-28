@@ -77,6 +77,7 @@ kueue.controller.runtime.webhook_requests_in_flight,gauge,0,,,Kueue controller r
 kueue.evicted_workloads.count,count,0,,,"The number of evicted workloads per cluster queue, tagged by reason, underlying cause, priority class, and replica role.",0,kueue,evicted_workloads_count,,
 kueue.evicted_workloads_once.count,count,0,,,"The number of unique workload evictions per cluster queue, tagged by eviction reason, underlying cause, priority class, and replica role.",0,kueue,evicted_workloads_once_count,,
 kueue.finished_workloads,gauge,0,,,"The number of finished workloads, per 'kueue_cluster_queue'.",0,kueue,finished_workloads,,
+kueue.finished_workloads.count,count,0,,,"The total number of finished workloads, per 'kueue_cluster_queue'.",0,kueue,finished_workloads_count,,
 kueue.go.gc.duration.seconds.count,count,0,second,,The summary count of garbage collection cycles.,0,kueue,go_gc_duration_seconds_count,,
 kueue.go.gc.duration.seconds.quantile,gauge,0,second,,A summary of the pause duration of garbage collection cycles.,0,kueue,go_gc_duration_seconds,,
 kueue.go.gc.duration.seconds.sum,count,0,second,,The sum of the pause duration of garbage collection cycles.,0,kueue,go_gc_duration_seconds_sum,,

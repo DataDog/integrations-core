@@ -75,6 +75,7 @@ FIXTURE_ONLY_METRICS = (
     'kueue.preempted_workloads.count',
     'kueue.evicted_workloads.count',
     'kueue.evicted_workloads_once.count',
+    'kueue.finished_workloads.count',
 )
 
 # All metrics for unit test_check presence + instance tag assertions.

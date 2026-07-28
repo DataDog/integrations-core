@@ -1,1 +1,1 @@
-Correct metric metadata so counters, histograms, and gauges resolve in dashboards, and remove a metric that Kueue does not emit.
+Correct metric metadata so counters, histograms, and gauges resolve in dashboards, collect the cumulative ``kueue.finished_workloads.count`` counter without polluting the gauge, and remove a metric that Kueue does not emit.
