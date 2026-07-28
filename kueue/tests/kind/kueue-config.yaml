@@ -12,6 +12,10 @@ data:
     metrics:
       bindAddress: :8443
       enableClusterQueueResources: true
+    fairSharing:
+      preemptionStrategies:
+      - LessThanOrEqualToFinalShare
+      - LessThanInitialShare
     webhook:
       port: 9443
     leaderElection:

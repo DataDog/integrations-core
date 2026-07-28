@@ -26,7 +26,9 @@ DDEV_CONFIG_PATHS = (
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
-    aggregator = dd_agent_check()
+    # rate=True runs the check twice so OpenMetrics monotonic counters flush their `.count` submission;
+    # otherwise the metadata assertion never validates counter/histogram metrics against metadata.csv.
+    aggregator = dd_agent_check(rate=True)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 

@@ -54,6 +54,22 @@ Kueue is a cluster-level service. Configure this integration as a Cluster Agent 
 
 See the [sample kueue.d/conf.yaml][4] for all available configuration options.
 
+### Log collection
+
+The Kueue controller manager writes logs to its container's standard output. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
+
+Then, set the Kueue log configuration as an Autodiscovery annotation on the Kueue controller manager pod:
+
+```yaml
+ad.datadoghq.com/kueue.logs: |
+  [
+    {
+      "source": "kueue",
+      "service": "<SERVICE_NAME>"
+    }
+  ]
+```
+
 ### Validation
 
 [Run the Cluster Agent's `clusterchecks` subcommand][11] and look for `kueue` under the Checks section.
@@ -96,3 +112,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
 [11]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/

@@ -54,6 +54,8 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
 
     check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
+    # Run twice so OpenMetrics monotonic counters flush their `.count` submission (skipped on first run).
+    dd_run_check(check)
     dd_run_check(check)
 
     for metric in UNIT_METRICS:

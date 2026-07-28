@@ -1,58 +1,22 @@
-# HELP certwatcher_read_certificate Kueue certwatcher read certificate metric.
-# TYPE certwatcher_read_certificate gauge
-certwatcher_read_certificate{replica_role="leader"} 1
 
-# HELP certwatcher_read_certificate_errors Kueue certwatcher read certificate errors metric.
-# TYPE certwatcher_read_certificate_errors gauge
-certwatcher_read_certificate_errors{replica_role="leader"} 1
 
 # HELP controller_runtime_active_workers Kueue controller runtime active workers metric.
 # TYPE controller_runtime_active_workers gauge
 controller_runtime_active_workers{replica_role="leader"} 1
 
-# HELP controller_runtime_conversion_webhook_panics Kueue controller runtime conversion webhook panics metric.
-# TYPE controller_runtime_conversion_webhook_panics gauge
-controller_runtime_conversion_webhook_panics{replica_role="leader"} 1
 
 # HELP controller_runtime_max_concurrent_reconciles Kueue controller runtime max concurrent reconciles metric.
 # TYPE controller_runtime_max_concurrent_reconciles gauge
 controller_runtime_max_concurrent_reconciles{replica_role="leader"} 1
 
-# HELP controller_runtime_reconcile Kueue controller runtime reconcile metric.
-# TYPE controller_runtime_reconcile gauge
-controller_runtime_reconcile{replica_role="leader"} 1
 
-# HELP controller_runtime_reconcile_errors Kueue controller runtime reconcile errors metric.
-# TYPE controller_runtime_reconcile_errors gauge
-controller_runtime_reconcile_errors{replica_role="leader"} 1
 
-# HELP controller_runtime_reconcile_panics Kueue controller runtime reconcile panics metric.
-# TYPE controller_runtime_reconcile_panics gauge
-controller_runtime_reconcile_panics{replica_role="leader"} 1
 
-# HELP controller_runtime_reconcile_time_seconds Kueue controller runtime reconcile time seconds metric.
-# TYPE controller_runtime_reconcile_time_seconds gauge
-controller_runtime_reconcile_time_seconds{replica_role="leader"} 1
 
-# HELP controller_runtime_reconcile_timeouts Kueue controller runtime reconcile timeouts metric.
-# TYPE controller_runtime_reconcile_timeouts gauge
-controller_runtime_reconcile_timeouts{replica_role="leader"} 1
 
-# HELP controller_runtime_terminal_reconcile_errors Kueue controller runtime terminal reconcile errors metric.
-# TYPE controller_runtime_terminal_reconcile_errors gauge
-controller_runtime_terminal_reconcile_errors{replica_role="leader"} 1
 
-# HELP controller_runtime_webhook_latency_seconds Kueue controller runtime webhook latency seconds metric.
-# TYPE controller_runtime_webhook_latency_seconds gauge
-controller_runtime_webhook_latency_seconds{replica_role="leader"} 1
 
-# HELP controller_runtime_webhook_panics Kueue controller runtime webhook panics metric.
-# TYPE controller_runtime_webhook_panics gauge
-controller_runtime_webhook_panics{replica_role="leader"} 1
 
-# HELP controller_runtime_webhook_requests Kueue controller runtime webhook requests metric.
-# TYPE controller_runtime_webhook_requests gauge
-controller_runtime_webhook_requests{replica_role="leader"} 1
 
 # HELP controller_runtime_webhook_requests_in_flight Kueue controller runtime webhook requests in flight metric.
 # TYPE controller_runtime_webhook_requests_in_flight gauge
@@ -84,17 +48,11 @@ go_goroutines{replica_role="leader"} 1
 # TYPE go_info gauge
 go_info{replica_role="leader",version="go1.26.3"} 1
 
-# HELP go_memstats_alloc_bytes Kueue go memstats alloc bytes metric.
-# TYPE go_memstats_alloc_bytes gauge
-go_memstats_alloc_bytes{replica_role="leader"} 1
 
 # HELP go_memstats_buck_hash_sys_bytes Kueue go memstats buck hash sys bytes metric.
 # TYPE go_memstats_buck_hash_sys_bytes gauge
 go_memstats_buck_hash_sys_bytes{replica_role="leader"} 1
 
-# HELP go_memstats_frees Kueue go memstats frees metric.
-# TYPE go_memstats_frees gauge
-go_memstats_frees{replica_role="leader"} 1
 
 # HELP go_memstats_gc_sys_bytes Kueue go memstats gc sys bytes metric.
 # TYPE go_memstats_gc_sys_bytes gauge
@@ -128,9 +86,6 @@ go_memstats_heap_sys_bytes{replica_role="leader"} 1
 # TYPE go_memstats_last_gc_time_seconds gauge
 go_memstats_last_gc_time_seconds{replica_role="leader"} 1
 
-# HELP go_memstats_mallocs Kueue go memstats mallocs metric.
-# TYPE go_memstats_mallocs gauge
-go_memstats_mallocs{replica_role="leader"} 1
 
 # HELP go_memstats_mcache_inuse_bytes Kueue go memstats mcache inuse bytes metric.
 # TYPE go_memstats_mcache_inuse_bytes gauge
@@ -190,9 +145,6 @@ kueue_admission_checks_wait_time_seconds_bucket{replica_role="leader",cluster_qu
 kueue_admission_checks_wait_time_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
 kueue_admission_checks_wait_time_seconds_count{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
-# HELP kueue_admission_cycle_preemption_skips The number of Workloads in the ClusterQueue that got preemption candidates but had to be skipped because other ClusterQueues needed the same resources in the same cycle
-# TYPE kueue_admission_cycle_preemption_skips gauge
-kueue_admission_cycle_preemption_skips{replica_role="leader"} 1
 
 # HELP kueue_admission_wait_time_seconds The time between a workload was created or requeued until admission, per 'cluster_queue'
 # TYPE kueue_admission_wait_time_seconds histogram
@@ -323,21 +275,12 @@ kueue_workload_eviction_latency_seconds_count{replica_role="leader",cluster_queu
 # TYPE leader_election_master_status gauge
 leader_election_master_status{replica_role="leader",status="inadmissible"} 1
 
-# HELP process_cpu_seconds Kueue process cpu seconds metric.
-# TYPE process_cpu_seconds gauge
-process_cpu_seconds{replica_role="leader"} 1
 
 # HELP process_max_fds Kueue process max fds metric.
 # TYPE process_max_fds gauge
 process_max_fds{replica_role="leader"} 1
 
-# HELP process_network_receive_bytes Kueue process network receive bytes metric.
-# TYPE process_network_receive_bytes gauge
-process_network_receive_bytes{replica_role="leader"} 1
 
-# HELP process_network_transmit_bytes Kueue process network transmit bytes metric.
-# TYPE process_network_transmit_bytes gauge
-process_network_transmit_bytes{replica_role="leader"} 1
 
 # HELP process_open_fds Kueue process open fds metric.
 # TYPE process_open_fds gauge
@@ -359,9 +302,6 @@ process_virtual_memory_bytes{replica_role="leader"} 1
 # TYPE process_virtual_memory_max_bytes gauge
 process_virtual_memory_max_bytes{replica_role="leader"} 1
 
-# HELP workqueue_adds Kueue workqueue adds metric.
-# TYPE workqueue_adds gauge
-workqueue_adds{replica_role="leader"} 1
 
 # HELP workqueue_depth Kueue workqueue depth metric.
 # TYPE workqueue_depth gauge
@@ -371,21 +311,12 @@ workqueue_depth{replica_role="leader"} 1
 # TYPE workqueue_longest_running_processor_seconds gauge
 workqueue_longest_running_processor_seconds{replica_role="leader"} 1
 
-# HELP workqueue_queue_duration_seconds Kueue workqueue queue duration seconds metric.
-# TYPE workqueue_queue_duration_seconds gauge
-workqueue_queue_duration_seconds{replica_role="leader"} 1
 
-# HELP workqueue_retries Kueue workqueue retries metric.
-# TYPE workqueue_retries gauge
-workqueue_retries{replica_role="leader"} 1
 
 # HELP workqueue_unfinished_work_seconds Kueue workqueue unfinished work seconds metric.
 # TYPE workqueue_unfinished_work_seconds gauge
 workqueue_unfinished_work_seconds{replica_role="leader",cluster_queue="cluster-queue"} 1
 
-# HELP workqueue_work_duration_seconds Kueue workqueue work duration seconds metric.
-# TYPE workqueue_work_duration_seconds gauge
-workqueue_work_duration_seconds{replica_role="leader"} 1
 
 # HELP kueue_local_queue_admission_checks_wait_time_seconds The time from when a workload got the quota reservation until admission, per 'local_queue'
 # TYPE kueue_local_queue_admission_checks_wait_time_seconds histogram
@@ -617,3 +548,123 @@ kueue_local_queue_resource_usage{replica_role="leader",name="user-queue",namespa
 # HELP kueue_local_queue_resource_usage Reports the localQueue's total resource usage within all the flavors
 # TYPE kueue_local_queue_resource_usage gauge
 kueue_local_queue_resource_usage{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="example.com/fpga"} 1
+# HELP certwatcher_read_certificate_errors_total Total number of certificate read errors
+# TYPE certwatcher_read_certificate_errors_total counter
+certwatcher_read_certificate_errors_total 0
+# HELP certwatcher_read_certificate_total Total number of certificate reads
+# TYPE certwatcher_read_certificate_total counter
+certwatcher_read_certificate_total 189
+# HELP controller_runtime_conversion_webhook_panics_total Total number of conversion webhook panics
+# TYPE controller_runtime_conversion_webhook_panics_total counter
+controller_runtime_conversion_webhook_panics_total 0
+# HELP controller_runtime_reconcile_errors_total Total number of reconciliation errors per controller
+# TYPE controller_runtime_reconcile_errors_total counter
+controller_runtime_reconcile_errors_total{controller="admissioncheck_controller"} 0
+controller_runtime_reconcile_errors_total{controller="cert-rotator"} 0
+controller_runtime_reconcile_errors_total{controller="cert-rotator-bootstrap"} 0
+# HELP controller_runtime_reconcile_panics_total Total number of reconciliation panics per controller
+# TYPE controller_runtime_reconcile_panics_total counter
+controller_runtime_reconcile_panics_total{controller="admissioncheck_controller"} 0
+controller_runtime_reconcile_panics_total{controller="cert-rotator"} 0
+controller_runtime_reconcile_panics_total{controller="cert-rotator-bootstrap"} 0
+# HELP controller_runtime_reconcile_time_seconds Length of time per reconciliation per controller
+# TYPE controller_runtime_reconcile_time_seconds histogram
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.005"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.01"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.025"} 0
+controller_runtime_reconcile_time_seconds_sum{controller="cert-rotator"} 0.366254655
+controller_runtime_reconcile_time_seconds_count{controller="cert-rotator"} 1
+controller_runtime_reconcile_time_seconds_sum{controller="cert-rotator-bootstrap"} 0.334556335
+controller_runtime_reconcile_time_seconds_count{controller="cert-rotator-bootstrap"} 1
+controller_runtime_reconcile_time_seconds_sum{controller="clusterqueue_controller"} 0.130540915
+controller_runtime_reconcile_time_seconds_count{controller="clusterqueue_controller"} 23
+# HELP controller_runtime_reconcile_timeouts_total Total number of reconciliation timeouts per controller
+# TYPE controller_runtime_reconcile_timeouts_total counter
+controller_runtime_reconcile_timeouts_total{controller="admissioncheck_controller"} 0
+controller_runtime_reconcile_timeouts_total{controller="cert-rotator"} 0
+controller_runtime_reconcile_timeouts_total{controller="cert-rotator-bootstrap"} 0
+# HELP controller_runtime_reconcile_total Total number of reconciliations per controller
+# TYPE controller_runtime_reconcile_total counter
+controller_runtime_reconcile_total{controller="admissioncheck_controller",result="error"} 0
+controller_runtime_reconcile_total{controller="admissioncheck_controller",result="requeue"} 0
+controller_runtime_reconcile_total{controller="admissioncheck_controller",result="requeue_after"} 0
+# HELP controller_runtime_terminal_reconcile_errors_total Total number of terminal reconciliation errors per controller
+# TYPE controller_runtime_terminal_reconcile_errors_total counter
+controller_runtime_terminal_reconcile_errors_total{controller="admissioncheck_controller"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="cert-rotator"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="cert-rotator-bootstrap"} 0
+# HELP controller_runtime_webhook_latency_seconds Histogram of the latency of processing admission requests
+# TYPE controller_runtime_webhook_latency_seconds histogram
+controller_runtime_webhook_latency_seconds_bucket{webhook="/convert",le="1e-08"} 0
+controller_runtime_webhook_latency_seconds_bucket{webhook="/convert",le="1e-07"} 0
+controller_runtime_webhook_latency_seconds_bucket{webhook="/convert",le="1e-06"} 0
+controller_runtime_webhook_latency_seconds_sum{webhook="/convert"} 0.05345964099999999
+controller_runtime_webhook_latency_seconds_count{webhook="/convert"} 112
+controller_runtime_webhook_latency_seconds_sum{webhook="/mutate--v1-pod"} 0.0028359830000000003
+controller_runtime_webhook_latency_seconds_count{webhook="/mutate--v1-pod"} 5
+controller_runtime_webhook_latency_seconds_sum{webhook="/mutate-batch-v1-job"} 0.00196293
+controller_runtime_webhook_latency_seconds_count{webhook="/mutate-batch-v1-job"} 6
+# HELP controller_runtime_webhook_panics_total Total number of webhook panics
+# TYPE controller_runtime_webhook_panics_total counter
+controller_runtime_webhook_panics_total 0
+# HELP controller_runtime_webhook_requests_total Total number of admission requests by HTTP status code.
+# TYPE controller_runtime_webhook_requests_total counter
+controller_runtime_webhook_requests_total{code="200",webhook="/convert"} 112
+controller_runtime_webhook_requests_total{code="200",webhook="/mutate--v1-pod"} 5
+controller_runtime_webhook_requests_total{code="200",webhook="/mutate-apps-v1-deployment"} 0
+# HELP go_memstats_alloc_bytes Number of bytes allocated in heap and currently in use. Equals to /memory/classes/heap/objects:bytes.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 2.0455576e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated in heap until now, even if released already. Equals to /gc/heap/allocs:bytes.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 3.33428576e+08
+# HELP go_memstats_frees_total Total number of heap objects frees. Equals to /gc/heap/frees:objects + /gc/heap/tiny/allocs:objects.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 2.440489e+06
+# HELP go_memstats_mallocs_total Total number of heap objects allocated, both live and gc-ed. Semantically a counter version for go_memstats_heap_objects gauge. Equals to /gc/heap/allocs:objects + /gc/heap/tiny/allocs:objects.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 2.560983e+06
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 10.87
+# HELP process_network_receive_bytes_total Number of bytes received by the process over the network.
+# TYPE process_network_receive_bytes_total counter
+process_network_receive_bytes_total 8.760328e+06
+# HELP process_network_transmit_bytes_total Number of bytes sent by the process over the network.
+# TYPE process_network_transmit_bytes_total counter
+process_network_transmit_bytes_total 6.585124e+06
+# HELP workqueue_adds_total Total number of adds handled by workqueue
+# TYPE workqueue_adds_total counter
+workqueue_adds_total{controller="admissioncheck_controller",name="admissioncheck_controller"} 0
+workqueue_adds_total{controller="cert-rotator",name="cert-rotator"} 1
+workqueue_adds_total{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 1
+# HELP workqueue_queue_duration_seconds How long in seconds an item stays in workqueue before being requested
+# TYPE workqueue_queue_duration_seconds histogram
+workqueue_queue_duration_seconds_bucket{controller="admissioncheck_controller",name="admissioncheck_controller",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="admissioncheck_controller",name="admissioncheck_controller",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="admissioncheck_controller",name="admissioncheck_controller",le="1e-06"} 0
+workqueue_queue_duration_seconds_sum{controller="admissioncheck_controller",name="admissioncheck_controller"} 0
+workqueue_queue_duration_seconds_count{controller="admissioncheck_controller",name="admissioncheck_controller"} 0
+workqueue_queue_duration_seconds_sum{controller="cert-rotator",name="cert-rotator"} 0.137806652
+workqueue_queue_duration_seconds_count{controller="cert-rotator",name="cert-rotator"} 1
+workqueue_queue_duration_seconds_sum{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 0.100810315
+workqueue_queue_duration_seconds_count{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 1
+# HELP workqueue_retries_total Total number of items added to the workqueue with a non-zero delay (rate-limited requeues, explicit RequeueAfter or AddAfter calls)
+# TYPE workqueue_retries_total counter
+workqueue_retries_total{controller="admissioncheck_controller",name="admissioncheck_controller"} 0
+workqueue_retries_total{controller="cert-rotator",name="cert-rotator"} 0
+workqueue_retries_total{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 0
+# HELP workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE workqueue_work_duration_seconds histogram
+workqueue_work_duration_seconds_bucket{controller="admissioncheck_controller",name="admissioncheck_controller",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="admissioncheck_controller",name="admissioncheck_controller",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="admissioncheck_controller",name="admissioncheck_controller",le="1e-06"} 0
+workqueue_work_duration_seconds_sum{controller="admissioncheck_controller",name="admissioncheck_controller"} 0
+workqueue_work_duration_seconds_count{controller="admissioncheck_controller",name="admissioncheck_controller"} 0
+workqueue_work_duration_seconds_sum{controller="cert-rotator",name="cert-rotator"} 0.366273493
+workqueue_work_duration_seconds_count{controller="cert-rotator",name="cert-rotator"} 1
+workqueue_work_duration_seconds_sum{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 0.33461217
+workqueue_work_duration_seconds_count{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 1
+# HELP kueue_admission_cycle_preemption_skips_total Number of preemptions skipped in an admission cycle.
+# TYPE kueue_admission_cycle_preemption_skips_total counter
+kueue_admission_cycle_preemption_skips_total{replica_role="leader"} 0

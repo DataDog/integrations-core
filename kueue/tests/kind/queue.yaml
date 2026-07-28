@@ -3,12 +3,88 @@ kind: ResourceFlavor
 metadata:
   name: default-flavor
 ---
+# Explicit cohort so cohort.info, cohort.weighted_share, and cohort_subtree.* metrics are emitted.
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: Cohort
+metadata:
+  name: shared-cohort
+spec: {}
+---
 apiVersion: kueue.x-k8s.io/v1beta2
 kind: ClusterQueue
 metadata:
   name: cluster-queue
 spec:
   namespaceSelector: {}
+  cohortName: shared-cohort
+  preemption:
+    withinClusterQueue: LowerPriority
+    reclaimWithinCohort: Any
+  resourceGroups:
+  - coveredResources:
+    - cpu
+    - memory
+    - nvidia.com/gpu
+    - example.com/foo
+    flavors:
+    - name: default-flavor
+      resources:
+      - name: cpu
+        nominalQuota: 1
+      - name: memory
+        nominalQuota: 1Gi
+      - name: nvidia.com/gpu
+        nominalQuota: 1
+      - name: example.com/foo
+        nominalQuota: 1
+---
+# Second member of the cohort so cohort_subtree aggregation and borrowing/lending are exercised.
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ClusterQueue
+metadata:
+  name: borrow-queue
+spec:
+  namespaceSelector: {}
+  cohortName: shared-cohort
+  resourceGroups:
+  - coveredResources:
+    - cpu
+    - memory
+    flavors:
+    - name: default-flavor
+      resources:
+      - name: cpu
+        nominalQuota: 1
+        borrowingLimit: 1
+      - name: memory
+        nominalQuota: 1Gi
+        borrowingLimit: 1Gi
+---
+# References a non-existent flavor so it stays inactive, exercising the not-active cluster_queue.status path.
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ClusterQueue
+metadata:
+  name: invalid-queue
+spec:
+  namespaceSelector: {}
+  resourceGroups:
+  - coveredResources:
+    - cpu
+    flavors:
+    - name: missing-flavor
+      resources:
+      - name: cpu
+        nominalQuota: 1
+---
+# Dedicated queue for the preemption/eviction scenario, isolated from the metrics workloads above.
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ClusterQueue
+metadata:
+  name: preempt-queue
+spec:
+  namespaceSelector: {}
+  preemption:
+    withinClusterQueue: LowerPriority
   resourceGroups:
   - coveredResources:
     - cpu
@@ -28,3 +104,23 @@ metadata:
   namespace: default
 spec:
   clusterQueue: cluster-queue
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: LocalQueue
+metadata:
+  name: preempt-queue
+  namespace: default
+spec:
+  clusterQueue: preempt-queue
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: WorkloadPriorityClass
+metadata:
+  name: low-priority
+value: 100
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: WorkloadPriorityClass
+metadata:
+  name: high-priority
+value: 1000

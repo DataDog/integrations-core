@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ipaddress
 import os
+import tempfile
 import time
 from contextlib import ExitStack
 
@@ -19,6 +21,83 @@ from .common import MOCKED_INSTANCE
 HERE = get_here()
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
+# Candidate /16 blocks for the kind service and pod networks. Kueue's controller and webhook
+# bootstrap over in-cluster Service IPs, so a subnet overlapping a host route (for example a VPN)
+# breaks cert bootstrap and crashloops the controller. We pick two that avoid the host routes.
+SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in (250, 251, 252, 253, 199, 198, 60, 61)] + [
+    f'172.{octet}.0.0/16' for octet in (28, 29, 30, 31)
+]
+
+
+def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
+    """Parse route destinations from `ip route` or `netstat -rn` output into networks."""
+    networks = []
+    skip = {'default', 'destination', 'internet:', 'routing'}
+    for line in output.splitlines():
+        parts = line.split()
+        if not parts:
+            continue
+        dest = parts[0].split('%')[0]
+        if dest.lower() in skip:
+            continue
+        prefix = '32'
+        if '/' in dest:
+            dest, prefix = dest.split('/', 1)
+        octets = dest.split('.')
+        if not (1 <= len(octets) <= 4) or not all(octet.isdigit() for octet in octets):
+            continue
+        octets += ['0'] * (4 - len(octets))
+        try:
+            networks.append(ipaddress.ip_network(f'{".".join(octets)}/{prefix}', strict=False))
+        except ValueError:
+            continue
+    return networks
+
+
+def host_routed_networks() -> list[ipaddress.IPv4Network]:
+    """Return the IPv4 networks currently present in the host routing table."""
+    for command in (['ip', '-4', 'route', 'show'], ['netstat', '-rn', '-f', 'inet']):
+        try:
+            output = run_command(command, capture=True).stdout
+        except Exception:
+            continue
+        if output.strip():
+            return parse_route_networks(output)
+    return []
+
+
+def choose_free_subnets() -> tuple[str, str] | None:
+    """Pick two non-overlapping /16 subnets that avoid host routes, for the kind service and pod networks."""
+    routed = host_routed_networks()
+    free = []
+    for candidate in SUBNET_CANDIDATES:
+        network = ipaddress.ip_network(candidate)
+        if any(network.overlaps(route) for route in routed):
+            continue
+        if any(network.overlaps(ipaddress.ip_network(chosen)) for chosen in free):
+            continue
+        free.append(candidate)
+        if len(free) == 2:
+            return free[0], free[1]
+    return None
+
+
+def build_kind_config() -> str:
+    """Render a kind config whose subnets avoid host-route collisions, falling back to the committed file."""
+    base_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    subnets = choose_free_subnets()
+    if subnets is None:
+        return base_config
+
+    with open(base_config) as f:
+        config = yaml.safe_load(f)
+    config.setdefault('networking', {})
+    config['networking']['serviceSubnet'], config['networking']['podSubnet'] = subnets
+
+    fd, path = tempfile.mkstemp(prefix='kueue-kind-', suffix='.yaml')
+    with os.fdopen(fd, 'w') as f:
+        yaml.safe_dump(config, f)
+    return path
 
 
 @pytest.fixture(autouse=True)
@@ -53,6 +132,34 @@ def wait_for_controller():
     )
 
 
+def disable_visibility_server():
+    """Disable Kueue's visibility server, whose cert bootstrap crashloops the controller in some clusters."""
+    run_command(
+        [
+            'kubectl',
+            'patch',
+            'deployment/kueue-controller-manager',
+            '-n',
+            KUEUE_NAMESPACE,
+            '--type=json',
+            '-p',
+            '[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", '
+            '"value": "--feature-gates=VisibilityOnDemand=false"}]',
+        ]
+    )
+    # Left in place, the endpoint-less visibility APIServices can stall namespace deletion.
+    run_command(
+        [
+            'kubectl',
+            'delete',
+            'apiservice',
+            'v1beta1.visibility.kueue.x-k8s.io',
+            'v1beta2.visibility.kueue.x-k8s.io',
+            '--ignore-not-found',
+        ]
+    )
+
+
 def setup_kueue():
     run_command(
         [
@@ -63,6 +170,8 @@ def setup_kueue():
             f'https://github.com/kubernetes-sigs/kueue/releases/download/{KUEUE_VERSION}/manifests.yaml',
         ]
     )
+
+    disable_visibility_server()
 
     # Ensure the controller is ready
     wait_for_controller()
@@ -88,12 +197,25 @@ def setup_kueue():
     )
     apply_queue_manifests()
     run_command(['kubectl', 'wait', 'clusterqueue/cluster-queue', '--for=condition=Active', '--timeout=300s'])
+    run_command(['kubectl', 'wait', 'clusterqueue/preempt-queue', '--for=condition=Active', '--timeout=300s'])
     run_command(
         ['kubectl', 'wait', 'localqueue/user-queue', '-n', 'default', '--for=condition=Active', '--timeout=300s']
     )
     run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'workloads.yaml')])
     wait_for_job_workload_condition('scheduled-workload', 'Admitted=True')
     wait_for_job_workload_condition('unschedulable-workload', 'QuotaReserved=False')
+    wait_for_job_workload_condition('gpu-workload', 'Admitted=True')
+    wait_for_job_workload_condition('finished-workload', 'Finished=True')
+    trigger_preemption()
+
+
+def trigger_preemption():
+    """Admit a low-priority workload, then a higher-priority one that preempts it, for preemption/eviction metrics."""
+    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'preempt-low-workload.yaml')])
+    wait_for_job_workload_condition('preempt-low-workload', 'Admitted=True')
+    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'preempt-high-workload.yaml')])
+    # Once the high-priority workload is admitted, the low-priority one has been preempted and evicted.
+    wait_for_job_workload_condition('preempt-high-workload', 'Admitted=True')
 
 
 def apply_queue_manifests():
@@ -159,7 +281,7 @@ def get_service_account_token():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    kind_config = build_kind_config()
     with kind_run(conditions=[setup_kueue], kind_config=kind_config, sleep=10) as kubeconfig, ExitStack() as stack:
         with open(kubeconfig) as f:
             kubeconfig_content = yaml.safe_load(f)
@@ -174,7 +296,7 @@ def dd_environment():
                 'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
                 'collect_workload_events': True,
                 'kube_config_dict': kubeconfig_content,
-                'min_collection_interval': 3600,
+                'min_collection_interval': 30,
             }
         ]
 

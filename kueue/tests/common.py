@@ -48,6 +48,17 @@ EXPECTED_METRIC_TAGS = {
     'kueue.local_queue.resource_reservation.memory': _local_queue_flavor_tags,
     'kueue.local_queue.resource_usage.cpu': _local_queue_flavor_tags,
     'kueue.local_queue.resource_usage.memory': _local_queue_flavor_tags,
+    # Cohort, fair-sharing, GPU, and preemption/eviction metrics; presence-only since tag values differ across envs.
+    'kueue.cluster_queue.weighted_share': [],
+    'kueue.cohort.info': [],
+    'kueue.cohort.weighted_share': [],
+    'kueue.cohort_subtree.quota.cpu': [],
+    'kueue.cohort_subtree.resource_reservations.cpu': [],
+    'kueue.cohort_subtree.admitted.active_workloads': [],
+    'kueue.cluster_queue.nominal_quota.gpu': [],
+    'kueue.cluster_queue.resource_usage.gpu': [],
+    'kueue.finished_workloads': [],
+    'kueue.cluster_queue.resource_usage.other': [],
     'kueue.controller.runtime.active_workers': [],
     'kueue.process.uptime.seconds': [],
     'kueue.workqueue.depth': [],
@@ -58,10 +69,13 @@ UNIT_E2E_METRICS = tuple(EXPECTED_METRIC_TAGS)
 
 # Extra Datadog metric names covered by tests/fixtures/metrics.txt but not required on the e2e cluster.
 FIXTURE_ONLY_METRICS = (
-    'kueue.cluster_queue.resource_usage.gpu',
-    'kueue.cluster_queue.resource_usage.other',
     'kueue.cluster_queue.resource_pending.gpu',
     'kueue.resource_flavor.quota_reserved_workloads',
+    # Monotonic counters — the env emits them (verified), but they don't reliably surface on a
+    # single-scrape e2e `agent check`, so assert them from the fixture in unit tests only.
+    'kueue.preempted_workloads.count',
+    'kueue.evicted_workloads.count',
+    'kueue.evicted_workloads_once.count',
 )
 
 # All metrics for unit test_check presence + instance tag assertions.
