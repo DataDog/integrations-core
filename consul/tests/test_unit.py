@@ -5,9 +5,9 @@ import logging
 
 import pytest
 
-from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
+from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 
 from . import common, consul_mocks
 

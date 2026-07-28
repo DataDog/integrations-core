@@ -137,9 +137,7 @@ class KafkaActionsCheck(AgentCheck):
                 self._schema_registry_http.close()
 
     def create_schema_registry_http_client(self):
-        config = {
-            key: value for key, value in self.instance.items() if key.startswith('schema_registry_')
-        }
+        config = {key: value for key, value in self.instance.items() if key.startswith('schema_registry_')}
         return create_http_client(config, self.init_config, self.SCHEMA_REGISTRY_HTTP_CONFIG_REMAPPER, self.log)
 
     def _verify_cluster_id(self):

@@ -6,11 +6,11 @@ import copy
 
 import pytest
 
+from datadog_checks.dev.http import assert_request_timeout
 from datadog_checks.fluentd import Fluentd
 
 from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST
 from .util import _get_metrics_by_version
-from datadog_checks.dev.http import assert_request_timeout
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 

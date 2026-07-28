@@ -8,8 +8,8 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
-from datadog_checks.mesos_master import MesosMaster
 from datadog_checks.dev.http import assert_request_timeout
+from datadog_checks.mesos_master import MesosMaster
 
 
 def test_check(check, instance, aggregator):

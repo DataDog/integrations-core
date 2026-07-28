@@ -8,6 +8,7 @@ import pytest
 from mock import MagicMock
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError, HTTPReadTimeoutError
 from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab_runner import GitlabRunnerCheck

@@ -399,7 +399,7 @@ class HTTPCheck(AgentCheck):
         port = o.port or 443
 
         sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
-        if (proxy_url := self.http.proxy_for_url(url)):
+        if proxy_url := self.http.proxy_for_url(url):
             proxy = parse_proxy_url(proxy_url)
             sock.set_proxy(**proxy)
 

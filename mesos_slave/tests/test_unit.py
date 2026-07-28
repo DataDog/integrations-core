@@ -7,11 +7,10 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.http import assert_request_timeout, get_http_capability
 from datadog_checks.mesos_slave import MesosSlave
 
 from .common import MESOS_SLAVE_VERSION, PARAMETERS
-from datadog_checks.dev.http import get_http_capability
-from datadog_checks.dev.http import assert_request_timeout
 
 
 def test_fixtures(check, instance, aggregator):

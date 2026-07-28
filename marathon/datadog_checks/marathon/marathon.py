@@ -67,9 +67,9 @@ class Marathon(AgentCheck):
                 float(self.instance.get('connect_timeout', timeout)),
             )
         self._auth_body = None
-        username = self.instance.get('user')
-        password = self.instance.get('password')
-        if username is not None and password is not None:
+        basic_auth = self.http.get_basic_auth()
+        if basic_auth is not None:
+            username, password = basic_auth
             self._auth_body = {'uid': username, 'password': password}
 
     def check(self, instance):

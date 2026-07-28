@@ -9,6 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.dev.http import assert_http_capability
+from datadog_checks.nginx import Nginx
 
 from .common import FIXTURES_PATH, HOST, PORT
 from .utils import mocked_perform_request
