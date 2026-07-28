@@ -49,7 +49,7 @@ Copy the API key to a secure location after you generate it.
 3. (Optional) Enable **Cost data ingestion** to send cost data to [Cloud Cost Management][6]. This requires Cloud Cost Management to be enabled on your Datadog account.
 4. Click **Save Configuration**.
 
-After you save the configuration, Datadog begins polling the appropriate Anthropic usage and cost endpoints and populates metrics in your environment. Usage metrics typically appear within 10 minutes, and cost data appears in Cloud Cost Management within 24 hours.
+After you save the configuration, Datadog begins polling the appropriate Anthropic usage and cost endpoints and populates metrics in your environment. Usage metrics typically appear within 10 minutes, and cost data appears in Cloud Cost Management within 24-48 hours.
 
 ## Data Collected
 
