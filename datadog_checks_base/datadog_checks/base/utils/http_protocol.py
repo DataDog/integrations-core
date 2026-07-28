@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
+from dataclasses import dataclass
 from datetime import timedelta
+from types import MappingProxyType
 from typing import Any, Protocol
 
 from datadog_checks.base.utils.tls import TlsConfig
@@ -13,6 +15,48 @@ from datadog_checks.base.utils.tls import TlsConfig
 # implements it on requests today; a future HTTPX2Wrapper implements the same surface on httpx. Do not
 # change existing methods, attributes, or their semantics without coordinating both backends.
 # Capabilities expose behavior, never a backend object (no requests or httpx type is returned).
+
+
+class HTTPHeaders(Mapping[str, str]):
+    """Immutable, case-insensitive HTTP headers."""
+
+    __slots__ = ('_values',)
+
+    def __init__(self, headers: Mapping[str, str]) -> None:
+        values = {name.lower(): (name, value) for name, value in headers.items()}
+        self._values = MappingProxyType(values)
+
+    def __getitem__(self, name: str) -> str:
+        return self._values[name.lower()][1]
+
+    def __iter__(self) -> Iterator[str]:
+        return (name for name, _ in self._values.values())
+
+    def __len__(self) -> int:
+        return len(self._values)
+
+
+class HTTPRequest(Protocol):
+    @property
+    def method(self) -> str | None: ...
+
+    @property
+    def url(self) -> str | None: ...
+
+    @property
+    def headers(self) -> Mapping[str, str]: ...
+
+
+@dataclass(frozen=True, slots=True)
+class HTTPRequestSnapshot:
+    """Backend-neutral request metadata captured when an HTTP error occurs."""
+
+    method: str | None
+    url: str | None
+    headers: Mapping[str, str]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, 'headers', HTTPHeaders(self.headers))
 
 
 class HTTPTimeoutConfig:

@@ -47,7 +47,13 @@ from .http_exceptions import (  # noqa: F401
     HTTPStatusError,
     HTTPTimeoutError,
 )
-from .http_protocol import HTTPClient, HTTPResponse, HTTPTimeoutConfig  # noqa: F401
+from .http_protocol import (  # noqa: F401
+    HTTPClient,
+    HTTPRequest,
+    HTTPRequestSnapshot,
+    HTTPResponse,
+    HTTPTimeoutConfig,
+)
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -217,6 +223,19 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
+def _translate_requests_request(
+    request: requests.Request | requests.PreparedRequest | None,
+) -> HTTPRequestSnapshot | None:
+    if request is None:
+        return None
+
+    return HTTPRequestSnapshot(
+        method=request.method,
+        url=request.url,
+        headers=request.headers or {},
+    )
+
+
 def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
     """Translate a requests exception into the library-agnostic equivalent.
 
@@ -227,7 +246,7 @@ def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapp
     agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
     """
     message = str(exc) or exc.__class__.__name__
-    request = getattr(exc, 'request', None)
+    request = _translate_requests_request(getattr(exc, 'request', None))
     if isinstance(
         exc,
         (

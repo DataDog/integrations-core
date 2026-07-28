@@ -1,7 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datadog_checks.base.utils.http_protocol import HTTPRequest, HTTPResponse
 
 __all__ = [
     'HTTPError',
@@ -17,7 +22,12 @@ __all__ = [
 
 
 class HTTPError(Exception):
-    def __init__(self, message: str, response: Any = None, request: Any = None):
+    def __init__(
+        self,
+        message: str,
+        response: HTTPResponse | None = None,
+        request: HTTPRequest | None = None,
+    ) -> None:
         super().__init__(message)
         self.response = response
         self.request = request

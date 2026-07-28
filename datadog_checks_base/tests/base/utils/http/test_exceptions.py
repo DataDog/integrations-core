@@ -104,6 +104,22 @@ def test_translate_does_not_leak_raw_response():
     assert result.response is None
 
 
+def test_translate_converts_raw_request_to_agnostic_snapshot():
+    request = requests.Request('GET', 'https://example.test/resource', headers={'X-Test-Header': 'original'}).prepare()
+    err = requests.exceptions.HTTPError('500 Server Error', request=request)
+
+    result = _translate_requests_exception(err)
+
+    assert not isinstance(result.request, (requests.Request, requests.PreparedRequest))
+    assert result.request.method == 'GET'
+    assert result.request.url == 'https://example.test/resource'
+    assert result.request.headers == {'X-Test-Header': 'original'}
+    assert result.request.headers['x-test-header'] == 'original'
+
+    request.headers['X-Test-Header'] = 'changed'
+    assert result.request.headers == {'X-Test-Header': 'original'}
+
+
 # Group B: the streaming seam. The failure surfaces only when the generator is consumed.
 @pytest.mark.parametrize(
     'raised, expected',
