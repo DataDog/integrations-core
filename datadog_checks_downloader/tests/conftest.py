@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import shutil
+from pathlib import Path
 
 import pytest
 
@@ -61,6 +62,13 @@ def distribution_version(request):
 def pytest_generate_tests(metafunc):
     if "disable_verification" in metafunc.fixturenames:
         metafunc.parametrize("disable_verification", [False, True])
+
+
+@pytest.fixture(autouse=True)
+def temporary_v2_metadata_root(monkeypatch, tmp_path):
+    from datadog_checks.downloader import download_v2
+
+    monkeypatch.setattr(download_v2, 'V2_METADATA_ROOT', Path(tmp_path) / 'v2-metadata')
 
 
 @pytest.fixture(autouse=True)

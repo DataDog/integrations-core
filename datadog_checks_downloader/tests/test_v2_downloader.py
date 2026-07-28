@@ -11,7 +11,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from tuf.api.exceptions import DownloadError
+from securesystemslib.signer import SSlibSigner
+from tuf.api.exceptions import BadVersionNumberError, DownloadError
+from tuf.api.metadata import Metadata, MetaFile, Timestamp
 
 from datadog_checks.downloader import cli
 from datadog_checks.downloader.download_v2 import (
@@ -29,7 +31,7 @@ from datadog_checks.downloader.exceptions import (
     TargetNotFoundError,
 )
 
-from ._v2_synth_repo import build_delegated_repo, serve_directory
+from ._v2_synth_repo import EXPIRY, SPEC_VERSION, build_delegated_repo, serve_directory
 
 pytestmark = pytest.mark.offline
 
@@ -343,25 +345,115 @@ def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setattr(TUFPointerDownloader, '_bootstrap_metadata_dir', fake_bootstrap)
 
 
+def _make_pointer_target(project: str, version: str) -> tuple[str, bytes, dict]:
+    wheel = b'synthetic wheel for delegation test'
+    wheel_name = f'{project.replace("-", "_")}-{version}-py3-none-any.whl'
+    pointer = {
+        'digest': hashlib.sha256(wheel).hexdigest(),
+        'length': len(wheel),
+        'version': version,
+        'repository': REPO_URL,
+        'wheel_path': f'/wheels/{project}/{wheel_name}',
+    }
+    return wheel_name, wheel, pointer
+
+
+def _write_timestamp(repo_root: Path, signer: SSlibSigner, version: int) -> None:
+    metadata = Metadata(
+        signed=Timestamp(
+            version=version,
+            spec_version=SPEC_VERSION,
+            expires=EXPIRY,
+            snapshot_meta=MetaFile(version=1),
+        )
+    )
+    metadata.sign(signer)
+    metadata.to_file(str(repo_root / 'metadata' / 'timestamp.json'))
+
+
+class TestMetadataPersistence:
+    def test_interrupted_bootstrap_does_not_leave_partial_root(self, monkeypatch, tmp_path):
+        metadata_dir = tmp_path / 'metadata'
+        metadata_dir.mkdir()
+        downloader = TUFPointerDownloader(REPO_URL, metadata_root=tmp_path)
+
+        def fail_replace(_source, _destination):
+            raise OSError('interrupted before atomic replace')
+
+        monkeypatch.setattr(Path, 'replace', fail_replace)
+        with pytest.raises(OSError, match='interrupted'):
+            downloader._bootstrap_metadata_dir(metadata_dir)
+
+        assert not (metadata_dir / 'root.json').exists()
+        assert not list(metadata_dir.iterdir())
+
+    def test_existing_trusted_root_is_not_overwritten(self, tmp_path):
+        state = tmp_path / 'client-state'
+        downloader = TUFPointerDownloader(REPO_URL, metadata_root=state)
+        repository_id = hashlib.sha256(REPO_URL.encode()).hexdigest()
+        metadata_dir = state / repository_id / 'metadata'
+        metadata_dir.mkdir(parents=True)
+        trusted_root = metadata_dir / 'root.json'
+        trusted_root.write_bytes(b'already trusted root')
+
+        assert downloader._prepare_metadata_dir() == metadata_dir
+        assert trusted_root.read_bytes() == b'already trusted root'
+
+    def test_persistent_metadata_rejects_rollback(self, monkeypatch, tmp_path):
+        target_path = f'{V2_POINTER_TARGET_PREFIX}/{PROJECT}/{VERSION}.json'
+        _, _, pointer = _make_pointer_target(PROJECT, VERSION)
+        repo = tmp_path / 'repo'
+        signers = build_delegated_repo(
+            repo,
+            delegated_targets={target_path: json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            paths=[f'{V2_POINTER_TARGET_PREFIX}/{PROJECT}/*'],
+        )
+        timestamp_v1 = (repo / 'metadata' / 'timestamp.json').read_bytes()
+        _patch_bootstrap_to_use(repo, monkeypatch)
+
+        with serve_directory(repo) as url:
+            state = tmp_path / 'client-state'
+            assert TUFPointerDownloader(url, metadata_root=state).get_pointer(PROJECT, VERSION) == pointer
+
+            _write_timestamp(repo, signers['timestamp'], version=2)
+            assert TUFPointerDownloader(url, metadata_root=state).get_pointer(PROJECT, VERSION) == pointer
+
+            (repo / 'metadata' / 'timestamp.json').write_bytes(timestamp_v1)
+            with pytest.raises(BadVersionNumberError):
+                TUFPointerDownloader(url, metadata_root=state).get_pointer(PROJECT, VERSION)
+
+            fresh_state = tmp_path / 'fresh-client-state'
+            assert TUFPointerDownloader(url, metadata_root=fresh_state).get_pointer(PROJECT, VERSION) == pointer
+
+    def test_repository_urls_have_isolated_metadata(self, monkeypatch, tmp_path):
+        target_path = f'{V2_POINTER_TARGET_PREFIX}/{PROJECT}/{VERSION}.json'
+        _, _, pointer = _make_pointer_target(PROJECT, VERSION)
+        repo = tmp_path / 'repo'
+        signers = build_delegated_repo(
+            repo,
+            delegated_targets={target_path: json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            paths=[f'{V2_POINTER_TARGET_PREFIX}/{PROJECT}/*'],
+        )
+        timestamp_v1 = (repo / 'metadata' / 'timestamp.json').read_bytes()
+        _patch_bootstrap_to_use(repo, monkeypatch)
+
+        with serve_directory(repo) as url_a, serve_directory(repo) as url_b:
+            state = tmp_path / 'shared-client-state'
+            _write_timestamp(repo, signers['timestamp'], version=2)
+            assert TUFPointerDownloader(url_a, metadata_root=state).get_pointer(PROJECT, VERSION) == pointer
+
+            (repo / 'metadata' / 'timestamp.json').write_bytes(timestamp_v1)
+            assert TUFPointerDownloader(url_b, metadata_root=state).get_pointer(PROJECT, VERSION) == pointer
+
+
 class TestDelegationTraversal:
     """Test v2 target resolution through delegated TUF metadata."""
 
-    @staticmethod
-    def _make_pointer_target(project: str, version: str) -> tuple[str, bytes, dict]:
-        wheel = b'synthetic wheel for delegation test'
-        wheel_name = f'{project.replace("-", "_")}-{version}-py3-none-any.whl'
-        pointer = {
-            'digest': hashlib.sha256(wheel).hexdigest(),
-            'length': len(wheel),
-            'version': version,
-            'repository': REPO_URL,
-            'wheel_path': f'/wheels/{project}/{wheel_name}',
-        }
-        return wheel_name, wheel, pointer
-
     def test_resolves_through_paths_delegation_without_naming_role(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
-        _, _, pointer = self._make_pointer_target(project, version)
+        _, _, pointer = _make_pointer_target(project, version)
 
         repo = tmp_path / 'repo'
         build_delegated_repo(
@@ -379,7 +471,7 @@ class TestDelegationTraversal:
     def test_resolves_through_hash_prefix_delegation(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
         target_path = f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json'
-        _, _, pointer = self._make_pointer_target(project, version)
+        _, _, pointer = _make_pointer_target(project, version)
 
         prefix = hashlib.sha256(target_path.encode()).hexdigest()[:2]
 
@@ -398,7 +490,7 @@ class TestDelegationTraversal:
 
     def test_unmatched_target_path_raises_not_found(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
-        _, _, pointer = self._make_pointer_target(project, version)
+        _, _, pointer = _make_pointer_target(project, version)
 
         repo = tmp_path / 'repo'
         build_delegated_repo(
