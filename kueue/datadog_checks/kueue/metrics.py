@@ -108,7 +108,6 @@ METRIC_MAP = {
     'kueue_quota_reserved_workloads': 'quota_reserved.workloads',
     'kueue_ready_wait_time_seconds': 'ready_wait_time.seconds',
     'kueue_replaced_workload_slices': 'replaced_workload_slices',
-    'kueue_resource_flavor_quota_reserved_workloads': 'resource_flavor.quota_reserved_workloads',
     'kueue_reserving_active_workloads': 'reserving.active_workloads',
     'kueue_workload_creation_latency_seconds': 'workload.creation_latency.seconds',
     'kueue_workload_eviction_latency_seconds': 'workload.eviction_latency.seconds',

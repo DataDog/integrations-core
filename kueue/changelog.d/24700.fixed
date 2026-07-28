@@ -1,1 +1,1 @@
-Correct metadata for counter and histogram metrics so they resolve in dashboards.
+Correct metric metadata so counters, histograms, and gauges resolve in dashboards, and remove a metric that Kueue does not emit.

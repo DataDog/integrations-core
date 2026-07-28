@@ -9,7 +9,7 @@ kueue.admission_attempt.duration.seconds.sum,count,0,second,,The duration of an 
 kueue.admission_checks.wait_time.seconds.bucket,count,0,second,,"The time between quota reservation and admission for a workload, per 'kueue_cluster_queue'.",0,kueue,admission_checks_wait_time_seconds_bucket,,
 kueue.admission_checks.wait_time.seconds.count,count,0,second,,"The time between quota reservation and admission for a workload, per 'kueue_cluster_queue'.",0,kueue,admission_checks_wait_time_seconds_count,,
 kueue.admission_checks.wait_time.seconds.sum,count,0,second,,"The time between quota reservation and admission for a workload, per 'kueue_cluster_queue'.",0,kueue,admission_checks_wait_time_seconds_sum,,
-kueue.admission_cycle.preemption_skips.count,count,0,,,The number of Workloads in the ClusterQueue that received preemption candidates but were skipped because other ClusterQueues needed the same resources in the same cycle.,0,kueue,admission_cycle_preemption_skips_count,,
+kueue.admission_cycle.preemption_skips,gauge,0,,,The number of Workloads in the ClusterQueue that received preemption candidates but were skipped because other ClusterQueues needed the same resources in the same cycle.,0,kueue,admission_cycle_preemption_skips,,
 kueue.admitted.active_workloads,gauge,0,,,"The number of admitted workloads that are active, per 'kueue_cluster_queue'.",0,kueue,admitted_active_workloads,,
 kueue.admitted.workloads.count,count,0,,,"The total number of admitted workloads, per 'kueue_cluster_queue'.",0,kueue,admitted_workloads_count,,
 kueue.admitted_until_ready.wait_time.seconds.bucket,count,0,second,,"The time between workload admission and the workload becoming ready, per 'kueue_cluster_queue'.",0,kueue,admitted_until_ready_wait_time_seconds_bucket,,
@@ -163,7 +163,6 @@ kueue.ready_wait_time.seconds.count,count,0,second,,"The time between workload c
 kueue.ready_wait_time.seconds.sum,count,0,second,,"The time between workload creation or requeueing and the workload becoming ready, per 'kueue_cluster_queue'.",0,kueue,ready_wait_time_seconds_sum,,
 kueue.replaced_workload_slices.count,count,0,,,"The number of replaced workload slices, per 'kueue_cluster_queue'.",0,kueue,replaced_workload_slices_count,,
 kueue.reserving.active_workloads,gauge,0,,,"The number of Workloads that are reserving quota, per 'kueue_cluster_queue'.",0,kueue,reserving_active_workloads,,
-kueue.resource_flavor.quota_reserved_workloads,gauge,0,,,Number of reserved workloads.,0,kueue,resource_flavor_quota_reserved_workloads,,"kueue_cluster_queue:default,flavor:on-demand"
 kueue.workload.creation_latency.seconds.bucket,count,0,second,,"The time between job creation and workload creation, per 'job_kind'. Entries are only recorded for objects with generation 1.",0,kueue,workload_creation_latency_seconds_bucket,,
 kueue.workload.creation_latency.seconds.count,count,0,second,,"The time between job creation and workload creation, per 'job_kind'. Entries are only recorded for objects with generation 1.",0,kueue,workload_creation_latency_seconds_count,,
 kueue.workload.creation_latency.seconds.sum,count,0,second,,"The time between job creation and workload creation, per 'job_kind'. Entries are only recorded for objects with generation 1.",0,kueue,workload_creation_latency_seconds_sum,,

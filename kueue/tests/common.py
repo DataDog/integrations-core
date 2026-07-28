@@ -70,7 +70,6 @@ UNIT_E2E_METRICS = tuple(EXPECTED_METRIC_TAGS)
 # Extra Datadog metric names covered by tests/fixtures/metrics.txt but not required on the e2e cluster.
 FIXTURE_ONLY_METRICS = (
     'kueue.cluster_queue.resource_pending.gpu',
-    'kueue.resource_flavor.quota_reserved_workloads',
     # Monotonic counters — the env emits them (verified), but they don't reliably surface on a
     # single-scrape e2e `agent check`, so assert them from the fixture in unit tests only.
     'kueue.preempted_workloads.count',

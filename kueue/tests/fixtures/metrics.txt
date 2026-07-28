@@ -249,10 +249,6 @@ kueue_ready_wait_time_seconds_count{replica_role="leader",cluster_queue="cluster
 # TYPE kueue_replaced_workload_slices_total counter
 kueue_replaced_workload_slices_total{replica_role="leader",cluster_queue="cluster-queue"} 1
 
-# HELP kueue_resource_flavor_quota_reserved_workloads Kueue kueue resource flavor quota reserved workloads metric.
-# TYPE kueue_resource_flavor_quota_reserved_workloads gauge
-kueue_resource_flavor_quota_reserved_workloads{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu",priority_class="default-priority"} 1
-
 # HELP kueue_reserving_active_workloads The number of Workloads that are reserving quota, per 'cluster_queue'
 # TYPE kueue_reserving_active_workloads gauge
 kueue_reserving_active_workloads{replica_role="leader",cluster_queue="cluster-queue"} 1
@@ -665,6 +661,6 @@ workqueue_work_duration_seconds_sum{controller="cert-rotator",name="cert-rotator
 workqueue_work_duration_seconds_count{controller="cert-rotator",name="cert-rotator"} 1
 workqueue_work_duration_seconds_sum{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 0.33461217
 workqueue_work_duration_seconds_count{controller="cert-rotator-bootstrap",name="cert-rotator-bootstrap"} 1
-# HELP kueue_admission_cycle_preemption_skips_total Number of preemptions skipped in an admission cycle.
-# TYPE kueue_admission_cycle_preemption_skips_total counter
-kueue_admission_cycle_preemption_skips_total{replica_role="leader"} 0
+# HELP kueue_admission_cycle_preemption_skips The number of Workloads in the ClusterQueue that received preemption candidates but were skipped because other ClusterQueues needed the same resources in the same cycle.
+# TYPE kueue_admission_cycle_preemption_skips gauge
+kueue_admission_cycle_preemption_skips{cluster_queue="cluster-queue",replica_role="leader"} 0
