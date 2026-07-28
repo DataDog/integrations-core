@@ -433,7 +433,6 @@
             "id": 332852656456888,
             "definition": {
               "title": "Security Signals by User",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -1434,9 +1433,82 @@
             }
           },
           {
+            "id": 2204064038441386,
+            "definition": {
+              "title": "Account Locks",
+              "description": "The occurrence of accounts being locked due to excessive failed login attempts.",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @payload.entries.info.nodeType:AccountLockoutNode $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "orange",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 18,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
             "id": 3076531017573708,
             "definition": {
-              "title": "Account LOCKED Attempts",
+              "title": "Most Login Attempts Against Locked Accounts",
               "type": "toplist",
               "requests": [
                 {
@@ -1503,7 +1575,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 18,
+              "y": 21,
               "width": 6,
               "height": 4
             }
@@ -1571,7 +1643,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 22,
+              "y": 25,
               "width": 6,
               "height": 4
             }
@@ -1582,7 +1654,7 @@
         "x": 0,
         "y": 27,
         "width": 6,
-        "height": 30,
+        "height": 31,
         "is_column_break": true
       }
     },
