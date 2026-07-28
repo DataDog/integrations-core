@@ -1924,11 +1924,11 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j47612b3:
+  jf5f9072:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: iris
-      target: iris
+      job-name: intersystems_iris
+      target: intersystems_iris
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

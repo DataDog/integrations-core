@@ -362,9 +362,9 @@ services:
 - id: infiniband
   paths:
   - infiniband/datadog_checks/infiniband/
-- id: iris
+- id: intersystems_iris
   paths:
-  - iris/datadog_checks/iris/
+  - intersystems_iris/datadog_checks/intersystems_iris/
 - id: istio
   paths:
   - istio/datadog_checks/istio/

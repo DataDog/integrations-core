@@ -1,3 +1,10 @@
+# Maps the raw `iris_*` metric names emitted by IRIS's built-in `/api/monitor/metrics`
+# OpenMetrics endpoint to their namespace-relative submission names. The check's
+# `__NAMESPACE__` ("intersystems_iris") is prepended by the base check on submission, so
+# an entry like `iris_cpu_pct: cpu.pct` is submitted as `intersystems_iris.cpu.pct`.
+#
+# Keys are exactly what the exposition emits; do not add the namespace prefix here.
+
 # CPU metrics
 iris_cpu_pct: cpu.pct
 iris_cpu_usage: cpu.usage
@@ -56,6 +63,8 @@ iris_sql_row_count_per_second: sql.row_count_per_second
 iris_system_alerts: system.alerts
 iris_system_alerts_log: system.alerts_log
 iris_system_alerts_new: system.alerts_new
+# `iris_system_info` is an info-style descriptor metric; pin the submission type so
+# the label set is preserved as a gauge rather than inferred.
 iris_system_info:
   name: system.info
   type: gauge

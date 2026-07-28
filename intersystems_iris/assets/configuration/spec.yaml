@@ -1,6 +1,6 @@
-name: iris
+name: intersystems_iris
 files:
-- name: iris.yaml
+- name: intersystems_iris.yaml
   options:
   - template: init_config
     options:

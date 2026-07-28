@@ -11,7 +11,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.iris import IrisCheck
+from datadog_checks.intersystems_iris import IrisCheck
 
 FIXTURE_PATH = str(Path(__file__).parent / 'fixtures' / 'metrics.txt')
 
@@ -23,7 +23,7 @@ def test_check(
     mock_http_response: Callable[..., None],
 ) -> None:
     mock_http_response(file_path=FIXTURE_PATH)
-    check = IrisCheck('iris', {}, [instance])
+    check = IrisCheck('intersystems_iris', {}, [instance])
     dd_run_check(check)
     dd_run_check(check)
 
@@ -37,7 +37,7 @@ def test_check(
         check_symmetric_inclusion=True,
     )
 
-    aggregator.assert_service_check('iris.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)
 
 
 def test_interop_host_label_renamed(
@@ -52,16 +52,16 @@ def test_interop_host_label_renamed(
     surfaced as a tag, just under the collision-safe key.
     """
     mock_http_response(file_path=FIXTURE_PATH)
-    check = IrisCheck('iris', {}, [instance])
+    check = IrisCheck('intersystems_iris', {}, [instance])
     dd_run_check(check)
     dd_run_check(check)
 
     interop_host_metrics = (
-        'iris.interop.hosts',
-        'iris.interop.last_activity',
-        'iris.interop.messages.count',
-        'iris.interop.messages.errored',
-        'iris.interop.messages.per_sec.count',
+        'intersystems_iris.interop.hosts',
+        'intersystems_iris.interop.last_activity',
+        'intersystems_iris.interop.messages.count',
+        'intersystems_iris.interop.messages.errored',
+        'intersystems_iris.interop.messages.per_sec.count',
     )
     for metric_name in interop_host_metrics:
         aggregator.assert_metric_has_tag_prefix(metric_name, 'interop_host:')
@@ -83,14 +83,14 @@ def test_system_info_version_label_renamed(
     still be present as a tag, just under the collision-safe key.
     """
     mock_http_response(file_path=FIXTURE_PATH)
-    check = IrisCheck('iris', {}, [instance])
+    check = IrisCheck('intersystems_iris', {}, [instance])
     dd_run_check(check)
     dd_run_check(check)
 
-    aggregator.assert_metric_has_tag('iris.system.info', 'iris_version:2026.1')
-    for metric in aggregator.metrics('iris.system.info'):
+    aggregator.assert_metric_has_tag('intersystems_iris.system.info', 'iris_version:2026.1')
+    for metric in aggregator.metrics('intersystems_iris.system.info'):
         assert not any(tag.startswith('version:') for tag in metric.tags), (
-            "iris.system.info must not carry a raw 'version:' tag sourced from the exposition"
+            "intersystems_iris.system.info must not carry a raw 'version:' tag sourced from the exposition"
         )
         # Other descriptor labels on this info metric pass through unrenamed.
         assert any(tag.startswith('product:') for tag in metric.tags)
@@ -111,24 +111,24 @@ def test_id_label_passthrough(
     would not add real disambiguation.
     """
     mock_http_response(file_path=FIXTURE_PATH)
-    check = IrisCheck('iris', {}, [instance])
+    check = IrisCheck('intersystems_iris', {}, [instance])
     dd_run_check(check)
     dd_run_check(check)
 
-    aggregator.assert_metric_has_tag('iris.cpu.pct', 'id:AUXWD')
-    aggregator.assert_metric_has_tag('iris.cpu.pct', 'id:CSPSRV')
+    aggregator.assert_metric_has_tag('intersystems_iris.cpu.pct', 'id:AUXWD')
+    aggregator.assert_metric_has_tag('intersystems_iris.cpu.pct', 'id:CSPSRV')
 
 
 @pytest.mark.parametrize(
     'metric_name, tag',
     [
-        ('iris.process', 'namespace:USER'),
-        ('iris.process', 'jobtype:2'),
-        ('iris.process', 'routine:Ens.Queue.1'),
-        ('iris.process', 'state:EVTW'),
-        ('iris.db.size_mb', 'dir:/usr/irissys/mgr/user/'),
-        ('iris.interop.hosts', 'production:Demo.MonitorProduction'),
-        ('iris.interop.hosts', 'status:OK'),
+        ('intersystems_iris.process', 'namespace:USER'),
+        ('intersystems_iris.process', 'jobtype:2'),
+        ('intersystems_iris.process', 'routine:Ens.Queue.1'),
+        ('intersystems_iris.process', 'state:EVTW'),
+        ('intersystems_iris.db.size_mb', 'dir:/usr/irissys/mgr/user/'),
+        ('intersystems_iris.interop.hosts', 'production:Demo.MonitorProduction'),
+        ('intersystems_iris.interop.hosts', 'status:OK'),
     ],
 )
 def test_other_labels_passthrough(
@@ -144,7 +144,7 @@ def test_other_labels_passthrough(
     metrics, `production`/`status`) pass through verbatim, unlike `host`/`version`.
     """
     mock_http_response(file_path=FIXTURE_PATH)
-    check = IrisCheck('iris', {}, [instance])
+    check = IrisCheck('intersystems_iris', {}, [instance])
     dd_run_check(check)
     dd_run_check(check)
 
@@ -162,14 +162,14 @@ def test_health_service_check_critical_then_ok(
     failure must report CRITICAL and a subsequent successful scrape must return it to OK.
     """
     mock_http_response(status_code=500)
-    check = IrisCheck('iris', {}, [instance])
+    check = IrisCheck('intersystems_iris', {}, [instance])
     with pytest.raises(Exception):
         dd_run_check(check)
 
-    aggregator.assert_service_check('iris.openmetrics.health', ServiceCheck.CRITICAL)
+    aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.CRITICAL)
 
     aggregator.reset()
     mock_http_response(file_path=FIXTURE_PATH)
     dd_run_check(check)
 
-    aggregator.assert_service_check('iris.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)

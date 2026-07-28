@@ -5,8 +5,8 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-iris"
-description = "The iris check"
+name = "datadog-intersystems-iris"
+description = "The InterSystems IRIS check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.13"
@@ -14,7 +14,7 @@ keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "iris",
+    "intersystems_iris",
 ]
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
@@ -42,7 +42,7 @@ deps = []
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/iris/__about__.py"
+path = "datadog_checks/intersystems_iris/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -53,7 +53,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/iris",
+    "/datadog_checks/intersystems_iris",
 ]
 dev-mode-dirs = [
     ".",
