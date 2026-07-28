@@ -7,12 +7,13 @@ from pathlib import Path
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
-from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
+from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointReadError, ResumeState
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
@@ -70,14 +71,38 @@ class PhaseOrchestrator(EventBusOrchestrator):
     def failed_phase(self) -> str | None:
         return self._failed_phase
 
+    def _read_resume_state(self, checkpoint_manager: CheckpointManager) -> ResumeState:
+        """Read the resume plan, or an empty one when this run is not resuming.
+
+        Raises:
+            ConfigError: If this run asked to resume but there is nothing left to resume.
+        """
+        if not self._resume:
+            return ResumeState()
+
+        try:
+            state = checkpoint_manager.resume_state(self._resolved_flow)
+        except CheckpointReadError as e:
+            raise ConfigError(
+                f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
+            ) from e
+
+        if not state.is_resumable:
+            reason = (
+                "every scheduled phase already completed successfully"
+                if state.completed
+                else "no incomplete run was recorded"
+            )
+            raise ConfigError(f"Cannot resume flow {self._resolved_flow.name!r}: {reason}. Launch it instead.")
+        return state
+
     async def on_initialize(self) -> None:
         """Construct phases from the resolved flow and submit the start PhaseTrigger."""
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
 
-        completed, frontier = (
-            resolve_resume_state(self._resolved_flow, checkpoint_manager) if self._resume else (set(), set())
-        )
+        resume_state = self._read_resume_state(checkpoint_manager)
+        completed, frontier = resume_state.completed, resume_state.frontier
         if self._resume:
             self._logger.info(
                 "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
@@ -97,7 +122,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             flow_variables=self._resolved_flow.variables,
             callbacks=run_callbacks,
             logger=self._logger,
-            resume_frontier=frozenset(frontier),
+            resume_frontier=frontier,
         )
 
         for entry in self._resolved_flow.flow:

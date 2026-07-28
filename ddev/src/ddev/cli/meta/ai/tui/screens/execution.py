@@ -55,7 +55,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseStarted,
     RunErrored,
 )
-from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug, resume_completed_phases
+from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_resume_state, flow_slug
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
@@ -125,7 +125,7 @@ class ExecutionScreen(TogoScreen):
         self.togo_app.bridge_target = self
         if self.resume:
             runs_dir = self._runs_dir or ai_runs_dir(self.togo_app.ddev_app.repo.path)
-            for phase_id in resume_completed_phases(self.flow, runs_dir):
+            for phase_id in flow_resume_state(self.flow, runs_dir).completed:
                 self._phase_statuses[phase_id] = RunStatus.DONE
                 for task_phase, task_name in self._task_statuses:
                     if task_phase == phase_id:

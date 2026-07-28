@@ -9,6 +9,7 @@ from rich.text import Text
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.message import Message
+from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
@@ -47,6 +48,10 @@ class FlowCard(Widget):
 
     BINDINGS = [Binding("enter", "select", "Select")]
 
+    # Recomposes rather than repaints: the resumable line lives in the footer child, which a
+    # repaint of the card would not rebuild.
+    resumable: reactive[bool] = reactive(False, init=False, recompose=True)
+
     class Selected(Message):
         """Posted when the card is activated (Enter or click)."""
 
@@ -60,7 +65,7 @@ class FlowCard(Widget):
         self.result = result
         self.flow = result.resolved
         self.index = index
-        self.resumable = resumable
+        self.set_reactive(FlowCard.resumable, resumable)
 
     @property
     def phase_count(self) -> int:

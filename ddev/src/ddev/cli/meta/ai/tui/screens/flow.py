@@ -10,6 +10,7 @@ from pathlib import Path
 
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.css.query import NoMatches
 from textual.widget import Widget
 from textual.widgets import Button, Static
 
@@ -87,14 +88,22 @@ class FlowScreen(TogoScreen):
                 yield Static(" · ".join(config.tools), classes="flow-agent-tools")
 
     def on_mount(self) -> None:
-        from ddev.cli.meta.ai.tui.runs import ai_runs_dir, has_resumable_run
+        self._refresh_resume_state()
+
+    def on_screen_resume(self) -> None:
+        """Re-read resume state whenever this screen becomes active again."""
+        self._refresh_resume_state()
+
+    def _refresh_resume_state(self) -> None:
+        """Show the Resume button only while a resumable run exists for this flow."""
+        from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_resume_state
 
         runs_dir = self._runs_dir or ai_runs_dir(self.togo_app.ddev_app.repo.path)
-        if has_resumable_run(self.flow, runs_dir):
-            try:
-                self.query_one("#resume").display = True
-            except Exception:
-                pass
+        state = flow_resume_state(self.flow, runs_dir)
+        try:
+            self.query_one("#resume", Button).display = state.is_resumable
+        except NoMatches:
+            pass
 
     def on_phase_selected(self, event: PhaseSelected) -> None:
         self.app.push_screen(PhaseConfigScreen(self.flow, event.phase_id))

@@ -4,14 +4,13 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
-
-from ddev.ai.config.errors import ConfigError
 
 if TYPE_CHECKING:
     from ddev.ai.config.models import ResolvedFlow
@@ -66,6 +65,24 @@ PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discrimi
 CheckpointAdapter: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)
 
 
+@dataclass(frozen=True)
+class ResumeState:
+    """What a prior run left behind for a flow, and what resuming it would do.
+
+    ``completed`` is the dependency-closed set of phases that succeeded and whose every transitive
+    dependency also succeeded; a resume skips exactly these. ``frontier`` is the phases a resume
+    would start with. The default, empty state means there is no prior run to resume.
+    """
+
+    completed: frozenset[str] = frozenset()
+    frontier: frozenset[str] = frozenset()
+
+    @property
+    def is_resumable(self) -> bool:
+        """Whether resuming would actually run anything."""
+        return bool(self.frontier)
+
+
 class CheckpointManager:
     """Manages checkpoints.yaml and per-phase memory files for the full pipeline."""
 
@@ -91,6 +108,11 @@ class CheckpointManager:
         except (OSError, yaml.YAMLError) as e:
             raise CheckpointReadError(f"Failed to load checkpoints from {self._path}: {e}") from e
 
+        if not isinstance(raw, dict):
+            raise CheckpointReadError(
+                f"Checkpoints in {self._path} must be a mapping of phase ids, got {type(raw).__name__}."
+            )
+
         result: dict[str, PhaseCheckpoint] = {}
         for phase_id, data in raw.items():
             try:
@@ -107,9 +129,30 @@ class CheckpointManager:
         self._ensure_dir()
         self._path.write_text(yaml.dump(all_checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
 
-    def successful_phases(self) -> set[str]:
-        """Phase ids whose last recorded checkpoint reached 'success'."""
-        return {pid for pid, data in self.read().items() if data.status == CheckpointStatus.SUCCESS}
+    def resume_state(self, resolved_flow: ResolvedFlow) -> ResumeState:
+        """Return what a resume of *resolved_flow* would skip and where it would start.
+
+        Reads the checkpoint file once. An empty state is returned when nothing was ever recorded.
+
+        The single-pass closure relies on ``resolved_flow.flow`` being topologically sorted.
+
+        Raises:
+            CheckpointReadError: If the checkpoint file exists but cannot be read or parsed.
+        """
+        checkpoints = self.read()
+        if not checkpoints:
+            return ResumeState()
+
+        succeeded = {pid for pid, data in checkpoints.items() if data.status is CheckpointStatus.SUCCESS}
+        completed: set[str] = set()
+        frontier: set[str] = set()
+        for entry in resolved_flow.flow:
+            deps_done = all(dep in completed for dep in entry.dependencies)
+            if entry.phase in succeeded and deps_done:
+                completed.add(entry.phase)
+            elif deps_done:
+                frontier.add(entry.phase)
+        return ResumeState(completed=frozenset(completed), frontier=frozenset(frontier))
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""
@@ -140,31 +183,3 @@ class CheckpointManager:
         if key.endswith("_memory"):
             return self.memory_content(key.removesuffix("_memory"))
         return f"<VARIABLE UNDEFINED: {key}>"
-
-
-def resolve_resume_state(
-    resolved_flow: ResolvedFlow, checkpoint_manager: CheckpointManager
-) -> tuple[set[str], set[str]]:
-    """Compute (completed, frontier) for resuming a flow from its checkpoints.
-
-    ``completed`` is the dependency-closed set of phases that succeeded and whose every
-    transitive dependency also succeeded. ``frontier`` is the phases that will run first
-    on resume (not completed, but all their dependencies are).
-
-    The single-pass closure relies on ``resolved_flow.flow`` being topologically sorted.
-    """
-    try:
-        succeeded = checkpoint_manager.successful_phases()
-    except CheckpointReadError as e:
-        raise ConfigError(
-            f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
-        ) from e
-    completed: set[str] = set()
-    frontier: set[str] = set()
-    for entry in resolved_flow.flow:
-        deps_done = all(dep in completed for dep in entry.dependencies)
-        if entry.phase in succeeded and deps_done:
-            completed.add(entry.phase)
-        elif deps_done:
-            frontier.add(entry.phase)
-    return completed, frontier

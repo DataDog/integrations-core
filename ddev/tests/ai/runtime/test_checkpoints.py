@@ -7,10 +7,12 @@ from pathlib import Path
 import pytest
 import yaml
 
+from ddev.ai.config.models import FlowEntry, ResolvedFlow
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointReadError,
     FailedCheckpoint,
+    ResumeState,
     SuccessCheckpoint,
 )
 
@@ -20,6 +22,21 @@ from .helpers import make_failed_checkpoint, make_success_checkpoint
 @pytest.fixture
 def manager(tmp_path: Path) -> CheckpointManager:
     return CheckpointManager(tmp_path / "checkpoints.yaml")
+
+
+def linear_flow() -> ResolvedFlow:
+    """Build a topologically sorted a → b → c flow."""
+    return ResolvedFlow(
+        name="demo",
+        agents={},
+        phases={},
+        flow=[
+            FlowEntry(phase="a"),
+            FlowEntry(phase="b", dependencies=["a"]),
+            FlowEntry(phase="c", dependencies=["b"]),
+        ],
+        variables={},
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -34,6 +51,12 @@ def test_read_returns_empty_when_file_absent(manager: CheckpointManager):
 def test_read_returns_empty_when_file_is_empty(manager: CheckpointManager):
     manager._path.write_text("")
     assert manager.read() == {}
+
+
+def test_read_non_mapping_yaml_raises_checkpoint_read_error(manager: CheckpointManager):
+    manager._path.write_text("stale")
+    with pytest.raises(CheckpointReadError, match="must be a mapping"):
+        manager.read()
 
 
 def test_read_malformed_yaml_raises_checkpoint_read_error(manager: CheckpointManager):
@@ -168,19 +191,68 @@ def test_resolve_template_variable_non_memory_key(manager: CheckpointManager):
 
 
 # ---------------------------------------------------------------------------
-# successful_phases
+# resume_state
 # ---------------------------------------------------------------------------
 
 
-def test_successful_phases_empty_when_no_file(manager: CheckpointManager):
-    assert manager.successful_phases() == set()
+def test_resume_state_empty_when_no_file(manager: CheckpointManager):
+    """A flow that never ran has nothing to resume, so it has no frontier either."""
+    state = manager.resume_state(linear_flow())
+    assert state == ResumeState()
+    assert not state.is_resumable
 
 
-def test_successful_phases_returns_only_succeeded(manager: CheckpointManager):
+def test_resume_state_empty_when_file_is_empty(manager: CheckpointManager):
+    manager._path.write_text("")
+    assert manager.resume_state(linear_flow()) == ResumeState()
+
+
+def test_resume_state_partial_run_is_resumable(manager: CheckpointManager):
     manager.write_phase_checkpoint("a", make_success_checkpoint())
-    manager.write_phase_checkpoint("b", make_failed_checkpoint())
+    state = manager.resume_state(linear_flow())
+    assert state.completed == {"a"}
+    assert state.frontier == {"b"}
+    assert state.is_resumable
+
+
+def test_resume_state_fully_complete_run_is_not_resumable(manager: CheckpointManager):
+    manager.write_phase_checkpoint("a", make_success_checkpoint())
+    manager.write_phase_checkpoint("b", make_success_checkpoint())
     manager.write_phase_checkpoint("c", make_success_checkpoint())
-    assert manager.successful_phases() == {"a", "c"}
+    state = manager.resume_state(linear_flow())
+    assert state.completed == {"a", "b", "c"}
+    assert state.frontier == frozenset()
+    assert not state.is_resumable
+
+
+def test_resume_state_failed_phase_is_the_frontier(manager: CheckpointManager):
+    manager.write_phase_checkpoint("a", make_failed_checkpoint())
+    state = manager.resume_state(linear_flow())
+    assert state.completed == frozenset()
+    assert state.frontier == {"a"}
+    assert state.is_resumable
+
+
+def test_resume_state_closure_excludes_successes_behind_a_failure(manager: CheckpointManager):
+    """A phase that succeeded but whose ancestor failed is not dependency-closed, so it re-runs."""
+    manager.write_phase_checkpoint("a", make_failed_checkpoint())
+    manager.write_phase_checkpoint("b", make_success_checkpoint())
+    manager.write_phase_checkpoint("c", make_success_checkpoint())
+    state = manager.resume_state(linear_flow())
+    assert state.completed == frozenset()
+    assert state.frontier == {"a"}
+
+
+def test_resume_state_propagates_read_errors(manager: CheckpointManager):
+    manager._path.write_text("{ not: valid: yaml")
+    with pytest.raises(CheckpointReadError):
+        manager.resume_state(linear_flow())
+
+
+def test_resume_state_empty_flow_is_not_resumable(manager: CheckpointManager):
+    manager.write_phase_checkpoint("a", make_success_checkpoint())
+    empty_flow = ResolvedFlow(name="demo", agents={}, phases={}, flow=[], variables={})
+    assert not manager.resume_state(empty_flow).is_resumable
 
 
 def test_read_raises_on_invalid_checkpoint_entry(manager: CheckpointManager):
