@@ -9,6 +9,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
 from datadog_checks.clickhouse.utils import (
     BUILTIN_SAMPLE_CLUSTERS,
+    CLUSTER_GROUP_PREFIX,
     CLUSTER_MACRO_QUERY,
     CLUSTER_NAME_QUERY,
     CLUSTER_TAG,
@@ -510,6 +511,16 @@ def test_cluster_name_query_excludes_builtin_sample_clusters():
 
     assert 'test_cluster_two_shards_localhost' in BUILTIN_SAMPLE_CLUSTERS
     assert 'test_shard_localhost' in BUILTIN_SAMPLE_CLUSTERS
+
+
+def test_cluster_name_query_excludes_cloud_group_pseudo_cluster():
+    """ClickHouse Cloud reports both 'all_groups.default' and 'default' as is_local.
+
+    The group entry sorts first, so without the filter Cloud instances would be
+    tagged all_groups.default while their data comes from 'default' via
+    clusterAllReplicas.
+    """
+    assert f"cluster NOT LIKE '{CLUSTER_GROUP_PREFIX}%'" in CLUSTER_NAME_QUERY
 
 
 def test_cluster_name_absent_when_both_sources_fail():

@@ -51,12 +51,21 @@ BUILTIN_SAMPLE_CLUSTERS = (
     'test_unavailable_shard',
 )
 
+# ClickHouse Cloud exposes an internal 'all_groups.<cluster>' entry spanning every service group
+# alongside the real cluster, and both are is_local. It sorts first alphabetically, so without this
+# filter Cloud instances would be tagged all_groups.default while their data is actually collected
+# from 'default' via clusterAllReplicas.
+CLUSTER_GROUP_PREFIX = 'all_groups.'
+
 # Fallback covering ClickHouse Cloud (returns 'default') and any deployment with remote_servers
 # configured but no {cluster} macro. ORDER BY keeps the result stable when a node is a member of
 # more than one cluster.
 CLUSTER_NAME_QUERY = (
-    "SELECT cluster FROM system.clusters WHERE is_local AND cluster NOT IN ({}) ORDER BY cluster LIMIT 1".format(
-        ', '.join(f"'{name}'" for name in BUILTIN_SAMPLE_CLUSTERS)
+    "SELECT cluster FROM system.clusters "
+    "WHERE is_local AND cluster NOT IN ({excluded}) AND cluster NOT LIKE '{prefix}%' "
+    "ORDER BY cluster LIMIT 1".format(
+        excluded=', '.join(f"'{name}'" for name in BUILTIN_SAMPLE_CLUSTERS),
+        prefix=CLUSTER_GROUP_PREFIX,
     )
 )
 
