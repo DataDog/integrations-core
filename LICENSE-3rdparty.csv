@@ -70,7 +70,7 @@ requests-oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2014 Kenneth Reitz.
 requests-oauthlib,PyPI,ISC,Copyright (c) 2014 Kenneth Reitz.
 requests-toolbelt,PyPI,Apache-2.0,"Copyright 2014 Ian Cordasco, Cory Benfield"
 requests-unixsocket2,PyPI,ISC,Copyright (c) 2024 - 2025 thelab
-rethinkdb,PyPI,Apache-2.0,Copyright RethinkDB.
+rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov"
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack and the service-identity contributors
@@ -79,6 +79,6 @@ supervisor,PyPI,BSD-3-Clause-Modification,"Copyright (c) 2002-2005, Daniel Krech
 tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University
 tuf,PyPI,MIT,Copyright (c) 2010 New York University
 urllib3,PyPI,MIT,Copyright (c) 2008-2020 Andrey Petrov and contributors.
-vertica-python,PyPI,Apache-2.0,"Copyright Justin Berka, Alex Kim, Siting Ren"
+vertica-python,PyPI,Apache-2.0,"Copyright 2013 Justin Berka, Alex Kim, Siting Ren"
 voltdbclient,PyPI,MIT,"Copyright (C) 2008-2023 Volt Active Data, Inc.  All rights reserved."
 wrapt,PyPI,BSD-3-Clause,"Copyright (c) 2013-2026, Graham Dumpleton"
