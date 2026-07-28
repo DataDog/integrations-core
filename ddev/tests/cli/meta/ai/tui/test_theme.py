@@ -9,7 +9,7 @@ import pytest
 
 from ddev.cli.meta.ai.palette import ACCENT, PRIMARY, SECONDARY
 from ddev.cli.meta.ai.tui.app import TogoApp
-from ddev.cli.meta.ai.tui.theme import togo_theme
+from ddev.cli.meta.ai.tui.theme import STATUS_VARIABLE_KEYS, togo_theme
 
 
 def test_togo_theme_tokens():
@@ -52,9 +52,9 @@ async def test_togo_app_css_loads_without_error(make_togo_app):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("key", ["status-running", "status-pending", "status-done", "status-failed"])
+@pytest.mark.parametrize("key", STATUS_VARIABLE_KEYS)
 def test_get_theme_variable_defaults_returns_status_key(key, make_togo_app):
-    """TogoApp.get_theme_variable_defaults() includes all four status keys."""
+    """TogoApp.get_theme_variable_defaults() includes all status keys."""
     defaults = make_togo_app([]).get_theme_variable_defaults()
     assert key in defaults
 
@@ -62,7 +62,7 @@ def test_get_theme_variable_defaults_returns_status_key(key, make_togo_app):
 def test_get_theme_variable_defaults_values_match_theme(make_togo_app):
     """Default values match the corresponding togo_theme variables."""
     defaults = make_togo_app([]).get_theme_variable_defaults()
-    for key in ("status-running", "status-pending", "status-done", "status-failed"):
+    for key in STATUS_VARIABLE_KEYS:
         assert defaults[key] == togo_theme.variables[key]
 
 

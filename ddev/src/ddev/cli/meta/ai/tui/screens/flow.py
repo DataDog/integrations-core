@@ -50,13 +50,20 @@ class FlowScreen(TogoScreen):
         with Horizontal(id="flow-body"):
             yield from self._compose_overview()
 
-            graph = PipelineGraph(
-                self.flow,
-                {entry.phase: RunStatus.PENDING for entry in self.flow.flow},
-                id="flow-pipeline",
-            )
-            graph.border_title = "Pipeline"
-            yield graph
+            with Vertical(id="flow-pipeline-column"):
+                graph = PipelineGraph(
+                    self.flow,
+                    self._preview_statuses(frozenset()),
+                    id="flow-pipeline",
+                )
+                graph.border_title = "Pipeline"
+                yield graph
+
+                legend = Static(
+                    "◇ completed in a previous run · skipped on resume", id="pipeline-legend", classes="desc"
+                )
+                legend.display = False
+                yield legend
 
         with Horizontal(id="actions"):
             yield Button("Back", id="back")
@@ -97,6 +104,13 @@ class FlowScreen(TogoScreen):
         """Re-read resume state whenever this screen becomes active again."""
         self._apply_resume_state(self._read_resume_state())
 
+    def _preview_statuses(self, completed: frozenset[str]) -> dict[str, RunStatus]:
+        """Map the flow's phases to preview statuses, marking dependency-closed successes as checkpointed."""
+        return {
+            entry.phase: RunStatus.CHECKPOINTED if entry.phase in completed else RunStatus.PENDING
+            for entry in self.flow.flow
+        }
+
     def _read_resume_state(self) -> ResumeState:
         from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_resume_state
 
@@ -104,9 +118,11 @@ class FlowScreen(TogoScreen):
         return flow_resume_state(self.flow, runs_dir)
 
     def _apply_resume_state(self, state: ResumeState) -> None:
-        """Show the Resume button only while a resumable run exists for this flow."""
+        """Drive the Resume button, pipeline preview, and legend from a single resume-state read."""
         try:
             self.query_one("#resume", Button).display = state.is_resumable
+            self.query_one("#flow-pipeline", PipelineGraph).update_statuses(self._preview_statuses(state.completed))
+            self.query_one("#pipeline-legend", Static).display = bool(state.completed)
         except NoMatches:
             pass
 
