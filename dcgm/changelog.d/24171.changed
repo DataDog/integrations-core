@@ -1,1 +1,0 @@
-Filter autodiscovery ``kube_namespace``, ``pod_name``, and ``kube_container_name`` tags from the exporter pod so only the GPU workload tags are submitted.

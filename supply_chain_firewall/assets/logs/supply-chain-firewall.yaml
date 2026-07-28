@@ -52,6 +52,16 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `warned` to `warning` (pre-v3 compatibility)
+      enabled: true
+      sources:
+        - warned
+      sourceType: attribute
+      target: warning
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: message-remapper
       name: Define `msg` as the official message of the log
       enabled: true

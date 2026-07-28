@@ -124,13 +124,15 @@ class GitRepository:
     def push(self, ref):
         return self.capture('push', 'origin', ref)
 
-    def tag(self, value, message=None):
+    def tag(self, value, message=None, ref=None):
         """
-        Create a tag with an optional message.
+        Create a tag with an optional message, optionally at a specific commit/ref.
         """
         cmd = ['tag', value]
         if message is not None:
-            cmd.extend(['--message', value])
+            cmd.extend(['--message', message])
+        if ref is not None:
+            cmd.append(ref)
         return self.capture(*cmd)
 
     def tags(self, glob_pattern=None) -> list[str]:

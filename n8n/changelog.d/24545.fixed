@@ -1,0 +1,1 @@
+Require `datadog-checks-base>=37.41.0` since config discovery relies on it.

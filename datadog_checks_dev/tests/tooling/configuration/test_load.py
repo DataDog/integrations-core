@@ -544,6 +544,44 @@ def test_discovery_candidate_field_cross_check():
     ) in spec.errors
 
 
+def test_discovery_candidate_accepts_literal_values():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/metrics
+                metric_patterns:
+                  include:
+                  - test.metric.{2}
+          options:
+          - template: init_config
+          - template: instances
+            options:
+            - name: endpoint
+              description: endpoint
+              required: true
+              value:
+                type: string
+            - name: metric_patterns
+              description: metric patterns
+              value:
+                type: object
+                additionalProperties: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
 def test_discovery_local_strategy_accepted():
     spec = get_spec(
         """

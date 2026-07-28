@@ -19,6 +19,38 @@ files:
       value:
         type: boolean
         example: true
+    - name: collect_workload_events
+      description: |
+        Collect Kueue Workload lifecycle events by polling Workload custom resources from the Kubernetes API.
+
+        This requires `get` and `list` RBAC permissions on `workloads.kueue.x-k8s.io`.
+      value:
+        type: boolean
+        example: true
+        default: true
+    - name: kube_config_dict
+      description: |
+        Optional kubeconfig dictionary used to configure the Kubernetes API client.
+
+        If unset, the check uses in-cluster Kubernetes configuration.
+      value:
+        type: object
+        example:
+          apiVersion: v1
+          kind: Config
+          clusters: []
+          contexts: []
+          users: []
+    - name: workload_events_namespaces
+      description: |
+        Optional list of namespaces to collect Workload events from. If unset, Workloads are collected from all
+        namespaces.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - default
     - name: resource_name_map
       description: |
         Mapping of Kueue resource label values to metric name suffixes for resource metrics.

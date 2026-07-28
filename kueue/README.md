@@ -33,6 +33,10 @@ Kueue is a cluster-level service. Configure this integration as a Cluster Agent 
          - openmetrics_endpoint: http://kueue-controller-manager-metrics-service.kueue-system.svc:8080/metrics
    ```
 
+   Kueue Workload lifecycle events are collected by default. The Agent running the check needs `get` and `list`
+   permissions on the `workloads` resource in the `kueue.x-k8s.io` API group. Set `collect_workload_events: false` to
+   disable event collection.
+
 3. Alternatively, annotate the Kueue metrics service with Autodiscovery cluster check annotations:
 
    ```yaml
@@ -62,7 +66,21 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Kueue integration does not include any events.
+By default, the Kueue integration polls the Kueue Workload custom resources and sends Datadog events for lifecycle
+transitions:
+
+- `kueue.workload.created`: a Workload appears after the check has initialized its state.
+- `kueue.workload.quota_reserved`: the `QuotaReserved` condition becomes `True`.
+- `kueue.workload.admitted`: the `Admitted` condition becomes `True`.
+- `kueue.workload.running`: the `PodsReady` condition becomes `True`.
+- `kueue.workload.evicted`: the `Evicted` condition becomes `True`.
+- `kueue.workload.finished`: the `Finished` condition becomes `True`.
+
+Events are tagged with the Workload namespace, name, UID, LocalQueue, transition, priority, and ClusterQueue when
+available. Eviction events also include the eviction reason, and preemption events include the Kueue preemption reason
+when available.
+
+The first collection run seeds the Workload state and does not emit events for already existing transitions.
 
 ## Troubleshooting
 
