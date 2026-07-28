@@ -6,7 +6,7 @@ import copy
 
 import pytest
 
-from datadog_checks.dev.http import assert_request_timeout
+from datadog_checks.dev.http import assert_http_capability, assert_request_timeout
 from datadog_checks.fluentd import Fluentd
 
 from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST
@@ -88,6 +88,25 @@ def test_default_timeout(instance):
     check.check(None)
 
     assert_request_timeout(check, (5, 5))
+
+
+@pytest.mark.parametrize(
+    ('timeout_config', 'expected_timeout'),
+    [
+        pytest.param({'read_timeout': 17}, (10, 17), id='read-timeout'),
+        pytest.param({'connect_timeout': 19}, (19, 10), id='connect-timeout'),
+    ],
+)
+def test_wrapper_native_timeout(instance, mocker, timeout_config, expected_timeout):
+    instance = copy.deepcopy(instance)
+    instance.update(timeout_config)
+    check = Fluentd(CHECK_NAME, {}, [instance])
+    get = mocker.patch.object(type(check.http), 'get', autospec=True, side_effect=type(check.http).get)
+
+    check._http_get(check.url)
+
+    assert_http_capability(check.http, 'timeout', expected_timeout)
+    get.assert_called_once_with(check.http, check.url)
 
 
 def test_init_config_old_timeout(instance):

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.http_assertions import assert_http_client_config
 from datadog_checks.etcd import Etcd
 
 CHECK_NAME = 'etcd'
@@ -21,7 +22,5 @@ CHECK_NAME = 'etcd'
 def test_config(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
-
-    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 
     assert_http_client_config(check.http, expected_http_kwargs)

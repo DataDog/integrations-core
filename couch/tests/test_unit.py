@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.couch.couch import CouchDB2
-from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
+from datadog_checks.dev.http_assertions import assert_http_client_config
 
 from . import common
 

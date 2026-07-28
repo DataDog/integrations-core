@@ -8,6 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPError
+from datadog_checks.dev.http_assertions import assert_http_client_config
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import (
@@ -133,8 +134,6 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
     config = {'rabbitmq_api_url': common.URL, 'queues': ['test1'], 'tags': ["tag1:1", "tag2"], 'exchanges': ['test1']}
     config.update(extra_config)
     check = RabbitMQ('rabbitmq', {}, instances=[config])
-
-    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 
     assert_http_client_config(check.http, expected_http_kwargs)
 

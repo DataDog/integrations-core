@@ -1,15 +1,28 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
+import yaml
 
 from ddev.utils.structures import EnvVars
+
+if TYPE_CHECKING:
+    from tests.helpers.git import ClonedRepo
 
 
 @pytest.fixture(scope='module', autouse=True)
 def terminal_width():
     with EnvVars({'COLUMNS': '200'}):
         yield
+
+
+def _remove_apache_legacy_http_options_accesses(repository: ClonedRepo) -> None:
+    apache_file = repository.path / 'apache' / 'datadog_checks' / 'apache' / 'apache.py'
+    apache_file.write_text(apache_file.read_text(encoding='utf-8').replace('.options', '.config'), encoding='utf-8')
 
 
 def test_warn_headers_auth(ddev, repository, helpers):
@@ -67,10 +80,20 @@ def test_uses_requests(ddev, repository, helpers):
     )
 
 
-def test_spec_missing_init_config(ddev, repository, helpers):
-    import yaml
+def test_validate_http_ignores_legacy_options_outside_selection(ddev, repository):
+    _remove_apache_legacy_http_options_accesses(repository)
 
+    new_file = repository.path / 'airflow' / 'datadog_checks' / 'airflow' / 'legacy_options_probe.py'
+    new_file.write_text("def probe(http):\n    http.options['timeout']\n", encoding='utf-8')
+
+    result = ddev('validate', 'http', 'apache')
+
+    assert result.exit_code == 0, result.output
+
+
+def test_spec_missing_init_config(ddev, repository, helpers):
     check = 'apache'
+    _remove_apache_legacy_http_options_accesses(repository)
 
     spec_yaml = repository.path / check / 'assets' / 'configuration' / 'spec.yaml'
     with spec_yaml.open(encoding='utf-8') as file:
@@ -98,9 +121,8 @@ def test_spec_missing_init_config(ddev, repository, helpers):
 
 
 def test_spec_missing_instance(ddev, repository, helpers):
-    import yaml
-
     check = 'apache'
+    _remove_apache_legacy_http_options_accesses(repository)
 
     spec_yaml = repository.path / check / 'assets' / 'configuration' / 'spec.yaml'
     with spec_yaml.open(encoding='utf-8') as file:

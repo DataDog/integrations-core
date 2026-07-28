@@ -9,6 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.dev.http_assertions import assert_http_client_config
 from datadog_checks.ecs_fargate import FargateCheck
 
 from .conftest import (
@@ -282,7 +283,5 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check, mock_
 def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = FargateCheck('ecs_fargate', {}, instances=[instance])
-
-    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 
     assert_http_client_config(check.http, expected_http_kwargs)

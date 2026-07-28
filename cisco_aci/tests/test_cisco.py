@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
-from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
+from datadog_checks.dev.http_assertions import assert_http_client_config
 
 from . import common
 

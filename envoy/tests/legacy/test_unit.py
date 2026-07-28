@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPTimeoutError
 from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.dev.http_assertions import assert_http_client_config
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
@@ -141,8 +142,6 @@ def test_config(extra_config, expected_http_kwargs, check):
     instance = deepcopy(INSTANCES['main'])
     instance.update(extra_config)
     check = check(instance)
-
-    from datadog_checks.dev.http import assert_http_capability as assert_http_client_config
 
     assert_http_client_config(check.http, expected_http_kwargs)
 

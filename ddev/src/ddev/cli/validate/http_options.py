@@ -4,11 +4,8 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ddev.cli.application import Application
 
 LEGACY_HTTP_OPTIONS_ALIASES = frozenset(
     {
@@ -53,27 +50,27 @@ def count_legacy_http_options_accesses(path: Path) -> int:
     return sum(1 for node in ast.walk(tree) if _is_legacy_http_options_access(node))
 
 
-def collect_legacy_http_options_accesses(repo_root: Path) -> dict[str, int]:
+def collect_legacy_http_options_accesses(repo_root: Path, integration_paths: Iterable[Path]) -> dict[str, int]:
     counts: dict[str, int] = {}
-    for path in repo_root.rglob('*.py'):
-        if any(part in _SKIP_DIR_NAMES for part in path.parts):
-            continue
+    for integration_path in integration_paths:
+        for path in integration_path.rglob('*.py'):
+            if any(part in _SKIP_DIR_NAMES for part in path.parts):
+                continue
 
-        relative_path = path.relative_to(repo_root).as_posix()
-        if relative_path in LEGACY_HTTP_OPTIONS_EXCLUDED_FILES:
-            continue
+            relative_path = path.relative_to(repo_root).as_posix()
+            if relative_path in LEGACY_HTTP_OPTIONS_EXCLUDED_FILES:
+                continue
 
-        count = count_legacy_http_options_accesses(path)
-        if count:
-            counts[relative_path] = count
+            count = count_legacy_http_options_accesses(path)
+            if count:
+                counts[relative_path] = count
 
     return counts
 
 
-def validate_legacy_http_options_accesses(app: Application) -> list[str]:
+def validate_legacy_http_options_accesses(repo_root: Path, integration_paths: Iterable[Path]) -> list[str]:
     """Fail on any legacy HTTP-client .options access outside RequestsWrapper internals."""
-    repo_root = app.repo.path
-    actual = collect_legacy_http_options_accesses(repo_root)
+    actual = collect_legacy_http_options_accesses(repo_root, integration_paths)
 
     errors: list[str] = []
     for path, count in sorted(actual.items()):
