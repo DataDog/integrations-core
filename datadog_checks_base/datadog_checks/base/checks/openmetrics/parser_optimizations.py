@@ -28,7 +28,7 @@ except ImportError:
 
 
 # Copied from prometheus_client v0.21.1:
-# https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parser.py#L56-L97
+# https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parser.py#L48-L95
 def _parse_labels(labels_string):
     labels = {}
     # Return if we don't have valid labels
@@ -80,7 +80,7 @@ def _parse_labels(labels_string):
 
 
 # Copied from prometheus_client v0.21.1:
-# https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parser.py#L110-L129
+# https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parser.py#L112C1-L134
 def _parse_sample(text):
     # Detect the labels in the text
     try:
