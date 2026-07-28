@@ -1296,3 +1296,85 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
         database_names = {row['database_name'] for row in sqlserver_rows}
         assert 'datadog_test-1' in database_names, "should have collected metrics for datadog_test-1 databases"
         assert 'master' in database_names, "should have collected metrics for master databases"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "collect_plans_value,expect_plans",
+    [
+        pytest.param(None, True, id="default_collects_plans"),
+        pytest.param(True, True, id="explicitly_enabled"),
+        pytest.param(False, False, id="disabled_skips_plans"),
+    ],
+)
+def test_collect_execution_plans_toggle(instance_docker, collect_plans_value, expect_plans):
+    """query_metrics.collect_plans=false skips plan loop while keeping metrics."""
+    instance_docker['dbm'] = True
+    query_metrics = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.1,
+        'enforce_collection_interval_deadline': False,
+    }
+    if collect_plans_value is not None:
+        query_metrics['collect_plans'] = collect_plans_value
+    instance_docker['query_metrics'] = query_metrics
+
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    fake_row = {
+        'query_signature': 'abc123',
+        'query_hash': '0xDEAD',
+        'query_plan_hash': '0xBEEF',
+        'plan_handle': '0000',
+        'text': 'SELECT 1',
+        'dd_tables': [],
+        'dd_commands': [],
+        'dd_comments': None,
+        'database_name': 'master',
+        'is_proc': False,
+        'is_encrypted': False,
+        'procedure_signature': None,
+        'procedure_name': None,
+    }
+
+    fake_plan_event = {
+        'dbm_type': 'plan',
+        'db': {'query_signature': 'abc123', 'plan': {'definition': '<ShowPlanXML/>'}},
+    }
+
+    def _mock_collect_plans(*_args, **_kwargs):
+        yield fake_plan_event
+
+    with (
+        mock.patch.object(
+            check.statement_metrics,
+            '_collect_metrics_rows',
+            return_value=[fake_row],
+        ),
+        mock.patch.object(
+            check.statement_metrics,
+            '_collect_plans',
+            side_effect=_mock_collect_plans,
+        ) as mock_collect_plans,
+        mock.patch.object(
+            check.statement_metrics,
+            '_rows_to_fqt_events',
+            return_value=[],
+        ),
+        mock.patch.object(
+            check.statement_metrics,
+            '_to_metrics_payload',
+            return_value={'sqlserver_rows': [fake_row]},
+        ),
+        mock.patch.object(check, 'database_monitoring_query_metrics'),
+        mock.patch.object(check, 'database_monitoring_query_sample'),
+        mock.patch.object(check.connection, 'open_managed_default_connection'),
+        mock.patch.object(check.connection, 'get_managed_cursor'),
+    ):
+        check.statement_metrics.collect_statement_metrics_and_plans()
+
+    if expect_plans:
+        mock_collect_plans.assert_called_once()
+    else:
+        mock_collect_plans.assert_not_called()

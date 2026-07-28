@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2026-07-08
+
+***Added***:
+
+* Add `fluxcd.gotk.resource.info` metric and `kube_state_metrics_endpoint` configuration option for Flux 2.1+ kube-state-metrics monitoring. ([#24053](https://github.com/DataDog/integrations-core/pull/24053))
+
 ## 3.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

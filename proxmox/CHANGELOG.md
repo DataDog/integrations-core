@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.0 / 2026-07-08
+
+***Added***:
+
+* Add infra_mode tag to proxmox metrics. ([#24008](https://github.com/DataDog/integrations-core/pull/24008))
+
 ## 2.5.2 / 2026-05-14 / Agent 7.80.0
 
 ***Fixed***:

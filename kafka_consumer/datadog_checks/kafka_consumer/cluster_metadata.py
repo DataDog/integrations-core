@@ -22,6 +22,10 @@ from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
 
 
+def _str_attr(obj: Any, attr: str) -> str:
+    return getattr(obj, attr, '') or ''
+
+
 class SchemaDefinition(TypedDict):
     schema: str
     schema_type: str
@@ -68,8 +72,14 @@ class ClusterMetadataCollector:
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
+        self.EARLIEST_OFFSETS_DEFAULT_TTL = 300  # 5 minutes, matches Kafka's own broker default
+        self.EARLIEST_OFFSETS_MIN_TTL = 60
+        self.EARLIEST_OFFSETS_MAX_TTL = 1800
+        self._log_retention_check_interval_s: float | None = None
+
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
         self.BROKER_CONFIG_FETCH_CACHE_KEY = 'kafka_broker_config_fetch_cache'
+        self.EARLIEST_OFFSETS_CACHE_KEY = 'kafka_earliest_offsets_cache'
         self.TOPIC_CONFIG_CACHE_KEY = 'kafka_topic_config_cache'
         self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
@@ -348,6 +358,21 @@ class ClusterMetadataCollector:
                                 config_data[config_name],
                             )
 
+                retention_check_interval_ms = config_data.get('log.retention.check.interval.ms')
+                if retention_check_interval_ms:
+                    try:
+                        interval_s = float(retention_check_interval_ms) / 1000
+                        if interval_s > 0:
+                            self._log_retention_check_interval_s = min(
+                                interval_s, self._log_retention_check_interval_s or interval_s
+                            )
+                    except (ValueError, TypeError):
+                        self.log.debug(
+                            "Could not convert broker %s config log.retention.check.interval.ms value %r to float",
+                            broker_id_str,
+                            retention_check_interval_ms,
+                        )
+
                 truncated_config = self._truncate_config_for_event(config_data, max_configs=50)
                 event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
 
@@ -386,7 +411,66 @@ class ClusterMetadataCollector:
                 "data-streams-message",
             )
 
+    def _topic_partition_pairs(self, topic_partitions):
+        return {
+            (topic, partition)
+            for topic, partitions in topic_partitions.items()
+            if topic not in KAFKA_INTERNAL_TOPICS
+            for partition in partitions
+        }
+
+    def _earliest_offsets_ttl(self) -> float:
+        """TTL for the earliest-offsets cache, derived from the broker's log-cleaner cycle."""
+        ttl = self._log_retention_check_interval_s or self.EARLIEST_OFFSETS_DEFAULT_TTL
+        return max(self.EARLIEST_OFFSETS_MIN_TTL, min(self.EARLIEST_OFFSETS_MAX_TTL, ttl))
+
+    def _load_earliest_offsets_cache(self) -> dict[str, Any] | None:
+        try:
+            cached_str = self.check.read_persistent_cache(self.EARLIEST_OFFSETS_CACHE_KEY)
+            if not cached_str:
+                return None
+            data = json.loads(cached_str)
+            return {
+                'expire_at': data['expire_at'],
+                'offsets': {(topic, partition): offset for topic, partition, offset in data['offsets']},
+            }
+        except Exception as e:
+            self.log.debug("Could not read earliest offsets cache: %s", e)
+            return None
+
+    def _save_earliest_offsets_cache(self, offsets: dict[tuple[str, int], int], expire_at: float | None = None) -> None:
+        try:
+            payload = {
+                'expire_at': expire_at if expire_at is not None else time.time() + self._earliest_offsets_ttl(),
+                'offsets': [[topic, partition, offset] for (topic, partition), offset in offsets.items()],
+            }
+            self.check.write_persistent_cache(self.EARLIEST_OFFSETS_CACHE_KEY, json.dumps(payload))
+        except Exception as e:
+            self.log.debug("Could not write earliest offsets cache: %s", e)
+
     def fetch_earliest_offsets(self, topic_partitions):
+        """Return cached log-start offsets, refetching from the broker only once the TTL expires."""
+        requested = self._topic_partition_pairs(topic_partitions)
+        if not requested:
+            return {}
+
+        cached = self._load_earliest_offsets_cache()
+        if cached is not None and time.time() < cached['expire_at']:
+            cached_offsets = {tp: offset for tp, offset in cached['offsets'].items() if tp in requested}
+            if cached_offsets.keys() == requested:
+                return cached_offsets
+
+            result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+            if result:
+                self._save_earliest_offsets_cache(result, expire_at=cached['expire_at'])
+            return result
+
+        result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+        if result:
+            self._save_earliest_offsets_cache(result)
+        return result
+
+    def _fetch_earliest_offsets_from_broker(self, topic_partitions):
         """Batch-fetch log-start offsets via AdminClient.list_offsets(earliest).
 
         Uses ListOffsets with the EARLIEST_TIMESTAMP sentinel, which the broker
@@ -397,9 +481,7 @@ class ClusterMetadataCollector:
         """
         requests = {
             TopicPartition(topic, partition): OffsetSpec.earliest()
-            for topic, partitions in topic_partitions.items()
-            if topic not in KAFKA_INTERNAL_TOPICS
-            for partition in partitions
+            for topic, partition in self._topic_partition_pairs(topic_partitions)
         }
         if not requests:
             return {}
@@ -722,9 +804,11 @@ class ClusterMetadataCollector:
                 tags=group_meta_tags,
             )
 
-            member_ids = sorted(getattr(m, 'member_id', '') or '' for m in members)
+            member_ids = sorted(_str_attr(member, 'member_id') for member in members)
             member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
+
+            self._emit_consumer_membership_event(cluster_id, group_id, member_ids, members)
 
             if prev_member_hashes is not None:
                 prev_hash = prev_member_hashes.get(group_id)
@@ -735,8 +819,9 @@ class ClusterMetadataCollector:
                 client_id = member.client_id
                 host = member.host
 
-                if hasattr(member, 'assignment') and member.assignment:
-                    partition_count = len(member.assignment.topic_partitions)
+                assignment = getattr(member, 'assignment', None)
+                if assignment:
+                    partition_count = len(assignment.topic_partitions)
 
                     # Member-level gauges deliberately use state_tags, not group_meta_tags: the
                     # group-level dimensional tags are omitted here to keep per-member cardinality bounded.
@@ -750,6 +835,42 @@ class ClusterMetadataCollector:
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
         self._save_member_hashes_cache(current_member_hashes)
+
+    def _emit_consumer_membership_event(self, cluster_id, group_id, member_ids, members) -> None:
+        self.check.event_platform_event(
+            json.dumps(
+                {
+                    'collection_timestamp': int(time.time() * 1000),
+                    'kafka_cluster_id': cluster_id,
+                    **self.config._original_cluster_id_field(),
+                    'config_type': 'consumer_membership',
+                    'group_id': group_id,
+                    'member_ids': member_ids,
+                    'members': self._build_members_detail(members),
+                }
+            ),
+            "data-streams-message",
+        )
+
+    def _build_members_detail(self, members) -> list[dict[str, Any]]:
+        members_detail = []
+        for member in members:
+            assignment = getattr(member, 'assignment', None)
+            topic_partitions = (
+                [{'topic': tp.topic, 'partition': tp.partition} for tp in assignment.topic_partitions]
+                if assignment
+                else []
+            )
+            members_detail.append(
+                {
+                    'member_id': _str_attr(member, 'member_id'),
+                    'client_id': _str_attr(member, 'client_id'),
+                    'member_host': _str_attr(member, 'host'),
+                    'topic_partitions': topic_partitions,
+                }
+            )
+        members_detail.sort(key=lambda x: x['member_id'])
+        return members_detail
 
     def _load_member_hashes_cache(self) -> dict[str, str] | None:
         """Return the previous member-hash map, or None if unreadable."""

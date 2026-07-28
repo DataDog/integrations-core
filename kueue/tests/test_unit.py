@@ -3,13 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+from unittest.mock import Mock
 
 import pytest
+from kubernetes.client.exceptions import ApiException
 
 from datadog_checks.base.stubs import tagger
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kueue import KueueCheck
 from datadog_checks.kueue.check import OTHER_RESOURCE_NAME, RESOURCE_NAME_MAP
+from datadog_checks.kueue.kube_client import KubernetesAPIClient
 from datadog_checks.kueue.metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
 from .common import EXPECTED_METRIC_TAGS, UNIT_METRICS, get_fixture_path
@@ -150,6 +153,23 @@ def test_workload_events_config_can_be_parsed_before_check(instance):
     assert check.collect_workload_events is True
 
 
+@pytest.mark.parametrize(
+    ('namespace', 'method_name'),
+    [
+        (None, 'list_cluster_custom_object'),
+        ('default', 'list_namespaced_custom_object'),
+    ],
+)
+def test_workload_api_version_fallback(namespace, method_name):
+    kube_client = object.__new__(KubernetesAPIClient)
+    kube_client.custom_obj_client = Mock()
+    method = getattr(kube_client.custom_obj_client, method_name)
+    method.side_effect = [ApiException(status=404), {'items': []}]
+
+    assert kube_client.list_workloads(namespace) == []
+    assert [call.kwargs['version'] for call in method.call_args_list] == ['v1beta2', 'v1beta1']
+
+
 class FakeKubernetesAPIClient:
     def __init__(self, *workload_snapshots):
         self.workload_snapshots = list(workload_snapshots)
@@ -194,6 +214,21 @@ def test_workload_events_suppress_first_poll(dd_run_check, aggregator, instance,
     dd_run_check(check)
 
     assert not aggregator.events
+
+
+@pytest.mark.parametrize(
+    ('spec', 'priority_class'),
+    [
+        ({'priorityClassName': 'v1beta1'}, 'v1beta1'),
+        ({'priorityClassName': 'v1beta1', 'priorityClassRef': {'name': 'v1beta2'}}, 'v1beta2'),
+    ],
+)
+def test_workload_event_tags_priority_class(instance, spec, priority_class):
+    check = KueueCheck('kueue', {}, [instance])
+
+    tags = check.workload_event_tags('admitted', {'spec': spec}, None)
+
+    assert f'kueue_workload_priority_class:{priority_class}' in tags
 
 
 def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_http_response):

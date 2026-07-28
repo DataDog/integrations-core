@@ -23,7 +23,7 @@ from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .table_metrics import ClickhouseTableMetrics
-from .utils import ErrorSanitizer
+from .utils import ErrorSanitizer, cluster_aware_query
 
 try:
     import datadog_agent
@@ -36,6 +36,8 @@ DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 
 
 class ClickhouseCheck(DatabaseCheck):
+    DBMS = 'clickhouse'
+
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'
 
@@ -221,7 +223,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "clickhouse",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": DATABASE_INSTANCE_COLLECTION_INTERVAL,
                 "dbms_version": self._dbms_version,
@@ -279,14 +281,19 @@ class ClickhouseCheck(DatabaseCheck):
 
     def get_queries(self) -> list[dict]:
         query_list = []
+        single = self._config.single_endpoint_mode
+
+        def pick(query: dict) -> dict:
+            """In single endpoint mode, read all replicas and tag each row per node."""
+            return cluster_aware_query(query) if single else query
 
         if self._config.use_legacy_queries:
             query_list.extend(
                 [
-                    queries.SystemMetrics,
-                    queries.SystemEventsToDeprecate,
-                    queries.SystemEvents,
-                    queries.SystemAsynchronousMetrics,
+                    pick(queries.SystemMetrics),
+                    pick(queries.SystemEventsToDeprecate),
+                    pick(queries.SystemEvents),
+                    pick(queries.SystemAsynchronousMetrics),
                     queries.SystemParts,
                     queries.SystemReplicas,
                     queries.SystemDictionaries,
@@ -296,13 +303,13 @@ class ClickhouseCheck(DatabaseCheck):
         if self._config.use_advanced_queries:
             query_list.extend(
                 [
-                    advanced_queries.SystemMetrics,
-                    advanced_queries.SystemEvents,
-                    advanced_queries.SystemAsynchronousMetrics,
+                    pick(advanced_queries.SystemMetrics),
+                    pick(advanced_queries.SystemEvents),
+                    pick(advanced_queries.SystemAsynchronousMetrics),
                 ]
             )
             if self.version_ge('21.3'):
-                query_list.append(advanced_queries.SystemErrors)
+                query_list.append(pick(advanced_queries.SystemErrors))
 
         return query_list
 
@@ -361,10 +368,6 @@ class ClickhouseCheck(DatabaseCheck):
             "port": str(self._config.port),
             "db": str(self._config.db),
         }
-
-    @property
-    def dbms(self) -> str:
-        return "clickhouse"
 
     @property
     def dbms_version(self) -> str:
