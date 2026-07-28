@@ -36,7 +36,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "voltdbclient==14.2.0",
+    "voltdbclient==15.3.0",
 ]
 
 [project.urls]
