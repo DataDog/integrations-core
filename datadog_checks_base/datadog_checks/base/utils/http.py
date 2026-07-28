@@ -33,6 +33,7 @@ from datadog_checks.base.utils import _http_utils
 
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .headers import set_header as set_header_value
 
 # Re-export HTTP exceptions for single import location
 from .http_exceptions import (  # noqa: F401
@@ -638,13 +639,13 @@ class RequestsWrapper(object):
         self._options['headers'].clear()
 
     def update_headers(self, headers) -> None:
-        update_headers(self._options['headers'], headers)
+        for name, value in headers.items():
+            set_header_value(self._options['headers'], name, str(value))
 
     def remove_header(self, name: str) -> None:
         for key in list(self._options['headers']):
             if key.lower() == name.lower():
                 del self._options['headers'][key]
-                return
 
     def get_basic_auth(self) -> tuple[str | bytes, str | bytes] | None:
         auth = self._options['auth']
@@ -671,11 +672,7 @@ class RequestsWrapper(object):
         return default
 
     def set_header(self, name: str, value: str) -> None:
-        for key in self._options['headers']:
-            if key.lower() == name.lower():
-                self._options['headers'][key] = value
-                return
-        self._options['headers'][name] = value
+        set_header_value(self._options['headers'], name, value)
 
     def disable_auth(self) -> None:
         """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""

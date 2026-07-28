@@ -470,7 +470,8 @@ class OpenMetricsScraper:
         # explicitly configured. get_default_headers() seeds Accept with '*/*', so that value (or an
         # absent header) means "unset" and is safe to replace.
         extra_headers = kwargs.get('extra_headers', {})
-        if self.http.get_header('Accept') in (None, '*/*') and 'Accept' not in extra_headers:
+        has_extra_accept = any(name.lower() == 'accept' for name in extra_headers)
+        if self.http.get_header('Accept') in (None, '*/*') and not has_extra_accept:
             if self._use_latest_spec:
                 accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
             else:

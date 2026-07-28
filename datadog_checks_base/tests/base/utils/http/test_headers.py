@@ -125,6 +125,36 @@ def test_set_header_case_insensitive():
     http.set_header('accept', 'application/json')
     # Overwrites the existing 'Accept' key (preserving original casing)
     assert http.get_header('Accept') == 'application/json'
-    assert http.get_header('Accept') == 'application/json'
     # No duplicate key created
     assert sum(1 for k in http.get_headers() if k.lower() == 'accept') == 1
+
+
+def test_set_header_collapses_case_insensitive_duplicates():
+    http = RequestsWrapper({}, {})
+    http._options['headers'] = OrderedDict(
+        (('x-vault-token', 'configured-lower'), ('X-Vault-Token', 'configured-canonical'))
+    )
+
+    http.set_header('X-Vault-Token', 'runtime-token')
+
+    assert http.get_header('X-Vault-Token') == 'runtime-token'
+    assert sum(1 for key in http.get_headers() if key.lower() == 'x-vault-token') == 1
+
+
+def test_update_headers_collapses_case_insensitive_duplicates():
+    http = RequestsWrapper({}, {})
+
+    http.update_headers(OrderedDict((('accept', 'first'), ('ACCEPT', 'last'))))
+
+    assert http.get_header('Accept') == 'last'
+    assert sum(1 for key in http.get_headers() if key.lower() == 'accept') == 1
+
+
+def test_remove_header_removes_case_insensitive_duplicates():
+    http = RequestsWrapper({}, {})
+    http._options['headers'] = OrderedDict((('x-token', 'first'), ('X-Token', 'last')))
+
+    http.remove_header('X-Token')
+
+    assert http.get_header('X-Token') is None
+    assert all(key.lower() != 'x-token' for key in http.get_headers())

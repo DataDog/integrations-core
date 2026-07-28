@@ -446,3 +446,13 @@ class TestUseLatestSpec:
 
         assert scraper.http.get_header('Accept') == 'application/json'
         assert _accept_header_sent(scraper) != LATEST_SPEC_ACCEPT
+
+    def test_lowercase_per_request_accept_header_is_preserved(self, dd_run_check):
+        check = get_check({'use_latest_spec': True})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        with mock.patch.object(type(scraper.http), 'get') as mock_get:
+            scraper.send_request(extra_headers={'accept': 'application/json'})
+
+        assert mock_get.call_args.kwargs['extra_headers'] == {'accept': 'application/json'}
