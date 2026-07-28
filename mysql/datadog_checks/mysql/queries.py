@@ -322,7 +322,7 @@ def get_indexes_query(version, is_mariadb, placeholders):
 # multi-way join would cause. The five `%s` placeholders are all the schema (database) name, in
 # order: columns, indexes, foreign keys, partitions, tables.
 #
-# Requires JSON_ARRAYAGG (MySQL >= 5.7.22, MariaDB >= 10.5.0); callers must gate on version.
+# Requires JSON_ARRAYAGG (MySQL >= 5.7.22); callers must gate on version.
 # JSON_ARRAYAGG does not guarantee element order, so the collector re-sorts columns, index key
 # parts, and partitions after parsing.
 SQL_SCHEMA_JSON = """\
@@ -429,17 +429,15 @@ WHERE t.table_schema = %s AND t.table_type = 'BASE TABLE'
 """
 
 
-def get_schema_json_query(version, is_mariadb, max_execution_time_ms=0):
-    """Build the single-query (shape A) schema collection SQL for one schema.
+def get_schema_json_query(version, max_execution_time_ms=0):
+    """Build the MySQL single-query (shape A) schema collection SQL for one schema.
 
-    ``max_execution_time_ms`` adds a MySQL ``MAX_EXECUTION_TIME`` optimizer hint (ignored for
-    MariaDB, which has no such hint; callers wrap the statement with ``SET STATEMENT
-    max_statement_time`` instead). The returned query has five ``%s`` placeholders, all the
-    schema name.
+    ``max_execution_time_ms`` adds a ``MAX_EXECUTION_TIME`` optimizer hint. The returned query has
+    five ``%s`` placeholders, all the schema name.
     """
-    # Functional-index expressions only exist on MySQL >= 8.0.13; MariaDB has no such column.
-    expression_col = "expression" if (not is_mariadb and version.version_compatible((8, 0, 13))) else "NULL"
-    if not is_mariadb and max_execution_time_ms and max_execution_time_ms > 0:
+    # Functional-index expressions only exist on MySQL >= 8.0.13.
+    expression_col = "expression" if version.version_compatible((8, 0, 13)) else "NULL"
+    if max_execution_time_ms and max_execution_time_ms > 0:
         hint = "/*+ MAX_EXECUTION_TIME({}) */".format(int(max_execution_time_ms))
     else:
         hint = ""

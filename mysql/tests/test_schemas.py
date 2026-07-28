@@ -24,9 +24,10 @@ from datadog_checks.mysql.version_utils import MySQLVersion
 pytestmark = pytest.mark.unit
 
 
-def _make_collector(strategy):
+def _make_collector(strategy, *, is_mariadb=False):
     check = mock.MagicMock()
     check.log = mock.MagicMock()
+    check.is_mariadb = is_mariadb
     metadata = mock.MagicMock()
     config = MySqlSchemaCollectorConfig({"collection_strategy": strategy})
     return MySqlSchemaCollector(check, metadata, config)
@@ -216,9 +217,9 @@ def test_normalize_foreign_keys_passthrough_keeps_table_name():
         (False, "5.7.22", True),
         (False, "5.7.21", False),
         (False, "8.0.35", True),
-        (True, "10.5.0", True),
+        (True, "10.5.0", False),
         (True, "10.4.30", False),
-        (True, "11.4.2", True),
+        (True, "11.4.2", False),
     ],
 )
 def test_supports_json_collection(is_mariadb, version, expected):
@@ -228,6 +229,12 @@ def test_supports_json_collection(is_mariadb, version, expected):
 
 def test_supports_json_collection_none_version():
     assert supports_json_collection(None, False) is False
+
+
+def test_mariadb_cannot_force_single_query_strategy():
+    collector = _make_collector(STRATEGY_SINGLE_QUERY, is_mariadb=True)
+
+    assert collector._effective_strategy() == STRATEGY_CHUNKED
 
 
 def _single_query_row():

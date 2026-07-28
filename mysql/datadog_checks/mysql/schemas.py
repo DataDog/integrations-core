@@ -27,11 +27,7 @@ if TYPE_CHECKING:
     from datadog_checks.mysql import MySql
     from datadog_checks.mysql.metadata import MySQLMetadata
 
-# JSON aggregation (JSON_ARRAYAGG / JSON_OBJECT grouped) is required for the single-query strategy.
-# It is available on MySQL >= 5.7.22 and MariaDB >= 10.5.0. Older versions use the chunked strategy,
-# which relies only on flat INFORMATION_SCHEMA queries and works on every supported version.
 MYSQL_MIN_JSON_VERSION = (5, 7, 22)
-MARIADB_MIN_JSON_VERSION = (10, 5, 0)
 
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_MAX_EXECUTION_TIME = 60
@@ -40,20 +36,14 @@ TABLES_CHUNK_SIZE = 500
 # Number of tables (rows) to buffer before flushing a metadata payload.
 DEFAULT_PAYLOAD_CHUNK_SIZE = 500
 
-# Collection strategies. Both produce byte-identical payloads; they differ only in how table detail
-# is fetched. single_query is the default on JSON-capable servers; chunked is the automatic fallback
-# for older versions and works everywhere. The strategy is normally chosen by server version; a
-# hidden ``collection_strategy`` config option can force one (an escape hatch for debugging).
 STRATEGY_SINGLE_QUERY = "single_query"  # shape A: one JSON-aggregation query per database
 STRATEGY_CHUNKED = "chunked"  # shape B: stream the table list, fetch detail per chunk
 
 
 def supports_json_collection(version, is_mariadb: bool) -> bool:
-    """Return True when the server supports the JSON functions the v2 collector relies on."""
-    if version is None:
+    """Return True when the server should use the JSON aggregation strategy."""
+    if version is None or is_mariadb:
         return False
-    if is_mariadb:
-        return version.version_compatible(MARIADB_MIN_JSON_VERSION)
     return version.version_compatible(MYSQL_MIN_JSON_VERSION)
 
 
@@ -254,8 +244,9 @@ class MySqlSchemaCollector(SchemaCollector):
         return event
 
     def _effective_strategy(self) -> str:
-        """Resolve the collection strategy: an explicit config value wins, otherwise pick by server
-        version -- single_query when JSON aggregation is available, chunked otherwise."""
+        """Resolve the collection strategy based on flavor, configuration, and server version."""
+        if self._check.is_mariadb:
+            return STRATEGY_CHUNKED
         if self._config.collection_strategy:
             return self._config.collection_strategy
         if supports_json_collection(self._check.version, self._check.is_mariadb):
@@ -275,13 +266,9 @@ class MySqlSchemaCollector(SchemaCollector):
 
         query = get_schema_json_query(
             self._check.version,
-            self._check.is_mariadb,
             max_execution_time_ms=int(self._config.max_execution_time * 1000),
         )
         params = [database_name] * 5
-        if self._check.is_mariadb and self._config.max_execution_time and self._config.max_execution_time > 0:
-            # MariaDB has no MAX_EXECUTION_TIME optimizer hint; wrap the statement instead.
-            query = "SET STATEMENT max_statement_time={} FOR {}".format(self._config.max_execution_time, query)
         # SSCursor streams rows one at a time, keeping integration memory to roughly one table's
         # worth of already-aggregated metadata plus the payload chunk buffer.
         with self._metadata.get_db_connection().cursor(CommenterSSDictCursor) as cursor:
