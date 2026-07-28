@@ -47,6 +47,7 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | `http_response_status_code`      | A string or Python regular expression for an HTTP status code. This check reports DOWN for any status code that does not match. This defaults to 1xx, 2xx and 3xx HTTP status codes. For example: `401` or `4\d\d`.                              |
 | `include_content`                | When set to `true`, the check includes the first 500 characters of the HTTP response body in notifications. The default value is `false`.                                                                                                        |
 | `collect_response_time`          | By default, the check collects the response time (in seconds) as the metric `network.http.response_time`. To disable, set this value to `false`.                                                                                                 |
+| `enable_status_code_tag`         | When set to `true`, adds an `http_status_code` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. The default is `false`. See the Metrics section for the effect on existing monitors.              |
 | `tls_verify`                     | Instructs the check to validate the TLS certificate of services when reaching to `url`.                                                                                                                                                          |
 | `tls_ignore_warning`             | If `tls_verify` is set to `true`, it disables any security warnings from the SSL connection.                                                                                                                                                     |
 | `tls_ca_cert`                    | This setting allows you to override the default certificate path as specified in `init_config`                                                                                                                                                   |
@@ -70,6 +71,8 @@ When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent]
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
+
+**Note**: If you set `enable_status_code_tag` to `true`, the Agent adds an `http_status_code` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. This splits each metric into one context per status code. Monitors that aggregate these metrics without grouping by `http_status_code` then evaluate an average across those contexts instead of across individual data points, which can change when they trigger, so review existing monitors before you enable this option. When no response is received, the tag value is `ssl_error`, `timeout`, `connection_error`, or `socket_error` instead of a status code. The `http.can_connect` service check never carries this tag.
 
 ### Events
 

@@ -30,6 +30,17 @@ MESSAGE_LENGTH = 2500  # https://docs.datadoghq.com/api/v1/service-checks/
 DATA_METHODS = ["POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 
 
+def get_error_status_code_tag_value(error):
+    """Return the `http_status_code` tag value to use when no HTTP response was received."""
+    if isinstance(error, requests.exceptions.SSLError):
+        return "ssl_error"
+    if isinstance(error, (requests.exceptions.Timeout, socket.timeout)):
+        return "timeout"
+    if isinstance(error, requests.exceptions.ConnectionError):
+        return "connection_error"
+    return "socket_error"
+
+
 class HTTPCheck(AgentCheck):
     SOURCE_TYPE_NAME = "system"
     SC_STATUS = "http.can_connect"
@@ -88,7 +99,7 @@ class HTTPCheck(AgentCheck):
             check_hostname,
             stream,
             use_cert_from_response,
-            disable_status_code_tag,
+            enable_status_code_tag,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options["timeout"][0]
         start = time.time()
@@ -113,6 +124,7 @@ class HTTPCheck(AgentCheck):
         service_checks_tags = self._get_service_checks_tags(instance)
         r = None  # type: Response
         peer_cert = None  # type: bytes | None
+        status_code_tag_value = None
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
@@ -140,6 +152,7 @@ class HTTPCheck(AgentCheck):
         ) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
+            status_code_tag_value = get_error_status_code_tag_value(e)
             service_checks.append(
                 (
                     self.SC_STATUS,
@@ -156,21 +169,7 @@ class HTTPCheck(AgentCheck):
                 repr(e),
                 length,
             )
-            service_checks.append(
-                (
-                    self.SC_STATUS,
-                    AgentCheck.CRITICAL,
-                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
-                )
-            )
-        except IOError as e:  # Py2 throws IOError on invalid cert path while py3 throws a socket.error
-            length = int((time.time() - start) * 1000)
-            self.log.info(
-                "Host %s could not be reached: %s. Connection failed after %s ms",
-                addr,
-                repr(e),
-                length,
-            )
+            status_code_tag_value = get_error_status_code_tag_value(e)
             service_checks.append(
                 (
                     self.SC_STATUS,
@@ -184,23 +183,14 @@ class HTTPCheck(AgentCheck):
             raise
 
         else:
-            if r is not None and not disable_status_code_tag:
-                http_status = r.status_code
-                tags_list.append("http_status_code:{}".format(http_status))
+            if r is not None:
+                status_code_tag_value = str(r.status_code)
             if use_cert_from_response:
                 peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
 
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile("^url:").match, tags_list)):
                 tags_list.append("url:{}".format(addr))
-
-            # Only report this metric if the site is not down
-            if response_time and not service_checks:
-                self.gauge(
-                    "network.http.response_time",
-                    r.elapsed.total_seconds(),
-                    tags=tags_list,
-                )
 
             # Check HTTP response status code
             if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
@@ -256,6 +246,17 @@ class HTTPCheck(AgentCheck):
             # resets the wrapper Session object
             self.http._session.close()
             self.http._session = None
+
+        if enable_status_code_tag and status_code_tag_value is not None:
+            tags_list.append("http_status_code:{}".format(status_code_tag_value))
+
+        # Report the response time whenever a response was received, regardless of the status code
+        if response_time and r is not None:
+            self.gauge(
+                "network.http.response_time",
+                r.elapsed.total_seconds(),
+                tags=tags_list,
+            )
 
         # Report status metrics as well
         if service_checks:

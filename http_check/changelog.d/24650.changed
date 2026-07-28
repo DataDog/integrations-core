@@ -1,0 +1,1 @@
+The `http_status_code` tag introduced in 12.7.0 is no longer applied by default, restoring the metric contexts that existed before 12.7.0. Set the new `enable_status_code_tag` option to `true` to keep it.

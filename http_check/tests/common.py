@@ -201,14 +201,14 @@ CONFIG_DONT_CHECK_EXP = {
     ]
 }
 
-CONFIG_DISABLE_STATUS_CODE_TAG = {
+CONFIG_ENABLE_STATUS_CODE_TAG = {
     "instances": [
         {
-            "name": "disable_status_code_tag",
+            "name": "enable_status_code_tag",
             "url": "https://valid.mock/",
             "check_certificate_expiration": False,
             "timeout": 1,
-            "disable_status_code_tag": True,
+            "enable_status_code_tag": True,
         }
     ]
 }

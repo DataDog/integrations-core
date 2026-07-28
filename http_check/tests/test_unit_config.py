@@ -46,7 +46,7 @@ def test_from_instance():
     assert config.check_hostname is True
     assert config.stream is False
     assert config.use_cert_from_response is False
-    assert config.disable_status_code_tag is False
+    assert config.enable_status_code_tag is False
 
     # headers
     config = from_instance(

@@ -119,16 +119,20 @@ instances:
     #
     # collect_response_time: true
 
-    ## @param disable_status_code_tag - boolean - optional - default: false
-    ## By default, the check tags `network.http.can_connect`, `network.http.cant_connect`, and
-    ## `network.http.response_time` with the HTTP status code of the response (`http_status_code`).
-    ## This creates a separate metric context per status code, which can change the behavior of
-    ## existing monitors that group by tags other than `http_status_code` (since each status code
-    ## context is aggregated as its own series rather than as individual data points).
+    ## @param enable_status_code_tag - boolean - optional - default: false
+    ## When enabled, the `http_status_code` tag is added to the `network.http.can_connect`,
+    ## `network.http.cant_connect`, and `network.http.response_time` metrics.
     ##
-    ## Set this option to true to restore the pre-12.7.0 behavior and omit the `http_status_code` tag.
+    ## This splits each metric into one context per status code. Monitors that aggregate these
+    ## metrics without grouping by `http_status_code` evaluate an average across those contexts
+    ## rather than across individual data points, which can change when they trigger. Review
+    ## existing monitors before enabling this option, and prefer the `http.can_connect` service
+    ## check for binary up or down alerting, since it never carries this tag.
+    ##
+    ## When no response is received, the tag value is one of `ssl_error`, `timeout`,
+    ## `connection_error`, or `socket_error` rather than a numeric status code.
     #
-    # disable_status_code_tag: false
+    # enable_status_code_tag: false
 
     ## @param check_certificate_expiration - boolean - optional - default: true
     ## The check_certificate_expiration will instruct the check
