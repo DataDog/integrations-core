@@ -41,7 +41,7 @@ class PhaseConfigScreen(TogoScreen):
                     yield Static(self.phase_id, id="phase-title")
                     if phase.description:
                         with VerticalScroll(id="phase-description"):
-                            yield Markdown(phase.description, classes="desc")
+                            yield Static(phase.description, classes="desc", markup=False)
                 with Vertical(id="phase-dependencies-summary"):
                     yield Static("DEPENDENCIES", classes="eyebrow")
                     yield Static(

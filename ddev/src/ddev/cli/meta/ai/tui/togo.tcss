@@ -163,6 +163,25 @@ FlowCard {
     min-width: 36;
 }
 
+.flow-card-name {
+    height: 1;
+    text-style: bold;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+}
+
+.flow-card-description {
+    height: auto;
+    max-height: 2;
+    color: $text-muted;
+    overflow: hidden hidden;
+}
+
+.flow-card-footer {
+    dock: bottom;
+    height: auto;
+}
+
 FlowCard:hover {
     border: solid $primary;
 }
@@ -302,13 +321,9 @@ Collapsible {
 
 #phase-description {
     height: auto;
-    max-height: 4;
+    max-height: 2;
     margin-top: 1;
     overflow-y: auto;
-}
-
-#phase-description > Markdown {
-    height: auto;
 }
 
 #phase-config-grid {

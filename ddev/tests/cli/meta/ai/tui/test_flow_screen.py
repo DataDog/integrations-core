@@ -359,26 +359,38 @@ async def test_phase_config_screen_renders_phase_info_and_agent_details() -> Non
         assert "_No system prompt configured._" in screen.query_one("#phase-agent-prompt").source
 
 
-async def test_phase_config_long_description_scrolls_without_displacing_config() -> None:
-    """Long phase descriptions use a bounded scroll region above the configuration cards."""
+async def test_phase_config_description_does_not_reduce_config_at_small_terminal() -> None:
+    """A phase description fits the existing summary height and remains scrollable."""
     from textual.containers import VerticalScroll
+    from textual.widgets import Static
 
     from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 
     flow = _make_flow()
     phase = flow.phases[flow.flow[0].phase]
-    phase.description = "\n\n".join(["Explain this phase clearly."] * 20)
     app = _app()
-    async with app.run_test(size=(120, 50)) as pilot:
+    async with app.run_test(size=(80, 24)) as pilot:
         await pilot.pause()
+        await pilot.app.push_screen(PhaseConfigScreen(flow, phase.name))
+        await pilot.pause()
+        baseline_grid_height = pilot.app.screen.query_one("#phase-config-grid").region.height
+        await pilot.press("escape")
+        await pilot.pause()
+
+        phase.description = "\n\n".join(["Explain **this phase** clearly."] * 20)
         await pilot.app.push_screen(PhaseConfigScreen(flow, phase.name))
         await pilot.pause()
 
         description = pilot.app.screen.query_one("#phase-description", VerticalScroll)
+        description_text = description.query_one(Static)
         config_grid = pilot.app.screen.query_one("#phase-config-grid")
-        assert description.region.height <= 4
+        task_title = pilot.app.screen.query_one("CollapsibleTitle")
+        footer = pilot.app.screen.query_one("Footer")
+        assert description_text.content == phase.description
+        assert description.region.height == 2
         assert description.max_scroll_y > 0
-        assert config_grid.region.height > description.region.height
+        assert config_grid.region.height == baseline_grid_height
+        assert task_title.region.bottom <= footer.region.y
 
 
 async def test_phase_config_screen_renders_resolved_task_prompt() -> None:

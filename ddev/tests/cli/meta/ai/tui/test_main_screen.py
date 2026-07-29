@@ -8,6 +8,8 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 
+from rich.text import Text
+
 from ddev.ai.config.errors import ErrorKind, FlowError
 from ddev.ai.config.models import ConfigStatus, FlowResult
 
@@ -212,16 +214,20 @@ async def test_flow_card_carries_flow_config(make_flow):
     assert card.flow is flow
 
 
-async def test_valid_flow_marker_uses_success_palette(make_flow):
+async def test_valid_flow_marker_uses_success_palette(make_flow, make_togo_app):
     """The valid marker uses the established success color."""
     from ddev.cli.meta.ai.palette import SUCCESS
-    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
 
     flow = make_flow("Valid", n_phases=1)
-    card = FlowCard(result=FlowResult(flow.name, ConfigStatus.OK, resolved=flow), index=0)
-    rendered = card.render()
-    marker_index = rendered.plain.index("●")
-    assert any(span.start <= marker_index < span.end and span.style == SUCCESS for span in rendered.spans)
+    app = make_togo_app([flow])
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        rendered = app.screen.query_one(".flow-card-footer").content
+
+        assert isinstance(rendered, Text)
+        marker_index = rendered.plain.index("●")
+        assert any(span.start <= marker_index < span.end and span.style == SUCCESS for span in rendered.spans)
 
 
 async def test_flow_card_uses_available_width_before_truncating(make_flow, make_togo_app):
@@ -232,9 +238,11 @@ async def test_flow_card_uses_available_width_before_truncating(make_flow, make_
     async with app.run_test(size=(240, 50)) as pilot:
         await pilot.pause()
         card = app.screen.query_one("FlowCard")
+        rendered_name = card.query_one(".flow-card-name").content
 
         assert card.content_region.width > len(name)
-        assert card.render().plain.splitlines()[0] == name
+        assert rendered_name == name
+        assert card.query_one(".flow-card-description").region.height == 1
 
 
 async def test_flow_card_limits_description_without_hiding_phase_count(make_flow, make_togo_app) -> None:
@@ -246,11 +254,35 @@ async def test_flow_card_limits_description_without_hiding_phase_count(make_flow
 
     async with app.run_test(size=(120, 50)) as pilot:
         await pilot.pause()
-        rendered_lines = app.screen.query_one("FlowCard").render().plain.splitlines()
+        card = app.screen.query_one("FlowCard")
+        description = card.query_one(".flow-card-description")
+        footer = card.query_one(".flow-card-footer")
 
-        assert len(rendered_lines) == 5
-        assert rendered_lines[2].endswith("…")
-        assert rendered_lines[-1] == "● 2 phases"
+        assert description.content == flow.description
+        assert description.region.height == 2
+        assert len(flow.description) > description.content_region.width * description.region.height
+        assert str(footer.render()) == "● 2 phases"
+        assert footer.region.bottom <= card.content_region.bottom
+
+
+async def test_flow_card_keeps_resumable_footer_with_long_description(make_flow, make_togo_app) -> None:
+    flow = replace(
+        make_flow("Long Resumable Description", n_phases=2),
+        description=" ".join(["A resumable flow with a deliberately long description."] * 10),
+    )
+    app = make_togo_app([flow])
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        card = app.screen.query_one("FlowCard")
+        card.resumable = True
+        await card.recompose()
+        await pilot.pause()
+
+        footer = card.query_one(".flow-card-footer")
+        assert str(footer.render()).splitlines() == ["● 2 phases", "↻ resumable run available"]
+        assert footer.region.height == 2
+        assert footer.region.bottom <= card.content_region.bottom
 
 
 async def test_flow_card_click_does_not_navigate_when_text_is_selected(monkeypatch, make_togo_app):
@@ -319,10 +351,7 @@ async def test_resume_discovery_uses_repository_root_when_cwd_differs(tmp_path, 
     other_cwd = tmp_path / "elsewhere"
     repo_path.mkdir()
     other_cwd.mkdir()
-    flow = replace(
-        make_flow("Repo Flow", n_phases=2),
-        description=" ".join(["A resumable flow with a deliberately long description."] * 10),
-    )
+    flow = make_flow("Repo Flow", n_phases=2)
     run_dir = repo_path / ".ddev" / "ai-runs" / flow_slug(flow)
     run_dir.mkdir(parents=True)
     (run_dir / "checkpoints.yaml").write_text(
@@ -344,10 +373,6 @@ async def test_resume_discovery_uses_repository_root_when_cwd_differs(tmp_path, 
         await pilot.pause()
         card = app.screen.query_one(FlowCard)
         assert card.resumable
-        rendered_lines = card.render().plain.splitlines()
-        assert len(rendered_lines) == 6
-        assert rendered_lines[-2] == "● 2 phases"
-        assert rendered_lines[-1] == "↻ resumable run available"
         card.action_select()
         await pilot.pause()
         assert isinstance(app.screen, FlowScreen)
