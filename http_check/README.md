@@ -72,11 +72,11 @@ When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent]
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-**Note**: If you set `enable_http_outcome_tag` to `true`, the Agent adds an `http_outcome` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. The value is the HTTP status code of the response, for example `http_outcome:200`. Because `network.http.can_connect` and `network.http.cant_connect` are also submitted when no response is received, their value in that case is set to `ssl_error`, `timeout`, `connection_error`, or `socket_error` instead. `network.http.response_time` is only submitted when a response is received, so its value is always a status code.
+**Note**: If you set `enable_http_outcome_tag` to `true`, the Agent adds an `http_outcome` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. The value is the HTTP status code of the response, for example `http_outcome:200`. `network.http.can_connect` and `network.http.cant_connect` are also submitted when no response is received. In that case, their value is set to `ssl_error`, `timeout`, `connection_error`, or `socket_error`. The Agent submits `network.http.response_time` only when a response is received, so its value is always a status code.
 
-`http_outcome` describes what the HTTP request returned, not the verdict of the check. The metric value carries the verdict. For example, `network.http.can_connect` is `0` with `http_outcome:200` when the endpoint returns 200 but the response fails the `content_match` check, or when 200 does not match the codes allowed by `http_response_status_code`.
+`http_outcome` describes the HTTP response. The metric value carries the verdict of the check. For example, `network.http.can_connect` is `0` with `http_outcome:200` when the endpoint returns 200 but the response fails the `content_match` check. The same applies when 200 falls outside the codes allowed by `http_response_status_code`.
 
-Enabling this option splits each metric into one context per value. Monitors that aggregate these metrics without grouping by `http_outcome` then evaluate an average across those contexts instead of across individual data points, which can change when the monitors trigger, so review existing monitors before you enable it. The `http.can_connect` service check never carries the tag and is unaffected.
+Enabling this option splits each metric into one context per value. Monitors that aggregate these metrics without grouping by `http_outcome` then evaluate an average across those contexts instead of across individual data points, which can change when the monitors trigger. Review existing monitors before you enable the option. The `http.can_connect` service check never carries the tag and is unaffected.
 
 ### Events
 

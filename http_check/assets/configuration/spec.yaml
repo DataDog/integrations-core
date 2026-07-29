@@ -111,20 +111,21 @@ files:
         example: true
     - name: enable_http_outcome_tag
       description: |
-        When enabled, the `http_outcome` tag is added to the `network.http.can_connect`,
+        When enabled, the Agent adds the `http_outcome` tag to the `network.http.can_connect`,
         `network.http.cant_connect`, and `network.http.response_time` metrics.
 
         The value is the HTTP status code of the response, for example `http_outcome:200`.
         `network.http.can_connect` and `network.http.cant_connect` are also submitted when no
-        response is received, and in that case the value is set to `ssl_error`, `timeout`,
-        `connection_error`, or `socket_error` instead. `network.http.response_time` is only
-        submitted when a response is received, so there the value is always a status code.
+        response is received. In that case, the value is set to `ssl_error`, `timeout`,
+        `connection_error`, or `socket_error`. The Agent submits `network.http.response_time`
+        only when a response is received, so its value is always a status code.
 
-        This splits each metric into one context per value. Monitors that aggregate these metrics
-        without grouping by `http_outcome` evaluate an average across those contexts rather than
-        across individual data points, which can change when the monitors trigger. Review existing
-        monitors before enabling this option, and use the `http.can_connect` service check for
-        binary up or down alerting, because the service check never carries the tag.
+        Enabling this option splits each metric into one context per value. Monitors that
+        aggregate these metrics without grouping by `http_outcome` evaluate an average across
+        those contexts rather than across individual data points, which can change when the
+        monitors trigger. Review existing monitors before you enable the option, and use the
+        `http.can_connect` service check for binary up or down alerting. Service checks never
+        carry the tag.
       fleet_configurable: true
       value:
         type: boolean
