@@ -11,11 +11,11 @@
 # Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
 # RESOLUTION_INPUTS).
 [resolution]
-hash = "b7dda45f6304bb08a905e62cc80d09cac7741001658185e7a52e50b58caa6e57"
+hash = "7f4dfc3fb811bd4e1f1da549971b85281baa277676811e9ad5acb615fce95892"
 
 [images]
 linux-aarch64 = "12d028af4a7aaead88c4947dc4996df85eb57f09ac6f0430f3ed640290418e85"
 linux-x86_64 = "947d461418c4dbc246db29b08ae4ff9fd7ebee7081b1e36500990c5d1f0aad99"
 macos-aarch64 = "78e6a48da3021de05ea531e272e5e2ebab7b5e09888144460586602f39368fbc"
 macos-x86_64 = "d27dd57c87253060744c2e1584b17348a921cbf7c343f1bb55005665fa5c61fb"
-windows-x86_64 = "e016f1da3aab33685b9e791535baebec81e6c28e8926a6503fbbee8daf43a2d1"
+windows-x86_64 = "68264cd441a76fd9f1469f00590d6ac270a109c7c8d8e8982dca5dda2ca54ca4"
