@@ -22,6 +22,7 @@ from .common import MOCKED_INSTANCE
 HERE = get_here()
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
+MANAGER_CONTAINER = 'manager'  # container name in the upstream controller deployment
 # Two independent failures crashloop the controller on a fresh cluster, and both mitigations below
 # are needed because they address different causes:
 #   1. A kind service or pod subnet overlapping a host route (for example a VPN) hijacks in-cluster
@@ -158,13 +159,38 @@ def wait_for_controller():
     )
 
 
+def manager_container_index() -> int:
+    """Return the index of the Kueue manager container in the controller deployment."""
+    names = run_command(
+        [
+            'kubectl',
+            'get',
+            'deployment/kueue-controller-manager',
+            '-n',
+            KUEUE_NAMESPACE,
+            '-o',
+            'jsonpath={.spec.template.spec.containers[*].name}',
+        ],
+        capture=True,
+    ).stdout.split()
+    if MANAGER_CONTAINER not in names:
+        raise RuntimeError(f'No {MANAGER_CONTAINER!r} container in the Kueue controller deployment: {names}')
+    return names.index(MANAGER_CONTAINER)
+
+
 def disable_visibility_server():
     """Disable Kueue's visibility server, whose cert bootstrap crashloops the controller in some clusters.
 
     This is a separate failure from the subnet collision the kind config guards against, so both
     mitigations are required. The trade-off is that the env no longer represents a default install:
     `VisibilityOnDemand` is Beta and on by default since v0.9, and the check does not read it.
+
+    This appends a second `--feature-gates` flag rather than editing any existing one, which relies on
+    Kueue merging repeated occurrences. That holds for the versions this env pins.
     """
+    # Patching by index would silently append the flag to a sidecar's args if upstream ever adds or
+    # reorders containers, producing a crashloop with an unrelated-looking error.
+    index = manager_container_index()
     run_command(
         [
             'kubectl',
@@ -174,7 +200,7 @@ def disable_visibility_server():
             KUEUE_NAMESPACE,
             '--type=json',
             '-p',
-            '[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", '
+            f'[{{"op": "add", "path": "/spec/template/spec/containers/{index}/args/-", '
             '"value": "--feature-gates=VisibilityOnDemand=false"}]',
         ]
     )
