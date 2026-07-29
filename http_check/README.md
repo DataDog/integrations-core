@@ -82,9 +82,9 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 | `connection_error` | The connection could not be established, such as when there is a refused connection, a DNS failure, or a proxy error. |
 | `socket_error` | A socket error occurred that does not fall into the categories above. |
 
-Only `network.http.can_connect` and `network.http.cant_connect` are submitted when no response is received, so those are the only metrics where the tag can have a non-numeric value. The Agent submits `network.http.response_time` only when a response is received, so on that metric the tag is always a status code.
+Only `network.http.can_connect` and `network.http.cant_connect` are submitted when no response is received, so those are the only metrics where the tag can have a non-numeric value. The Agent submits `network.http.response_time` only when a response is received, so the tag on that metric is always a status code.
 
-`http_outcome` describes the HTTP response. The metric value carries the verdict of the check. For example, `network.http.can_connect` is `0` with `http_outcome:200` when the endpoint returns 200 but the response fails the `content_match` check. The same applies when 200 falls outside the codes allowed by `http_response_status_code`.
+`http_outcome` describes the HTTP response. The metric value carries the verdict of the check. For example, `network.http.can_connect` is `0` with `http_outcome:200` when the endpoint returns `200` but the response fails the `content_match` check. The same applies when `200` falls outside the codes allowed by `http_response_status_code`.
 
 Enabling this option splits each metric into one context per value. Monitors that aggregate these metrics without grouping by `http_outcome` then evaluate an average across those contexts instead of across individual data points, which can change when the monitors trigger. Review existing monitors before you enable the option. The `http.can_connect` service check does not include the tag and is unaffected.
 
