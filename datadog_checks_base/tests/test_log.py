@@ -41,6 +41,14 @@ def test_logging_capture_warnings():
         assert "hello-world" in msg
 
 
+def test_init_logging_suppresses_noisy_third_party_loggers():
+    init_logging()
+
+    assert logging.getLogger("requests.packages.urllib3").level == logging.WARNING
+    assert logging.getLogger("msal").level == logging.WARNING
+    assert logging.getLogger("urllib3.connectionpool").level == logging.WARNING
+
+
 def test_get_check_logger(caplog):
     class FooConfig(object):
         def __init__(self):
