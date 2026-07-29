@@ -114,7 +114,7 @@ files:
         When enabled, the Agent adds the `http_outcome` tag to the `network.http.can_connect`,
         `network.http.cant_connect`, and `network.http.response_time` metrics.
 
-        The value is the HTTP status code of the response, for example `http_outcome:200`. When no
+        The value is the HTTP status code of the response, such as `http_outcome:200`. When no
         response is received, the value is one of the following instead:
 
           - `ssl_error`: The TLS connection failed, for example a certificate that cannot be
