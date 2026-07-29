@@ -25,8 +25,9 @@ LOCAL_QUEUE_METRIC_MAP = {
     'kueue_local_queue_admitted_active_workloads': 'local_queue.admitted.active_workloads',
     'kueue_local_queue_admitted_workloads': 'local_queue.admitted.workloads',
     'kueue_local_queue_evicted_workloads': 'local_queue.evicted_workloads',
+    # The endpoint exports both a gauge and a `_total` counter; the parser strips `_total`, so a single
+    # key covers both and `configure_local_queue_transformer` routes each type to its own transformer.
     'kueue_local_queue_finished_workloads': 'local_queue.finished_workloads',
-    'kueue_local_queue_finished_workloads_total': 'local_queue.finished_workloads',
     'kueue_local_queue_pending_workloads': 'local_queue.pending_workloads',
     'kueue_local_queue_quota_reserved_wait_time_seconds': 'local_queue.quota_reserved.wait_time.seconds',
     'kueue_local_queue_quota_reserved_workloads': 'local_queue.quota_reserved.workloads',
