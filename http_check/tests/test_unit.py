@@ -89,7 +89,7 @@ def test_message_when_content_is_disabled():
 
 URL = 'http://foo.bar'
 URL_TAG = 'url:{}'.format(URL)
-INSTANCE_TAG = 'instance:status_code_tag'
+INSTANCE_TAG = 'instance:http_outcome_tag'
 
 
 def _mock_response(status_code):
@@ -103,13 +103,13 @@ def _mock_response(status_code):
 
 
 def _make_check(**extra):
-    instance = {'name': 'status_code_tag', 'url': URL, 'timeout': 1}
+    instance = {'name': 'http_outcome_tag', 'url': URL, 'timeout': 1}
     instance.update(extra)
     return HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance]), instance
 
 
-def test_status_code_tag_absent_by_default(aggregator):
-    """Without `enable_status_code_tag`, no metric carries an `http_status_code` tag."""
+def test_http_outcome_tag_absent_by_default(aggregator):
+    """Without `enable_http_outcome_tag`, no metric carries an `http_outcome` tag."""
     check, instance = _make_check()
 
     with mock.patch('requests.Session.get', return_value=_mock_response(200)):
@@ -128,17 +128,31 @@ def test_status_code_tag_absent_by_default(aggregator):
         pytest.param(500, 0.0, 1.0, id='non-2xx response'),
     ],
 )
-def test_status_code_tag_added_when_enabled(aggregator, status_code, can_connect, cant_connect):
+def test_http_outcome_tag_added_when_enabled(aggregator, status_code, can_connect, cant_connect):
     """All three metrics carry the numeric status code, including for error responses."""
-    check, instance = _make_check(enable_status_code_tag=True)
+    check, instance = _make_check(enable_http_outcome_tag=True)
 
     with mock.patch('requests.Session.get', return_value=_mock_response(status_code)):
         check.check(instance)
 
-    expected_tags = [URL_TAG, INSTANCE_TAG, 'http_status_code:{}'.format(status_code)]
+    expected_tags = [URL_TAG, INSTANCE_TAG, 'http_outcome:{}'.format(status_code)]
     aggregator.assert_metric('network.http.can_connect', value=can_connect, tags=expected_tags, count=1)
     aggregator.assert_metric('network.http.cant_connect', value=cant_connect, tags=expected_tags, count=1)
     aggregator.assert_metric('network.http.response_time', value=0.5, tags=expected_tags, count=1)
+
+
+def test_http_outcome_tag_reports_status_code_when_content_match_fails(aggregator):
+    """`http_outcome` is what HTTP returned, not the verdict: a 200 that fails `content_match` is down."""
+    check, instance = _make_check(enable_http_outcome_tag=True, content_match='not in the body')
+
+    with mock.patch('requests.Session.get', return_value=_mock_response(200)):
+        check.check(instance)
+
+    expected_tags = [URL_TAG, INSTANCE_TAG, 'http_outcome:200']
+    aggregator.assert_metric('network.http.can_connect', value=0.0, tags=expected_tags, count=1)
+    aggregator.assert_metric('network.http.cant_connect', value=1.0, tags=expected_tags, count=1)
+    aggregator.assert_metric('network.http.response_time', value=0.5, tags=expected_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL, count=1)
 
 
 @pytest.mark.parametrize(
@@ -153,16 +167,16 @@ def test_status_code_tag_added_when_enabled(aggregator, status_code, can_connect
         pytest.param(OSError('no such file'), 'socket_error', id='socket_error'),
     ],
 )
-def test_status_code_tag_on_failure_paths(aggregator, error, expected_value):
+def test_http_outcome_tag_on_failure_paths(aggregator, error, expected_value):
     """When no response is received the tag falls back to a sentinel and no response time is reported."""
-    check, instance = _make_check(enable_status_code_tag=True)
+    check, instance = _make_check(enable_http_outcome_tag=True)
 
     # Patch the wrapper rather than `requests.Session` so the base library's AIA chasing,
     # which swallows `SSLError` to go fetch intermediate certs, stays out of the way.
     with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', side_effect=error):
         check.check(instance)
 
-    expected_tags = [URL_TAG, INSTANCE_TAG, 'http_status_code:{}'.format(expected_value)]
+    expected_tags = [URL_TAG, INSTANCE_TAG, 'http_outcome:{}'.format(expected_value)]
     aggregator.assert_metric('network.http.can_connect', value=0.0, tags=expected_tags, count=1)
     aggregator.assert_metric('network.http.cant_connect', value=1.0, tags=expected_tags, count=1)
     aggregator.assert_metric('network.http.response_time', count=0)

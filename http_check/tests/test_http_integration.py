@@ -16,7 +16,7 @@ from .common import (
     CONFIG_CUSTOM_NAME,
     CONFIG_DATA_METHOD,
     CONFIG_DONT_CHECK_EXP,
-    CONFIG_ENABLE_STATUS_CODE_TAG,
+    CONFIG_ENABLE_HTTP_OUTCOME_TAG,
     CONFIG_EXPIRED_SSL,
     CONFIG_HTTP_ALLOW_REDIRECTS,
     CONFIG_HTTP_NO_REDIRECTS,
@@ -443,41 +443,41 @@ def test_data_methods(aggregator, http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_enable_status_code_tag(aggregator, http_check):
-    instance = CONFIG_ENABLE_STATUS_CODE_TAG['instances'][0]
+def test_enable_http_outcome_tag(aggregator, http_check):
+    instance = CONFIG_ENABLE_HTTP_OUTCOME_TAG['instances'][0]
     http_check.check(instance)
 
     url_tag = ['url:{}'.format(instance.get('url'))]
     instance_tag = ['instance:{}'.format(instance.get('name'))]
-    status_code_tag = ['http_status_code:200']
+    http_outcome_tag = ['http_outcome:200']
 
     # The service check is never tagged with the status code
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.OK, tags=url_tag + instance_tag, count=1)
     aggregator.assert_metric(
-        'network.http.can_connect', tags=url_tag + instance_tag + status_code_tag, value=1.0, count=1
+        'network.http.can_connect', tags=url_tag + instance_tag + http_outcome_tag, value=1.0, count=1
     )
     aggregator.assert_metric(
-        'network.http.cant_connect', tags=url_tag + instance_tag + status_code_tag, value=0.0, count=1
+        'network.http.cant_connect', tags=url_tag + instance_tag + http_outcome_tag, value=0.0, count=1
     )
-    aggregator.assert_metric('network.http.response_time', tags=url_tag + instance_tag + status_code_tag, count=1)
+    aggregator.assert_metric('network.http.response_time', tags=url_tag + instance_tag + http_outcome_tag, count=1)
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_enable_status_code_tag_leaves_ssl_metrics_untagged(aggregator, http_check):
-    """The `http.ssl.*` metrics and both service checks never carry `http_status_code`."""
+def test_enable_http_outcome_tag_leaves_ssl_metrics_untagged(aggregator, http_check):
+    """The `http.ssl.*` metrics and both service checks never carry `http_outcome`."""
     instance = {
-        'name': 'ssl_status_code_tag',
+        'name': 'ssl_http_outcome_tag',
         'url': 'https://valid.mock/',
         'timeout': 1,
         'check_certificate_expiration': True,
         'days_warning': 14,
         'days_critical': 7,
-        'enable_status_code_tag': True,
+        'enable_http_outcome_tag': True,
     }
     http_check.check(instance)
 
     url_tag = ['url:https://valid.mock/']
-    instance_tag = ['instance:ssl_status_code_tag']
+    instance_tag = ['instance:ssl_http_outcome_tag']
 
     aggregator.assert_metric('http.ssl.days_left', tags=url_tag + instance_tag, count=1)
     aggregator.assert_metric('http.ssl.seconds_left', tags=url_tag + instance_tag, count=1)

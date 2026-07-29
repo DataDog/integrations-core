@@ -119,20 +119,23 @@ instances:
     #
     # collect_response_time: true
 
-    ## @param enable_status_code_tag - boolean - optional - default: false
-    ## When enabled, the `http_status_code` tag is added to the `network.http.can_connect`,
+    ## @param enable_http_outcome_tag - boolean - optional - default: false
+    ## When enabled, the `http_outcome` tag is added to the `network.http.can_connect`,
     ## `network.http.cant_connect`, and `network.http.response_time` metrics.
     ##
-    ## This splits each metric into one context per status code. Monitors that aggregate these
-    ## metrics without grouping by `http_status_code` evaluate an average across those contexts
-    ## rather than across individual data points, which can change when they trigger. Review
-    ## existing monitors before enabling this option, and prefer the `http.can_connect` service
-    ## check for binary up or down alerting, since it never carries this tag.
+    ## The value is the HTTP status code of the response, for example `http_outcome:200`.
+    ## `network.http.can_connect` and `network.http.cant_connect` are also submitted when no
+    ## response was received, and in that case the value is one of `ssl_error`, `timeout`,
+    ## `connection_error`, or `socket_error` instead. `network.http.response_time` is only
+    ## submitted when a response was received, so there the value is always a status code.
     ##
-    ## When no response is received, the tag value is one of `ssl_error`, `timeout`,
-    ## `connection_error`, or `socket_error` rather than a numeric status code.
+    ## This splits each metric into one context per value. Monitors that aggregate these metrics
+    ## without grouping by `http_outcome` evaluate an average across those contexts rather than
+    ## across individual data points, which can change when they trigger. Review existing monitors
+    ## before enabling this option, and prefer the `http.can_connect` service check for binary up
+    ## or down alerting, since it never carries this tag.
     #
-    # enable_status_code_tag: false
+    # enable_http_outcome_tag: false
 
     ## @param check_certificate_expiration - boolean - optional - default: true
     ## The check_certificate_expiration will instruct the check

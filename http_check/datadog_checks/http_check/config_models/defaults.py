@@ -48,12 +48,12 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_http_outcome_tag():
+    return False
+
+
 def instance_enable_legacy_tags_normalization():
     return True
-
-
-def instance_enable_status_code_tag():
-    return False
 
 
 def instance_http_response_status_code():

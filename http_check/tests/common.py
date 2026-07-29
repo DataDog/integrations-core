@@ -201,14 +201,14 @@ CONFIG_DONT_CHECK_EXP = {
     ]
 }
 
-CONFIG_ENABLE_STATUS_CODE_TAG = {
+CONFIG_ENABLE_HTTP_OUTCOME_TAG = {
     "instances": [
         {
-            "name": "enable_status_code_tag",
+            "name": "enable_http_outcome_tag",
             "url": "https://valid.mock/",
             "check_certificate_expiration": False,
             "timeout": 1,
-            "enable_status_code_tag": True,
+            "enable_http_outcome_tag": True,
         }
     ]
 }

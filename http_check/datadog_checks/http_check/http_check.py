@@ -30,8 +30,8 @@ MESSAGE_LENGTH = 2500  # https://docs.datadoghq.com/api/v1/service-checks/
 DATA_METHODS = ["POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 
 
-def get_error_status_code_tag_value(error):
-    """Return the `http_status_code` tag value to use when no HTTP response was received."""
+def get_error_http_outcome(error):
+    """Return the `http_outcome` tag value to use when no HTTP response was received."""
     if isinstance(error, requests.exceptions.SSLError):
         return "ssl_error"
     if isinstance(error, (requests.exceptions.Timeout, socket.timeout)):
@@ -99,7 +99,7 @@ class HTTPCheck(AgentCheck):
             check_hostname,
             stream,
             use_cert_from_response,
-            enable_status_code_tag,
+            enable_http_outcome_tag,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options["timeout"][0]
         start = time.time()
@@ -124,7 +124,7 @@ class HTTPCheck(AgentCheck):
         service_checks_tags = self._get_service_checks_tags(instance)
         r = None  # type: Response
         peer_cert = None  # type: bytes | None
-        status_code_tag_value = None
+        http_outcome = None
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
@@ -152,7 +152,7 @@ class HTTPCheck(AgentCheck):
         ) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
-            status_code_tag_value = get_error_status_code_tag_value(e)
+            http_outcome = get_error_http_outcome(e)
             service_checks.append(
                 (
                     self.SC_STATUS,
@@ -169,7 +169,7 @@ class HTTPCheck(AgentCheck):
                 repr(e),
                 length,
             )
-            status_code_tag_value = get_error_status_code_tag_value(e)
+            http_outcome = get_error_http_outcome(e)
             service_checks.append(
                 (
                     self.SC_STATUS,
@@ -184,7 +184,7 @@ class HTTPCheck(AgentCheck):
 
         else:
             if r is not None:
-                status_code_tag_value = str(r.status_code)
+                http_outcome = str(r.status_code)
             if use_cert_from_response:
                 peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
 
@@ -247,8 +247,8 @@ class HTTPCheck(AgentCheck):
             self.http._session.close()
             self.http._session = None
 
-        if enable_status_code_tag and status_code_tag_value is not None:
-            tags_list.append("http_status_code:{}".format(status_code_tag_value))
+        if enable_http_outcome_tag and http_outcome is not None:
+            tags_list.append("http_outcome:{}".format(http_outcome))
 
         # Report the response time whenever a response was received, regardless of the status code
         if response_time and r is not None:
