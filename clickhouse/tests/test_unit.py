@@ -489,9 +489,9 @@ def test_cluster_name_prefers_the_macro():
 @pytest.mark.parametrize(
     'macro_result',
     [
-        pytest.param([], id='no-rows'),
+        pytest.param([], id='macro-not-set'),
         pytest.param([['']], id='empty-value'),
-        pytest.param(Error('No macro cluster in config'), id='macro-undefined'),
+        pytest.param(Error('query failed'), id='query-error'),
     ],
 )
 def test_cluster_name_falls_back_to_system_clusters(macro_result):
@@ -520,13 +520,13 @@ def test_cluster_name_query_excludes_cloud_group_pseudo_cluster():
     tagged all_groups.default while their data comes from 'default' via
     clusterAllReplicas.
     """
-    assert f"cluster NOT LIKE '{CLUSTER_GROUP_PREFIX}%'" in CLUSTER_NAME_QUERY
+    assert f"NOT startsWith(cluster, '{CLUSTER_GROUP_PREFIX}')" in CLUSTER_NAME_QUERY
 
 
 def test_cluster_name_absent_when_both_sources_fail():
     check = make_cluster_name_check(
         {
-            CLUSTER_MACRO_QUERY: Error('No macro cluster in config'),
+            CLUSTER_MACRO_QUERY: Error('query failed'),
             CLUSTER_NAME_QUERY: [],
         }
     )
