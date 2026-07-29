@@ -13,6 +13,15 @@ on:
         required: true
         type: string
 
+env:
+  DOCS_URL: https://datadoghq.atlassian.net/wiki/spaces/AI/pages/6182240746/Dependency+Updates
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  PR_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}
+  # Shared with dependency-wheel-promotion-gate.yaml, and keyed on the PR rather
+  # than the commit, so this run updates the notice that workflow posts when the
+  # check first goes pending instead of adding another comment.
+  PROMOTION_COMMENT_MARKER: <!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} -->
+
 jobs:
   promote:
     name: Promote dependency wheels from dev to stable
@@ -32,7 +41,8 @@ jobs:
       uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
       with:
         issue-number: ${{ inputs.pr_number }}
-        body-includes: "<!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->"
+        comment-author: 'github-actions[bot]'
+        body-includes: ${{ env.PROMOTION_COMMENT_MARKER }}
 
     - name: Post lifecycle comment (started)
       id: started_comment
@@ -42,9 +52,13 @@ jobs:
         comment-id: ${{ steps.find_comment.outputs.comment-id }}
         edit-mode: replace
         body: |
-          <!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->
-          Wheel promotion started for commit `${{ inputs.head_sha }}` by @${{ github.actor }}.
-          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          > [!WARNING]
+          > **Wheel promotion is running. Do not merge until `dependency-wheel-promotion` is green.**
+          >
+          > Promoting wheels from `dev` to `stable` for commit `${{ inputs.head_sha }}`, started by @${{ github.actor }}. Follow the [workflow run](${{ env.RUN_URL }}).
+          >
+          > <sub>Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
 
     - name: Checkout PR lockfiles only
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -102,9 +116,12 @@ jobs:
         comment-id: ${{ steps.started_comment.outputs.comment-id }}
         edit-mode: replace
         body: |
-          <!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->
-          Wheels promoted to stable storage for commit `${{ inputs.head_sha }}` by @${{ github.actor }}.
-          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          Wheels promoted to stable storage for commit `${{ inputs.head_sha }}` by @${{ github.actor }} in this [workflow run](${{ env.RUN_URL }}). The `dependency-wheel-promotion` check is green for that commit, so this PR can be merged once the rest of CI passes.
+
+          Pushing again to this branch sends the check back to pending. Promote the new commit before merging.
+
+          <sub>Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
 
     - name: Set dependency-wheel-promotion status to error
       if: failure()
@@ -131,7 +148,15 @@ jobs:
         comment-id: ${{ steps.started_comment.outputs.comment-id }}
         edit-mode: replace
         body: |
-          <!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->
-          Wheel promotion failed for commit `${{ inputs.head_sha }}` by @${{ github.actor }}.
-          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          Check the workflow logs before retrying.
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          > [!CAUTION]
+          > **Wheel promotion failed. Do not merge: `dependency-wheel-promotion` will not go green until a promotion succeeds.**
+          >
+          > Promotion of commit `${{ inputs.head_sha }}`, started by @${{ github.actor }}, failed in this [workflow run](${{ env.RUN_URL }}).
+          >
+          > Check the logs, then retry with:
+          > ```
+          > ddev dep promote ${{ env.PR_URL }}
+          > ```
+          >
+          > <sub>Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
