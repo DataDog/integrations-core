@@ -5,7 +5,8 @@ import ipaddress
 import os
 import tempfile
 import time
-from contextlib import ExitStack
+from collections.abc import Iterator
+from contextlib import ExitStack, contextmanager
 
 import pytest
 import yaml
@@ -45,12 +46,15 @@ def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
         dest = parts[0].split('%')[0]
         if dest.lower() in skip:
             continue
-        prefix = '32'
+        prefix = ''
         if '/' in dest:
             dest, prefix = dest.split('/', 1)
         octets = dest.split('.')
         if not (1 <= len(octets) <= 4) or not all(octet.isdigit() for octet in octets):
             continue
+        # macOS `netstat -rn` abbreviates network routes, so `10` means 10.0.0.0/8 rather than /32.
+        # Deriving the prefix from the octet count keeps those routes wide enough to detect a collision.
+        prefix = prefix or str(8 * len(octets))
         octets += ['0'] * (4 - len(octets))
         try:
             networks.append(ipaddress.ip_network(f'{".".join(octets)}/{prefix}', strict=False))
@@ -60,7 +64,11 @@ def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
 
 
 def host_routed_networks() -> list[ipaddress.IPv4Network]:
-    """Return the IPv4 networks currently present in the host routing table."""
+    """Return the IPv4 networks currently present in the host routing table.
+
+    On macOS this cannot see Docker Desktop's own bridge networks, which live inside the LinuxKit VM
+    and never reach the host routing table, so a collision with those is not detectable here.
+    """
     for command in (['ip', '-4', 'route', 'show'], ['netstat', '-rn', '-f', 'inet']):
         try:
             output = run_command(command, capture=True).stdout
@@ -87,22 +95,35 @@ def choose_free_subnets() -> tuple[str, str] | None:
     return None
 
 
-def build_kind_config() -> str:
-    """Render a kind config whose subnets avoid host-route collisions, falling back to the committed file."""
+@contextmanager
+def build_kind_config() -> Iterator[str]:
+    """Yield a kind config whose subnets avoid host-route collisions, falling back to the committed file."""
     base_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
-    subnets = choose_free_subnets()
-    if subnets is None:
-        return base_config
-
     with open(base_config) as f:
         config = yaml.safe_load(f)
+
+    subnets = choose_free_subnets()
+    if subnets is None:
+        # Log the fallback too: when the controller crashloops in CI, the subnets used are the first
+        # thing to check, and the committed pair is the one known to collide in some environments.
+        networking = config.get('networking', {})
+        service_subnet = networking.get('serviceSubnet')
+        pod_subnet = networking.get('podSubnet')
+        print(f'No free subnet pair found, falling back to {service_subnet} / {pod_subnet}')
+        yield base_config
+        return
+
     config.setdefault('networking', {})
     config['networking']['serviceSubnet'], config['networking']['podSubnet'] = subnets
+    print(f'Using kind subnets {subnets[0]} / {subnets[1]}')
 
     fd, path = tempfile.mkstemp(prefix='kueue-kind-', suffix='.yaml')
-    with os.fdopen(fd, 'w') as f:
-        yaml.safe_dump(config, f)
-    return path
+    try:
+        with os.fdopen(fd, 'w') as f:
+            yaml.safe_dump(config, f)
+        yield path
+    finally:
+        os.unlink(path)
 
 
 @pytest.fixture(autouse=True)
@@ -294,8 +315,11 @@ def get_service_account_token():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    kind_config = build_kind_config()
-    with kind_run(conditions=[setup_kueue], kind_config=kind_config, sleep=10) as kubeconfig, ExitStack() as stack:
+    with (
+        build_kind_config() as kind_config,
+        kind_run(conditions=[setup_kueue], kind_config=kind_config, sleep=10) as kubeconfig,
+        ExitStack() as stack,
+    ):
         with open(kubeconfig) as f:
             kubeconfig_content = yaml.safe_load(f)
 
