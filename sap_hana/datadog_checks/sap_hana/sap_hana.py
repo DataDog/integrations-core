@@ -159,10 +159,10 @@ class SapHanaCheck(AgentCheck):
                 self._connection_flaked = False
 
     def cancel(self):
-        # Signal both async jobs to stop so their executor threads (and the schema job's
-        # dedicated HANA connection) are released when the check is unscheduled (e.g.
-        # cluster-agent flavor or one-off check invocations), instead of leaking the
-        # DBMAsyncJob thread pool.
+        # Signal both async jobs to stop so their executor threads are released when the
+        # check is unscheduled (e.g. cluster-agent flavor or one-off check invocations),
+        # instead of leaking the shared DBMAsyncJob thread pool. This only sets each job's
+        # cancel event; it does not itself close the schema job's dedicated HANA connection.
         self._schema_collection_job.cancel()
         self.data_observability.cancel()
 
