@@ -92,10 +92,12 @@ spec:
     flavors:
     - name: default-flavor
       resources:
+      # Preemption is pure quota accounting, so a small quota yields the same metrics without
+      # oversubscribing a 2-vCPU runner and leaving permanently Pending pods behind.
       - name: cpu
-        nominalQuota: 1
+        nominalQuota: 200m
       - name: memory
-        nominalQuota: 1Gi
+        nominalQuota: 128Mi
 ---
 apiVersion: kueue.x-k8s.io/v1beta2
 kind: LocalQueue
