@@ -1,26 +1,22 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
-
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .utils import get_legacy_check
 
 
-def test_legacy_bearer_token_translation_reaches_http_client(tmp_path):
-    token_file = tmp_path / 'token'
-    token_file.write_text('secret')
-    check = get_legacy_check({'bearer_token_auth': True, 'bearer_token_path': str(token_file)})
+def test_legacy_bearer_token_translation_reaches_http_client(tmp_path, mocker):
+    token_path = str(tmp_path / 'token')
+    check = get_legacy_check({'bearer_token_auth': True, 'bearer_token_path': token_path})
+    create_http_client = mocker.spy(check, 'create_http_client')
     check.configure_scrapers()
-    scraper = check.scrapers['test']
 
-    with mock.patch('requests.Session.get', return_value=MockHTTPResponse()) as get:
-        scraper.http.get(scraper.endpoint)
-
-    request_headers = get.call_args.kwargs['headers']
-    assert request_headers['Authorization'] == 'Bearer secret'
+    create_http_client.assert_called_once()
+    assert create_http_client.call_args.args[0]['auth_token'] == {
+        'reader': {'type': 'file', 'path': token_path},
+        'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+    }
 
 
 def test_scraper_http_configuration_is_endpoint_scoped():
@@ -31,14 +27,8 @@ def test_scraper_http_configuration_is_endpoint_scoped():
     ]
     check.configure_scrapers()
 
-    request_headers = {}
-    with mock.patch('requests.Session.get', return_value=MockHTTPResponse()) as get:
-        for endpoint, scraper in check.scrapers.items():
-            scraper.http.get(endpoint)
-            request_headers[endpoint] = get.call_args.kwargs['headers']
-
-    assert request_headers['http://first']['X-Endpoint'] == 'first'
-    assert request_headers['http://second']['X-Endpoint'] == 'second'
+    assert check.scrapers['http://first'].http.get_header('X-Endpoint') == 'first'
+    assert check.scrapers['http://second'].http.get_header('X-Endpoint') == 'second'
 
 
 class TestRawMetricPrefix:
