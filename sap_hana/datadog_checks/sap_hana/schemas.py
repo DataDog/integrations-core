@@ -159,7 +159,10 @@ ORDER BY ao.SCHEMA_NAME, ao.TABLE_NAME, ac.POSITION
 class HanaSchemaCollectorConfig(SchemaCollectorConfig):
     def __init__(self, config: CollectSchemas):
         super().__init__()
-        self.collection_interval = int(config.collection_interval or 600)
+        # Guard against a non-positive interval (a sub-1 value truncates to 0), which would
+        # otherwise ship as collection_interval: 0 in every schema payload.
+        collection_interval = int(config.collection_interval or 600)
+        self.collection_interval = collection_interval if collection_interval > 0 else 600
         self.max_tables = int(config.max_tables or 2000)
         self.max_views = int(config.max_views or 2000)
         self.max_columns = int(config.max_columns or 500)
@@ -239,10 +242,16 @@ class HanaSchemaCollector(SchemaCollector):
         super().__init__(check, HanaSchemaCollectorConfig(config))
         self._query_builder = HanaSchemaQueryBuilder(self._config, self._log)
         self._pending_row = None
-        self._conn: Any = None  # injected by HanaSchemaCollectionJob; falls back to check._conn
+        # The owning HanaSchemaCollectionJob injects its dedicated connection via
+        # set_connection() before each cycle; connection_lost is the collector's signal
+        # back to the job that the connection died mid-cycle and must be rebuilt.
+        self._conn: Any = None
+        self.connection_lost = False
 
-    def _active_conn(self) -> Any:
-        return self._conn if self._conn is not None else self._check._conn
+    def set_connection(self, conn: Any) -> None:
+        """Inject the job's dedicated connection for the upcoming collection cycle."""
+        self._conn = conn
+        self.connection_lost = False
 
     def _reset(self) -> None:
         super()._reset()
@@ -264,7 +273,7 @@ class HanaSchemaCollector(SchemaCollector):
 
     def _get_databases(self) -> list[DatabaseInfo]:
         try:
-            with closing(self._active_conn().cursor()) as cursor:
+            with closing(self._conn.cursor()) as cursor:
                 cursor.execute(CURRENT_DATABASE_QUERY)
                 row = cursor.fetchone()
                 if not row:
@@ -281,16 +290,16 @@ class HanaSchemaCollector(SchemaCollector):
                     pass
                 return [{'name': db_name, 'description': description}]
         except Exception as e:
-            # A dead HANA connection surfaces here rather than propagating, so drop our
-            # reference to signal the owning job to reconnect on the next cycle.
+            # A dead HANA connection surfaces here rather than propagating, so flag it for
+            # the owning job to reconnect on the next cycle.
             if isinstance(e, HanaError):
-                self._conn = None
+                self.connection_lost = True
             self._log.warning("Could not determine current HANA database; skipping schema collection: %s", e)
             return []
 
     @contextlib.contextmanager
     def _get_cursor(self, _database_name):
-        conn = self._active_conn()
+        conn = self._conn
         try:
             self._query_builder.ensure_stats_permission(conn)
             query, params = self._query_builder.build()
@@ -302,9 +311,9 @@ class HanaSchemaCollector(SchemaCollector):
                 finally:
                     self._pending_row = None
         except HanaError:
-            # collect_schemas() swallows this per-database error, so signal the dead
-            # connection to the owning job by dropping our reference; it reconnects next cycle.
-            self._conn = None
+            # collect_schemas() swallows this per-database error, so flag the dead
+            # connection to the owning job; it reconnects next cycle.
+            self.connection_lost = True
             raise
 
     def _get_next(self, cursor):
@@ -372,7 +381,12 @@ class HanaSchemaCollectionJob(DBMAsyncJob):
         self._check = check
         self._schema_collector = HanaSchemaCollector(check, config)
         self._job_conn: Any = None
-        collection_interval = int(config.collection_interval or 600)
+        # Cast to float (not int) so a sub-1 interval doesn't truncate to 0 and make the
+        # rate_limit below divide by zero, which would crash the whole check on construction.
+        # A non-positive value is meaningless as an interval, so clamp it back to the default.
+        collection_interval = float(config.collection_interval or 600)
+        if collection_interval <= 0:
+            collection_interval = 600
         super().__init__(
             check,
             config_host=check._server,
@@ -406,18 +420,20 @@ class HanaSchemaCollectionJob(DBMAsyncJob):
     def run_job(self) -> None:
         try:
             conn = self._get_conn()
-            self._schema_collector._conn = conn
+            # Resolve the HANA version on this dedicated connection so base_event never
+            # reads it off the main check's connection from this thread.
+            self._check._resolve_dbms_version(conn)
+            self._schema_collector.set_connection(conn)
             self._schema_collector.collect_schemas()
         except HanaError:
             self._reset_conn()
             raise
         # collect_schemas() swallows per-database HANA errors internally, so a transient
-        # disconnect never reaches the except above. The collector drops its connection
-        # reference in that case; close ours too so the next cycle reconnects instead of
-        # reusing a dead handle forever.
-        if self._schema_collector._conn is None:
+        # disconnect never reaches the except above. The collector flags connection_lost
+        # in that case; close ours too so the next cycle reconnects instead of reusing a
+        # dead handle forever.
+        if self._schema_collector.connection_lost:
             self._reset_conn()
 
     def _reset_conn(self) -> None:
         self._shutdown()
-        self._schema_collector._conn = None

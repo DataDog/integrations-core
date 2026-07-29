@@ -219,15 +219,29 @@ class SapHanaCheck(AgentCheck):
 
     @property
     def dbms_version(self):
-        if self._dbms_version is None and self._conn is not None:
-            try:
-                with closing(self._conn.cursor()) as cursor:
-                    cursor.execute("SELECT VERSION FROM SYS.M_DATABASE")
-                    row = cursor.fetchone()
-                    self._dbms_version = str(row[0]).split()[0] if row else 'unknown'
-            except Exception:
-                self._dbms_version = 'unknown'
+        # Only returns the cached value; resolution happens via _resolve_dbms_version on the
+        # schema job's dedicated connection. The version is read from base_event on the job
+        # thread, and querying self._conn here would race with the main check loop's concurrent
+        # use of that same connection (there is no thread-safe pool, unlike DBM integrations).
         return self._dbms_version or 'unknown'
+
+    def _resolve_dbms_version(self, conn):
+        """Resolve and cache the HANA version using the given connection.
+
+        Called from the schema-collection job thread on its dedicated connection so the main
+        check connection is never touched off-thread. Caches on first success; a transient
+        failure leaves the value unresolved so the next cycle retries instead of caching
+        'unknown' permanently.
+        """
+        if self._dbms_version is not None:
+            return
+        try:
+            with closing(conn.cursor()) as cursor:
+                cursor.execute("SELECT VERSION FROM SYS.M_DATABASE")
+                row = cursor.fetchone()
+                self._dbms_version = str(row[0]).split()[0] if row else 'unknown'
+        except Exception:
+            pass
 
     @property
     def tags(self):

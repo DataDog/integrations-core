@@ -78,13 +78,19 @@ def _make_cursor_mock(joined_rows, db_name='TEST_DB', description='Test database
 
 
 def _collect_payloads(check):
-    """Run collect_schemas() and return list of decoded payloads."""
+    """Run collect_schemas() and return list of decoded payloads.
+
+    Injects check._conn into the collector via set_connection(), mirroring how the owning
+    job hands it a dedicated connection before each cycle.
+    """
     payloads = []
     check.database_monitoring_metadata = lambda raw: payloads.append(json.loads(raw))
     # suppress internal metrics so tests don't need a live aggregator
     check.histogram = mock.MagicMock()
     check.gauge = mock.MagicMock()
-    check._schema_collection_job._schema_collector.collect_schemas()
+    collector = check._schema_collection_job._schema_collector
+    collector.set_connection(check._conn)
+    collector.collect_schemas()
     return payloads
 
 
@@ -95,6 +101,14 @@ class TestHanaSchemaCollector:
     def test_disabled_by_default(self):
         check = _make_check()
         assert not check._schema_collection_job._enabled
+
+    def test_fractional_collection_interval_does_not_crash(self):
+        # A sub-1 collection_interval must not truncate to 0 and raise ZeroDivisionError
+        # while building the job's rate_limit, which would take down the whole check.
+        check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 0.5}})
+        assert check._schema_collection_job is not None
+        # A non-positive interval is clamped back to the default in the payload config too.
+        assert check._schema_collection_job._schema_collector._config.collection_interval == 600
 
     def test_enabled_creates_collector(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
@@ -227,19 +241,19 @@ class TestHanaSchemaCollector:
         with pytest.raises(HanaError):
             job.run_job()
 
+        # The job drops its own connection so the next cycle reconnects.
         assert job._job_conn is None
-        assert job._schema_collector._conn is None
 
     def test_schema_job_resets_conn_on_swallowed_error(self):
         # collect_schemas() swallows per-database HANA errors and returns normally after
-        # dropping the collector's connection reference; the job must still reconnect.
+        # flagging connection_lost on the collector; the job must still reconnect.
         check = _make_check({'collect_schemas': {'enabled': True, 'run_sync': True}})
         job = check._schema_collection_job
         conn = mock.MagicMock()
         job._job_conn = conn
 
         def swallow():
-            job._schema_collector._conn = None
+            job._schema_collector.connection_lost = True
 
         job._schema_collector.collect_schemas = mock.MagicMock(side_effect=swallow)
 
@@ -247,7 +261,6 @@ class TestHanaSchemaCollector:
 
         conn.close.assert_called_once()
         assert job._job_conn is None
-        assert job._schema_collector._conn is None
 
     def test_cancel_cancels_schema_collection_job(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
@@ -327,9 +340,10 @@ class TestHanaSchemaCollector:
         cursor = mock.MagicMock()
         conn.cursor.return_value = cursor
         cursor.fetchone.side_effect = [('PROD_DB',), ('Production instance',)]
-        check._conn = conn
+        collector = check._schema_collection_job._schema_collector
+        collector.set_connection(conn)
 
-        result = check._schema_collection_job._schema_collector._get_databases()
+        result = collector._get_databases()
         assert result == [{'name': 'PROD_DB', 'description': 'Production instance'}]
 
     def test_get_databases_description_query_fails(self):
@@ -344,9 +358,10 @@ class TestHanaSchemaCollector:
                 raise Exception('access denied')
 
         cursor.execute.side_effect = raise_on_description
-        check._conn = conn
+        collector = check._schema_collection_job._schema_collector
+        collector.set_connection(conn)
 
-        result = check._schema_collection_job._schema_collector._get_databases()
+        result = collector._get_databases()
         assert result == [{'name': 'PROD_DB', 'description': ''}]
 
     def test_get_databases_execute_exception_skips_collection(self):
@@ -355,10 +370,11 @@ class TestHanaSchemaCollector:
         cursor = mock.MagicMock()
         conn.cursor.return_value = cursor
         cursor.execute.side_effect = Exception('connection error')
-        check._conn = conn
+        collector = check._schema_collection_job._schema_collector
+        collector.set_connection(conn)
 
         # No hostname fallback: an unreadable current database skips collection entirely.
-        result = check._schema_collection_job._schema_collector._get_databases()
+        result = collector._get_databases()
         assert result == []
 
     def test_get_databases_no_rows_skips_collection(self):
@@ -367,9 +383,10 @@ class TestHanaSchemaCollector:
         cursor = mock.MagicMock()
         conn.cursor.return_value = cursor
         cursor.fetchone.return_value = None
-        check._conn = conn
+        collector = check._schema_collection_job._schema_collector
+        collector.set_connection(conn)
 
-        result = check._schema_collection_job._schema_collector._get_databases()
+        result = collector._get_databases()
         assert result == []
 
     def test_is_column_table_false(self):
