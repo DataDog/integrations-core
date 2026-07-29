@@ -16,6 +16,11 @@ def test_mock_http_patches_agentcheck(mock_http):
     assert check.http is mock_http
 
 
+def test_mock_http_patches_explicit_agentcheck_client(mock_http):
+    check = AgentCheck('test', {}, [{}])
+    assert check.create_http_client({'url': 'https://example.test'}) is mock_http
+
+
 def test_mock_http_supports_options(mock_http):
     response = MockHTTPResponse()
     mock_http.options_method.return_value = response

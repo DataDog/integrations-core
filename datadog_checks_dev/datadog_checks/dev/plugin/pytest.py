@@ -468,6 +468,7 @@ def mock_http(mocker):
     client.close.return_value = None
     seal(client)
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
     return client
 
 
@@ -476,8 +477,8 @@ def mock_openmetrics_http(mock_http, mocker):
     """OpenMetrics HTTP mock with dual interception:
 
     - v1 checks (OpenMetricsBaseCheck): patches OpenMetricsScraperMixin.get_http_handler to return mock_http.
-    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck.http PropertyMock; the
-      get_http_handler patch is unused on this path because v2 calls self.http.get(...) directly.
+    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck HTTP client patches; the
+      get_http_handler patch is unused on this path.
     """
     mocker.patch(
         'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
