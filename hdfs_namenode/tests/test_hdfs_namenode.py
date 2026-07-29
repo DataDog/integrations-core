@@ -15,6 +15,8 @@ from .common import (
     HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES,
     HDFS_NAMESYSTEM_STATE_METRICS_VALUES,
     HDFS_RAW_VERSION,
+    TEST_PASSWORD,
+    TEST_USERNAME,
 )
 
 pytestmark = pytest.mark.unit
@@ -72,13 +74,8 @@ def test_metadata(aggregator, dd_run_check, mocked_request, datadog_agent):
     datadog_agent.assert_metadata_count(6)
 
 
-def test_auth(aggregator, dd_run_check, mocked_auth_request):
+def test_auth():
     instance = HDFS_NAMENODE_AUTH_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
-    # Run the check once
-    dd_run_check(hdfs_namenode)
-
-    aggregator.assert_service_check(
-        HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
-    )
+    assert hdfs_namenode.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)

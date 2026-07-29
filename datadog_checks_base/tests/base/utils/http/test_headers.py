@@ -99,6 +99,23 @@ def test_extra_headers_on_http_method_call():
     assert extra_headers == {"foo": "bar"}
 
 
+def test_request_headers_override_defaults_before_extra_headers():
+    http = RequestsWrapper({'headers': {'X-Default': 'default', 'X-Precedence': 'default'}}, {})
+
+    with mock.patch('requests.Session.get') as get:
+        http.get(
+            'http://example.com/hello',
+            headers={'X-Request': 'request', 'X-Precedence': 'request'},
+            extra_headers={'X-Extra': 'extra', 'X-Precedence': 'extra'},
+        )
+
+    assert get.call_args.kwargs['headers'] == {
+        'X-Request': 'request',
+        'X-Extra': 'extra',
+        'X-Precedence': 'extra',
+    }
+
+
 def test_get_header_default_for_missing():
     http = RequestsWrapper({}, {})
     assert http.get_header('X-Missing') is None

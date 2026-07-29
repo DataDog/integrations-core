@@ -106,6 +106,11 @@ class HTTPResponse(Protocol):
     # Peer TLS certificate of the connection, or None if not HTTPS or already released.
     def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None: ...
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]: ...
+    # Empty bodies yield no records. With default line splitting, one terminal line ending only closes
+    # the current record, while complete empty records are preserved. With a custom delimiter, a complete
+    # terminal delimiter produces an empty final record, while an incomplete delimiter remains part of
+    # the final record.
+    # Records are bytes by default; decode_unicode yields text when an encoding is configured or determined.
     def iter_lines(
         self,
         chunk_size: int | None = None,

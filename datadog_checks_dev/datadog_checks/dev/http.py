@@ -185,6 +185,9 @@ class MockHTTPResponseImpl:
     ) -> Iterator[bytes | str]:
         self._stream.seek(0)
         content = self._stream.read()
+        if not content:
+            return
+
         if decode_unicode:
             decoded_content = self._decode(content)
             decoded_delimiter = self._decode(delimiter) if isinstance(delimiter, bytes) else delimiter
@@ -200,8 +203,6 @@ class MockHTTPResponseImpl:
                 encoded_delimiter = delimiter
             lines = content.splitlines() if encoded_delimiter is None else content.split(encoded_delimiter)
 
-        if lines and not lines[-1]:
-            lines.pop()
         yield from lines
 
     def close(self) -> None:

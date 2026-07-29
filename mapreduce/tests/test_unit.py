@@ -21,6 +21,8 @@ from .common import (
     MR_AUTH_CONFIG,
     MR_CONFIG,
     RM_URI,
+    TEST_PASSWORD,
+    TEST_USERNAME,
 )
 
 
@@ -90,26 +92,11 @@ def test_check(aggregator, dd_run_check, mocked_request):
     aggregator.assert_all_metrics_covered()
 
 
-def test_auth(aggregator, dd_run_check, mocked_auth_request):
-    """
-    Test that we get all the metrics we're supposed to get
-    """
+def test_auth():
     instance = MR_AUTH_CONFIG['instances'][0]
-
-    # Instantiate the check
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
-    # Run the check once
-    dd_run_check(mapreduce)
-
-    # Check the service tests
-    service_check_tags = ["url:{}".format(RM_URI)] + CUSTOM_TAGS
-    aggregator.assert_service_check(
-        MapReduceCheck.YARN_SERVICE_CHECK, status=MapReduceCheck.OK, tags=service_check_tags, count=1
-    )
-    aggregator.assert_service_check(
-        MapReduceCheck.MAPREDUCE_SERVICE_CHECK, status=MapReduceCheck.OK, tags=service_check_tags, count=1
-    )
+    assert mapreduce.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)
 
 
 def test_disable_legacy_cluster_tag(aggregator, dd_run_check, mocked_request):

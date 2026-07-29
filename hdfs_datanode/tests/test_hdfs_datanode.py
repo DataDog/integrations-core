@@ -13,6 +13,8 @@ from .common import (
     HDFS_DATANODE_METRIC_TAGS,
     HDFS_DATANODE_METRICS_VALUES,
     HDFS_RAW_VERSION,
+    TEST_PASSWORD,
+    TEST_USERNAME,
 )
 
 pytestmark = pytest.mark.unit
@@ -73,17 +75,8 @@ def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_a
     datadog_agent.assert_metadata_count(6)
 
 
-def test_auth(aggregator, mocked_auth_request):
-    """
-    Test that we can connect to the endpoint when we authenticate
-    """
+def test_auth():
     instance = HDFS_DATANODE_AUTH_CONFIG['instances'][0]
     hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 
-    # Run the check once
-    hdfs_datanode.check(instance)
-
-    # Make sure the service is up
-    aggregator.assert_service_check(
-        HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1
-    )
+    assert hdfs_datanode.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)

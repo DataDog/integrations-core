@@ -8,6 +8,7 @@ import requests
 from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 from datadog_checks.base.utils.http_protocol import HTTPResponse, HTTPTimeoutConfig
 from datadog_checks.base.utils.tls import TlsConfig
+from datadog_checks.dev.http import MockHTTPResponse
 
 pytestmark = [pytest.mark.unit]
 
@@ -56,6 +57,28 @@ class TestAuthCapabilities:
         http.clear_default_auth()
         assert http.get_basic_auth() is None
         assert http.get_basic_auth() is None
+
+    def test_clear_default_auth_removes_auth_from_persistent_prepared_request(self):
+        http = RequestsWrapper(
+            {'username': 'user', 'password': 'pass', 'persist_connections': True},
+            {},
+        )
+        session = http.session
+        http.trust_env = False
+        http.clear_default_auth()
+        captured = {}
+
+        def fake_send(prepared_request, **kwargs):
+            captured['request'] = prepared_request
+            response = requests.Response()
+            response.status_code = 200
+            return response
+
+        with mock.patch.object(session, 'send', side_effect=fake_send):
+            http.get('http://example.com')
+
+        prepared_request = captured['request']
+        assert prepared_request.headers.get('Authorization') is None
 
 
 class TestTlsAndProxyCapabilities:
@@ -301,6 +324,44 @@ class TestResponseProtocolSurface:
             assert entered is wrapper
 
         response.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize('backend', ['requests', 'mock'])
+@pytest.mark.parametrize(
+    ('content', 'delimiter', 'decode_unicode', 'expected', 'element_type'),
+    [
+        (b'', None, False, [], bytes),
+        (b'a\n', None, False, [b'a'], bytes),
+        (b'a\n\n', None, False, [b'a', b''], bytes),
+        (b'a|', b'||', False, [b'a|'], bytes),
+        (b'a||', b'||', False, [b'a', b''], bytes),
+        ('café\n\n'.encode('utf-8'), None, True, ['café', ''], str),
+        ('café||'.encode('utf-8'), '||', True, ['café', ''], str),
+    ],
+)
+def test_iter_lines_contract(
+    backend: str,
+    content: bytes,
+    delimiter: bytes | str | None,
+    decode_unicode: bool,
+    expected: list[bytes | str],
+    element_type: type[bytes] | type[str],
+) -> None:
+    if backend == 'requests':
+        raw_response = requests.Response()
+        raw_response._content = content
+        raw_response._content_consumed = True
+        response = ResponseWrapper(raw_response, 1024)
+    else:
+        response = MockHTTPResponse(content=content)
+
+    if decode_unicode:
+        response.encoding = 'utf-8'
+
+    actual = list(response.iter_lines(decode_unicode=decode_unicode, delimiter=delimiter))
+
+    assert actual == expected
+    assert [type(line) for line in actual] == [element_type] * len(expected)
 
 
 class TestPeerCert:

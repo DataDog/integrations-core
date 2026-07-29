@@ -57,12 +57,6 @@ def mocked_request(mock_http):
     yield
 
 
-@pytest.fixture
-def mocked_auth_request(mock_http):
-    mock_http.get.side_effect = requests_get_mock
-    yield
-
-
 def requests_get_mock(url, *args, **kwargs):
     if url == YARN_CLUSTER_METRICS_URL:
         return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'cluster_metrics'))

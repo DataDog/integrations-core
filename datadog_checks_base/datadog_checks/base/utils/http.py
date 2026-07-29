@@ -22,6 +22,7 @@ from requests import auth as requests_auth
 from requests import cookies as requests_cookies
 from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
+from requests.structures import CaseInsensitiveDict
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3.exceptions import ReadTimeoutError as Urllib3ReadTimeoutError
 from wrapt import ObjectProxy
@@ -676,6 +677,8 @@ class RequestsWrapper(object):
 
     def clear_default_auth(self) -> None:
         self._options['auth'] = None
+        if self._session is not None:
+            self._session.auth = None
 
     def proxy_for_url(self, url: str) -> str | None:
         if self.should_bypass_proxy(url):
@@ -733,21 +736,25 @@ class RequestsWrapper(object):
         if 'timeout' in options:
             options['timeout'] = _normalize_timeout_value(options['timeout'])
 
-        new_options = ChainMap(options, self._options)
-
-        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.debug('An unverified HTTPS request is being made to %s', url)
-
         extra_headers = options.pop('extra_headers', None)
-        if extra_headers is not None:
-            new_options['headers'] = new_options['headers'].copy()
-            new_options['headers'].update(extra_headers)
+        explicit_headers = options.get('headers')
 
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
         self.handle_auth_token(method=method, url=url, default_options=self._options)
+
+        new_options = ChainMap(options, self._options)
+        request_headers = CaseInsensitiveDict(
+            explicit_headers if explicit_headers is not None else self._options['headers']
+        )
+        if extra_headers is not None:
+            request_headers.update(extra_headers)
+        new_options['headers'] = request_headers
+
+        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
+            self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -765,6 +772,12 @@ class RequestsWrapper(object):
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self._options, error=str(e))
+                    retry_headers = CaseInsensitiveDict(
+                        explicit_headers if explicit_headers is not None else self._options['headers']
+                    )
+                    if extra_headers is not None:
+                        retry_headers.update(extra_headers)
+                    new_options['headers'] = retry_headers
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)

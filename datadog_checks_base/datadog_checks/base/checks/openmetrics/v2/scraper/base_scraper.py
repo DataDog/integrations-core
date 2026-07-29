@@ -220,7 +220,7 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = self.check.http
+        self.http = self.check.create_http_client(config)
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))

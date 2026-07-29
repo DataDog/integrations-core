@@ -45,12 +45,6 @@ def mocked_request(mock_http):
     yield
 
 
-@pytest.fixture
-def mocked_auth_request(mock_http):
-    mock_http.get.side_effect = requests_get_mock
-    yield
-
-
 def requests_get_mock(url, *args, **kwargs):
     if url == NAME_SYSTEM_STATE_URL:
         return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_state.json'))

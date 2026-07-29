@@ -53,12 +53,6 @@ def mocked_request(mock_http):
     yield
 
 
-@pytest.fixture
-def mocked_auth_request(mock_http):
-    mock_http.get.side_effect = requests_get_mock
-    yield
-
-
 def get_custom_hosts():
     return [(host, '127.0.0.1') for host in MOCKED_E2E_HOSTS]
 
