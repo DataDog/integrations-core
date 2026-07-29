@@ -21,9 +21,14 @@ from .common import MOCKED_INSTANCE
 HERE = get_here()
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
-# Candidate /16 blocks for the kind service and pod networks. Kueue's controller and webhook
-# bootstrap over in-cluster Service IPs, so a subnet overlapping a host route (for example a VPN)
-# breaks cert bootstrap and crashloops the controller. We pick two that avoid the host routes.
+# Two independent failures crashloop the controller on a fresh cluster, and both mitigations below
+# are needed because they address different causes:
+#   1. A kind service or pod subnet overlapping a host route (for example a VPN) hijacks in-cluster
+#      traffic to the API server, so the webhook's cert bootstrap never completes. Handled by the
+#      subnet selection here.
+#   2. The visibility server's own cert bootstrap fails independently of networking. Handled by
+#      `disable_visibility_server`.
+# Candidate /16 blocks for the kind service and pod networks.
 SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in (250, 251, 252, 253, 199, 198, 60, 61)] + [
     f'172.{octet}.0.0/16' for octet in (28, 29, 30, 31)
 ]
@@ -133,7 +138,12 @@ def wait_for_controller():
 
 
 def disable_visibility_server():
-    """Disable Kueue's visibility server, whose cert bootstrap crashloops the controller in some clusters."""
+    """Disable Kueue's visibility server, whose cert bootstrap crashloops the controller in some clusters.
+
+    This is a separate failure from the subnet collision the kind config guards against, so both
+    mitigations are required. The trade-off is that the env no longer represents a default install:
+    `VisibilityOnDemand` is Beta and on by default since v0.9, and the check does not read it.
+    """
     run_command(
         [
             'kubectl',
