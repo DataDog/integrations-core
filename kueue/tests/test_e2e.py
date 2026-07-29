@@ -47,9 +47,8 @@ def test_e2e_workload_events(dd_agent_check, aggregator):
         kubectl_env = {**os.environ, 'KUBECONFIG': kubeconfig.name}
 
         run_command(['kubectl', 'delete', 'job/event-workload', '-n', 'default', '--ignore-not-found'], env=kubectl_env)
-        check = KueueCheck('kueue', {}, [load_check_instance(kubeconfig_dict)])
-        check._parse_workload_events_config()
-        check.check(check.instance)
+        check = KueueCheck(CHECK_NAME, {}, [load_check_instance(kubeconfig_dict)])
+        run_check(check)
 
         apply_event_workload(kubectl_env)
         workload_name = wait_for_workload('event-workload', kubectl_env)
@@ -69,9 +68,15 @@ def test_e2e_workload_events(dd_agent_check, aggregator):
     wait_for_workload_event(check, aggregator, f'Workload default/{workload_name} admitted.')
 
 
+def run_check(check):
+    """Run the check the way the Agent does so its initializations are applied."""
+    error = check.run()
+    assert not error, error
+
+
 def wait_for_workload_event(check, aggregator, msg_text):
     for _ in range(10):
-        check.check(check.instance)
+        run_check(check)
         try:
             aggregator.assert_event(
                 msg_text,

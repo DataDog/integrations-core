@@ -16,13 +16,16 @@ from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.utils import get_active_env
 
 from .common import MOCKED_INSTANCE
 
 HERE = get_here()
+CHECK_NAME = 'kueue'
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
 MANAGER_CONTAINER = 'manager'  # container name in the upstream controller deployment
+WORKLOAD_IMAGE = 'alpine:3.19.1'  # keep in sync with the Job manifests under tests/kind
 # Two independent failures crashloop the controller on a fresh cluster, and both mitigations below
 # are needed because they address different causes:
 #   1. A kind service or pod subnet overlapping a host route (for example a VPN) hijacks in-cluster
@@ -217,7 +220,17 @@ def disable_visibility_server():
     )
 
 
+def preload_workload_image():
+    """Pull the workload image once and side-load it, instead of once per Job pod from Docker Hub."""
+    run_command(['docker', 'pull', WORKLOAD_IMAGE])
+    run_command(
+        # Cluster naming matches datadog_checks_dev/dev/kind.py.
+        ['kind', 'load', 'docker-image', WORKLOAD_IMAGE, '--name', f'cluster-{CHECK_NAME}-{get_active_env()}'],
+    )
+
+
 def setup_kueue():
+    preload_workload_image()
     run_command(
         [
             'kubectl',
@@ -359,6 +372,8 @@ def dd_environment():
                 'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
                 'collect_workload_events': True,
                 'kube_config_dict': kubeconfig_content,
+                # The workload-events test drives several consecutive check runs and needs the event
+                # state to advance, which a once-per-env interval prevented.
                 'min_collection_interval': 30,
             }
         ]
