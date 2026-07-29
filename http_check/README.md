@@ -72,7 +72,17 @@ When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent]
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-**Note**: If you set `enable_http_outcome_tag` to `true`, the Agent adds an `http_outcome` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. The value is the HTTP status code of the response, for example `http_outcome:200`. `network.http.can_connect` and `network.http.cant_connect` are also submitted when no response is received. In that case, their value is set to `ssl_error`, `timeout`, `connection_error`, or `socket_error`. The Agent submits `network.http.response_time` only when a response is received, so its value is always a status code.
+**Note**: If you set `enable_http_outcome_tag` to `true`, the Agent adds an `http_outcome` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. The value is one of the following:
+
+| `http_outcome` value | Meaning |
+| -------------------- | ------- |
+| An HTTP status code, such as `200` or `502` | The endpoint returned a response. |
+| `ssl_error` | The TLS connection failed, for example a certificate that cannot be verified. |
+| `timeout` | The request timed out while connecting or while waiting for the response. |
+| `connection_error` | The connection could not be established, for example a refused connection, a DNS failure, or a proxy error. |
+| `socket_error` | A socket error occurred that does not fall into the categories above. |
+
+Only `network.http.can_connect` and `network.http.cant_connect` are submitted when no response is received, so those are the only metrics that can carry a non-numeric value. `network.http.response_time` always carries a status code.
 
 `http_outcome` describes the HTTP response. The metric value carries the verdict of the check. For example, `network.http.can_connect` is `0` with `http_outcome:200` when the endpoint returns 200 but the response fails the `content_match` check. The same applies when 200 falls outside the codes allowed by `http_response_status_code`.
 

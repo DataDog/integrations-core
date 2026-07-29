@@ -123,11 +123,20 @@ instances:
     ## When enabled, the Agent adds the `http_outcome` tag to the `network.http.can_connect`,
     ## `network.http.cant_connect`, and `network.http.response_time` metrics.
     ##
-    ## The value is the HTTP status code of the response, for example `http_outcome:200`.
-    ## `network.http.can_connect` and `network.http.cant_connect` are also submitted when no
-    ## response is received. In that case, the value is set to `ssl_error`, `timeout`,
-    ## `connection_error`, or `socket_error`. The Agent submits `network.http.response_time`
-    ## only when a response is received, so its value is always a status code.
+    ## The value is the HTTP status code of the response, for example `http_outcome:200`. When no
+    ## response is received, the value is one of the following instead:
+    ##
+    ##   - `ssl_error`: The TLS connection failed, for example a certificate that cannot be
+    ##     verified.
+    ##   - `timeout`: The request timed out while connecting or while waiting for the response.
+    ##   - `connection_error`: The connection could not be established, for example a refused
+    ##     connection, a DNS failure, or a proxy error.
+    ##   - `socket_error`: A socket error occurred that does not fall into the categories above.
+    ##
+    ## Only `network.http.can_connect` and `network.http.cant_connect` are submitted when no
+    ## response is received, so those are the only metrics that can carry a non-numeric value.
+    ## The Agent submits `network.http.response_time` only when a response is received, so its
+    ## value is always a status code.
     ##
     ## Enabling this option splits each metric into one context per value. Monitors that
     ## aggregate these metrics without grouping by `http_outcome` evaluate an average across
