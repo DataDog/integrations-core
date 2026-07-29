@@ -1,0 +1,1 @@
+Reduce excessive log volume from MSAL and urllib3 during Azure AD managed authentication token requests.
