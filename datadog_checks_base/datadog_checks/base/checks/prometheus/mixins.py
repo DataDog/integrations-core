@@ -12,6 +12,7 @@ from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.utils.headers import DEFAULT_ACCEPT, DEFAULT_ACCEPT_ENCODING
 from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
 from datadog_checks.base.utils.prometheus import metrics_pb2
@@ -471,11 +472,13 @@ class PrometheusScraperMixin(object):
         if bearer_token is not None:
             http_handler.set_header('Authorization', 'Bearer {}'.format(bearer_token))
 
-        if http_handler.get_header('accept-encoding') is None:
+        # Never clobber a header the user explicitly configured. get_default_headers() seeds both of
+        # these, so their seeded value means "unset" and is safe to replace.
+        if http_handler.get_header('accept-encoding') in (None, DEFAULT_ACCEPT_ENCODING):
             http_handler.set_header('accept-encoding', 'gzip')
 
         # Explicitly set the content type we accept
-        if http_handler.get_header('accept') is None:
+        if http_handler.get_header('accept') in (None, DEFAULT_ACCEPT):
             http_handler.set_header('accept', 'text/plain')
 
         return http_handler
