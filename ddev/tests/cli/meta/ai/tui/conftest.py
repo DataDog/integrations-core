@@ -31,7 +31,7 @@ from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.theme import togo_theme
 
 LARGE_TERMINAL = (120, 50)
-STATUS_VARIABLE_KEYS = ("status-running", "status-pending", "status-done", "status-failed")
+STATUS_VARIABLE_KEYS = ("status-running", "status-pending", "status-done", "status-failed", "status-cancelled")
 
 
 def export_screenshot_text(app: App[Any]) -> str:

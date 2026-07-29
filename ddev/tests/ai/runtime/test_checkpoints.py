@@ -97,6 +97,30 @@ def test_write_multiple_phases(manager: CheckpointManager):
     assert data["phase3"].reason == "maximum runtime reached"
 
 
+def test_failed_checkpoint_error_type_round_trips(manager: CheckpointManager):
+    manager.write_phase_checkpoint(
+        "phase1",
+        make_failed_checkpoint(error_type="GoalAttemptsExhausted"),
+    )
+
+    checkpoint = manager.read()["phase1"]
+
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.error_type == "GoalAttemptsExhausted"
+
+
+def test_failed_checkpoint_without_error_type_still_parses(manager: CheckpointManager):
+    manager.write_phase_checkpoint("phase1", make_failed_checkpoint())
+    raw = yaml.safe_load(manager._path.read_text())
+    raw["phase1"].pop("error_type")
+    manager._path.write_text(yaml.dump(raw))
+
+    checkpoint = manager.read()["phase1"]
+
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.error_type is None
+
+
 def test_write_overwrites_existing_phase(manager: CheckpointManager):
     manager.write_phase_checkpoint("phase1", make_failed_checkpoint())
     manager.write_phase_checkpoint("phase1", make_success_checkpoint())

@@ -13,14 +13,22 @@ from typing import TYPE_CHECKING
 
 from textual import events, work
 from textual.binding import Binding
+from textual.containers import Horizontal
 from textual.css.query import NoMatches
 from textual.widget import Widget
-from textual.widgets import Static
+from textual.widgets import Button, Static
 from textual.worker import Worker
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
+from ddev.ai.runtime.outcome import (
+    PhaseReportStatus,
+    RunOutcome,
+    RunOutcomeBuildError,
+    RunOutcomeError,
+    RunVerdict,
+)
 from ddev.cli.meta.ai.rendering import (
     render_agent_error_line,
     render_agent_finish_line,
@@ -54,9 +62,12 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseFinished,
     PhaseStarted,
     RunErrored,
+    RunFinished,
+    RunOutcomeErrored,
 )
 from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug, resume_completed_phases
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
+from ddev.cli.meta.ai.tui.screens.formatting import compact_error_detail
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
 from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogEntry, PhaseLogScreen
@@ -69,8 +80,6 @@ if TYPE_CHECKING:
 
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
 
-BANNER_ERROR_MAX_CHARS = 200
-
 
 class ExecutionScreen(TogoScreen):
     """Live execution screen: pipeline graph plus per-phase drill-down logs."""
@@ -78,6 +87,7 @@ class ExecutionScreen(TogoScreen):
     BINDINGS = [
         Binding("escape", "back", "Back", priority=True),
         Binding("ctrl+c", "copy_or_cancel_run", "Copy / Cancel"),
+        Binding("s", "show_outcome", "Summary"),
     ]
 
     def __init__(
@@ -108,6 +118,7 @@ class ExecutionScreen(TogoScreen):
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
+        self._outcome: RunOutcome | None = None
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -120,6 +131,12 @@ class ExecutionScreen(TogoScreen):
         pipeline = PipelineGraph(self.flow, self._phase_statuses, id="pipeline")
         pipeline.border_title = "Pipeline"
         yield pipeline
+        actions = Horizontal(
+            Button("View summary", id="view-summary", variant="primary"),
+            id="execution-actions",
+        )
+        actions.display = self._outcome is not None
+        yield actions
 
     def on_mount(self) -> None:
         self.togo_app.bridge_target = self
@@ -155,6 +172,12 @@ class ExecutionScreen(TogoScreen):
         if not self.copy_selection():
             self.action_cancel_run()
 
+    def action_show_outcome(self) -> None:
+        if self._outcome is not None:
+            from ddev.cli.meta.ai.tui.screens.ending import EndingScreen
+
+            self.app.push_screen(EndingScreen(self._outcome))
+
     def action_back(self) -> None:
         if not self.togo_app.execution_status.is_active:
             self.app.pop_screen()
@@ -173,6 +196,11 @@ class ExecutionScreen(TogoScreen):
             event.stop()
             self.action_back()
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "view-summary":
+            event.stop()
+            self.action_show_outcome()
+
     @work(exit_on_error=False)
     async def _run_orchestrator(self) -> None:
         from ddev.cli.meta.ai.tui.bridge import build_app_callback_set
@@ -187,11 +215,19 @@ class ExecutionScreen(TogoScreen):
                 orchestrator = self._build_real_orchestrator(callbacks)
             self._orchestrator = orchestrator
             await orchestrator.run_async()
-            self.togo_app.execution_status = ExecutionStatus.COMPLETED
+            if orchestrator.outcome is None:
+                self.post_message(
+                    RunOutcomeErrored(
+                        RunOutcomeBuildError("The orchestrator returned without producing a run outcome"),
+                        None,
+                    )
+                )
         except asyncio.CancelledError:
             if self.togo_app.bridge_target is self:
                 self.togo_app.execution_status = ExecutionStatus.IDLE
             raise
+        except RunOutcomeError as error:
+            self.post_message(RunOutcomeErrored(error, orchestrator.outcome if orchestrator is not None else None))
         except Exception as error:
             if orchestrator is None or orchestrator.failed_phase is None:
                 self.post_message(ExecutionFailed(error))
@@ -233,20 +269,15 @@ class ExecutionScreen(TogoScreen):
             pass
 
     def _compact_error_detail(self, error: BaseException, phase_id: str | None = None) -> str:
-        detail = next((line.strip() for line in str(error).splitlines() if line.strip()), type(error).__name__)
-        if phase_id is not None:
-            detail = detail.removeprefix(f"Phase '{phase_id}' failed: ")
-            detail = detail.removeprefix(f"Phase '{phase_id}': ")
-        if len(detail) > BANNER_ERROR_MAX_CHARS:
-            detail = f"{detail[: BANNER_ERROR_MAX_CHARS - 1].rstrip()}…"
-        return detail
+        return compact_error_detail(error, phase_id)
 
-    def _show_error_banner(self, message: str) -> None:
+    def _show_error_banner(self, message: str, *, warning: bool = False) -> None:
         try:
             widget = self.query_one("#execution-error", Static)
         except NoMatches:
             return
         widget.update(message)
+        widget.set_class(warning, "outcome-warning")
         widget.display = True
 
     def _show_run_error(self, error: BaseException, phase_id: str | None = None) -> None:
@@ -279,6 +310,45 @@ class ExecutionScreen(TogoScreen):
         for (task_phase, task_name), status in list(self._task_statuses.items()):
             if task_phase == phase_id and status in (RunStatus.RUNNING, RunStatus.PENDING):
                 self._task_statuses[(task_phase, task_name)] = RunStatus.FAILED
+
+    def _apply_outcome_statuses(self, outcome: RunOutcome) -> None:
+        phase_statuses = {
+            PhaseReportStatus.SUCCEEDED: RunStatus.DONE,
+            PhaseReportStatus.SKIPPED_ON_RESUME: RunStatus.DONE,
+            PhaseReportStatus.FAILED: RunStatus.FAILED,
+            PhaseReportStatus.CANCELLED: RunStatus.CANCELLED,
+            PhaseReportStatus.NOT_RUN: RunStatus.PENDING,
+        }
+        for report in outcome.phases:
+            self._stop_phase_thinking(report.phase_id)
+            self._phase_statuses[report.phase_id] = phase_statuses[report.status]
+            for (task_phase, task_name), status in list(self._task_statuses.items()):
+                if task_phase != report.phase_id:
+                    continue
+                if report.status in (PhaseReportStatus.SUCCEEDED, PhaseReportStatus.SKIPPED_ON_RESUME):
+                    self._task_statuses[(task_phase, task_name)] = RunStatus.DONE
+                elif report.status is PhaseReportStatus.FAILED:
+                    self._task_statuses[(task_phase, task_name)] = RunStatus.FAILED
+                elif report.status is PhaseReportStatus.CANCELLED and status is RunStatus.RUNNING:
+                    self._task_statuses[(task_phase, task_name)] = RunStatus.CANCELLED
+                elif report.status is PhaseReportStatus.NOT_RUN:
+                    self._task_statuses[(task_phase, task_name)] = RunStatus.PENDING
+        self._update_display()
+
+    def _accept_outcome(self, outcome: RunOutcome) -> None:
+        self._outcome = outcome
+        self._apply_outcome_statuses(outcome)
+        self.togo_app.execution_status = {
+            RunVerdict.SUCCEEDED: ExecutionStatus.COMPLETED,
+            RunVerdict.FAILED: ExecutionStatus.FAILED,
+            RunVerdict.INCOMPLETE: ExecutionStatus.INCOMPLETE,
+        }[outcome.verdict]
+        try:
+            actions = self.query_one("#execution-actions", Horizontal)
+            actions.display = True
+            actions.query_one("#view-summary", Button).focus()
+        except NoMatches:
+            pass
 
     def register_phase_log_screen(self, screen: PhaseLogScreen) -> None:
         self._open_phase_log_screens.setdefault(screen.phase_id, []).append(screen)
@@ -363,6 +433,27 @@ class ExecutionScreen(TogoScreen):
             self._show_phase_error_summary()
         else:
             self._show_error_banner("Run failed.")
+
+    def on_run_finished(self, msg: RunFinished) -> None:
+        self._accept_outcome(msg.outcome)
+
+    def on_run_outcome_errored(self, msg: RunOutcomeErrored) -> None:
+        if msg.outcome is not None:
+            if self._outcome is None:
+                self._accept_outcome(msg.outcome)
+            detail = self._compact_error_detail(msg.error)
+            self._show_error_banner(
+                f"The flow outcome is available, but it could not be persisted: {detail}",
+                warning=True,
+            )
+            return
+
+        self.togo_app.execution_status = ExecutionStatus.OUTCOME_ERROR
+        detail = self._compact_error_detail(msg.error)
+        self._show_error_banner(
+            f"The flow ended, but its outcome could not be determined: {detail}",
+            warning=True,
+        )
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED

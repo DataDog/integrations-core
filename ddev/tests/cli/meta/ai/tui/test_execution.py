@@ -18,6 +18,15 @@ from textual.widgets import Input
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import AgentConfig, FlowConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
 from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.runtime.outcome import (
+    FailureKind,
+    PhaseReport,
+    PhaseReportStatus,
+    RunOutcome,
+    RunOutcomeBuildError,
+    RunOutcomePersistenceError,
+    RunVerdict,
+)
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
 
@@ -137,6 +146,46 @@ def _make_react_result(response: Any) -> Any:
     )
 
 
+def _make_outcome(
+    phases: list[tuple[str, list[str]]],
+    *,
+    verdict: RunVerdict = RunVerdict.SUCCEEDED,
+    statuses: dict[str, PhaseReportStatus] | None = None,
+) -> RunOutcome:
+    reports = [
+        PhaseReport(
+            phase_id=phase_id,
+            status=(statuses or {}).get(phase_id, PhaseReportStatus.SUCCEEDED),
+            started_at="2026-01-01T00:00:00+00:00",
+            finished_at="2026-01-01T00:00:01+00:00",
+            duration_seconds=1,
+            input_tokens=0,
+            output_tokens=0,
+            goal_validations=None,
+            error=None,
+            error_type=None,
+        )
+        for phase_id, _ in phases
+    ]
+    return RunOutcome(
+        flow_name="Test Flow",
+        verdict=verdict,
+        failure_kind=FailureKind.NONE if verdict is RunVerdict.SUCCEEDED else FailureKind.TIMEOUT,
+        failed_phase=None,
+        error=None,
+        error_type=None,
+        started_at="2026-01-01T00:00:00+00:00",
+        finished_at="2026-01-01T00:00:01+00:00",
+        duration_seconds=1,
+        phases=reports,
+        recorded_input_tokens=0,
+        recorded_output_tokens=0,
+        resumed=False,
+        skipped_on_resume=[],
+        run_dir="/tmp/test-run",
+    )
+
+
 class _FakeOrchestrator:
     """Scripted fake orchestrator for tests — no API key, no real agents.
 
@@ -157,11 +206,18 @@ class _FakeOrchestrator:
         self._phases = phases
         self._fail_on_phase = fail_on_phase
         self.failed_phase: str | None = None
+        self._outcome: RunOutcome | None = None
+
+    @property
+    def outcome(self) -> RunOutcome | None:
+        return self._outcome
 
     async def run_async(self) -> None:
         """Fire the scripted event sequence through the callbacks."""
         for phase_id, task_names in self._phases:
             await self._run_phase(phase_id, task_names)
+        self._outcome = _make_outcome(self._phases)
+        await self._callbacks.fire_run_finished(self._outcome)
 
     async def _run_phase(self, phase_id: str, task_names: list[str]) -> None:
         from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -1277,11 +1333,14 @@ async def test_execution_finishes_phases_before_reporting_success() -> None:
 
         def __init__(self, callbacks: Any) -> None:
             self.callbacks = callbacks
+            self.outcome: RunOutcome | None = None
 
         async def run_async(self) -> None:
             for phase_id, _ in DEMO_PHASES:
                 await self.callbacks.fire_phase_finish(phase_id)
             await release.wait()
+            self.outcome = _make_outcome(DEMO_PHASES)
+            await self.callbacks.fire_run_finished(self.outcome)
 
     flow = _make_flow()
     app = _app(flow)
@@ -1357,10 +1416,13 @@ async def test_phase_log_header_keeps_running_status() -> None:
 
         def __init__(self, callbacks: Any) -> None:
             self.callbacks = callbacks
+            self.outcome: RunOutcome | None = None
 
         async def run_async(self) -> None:
             await self.callbacks.fire_phase_start("phase_1")
             await release.wait()
+            self.outcome = _make_outcome(DEMO_PHASES)
+            await self.callbacks.fire_run_finished(self.outcome)
 
     flow = _make_flow()
     app = _app(flow)
@@ -1381,6 +1443,109 @@ async def test_phase_log_header_keeps_running_status() -> None:
         release.set()
         await pilot.pause()
         assert "✓ completed" in export_screenshot_text(app)
+
+
+async def test_incomplete_outcome_reconciles_cancelled_phase_and_stops_thinking() -> None:
+    from ddev.cli.meta.ai.tui.messages import RunFinished
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.status import ExecutionStatus
+
+    flow = _make_flow()
+    app = _app(flow)
+    screen = ExecutionScreen(flow, orchestrator_builder=_make_builder())
+    outcome = _make_outcome(
+        DEMO_PHASES,
+        verdict=RunVerdict.INCOMPLETE,
+        statuses={
+            "phase_1": PhaseReportStatus.CANCELLED,
+            "phase_2": PhaseReportStatus.NOT_RUN,
+        },
+    )
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        await app.push_screen(screen)
+        await pilot.pause()
+        screen._phase_statuses = {"phase_1": RunStatus.RUNNING, "phase_2": RunStatus.RUNNING}
+        screen._task_statuses[("phase_1", "task_one")] = RunStatus.RUNNING
+        screen._task_statuses[("phase_2", "task_two")] = RunStatus.RUNNING
+        screen._active_thinking["phase_1"]["agent:phase:1"] = "thinking"
+
+        screen.on_run_finished(RunFinished(outcome))
+        await pilot.pause()
+
+        assert app.execution_status is ExecutionStatus.INCOMPLETE
+        assert screen._phase_statuses == {
+            "phase_1": RunStatus.CANCELLED,
+            "phase_2": RunStatus.PENDING,
+        }
+        assert screen._task_statuses[("phase_1", "task_one")] is RunStatus.CANCELLED
+        assert screen._task_statuses[("phase_2", "task_two")] is RunStatus.PENDING
+        assert screen._active_thinking["phase_1"] == {}
+
+
+async def test_outcome_build_error_is_not_reported_as_flow_failure() -> None:
+    from textual.containers import Horizontal
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.status import ExecutionStatus
+
+    class OutcomeBuildFailure:
+        failed_phase = None
+        outcome = None
+
+        async def run_async(self) -> None:
+            raise RunOutcomeBuildError("checkpoint unreadable")
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _: OutcomeBuildFailure())
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        banner = screen.query_one("#execution-error", Static)
+        assert app.execution_status is ExecutionStatus.OUTCOME_ERROR
+        assert "outcome could not be determined" in banner.render().plain
+        assert "checkpoint unreadable" in banner.render().plain
+        assert screen.query_one("#execution-actions", Horizontal).display is False
+
+
+async def test_outcome_persistence_error_keeps_flow_verdict_and_summary() -> None:
+    from textual.containers import Horizontal
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.status import ExecutionStatus
+
+    outcome = _make_outcome(DEMO_PHASES)
+
+    class OutcomePersistenceFailure:
+        failed_phase = None
+
+        def __init__(self, callbacks: Any) -> None:
+            self.callbacks = callbacks
+            self.outcome = outcome
+
+        async def run_async(self) -> None:
+            await self.callbacks.fire_run_finished(self.outcome)
+            raise RunOutcomePersistenceError("disk full")
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=OutcomePersistenceFailure)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        banner = screen.query_one("#execution-error", Static)
+        assert app.execution_status is ExecutionStatus.COMPLETED
+        assert "outcome is available" in banner.render().plain
+        assert "disk full" in banner.render().plain
+        assert screen.query_one("#execution-actions", Horizontal).display is True
 
 
 # ---------------------------------------------------------------------------
@@ -1845,10 +2010,13 @@ async def test_resume_transitions_to_finishing_after_remaining_phase(tmp_path: P
 
         def __init__(self, callbacks: Any) -> None:
             self.callbacks = callbacks
+            self.outcome: RunOutcome | None = None
 
         async def run_async(self) -> None:
             await self.callbacks.fire_phase_finish("phase_2")
             await release.wait()
+            self.outcome = _make_outcome(DEMO_PHASES)
+            await self.callbacks.fire_run_finished(self.outcome)
 
     app = _app(flow)
     async with app.run_test() as pilot:

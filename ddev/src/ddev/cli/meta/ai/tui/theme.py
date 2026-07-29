@@ -17,6 +17,7 @@ from ddev.cli.meta.ai.palette import (
     ROLE_GOAL_REVIEWER,
     ROLE_PHASE,
     SECONDARY,
+    STATUS_CANCELLED,
     STATUS_DONE,
     STATUS_FAILED,
     STATUS_PENDING,
@@ -52,6 +53,7 @@ togo_theme = Theme(
         "status-pending": STATUS_PENDING,
         "status-done": STATUS_DONE,
         "status-failed": STATUS_FAILED,
+        "status-cancelled": STATUS_CANCELLED,
     },
 )
 

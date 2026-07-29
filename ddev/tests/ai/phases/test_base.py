@@ -120,6 +120,7 @@ async def test_on_error_writes_failed_checkpoint(flow_dir, flow_context, message
     checkpoint = mgr.read()["p1"]
     assert isinstance(checkpoint, FailedCheckpoint)
     assert checkpoint.error == "boom"
+    assert checkpoint.error_type == "RuntimeError"
     assert checkpoint.started_at is None  # not started yet
 
 

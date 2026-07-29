@@ -57,6 +57,7 @@ class FailedCheckpoint(BaseModel):
     started_at: str | None
     finished_at: str
     error: str
+    error_type: str | None = None
     tokens: CheckpointTokenInfo
     goal_validations: list[GoalValidationRecord] | None = None
 
