@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.dev.docker import CONTAINER_STABILITY_LOG_PATTERNS, assert_all_discovery_candidates_stable
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab import GitlabCheck
 from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
@@ -61,15 +61,4 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
 
 def test_e2e_discovery_all_candidates(dd_agent_check):
-    # GitLab CE's own idempotent `reconfigure` step re-diffs and reprints config files (e.g.
-    # postgresql.conf's comments enumerating log-severity levels, which include the words "error",
-    # "panic" and "fatal") on every boot, and its embedded PostgreSQL emits expected transient
-    # "FATAL: Peer authentication failed" lines while pg_hba.conf converges. Its bundled
-    # Prometheus/Grafana/postgres_exporter and one-time self-monitoring project bootstrap also log
-    # benign lines containing "error" (missing Kubernetes service discovery cert, missing Grafana
-    # plugin dir, missing postgres_exporter queries.yaml, expected Sidekiq transaction warnings).
-    # None of this relates to the discovered candidate's own health, so only the patterns that
-    # indicate a genuine crash are kept here.
-    noisy_patterns = (r'error', r'panic', r'fatal')
-    log_patterns = tuple(pattern for pattern in CONTAINER_STABILITY_LOG_PATTERNS if pattern not in noisy_patterns)
-    assert_all_discovery_candidates_stable(dd_agent_check, GitlabCheck, log_patterns=log_patterns)
+    assert_all_discovery_candidates_stable(dd_agent_check, GitlabCheck)
