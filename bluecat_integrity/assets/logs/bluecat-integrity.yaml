@@ -268,6 +268,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class DNS Activity [4003]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@payloadType:dnstap"
       processors:
@@ -690,6 +692,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class DHCP Activity [4004]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@payloadType:(dhcpv4-packet OR dhcpv6-packet)"
       processors:
