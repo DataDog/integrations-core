@@ -23,7 +23,13 @@ from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .table_metrics import ClickhouseTableMetrics
-from .utils import ErrorSanitizer, cluster_aware_query
+from .utils import (
+    CLUSTER_MACRO_QUERY,
+    CLUSTER_NAME_QUERY,
+    CLUSTER_TAG,
+    ErrorSanitizer,
+    cluster_aware_query,
+)
 
 try:
     import datadog_agent
@@ -60,6 +66,8 @@ class ClickhouseCheck(DatabaseCheck):
         self._resolved_hostname = None
         self._database_hostname = None
         self._dbms_version = None
+        self._cluster_name = None
+        self._cluster_name_resolved = False
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
@@ -242,6 +250,12 @@ class ClickhouseCheck(DatabaseCheck):
     def check(self, _):
         self.connect()
         self._server_version = self.select_version()
+
+        # Must run before the query manager is built and before the DBM jobs are handed
+        # self.tags below, since both snapshot the tag list.
+        if self.cluster_name:
+            self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
+
         if self._query_manager is None or self._query_manager_version != self._server_version:
             self._query_manager = self._build_query_manager()
             self._query_manager_version = self._server_version
@@ -356,6 +370,32 @@ class ClickhouseCheck(DatabaseCheck):
         if self._database_hostname is None:
             self._database_hostname = resolve_db_host(self._config.server)
         return self._database_hostname
+
+    @property
+    def cluster_name(self) -> str | None:
+        """The cluster this instance belongs to, or None when it cannot be determined.
+
+        Requires a live client, so this resolves on the first check run rather than at
+        init. The "not found" outcome is cached too: a deployment without a cluster
+        should not re-query on every run.
+        """
+        if not self._cluster_name_resolved:
+            self._cluster_name = self._resolve_cluster_name()
+            self._cluster_name_resolved = True
+        return self._cluster_name
+
+    def _resolve_cluster_name(self) -> str | None:
+        for query in (CLUSTER_MACRO_QUERY, CLUSTER_NAME_QUERY):
+            try:
+                rows = self.execute_query_raw(query)
+            except Exception as e:
+                self.log.debug('Unable to resolve cluster name with %r: %s', query, e)
+                continue
+            if rows and rows[0] and rows[0][0]:
+                return str(rows[0][0])
+        # Deliberately no 'default' fallback: an absent tag is better than a wrong one.
+        self.log.debug('No ClickHouse cluster name found; %s tag will not be emitted', CLUSTER_TAG)
+        return None
 
     @property
     def database_identifier_template(self) -> str:
