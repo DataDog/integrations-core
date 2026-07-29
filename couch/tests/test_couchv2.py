@@ -11,8 +11,8 @@ from collections import defaultdict
 from copy import deepcopy
 
 import pytest
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -334,14 +334,15 @@ def test_indexing_metrics(aggregator, gauges, active_tasks):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_view_compaction_metrics(aggregator, gauges):
+def test_view_compaction_metrics(aggregator, gauges, check):
     class LoadGenerator(threading.Thread):
         STOP = 0
         RUN = 1
 
-        def __init__(self, server, auth):
+        def __init__(self, server, auth, http):
             self._server = server
             self._auth = auth
+            self._http = http
             self._status = self.RUN
             threading.Thread.__init__(self)
 
@@ -360,35 +361,35 @@ def test_view_compaction_metrics(aggregator, gauges):
         def generate_views(self):
             url = '{}/kennel/_design/dummy/_view/all'.format(self._server)
             try:
-                r = requests.get(url, auth=self._auth, timeout=1)
+                r = self._http.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
-            except requests.exceptions.Timeout:
+            except HTTPTimeoutError:
                 pass
             url = '{}/kennel/_design/dummy/_view/by_data'.format(self._server)
             try:
-                r = requests.get(url, auth=self._auth, timeout=1)
+                r = self._http.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
-            except requests.exceptions.Timeout:
+            except HTTPTimeoutError:
                 pass
 
         def update_doc(self, doc):
             body = {'data': str(random.randint(0, 1000000000)), '_rev': doc['rev']}
 
             url = '{}/kennel/{}'.format(self._server, doc['id'])
-            r = requests.put(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
+            r = self._http.put(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
             r.raise_for_status()
             return r.json()
 
         def post_doc(self, doc_id):
             body = {"_id": doc_id, "data": str(time.time())}
             url = '{}/kennel'.format(self._server)
-            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
+            r = self._http.post(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
             r.raise_for_status()
             return r.json()
 
         def compact_views(self):
             url = '{}/kennel/_compact/dummy'.format(self._server)
-            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'})
+            r = self._http.post(url, auth=self._auth, headers={'Content-Type': 'application/json'})
             r.raise_for_status()
 
         def stop(self):
@@ -396,7 +397,7 @@ def test_view_compaction_metrics(aggregator, gauges):
 
     threads = []
     for _ in range(40):
-        t = LoadGenerator(common.NODE1['server'], (common.NODE1['user'], common.NODE1['password']))
+        t = LoadGenerator(common.NODE1['server'], (common.NODE1['user'], common.NODE1['password']), check.http)
         t.start()
         threads.append(t)
 
