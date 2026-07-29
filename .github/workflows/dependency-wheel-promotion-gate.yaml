@@ -8,6 +8,14 @@ on:
   merge_group:
     types: [checks_requested]
 
+# Finding and then creating the notice comment is not atomic, so two runs racing
+# on quick successive pushes would each create their own copy. github.ref points
+# at the base branch on pull_request_target, so the group is keyed on the PR to
+# avoid serializing every open PR behind one queue.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   DOCS_URL: https://datadoghq.atlassian.net/wiki/spaces/AI/pages/6182240746/Dependency+Updates
   PR_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}
@@ -73,7 +81,7 @@ jobs:
             state,
             context: 'dependency-wheel-promotion',
             description: changed
-              ? 'Wheels must be promoted to stable before merge. Run: ddev dep promote <PR_URL>'
+              ? 'Wheels must be promoted to stable before merge. Run: ddev dep promote ${{ env.PR_URL }}'
               : 'No dependency changes; promotion not required.',
           });
           core.setOutput('state', state);
