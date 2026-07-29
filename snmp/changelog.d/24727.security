@@ -1,0 +1,1 @@
+Bump pyasn1 from 0.6.3 to 0.6.4 to remediate CVE-2026-59885, CVE-2026-59886, and PYSEC-2026-3455 (denial-of-service in BER/CER/DER decoding).
