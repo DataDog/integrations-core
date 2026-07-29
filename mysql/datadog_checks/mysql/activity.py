@@ -305,7 +305,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
             if row["thread_id"] in seen:
                 # `performance_schema.events_statements_current` can contain previous statements
                 # for the same thread. We only want the most recent one.
-                if row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
+                if row["event_timer_end"] is None or row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
                     continue
                 else:
                     second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
@@ -329,7 +329,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         for row in rows:
             if (
                 row["thread_id"] in second_pass
-                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+                and row.get("event_timer_end") is not None and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
             ):
                 continue
             filtered_rows.append(row)
