@@ -272,8 +272,11 @@ def wait_for_job_workload_condition(job_name: str, condition: str) -> None:
 
 
 def get_service_account_token():
+    # The token is minted once and baked into the instance config, so it has to outlive a
+    # `ddev env start --dev` session. Without `--duration` the apiserver default is one hour,
+    # after which the scrape 401s and the failure looks like missing metrics.
     result = run_command(
-        ['kubectl', 'create', 'token', 'kueue-metrics-reader', '-n', 'default'],
+        ['kubectl', 'create', 'token', 'kueue-metrics-reader', '-n', 'default', '--duration=24h'],
         capture=True,
     )
     return result.stdout.strip()
