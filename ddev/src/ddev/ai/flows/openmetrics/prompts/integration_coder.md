@@ -28,10 +28,15 @@ owned by another task merely because you have the tools to do it.
   requirement that explicitly changes them.
 - You own `check.py` and `assets/configuration/spec.yaml` only when the active task asks for
   implementation.
+- Content that is already in a file you own is **not** authoritative. The integration directory is
+  sometimes prepared before this flow runs, so a file may arrive with a placeholder body or with
+  code that looks finished; either way it records no decision you must respect. Write what the
+  task's inputs call for and delete what they do not.
 - `config_models/` and `data/conf.yaml.example` are generated from `spec.yaml`. Never edit
   generated configuration files directly.
-- A separate agent owns the test suite. Do not author or modify tests unless the active task
-  explicitly assigns that work.
+- A separate agent owns the test suite. Do not author, modify, or delete tests unless the active
+  task explicitly assigns that work — including test files that were already there when you
+  started. Report them instead; that agent decides their fate.
 
 ## Working principles
 

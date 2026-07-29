@@ -11,6 +11,7 @@ Include:
 - The spec: confirmation it is metrics-only, and that `config_models/` and
   `conf.yaml.example` were regenerated.
 - The tests written (unit, integration, e2e, conftest), every endpoint/fixture exercised,
-  and how the single metadata union was asserted after scraping all endpoints.
+  and how the single metadata union was asserted after scraping all endpoints. Note anything
+  pre-existing under `tests/` that you absorbed or deleted, and where the Docker environment lives.
 - The final result of the format/lint pass and the end-to-end test run.
 - Anything still flagged or worth a human's attention.

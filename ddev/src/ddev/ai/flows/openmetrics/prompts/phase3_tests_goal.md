@@ -16,8 +16,9 @@ environment, runs the integration inside a real Agent, and exercises the tests.
   the concrete failure (the failing test and the error/missing-metric output) in
   `reason`, so the worker can **fix the check or the spec** — not weaken the tests — and
   the run can be retried.
-- If the tests cannot run for an environmental reason unrelated to the integration
-  (Docker unavailable, image pull failure), say so explicitly in `reason`.
+- If the tests cannot run for a reason the worker cannot fix — Docker unavailable, an image that
+  will not pull, no environment matrix to run — say so explicitly in `reason` and name the
+  obstacle, so it is not mistaken for a test that needs another attempt.
 
 ## 2 — Confirm the tests are necessary and honest
 
@@ -46,7 +47,12 @@ passes only because it asserts nothing is **not** valid. Check that:
   same justified live exclusion list as the integration test.
 - `conftest.py`'s `dd_environment` waits for every configured metrics endpoint to be healthy
   before yielding all endpoint instances.
-- `conftest.py` supplies, via `docker_run(env_vars=...)`, **every** variable the copied
+- `conftest.py` points at the integration's **actual** compose file. Locate it yourself by listing
+  `tests/` — it may be under `docker/` or `compose/`, and named `docker-compose.yaml`,
+  `docker-compose.yml`, or something ending in `.compose`. Any of those is correct; what matters is
+  that the path in `conftest.py` resolves to the file that is really there. Do not fail an
+  environment for its directory name and do not ask for it to be moved.
+- `conftest.py` supplies, via `docker_run(env_vars=...)`, **every** variable that
   compose references (image version tags, credentials, ports). An unset variable the
   compose needs is a likely cause of a startup failure — flag it specifically.
 - `conftest.py`'s ports are consistent with the compose: it must not invent arbitrary
@@ -54,7 +60,10 @@ passes only because it asserts nothing is **not** valid. Check that:
   wait on a port nothing is listening on). Either the compose's ports come from env vars
   and the conftest chooses them with `find_free_port`, or the conftest uses the compose's
   actual published ports. Flag a mismatch between the URL ports and what the compose binds.
-- There are no pointless or redundant tests.
+- There are no pointless or redundant tests, **and nothing extraneous is left in `tests/`**. List
+  the directory: it should hold the four suite files, a shared helper if one is used, the fixtures,
+  and the environment — nothing else. A stray test module is a fail regardless of who wrote it,
+  because the worker owns the whole directory; say which file and why it does not belong.
 - Any assertion that inspects the effective `metrics` config considers every mapping dict,
   not only `metrics[0]`.
 

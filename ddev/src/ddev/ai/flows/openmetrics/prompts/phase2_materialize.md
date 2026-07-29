@@ -2,13 +2,13 @@
 type: prompt
 name: phase2_materialize
 ---
-# Task — Bring in the test environment and all endpoint fixtures
+# Task — Ensure the test environment is in place and place all endpoint fixtures
 
 You are building the Datadog integration for **${integration}**. Before any code or
-tests are written, this task puts the ready-made inputs in place. You only **copy** files
-here — you do not author, read, or modify their contents.
+tests are written, this task makes sure the ready-made inputs are in place. You only **copy** and
+**locate** files here — you do not author or modify their contents.
 
-The integration lives in the scaffolded directory named after `${integration}` in
+The integration lives in the directory named after `${integration}` in
 snake_case (lowercase, each run of non-alphanumeric characters replaced by a single
 underscore). List the working tree if you need to confirm the exact directory name.
 
@@ -17,15 +17,36 @@ these inputs are large, and copying them through your response is impossible and
 unnecessary. `copy_path` copies byte-for-byte on disk and creates missing parent
 directories for you.
 
-## 1 — Copy the Docker test environment
+## 1 — Ensure the Docker test environment is in place
 
-A real, working Docker environment for this technology lives at:
+The integration needs a real, working Docker environment that runs this technology and serves the
+inspected endpoints. It arrives one of two ways, and your job is to end this task knowing exactly
+where it is.
 
-`${docker_source_path}`
+A folder holding that environment may have been supplied for this run. The path is on the next
+line, and **that line is empty when no folder was supplied**:
 
-Copy that whole directory to `<integration_name>/tests/docker/` with a single `copy_path`
-call (source = the path above, destination = `<integration_name>/tests/docker`). This brings
-the entire tree across verbatim. Do not inspect, rename, or "improve" anything inside it.
+Supplied Docker folder: ${docker_source_path}
+
+**If a path is given,** copy that whole directory to `<integration_name>/tests/docker/` with a
+single `copy_path` call (source = the path above, destination = `<integration_name>/tests/docker`).
+This brings the entire tree across verbatim. Do not rename or "improve" anything inside it.
+
+**If the line is empty,** the environment is expected to be in the integration already. Find it:
+list `<integration_name>/tests/` and look for the directory holding the compose file — `docker/`
+and `compose/` are both common, and the compose file itself may be named `docker-compose.yaml`,
+`docker-compose.yml`, or something ending in `.compose`. Leave it exactly where it is; do not move,
+rename, or reorganize it to match some other layout. The tests are written around wherever it
+actually lives, which is why the next section asks you to report it precisely.
+
+Either way, read the compose file once you have located it — enough to report the service names,
+the ports it publishes, and the environment variables it references. That is what the test author
+needs from you and the one thing here worth reading rather than copying.
+
+If neither branch leaves you with a compose file — no path was supplied **and** there is nothing
+resembling an environment under `tests/` — stop and say so plainly as your outcome. Do not invent a
+compose file, do not scaffold one from what you know about the technology, and do not press on as
+though the environment were present.
 
 ## 2 — Place every endpoint fixture
 
@@ -47,6 +68,14 @@ path. Never overwrite several endpoint snapshots into one `metrics.txt`.
 
 ## Finish
 
-Confirm the Docker tree copy and every fixture copy succeeded (the tool reports each
-destination and size/file count). Briefly summarize the Docker destination and the complete
-endpoint-to-fixture mapping. Do not list file contents.
+Confirm every copy succeeded (the tool reports each destination and size/file count), then
+summarize:
+
+- **Where the test environment is** — the directory relative to the integration root and the exact
+  compose filename, whether you copied it in or found it already there. State which of the two it
+  was. Add the service names, published ports, and environment variables the compose references.
+- The complete endpoint-to-fixture mapping.
+- Anything already under `tests/` that you did not put there — test files, helper modules — named
+  but not touched, so the phases that own them know what is waiting.
+
+Do not list file contents.

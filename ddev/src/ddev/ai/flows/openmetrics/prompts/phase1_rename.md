@@ -2,10 +2,10 @@
 type: prompt
 name: phase1_rename
 ---
-# Task — Scaffold the integration and write the endpoint metrics mappings
+# Task — Ensure the integration package exists and write the endpoint metrics mappings
 
-You are building the Datadog integration for **${integration}**. In this task you
-scaffold the integration and produce one metrics rename mapping per inspected endpoint. You do **not**
+You are building the Datadog integration for **${integration}**. In this task you make sure the
+integration package exists and produce one metrics rename mapping per inspected endpoint. You do **not**
 write `metadata.csv` here (that is the next task) and you never touch `check.py`.
 
 ## Context from the endpoint inspection
@@ -22,9 +22,12 @@ backend, a specific version, or particular traffic. Step 2b covers finding those
 official documentation. Beyond the catalog families and any metric you confirm in an
 **official** source per Step 2b, map nothing.
 
-## Step 1 — Scaffold the integration
+## Step 1 — Ensure the integration package exists
 
-Create the integration with the scaffolding tool, supplying:
+List the working tree and look for the package directory named by your standing
+integration-identity rule. It may or may not be there already.
+
+**If it is absent,** create the integration with the scaffolding tool, supplying:
 
 - **integration name** — the name derived by your standing integration-identity rule.
 - **display name** — `${integration}`, exactly as given here.
@@ -35,6 +38,12 @@ Create the integration with the scaffolding tool, supplying:
 This creates the `<integration_name>/` directory and registers the display name,
 metrics prefix, and platforms in `.ddev/config.toml`.
 
+**If it is already there,** do not run the scaffolding tool over it and do not create a second
+package. Adopt the existing directory and make its registration correct instead: read
+`.ddev/config.toml` and confirm the display name, metrics prefix, and platforms match the values
+listed above, editing that file where they do not. The identity above is what the rest of the flow
+relies on, so it wins over whatever is recorded.
+
 ## Step 2 — Read the catalogs and choose the delegation shape
 
 Read every JSONL catalog path from the inspection summary in full.
@@ -44,7 +53,7 @@ If there is more than one endpoint, **always fan out by endpoint** with one
 `<integration_name>/datadog_checks/<integration_name>/metrics/` directory. Then create one
 assignment per endpoint. Every child receives this complete system prompt, this complete task
 prompt, the endpoint name, the complete catalog path, and the exact output path from Step 3.
-State that scaffolding is complete and that the child owns only research, renaming, and
+State that the package is ready and that the child owns only research, renaming, and
 validation for its endpoint. Grant `read_file`, `create_file`, `web_search`, and `web_fetch`.
 Each child creates only its assigned file and cannot delegate further. After the parallel
 assignments return, perform Step 4 yourself.

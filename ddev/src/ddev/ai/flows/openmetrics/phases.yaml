@@ -11,7 +11,7 @@
   config:
     name: rename_metrics
     description: >-
-      Scaffold the integration, map every discovered metric to a Datadog name, and generate the combined metric metadata.
+      Ensure the integration package exists, map every discovered metric to a Datadog name, and generate the combined metric metadata.
     class: AgenticPhase
     agent: metrics_renamer
     variables:
@@ -34,7 +34,7 @@
   config:
     name: build_integration
     description: >-
-      Copy the test environment and captured fixtures, then implement the OpenMetrics check and its configuration specification.
+      Ensure the test environment is in place, copy every captured fixture, then implement the OpenMetrics check and its configuration specification.
     class: AgenticPhase
     agent: integration_coder
     variables:
@@ -45,6 +45,8 @@
     tasks:
       - name: materialize_assets
         prompt_ref: phase2_materialize
+        goal_ref: phase2_materialize_goal
+        max_goal_attempts: 2
       - name: write_code
         prompt_ref: phase2_code
         clear_context_before: true
