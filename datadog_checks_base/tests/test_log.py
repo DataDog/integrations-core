@@ -49,6 +49,19 @@ def test_init_logging_suppresses_noisy_third_party_loggers():
     assert logging.getLogger("urllib3.connectionpool").level == logging.WARNING
 
 
+def test_init_logging_preserves_stricter_configured_log_level():
+    from datadog_checks.base.stubs import datadog_agent
+
+    datadog_agent._config['log_level'] = 'error'
+    try:
+        init_logging()
+
+        assert logging.getLogger("msal").level == logging.ERROR
+        assert logging.getLogger("urllib3.connectionpool").level == logging.ERROR
+    finally:
+        datadog_agent._config.pop('log_level', None)
+
+
 def test_get_check_logger(caplog):
     class FooConfig(object):
         def __init__(self):

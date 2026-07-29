@@ -171,13 +171,15 @@ def init_logging():
 
     # MSAL (used by azure-identity's WorkloadIdentityCredential/ClientAssertionCredential for
     # Azure AD managed authentication) and its direct urllib3 usage log verbosely at DEBUG,
-    # emitting several Agent log events per token request regardless of outcome
+    # emitting several Agent log events per token request regardless of outcome.
+    # Cap at WARN by default, but never loosen a stricter configured log_level (e.g. ERROR).
+    msal_suppression_level = max(rootLogger.level, logging.WARN)
     msal_logger = logging.getLogger("msal")
-    msal_logger.setLevel(logging.WARN)
+    msal_logger.setLevel(msal_suppression_level)
     msal_logger.propagate = True
 
     msal_urllib3_logger = logging.getLogger("urllib3.connectionpool")
-    msal_urllib3_logger.setLevel(logging.WARN)
+    msal_urllib3_logger.setLevel(msal_suppression_level)
     msal_urllib3_logger.propagate = True
 
 
