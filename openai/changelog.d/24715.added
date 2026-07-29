@@ -1,1 +1,0 @@
-Add metadata for the `openai.completions.input_cache_write_tokens` and `openai.completions.input_uncached_tokens` metrics.
