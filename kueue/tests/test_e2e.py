@@ -12,15 +12,17 @@ import yaml
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.subprocess import run_command
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import get_active_env, get_metadata_metrics
 from datadog_checks.kueue import KueueCheck
 
 from .common import EXPECTED_METRIC_TAGS
 
 HERE = get_here()
-DDEV_CONFIG_PATHS = (
-    Path('~/.local/share/ddev/env/kueue/py3.13-v0.18.0/config/kueue.yaml'),
-    Path('~/Library/Application Support/ddev/env/kueue/py3.13-v0.18.0/config/kueue.yaml'),
+CHECK_NAME = 'kueue'
+# Derived from the active hatch env so bumping python or KUEUE_VERSION does not break these lookups.
+DDEV_CONFIG_ROOTS = (
+    Path('~/.local/share/ddev/env'),
+    Path('~/Library/Application Support/ddev/env'),
 )
 
 
@@ -92,7 +94,8 @@ def wait_for_workload_event(check, aggregator, msg_text):
 
 
 def write_kind_kubeconfig(kubeconfig):
-    cluster_name = 'cluster-kueue-py3.13-v0.18.0'
+    # Matches the naming in datadog_checks_dev/dev/kind.py.
+    cluster_name = f'cluster-{CHECK_NAME}-{get_active_env()}'
     kubeconfig_content = run_command(['kind', 'get', 'kubeconfig', '--name', cluster_name], capture=True).stdout
     kubeconfig_dict = yaml.safe_load(kubeconfig_content)
     kubeconfig.write(kubeconfig_content)
@@ -109,11 +112,12 @@ def load_check_instance(kubeconfig_dict):
 
 
 def get_ddev_config_path():
-    for config_path in DDEV_CONFIG_PATHS:
-        config_path = config_path.expanduser()
+    relative_path = Path(CHECK_NAME, get_active_env(), 'config', f'{CHECK_NAME}.yaml')
+    for config_root in DDEV_CONFIG_ROOTS:
+        config_path = config_root.expanduser() / relative_path
         if config_path.exists():
             return config_path
-    raise FileNotFoundError('Could not find ddev Kueue config file')
+    raise FileNotFoundError(f'Could not find ddev Kueue config file at {relative_path}')
 
 
 def apply_event_workload(kubectl_env):
