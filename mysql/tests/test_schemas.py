@@ -24,13 +24,15 @@ from datadog_checks.mysql.version_utils import MySQLVersion
 pytestmark = pytest.mark.unit
 
 
-def _make_collector(strategy, *, is_mariadb=False):
+def _make_collector(strategy, *, is_mariadb=False, version="8.0.35", config=None):
     check = mock.MagicMock()
     check.log = mock.MagicMock()
     check.is_mariadb = is_mariadb
+    check.version = MySQLVersion(version, "MariaDB" if is_mariadb else "MySQL", "unspecified")
     metadata = mock.MagicMock()
-    config = MySqlSchemaCollectorConfig({"collection_strategy": strategy})
-    return MySqlSchemaCollector(check, metadata, config)
+    schemas_config = {"collection_strategy": strategy}
+    schemas_config.update(config or {})
+    return MySqlSchemaCollector(check, metadata, MySqlSchemaCollectorConfig(schemas_config))
 
 
 def test_normalize_columns_matches_legacy_transforms():
@@ -235,6 +237,25 @@ def test_mariadb_cannot_force_single_query_strategy():
     collector = _make_collector(STRATEGY_SINGLE_QUERY, is_mariadb=True)
 
     assert collector._effective_strategy() == STRATEGY_CHUNKED
+
+
+@pytest.mark.parametrize(
+    "is_mariadb,version,expected_query",
+    [
+        (False, "5.6.51", "SELECT 1"),
+        (False, "5.7.7", "SELECT 1"),
+        (False, "5.7.8", "SELECT /*+ MAX_EXECUTION_TIME(60000) */ 1"),
+        (False, "5.7.44", "SELECT /*+ MAX_EXECUTION_TIME(60000) */ 1"),
+        (True, "10.11.18", "SET STATEMENT max_statement_time=60.0 FOR SELECT 1"),
+    ],
+)
+def test_execute_applies_supported_query_timeout(is_mariadb, version, expected_query):
+    collector = _make_collector(STRATEGY_CHUNKED, is_mariadb=is_mariadb, version=version)
+    cursor = mock.MagicMock()
+
+    collector._execute(cursor, "SELECT 1")
+
+    cursor.execute.assert_called_once_with(expected_query, None)
 
 
 def _single_query_row():

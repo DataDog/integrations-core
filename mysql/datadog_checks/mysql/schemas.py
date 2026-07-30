@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from datadog_checks.mysql.metadata import MySQLMetadata
 
 MYSQL_MIN_JSON_VERSION = (5, 7, 22)
+MYSQL_MIN_QUERY_TIMEOUT_VERSION = (5, 7, 8)
 
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_MAX_EXECUTION_TIME = 60
@@ -226,6 +227,23 @@ class MySqlSchemaCollector(SchemaCollector):
         self._metadata = metadata
         super().__init__(check, config or MySqlSchemaCollectorConfig(check._config.schemas_config))
 
+    def _query_timeout(self) -> float | None:
+        max_execution_time = float(self._config.max_execution_time)
+        if max_execution_time > 0:
+            return max_execution_time
+        return None
+
+    def _execute(self, cursor, query: str, params=None):
+        timeout = self._query_timeout()
+        if timeout is not None:
+            if self._check.is_mariadb:
+                query = "SET STATEMENT max_statement_time={} FOR {}".format(timeout, query)
+            elif self._check.version.version_compatible(MYSQL_MIN_QUERY_TIMEOUT_VERSION):
+                timeout_ms = max(1, int(timeout * 1000))
+                query = query.replace("SELECT", "SELECT /*+ MAX_EXECUTION_TIME({}) */".format(timeout_ms), 1)
+
+        cursor.execute(query, params)
+
     @property
     def kind(self) -> str:
         return "mysql_databases"
@@ -255,7 +273,7 @@ class MySqlSchemaCollector(SchemaCollector):
 
     def _get_databases(self) -> list[dict]:
         with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
-            cursor.execute(SQL_DATABASES)
+            self._execute(cursor, SQL_DATABASES)
             return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
@@ -264,15 +282,12 @@ class MySqlSchemaCollector(SchemaCollector):
             yield _ChunkedTableCursor(self._iter_chunked_tables(database_name))
             return
 
-        query = get_schema_json_query(
-            self._check.version,
-            max_execution_time_ms=int(self._config.max_execution_time * 1000),
-        )
+        query = get_schema_json_query(self._check.version)
         params = [database_name] * 5
         # SSCursor streams rows one at a time, keeping integration memory to roughly one table's
         # worth of already-aggregated metadata plus the payload chunk buffer.
         with self._metadata.get_db_connection().cursor(CommenterSSDictCursor) as cursor:
-            cursor.execute(query, params)
+            self._execute(cursor, query, params)
             yield cursor
 
     def _get_next(self, cursor):
@@ -337,7 +352,7 @@ class MySqlSchemaCollector(SchemaCollector):
         """
         conn = self._metadata.get_db_connection()
         with conn.cursor(CommenterDictCursor) as cursor:
-            cursor.execute(SQL_TABLES, database_name)
+            self._execute(cursor, SQL_TABLES, database_name)
             tables = [dict(row) for row in cursor.fetchall()]
 
         for tables_chunk in get_list_chunks(tables, TABLES_CHUNK_SIZE):
@@ -370,7 +385,7 @@ class MySqlSchemaCollector(SchemaCollector):
         rows to match the single-query JSON output; foreign-key rows keep it, as in v1)."""
         grouped: dict[Any, list[dict]] = defaultdict(list)
         with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
-            cursor.execute(query, params)
+            self._execute(cursor, query, params)
             for row in cursor.fetchall():
                 grouped[row["table_name"]].append(dict(row))
         return grouped
