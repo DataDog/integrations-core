@@ -17,7 +17,12 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     check = check(instance_arbiter)
     dd_run_check(check)
 
-    tags = [f'host:{common.HOST}', f'port:{common.PORT_ARBITER}', 'db:admin']
+    tags = [
+        f'host:{common.HOST}',
+        f'port:{common.PORT_ARBITER}',
+        'db:admin',
+        f'database_instance:{check._resolved_hostname}',
+    ]
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
     metric_names = aggregator.metric_names

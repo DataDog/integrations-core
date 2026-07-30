@@ -87,6 +87,7 @@ files:
           -----END PRIVATE KEY-----
       value:
         type: string
+      fleet_configurable: false
     - name: cert_key_path
       description: |
         Certificate Authentication:

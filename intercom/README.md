@@ -4,7 +4,7 @@
 
 [Intercom][1] is a customer communication platform that enables businesses to engage with their users through in-app messaging, email, and chat. It offers features like live chat, automated messaging, and customer support tools, making it easier for companies to provide personalized customer experiences.
 
-The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using [webhooks][6].
+The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using [webhooks][5].
 
 **Minimum Agent version:** 7.57.1
 
@@ -12,13 +12,11 @@ The Intercom integration seamlessly collects admin activities, data events, conv
 
 Follow the instructions below to configure this integration for your Intercom account.
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward Intercom events as logs to Datadog. See [Intercom webhook overview][3] for more details.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Intercom integration tile][4].
+1. {{< integration-api-key-picker >}}
 2. Sign in to your [Intercom][2] account using a user account with full access to Apps and Integrations.
 3. Go to **Settings**.
 4. In the Integrations section, select **Developer Hub**.
@@ -78,11 +76,10 @@ The Intercom integration does not include any service checks.
 
 ## Support
 
-For further assistance, contact [Datadog Support][5].
+For further assistance, contact [Datadog Support][4].
 
 [1]: https://www.intercom.com/
 [2]: https://app.intercom.com/
 [3]: https://developers.intercom.com/docs/webhooks
-[4]: /integrations/intercom
-[5]: https://docs.datadoghq.com/help/
-[6]: https://developers.intercom.com/docs/references/2.10/webhooks/webhook-models
+[4]: https://docs.datadoghq.com/help/
+[5]: https://developers.intercom.com/docs/references/2.10/webhooks/webhook-models

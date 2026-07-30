@@ -19,6 +19,7 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
+      "Supported OS::AIX",
       "Offering::Integration"
     ],
     "resources": [

@@ -38,6 +38,7 @@ files:
           fleet_configurable: true
           value:
             type: string
+            require_trusted_provider: true
             example: <SOCKETFILE_PATH>
         - name: username
           description: Required only if a username is configured.
@@ -78,6 +79,7 @@ files:
             items:
               type: string
             example: [<PROC_REGEX>]
+          fleet_configurable: false
         - name: proc_names_exclude
           description: |
             The process not to monitor within this supervisord instance.
@@ -86,6 +88,7 @@ files:
             items:
               type: string
             example: [<PROCESS_NAME_EXCLUDE_1>, <PROCESS_NAME_EXCLUDE_2>]
+          fleet_configurable: false
         - name: status_mapping_override
           description: |
             The process status mapping override between supervisord status and Datadog status.
@@ -106,6 +109,7 @@ files:
             example:
               <SUPERVISORD_STATUS_1>: <DATADOG_STATUS_1>
               <SUPERVISORD_STATUS_2>: <DATADOG_STATUS_2>
+          fleet_configurable: false
         - template: instances/default
     - template: logs
       example:

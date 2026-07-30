@@ -1,33 +1,72 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: n8n-test-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: n8n-test-postgres
+    environment:
+      - POSTGRES_USER=n8n
+      - POSTGRES_PASSWORD=n8n
+      - POSTGRES_DB=n8n
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n -d n8n"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   n8n:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: n8nio/n8n:${N8N_VERSION:-1.118.1}
     container_name: n8n-test
     ports:
-      - "5678:5678"
+      - "${N8N_MAIN_HOST_PORT:-5678}:5678"
     environment:
-      # Enable metrics endpoint
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=n8n
+      - N8N_ENCRYPTION_KEY=test-encryption-key-not-a-secret
+      - N8N_LOG_LEVEL=debug
+      - N8N_LOG_OUTPUT=console
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
+      - N8N_TEMPLATES_ENABLED=false
+      - N8N_RUNNERS_ENABLED=false
       - N8N_METRICS=true
       - N8N_METRICS_INCLUDE_DEFAULT_METRICS=true
       - N8N_METRICS_INCLUDE_CACHE_METRICS=true
       - N8N_METRICS_INCLUDE_MESSAGE_EVENT_BUS_METRICS=true
       - N8N_METRICS_INCLUDE_API_ENDPOINTS=true
+      - N8N_METRICS_INCLUDE_QUEUE_METRICS=true
       - N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true
-      # Logging configuration
-      - N8N_LOG_LEVEL=debug
-      - N8N_LOG_OUTPUT=console
-      # Basic configuration
-      - N8N_HOST=0.0.0.0
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      # Authentication (optional for testing)
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=admin
-      - N8N_BASIC_AUTH_PASSWORD=admin
+      - N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true
     volumes:
       - n8n_data:/home/node/.n8n
       - ${N8N_LOG_FOLDER:-./logs}:/var/log/n8n
+      - ./sample_workflow.json:/workflows/sample_workflow.json:ro
+      - ./sample_workflow_failing.json:/workflows/sample_workflow_failing.json:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:5678/healthz"]
       interval: 10s
@@ -35,7 +74,40 @@ services:
       retries: 5
       start_period: 30s
 
+  n8n-worker:
+    image: n8nio/n8n:${N8N_VERSION:-1.118.1}
+    container_name: n8n-test-worker
+    command: ["worker"]
+    ports:
+      - "${N8N_WORKER_HOST_PORT:-5680}:5680"
+    environment:
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=n8n
+      - N8N_ENCRYPTION_KEY=test-encryption-key-not-a-secret
+      - N8N_LOG_LEVEL=info
+      - N8N_LOG_OUTPUT=console
+      - N8N_RUNNERS_ENABLED=false
+      - N8N_METRICS=true
+      - N8N_METRICS_INCLUDE_DEFAULT_METRICS=true
+      - N8N_METRICS_INCLUDE_CACHE_METRICS=true
+      - N8N_METRICS_INCLUDE_MESSAGE_EVENT_BUS_METRICS=true
+      - N8N_METRICS_INCLUDE_API_ENDPOINTS=true
+      - N8N_METRICS_INCLUDE_QUEUE_METRICS=true
+      - N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true
+      - N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true
+      - QUEUE_HEALTH_CHECK_ACTIVE=true
+      - QUEUE_HEALTH_CHECK_PORT=5680
+    depends_on:
+      n8n:
+        condition: service_healthy
+
 volumes:
   n8n_data:
     driver: local
-

@@ -72,13 +72,17 @@ class SqlserverAvailabilityReplicasMetrics(SqlserverDatabaseMetricsBase):
         query = AVAILABILITY_REPLICAS_METRICS_QUERY.copy()
         if self.availability_group or self.only_emit_local or self.ao_database:
             where_clauses = []
+            params = []
             if self.availability_group:
-                where_clauses.append(f"resource_group_id = '{self.availability_group}'")
+                where_clauses.append("resource_group_id = ?")
+                params.append(self.availability_group)
             if self.only_emit_local:
                 where_clauses.append("is_local = 1")
             if self.ao_database:
-                where_clauses.append(f"database_name = '{self.ao_database}'")
+                where_clauses.append("database_name = ?")
+                params.append(self.ao_database)
             query['query'] += f" where {' and '.join(where_clauses)}"
+            query['params'] = tuple(params)
         if self.major_version >= 12:
             # This column only supported in SQL Server 2014 and later
             is_primary_replica = "is_primary_replica"

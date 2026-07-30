@@ -84,9 +84,6 @@ class KafkaConfig:
             self._sasl_oauth_token_provider.get("tls_ca_cert") if self._sasl_oauth_token_provider else None
         )
 
-        # Data Streams live messages
-        self.live_messages_configs = instance.get('live_messages_configs', [])
-
         self._kafka_cluster_id_override = instance.get('kafka_cluster_id_override')
         self._auto_detected_cluster_id = ""
 
@@ -121,6 +118,39 @@ class KafkaConfig:
         self._schema_registry_tls_key = instance.get('schema_registry_tls_key')
         self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
         self._schema_registry_oauth_token_provider = instance.get('schema_registry_oauth_token_provider')
+
+        # Kafka Connect
+        self._kafka_connect_urls = self._parse_connect_urls(instance.get('kafka_connect_url'))
+        self._kafka_connect_username = instance.get('kafka_connect_username')
+        self._kafka_connect_password = instance.get('kafka_connect_password')
+        self._kafka_connect_tls_verify = is_affirmative(instance.get('kafka_connect_tls_verify', True))
+        self._kafka_connect_tls_cert = instance.get('kafka_connect_tls_cert')
+        self._kafka_connect_tls_key = instance.get('kafka_connect_tls_key')
+        self._kafka_connect_tls_ca_cert = instance.get('kafka_connect_tls_ca_cert')
+        self._kafka_connect_oauth_token_provider = instance.get('kafka_connect_oauth_token_provider')
+
+    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
+        """Build metric tags, appending cluster ID tags when provided."""
+        tags = list(self._custom_tags)
+        if cluster_id:
+            tags.append(f'kafka_cluster_id:{cluster_id}')
+            if self._kafka_cluster_id_override:
+                tags.append(f'original_kafka_cluster_id:{self._auto_detected_cluster_id}')
+        return tags
+
+    def _original_cluster_id_field(self) -> dict[str, str]:
+        """Return the original cluster ID event field when a cluster ID override is active."""
+        if self._kafka_cluster_id_override:
+            return {'original_kafka_cluster_id': self._auto_detected_cluster_id}
+        return {}
+
+    @staticmethod
+    def _parse_connect_urls(value: str | list[str] | tuple[str, ...] | None) -> list[str]:
+        if not value:
+            return []
+        if isinstance(value, str):
+            return [value]
+        return list(value)
 
     def validate_config(self):
         if not self._kafka_connect_str:
@@ -216,70 +246,6 @@ class KafkaConfig:
             )
 
         self._validate_consumer_groups()
-        self._validate_live_messages_configs()
-
-    def _validate_live_messages_configs(self):
-        live_messages_configs = []
-        for config in self.live_messages_configs:
-            if 'id' not in config:
-                self.log.debug('Data Streams live messages configuration has no ID')
-                continue
-            kafka = config.get('kafka', None)
-            if not kafka:
-                self.log.debug('Data Streams live messages configuration has no kafka configuration')
-                continue
-            if not (
-                'cluster' in kafka
-                and 'topic' in kafka
-                and 'partition' in kafka
-                and 'start_offset' in kafka
-                and 'n_messages' in kafka
-            ):
-                self.log.debug('Data Streams live messages configuration missing required kafka parameters.', kafka)
-                continue
-
-            # Validate value format
-            if kafka.get('value_format', '') == '':
-                kafka['value_format'] = 'json'
-            value_format = kafka['value_format']
-            if value_format not in ['json', 'avro', 'protobuf']:
-                self.log.debug(
-                    'Unsupported value format for Data Streams live messages, got %s. '
-                    'Supported formats: json, avro, protobuf',
-                    value_format,
-                )
-                continue
-
-            # Validate key format
-            if kafka.get('key_format', '') == '':
-                kafka['key_format'] = 'json'
-            key_format = kafka['key_format']
-            if key_format not in ['json', 'avro', 'protobuf']:
-                self.log.debug(
-                    'Unsupported key format for Data Streams live messages, got %s. '
-                    'Supported formats: json, avro, protobuf',
-                    key_format,
-                )
-                continue
-
-            # Validate schemas for non-JSON formats
-            if value_format in ['avro', 'protobuf']:
-                if 'value_schema' not in kafka or not kafka['value_schema']:
-                    self.log.debug(
-                        'Value schema is required for %s format in Data Streams live messages configuration',
-                        value_format,
-                    )
-                    continue
-
-            if key_format in ['avro', 'protobuf']:
-                if 'key_schema' not in kafka or not kafka['key_schema']:
-                    self.log.debug(
-                        'Key schema is required for %s format in Data Streams live messages configuration', key_format
-                    )
-                    continue
-
-            live_messages_configs.append(config)
-        self.live_messages_configs = live_messages_configs
 
     def _compile_regex(self, consumer_groups_regex, consumer_groups):
         # Turn the dict of regex dicts into a single string and compile

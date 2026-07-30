@@ -4,5 +4,5 @@
 import sys
 
 
-def pytest_ignore_collect(path, config):
+def pytest_ignore_collect(collection_path, config):
     return sys.platform != 'win32'

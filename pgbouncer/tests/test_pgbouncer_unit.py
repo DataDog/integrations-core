@@ -28,6 +28,41 @@ def test_config_missing_user(instance):
 
 
 @pytest.mark.unit
+def test_config_invalid_database_filter_regex(instance):
+    instance['database_filter_regex'] = '('
+
+    with pytest.raises(ConfigurationError, match='Invalid database_filter_regex'):
+        PgBouncer('pgbouncer', {}, [instance])
+
+
+@pytest.mark.unit
+def test_database_filter_matches_database_rows(instance):
+    instance['database_filter_regex'] = '^dogs$'
+    check = PgBouncer('pgbouncer', {}, [instance])
+
+    assert check._should_collect_row({'database': 'dogs'})
+    assert not check._should_collect_row({'database': 'datadog_test'})
+
+
+@pytest.mark.unit
+def test_database_filter_matches_show_databases_rows(instance):
+    instance['database_filter_regex'] = '^dogs$'
+    check = PgBouncer('pgbouncer', {}, [instance])
+
+    assert check._get_row_database_name({'name': 'dogs', 'database': 'postgres_dogs'}) == 'dogs'
+    assert check._should_collect_row({'name': 'dogs'})
+    assert not check._should_collect_row({'name': 'datadog_test'})
+
+
+@pytest.mark.unit
+def test_database_filter_keeps_global_rows(instance):
+    instance['database_filter_regex'] = '^dogs$'
+    check = PgBouncer('pgbouncer', {}, [instance])
+
+    assert check._should_collect_row({'key': 'max_client_conn', 'value': '100'})
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize('use_cached', [True, False])
 def test_connection_cleanup_on_error(instance, use_cached):
     """

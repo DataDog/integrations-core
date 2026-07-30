@@ -62,13 +62,11 @@ INTEGRATION_LOGS_NOT_POSSIBLE = {
     'riakcs',  # would require installing agent on each node
     'sap_hana',  # see open questions in the architecture rfc
     'snmp',  # remote connection to the devices
-    'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
     'ssh_check',  # remote connection
     'system_core',  # system
     'system_swap',  # system
     'tcp_check',  # remote connection
     'tls',  # remote connection
-    'tokumx',  # eoled, only available in py2
     'windows_service',  # OS
     'wmi_check',  # base class
 }
@@ -82,6 +80,5 @@ PROCESS_SIGNATURE_EXCLUDE = {
     'datadog_checks_base',
     'datadog_checks_dev',
     'datadog_checks_downloader',
-    'snowflake',
     'go-metro',
 }

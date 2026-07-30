@@ -102,6 +102,8 @@ jobs:
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts to fetch a temporary API key via OIDC
+       id-token: write
     steps:
 
     - name: Set up Windows
@@ -109,6 +111,28 @@ jobs:
       run: |-
         # Enable disk performance counters
         diskperf -y
+
+    # On Windows minimum-base-package jobs only, force uv to copy files into
+    # the venv instead of hardlinking them from its cache. uv's default
+    # `hardlink` mode on Windows breaks `hatch env remove`, which is invoked
+    # by `ddev test --compat` (used by the minimum-base-package matrix) at the
+    # end of the run: extension modules such as `backports.zstd._zstd.pyd`
+    # (a transitive of `hatch>=1.13`) get loaded by Python during the test
+    # run, and Windows then refuses to delete the venv's hardlink while the
+    # cache copy is still pinned, so cleanup fails with
+    # `PermissionError: [WinError 5]`. We can't influence this from our side:
+    # the share flags that would allow deletion are set by whoever opens the
+    # file (CPython's loader, Defender, etc.), not by us.
+    #
+    # We only set this for `minimum-base-package` runs because regular test
+    # jobs never invoke `hatch env remove` and so keep the hardlink speed-up.
+    # Refs:
+    #   https://github.com/astral-sh/uv/issues/7918
+    #   https://docs.astral.sh/uv/reference/settings/#link-mode
+    - name: Configure uv link mode (Windows minimum-base-package)
+      if: runner.os == 'Windows' && inputs.minimum-base-package
+      shell: bash
+      run: echo "UV_LINK_MODE=copy" >> "$GITHUB_ENV"
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -136,6 +160,13 @@ jobs:
         sparse-checkout: .github/actions
         # Use a specific sub-folder
         path: core-temp
+
+    - name: Get Datadog credentials
+      if: github.event.pull_request.head.repo.fork != true
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-test-target-api-key
 
     - name: Install workflow scripts (core)
       if: inputs.repo == 'core'
@@ -198,7 +229,7 @@ jobs:
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
         INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
         INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
-        DD_API_KEY_SECRET: ${{ secrets.DD_API_KEY }}
+        DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
@@ -208,12 +239,12 @@ jobs:
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Tag job for CI Visibility
-      # Skip on fork PRs and non-core repos since secrets won't be available
+      # Skip on fork PRs and non-core repos since dd-sts credentials won't be available
       if: env.INPUT_IS_FORK != 'true' && env.INPUT_REPO == 'core'
       uses: ./.github/actions/tag-job
       with:
         tags: ${{ env.DD_TAGS }}
-        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
         dd_site: ${{ env.DD_SITE }}
 
     - name: Set up Python 2.7
@@ -235,33 +266,19 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
-        cache: 'pip'
-
-    - name: Restore cache
-      if: inputs.repo == 'core'
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-      with:
-        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
-        key: >-
-          ${{ format(
-            'v01-python-{0}-{1}-{2}-{3}',
-            env.pythonLocation,
-            hashFiles('datadog_checks_base/pyproject.toml'),
-            hashFiles('datadog_checks_dev/pyproject.toml'),
-            hashFiles('ddev/pyproject.toml')
-          )}}
-        restore-keys: |-
-          v01-python-${{ env.pythonLocation }}
 
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
-      run: |-
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
-      run: pip install ddev
+      uses: ./core-temp/.github/actions/setup-ddev
+      with:
+        install-mode: pypi
 
     - name: Configure ddev
       run: |-

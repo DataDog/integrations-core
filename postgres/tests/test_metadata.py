@@ -183,6 +183,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
                     assert table['name']
                     assert table['owner']
+                    assert 'relkind' in table
+                    assert table['relkind'] in ('r', 'p', 'f')
 
                     # make some assertions on fields
                     if table['name'] == "persons":

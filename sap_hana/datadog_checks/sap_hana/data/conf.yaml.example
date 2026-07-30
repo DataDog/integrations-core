@@ -70,6 +70,25 @@ instances:
     #
     # use_hana_hostnames: false
 
+    ## Controls how the database is identified in Data Observability.
+    ##
+    ## The default value is the host and port of the instance (`$host:$port`).
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. See https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $host:$port
+        ## The template to use for the database identifier. The default value is `$host:$port`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: saphana_myorg_$env
+
     ## @param batch_size - integer - optional - default: 1000
     ## The number of rows to return with each query result.
     #

@@ -313,6 +313,392 @@ def test_sections_not_array():
     assert 'test, test.yaml: The `options` attribute must be an array' in spec.errors
 
 
+def test_discovery_valid():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_rejects_boolean_port_hints():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - true
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `port_hints` must be an array of integers' in spec.errors
+
+
+def test_discovery_unsupported_strategy():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_services
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Unsupported strategy `from_services`' in spec.errors
+
+
+def test_discovery_unknown_placeholder():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.hostname}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, openmetrics_endpoint: '
+        'Unknown placeholder `service.hostname`'
+    ) in spec.errors
+
+
+def test_discovery_rejects_ad_identifiers_field():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - test
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery: Unknown field(s): ad_identifiers' in spec.errors
+
+
+def test_discovery_enabled_false_skips_validation():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            enabled: false
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - true
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_unknown_port_attr_placeholder():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.portnum}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, openmetrics_endpoint: '
+        'Unknown placeholder `port.portnum`'
+    ) in spec.errors
+
+
+def test_discovery_port_hints_optional():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_candidate_field_cross_check():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - unknown_field: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+            options:
+            - name: openmetrics_endpoint
+              description: endpoint
+              required: true
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, unknown_field: Not a recognized instance option'
+    ) in spec.errors
+
+
+def test_discovery_candidate_accepts_literal_values():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/metrics
+                metric_patterns:
+                  include:
+                  - test.metric.{2}
+          options:
+          - template: init_config
+          - template: instances
+            options:
+            - name: endpoint
+              description: endpoint
+              required: true
+              value:
+                type: string
+            - name: metric_patterns
+              description: metric patterns
+              value:
+                type: object
+                additionalProperties: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_local_strategy_accepted():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: local:my_strategy
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:9090/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not any('Unsupported strategy' in e for e in spec.errors)
+
+
+def test_discovery_local_strategy_requires_contract():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: local:my_strategy
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:9090/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `provides` must be an array of strings' in spec.errors
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `inputs` must be a mapping object' in spec.errors
+
+
+def test_discovery_local_strategy_validates_declared_inputs():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: local:my_strategy
+              provides: [svc]
+              inputs:
+                config_path: string
+                retries: integer
+              config_path: /etc/app.conf
+              retries: true
+              ignored: value
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{svc.port}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `retries` must be an integer' in spec.errors
+    assert 'test, test.yaml, discovery, strategy #1: Unknown field(s): ignored' in spec.errors
+
+
+def test_discovery_strategy_template_overrides_are_scoped_to_each_item(tmp_path):
+    discovery_templates = tmp_path / 'discovery'
+    discovery_templates.mkdir()
+    (discovery_templates / 'test_ports.yaml').write_text(
+        """
+        strategy: from_ports
+        port_hints: []
+        candidates:
+        - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+        """
+    )
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - template: discovery/test_ports
+              overrides:
+                port_hints: [9090]
+            - template: discovery/test_ports
+          options:
+          - template: init_config
+          - template: instances
+            options:
+            - name: openmetrics_endpoint
+              description: endpoint
+              required: true
+              value:
+                type: string
+        """,
+        template_paths=[str(tmp_path)],
+    )
+    spec.load()
+
+    assert not spec.errors
+    assert spec.data['files'][0]['discovery']['strategies'][0]['port_hints'] == [9090]
+    assert spec.data['files'][0]['discovery']['strategies'][1]['port_hints'] == []
+
+
 def test_section_not_map():
     spec = get_spec(
         """
@@ -3043,7 +3429,7 @@ def test_template_array_primitive():
         )
         spec.load()
 
-        assert 'test, test.yaml, instances, option #2: Template option must be a mapping object' in spec.errors
+        assert 'test, test.yaml, instances, option #2: Template item must be a mapping object' in spec.errors
 
 
 def test_template_primitive():
@@ -3090,6 +3476,94 @@ def test_template_hide_duplicate():
     spec.load()
 
     assert not spec.errors
+
+
+def test_template_override_resolves_against_nested_template():
+    """An override targeting a nested template must defer until that template expands.
+
+    Mirrors the Windows perf-counter integrations (e.g. active_directory): the
+    `extra_metrics` option is itself a `common/perf_counters.metrics` template that
+    is spliced into the instances list, and the `extra_metrics.value.example`
+    override only resolves once that nested template is expanded.
+    """
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: init_config
+            options:
+            - template: init_config/perf_counters
+            - template: init_config/default
+          - template: instances
+            options:
+            - template: instances/perf_counters
+              overrides:
+                extra_metrics.value.example:
+                  NTDS:
+                    name: ds
+                    counters:
+                      - 'DS % Writes from LDAP': writes_from_ldap
+            - template: instances/default
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+    instances = next(opt for opt in spec.data['files'][0]['options'] if opt['name'] == 'instances')
+    extra_metrics = next(opt for opt in instances['options'] if opt['name'] == 'extra_metrics')
+    assert extra_metrics['value']['example'] == {
+        'NTDS': {'name': 'ds', 'counters': [{'DS % Writes from LDAP': 'writes_from_ldap'}]}
+    }
+
+
+def test_template_array_wrapper_hidden_propagates_to_items():
+    with TempDir() as d:
+        template_file = path_join(d, 'pair.yaml')
+        ensure_parent_dir_exists(template_file)
+        write_file(
+            template_file,
+            """
+            - name: foo
+              description: words
+              value:
+                type: string
+            - name: bar
+              description: words
+              hidden: false
+              value:
+                type: string
+            """,
+        )
+
+        spec = get_spec(
+            """
+            version: 0.0.0
+            files:
+            - name: test.yaml
+              example_name: test.yaml.example
+              options:
+              - name: instances
+                description: words
+                options:
+                - template: pair
+                  hidden: true
+            """,
+            template_paths=[d],
+        )
+        spec.load()
+
+        assert not spec.errors
+
+        options = spec.data['files'][0]['options'][0]['options']
+        hidden_by_name = {option['name']: option['hidden'] for option in options}
+        # The wrapper's `hidden: true` applies to every expanded item...
+        assert hidden_by_name['foo'] is True
+        # ...but an item's own explicit value wins.
+        assert hidden_by_name['bar'] is False
 
 
 def test_value_one_of_with_type():

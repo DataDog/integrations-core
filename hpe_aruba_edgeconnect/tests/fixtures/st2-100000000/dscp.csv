@@ -1,0 +1,6 @@
+dscp,traftype,bytes_wtx,bytes_wrx,bytes_ltx,bytes_lrx,pkts_wtx,pkts_wrx,pkts_ltx,pkts_lrx,comp_l2w,comp_w2l,comp_noohead_l2w,comp_noohead_w2l
+be,pass-through,328,698,698,328,4,4,4,4,0,0,0,0
+be,pass-through-unshaped,37524,27376,27376,37524,177,118,118,177,0,0,0,0
+be,all traffic,37852,28074,28074,37852,181,122,122,181,0,0,0,0
+cs3,pass-through-unshaped,0,13688,13688,0,0,59,59,0,0,0,0,0
+cs3,all traffic,0,13688,13688,0,0,59,59,0,0,0,0,0

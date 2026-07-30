@@ -82,7 +82,7 @@ facets:
     type: double
 pipeline:
   type: pipeline
-  name: Trend Micro Vision One XDR
+  name: TrendAI Vision One XDR
   enabled: true
   filter:
     query: "source:trend-micro-vision-one-xdr"
@@ -97,7 +97,7 @@ pipeline:
       name: Alerts
       enabled: true
       filter:
-        query: "service:alerts "
+        query: "(service:alerts OR @vendor.endpoint:alerts)"
       processors:
         - type: attribute-remapper
           name: Map `score` to `trend_micro_vision_one_xdr.score`
@@ -133,7 +133,7 @@ pipeline:
       name: Observed Attack Techniques
       enabled: true
       filter:
-        query: "service:observed-attack-techniques"
+        query: "(service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques)"
       processors:
         - type: attribute-remapper
           name: Map `detail.userDisplayName` to `usr.name`

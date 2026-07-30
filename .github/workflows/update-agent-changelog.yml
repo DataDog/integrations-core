@@ -23,9 +23,10 @@ jobs:
       with:
         python-version: 3.13
     - name: Install ddev from local folder
-      run: |-
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
     - name: Configure ddev
       run: |-
         ddev config set upgrade_check false

@@ -47,6 +47,22 @@ def test_current_branch(repository):
     assert repo.git.current_branch() == new_branch
 
 
+def test_get_remote_url_returns_configured_origin(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    url = repo.git.get_remote_url('origin')
+
+    assert url is not None
+    assert url.strip() == url
+
+
+def test_get_remote_url_returns_none_when_remote_missing(tmp_path):
+    subprocess.run(['git', 'init', '--quiet'], cwd=tmp_path, check=True)
+    repo = Repository(tmp_path.name, str(tmp_path))
+
+    assert repo.git.get_remote_url('origin') is None
+
+
 def test_get_latest_commit(repository):
     repo = Repository(repository.path.name, str(repository.path))
 

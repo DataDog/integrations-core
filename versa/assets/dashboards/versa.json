@@ -1,7 +1,6 @@
 {
   "title": "Versa SD-WAN Overview",
-  "author_name": "Datadog",
-  "description": "[[suggested_dashboards]]",
+  "description": "## Versa SD-WAN Dashboard\n\nMonitor the health, performance, and SLA of your Versa Networks SD-WAN and SASE deployment end-to-end \u2014 Director / Analytics, per-tenant appliances, transport interfaces and tunnels, SLA path scores, QoS classes, and security services.",
   "widgets": [
     {
       "id": 1937983187702050,
@@ -16,7 +15,7 @@
             "id": 6107883287952970,
             "definition": {
               "type": "image",
-              "url": "/api/v2/images/32d08fa3-bbc7-4285-ad3f-72cc275a4eb9",
+              "url": "/static/images/logos/versa_large.svg",
               "sizing": "contain",
               "has_background": true,
               "has_border": true,
@@ -305,6 +304,227 @@
               "width": 12,
               "height": 3
             }
+          },
+          {
+            "id": 1778178660776075,
+            "definition": {
+              "title": "Bottom 10 Sites \u2014 Lowest Availability",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.site.availability{$site,$device_namespace,$device_hostname,$device_id} by {site}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776076,
+            "definition": {
+              "title": "Top 10 Sites \u2014 RX Bandwidth",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.site.bandwidth_rx{$site,$device_namespace,$device_hostname,$device_id} by {site}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776077,
+            "definition": {
+              "title": "Top 10 Sites \u2014 TX Bandwidth",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.site.bandwidth_tx{$site,$device_namespace,$device_hostname,$device_id} by {site}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776078,
+            "definition": {
+              "title": "Total Site Volume Trend (RX vs TX)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Site Volume RX",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit_in_bits_family"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Site Volume TX",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit_in_bits_family"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.site.volume_rx{$site,$device_namespace,$device_hostname,$device_id}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:versa.site.volume_tx{$site,$device_namespace,$device_hostname,$device_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 3
+            }
           }
         ]
       },
@@ -312,7 +532,7 @@
         "x": 0,
         "y": 9,
         "width": 12,
-        "height": 6
+        "height": 13
       }
     },
     {
@@ -724,14 +944,164 @@
               "width": 6,
               "height": 2
             }
+          },
+          {
+            "id": 1778178660776036,
+            "definition": {
+              "title": "Top 10 Headends \u2014 CPU %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.cpu.usage{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776037,
+            "definition": {
+              "title": "Top 10 Headends \u2014 Memory %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.memory.usage{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776038,
+            "definition": {
+              "title": "Top 10 Headends \u2014 Disk %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.disk.usage{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 15,
+        "y": 22,
         "width": 12,
-        "height": 7,
+        "height": 11,
         "is_column_break": true
       }
     },
@@ -1162,20 +1532,230 @@
               "width": 12,
               "height": 4
             }
+          },
+          {
+            "id": 1778178660776039,
+            "definition": {
+              "title": "Top 10 Edges \u2014 CPU %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.cpu.usage{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,site}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776040,
+            "definition": {
+              "title": "Top 10 Edges \u2014 Memory %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.memory.usage{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,site}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 10,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776041,
+            "definition": {
+              "title": "Top 10 Edges \u2014 Disk %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.disk.usage{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,site}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 10,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776042,
+            "definition": {
+              "title": "Edges Reachable / Unreachable over time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "default_zero(count_nonzero(query1))",
+                      "alias": "Edges UP",
+                      "style": {
+                        "palette": "green",
+                        "palette_index": 1
+                      }
+                    },
+                    {
+                      "formula": "default_zero(count_not_null(query1) - count_nonzero(query1))",
+                      "alias": "Edges DOWN",
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 1
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.device.reachable{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 12,
+              "height": 4
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 22,
+        "y": 33,
         "width": 12,
-        "height": 11
+        "height": 19
       }
     },
     {
       "id": 2867797573402597,
       "definition": {
-        "title": "Interfaces",
+        "title": "Physical Interfaces",
         "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
@@ -1416,13 +1996,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "avg:versa.interface.tx_errors{$device_namespace,$device_hostname,$device_id} by {device_hostname,device_id,site,interface}",
+                      "query": "avg:versa.interface.tx_errors{$device_namespace,$device_hostname,$device_id} by {device_id,site,interface}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "avg:versa.interface.status{$device_namespace,$device_hostname,$device_id} by {device_hostname,device_id,site,interface}",
+                      "query": "avg:versa.interface.status{$device_namespace,$device_hostname,$device_id} by {device_id,site,interface}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1540,20 +2120,339 @@
               "width": 12,
               "height": 3
             }
+          },
+          {
+            "id": 1778178660776043,
+            "definition": {
+              "title": "Top 10 Interfaces \u2014 RX Util %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.interface.rx_util{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776044,
+            "definition": {
+              "title": "Top 10 Interfaces \u2014 TX Util %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.interface.tx_util{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776045,
+            "definition": {
+              "title": "Interfaces UP / DOWN over time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "default_zero(count_nonzero(query1))",
+                      "alias": "Interfaces UP",
+                      "style": {
+                        "palette": "green",
+                        "palette_index": 1
+                      }
+                    },
+                    {
+                      "formula": "default_zero(count_not_null(query1) - count_nonzero(query1))",
+                      "alias": "Interfaces DOWN",
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 1
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.interface.status{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776046,
+            "definition": {
+              "title": "Top 10 Interfaces \u2014 RX Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.interface.rx_errors{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776047,
+            "definition": {
+              "title": "Top 10 Interfaces \u2014 TX Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.interface.tx_errors{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 10,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776048,
+            "definition": {
+              "title": "Interface Throughput (RX vs TX)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "RX (bps)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit_in_bits_family",
+                          "per_unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "TX (bps)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit_in_bits_family",
+                          "per_unit_name": "second"
+                        }
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.interface.bandwidth_rx{$site,$device_namespace,$device_hostname,$device_id}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:versa.interface.bandwidth_tx{$site,$device_namespace,$device_hostname,$device_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 10,
+              "width": 4,
+              "height": 4
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 33,
+        "y": 52,
         "width": 12,
-        "height": 7
+        "height": 15
       }
     },
     {
       "id": 6111342913598089,
       "definition": {
-        "title": "Links",
+        "title": "WAN Links",
         "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
@@ -1891,14 +2790,235 @@
               "width": 12,
               "height": 3
             }
+          },
+          {
+            "id": 1778178660776049,
+            "definition": {
+              "title": "Top 10 Links \u2014 RX Util %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.link.rx_util{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776050,
+            "definition": {
+              "title": "Top 10 Links \u2014 TX Util %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.link.tx_util{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776051,
+            "definition": {
+              "title": "Bottom 10 Links \u2014 Lowest Availability",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.link.availability{$site,$device_namespace,$device_hostname,$device_id} by {device_hostname,interface}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776052,
+            "definition": {
+              "title": "Link Throughput (RX vs TX)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "RX (bps)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "TX (bps)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.link.bandwidth_rx{$site,$device_namespace,$device_hostname,$device_id}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:versa.link.bandwidth_tx{$site,$device_namespace,$device_hostname,$device_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 3
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 40,
+        "y": 67,
         "width": 12,
-        "height": 7
+        "height": 14
       }
     },
     {
@@ -2231,14 +3351,333 @@
               "width": 12,
               "height": 4
             }
+          },
+          {
+            "id": 1778178660776053,
+            "definition": {
+              "title": "Top 10 SLAs \u2014 Worst Forward Loss %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.sla.fwd_loss_ratio{$site,$device_namespace,$device_hostname,$device_id} by {local_site,remote_site}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776054,
+            "definition": {
+              "title": "Top 10 SLAs \u2014 Worst Reverse Loss %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.sla.rev_loss_ratio{$site,$device_namespace,$device_hostname,$device_id} by {local_site,remote_site}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 12,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776055,
+            "definition": {
+              "title": "Top 10 SLAs \u2014 Worst PDU Loss %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.sla.pdu_loss_ratio{$site,$device_namespace,$device_hostname,$device_id} by {local_site,remote_site}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 12,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776056,
+            "definition": {
+              "title": "Top 10 SLAs \u2014 Worst Forward Delay Var",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.sla.fwd_delay_var{$site,$device_namespace,$device_hostname,$device_id} by {local_site,remote_site}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776057,
+            "definition": {
+              "title": "Top 10 SLAs \u2014 Worst Reverse Delay Var",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.sla.rev_delay_var{$site,$device_namespace,$device_hostname,$device_id} by {local_site,remote_site}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 16,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776058,
+            "definition": {
+              "title": "Tunnel Volume (RX vs TX)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "RX",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "TX",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.tunnel.volume_rx{$site,$device_namespace,$device_hostname,$device_id}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:versa.tunnel.volume_tx{$site,$device_namespace,$device_hostname,$device_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 16,
+              "width": 4,
+              "height": 4
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 47,
+        "y": 81,
         "width": 12,
-        "height": 13
+        "height": 21
       }
     },
     {
@@ -2636,14 +4075,275 @@
               "width": 5,
               "height": 4
             }
+          },
+          {
+            "id": 1778178660776059,
+            "definition": {
+              "title": "Top 10 Apps \u2014 Sessions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.app.sessions{$site,$device_namespace,$device_hostname,$device_id} by {app_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776060,
+            "definition": {
+              "title": "Top 10 Apps \u2014 Total Bandwidth",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.app.bandwidth{$site,$device_namespace,$device_hostname,$device_id} by {app_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 12,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776061,
+            "definition": {
+              "title": "Top 10 Users \u2014 Sessions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.user.sessions{$site,$device_namespace,$device_hostname,$device_id} by {user}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 12,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776062,
+            "definition": {
+              "title": "Top 10 Users \u2014 Total Bandwidth",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.user.bandwidth{$site,$device_namespace,$device_hostname,$device_id} by {user}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778178660776063,
+            "definition": {
+              "title": "DIA Bandwidth (RX vs TX)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "RX (bps)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "TX (bps)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.dia.bandwidth_rx{$site,$device_namespace,$device_hostname,$device_id}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:versa.dia.bandwidth_tx{$site,$device_namespace,$device_hostname,$device_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 16,
+              "width": 8,
+              "height": 4
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 60,
+        "y": 102,
         "width": 12,
-        "height": 13
+        "height": 21
       }
     },
     {
@@ -2818,14 +4518,137 @@
               "width": 12,
               "height": 4
             }
+          },
+          {
+            "id": 1778178660776065,
+            "definition": {
+              "title": "Avg QoS Drop %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:versa.qos.percent_drop{$site,$device_namespace,$device_hostname,$device_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1778178660776066,
+            "definition": {
+              "title": "Total QoS Drop Bytes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.qos.total_drop{$site,$device_namespace,$device_hostname,$device_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1778178660776068,
+            "definition": {
+              "title": "QoS Volume TX",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:versa.qos.volume_tx{$site,$device_namespace,$device_hostname,$device_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 8,
+              "y": 7,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 73,
+        "y": 123,
         "width": 12,
-        "height": 8
+        "height": 10
       }
     }
   ],

@@ -551,12 +551,12 @@ tests:
       new_state:
         library_items_added:
          -
-          name: "Bloxone"
           id: "00722363-0b8b-4fdb-9806-5cf49dd4c4eb"
+          name: "Bloxone"
         library_items_scoped:
          -
-          name: "Liftoff-test"
           id: "e6f2f3bf-56ef-4f2f-9613-fc362f29adab"
+          name: "Liftoff-test"
         name: "DDS-Test"
       occurred_at: "2025-09-09T06:23:43.383914Z"
       target_component: "library_items"

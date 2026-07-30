@@ -61,6 +61,7 @@ class ExtraMetrics(BaseModel):
     counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
+    include_total: Optional[bool] = None
     instance_counts: Optional[InstanceCounts] = None
     name: str
     tag_name: Optional[str] = None
@@ -84,6 +85,7 @@ class Metrics(BaseModel):
     counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
+    include_total: Optional[bool] = None
     instance_counts: Optional[InstanceCounts] = None
     name: str
     tag_name: Optional[str] = None

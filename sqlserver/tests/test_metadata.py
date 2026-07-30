@@ -21,6 +21,11 @@ except ImportError:
     pyodbc = None
 
 
+def normalize_compatibility_level(actual_payload):
+    assert actual_payload['compatibility_level'].isdigit()
+    actual_payload['compatibility_level'] = 'normalized_value'
+
+
 @pytest.fixture
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
@@ -101,6 +106,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'name': 'datadog_test_schemas_second',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
+        'compatibility_level': 'normalized_value',
         'schemas': [
             {
                 'name': 'dbo',
@@ -147,6 +153,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'name': 'datadog_test_schemas',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
+        'compatibility_level': 'normalized_value',
         'schemas': [
             {
                 'name': 'test_schema',
@@ -373,6 +380,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert db_name in databases_to_find
         # id's are env dependant
         normalize_ids(actual_payload)
+        # compatibility_level varies by SQL Server version
+        normalize_compatibility_level(actual_payload)
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
         matches = deep_compare(actual_payload, expected_data_for_db[db_name])

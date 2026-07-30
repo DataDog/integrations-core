@@ -2,6 +2,19 @@ name: Nginx
 fleet_configurable: true
 files:
 - name: nginx.yaml
+  discovery:
+    strategies:
+      - strategy: local:from_nginx_ports
+        provides:
+          - endpoint
+        inputs:
+          port_hints: array[int]
+        port_hints:
+          - 80
+          - 443
+          - 8443
+        candidates:
+          - nginx_status_url: "{endpoint.scheme}://{service.host}:{endpoint.port.number}/nginx_status"
   options:
   - template: init_config
     options:
@@ -12,7 +25,7 @@ files:
     - name: nginx_status_url
       fleet_configurable: true
       required: true
-      display_priority: 2
+      display_priority: 1
       formats: ["url"]
       description: |
         For every instance, you need an `nginx_status_url` and can optionally
@@ -30,6 +43,7 @@ files:
         example: http://localhost:81/nginx_status/
         type: string
     - name: use_plus_api
+      display_priority: 0
       description: |
         If you are using the commercial version of NGINX for releases R13 and above,
         there is a new API that replaces the extended status API.
@@ -40,6 +54,7 @@ files:
         type: boolean
         example: false
     - name: use_plus_api_stream
+      display_priority: 0
       description: |
        If you are using the commercial version of NGINX, for releases R13 and above,
        there is an API that replaces the extended status API.
@@ -52,12 +67,14 @@ files:
         example: false
         display_default: true
     - name: plus_api_version
+      display_priority: 0
       description: Specify the version of the Plus API to use. The check supports versions 1-7.
       fleet_configurable: true
       value:
         type: integer
         display_default: 2
     - name: only_query_enabled_endpoints
+      display_priority: 0
       description: |
         Enable this option if you would like the check to determine which API endpoints
         to query based on your NGINX Plus configuration.
@@ -68,12 +85,14 @@ files:
         display_default: false
       enabled: true
     - name: use_vts
+      display_priority: 0
       description: |
         Set this option to true if you are using the nginx vhost_traffic_status module.
         If you are using VTS, set the nginx_status_url to something like http://localhost/nginx_stats/format/json.
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - template: instances/http
     - template: instances/default
       overrides:
@@ -94,3 +113,11 @@ files:
     - type: file
       path: /var/log/nginx/error.log
       source: nginx
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - nginx
+  - template: auto_conf/discovery

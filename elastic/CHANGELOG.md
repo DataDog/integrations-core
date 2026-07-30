@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 9.5.0 / 2026-04-01
+## 9.6.0 / 2026-07-08
+
+***Added***:
+
+* Allow custom queries to target the root of a flat response by making `data_path` optional. ([#24323](https://github.com/DataDog/integrations-core/pull/24323))
+
+## 9.5.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Re-order configuration fields based on real-world usage data. ([#23278](https://github.com/DataDog/integrations-core/pull/23278))
+
+## 9.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

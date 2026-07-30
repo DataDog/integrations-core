@@ -38,9 +38,17 @@ class PgBouncer(AgentCheck):
         self.password = self.instance.get('password', '')
         self.tags = self.instance.get('tags', [])
         self.database_url = self.instance.get('database_url')
+        self.database_filter_regex = self.instance.get('database_filter_regex', '')
         self.use_cached = is_affirmative(self.instance.get('use_cached', True))
         self.collect_per_client_metrics = is_affirmative(self.instance.get('collect_per_client_metrics', False))
         self.collect_per_server_metrics = is_affirmative(self.instance.get('collect_per_server_metrics', False))
+        self.database_filter = None
+
+        if self.database_filter_regex:
+            try:
+                self.database_filter = re.compile(self.database_filter_regex)
+            except re.error as e:
+                raise ConfigurationError('Invalid database_filter_regex: {}'.format(e))
 
         if not self.database_url:
             if not self.host:
@@ -100,6 +108,9 @@ class PgBouncer(AgentCheck):
                         elif row.get('database') == self.DB_NAME:
                             continue
 
+                        if not self._should_collect_row(row):
+                            continue
+
                         tags = list(self.tags)
                         tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
                         for column, (name, reporter) in metrics:
@@ -135,6 +146,23 @@ class PgBouncer(AgentCheck):
                 yield row
 
             row_num += 1
+
+    def _get_row_database_name(self, row):
+        if 'name' in row:
+            return row['name']
+        if 'database' in row:
+            return row['database']
+        return None
+
+    def _should_collect_row(self, row):
+        if not self.database_filter:
+            return True
+
+        database_name = self._get_row_database_name(row)
+        if database_name is None:
+            return True
+
+        return self.database_filter.search(database_name) is not None
 
     def _get_connect_kwargs(self):
         """

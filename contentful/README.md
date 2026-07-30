@@ -15,7 +15,7 @@ Follow the instructions below to configure this integration for your Contentful 
 #### Webhook Configuration
 Configure the Datadog endpoint to forward Contentful events as logs to Datadog. See [Contentful Webhook overview][2] for more details.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Contentful integration tile][5].
+1. {{< integration-api-key-picker >}}
 2. Log in to your [Contentful account][3] as space admin.
 3. Go to **Settings > Webhooks**.
 4. Click on **Add Webhook**.
@@ -63,4 +63,3 @@ Need help? Contact [Datadog support][4].
 [2]: https://www.contentful.com/developers/docs/webhooks/overview/
 [3]: https://be.contentful.com/login/
 [4]: https://docs.datadoghq.com/help/
-[5]: /integrations/contentful

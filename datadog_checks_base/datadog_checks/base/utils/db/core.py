@@ -84,9 +84,9 @@ class QueryExecutor(object):
             try:
                 if self.track_operation_time:
                     with tracked_query(check=self.submitter, operation=query_name):
-                        rows = self.execute_query(query.query)
+                        rows = self.execute_query(query.query, query.params)
                 else:
-                    rows = self.execute_query(query.query)
+                    rows = self.execute_query(query.query, query.params)
             except Exception as e:
                 if self.error_handler:
                     self.logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))
@@ -158,12 +158,12 @@ class QueryExecutor(object):
             return False
         return True
 
-    def execute_query(self, query):
+    def execute_query(self, query, params=None):
         """
         Called by `execute`, this triggers query execution to check for errors immediately in a way that is compatible
         with any library. If there are no errors, this is guaranteed to return an iterator over the result set.
         """
-        rows = self.executor(query)
+        rows = self.executor(query, params=params) if params else self.executor(query)
         if rows is None:
             return iter([])
         else:

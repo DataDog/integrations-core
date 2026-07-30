@@ -23,6 +23,16 @@ instances:
     #
     port: 6379
 
+    ## @param username - string - optional
+    ## The username for the connection. Redis 6+ only.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password for the connection.
+    #
+    # password: <PASSWORD>
+
     ## @param unix_socket_path - string - optional
     ## Connect through a unix socket instead of using a `host` and `port`.
     #
@@ -35,16 +45,6 @@ instances:
     ## used as in rc.
     #
     # db: 0
-
-    ## @param username - string - optional
-    ## The username for the connection. Redis 6+ only.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password for the connection.
-    #
-    # password: <PASSWORD>
 
     ## @param collect_client_metrics - boolean - optional - default: false
     ## Collects metrics using the `CLIENT` command.
@@ -93,6 +93,12 @@ instances:
     ## does not match the connection hostname (for example, if connecting by IP).
     #
     # ssl_check_hostname: true
+
+    ## @param client_name - string - optional
+    ## Set the connection name that appears in CLIENT LIST on the Redis server.
+    ## Useful for identifying agent connections. Requires the CLIENT SETNAME permission.
+    #
+    # client_name: <CLIENT_NAME>
 
     ## @param keys - list of strings - optional
     ## Enter the list of keys to collect the lengths from.

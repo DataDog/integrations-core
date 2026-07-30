@@ -65,7 +65,20 @@ class TestResolvePackages:
         with pytest.raises(ValueError, match="SELECTED_PACKAGES is not valid JSON"):
             resolve_packages(selected="not-json", all_packages=self.all_packages)
 
-    def test_unknown_in_auto_detect_raises(self):
+    def test_auto_detect_ignores_unknown_tags(self):
+        # Sentinel/bootstrap tags at HEAD (e.g. dk-bootstrap-7.78.0) do not map to
+        # real packages and must be ignored rather than aborting the release.
+        tags = ["rabbitmq-8.5.1", "dk-bootstrap-7.78.0"]
+        packages, mode = resolve_packages(
+            selected="", all_packages=self.all_packages + ["rabbitmq"], head_tags=tags
+        )
+        assert packages == ["rabbitmq"]
+        assert mode == "auto-detect from tags at HEAD"
+
+    def test_auto_detect_all_unknown_returns_empty(self):
         tags = ["not-a-package-1.0.0"]
-        with pytest.raises(ValueError, match="Unknown packages"):
-            resolve_packages(selected="", all_packages=self.all_packages, head_tags=tags)
+        packages, mode = resolve_packages(
+            selected="", all_packages=self.all_packages, head_tags=tags
+        )
+        assert packages == []
+        assert mode == "auto-detect from tags at HEAD"

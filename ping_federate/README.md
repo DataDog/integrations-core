@@ -62,7 +62,7 @@ Linux command
 
 ### Logs
 
-The Ping Federate integration collects the following log types.
+The PingFederate integration collects the following log types.
 
 | Format     | Event Types    |
 | ---------  | -------------- |
@@ -95,15 +95,15 @@ Additional field log format:
 
 ### Metrics
 
-The Ping Federate does not include any metrics.
+The PingFederate does not include any metrics.
 
 ### Events
 
-The Ping Federate integration does not include any events.
+The PingFederate integration does not include any events.
 
 ### Service Checks
 
-The Ping Federate integration does not include any service checks.
+The PingFederate integration does not include any service checks.
 
 ## Troubleshooting
 

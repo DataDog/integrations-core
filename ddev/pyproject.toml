@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "ddev"
 description = "The Datadog Agent integration developer tool"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",
@@ -26,12 +26,14 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "aiolimiter==1.2.1",
     "anthropic>=0.18.0",
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=36.1",
-    "hatch>=1.8.1",
+    "datadog-checks-dev[cli]>=39.0,<41",
+    "defusedxml==0.7.1",
+    "hatch>=1.13.0",
     "httpx",
     "jsonpointer",
     "pluggy",
@@ -41,7 +43,7 @@ dependencies = [
     "tomli-w",
     "tomlkit",
     "tqdm",
-    "requests",
+    "requests==2.34.2",
     "matplotlib",
     "squarify",
     "datadog",
@@ -74,21 +76,23 @@ version-file = "src/ddev/_version.py"
 [tool.hatch.build.targets.sdist]
 include = ["src"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/ddev"]
+artifacts = ["src/ddev/cli/create/templates"]
+
 [tool.hatch.build.targets.binary]
+python-version = "3.13"
 scripts = ["ddev"]
 
-# Keep Black configuration to generate models through validate
-# Switch to Ruff after it provides a Python API
-[tool.black]
-include = '\.pyi?$'
-line-length = 120
-skip-string-normalization = true
-target-version = ["py313"]
-extend-exclude = "src/ddev/_version.py"
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+norecursedirs = ["src/ddev/cli/create/templates"]
 
 [tool.ruff]
 extend = "../pyproject.toml"
-exclude = []
+exclude = [
+  "src/ddev/cli/create/templates",
+]
 target-version = "py313"
 line-length = 120
 
@@ -124,7 +128,8 @@ unfixable = [
 [tool.ruff.format]
 quote-style = "preserve"
 exclude = [
-  "src/ddev/_version.py"
+  "src/ddev/_version.py",
+  "src/ddev/cli/create/templates",
 ]
 
 [tool.ruff.lint.isort]

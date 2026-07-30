@@ -1,10 +1,19 @@
 import os
 import re
+import shlex
+import sys
 from functools import cached_property
-from pathlib import Path
 from typing import Any
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
+
+
+def shell_quote(token: str) -> str:
+    """Quote a token for the shell Hatch runs commands through: cmd.exe on Windows, POSIX sh elsewhere."""
+    # Mypy has special recognition for sys.platform, not os.name.
+    if sys.platform == 'win32':
+        return f'"{token}"'
+    return shlex.quote(token)
 
 
 class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
@@ -63,7 +72,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @cached_property
     def mypy_args(self):
-        return self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
+        return (
+            ['--explicit-package-bases'] + self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
+        )
 
     @cached_property
     def mypy_files(self):
@@ -76,26 +87,28 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     @cached_property
     def test_package_install_command(self):
         if not self.in_core_repo:
-            return self.pip_install_command('datadog-checks-dev')
+            return self.uv_install_command('datadog-checks-dev')
         elif not (self.is_test_package or self.is_dev_package):
-            return self.pip_install_command('-e', '../datadog_checks_dev')
+            return self.uv_install_command('-e', shell_quote(str(self.root.parent / 'datadog_checks_dev')))
 
     def base_package_install_command(self, features):
         from ddev.testing.constants import TestEnvVars
 
         if base_package_version := os.environ.get(TestEnvVars.BASE_PACKAGE_VERSION):
-            return self.pip_install_command(self.format_base_package(features, version=base_package_version))
+            return self.uv_install_command(self.format_base_package(features, version=base_package_version))
         elif not self.in_core_repo:
-            return self.pip_install_command(self.format_base_package(features))
+            return self.uv_install_command(self.format_base_package(features))
         elif not (self.is_base_package or self.is_dev_package):
-            return self.pip_install_command('-e', self.format_base_package(features, local=True))
+            return self.uv_install_command(
+                '-e', self.format_base_package(features, local_path=self.root.parent / 'datadog_checks_base')
+            )
 
     @staticmethod
-    def format_base_package(features, version='', local=False):
+    def format_base_package(features, version='', local_path=None):
         if not features:
             features = ['deps']
 
-        base_package = '../datadog_checks_base' if local else 'datadog-checks-base'
+        base_package = shell_quote(str(local_path)) if local_path is not None else 'datadog-checks-base'
         formatted = f'{base_package}[{",".join(sorted(features))}]'
         if version:
             formatted += f'=={version}'
@@ -103,11 +116,13 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return formatted
 
     @staticmethod
-    def pip_install_command(*args):
-        return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
+    def uv_install_command(*args):
+        return f'uv pip install {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
         for env_name, env_config in config.items():
+            env_config.setdefault('installer', 'uv')
+
             if env_name == 'default':
                 # Always add ddtrace as a dependency for the default environment
                 # This ensures we have it available when running tests to emit CI visibility data
@@ -125,6 +140,11 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
             if not (self.is_test_package or self.is_dev_package):
                 env_config.setdefault('features', ['deps'])
+
+            # uv-managed venvs do not seed pip. Some tests and integration
+            # scripts shell out to `python -m pip install`, so include pip as
+            # a dependency to keep that working.
+            env_config.setdefault('dependencies', []).append('pip')
 
             base_package_features = env_config.get('base-package-features', self.config.get('base-package-features'))
             install_commands = []
@@ -152,17 +172,19 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             scripts.setdefault('benchmark', '_dd-benchmark')
 
     def lint_command(self, options: str, settings_dir: str) -> str:
+        config = shell_quote(f'{settings_dir}/pyproject.toml')
         return self.on_config(
             'disable-linter',
             "echo 'Linter is disabled for this environment'",
-            f'ruff check {options} --config {settings_dir}/pyproject.toml .',
+            f'ruff check {options} --config {config} .',
         )
 
     def formatter_command(self, options: str, settings_dir: str) -> str:
+        config = shell_quote(f'{settings_dir}/pyproject.toml')
         return self.on_config(
             'disable-formatter',
             "echo 'Formatter is disabled for this environment'",
-            f'ruff format {options} --config {settings_dir}/pyproject.toml .',
+            f'ruff format {options} --config {config} .',
         )
 
     def inject_ddtrace_dependency(self, env_config):
@@ -180,18 +202,19 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     def ruff_settings_dir(self):
         # If the local pyproject.toml exists and has ruff configuration, use it
-        local_pyproject = Path("./pyproject.toml")
+        local_pyproject = self.root / 'pyproject.toml'
         if local_pyproject.exists():
             pyproject_text = local_pyproject.read_text()
             if re.search(r'\[tool\.ruff\]', pyproject_text):
-                return "."
-        return ".."
+                return str(self.root)
+        return str(self.root.parent)
 
     def get_initial_config(self):
         settings_dir = self.ruff_settings_dir()
 
         lint_env = {
             'detached': True,
+            'installer': 'uv',
             'scripts': {
                 'style': [
                     self.formatter_command('--diff --check', settings_dir),
@@ -216,14 +239,18 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 'ruff==0.11.10',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==2.11.5',
+                # uv-managed venvs do not seed pip, but mypy's --install-types
+                # shells out to `python -m pip install` for missing type stubs.
+                'pip',
             ],
         }
         config = {'lint': lint_env}
 
         if self.check_types:
-            lint_env['scripts']['typing'] = [
-                f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)} {" ".join(self.mypy_files)}'.rstrip()
-            ]
+            mypy_config = shell_quote(f'--config-file={self.root.parent / "pyproject.toml"}')
+            mypy_args = ' '.join(self.mypy_args)
+            mypy_files = ' '.join(self.mypy_files)
+            lint_env['scripts']['typing'] = [f'mypy {mypy_config} {mypy_args} {mypy_files}'.rstrip()]
             lint_env['scripts']['all'].append('typing')
             lint_env['dependencies'].extend(self.mypy_deps)
 

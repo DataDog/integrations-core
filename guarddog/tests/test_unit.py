@@ -166,7 +166,7 @@ def test_get_guarddog_output(config, instance, mocker):
     expected_returncode = 0
     check.package_ecosystem = "pypi"
     check.path = dependency_file_path
-    cmd = "guarddog pypi verify /tmp/dependency_file_path/requirements.txt --output-format=json"
+    cmd = ["guarddog", "pypi", "verify", "/tmp/dependency_file_path/requirements.txt", "--output-format=json"]
 
     mock_completed_process = Mock(stdout=expected_stdout, stderr=expected_stderr, returncode=expected_returncode)
 

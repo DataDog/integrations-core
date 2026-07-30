@@ -78,46 +78,46 @@ tests:
       is_user_created: false
       mitre_tactics:
        -
-        name: "Discovery"
         id: "TA0007"
+        name: "Discovery"
         url: "https://attack.mitre.org/tactics/TA0007"
       mitre_techniques:
        -
+        id: "T1046"
         legacy_ids:
          - "T1046"
         name: "Network Service Scanning"
-        id: "T1046"
         url: "https://attack.mitre.org/techniques/T1046"
       mod_time: 1709049465950
       participants:
        -
         external: false
-        role: "offender"
-        object_type: "device"
-        object_value: "172.0.4.100"
         id: 6190704
         object_id: 34359738588
+        object_type: "device"
+        object_value: "172.0.4.100"
+        role: "offender"
        -
         external: false
-        role: "victim"
-        object_type: "device"
-        object_value: "172.0.7.190"
         id: 6190653
         object_id: 34359738485
+        object_type: "device"
+        object_value: "172.0.7.190"
+        role: "victim"
        -
         external: false
-        role: "victim"
-        object_type: "device"
-        object_value: "172.0.7.188"
         id: 6190585
         object_id: 34359738398
+        object_type: "device"
+        object_value: "172.0.7.188"
+        role: "victim"
        -
         external: false
-        role: "victim"
-        object_type: "device"
-        object_value: "172.0.4.222"
         id: 6190639
         object_id: 34359738408
+        object_type: "device"
+        object_value: "172.0.4.222"
+        role: "victim"
       recommended: false
       risk_score: 37
       start_time: 1708636140001

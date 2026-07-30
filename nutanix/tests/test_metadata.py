@@ -8,6 +8,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nutanix import NutanixCheck
 
 from .metrics import (
+    ALERT_METRICS_OPTIONAL,
     CLUSTER_BASIC_METRICS,
     CLUSTER_CAPACITY_METRICS,
     CLUSTER_STATS_METRICS_OPTIONAL,
@@ -36,7 +37,9 @@ REQUIRED_METRICS = (
     + VM_STATS_METRICS_REQUIRED
 )
 
-OPTIONAL_METRICS = CLUSTER_STATS_METRICS_OPTIONAL + HOST_STATS_METRICS_OPTIONAL + VM_STATS_METRICS_OPTIONAL
+OPTIONAL_METRICS = (
+    ALERT_METRICS_OPTIONAL + CLUSTER_STATS_METRICS_OPTIONAL + HOST_STATS_METRICS_OPTIONAL + VM_STATS_METRICS_OPTIONAL
+)
 
 
 @pytest.mark.unit
@@ -61,9 +64,12 @@ def test_version_metadata(dd_run_check, mock_instance, mock_http_get, datadog_ag
         ('pc.2024.3', '2024', '3'),
     ],
 )
-def test_version_metadata_formats(mock_instance, datadog_agent, version, expected_major, expected_minor):
+def test_version_metadata_formats(
+    dd_run_check, mock_instance, mock_http_get, datadog_agent, version, expected_major, expected_minor
+):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     check.check_id = 'test:123'
+    dd_run_check(check)
 
     pc_cluster = {'config': {'buildInfo': {'version': version}, 'clusterFunction': ['PRISM_CENTRAL']}}
     check.infrastructure_monitor._collect_pc_version_metadata(pc_cluster)

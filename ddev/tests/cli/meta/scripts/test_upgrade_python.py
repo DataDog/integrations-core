@@ -72,13 +72,13 @@ def test_update_python_version_success(fake_repo, ddev, mocker, mock_python_vers
     assert '-Hash \'200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5\'' in contents
     assert 'ENV PYTHON_VERSION="3.13.7"' not in contents
 
-    workflow_file = fake_repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
-    contents = workflow_file.read_text()
-    assert 'PYTHON_PATCH: 9' in contents
-    assert 'PYTHON_PATCH: 7' not in contents
-    assert 'PBS_RELEASE: 20251210' in contents
-    assert 'PBS_SHA256__aarch64: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2' in contents
-    assert 'PBS_SHA256__x86_64: f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5' in contents
+    pbs_env = fake_repo.path / '.builders' / 'images' / 'macos' / 'pbs.env'
+    contents = pbs_env.read_text()
+    assert 'PYTHON_PATCH=9' in contents
+    assert 'PYTHON_PATCH=7' not in contents
+    assert 'PBS_RELEASE=20251210' in contents
+    assert 'PBS_SHA256__aarch64=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2' in contents
+    assert 'PBS_SHA256__x86_64=f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5' in contents
 
 
 def test_update_python_version_already_latest(fake_repo, ddev, mocker, mock_python_version):
@@ -132,9 +132,9 @@ def test_upgrade_macos_reports_error_on_pattern_mismatch(tmp_path, mocker):
     mock_app.repo.path = tmp_path
     mock_tracker = mocker.MagicMock()
 
-    workflow_dir = tmp_path / '.github' / 'workflows'
-    workflow_dir.mkdir(parents=True)
-    (workflow_dir / 'resolve-build-deps.yaml').write_text('name: Resolve build deps\njobs:\n  build: {}\n')
+    macos_dir = tmp_path / '.builders' / 'images' / 'macos'
+    macos_dir.mkdir(parents=True)
+    (macos_dir / 'pbs.env').write_text('PBS_RELEASE=1\n')
 
     mocker.patch(
         'ddev.cli.meta.scripts.upgrade_python.get_pbs_release_info',
@@ -144,7 +144,7 @@ def test_upgrade_macos_reports_error_on_pattern_mismatch(tmp_path, mocker):
     upgrade_macos_python_version(mock_app, '3.13.9', mock_tracker)
 
     mock_tracker.error.assert_called_once()
-    assert 'Could not find PYTHON_PATCH in workflow file' in mock_tracker.error.call_args[1]['message']
+    assert 'Could not find PYTHON_PATCH in macOS pbs.env' in mock_tracker.error.call_args[1]['message']
 
 
 @pytest.mark.parametrize(

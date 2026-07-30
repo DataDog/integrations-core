@@ -20,7 +20,7 @@ DEFAULT_ROW_LIMIT = 10000
 
 AGENT_HISTORY_QUERY = """\
 WITH BASE AS (
-    SELECT {history_row_limit_filter}
+    SELECT TOP (?)
         j.name AS job_name,
         CAST(sjh.job_id AS CHAR(36)) AS job_id,
         sjh.step_name,
@@ -94,7 +94,7 @@ SELECT
 	message
 FROM HISTORY_ENTRIES
 WHERE
-    completion_epoch_time > {last_collection_time_filter};
+    completion_epoch_time > ?;
 """
 
 
@@ -121,7 +121,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
             enabled=self._config.agent_jobs_config.get('enabled', False),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name="agent-jobs-history",
             shutdown_callback=self._close_db_conn,
@@ -136,14 +136,10 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
-        last_collection_time_filter = "{last_collection_time}".format(last_collection_time=self._last_collection_time)
-        history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=self.history_row_limit)
-        query = AGENT_HISTORY_QUERY.format(
-            history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter
-        )
+        params = (self.history_row_limit, self._last_collection_time)
         self.log.debug("collecting sql server agent jobs history")
-        self.log.debug("Running query [%s]", query)
-        cursor.execute(query)
+        self.log.debug("Running query [%s] %s", AGENT_HISTORY_QUERY, params)
+        cursor.execute(AGENT_HISTORY_QUERY, params)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]

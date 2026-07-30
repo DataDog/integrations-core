@@ -47,6 +47,7 @@ files:
         example:
           - https://%%host%%:6443/metrics
           - https://%%host%%:8443/metrics
+      fleet_configurable: false
     - name: prometheus_url
       required: false
       description: |
@@ -55,6 +56,7 @@ files:
       value:
         example: https://%%host%%:6443/metrics
         type: string
+      fleet_configurable: false
     - name: bearer_token_auth
       description: |
         Used if you are using RBACs and need the Agent to authenticate
@@ -65,17 +67,20 @@ files:
         anyOf:
         - type: boolean
         - type: string
+      fleet_configurable: false
     - name: bearer_token_path
       description: Used to specify the path where the service account token is located.
       value:
         type: string
         require_trusted_provider: true
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
+      fleet_configurable: false
     - name: ssl_verify
       description: Used to verify self signed certificates.
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: tags
       description: |
         List of tags to attach to every metric, event and service check emitted by this integration.
@@ -88,3 +93,4 @@ files:
           type: string
         example:
           - "apiserver:%%host%%"
+      fleet_configurable: false

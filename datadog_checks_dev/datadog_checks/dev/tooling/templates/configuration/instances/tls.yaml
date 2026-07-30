@@ -1,4 +1,5 @@
 - name: tls_verify
+  display_priority: 0
   fleet_configurable: true
   value:
     example: true
@@ -6,6 +7,7 @@
   description: |
     Instructs the check to validate the TLS certificate(s) of the service(s).
 - name: tls_ca_cert
+  display_priority: 0
   fleet_configurable: true
   value:
     example: <CA_CERT_PATH>
@@ -19,6 +21,7 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_cert
+  display_priority: 0
   fleet_configurable: true
   value:
     example: <CERT_PATH>
@@ -31,6 +34,7 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_private_key
+  display_priority: 0
   fleet_configurable: true
   secret: true
   value:
@@ -43,6 +47,7 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_private_key_password
+  display_priority: 0
   secret: true
   fleet_configurable: true
   value:
@@ -53,6 +58,7 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_validate_hostname
+  display_priority: 0
   fleet_configurable: true
   value:
     example: true
@@ -60,6 +66,7 @@
   description: |
     Verifies that the server's cert hostname matches the one requested.
 - name: tls_ciphers
+  display_priority: 0
   description: |
     The list of ciphers suites to use when connecting to an endpoint. If not specified, 
     `ALL` ciphers are used. For list of ciphers see: 

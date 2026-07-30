@@ -18,6 +18,7 @@ files:
         to poll for the `hazelcast.mc_cluster_state` service check.
       value:
         type: string
+      fleet_configurable: false
     - name: mc_cluster_states
       description: |
         Override cluster state to `hazelcast.mc_cluster_state` service check status mapping.
@@ -26,6 +27,7 @@ files:
         example:
           UP: OK
           ACTIVE: OK
+      fleet_configurable: false
     - template: instances/jmx
       overrides:
         host.required: false

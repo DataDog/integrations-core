@@ -108,33 +108,33 @@ tests:
           lastModifiedTime: "2024-07-23T11:48:10.032Z"
           legs:
           -
-            reason: "Hang Up"
+            action: "VoIP Call"
+            direction: "Outbound"
+            duration: 16
+            durationMs: 1687
             extension:
               id: 12345678
               uri: "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/12345678"
-            reasonDescription: "The caller hung up before the call was answered."
-            legType: "SipToPstnUnmetered"
-            internalType: "International"
-            transport: "VoIP"
-            type: "Voice"
-            master: true
-            duration: 16
-            result: "Hang Up"
-            telephonySessionId: "s-a7280be05beffz190df6b11d4z296c790000"
-            action: "VoIP Call"
-            startTime: "2024-07-23T12:19:34.664Z"
             from:
-              phoneNumber: "+00000000000"
-              name: "xxxxxxxxxxx"
-              extensionId: "12345678"
               device:
                 id: "1234567890"
                 uri: "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/000000000"
+              extensionId: "12345678"
+              name: "xxxxxxxxxxx"
+              phoneNumber: "+00000000000"
+            internalType: "International"
+            legType: "SipToPstnUnmetered"
+            master: true
+            partyId: "p-a7280be05beffz190df6b11d4z296c790000-2"
+            reason: "Hang Up"
+            reasonDescription: "The caller hung up before the call was answered."
+            result: "Hang Up"
+            startTime: "2024-07-23T12:19:34.664Z"
+            telephonySessionId: "s-a7280be05beffz190df6b11d4z296c790000"
             to:
               phoneNumber: "+0000000000"
-            partyId: "p-a7280be05beffz190df6b11d4z296c790000-2"
-            durationMs: 1687
-            direction: "Outbound"
+            transport: "VoIP"
+            type: "Voice"
           partyId: "p-a7280be05beffz190df6b11d4z296c790000-2"
           reason: "Hang Up"
           reasonDescription: "The caller hung up before the call was answered."
@@ -270,11 +270,11 @@ tests:
         details:
           parameters:
             -
-              value: "Super Admin"
               key: "oldRoleName"
+              value: "Super Admin"
             -
-              value: "Standard (International)"
               key: "newRoleName"
+              value: "Standard (International)"
         eventTime: "2024-08-06T10:50:19.442Z"
         eventType: "UPDATE"
         extensionId: "12345678"

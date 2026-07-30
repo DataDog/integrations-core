@@ -100,7 +100,6 @@ The Flask server mocks the following Nutanix Prism Central v4 APIs:
 - `GET /api/monitoring/v4.0/serviceability/events` - List events (paginated, time-filtered)
 - `GET /api/monitoring/v4.0/serviceability/audits` - List audits (paginated, time-filtered)
 - `GET /api/monitoring/v4.0/serviceability/alerts` - List alerts (paginated, time-filtered)
-- `GET /api/monitoring/v4.2/serviceability/alerts` - List alerts v4.2 (paginated, time-filtered)
 - `GET /api/prism/v4.0/config/tasks` - List tasks (paginated, time-filtered)
 
 ### Metadata APIs

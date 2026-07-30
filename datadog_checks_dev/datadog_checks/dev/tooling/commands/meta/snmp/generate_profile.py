@@ -639,17 +639,17 @@ def _add_profile_row_node(
             oid_name = alias['name']
 
         index = {'MIB': mib, 'tag': oid_name}
-        column = {'name': oid_name}
+        symbol = {'name': oid_name}
         index_oid = _find_oid_by_name(mib, oid_name, mibs_directories, json_mib_directory, source, compiled_mibs_path)
         if index_oid is not None:
-            column['OID'] = index_oid
+            symbol['OID'] = index_oid
             index_table_oid = '.'.join(index_oid.split('.')[:-2])
             index_table_name = _find_name_by_oid(
                 mib, index_table_oid, mibs_directories, json_mib_directory, source, compiled_mibs_path
             )
             if index_table_name is not None:
                 index['table'] = index_table_name
-        index['column'] = column
+        index['symbol'] = symbol
         metric_tags.append(index)
 
     profile_oid_collection[table_oid]['metric_tags'] = metric_tags

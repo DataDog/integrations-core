@@ -81,14 +81,18 @@ class InstanceConfig(BaseModel):
     collect_alerts: Optional[bool] = None
     collect_audits: Optional[bool] = None
     collect_events: Optional[bool] = None
+    collect_resource_ids_as_tags: Optional[bool] = None
     collect_subtasks: Optional[bool] = None
     collect_tasks: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
+    exclude_filtered_resources_from_cluster_capacity: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
+    hostname_transform: Optional[Literal['upper', 'lower', 'default']] = None
+    infrastructure_mode: Optional[Literal['full', 'basic']] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
@@ -102,9 +106,9 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str] = None
     page_limit: Optional[int] = None
     password: Optional[str] = None
-    pc_base_backoff_seconds: Optional[float] = None
+    pc_base_backoff_seconds: Optional[int] = None
     pc_ip: str
-    pc_max_backoff_seconds: Optional[float] = None
+    pc_max_backoff_seconds: Optional[int] = None
     pc_max_retries: Optional[int] = None
     pc_password: str
     pc_port: Optional[int] = None

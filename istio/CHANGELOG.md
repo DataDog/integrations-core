@@ -2,7 +2,26 @@
 
 <!-- towncrier release notes start -->
 
-## 9.5.0 / 2026-04-01
+## 9.5.3 / 2026-07-08
+
+***Fixed***:
+
+* Fix collisions between gauge and counter metrics that share a name after the OpenMetrics V2 parser strips the ``_total`` suffix. ``istio.go.memstats.alloc_bytes`` (gauge) and ``istio.go.memstats.alloc_bytes.count`` (counter), and their ``istio.mesh.agent.go.memstats.alloc_bytes`` counterparts, are now both collected. ([#23396](https://github.com/DataDog/integrations-core/pull/23396))
+
+## 9.5.2 / 2026-05-20 / Agent 7.80.0
+
+***Fixed***:
+
+* Restore Istio ambient mode metric collection broken in 9.4.0: ztunnel counters are no longer silently dropped, proxy management metrics use the `workload_manager_*` names ztunnel actually emits, and the missing xDS message counters are now registered. ([#23707](https://github.com/DataDog/integrations-core/pull/23707))
+
+## 9.5.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 9.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

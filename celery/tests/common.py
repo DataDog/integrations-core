@@ -36,10 +36,4 @@ METRICS = [
 ]
 
 
-E2E_METADATA = {
-    'env_vars': {
-        'DD_LOGS_ENABLED': 'true',
-        'DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL': 'true',
-    },
-    'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
-}
+E2E_METADATA = {}

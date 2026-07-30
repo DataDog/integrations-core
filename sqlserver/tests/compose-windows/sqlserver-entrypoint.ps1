@@ -17,7 +17,7 @@ $smo.Settings.LoginMode = "Mixed"
 $smo.Alter()
 
 echo "INFO: running setup.sql for integration tests"
-sqlcmd -d master -i setup.sql -b -f 65001
+sqlcmd -d master -i setup.sql -b -f 65001 -C
 if (-Not $?) {
     throw "ERROR: setup.sql failed"
 }

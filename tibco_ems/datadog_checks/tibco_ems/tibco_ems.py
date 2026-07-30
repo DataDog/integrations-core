@@ -3,16 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import subprocess
-from typing import Any  # noqa: F401
+from typing import Any
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
 
 from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 7222
 TO_BYTES = {'b': 1, 'kb': 1e3, 'mb': 1e6, 'gb': 1e9, 'tb': 1e12}
-CONNECTION_STRING = 'tcp://{}:{}'
+TCP_CONNECTION_STRING = 'tcp://{}:{}'
+SSL_CONNECTION_STRING = 'ssl://{}:{}'
 
 
 class TibcoEMSCheck(AgentCheck):
@@ -29,7 +30,11 @@ class TibcoEMSCheck(AgentCheck):
         username = self.instance.get('username')
         password = self.instance.get('password')
         script_path = self.instance.get('script_path')
-        server_string = CONNECTION_STRING.format(host, port)
+        use_ssl = is_affirmative(self.instance.get('use_ssl', False))
+        if not use_ssl:
+            server_string = TCP_CONNECTION_STRING.format(host, port)
+        else:
+            server_string = SSL_CONNECTION_STRING.format(host, port)
         self.tags = self.instance.get('tags', [])
 
         self.cmd = tibemsadmin_cmd + [
@@ -75,6 +80,8 @@ class TibcoEMSCheck(AgentCheck):
             if command == 'show server':
                 self._submit_metrics_factory(metric_prefix, metric_info, metric_keys, tag_keys)
             else:
+                if SHOW_METRIC_DATA[command].get('aggregate'):
+                    metric_info = self._aggregate_metric_entries(metric_info, metric_keys, tag_keys)
                 for metric_entry in metric_info:
                     self._submit_metrics_factory(metric_prefix, metric_entry, metric_keys, tag_keys)
 
@@ -204,6 +211,24 @@ class TibcoEMSCheck(AgentCheck):
                         info[key] = self._parse_generic(value)
                 data.append(info)
         return data
+
+    def _aggregate_metric_entries(
+        self, metric_entries: list[dict[str, Any]], metric_names: list[str], tag_keys: list[str]
+    ) -> list[dict[str, Any]]:
+        aggregated_entries = {}
+        for metric_entry in metric_entries:
+            present_keys = [key for key in tag_keys if key in metric_entry]
+            tag_values = tuple((key, metric_entry[key]) for key in present_keys)
+            aggregated_entry = aggregated_entries.setdefault(
+                tag_values, {key: metric_entry[key] for key in present_keys}
+            )
+            for metric_name in metric_names:
+                metric_value = metric_entry[metric_name]
+                if isinstance(metric_value, dict):
+                    metric_value = metric_value['value'] * TO_BYTES[metric_value['unit'].lower()]
+                aggregated_entry[metric_name] = aggregated_entry.get(metric_name, 0) + metric_value
+
+        return list(aggregated_entries.values())
 
     def _submit_metrics_factory(self, prefix, metric_data, metric_names, tag_keys):
         self.log.debug("Submitting %s metrics (%s tags) for %s", len(metric_names), len(tag_keys), prefix)

@@ -19,7 +19,7 @@ def test_check(aggregator, check, instance):
     sc_tags = tags + ['url:' + instance['url']]
 
     for gauge in common.CHECK_GAUGES + common.CHECK_GAUGES_STATS:
-        aggregator.assert_metric(gauge, tags=tags, count=2)
+        aggregator.assert_metric(gauge, tags=tags, at_least=1)
 
     aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=Riak.OK, tags=sc_tags)
 

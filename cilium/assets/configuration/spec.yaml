@@ -69,6 +69,7 @@ files:
       value:
         example: http://%%host%%:9962/metrics
         type: string
+      fleet_configurable: false
     - name: tags
       description: |
         List of tags to attach to every metrics, events and service checks emitted by this integration.
@@ -80,8 +81,10 @@ files:
           type: string
         example:
           - "cilium-pod:%%host%%"
+      fleet_configurable: false
     - name: timeout
       description: Overrides the default timeout value in second
       value:
         type: integer
         example: 10
+      fleet_configurable: false

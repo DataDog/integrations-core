@@ -9,6 +9,7 @@ files:
   - template: instances
     options:
     - name: cluster_operator_endpoint
+      display_priority: 5
       description: |
         Endpoint exposing the Cluster Operator's Prometheus metrics.
       fleet_configurable: true
@@ -17,6 +18,7 @@ files:
         example: http://cluster-operator-address:8080/metrics
         type: string
     - name: topic_operator_endpoint
+      display_priority: 4
       description: |
         Endpoint exposing the Topic Operator's Prometheus metrics.
       fleet_configurable: true
@@ -25,6 +27,7 @@ files:
         example: http://topic-operator-address:8080/metrics
         type: string
     - name: user_operator_endpoint
+      display_priority: 3
       description: |
         Endpoint exposing the User Operator's Prometheus metrics.
       fleet_configurable: true

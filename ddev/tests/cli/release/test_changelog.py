@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import shutil
 from functools import partial
 
 import pytest
 
 from ddev.repo.core import Repository
+from tests.helpers.changelog import reset_fragments_dir
 
 
 class TestFix:
@@ -175,79 +175,6 @@ class TestFix:
         )
 
 
-@pytest.fixture
-def repo_with_towncrier(repository, helpers):
-    (repository.path / 'towncrier.toml').write_text(
-        helpers.dedent(
-            r'''
-            [tool.towncrier]
-            # If you change the values for directory or filename, make sure to look for them in the code as well.
-            directory = "changelog.d"
-            filename = "CHANGELOG.md"
-            start_string = "<!-- towncrier release notes start -->\n"
-            underlines = ["", "", ""]
-            template = "changelog_template.jinja"
-            title_format = "## {version} / {project_date}"
-            # We automatically link to PRs, but towncrier only has an issue template so we abuse that.
-            issue_format = "([#{issue}](https://github.com/DataDog/integrations-core/pull/{issue}))"
-
-            # The order of entries matters! It controls the order in which changelog sections are displayed.
-            # https://towncrier.readthedocs.io/en/stable/configuration.html#use-a-toml-array-defined-order
-            [[tool.towncrier.type]]
-            directory="removed"
-            name = "Removed"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="changed"
-            name = "Changed"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="security"
-            name = "Security"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="deprecated"
-            name = "Deprecated"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="added"
-            name = "Added"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="fixed"
-            name = "Fixed"
-            showcontent = true
-            '''
-        )
-    )
-    (repository.path / 'changelog_template.jinja').write_text(
-        helpers.dedent(
-            '''
-            {% if sections[""] %}
-            {% for category, val in definitions.items() if category in sections[""] %}
-            ***{{ definitions[category]['name'] }}***:
-
-            {% for text, values in sections[""][category].items() %}
-            * {{ text }} {{ values|join(', ') }}
-            {% endfor %}
-
-            {% endfor %}
-            {% else %}
-            No significant changes.
-
-
-            {% endif %}
-            '''
-        )
-    )
-    return repository
-
-
 class TestNew:
     @pytest.fixture
     def fragments_dir(self, repo_with_towncrier, network_replay, mocker):
@@ -390,10 +317,7 @@ class TestBuild:
                 '''
             )
         )
-        fragments_dir = repo_with_towncrier.path / 'ddev' / 'changelog.d'
-        if fragments_dir.exists():
-            shutil.rmtree(fragments_dir)
-        fragments_dir.mkdir(parents=True)
+        fragments_dir = reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
         return changelog, fragments_dir
 
     def test_build(self, setup_changelog_build, helpers, build_changelog):

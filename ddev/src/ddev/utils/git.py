@@ -64,6 +64,14 @@ class GitRepository:
     def current_branch(self) -> str:
         return self.capture('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
+    def get_remote_url(self, remote: str = 'origin') -> str | None:
+        """Return the configured URL for `remote`, or None if it isn't set."""
+        try:
+            url = self.capture('remote', 'get-url', remote).strip()
+        except OSError:
+            return None
+        return url or None
+
     def latest_commit(self) -> GitCommit:
         sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
         return GitCommit(sha, subject=subject)
@@ -116,13 +124,15 @@ class GitRepository:
     def push(self, ref):
         return self.capture('push', 'origin', ref)
 
-    def tag(self, value, message=None):
+    def tag(self, value, message=None, ref=None):
         """
-        Create a tag with an optional message.
+        Create a tag with an optional message, optionally at a specific commit/ref.
         """
         cmd = ['tag', value]
         if message is not None:
-            cmd.extend(['--message', value])
+            cmd.extend(['--message', message])
+        if ref is not None:
+            cmd.append(ref)
         return self.capture(*cmd)
 
     def tags(self, glob_pattern=None) -> list[str]:

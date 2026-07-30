@@ -2,6 +2,76 @@
 
 <!-- towncrier release notes start -->
 
+## 15.18.0 / 2026-07-08
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Fix `mysql.index.reads`, `mysql.index.updates`, and `mysql.index.deletes` metrics by submitting them as monotonic counts instead of gauges, so they correctly reflect per-interval operations rather than cumulative `performance_schema` lifetime totals. ([#24125](https://github.com/DataDog/integrations-core/pull/24125))
+* Fix MariaDB multi-channel replication reporting 0 channels by using `SHOW ALL REPLICAS STATUS` when no specific channel is configured. ([#24178](https://github.com/DataDog/integrations-core/pull/24178))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24269](https://github.com/DataDog/integrations-core/pull/24269))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24273](https://github.com/DataDog/integrations-core/pull/24273))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24277](https://github.com/DataDog/integrations-core/pull/24277))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 15.17.2 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 15.17.1 / 2026-06-09
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 15.17.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Collect additional statement metrics for sort operations, temporary table usage, and join strategies from events_statements_summary_by_digest. ([#23365](https://github.com/DataDog/integrations-core/pull/23365))
+* Add metadata lock blocking detection to activity query for MySQL 8.0+. ([#23505](https://github.com/DataDog/integrations-core/pull/23505))
+* Add collection of global wait event metrics from performance_schema for DBM-enabled instances. ([#23562](https://github.com/DataDog/integrations-core/pull/23562))
+
+***Fixed***:
+
+* Re-order configuration fields based on real-world usage data. ([#23272](https://github.com/DataDog/integrations-core/pull/23272))
+* Use parameterized queries for table names in schema collection. ([#23366](https://github.com/DataDog/integrations-core/pull/23366))
+* Use parameterized queries for replication channel configuration to safely handle special characters in channel names. ([#23581](https://github.com/DataDog/integrations-core/pull/23581))
+* Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled. ([#23593](https://github.com/DataDog/integrations-core/pull/23593))
+* Log a warning when a 1045 access denied error occurs with no SSL configuration, hinting that SSL may be required by the MySQL instance. ([#23607](https://github.com/DataDog/integrations-core/pull/23607))
+
+## 15.16.1 / 2026-04-28 / Agent 7.79.0
+
+***Fixed***:
+
+* Bump cryptography from 46.0.6 to 46.0.7 to address CVE-2026-39892. ([#23403](https://github.com/DataDog/integrations-core/pull/23403))
+
+## 15.16.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+
+***Fixed***:
+
+* Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics with a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list where it should not. ([#22938](https://github.com/DataDog/integrations-core/pull/22938))
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Fix schema collection silently dropping all collected metadata when the last discovered database has no tables. ([#22880](https://github.com/DataDog/integrations-core/pull/22880))
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
+    - Improve compile-time error messages for invalid syntax in DB query extras expressions. ([#23140](https://github.com/DataDog/integrations-core/pull/23140)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
+## 15.15.1 / 2026-04-09 / Agent 7.78.0
+
+***Fixed***:
+
+* Bump `cryptography` to `==46.0.6` (CVE-2026-34073 / VULN-59768). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+
 ## 15.15.0 / 2026-04-01
 
 ***Added***:

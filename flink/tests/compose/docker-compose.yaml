@@ -1,0 +1,41 @@
+services:
+  jobmanager:
+    image: flink:1.18-scala_2.12-java17
+    container_name: flink-jobmanager
+    command: jobmanager
+    networks:
+      - flink-network
+    ports:
+      - "9249:9249"
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+        metrics.reporter.prom.port: 9249
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9249/metrics > /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  taskmanager:
+    image: flink:1.18-scala_2.12-java17
+    container_name: flink-taskmanager
+    command: taskmanager
+    depends_on:
+      jobmanager:
+        condition: service_healthy
+    networks:
+      - flink-network
+    ports:
+      - "9250:9249"
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+        metrics.reporter.prom.port: 9249
+
+networks:
+  flink-network:
+    driver: bridge

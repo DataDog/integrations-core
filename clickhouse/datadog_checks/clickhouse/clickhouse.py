@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from string import Template
 from time import time
 
 import clickhouse_connect
@@ -10,17 +9,27 @@ from clickhouse_connect.driver import httputil
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
-from . import queries
+from . import advanced_queries, queries, utils
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .metadata import ClickhouseMetadata
+from .parts_and_merges import ClickhousePartsAndMerges
 from .query_completions import ClickhouseQueryCompletions
+from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
-from .utils import ErrorSanitizer
+from .table_metrics import ClickhouseTableMetrics
+from .utils import (
+    CLUSTER_MACRO_QUERY,
+    CLUSTER_NAME_QUERY,
+    CLUSTER_TAG,
+    ErrorSanitizer,
+    cluster_aware_query,
+)
 
 try:
     import datadog_agent
@@ -33,6 +42,8 @@ DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 
 
 class ClickhouseCheck(DatabaseCheck):
+    DBMS = 'clickhouse'
+
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'
 
@@ -53,20 +64,20 @@ class ClickhouseCheck(DatabaseCheck):
 
         # DBM-related properties (computed lazily)
         self._resolved_hostname = None
-        self._database_identifier = None
-        self._agent_hostname = None
+        self._database_hostname = None
         self._dbms_version = None
+        self._cluster_name = None
+        self._cluster_name_resolved = False
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
 
-        # Initialize TagManager for tag management (similar to MySQL)
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self._add_core_tags()
 
         self._error_sanitizer = ErrorSanitizer(self._config.password)
         self.check_initializations.append(self.validate_config)
+        self.check_initializations.append(advanced_queries.warm_cache)
 
         # Submit health event with config validation result
         # Tags are now available so health events will include them
@@ -75,27 +86,20 @@ class ClickhouseCheck(DatabaseCheck):
         # We'll connect on the first check run
         self._client = None
 
-        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
-        # This reduces connection overhead while maintaining client isolation
-        # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
-        self._pool_manager = httputil.get_pool_manager(maxsize=8, num_pools=4)
+        # Cache query manager per server version to avoid recompiling on every check run
+        self._query_manager: QueryManager | None = None
+        self._query_manager_version: str | None = None
 
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query_raw,
-            queries=[
-                queries.SystemMetrics,
-                queries.SystemEventsToDeprecate,
-                queries.SystemEvents,
-                queries.SystemAsynchronousMetrics,
-                queries.SystemParts,
-                queries.SystemReplicas,
-                queries.SystemDictionaries,
-            ],
-            tags=self.tags,
-            error_handler=self._error_sanitizer.clean,
+        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs).
+        # TLS settings must be baked in here: when pool_mgr is provided to get_client(),
+        # clickhouse-connect assigns it immediately and skips its own TLS pool creation,
+        # so verify=False would be silently ignored if the pool was created without it.
+        self._pool_manager = httputil.get_pool_manager(
+            maxsize=8,
+            num_pools=4,
+            verify=self._config.verify,
+            ca_cert=self._config.tls_ca_cert,
         )
-        self.check_initializations.append(self._query_manager.compile_queries)
 
         # Initialize DBM components if enabled
         self._init_dbm_components()
@@ -120,10 +124,29 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.query_completions = None
 
-    @property
-    def tags(self) -> list[str]:
-        """Return the current list of tags from the TagManager."""
-        return list(self.tag_manager.get_tags())
+        # Initialize query errors (from system.query_log - failed queries)
+        if self._config.dbm and self._config.query_errors.enabled:
+            self.query_errors = ClickhouseQueryErrors(self, self._config.query_errors)
+        else:
+            self.query_errors = None
+
+        # Initialize schema metrics (per-table size and per-view refresh gauges)
+        if self._config.dbm and self._config.schema_metrics.enabled:
+            self.table_metrics = ClickhouseTableMetrics(self, self._config.schema_metrics)
+        else:
+            self.table_metrics = None
+
+        # Initialize schema collection (catalog metadata for Schema Explorer)
+        if self._config.dbm and self._config.collect_schemas.enabled:
+            self.metadata = ClickhouseMetadata(self)
+        else:
+            self.metadata = None
+
+        # Initialize parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
+        if self._config.dbm and self._config.parts_and_merges.enabled:
+            self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
+        else:
+            self.parts_and_merges = None
 
     def _add_core_tags(self):
         """
@@ -133,7 +156,7 @@ class ClickhouseCheck(DatabaseCheck):
         self.tag_manager.set_tag("server", self._config.server, replace=True)
         self.tag_manager.set_tag("port", str(self._config.port), replace=True)
         self.tag_manager.set_tag("db", self._config.db, replace=True)
-        self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
+        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def validate_config(self):
@@ -205,10 +228,10 @@ class ClickhouseCheck(DatabaseCheck):
                 "host": self.reported_hostname,
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
-                "database_hostname": self.reported_hostname,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "clickhouse",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": DATABASE_INSTANCE_COLLECTION_INTERVAL,
                 "dbms_version": self._dbms_version,
@@ -226,8 +249,18 @@ class ClickhouseCheck(DatabaseCheck):
 
     def check(self, _):
         self.connect()
+        self._server_version = self.select_version()
+
+        # Must run before the query manager is built and before the DBM jobs are handed
+        # self.tags below, since both snapshot the tag list.
+        if self.cluster_name:
+            self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
+
+        if self._query_manager is None or self._query_manager_version != self._server_version:
+            self._query_manager = self._build_query_manager()
+            self._query_manager_version = self._server_version
         self._query_manager.execute()
-        self.collect_version()
+        self.set_version_metadata(self._server_version)
 
         # Send database instance metadata
         self._send_database_instance_metadata()
@@ -244,10 +277,73 @@ class ClickhouseCheck(DatabaseCheck):
         if self.query_completions:
             self.query_completions.run_job_loop(self.tags)
 
-    @AgentCheck.metadata_entrypoint
-    def collect_version(self):
-        version = list(self.execute_query_raw('SELECT version()'))[0][0]
+        # Run query errors if DBM is enabled (from system.query_log - failed queries)
+        if self.query_errors:
+            self.query_errors.run_job_loop(self.tags)
 
+        # Run schema metrics (per-table size and per-view refresh gauges) if enabled
+        if self.table_metrics:
+            self.table_metrics.run_job_loop(self.tags)
+
+        # Run schema collection if enabled
+        if self.metadata:
+            self.metadata.run_job_loop(self.tags)
+
+        # Run parts and merges monitoring if enabled
+        if self.parts_and_merges:
+            self.parts_and_merges.run_job_loop(self.tags)
+
+    def get_queries(self) -> list[dict]:
+        query_list = []
+        single = self._config.single_endpoint_mode
+
+        def pick(query: dict) -> dict:
+            """In single endpoint mode, read all replicas and tag each row per node."""
+            return cluster_aware_query(query) if single else query
+
+        if self._config.use_legacy_queries:
+            query_list.extend(
+                [
+                    pick(queries.SystemMetrics),
+                    pick(queries.SystemEventsToDeprecate),
+                    pick(queries.SystemEvents),
+                    pick(queries.SystemAsynchronousMetrics),
+                    queries.SystemParts,
+                    queries.SystemReplicas,
+                    queries.SystemDictionaries,
+                ]
+            )
+
+        if self._config.use_advanced_queries:
+            query_list.extend(
+                [
+                    pick(advanced_queries.SystemMetrics),
+                    pick(advanced_queries.SystemEvents),
+                    pick(advanced_queries.SystemAsynchronousMetrics),
+                ]
+            )
+            if self.version_ge('21.3'):
+                query_list.append(pick(advanced_queries.SystemErrors))
+
+        return query_list
+
+    def _build_query_manager(self) -> QueryManager:
+        query_manager = QueryManager(
+            self,
+            self.execute_query_raw,
+            queries=self.get_queries(),
+            tags=self.tags,
+            error_handler=self._error_sanitizer.clean,
+        )
+        query_manager.compile_queries()
+
+        return query_manager
+
+    def select_version(self) -> str:
+        return self._client.command('SELECT version()', use_database=False)
+
+    @AgentCheck.metadata_entrypoint
+    def set_version_metadata(self, version: str):
         # The version comes in like `19.15.2.2` though sometimes there is no patch part
         version_parts = dict(zip(('year', 'major', 'minor', 'patch'), version.split('.')))
 
@@ -262,45 +358,56 @@ class ClickhouseCheck(DatabaseCheck):
 
     @property
     def reported_hostname(self) -> str | None:
-        """
-        Get the hostname to be reported in metrics and events.
-        """
         if self._resolved_hostname is None:
-            self._resolved_hostname = self._config.server
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            else:
+                self._resolved_hostname = resolve_db_host(self._config.server)
         return self._resolved_hostname
 
     @property
-    def agent_hostname(self):
-        """Get the agent hostname."""
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
+    def database_hostname(self) -> str:
+        if self._database_hostname is None:
+            self._database_hostname = resolve_db_host(self._config.server)
+        return self._database_hostname
 
     @property
-    def database_identifier(self) -> str:
+    def cluster_name(self) -> str | None:
+        """The cluster this instance belongs to, or None when it cannot be determined.
+
+        Requires a live client, so this resolves on the first check run rather than at
+        init. The "not found" outcome is cached too: a deployment without a cluster
+        should not re-query on every run.
         """
-        Get a unique identifier for this database instance.
-        Uses the database_identifier template from config, defaulting to "$server:$port:$db".
-        """
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.template)
-            tag_dict = {}
-            tags = self.tags.copy()
-            # Sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            # Add connection parameters to the template variables
-            tag_dict['server'] = str(self._config.server)
-            tag_dict['port'] = str(self._config.port)
-            tag_dict['db'] = str(self._config.db)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+        if not self._cluster_name_resolved:
+            self._cluster_name = self._resolve_cluster_name()
+            self._cluster_name_resolved = True
+        return self._cluster_name
+
+    def _resolve_cluster_name(self) -> str | None:
+        for query in (CLUSTER_MACRO_QUERY, CLUSTER_NAME_QUERY):
+            try:
+                rows = self.execute_query_raw(query)
+            except Exception as e:
+                self.log.debug('Unable to resolve cluster name with %r: %s', query, e)
+                continue
+            if rows and rows[0] and rows[0][0]:
+                return str(rows[0][0])
+        # Deliberately no 'default' fallback: an absent tag is better than a wrong one.
+        self.log.debug('No ClickHouse cluster name found; %s tag will not be emitted', CLUSTER_TAG)
+        return None
+
+    @property
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.template
+
+    @property
+    def database_identifier_params(self) -> dict:
+        return {
+            "server": str(self._config.server),
+            "port": str(self._config.port),
+            "db": str(self._config.db),
+        }
 
     @property
     def dbms_version(self) -> str:
@@ -461,6 +568,14 @@ class ClickhouseCheck(DatabaseCheck):
             self.statement_samples.cancel()
         if self.query_completions:
             self.query_completions.cancel()
+        if self.query_errors:
+            self.query_errors.cancel()
+        if self.table_metrics:
+            self.table_metrics.cancel()
+        if self.metadata:
+            self.metadata.cancel()
+        if self.parts_and_merges:
+            self.parts_and_merges.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
@@ -469,6 +584,14 @@ class ClickhouseCheck(DatabaseCheck):
             self.statement_samples._job_loop_future.result()
         if self.query_completions and self.query_completions._job_loop_future:
             self.query_completions._job_loop_future.result()
+        if self.query_errors and self.query_errors._job_loop_future:
+            self.query_errors._job_loop_future.result()
+        if self.table_metrics and self.table_metrics._job_loop_future:
+            self.table_metrics._job_loop_future.result()
+        if self.metadata and self.metadata._job_loop_future:
+            self.metadata._job_loop_future.result()
+        if self.parts_and_merges and self.parts_and_merges._job_loop_future:
+            self.parts_and_merges._job_loop_future.result()
 
         # Close main client
         if self._client:
@@ -481,3 +604,23 @@ class ClickhouseCheck(DatabaseCheck):
         # Clear the shared pool manager
         # Note: urllib3 pool connections are automatically closed when idle
         self._pool_manager = None
+
+    def version_lt(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is less than the compared version, otherwise False.
+        """
+        # The `latest` version should always be greater than any other
+        if version == 'latest':
+            return True
+
+        return utils.parse_version(self._server_version) < utils.parse_version(version)
+
+    def version_ge(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is greater than the compared version, otherwise False.
+        """
+        # The `latest` version should always be less than any other
+        if version == 'latest':
+            return False
+
+        return utils.parse_version(self._server_version) >= utils.parse_version(version)
