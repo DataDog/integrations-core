@@ -257,8 +257,8 @@ def _original_exception(exception: BaseException | None) -> BaseException | None
 class RunOutcomeStore:
     """Persist the latest deterministic outcome for a flow run."""
 
-    def __init__(self, run_dir: Path) -> None:
-        self.path = run_dir / "run.yaml"
+    def __init__(self, path: Path) -> None:
+        self.path = path
 
     def write(self, outcome: RunOutcome) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)

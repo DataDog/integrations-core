@@ -72,7 +72,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._resume = resume
         self._checkpoint_manager = CheckpointManager(checkpoint_path)
-        self._outcome_store = RunOutcomeStore(self._checkpoint_manager.root)
+        self._outcome_store = RunOutcomeStore(self._checkpoint_manager.outcome_path)
         self._agent_logger: AgentLogger | None = None
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
@@ -126,7 +126,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 skipped_on_resume=self._resume_completed,
                 started_at=started_at,
                 finished_at=finished_at,
-                run_dir=self._checkpoint_manager.root,
+                run_dir=self._checkpoint_manager.run_dir,
                 resumed=self._resume,
                 exception=exception,
                 failed_phase=self._failed_phase,
@@ -168,7 +168,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
             )
 
-        self._agent_logger = AgentLogger(self._checkpoint_manager.root)
+        self._agent_logger = AgentLogger(self._checkpoint_manager.agent_log_root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
 
         self._resources = RunResources(
@@ -228,6 +228,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
 
 def _checkpoint_finished_at(checkpoint: PhaseCheckpoint) -> datetime:
+    """Return an aware timestamp suitable for filtering checkpoints from older attempts."""
     try:
         finished_at = datetime.fromisoformat(checkpoint.finished_at)
     except ValueError:

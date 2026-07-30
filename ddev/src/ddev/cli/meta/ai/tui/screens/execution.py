@@ -178,6 +178,11 @@ class ExecutionScreen(TogoScreen):
 
             self.app.push_screen(EndingScreen(self._outcome))
 
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        if action == "show_outcome":
+            return self._outcome is not None
+        return super().check_action(action, parameters)
+
     def action_back(self) -> None:
         if not self.togo_app.execution_status.is_active:
             self.app.pop_screen()
@@ -268,9 +273,6 @@ class ExecutionScreen(TogoScreen):
         except NoMatches:
             pass
 
-    def _compact_error_detail(self, error: BaseException, phase_id: str | None = None) -> str:
-        return compact_error_detail(error, phase_id)
-
     def _show_error_banner(self, message: str, *, warning: bool = False) -> None:
         try:
             widget = self.query_one("#execution-error", Static)
@@ -281,7 +283,7 @@ class ExecutionScreen(TogoScreen):
         widget.display = True
 
     def _show_run_error(self, error: BaseException, phase_id: str | None = None) -> None:
-        detail = self._compact_error_detail(error, phase_id)
+        detail = compact_error_detail(error, phase_id)
         title = f"Run failed in {phase_id}" if phase_id is not None else "Run failed"
         hint = f"Select {phase_id} to view the full error." if phase_id is not None else ""
         message = f"{title}: {detail}"
@@ -301,7 +303,7 @@ class ExecutionScreen(TogoScreen):
             return
 
         lines = [f"Run failed — {len(ordered_errors)} phases failed"]
-        lines.extend(f"{phase_id}: {self._compact_error_detail(error, phase_id)}" for phase_id, error in ordered_errors)
+        lines.extend(f"{phase_id}: {compact_error_detail(error, phase_id)}" for phase_id, error in ordered_errors)
         lines.append("Select a failed phase to view its full error.")
         self._show_error_banner("\n".join(lines))
 
@@ -337,6 +339,7 @@ class ExecutionScreen(TogoScreen):
 
     def _accept_outcome(self, outcome: RunOutcome) -> None:
         self._outcome = outcome
+        self.refresh_bindings()
         self._apply_outcome_statuses(outcome)
         self.togo_app.execution_status = {
             RunVerdict.SUCCEEDED: ExecutionStatus.COMPLETED,
@@ -441,7 +444,7 @@ class ExecutionScreen(TogoScreen):
         if msg.outcome is not None:
             if self._outcome is None:
                 self._accept_outcome(msg.outcome)
-            detail = self._compact_error_detail(msg.error)
+            detail = compact_error_detail(msg.error)
             self._show_error_banner(
                 f"The flow outcome is available, but it could not be persisted: {detail}",
                 warning=True,
@@ -449,7 +452,7 @@ class ExecutionScreen(TogoScreen):
             return
 
         self.togo_app.execution_status = ExecutionStatus.OUTCOME_ERROR
-        detail = self._compact_error_detail(msg.error)
+        detail = compact_error_detail(msg.error)
         self._show_error_banner(
             f"The flow ended, but its outcome could not be determined: {detail}",
             warning=True,

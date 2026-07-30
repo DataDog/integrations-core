@@ -166,7 +166,7 @@ def test_classify_failure(error_type: str, expected: FailureKind):
 
 
 def test_run_outcome_store_round_trips_and_overwrites(tmp_path: Path):
-    store = RunOutcomeStore(tmp_path)
+    store = RunOutcomeStore(tmp_path / "run.yaml")
     first = build_outcome(tmp_path, checkpoints={"inspect": make_success_checkpoint()})
     second = build_outcome(
         tmp_path,

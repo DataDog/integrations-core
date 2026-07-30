@@ -89,12 +89,27 @@ class CheckpointManager:
         self._path = path
 
     @property
-    def root(self) -> Path:
-        """Directory that holds checkpoints.yaml, per-phase memory files, and any side artifacts."""
+    def run_dir(self) -> Path:
+        """Directory containing all artifacts for this run."""
         return self._path.parent
 
+    @property
+    def root(self) -> Path:
+        """Directory that holds checkpoints.yaml, per-phase memory files, and any side artifacts."""
+        return self.run_dir
+
+    @property
+    def outcome_path(self) -> Path:
+        """Path where the deterministic run outcome is persisted."""
+        return self.run_dir / "run.yaml"
+
+    @property
+    def agent_log_root(self) -> Path:
+        """Directory under which per-agent logs are persisted."""
+        return self.run_dir
+
     def _ensure_dir(self) -> None:
-        self.root.mkdir(parents=True, exist_ok=True)
+        self.run_dir.mkdir(parents=True, exist_ok=True)
 
     def read(self) -> dict[str, PhaseCheckpoint]:
         """Return validated checkpoints keyed by phase_id.
@@ -135,11 +150,11 @@ class CheckpointManager:
     @property
     def memory_dir(self) -> Path:
         """Directory where memory files and per-phase sidecar artifacts are written."""
-        return self._path.parent
+        return self.run_dir
 
     def memory_path(self, phase_id: str) -> Path:
         """Return the resolved path to a phase's memory file."""
-        return (self.root / f"{phase_id}_memory.md").resolve()
+        return (self.run_dir / f"{phase_id}_memory.md").resolve()
 
     def write_memory(self, phase_id: str, text: str) -> None:
         """Write agent-authored text to this phase's memory file."""

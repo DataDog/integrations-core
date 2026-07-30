@@ -293,7 +293,7 @@ def test_run_executes_phases_in_dependency_order(tmp_path, make_orchestrator):
     assert checkpoints["b"].status == CheckpointStatus.SUCCESS
     assert orchestrator.outcome is not None
     assert orchestrator.outcome.verdict is RunVerdict.SUCCEEDED
-    assert RunOutcomeStore(tmp_path).read() == orchestrator.outcome
+    assert RunOutcomeStore(tmp_path / "run.yaml").read() == orchestrator.outcome
     assert finished == [orchestrator.outcome]
 
 

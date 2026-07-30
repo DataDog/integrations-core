@@ -195,6 +195,7 @@ async def test_execution_screen_offers_summary_without_opening_it_automatically(
         await app.push_screen(screen)
         await pilot.pause()
         assert screen.query_one("#execution-actions", Horizontal).display is False
+        assert screen.check_action("show_outcome", ()) is False
 
         screen.on_run_finished(RunFinished(outcome))
         await pilot.pause()
@@ -202,6 +203,7 @@ async def test_execution_screen_offers_summary_without_opening_it_automatically(
         assert app.screen is screen
         assert app.execution_status is ExecutionStatus.COMPLETED
         assert screen.query_one("#execution-actions", Horizontal).display is True
+        assert screen.check_action("show_outcome", ()) is True
         assert screen.query_one("#view-summary", Button).has_focus
 
         await pilot.click("#view-summary")

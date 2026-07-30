@@ -25,6 +25,13 @@ def manager(tmp_path: Path) -> CheckpointManager:
     return CheckpointManager(tmp_path / "checkpoints.yaml")
 
 
+def test_run_artifact_locations_are_derived_from_checkpoint_path(manager: CheckpointManager, tmp_path: Path) -> None:
+    # This tests that run artifacts are written where we expect them to be in the rest of this test suite.
+    assert manager.run_dir == tmp_path
+    assert manager.outcome_path == tmp_path / "run.yaml"
+    assert manager.agent_log_root == tmp_path
+
+
 # ---------------------------------------------------------------------------
 # read
 # ---------------------------------------------------------------------------
