@@ -99,6 +99,12 @@ jobs:
           // input hashes and the image digests. A commit touching it is a commit
           // where resolution landed its output on this branch.
           const isResolutionOutput = name => name.startsWith('.deps/') && !isFilteredBelow(name, '.deps/');
+          // Renaming a hashed input out of the hashed set changes the resolution
+          // hash just as editing it would, and the API reports only the
+          // destination in `filename`, so both ends of a rename are inspected.
+          const inputsTouched = file => (
+            file.previous_filename ? [file.filename, file.previous_filename] : [file.filename]
+          );
 
           const files = await github.paginate(github.rest.pulls.listFiles, {
             owner: context.repo.owner,
@@ -106,7 +112,9 @@ jobs:
             pull_number: context.payload.pull_request.number,
             per_page: 100,
           });
-          const changed = files.some(file => affectsDependencies(file.filename));
+          const changed = files.some(file => inputsTouched(file).some(affectsDependencies));
+          // Only the destination counts here: output has to have landed in .deps/,
+          // and a rename out of it is not resolution publishing anything.
           const hasResolutionOutput = files.some(file => isResolutionOutput(file.filename));
           core.setOutput('changed', changed ? 'true' : 'false');
 
@@ -133,16 +141,19 @@ jobs:
                 repo: context.repo.repo,
                 ref: summary.sha,
               });
-              const names = (commit.files ?? []).map(file => file.filename);
-              if (names.length >= COMMIT_FILE_LIMIT) {
+              const commitFiles = commit.files ?? [];
+              if (commitFiles.length >= COMMIT_FILE_LIMIT) {
                 core.info(`${summary.sha} touches too many files to inspect; assuming resolution is stale.`);
                 break;
               }
-              if (names.some(name => affectsDependencies(name) && !isResolutionOutput(name))) {
+              const touchedInput = commitFiles.some(file => inputsTouched(file).some(
+                name => affectsDependencies(name) && !isResolutionOutput(name)
+              ));
+              if (touchedInput) {
                 core.info(`${summary.sha} changed a resolution input after the last published lockfiles.`);
                 break;
               }
-              if (names.some(isResolutionOutput)) {
+              if (commitFiles.some(file => isResolutionOutput(file.filename))) {
                 current = true;
                 break;
               }
