@@ -52,9 +52,45 @@ flink_taskmanager_job_task_numRecordsOut{host="taskmanager-0",tm_id="tm-1",job_n
 # HELP flink_taskmanager_job_task_numRecordsOutPerSecond numRecordsOutPerSecond (scope: taskmanager_job_task)
 # TYPE flink_taskmanager_job_task_numRecordsOutPerSecond gauge
 flink_taskmanager_job_task_numRecordsOutPerSecond{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 42.5
+# HELP flink_taskmanager_job_task_numBytesOut numBytesOut (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numBytesOut gauge
+flink_taskmanager_job_task_numBytesOut{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 999999.0
+# HELP flink_taskmanager_job_task_numBuffersOut numBuffersOut (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numBuffersOut gauge
+flink_taskmanager_job_task_numBuffersOut{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 500.0
+# HELP flink_taskmanager_job_task_numLateRecordsDropped numLateRecordsDropped (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numLateRecordsDropped gauge
+flink_taskmanager_job_task_numLateRecordsDropped{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 3.0
+# HELP flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInLocal numBytesInLocal (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInLocal gauge
+flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInLocal{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 1000.0
+# HELP flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInRemote numBytesInRemote (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInRemote gauge
+flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInRemote{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 2000.0
+# HELP flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInLocal numBuffersInLocal (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInLocal gauge
+flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInLocal{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 10.0
+# HELP flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInRemote numBuffersInRemote (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInRemote gauge
+flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInRemote{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 20.0
 # HELP flink_taskmanager_job_task_operator_numRecordsIn numRecordsIn (scope: taskmanager_job_task_operator)
 # TYPE flink_taskmanager_job_task_operator_numRecordsIn gauge
 flink_taskmanager_job_task_operator_numRecordsIn{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 12345.0
+# HELP flink_taskmanager_job_task_operator_numRecordsOut numRecordsOut (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_numRecordsOut gauge
+flink_taskmanager_job_task_operator_numRecordsOut{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 6789.0
+# HELP flink_taskmanager_job_task_operator_numLateRecordsDropped numLateRecordsDropped (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_numLateRecordsDropped gauge
+flink_taskmanager_job_task_operator_numLateRecordsDropped{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 1.0
+# HELP flink_taskmanager_job_task_operator_numSplitsProcessed numSplitsProcessed (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_numSplitsProcessed gauge
+flink_taskmanager_job_task_operator_numSplitsProcessed{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 7.0
+# HELP flink_taskmanager_job_task_operator_commitsSucceeded commitsSucceeded (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_commitsSucceeded gauge
+flink_taskmanager_job_task_operator_commitsSucceeded{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 15.0
+# HELP flink_taskmanager_job_task_operator_commitsFailed commitsFailed (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_commitsFailed gauge
+flink_taskmanager_job_task_operator_commitsFailed{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 0.0
 # HELP flink_taskmanager_job_task_operator_currentInputWatermark currentInputWatermark (scope: taskmanager_job_task_operator)
 # TYPE flink_taskmanager_job_task_operator_currentInputWatermark gauge
 flink_taskmanager_job_task_operator_currentInputWatermark{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 1735689600000.0
