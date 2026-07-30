@@ -1,0 +1,1 @@
+Adapt intermediate certificate discovery to the Agent's backend-agnostic TLS configuration interface.
