@@ -57,18 +57,12 @@ jobs:
           }
           core.setOutput('evaluate', settled ? 'false' : 'true');
 
-    - name: Check if dependency files changed
-      id: deps-changed
+    - name: Assess the pull request
+      id: assess
       if: steps.settled.outputs.evaluate == 'true'
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       with:
         script: |
-          const files = await github.paginate(github.rest.pulls.listFiles, {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.payload.pull_request.number,
-            per_page: 100,
-          });
           const depPaths = ['agent_requirements.in', '.github/workflows/resolve-build-deps.yaml'];
           const depPrefixes = ['.builders/', '.deps/'];
           // Mirrors IGNORED_DIRS and IGNORED_FILES in .builders/inputs_hash.py:
@@ -88,13 +82,67 @@ jobs:
             && !ignoredPrefixes.some(prefix => name.startsWith(prefix))
             && (depPaths.includes(name) || depPrefixes.some(prefix => name.startsWith(prefix)))
           );
+          // .deps/ holds what resolution publishes: the lockfiles, the pinned
+          // input hashes and the image digests. A commit touching it is a commit
+          // where resolution landed its output on this branch.
+          const isResolutionOutput = name => name.startsWith('.deps/');
+
+          const files = await github.paginate(github.rest.pulls.listFiles, {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request.number,
+            per_page: 100,
+          });
           const changed = files.some(file => affectsDependencies(file.filename));
+          const hasResolutionOutput = files.some(file => isResolutionOutput(file.filename));
           core.setOutput('changed', changed ? 'true' : 'false');
 
-    # Set before the comment steps so that a failure below still leaves the check
-    # blocking, pointing at this run to explain itself.
+          // Whether resolution has published for the inputs on this head. Walking
+          // back from the head, the first commit that published output ends the
+          // walk; a resolution input touched before reaching it means the
+          // lockfiles here predate that change and new ones are on the way, so
+          // the wheels they pin being promoted says nothing about what will merge.
+          const WALK_LIMIT = 50;
+          // getCommit truncates its file list at 300 entries, so a commit at that
+          // size could hide a dependency change.
+          const COMMIT_FILE_LIMIT = 300;
+          let current = false;
+          if (hasResolutionOutput) {
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+            for (const summary of commits.reverse().slice(0, WALK_LIMIT)) {
+              const { data: commit } = await github.rest.repos.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: summary.sha,
+              });
+              const names = (commit.files ?? []).map(file => file.filename);
+              if (names.length >= COMMIT_FILE_LIMIT) {
+                core.info(`${summary.sha} touches too many files to inspect; assuming resolution is stale.`);
+                break;
+              }
+              if (names.some(name => affectsDependencies(name) && !isResolutionOutput(name))) {
+                core.info(`${summary.sha} changed a resolution input after the last published lockfiles.`);
+                break;
+              }
+              if (names.some(isResolutionOutput)) {
+                current = true;
+                break;
+              }
+            }
+          }
+          // Checking the wheels is only worth it once resolution is settled: the
+          // lockfiles are otherwise either absent or about to be replaced.
+          core.setOutput('check_promotion', changed && hasResolutionOutput && current ? 'true' : 'false');
+
+    # Set before the slower steps below so that a failure in them still leaves the
+    # check blocking, pointing at this run to explain itself.
     - name: Block the merge while the notice is prepared
-      if: steps.settled.outputs.evaluate == 'true' && steps.deps-changed.outputs.changed == 'true'
+      if: steps.settled.outputs.evaluate == 'true' && steps.assess.outputs.changed == 'true'
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       with:
         script: |
@@ -108,6 +156,55 @@ jobs:
             target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
           });
 
+    # The base branch's copy, never the pull request's: this job holds a token
+    # that can write statuses and comments.
+    - name: Checkout the promotion script
+      if: steps.settled.outputs.evaluate == 'true' && steps.assess.outputs.check_promotion == 'true'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.pull_request.base.ref }}
+        sparse-checkout: .builders/promote.py
+        sparse-checkout-cone-mode: false
+
+    - name: Checkout the pull request's lockfiles
+      if: steps.settled.outputs.evaluate == 'true' && steps.assess.outputs.check_promotion == 'true'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        path: pr
+        sparse-checkout: .deps/resolved
+        sparse-checkout-cone-mode: false
+
+    # promote.py --verify reads the public index over HTTPS, so this needs no
+    # credentials and no dependencies beyond the runner's Python.
+    - name: Check whether the wheels are already promoted
+      id: verify
+      if: steps.settled.outputs.evaluate == 'true' && steps.assess.outputs.check_promotion == 'true'
+      env:
+        PROMOTE_LOCKFILE_DIR: pr/.deps/resolved
+      run: python3 .builders/promote.py --verify
+
+    - name: Determine the promotion state
+      id: state
+      if: steps.settled.outputs.evaluate == 'true'
+      env:
+        CHANGED: ${{ steps.assess.outputs.changed }}
+        CHECK_PROMOTION: ${{ steps.assess.outputs.check_promotion }}
+        PROMOTED: ${{ steps.verify.outputs.promoted }}
+      run: |
+        set -euo pipefail
+        if [[ "${CHANGED}" != "true" ]]; then
+          state=not_applicable
+        elif [[ "${CHECK_PROMOTION}" != "true" ]]; then
+          state=awaiting_resolution
+        elif [[ "${PROMOTED}" != "true" ]]; then
+          state=awaiting_promotion
+        else
+          state=promoted
+        fi
+        echo "state=${state}" >> "${GITHUB_OUTPUT}"
+        echo "Promotion state: ${state}"
+
     - name: Find existing promotion notice
       id: find_notice
       if: steps.settled.outputs.evaluate == 'true'
@@ -117,9 +214,9 @@ jobs:
         comment-author: 'github-actions[bot]'
         body-includes: ${{ env.PROMOTION_COMMENT_MARKER }}
 
-    - name: Post or update the promotion notice
-      id: post_notice
-      if: steps.settled.outputs.evaluate == 'true' && steps.deps-changed.outputs.changed == 'true'
+    - name: Post the notice for a branch awaiting resolution
+      id: awaiting_resolution_notice
+      if: steps.state.outputs.state == 'awaiting_resolution'
       uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -130,7 +227,7 @@ jobs:
           > [!WARNING]
           > **This PR changes Agent dependencies. Do not merge it until the wheels are promoted.**
           >
-          > Dependency inputs changed, so the dependency resolution and wheel build workflow runs on this branch. It takes 1.5 to 3 hours and finishes by committing updated lockfiles. The wheels it builds then have to be promoted before the Agent can use them.
+          > Dependency inputs changed, so the dependency resolution and wheel build workflow is running on this branch. It takes 1.5 to 3 hours and finishes by committing updated lockfiles. The wheels it builds then have to be promoted before the Agent can use them.
           >
           > **Steps to take, in order:**
           >
@@ -145,12 +242,59 @@ jobs:
           >
           > Merging before promotion leaves the Agent unable to install the wheels these lockfiles pin. `dependency-wheel-promotion` is a required check: if it is pending or red, that is intentional. Do not bypass it and do not ask for an admin merge.
           >
-          > Pushing again to this branch invalidates the promotion, so if you push after step 4 you have to promote again.
+          > Do not promote before step 1. Promotion copies whatever wheels are in `dev` at the time, so promoting early publishes the wrong set.
           >
-          > <sub>Head commit `${{ github.event.pull_request.head.sha }}`. Full process: [Dependency Updates](${{ env.DOCS_URL }}). This comment is updated automatically as promotion progresses.</sub>
+          > <sub>Head commit `${{ github.event.pull_request.head.sha }}`. Full process: [Dependency Updates](${{ env.DOCS_URL }}). This comment is updated automatically as the branch progresses.</sub>
+
+    - name: Post the notice for a branch awaiting promotion
+      id: awaiting_promotion_notice
+      if: steps.state.outputs.state == 'awaiting_promotion'
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-id: ${{ steps.find_notice.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          > [!WARNING]
+          > **The lockfiles on this commit are ready. The wheels they pin still need promoting.**
+          >
+          > Dependency resolution has finished for this head commit, so the lockfiles here are the ones that will be merged. Their wheels are in `dev` storage, which the Agent build cannot read.
+          >
+          > **Steps to take, in order:**
+          >
+          > 1. Review the Agent build triggered by the lockfile commit (`default-pipeline` in GitLab), especially `static_quality_gate`.
+          > 2. Get the PR approved.
+          > 3. Promote the wheels:
+          >    ```
+          >    ddev dep promote ${{ env.PR_URL }}
+          >    ```
+          > 4. Wait for `dependency-wheel-promotion` to turn green. Only then merge.
+          >
+          > Merging before promotion leaves the Agent unable to install the wheels these lockfiles pin. `dependency-wheel-promotion` is a required check: if it is pending or red, that is intentional. Do not bypass it and do not ask for an admin merge.
+          >
+          > Pushing another dependency change after promoting starts this over, since resolution has to run again for the new inputs.
+          >
+          > <sub>Head commit `${{ github.event.pull_request.head.sha }}`. Full process: [Dependency Updates](${{ env.DOCS_URL }}). This comment is updated automatically as the branch progresses.</sub>
+
+    - name: Post the notice for a promoted branch
+      id: promoted_notice
+      if: steps.state.outputs.state == 'promoted'
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-id: ${{ steps.find_notice.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          Dependency resolution has run for this head commit and every wheel its lockfiles pin is already in stable storage, so `dependency-wheel-promotion` passes and this PR can merge.
+
+          Pushing another dependency change sends the check back to pending, because resolution has to run again for the new inputs.
+
+          <sub>Head commit `${{ github.event.pull_request.head.sha }}`. Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
 
     - name: Clear the promotion notice
-      if: steps.settled.outputs.evaluate == 'true' && steps.deps-changed.outputs.changed != 'true' && steps.find_notice.outputs.comment-id != ''
+      if: steps.state.outputs.state == 'not_applicable' && steps.find_notice.outputs.comment-id != ''
       uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
       with:
         comment-id: ${{ steps.find_notice.outputs.comment-id }}
@@ -165,22 +309,37 @@ jobs:
       if: steps.settled.outputs.evaluate == 'true'
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       env:
-        CHANGED: ${{ steps.deps-changed.outputs.changed }}
-        NOTICE_COMMENT_ID: ${{ steps.post_notice.outputs.comment-id }}
+        STATE: ${{ steps.state.outputs.state }}
+        NOTICE_COMMENT_ID: >-
+          ${{ steps.awaiting_resolution_notice.outputs.comment-id
+              || steps.awaiting_promotion_notice.outputs.comment-id
+              || steps.promoted_notice.outputs.comment-id }}
       with:
         script: |
-          const changed = process.env.CHANGED === 'true';
-          const commentId = process.env.NOTICE_COMMENT_ID;
+          // The merge box truncates the description to about 30 characters, so
+          // the instructions live in the linked notice rather than here.
+          const outcomes = {
+            not_applicable: ['success', 'No dependency changes.'],
+            awaiting_resolution: ['pending', 'Waiting for dependency resolution.'],
+            awaiting_promotion: ['pending', 'Promote wheels before merging.'],
+            promoted: ['success', 'Wheels are promoted.'],
+          };
+          const outcome = outcomes[process.env.STATE];
+          if (outcome === undefined) {
+            core.setFailed(`Unknown promotion state: ${process.env.STATE}`);
+            return;
+          }
+
+          const [state, description] = outcome;
           const status = {
             owner: context.repo.owner,
             repo: context.repo.repo,
             sha: context.payload.pull_request.head.sha,
-            state: changed ? 'pending' : 'success',
+            state,
             context: 'dependency-wheel-promotion',
-            // The merge box truncates this to about 30 characters, so the
-            // instructions live in the linked notice rather than here.
-            description: changed ? 'Promote wheels before merging.' : 'No dependency changes.',
+            description,
           };
+          const commentId = process.env.NOTICE_COMMENT_ID;
           if (commentId) {
             status.target_url = `${context.payload.pull_request.html_url}#issuecomment-${commentId}`;
           }

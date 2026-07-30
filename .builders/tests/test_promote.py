@@ -1,3 +1,4 @@
+import urllib.error
 from pathlib import Path
 from unittest import mock
 
@@ -183,3 +184,127 @@ def test_promote_nothing_to_promote():
         promote.promote([])
 
     mock_client_cls.assert_not_called()
+
+
+def test_promote_without_the_storage_dependency(capsys):
+    """promote exits with a clear error when google-cloud-storage is unavailable.
+
+    The module import is optional so that --verify can run with only the standard
+    library, which leaves promotion itself to fail on a missing dependency.
+    """
+    with mock.patch.object(promote, "storage", None):
+        with pytest.raises(SystemExit) as exc_info:
+            promote.promote(["built/foo/foo-1.0-py3-none-any.whl"])
+
+    assert exc_info.value.code == 1
+    assert "google-cloud-storage is not installed" in capsys.readouterr().err
+
+
+def head_response(status: int) -> mock.MagicMock:
+    """Build a urlopen context manager that yields a response with `status`."""
+    response = mock.MagicMock()
+    response.status = status
+    response.__enter__.return_value = response
+    return response
+
+
+def http_error(code: int) -> urllib.error.HTTPError:
+    return urllib.error.HTTPError(url="https://example.com", code=code, msg="boom", hdrs=None, fp=None)
+
+
+def test_stable_wheel_exists_for_published_wheel():
+    """stable_wheel_exists returns True when the stable URL responds with 200."""
+    with mock.patch.object(promote.urllib.request, "urlopen", return_value=head_response(200)) as urlopen:
+        assert promote.stable_wheel_exists("built/foo/foo-1.0-py3-none-any.whl") is True
+
+    request = urlopen.call_args.args[0]
+    assert request.method == "HEAD"
+    assert request.full_url == (
+        "https://agent-int-packages.datadoghq.com/stable/built/foo/foo-1.0-py3-none-any.whl"
+    )
+
+
+def test_stable_wheel_exists_for_missing_wheel():
+    """stable_wheel_exists returns False on 404 without retrying."""
+    with mock.patch.object(promote.urllib.request, "urlopen", side_effect=http_error(404)) as urlopen:
+        assert promote.stable_wheel_exists("built/foo/foo-1.0-py3-none-any.whl") is False
+
+    assert urlopen.call_count == 1
+
+
+def test_stable_wheel_exists_retries_transient_failures():
+    """stable_wheel_exists retries a server error and returns the eventual answer."""
+    responses = [http_error(503), urllib.error.URLError("connection reset"), head_response(200)]
+    with mock.patch.object(promote, "time"):
+        with mock.patch.object(promote.urllib.request, "urlopen", side_effect=responses) as urlopen:
+            assert promote.stable_wheel_exists("built/foo/foo-1.0-py3-none-any.whl") is True
+
+    assert urlopen.call_count == 3
+
+
+def test_stable_wheel_exists_raises_when_undeterminable():
+    """stable_wheel_exists raises rather than guessing when every attempt fails."""
+    with mock.patch.object(promote, "time"):
+        with mock.patch.object(promote.urllib.request, "urlopen", side_effect=http_error(500)):
+            with pytest.raises(RuntimeError, match="Could not determine"):
+                promote.stable_wheel_exists("built/foo/foo-1.0-py3-none-any.whl")
+
+
+def test_find_unpromoted_reports_only_missing_wheels():
+    """find_unpromoted returns the wheels that are absent from stable storage."""
+    present = "built/present/present-1.0-py3-none-any.whl"
+    missing = "built/missing/missing-1.0-py3-none-any.whl"
+
+    with mock.patch.object(promote, "stable_wheel_exists", side_effect=lambda path: "present" in path):
+        assert promote.find_unpromoted([present, missing]) == [missing]
+
+
+def test_find_unpromoted_checks_each_wheel_once():
+    """find_unpromoted deduplicates paths shared across lockfiles."""
+    shared = "external/requests/requests-2.32.0-py3-none-any.whl"
+
+    with mock.patch.object(promote, "stable_wheel_exists", return_value=True) as exists:
+        assert promote.find_unpromoted([shared, shared, shared]) == []
+
+    assert exists.call_count == 1
+
+
+@pytest.mark.parametrize(
+    ("unpromoted", "expected"),
+    [
+        pytest.param([], "true", id="all-promoted"),
+        pytest.param(["built/foo/foo-1.0-py3-none-any.whl"], "false", id="some-missing"),
+    ],
+)
+def test_verify_reports_the_verdict_to_github_output(tmp_path, monkeypatch, unpromoted, expected):
+    """verify writes promoted=true|false to $GITHUB_OUTPUT."""
+    output_file = tmp_path / "github_output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output_file))
+
+    with mock.patch.object(promote, "find_unpromoted", return_value=unpromoted):
+        promote.verify(["built/foo/foo-1.0-py3-none-any.whl"])
+
+    assert output_file.read_text(encoding="utf-8") == f"promoted={expected}\n"
+
+
+def test_verify_fails_when_no_storage_wheels_are_pinned(capsys):
+    """verify exits with an error when the lockfiles pin nothing from our storage.
+
+    Reporting that as "nothing to promote" would turn the promotion gate green
+    for a branch whose lockfiles are empty or malformed.
+    """
+    with pytest.raises(SystemExit) as exc_info:
+        promote.verify([])
+
+    assert exc_info.value.code == 1
+    assert "No ${INTEGRATIONS_WHEELS_STORAGE} wheels" in capsys.readouterr().err
+
+
+def test_verify_survives_outside_github_actions(monkeypatch, capsys):
+    """verify prints the verdict instead of failing when $GITHUB_OUTPUT is unset."""
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+
+    with mock.patch.object(promote, "find_unpromoted", return_value=[]):
+        promote.verify(["built/foo/foo-1.0-py3-none-any.whl"])
+
+    assert "promoted=true" in capsys.readouterr().out
