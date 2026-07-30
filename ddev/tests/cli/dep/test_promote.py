@@ -11,16 +11,23 @@ RUN_DETAILS = {
     'html_url': 'https://github.com/DataDog/integrations-core/actions/runs/999',
 }
 
-RESOLUTION_RUN = {
-    'status': 'in_progress',
-    'html_url': 'https://github.com/DataDog/integrations-core/actions/runs/555',
-}
+RESOLUTION_RUN_URL = 'https://github.com/DataDog/integrations-core/actions/runs/555'
+SUCCESSFUL_RESOLUTION_RUN = {'status': 'completed', 'conclusion': 'success', 'html_url': RESOLUTION_RUN_URL}
 
 
 @pytest.fixture(autouse=True)
-def resolution_runs(mocker):
-    """Default every test to a head commit with no resolution run in flight."""
-    return mocker.patch('ddev.utils.github.GitHubManager.get_unfinished_workflow_runs', return_value=[])
+def resolution_run(mocker):
+    """Default every test to a head commit whose resolution finished successfully."""
+    return mocker.patch(
+        'ddev.utils.github.GitHubManager.get_latest_workflow_run',
+        return_value=SUCCESSFUL_RESOLUTION_RUN,
+    )
+
+
+@pytest.fixture(autouse=True)
+def from_fork(mocker):
+    """Default every test to a pull request whose head branch lives in this repository."""
+    return mocker.patch('ddev.utils.github.GitHubManager.pull_request_is_from_fork', return_value=False)
 
 
 def test_promote_dispatches_workflow_and_prints_run_url(ddev, mocker):
@@ -79,19 +86,20 @@ def test_promote_suppresses_httpx_logs_and_restores_level(ddev, mocker, httpx_at
     assert httpx_at_debug.level == logging.DEBUG
 
 
-def test_promote_checks_resolution_for_the_head_commit(ddev, mocker, resolution_runs):
+def test_promote_checks_resolution_for_the_head_commit(ddev, mocker, resolution_run):
     mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
     mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow', return_value=RUN_DETAILS)
 
     result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
 
     assert result.exit_code == 0, result.output
-    resolution_runs.assert_called_once_with('resolve-build-deps.yaml', 'deadbeef')
+    resolution_run.assert_called_once_with('resolve-build-deps.yaml', 'deadbeef')
 
 
-def test_promote_refuses_while_resolution_is_running(ddev, mocker, resolution_runs):
+@pytest.mark.parametrize('status', ['queued', 'in_progress'])
+def test_promote_refuses_while_resolution_is_running(ddev, mocker, resolution_run, status):
     """Promotion copies whatever is in dev storage, so it must wait for the lockfiles."""
-    resolution_runs.return_value = [RESOLUTION_RUN]
+    resolution_run.return_value = {'status': status, 'conclusion': None, 'html_url': RESOLUTION_RUN_URL}
     mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
     dispatch = mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow')
 
@@ -99,9 +107,52 @@ def test_promote_refuses_while_resolution_is_running(ddev, mocker, resolution_ru
 
     assert result.exit_code != 0
     assert 'still running for deadbeef' in result.output
-    assert RESOLUTION_RUN['html_url'] in result.output
+    assert RESOLUTION_RUN_URL in result.output
     assert 'Wait for it to commit the lockfiles' in result.output
     dispatch.assert_not_called()
+
+
+@pytest.mark.parametrize('conclusion', ['failure', 'cancelled', 'timed_out', 'startup_failure', None])
+def test_promote_refuses_when_resolution_did_not_succeed(ddev, mocker, resolution_run, conclusion):
+    """A run that finished without publishing leaves the previous lockfiles at the head."""
+    resolution_run.return_value = {'status': 'completed', 'conclusion': conclusion, 'html_url': RESOLUTION_RUN_URL}
+    mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
+    dispatch = mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow')
+
+    result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+
+    assert result.exit_code != 0
+    assert 'did not succeed for deadbeef' in result.output
+    assert RESOLUTION_RUN_URL in result.output
+    assert 'Re-run it' in result.output
+    dispatch.assert_not_called()
+
+
+def test_promote_proceeds_when_resolution_never_ran(ddev, mocker, resolution_run):
+    """An absent run says nothing about the lockfiles, so it must not block promotion."""
+    resolution_run.return_value = None
+    mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
+    dispatch = mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow', return_value=RUN_DETAILS)
+
+    result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+
+    assert result.exit_code == 0, result.output
+    dispatch.assert_called_once()
+
+
+def test_promote_refuses_a_fork_pull_request(ddev, mocker, from_fork, resolution_run):
+    """Resolution never runs on a fork, so promoting one publishes the base branch's wheels."""
+    from_fork.return_value = True
+    mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
+    dispatch = mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow')
+
+    result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+
+    assert result.exit_code != 0
+    assert 'comes from a fork' in result.output
+    assert 'Reopen the change as a branch in this repository' in result.output
+    dispatch.assert_not_called()
+    resolution_run.assert_not_called()
 
 
 def test_promote_restores_httpx_log_level_on_failure(ddev, mocker, httpx_at_debug):

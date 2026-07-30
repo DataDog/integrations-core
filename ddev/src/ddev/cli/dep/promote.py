@@ -29,8 +29,9 @@ def promote(app: Application, pr_url: str):
     wheels from the dev/ GCS prefix to stable/ so the Agent can reference them
     after merge.
 
-    Refuses to dispatch while dependency resolution is still running for the head
-    commit, because promotion publishes whatever is in dev storage at the time.
+    Refuses to dispatch unless dependency resolution has finished successfully for the
+    head commit, because promotion publishes whatever is in dev storage at the time.
+    Pull requests from forks cannot be promoted, since resolution never runs on them.
 
     Example:
 
@@ -53,16 +54,33 @@ def promote(app: Application, pr_url: str):
 
         app.display_info(f'PR #{pr_number}: branch {head_ref}, SHA {head_sha}')
 
-        with app.status('Checking for dependency resolution in flight...'):
-            unfinished_runs = app.github.get_unfinished_workflow_runs(RESOLUTION_WORKFLOW, head_sha)
+        with app.status('Checking whether the pull request comes from a fork...'):
+            from_fork = app.github.pull_request_is_from_fork(pr_number)
 
-        if unfinished_runs:
-            # Promotion copies whatever is in dev storage when it runs, and an
-            # unfinished run has not uploaded its wheels or committed its lockfiles.
-            app.display_error(f'Dependency resolution is still running for {head_sha}.')
-            for run in unfinished_runs:
-                app.display_info(f'  {run["status"]}: {run["html_url"]}')
-            app.abort('Wait for it to commit the lockfiles, then promote the new head.')
+        if from_fork:
+            # Resolution only runs on pushes to branches in this repository, so a fork
+            # head carries no lockfiles of its own and promoting it would publish the
+            # base branch's wheels behind a green check.
+            app.display_error(f'PR #{pr_number} comes from a fork, so its dependencies were never resolved.')
+            app.abort('Reopen the change as a branch in this repository, then promote that pull request.')
+
+        with app.status('Checking dependency resolution for the head commit...'):
+            resolution_run = app.github.get_latest_workflow_run(RESOLUTION_WORKFLOW, head_sha)
+
+        # No run at all leaves nothing to judge, so promotion goes ahead as before.
+        if resolution_run is not None:
+            if resolution_run['status'] != 'completed':
+                # Promotion copies whatever is in dev storage when it runs, and a run
+                # still going has not uploaded its wheels or committed its lockfiles.
+                app.display_error(f'Dependency resolution is still running for {head_sha}.')
+                app.display_info(f'  {resolution_run["status"]}: {resolution_run["html_url"]}')
+                app.abort('Wait for it to commit the lockfiles, then promote the new head.')
+            elif resolution_run.get('conclusion') != 'success':
+                # The lockfiles at this head are still the previous ones, so promoting
+                # would report a resolution that never published as ready to merge.
+                app.display_error(f'Dependency resolution did not succeed for {head_sha}.')
+                app.display_info(f'  {resolution_run.get("conclusion")}: {resolution_run["html_url"]}')
+                app.abort('Re-run it and let it commit the lockfiles before promoting.')
 
         with app.status('Dispatching promote workflow...'):
             run_details = app.github.dispatch_workflow(

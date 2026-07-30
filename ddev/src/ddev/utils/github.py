@@ -278,13 +278,30 @@ class GitHubManager:
             return None
         return response.json()
 
-    def get_unfinished_workflow_runs(self, workflow_id: str, head_sha: str) -> list[dict[str, Any]]:
-        """Return the queued or in-progress runs of `workflow_id` for `head_sha`."""
+    def get_latest_workflow_run(self, workflow_id: str, head_sha: str) -> dict[str, Any] | None:
+        """Return the most recent run of `workflow_id` for `head_sha`, or None if it never ran.
+
+        Ordered by run number rather than by the API's own ordering, which does not
+        promise that a re-run of an earlier run comes back last.
+        """
         response = self.__api_get(
             self.WORKFLOW_RUNS_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
             params={'head_sha': head_sha, 'per_page': '100'},
         )
-        return [run for run in response.json().get('workflow_runs', []) if run.get('status') not in ('completed', None)]
+        runs = response.json().get('workflow_runs', [])
+        if not runs:
+            return None
+        return max(runs, key=lambda run: (run.get('run_number') or 0, run.get('run_attempt') or 0))
+
+    def pull_request_is_from_fork(self, pr_number: int) -> bool:
+        """Whether the pull request's head branch lives outside this repository.
+
+        A head repository that no longer exists counts as a fork, since its branch is
+        equally out of reach.
+        """
+        response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        head_repo = response.json()['head'].get('repo') or {}
+        return head_repo.get('full_name') != self.repo_id
 
     def get_pull_request_comments(self, pr_number: int) -> list[dict]:
         response = self.__api_get(

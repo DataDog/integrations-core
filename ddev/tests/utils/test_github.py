@@ -134,34 +134,65 @@ def test_dispatch_workflow_return_run_details_sends_flag_and_returns_json(github
 
 
 @pytest.mark.parametrize(
-    ('runs', 'expected_urls'),
+    ('runs', 'expected_url'),
     [
-        pytest.param([], [], id='no-runs'),
-        pytest.param([{'status': 'completed', 'html_url': 'u1'}], [], id='finished'),
-        pytest.param([{'status': 'in_progress', 'html_url': 'u1'}], ['u1'], id='in-progress'),
-        pytest.param([{'status': 'queued', 'html_url': 'u1'}], ['u1'], id='queued'),
+        pytest.param([], None, id='no-runs'),
+        pytest.param([{'run_number': 4, 'run_attempt': 1, 'html_url': 'u1'}], 'u1', id='single-run'),
         pytest.param(
             [
-                {'status': 'completed', 'html_url': 'u1'},
-                {'status': 'queued', 'html_url': 'u2'},
-                {'status': 'in_progress', 'html_url': 'u3'},
+                {'run_number': 7, 'run_attempt': 1, 'html_url': 'newest'},
+                {'run_number': 5, 'run_attempt': 1, 'html_url': 'older'},
             ],
-            ['u2', 'u3'],
-            id='mixed',
+            'newest',
+            id='highest-run-number-wins-regardless-of-order',
         ),
+        pytest.param(
+            [
+                {'run_number': 5, 'run_attempt': 1, 'html_url': 'older'},
+                {'run_number': 7, 'run_attempt': 1, 'html_url': 'newest'},
+            ],
+            'newest',
+            id='api-order-is-not-trusted',
+        ),
+        pytest.param(
+            [
+                {'run_number': 7, 'run_attempt': 2, 'html_url': 're-run'},
+                {'run_number': 7, 'run_attempt': 1, 'html_url': 'first-attempt'},
+            ],
+            're-run',
+            id='latest-attempt-of-the-same-run-wins',
+        ),
+        pytest.param([{'html_url': 'u1'}, {'html_url': 'u2'}], 'u1', id='missing-ordering-keys-do-not-raise'),
     ],
 )
-def test_get_unfinished_workflow_runs(github_manager, mocker, runs, expected_urls):
-    """Only runs that have not completed are reported."""
+def test_get_latest_workflow_run(github_manager, mocker, runs, expected_url):
+    """The most recent run for the commit is reported, or None when it never ran."""
     response = mocker.MagicMock()
     response.json.return_value = {'workflow_runs': runs}
     api_get = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
 
-    result = github_manager.get_unfinished_workflow_runs('example.yaml', 'deadbeef')
+    result = github_manager.get_latest_workflow_run('example.yaml', 'deadbeef')
 
-    assert [run['html_url'] for run in result] == expected_urls
+    assert (result['html_url'] if result else None) == expected_url
     assert api_get.call_args.kwargs['params'] == {'head_sha': 'deadbeef', 'per_page': '100'}
     assert api_get.call_args.args[0].endswith('/actions/workflows/example.yaml/runs')
+
+
+@pytest.mark.parametrize(
+    ('head_repo', 'expected'),
+    [
+        pytest.param({'full_name': 'DataDog/integrations-core'}, False, id='same-repository'),
+        pytest.param({'full_name': 'someone/integrations-core'}, True, id='fork'),
+        pytest.param(None, True, id='deleted-head-repository'),
+    ],
+)
+def test_pull_request_is_from_fork(github_manager, mocker, head_repo, expected):
+    response = mocker.MagicMock()
+    response.json.return_value = {'head': {'sha': 'abc', 'ref': 'feature', 'repo': head_repo}}
+    api_get = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
+
+    assert github_manager.pull_request_is_from_fork(1) is expected
+    assert api_get.call_args.args[0].endswith('/pulls/1')
 
 
 @pytest.mark.parametrize('status_code', [401, 403])

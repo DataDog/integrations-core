@@ -109,15 +109,22 @@ jobs:
           const hasResolutionOutput = files.some(file => isResolutionOutput(file.filename));
           core.setOutput('changed', changed ? 'true' : 'false');
 
+          // resolve-build-deps.yaml only runs on pushes to branches here, so a fork
+          // head can never carry lockfiles of its own. A head repository that is gone
+          // counts as a fork too, its branch being equally out of reach.
+          const repoFullName = `${context.repo.owner}/${context.repo.repo}`;
+          const isFork = context.payload.pull_request.head.repo?.full_name !== repoFullName;
+          core.setOutput('fork', isFork ? 'true' : 'false');
+
           // Whether resolution has published for the inputs on this head: walk back
           // until a commit publishes output, and an input changed before then means
           // the lockfiles here are about to be replaced.
           const WALK_LIMIT = 50;
-          // getCommit truncates its file list here, so such a commit could be
-          // hiding a dependency change.
+          // The most files getCommit serves in one page, so a commit reporting this
+          // many may be truncated and could be hiding an input change.
           const COMMIT_FILE_LIMIT = 300;
           let current = false;
-          if (hasResolutionOutput) {
+          if (hasResolutionOutput && !isFork) {
             const commits = await github.paginate(github.rest.pulls.listCommits, {
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -129,6 +136,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 ref: summary.sha,
+                per_page: COMMIT_FILE_LIMIT,
               });
               const commitFiles = commit.files ?? [];
               if (commitFiles.length >= COMMIT_FILE_LIMIT) {
@@ -148,8 +156,12 @@ jobs:
               }
             }
           }
-          // Only worth checking the wheels once the lockfiles here are the final ones.
-          core.setOutput('check_promotion', changed && hasResolutionOutput && current ? 'true' : 'false');
+          // Only worth checking the wheels once the lockfiles here are the final ones,
+          // and a fork's lockfiles are never ours to check.
+          core.setOutput(
+            'check_promotion',
+            changed && !isFork && hasResolutionOutput && current ? 'true' : 'false',
+          );
 
     # Before the slower steps, so a failure in them still leaves the merge blocked.
     - name: Block the merge while the notice is prepared
@@ -198,12 +210,15 @@ jobs:
       if: steps.settled.outputs.evaluate == 'true'
       env:
         CHANGED: ${{ steps.assess.outputs.changed }}
+        FORK: ${{ steps.assess.outputs.fork }}
         CHECK_PROMOTION: ${{ steps.assess.outputs.check_promotion }}
         PROMOTED: ${{ steps.verify.outputs.promoted }}
       run: |
         set -euo pipefail
         if [[ "${CHANGED}" != "true" ]]; then
           state=not_applicable
+        elif [[ "${FORK}" == "true" ]]; then
+          state=fork
         elif [[ "${CHECK_PROMOTION}" != "true" ]]; then
           state=awaiting_resolution
         elif [[ "${PROMOTED}" != "true" ]]; then
@@ -222,6 +237,27 @@ jobs:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
         body-includes: ${{ env.PROMOTION_COMMENT_MARKER }}
+
+    - name: Post the notice for a fork pull request
+      id: fork_notice
+      if: steps.state.outputs.state == 'fork'
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-id: ${{ steps.find_notice.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          > [!WARNING]
+          > **This PR changes Agent dependencies and comes from a fork, so it cannot be merged as it stands.**
+          >
+          > Thanks for the contribution. Dependency resolution builds the wheels the Agent installs, and it only runs on branches in this repository, so it will never run here. Without it there are no wheels to promote and `dependency-wheel-promotion` stays pending.
+          >
+          > **A maintainer has to take it from here:** once this PR is reviewed and agreed, they reopen the same change as a branch in `DataDog/integrations-core`, let resolution run there, promote the wheels, and merge that PR instead. This one is then closed with a link to it.
+          >
+          > Nothing more is needed from you. `dependency-wheel-promotion` is a required check and it is pending on purpose: do not bypass it and do not ask for an admin merge.
+          >
+          > <sub>Head commit `${{ github.event.pull_request.head.sha }}`. Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
 
     - name: Post the notice for a branch awaiting resolution
       id: awaiting_resolution_notice
@@ -320,7 +356,8 @@ jobs:
       env:
         STATE: ${{ steps.state.outputs.state }}
         NOTICE_COMMENT_ID: >-
-          ${{ steps.awaiting_resolution_notice.outputs.comment-id
+          ${{ steps.fork_notice.outputs.comment-id
+              || steps.awaiting_resolution_notice.outputs.comment-id
               || steps.awaiting_promotion_notice.outputs.comment-id
               || steps.promoted_notice.outputs.comment-id }}
       with:
@@ -329,6 +366,7 @@ jobs:
           // instructions live in the linked notice.
           const outcomes = {
             not_applicable: ['success', 'No dependency changes.'],
+            fork: ['pending', 'Fork PR: reopen it here.'],
             awaiting_resolution: ['pending', 'Waiting for dependency resolution.'],
             awaiting_promotion: ['pending', 'Promote wheels before merging.'],
             promoted: ['success', 'Wheels are promoted.'],
