@@ -322,7 +322,8 @@ def get_indexes_query(version, is_mariadb, placeholders):
 # multi-way join would cause. The five `%s` placeholders are all the schema (database) name, in
 # order: columns, indexes, foreign keys, partitions, tables.
 #
-# Requires JSON_ARRAYAGG (MySQL >= 5.7.22); callers must gate on version.
+# Subqueries are filtered by schema only, so each scans a full information_schema view; callers
+# must gate on MYSQL_MIN_SINGLE_QUERY_VERSION.
 # JSON_ARRAYAGG does not guarantee element order, so the collector re-sorts columns, index key
 # parts, and partitions after parsing.
 SQL_SCHEMA_JSON = """\

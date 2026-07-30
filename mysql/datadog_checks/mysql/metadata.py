@@ -86,7 +86,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._db_created_at = 0
         self._db = None
         # Schema collector, built lazily once the server version is known (see run_job). It selects
-        # single_query on JSON-capable servers and chunked on older ones; both emit the shared
+        # single_query on MySQL 8.0+ and chunked everywhere else; both emit the shared
         # SchemaCollector snapshot markers.
         self._schema_collector = None
         self._last_settings_collection_time = 0

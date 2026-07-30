@@ -17,7 +17,7 @@ from datadog_checks.mysql.schemas import (
     group_partitions,
     normalize_columns,
     normalize_foreign_keys,
-    supports_json_collection,
+    supports_single_query_collection,
 )
 from datadog_checks.mysql.version_utils import MySQLVersion
 
@@ -216,21 +216,24 @@ def test_normalize_foreign_keys_passthrough_keeps_table_name():
 @pytest.mark.parametrize(
     "is_mariadb,version,expected",
     [
-        (False, "5.7.22", True),
-        (False, "5.7.21", False),
+        # 5.7 has JSON_ARRAYAGG from 5.7.22 but is excluded on cost grounds.
+        (False, "5.7.22", False),
+        (False, "5.7.44", False),
+        (False, "8.0.0", True),
         (False, "8.0.35", True),
+        (False, "8.4.0", True),
         (True, "10.5.0", False),
         (True, "10.4.30", False),
         (True, "11.4.2", False),
     ],
 )
-def test_supports_json_collection(is_mariadb, version, expected):
+def test_supports_single_query_collection(is_mariadb, version, expected):
     v = MySQLVersion(version, "MariaDB" if is_mariadb else "MySQL", "unspecified")
-    assert supports_json_collection(v, is_mariadb) is expected
+    assert supports_single_query_collection(v, is_mariadb) is expected
 
 
-def test_supports_json_collection_none_version():
-    assert supports_json_collection(None, False) is False
+def test_supports_single_query_collection_none_version():
+    assert supports_single_query_collection(None, False) is False
 
 
 def test_mariadb_cannot_force_single_query_strategy():

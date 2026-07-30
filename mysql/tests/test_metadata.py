@@ -105,9 +105,9 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-# ``None`` exercises the default (version-selected) strategy -- single_query on JSON-capable
-# servers, chunked otherwise. ``'chunked'`` forces the chunked strategy, which works on every
-# supported version. Both must produce identical schema payloads.
+# ``None`` exercises the default (version-selected) strategy -- single_query on MySQL 8.0+, chunked
+# on 5.7 and MariaDB. ``'chunked'`` forces the chunked strategy, which works on every supported
+# version. Both must produce identical schema payloads.
 @pytest.mark.parametrize('collection_strategy', [None, 'chunked'])
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance, collection_strategy):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']

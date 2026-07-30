@@ -27,7 +27,9 @@ if TYPE_CHECKING:
     from datadog_checks.mysql import MySql
     from datadog_checks.mysql.metadata import MySQLMetadata
 
-MYSQL_MIN_JSON_VERSION = (5, 7, 22)
+# Stricter than JSON_ARRAYAGG availability (5.7.22): the single-query shape aggregates a whole
+# information_schema view per source, which is only affordable on 8.0's data dictionary.
+MYSQL_MIN_SINGLE_QUERY_VERSION = (8, 0, 0)
 MYSQL_MIN_QUERY_TIMEOUT_VERSION = (5, 7, 8)
 
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
@@ -41,11 +43,11 @@ STRATEGY_SINGLE_QUERY = "single_query"  # shape A: one JSON-aggregation query pe
 STRATEGY_CHUNKED = "chunked"  # shape B: stream the table list, fetch detail per chunk
 
 
-def supports_json_collection(version, is_mariadb: bool) -> bool:
-    """Return True when the server should use the JSON aggregation strategy."""
+def supports_single_query_collection(version, is_mariadb: bool) -> bool:
+    """Return True when the server should use the single-query (JSON aggregation) strategy."""
     if version is None or is_mariadb:
         return False
-    return version.version_compatible(MYSQL_MIN_JSON_VERSION)
+    return version.version_compatible(MYSQL_MIN_SINGLE_QUERY_VERSION)
 
 
 def _as_list(value: Any) -> list:
@@ -199,8 +201,8 @@ class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
         self.max_execution_time = min(
             schemas_config.get("max_execution_time", DEFAULT_MAX_EXECUTION_TIME), self.collection_interval
         )
-        # None means "choose by server version" (single_query when JSON is supported, else chunked).
-        # An explicit value forces that strategy regardless of version (hidden debugging escape hatch).
+        # None chooses by server version (see MYSQL_MIN_SINGLE_QUERY_VERSION). An explicit value
+        # forces that strategy on MySQL (debugging escape hatch); MariaDB is always chunked.
         self.collection_strategy = schemas_config.get("collection_strategy")
 
 
@@ -267,7 +269,7 @@ class MySqlSchemaCollector(SchemaCollector):
             return STRATEGY_CHUNKED
         if self._config.collection_strategy:
             return self._config.collection_strategy
-        if supports_json_collection(self._check.version, self._check.is_mariadb):
+        if supports_single_query_collection(self._check.version, self._check.is_mariadb):
             return STRATEGY_SINGLE_QUERY
         return STRATEGY_CHUNKED
 
