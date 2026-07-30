@@ -617,9 +617,7 @@ PROBE_FAILED = Error('Not enough privileges')
     ],
 )
 def test_hosting_type_resolution(cloud_mode, shared_merge_tree, expected):
-    check = make_query_replaying_check(
-        {CLOUD_MODE_QUERY: cloud_mode, SHARED_MERGE_TREE_QUERY: shared_merge_tree}
-    )
+    check = make_query_replaying_check({CLOUD_MODE_QUERY: cloud_mode, SHARED_MERGE_TREE_QUERY: shared_merge_tree})
 
     assert check.hosting_type == expected
 
