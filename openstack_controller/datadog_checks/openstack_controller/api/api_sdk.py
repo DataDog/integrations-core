@@ -78,10 +78,28 @@ class ApiSdk(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
+    def _keystone_proxies(self):
+        """Proxy URLs keyed by scheme, for the transport keystoneauth builds.
+
+        Probes a neutral host rather than a catalog endpoint: requests applies no_proxy only to
+        environment proxies, so a shared transport cannot express per-host bypass, and anchoring the
+        lookup on one endpoint would apply that endpoint's rules to every other one.
+        """
+        http_proxy = self.http.proxy_for_url('http://example.com')
+        https_proxy = self.http.proxy_for_url('https://example.com')
+        if http_proxy is None and https_proxy is None:
+            return {}
+        return {'http': http_proxy or '', 'https': https_proxy or ''}
+
     def _build_keystone_session(self, auth):
         # keystoneauth builds its own transport; mirror the TLS config and headers from our HTTP
         # client via the backend-neutral protocol surface instead of handing it the requests session.
-        return session.Session(auth=auth, **self._keystone_session_kwargs())
+        keystone_session = session.Session(auth=auth, **self._keystone_session_kwargs())
+        # keystoneauth1 takes no proxy argument, so its transport is the only place proxies can go.
+        # It takes no auth, ntlm_domain, kerberos_auth or tls_ciphers either; those options stay
+        # unapplied on this path until the SDK is routed through ApiRest.
+        keystone_session.session.proxies = self._keystone_proxies()
+        return keystone_session
 
     def authorize_user(self):
         v3_auth = v3.Password(
