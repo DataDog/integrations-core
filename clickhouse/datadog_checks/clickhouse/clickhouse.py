@@ -420,11 +420,17 @@ class ClickhouseCheck(DatabaseCheck):
     def _resolve_hosting_type(self) -> str:
         """Resolve the hosting type from two independent server-side signals.
 
-        Both signals must agree before reporting cloud. A probe that succeeds without
-        finding its marker is a definite negative and settles the conjunction on its own,
-        so it short-circuits to self-hosted. A probe that raises is indeterminate, and
-        yields unknown rather than a self-hosted verdict built on nothing more than a
-        permission error or a system table the server is too old to have.
+        Both probes are always issued, and both signals must agree before reporting cloud.
+        Either one succeeding without finding its marker is a definite negative that decides
+        the result on its own. Neither probe is skipped on the strength of the other: the two
+        read unrelated parts of the server, and a deployment that satisfies only one of them
+        is exactly the ambiguous case worth spending a second query to see.
+
+        A probe that raises is indeterminate, and yields unknown rather than a self-hosted
+        verdict built on nothing more than a transport error or a system table the server is
+        too old to have. Note that a lack of privileges is not such a case: neither
+        system.settings nor system.table_engines is gated behind grants, so a restricted
+        monitoring user reads both in full.
         """
         cloud_mode = self._probe_cloud_mode()
         shared_merge_tree = self._probe_shared_merge_tree()
