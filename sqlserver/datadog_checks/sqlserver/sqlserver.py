@@ -906,7 +906,6 @@ class SQLServer(DatabaseCheck):
                     except Exception as e:
                         self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
 
-            # Data Observability does not require DBM — run independently.
             if self._config.data_observability.enabled:
                 self.data_observability.run_job_loop(self.tag_manager.get_tags())
 
