@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Callable, Type
 
 import stamina
 
+from ddev.e2e.agent.image import normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
 from ddev.utils.structures import EnvVars
 
@@ -140,7 +141,9 @@ class DockerAgent(AgentInterface):
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         from ddev.e2e.agent.constants import AgentEnvVars
 
-        agent_build = self.normalize_agent_image_name(agent_build)
+        agent_build = normalize_agent_image_name(
+            agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
+        )
 
         env_vars = env_vars.copy()
 
