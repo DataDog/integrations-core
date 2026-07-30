@@ -238,12 +238,8 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                             },
                         }
                     }
-                    if hasattr(self, '_http'):
-                        del self._http
-                    self.http.set_header('X-Vault-Request', 'true')
                 if self.config.client_token:
                     config['headers']['X-Vault-Token'] = self.config.client_token
-                    self.http.set_header('X-Vault-Token', self.config.client_token)
 
             self.scraper_configs.clear()
             self.scraper_configs.append(config)
