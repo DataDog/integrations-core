@@ -23,9 +23,7 @@ from pathlib import Path, PurePosixPath
 try:
     from google.cloud import storage
 except ImportError:
-    # Only promotion talks to the bucket. --verify reads the public index over
-    # HTTPS, so the promotion gate can run it with nothing but the standard
-    # library and no credentials.
+    # --verify needs only the standard library, so the bucket client is optional.
     storage = None  # type: ignore[assignment]
 
 BUCKET_NAME = "deps-agent-int-datadoghq-com"
@@ -35,8 +33,6 @@ LOCK_FILE_DIR = REPO_DIR / ".deps" / "resolved"
 DEV_PREFIX = "dev/"
 STABLE_PREFIX = "stable/"
 
-# Verification reads the public index over HTTPS rather than the bucket, so it
-# needs no credentials and can run in the promotion gate.
 VERIFY_WORKERS = 16
 VERIFY_ATTEMPTS = 3
 VERIFY_TIMEOUT = 15
@@ -152,9 +148,7 @@ def promote(rel_paths: list[str]) -> None:
 def stable_wheel_exists(rel_path: str) -> bool:
     """Whether `rel_path` is already published under the stable prefix.
 
-    Transient failures are retried and then raised rather than reported as a
-    missing wheel: a wrong answer either sends the reader off to promote wheels
-    that are already there, or lets an unpromoted branch look mergeable.
+    Raises if the answer cannot be established, rather than assuming either way.
     """
     request = urllib.request.Request(f"{STABLE_URL_PREFIX}{rel_path}", method="HEAD")
     last_error: Exception | None = None
@@ -197,9 +191,7 @@ def write_github_output(name: str, value: str) -> None:
 def verify(rel_paths: list[str]) -> None:
     """Report whether every wheel the lockfiles pin is already in stable storage."""
     if not rel_paths:
-        # Lockfiles exist, since collect_relative_paths exits otherwise, so this
-        # means none of their entries point at our storage. Reporting that as
-        # "nothing to promote" would turn the gate green on a broken lockfile.
+        # Lockfiles that pin nothing from our storage are broken, not complete.
         print("No ${INTEGRATIONS_WHEELS_STORAGE} wheels found in the lockfiles.", file=sys.stderr)
         sys.exit(1)
 

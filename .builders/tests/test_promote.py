@@ -187,11 +187,7 @@ def test_promote_nothing_to_promote():
 
 
 def test_promote_without_the_storage_dependency(capsys):
-    """promote exits with a clear error when google-cloud-storage is unavailable.
-
-    The module import is optional so that --verify can run with only the standard
-    library, which leaves promotion itself to fail on a missing dependency.
-    """
+    """promote exits with a clear error when google-cloud-storage is unavailable."""
     with mock.patch.object(promote, "storage", None):
         with pytest.raises(SystemExit) as exc_info:
             promote.promote(["built/foo/foo-1.0-py3-none-any.whl"])
@@ -288,11 +284,7 @@ def test_verify_reports_the_verdict_to_github_output(tmp_path, monkeypatch, unpr
 
 
 def test_verify_fails_when_no_storage_wheels_are_pinned(capsys):
-    """verify exits with an error when the lockfiles pin nothing from our storage.
-
-    Reporting that as "nothing to promote" would turn the promotion gate green
-    for a branch whose lockfiles are empty or malformed.
-    """
+    """verify exits with an error when the lockfiles pin nothing from our storage."""
     with pytest.raises(SystemExit) as exc_info:
         promote.verify([])
 

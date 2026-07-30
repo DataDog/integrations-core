@@ -57,10 +57,8 @@ def promote(app: Application, pr_url: str):
             unfinished_runs = app.github.get_unfinished_workflow_runs(RESOLUTION_WORKFLOW, head_sha)
 
         if unfinished_runs:
-            # Promotion copies whatever is in dev storage when it runs. A resolution
-            # run that has not finished has neither uploaded its wheels nor committed
-            # its lockfiles, so promoting now publishes the previous set, and the run
-            # moves the PR head out from under this promotion when it commits.
+            # Promotion copies whatever is in dev storage when it runs, and an
+            # unfinished run has not uploaded its wheels or committed its lockfiles.
             app.display_error(f'Dependency resolution is still running for {head_sha}.')
             for run in unfinished_runs:
                 app.display_info(f'  {run["status"]}: {run["html_url"]}')
