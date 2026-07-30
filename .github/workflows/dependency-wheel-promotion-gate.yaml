@@ -77,15 +77,28 @@ jobs:
             '.builders/AGENTS.md',
             '.builders/CLAUDE.md',
           ];
-          const affectsDependencies = name => (
-            !ignoredPaths.includes(name)
-            && !ignoredPrefixes.some(prefix => name.startsWith(prefix))
-            && (depPaths.includes(name) || depPrefixes.some(prefix => name.startsWith(prefix)))
-          );
+          // inputs_hash.py also drops dotfiles and __pycache__, but only below the
+          // directory a pattern names, which is why the prefix itself is exempt
+          // here and why an explicitly named path like the workflow above counts
+          // even though .github looks like a dotfile.
+          const isFilteredBelow = (name, prefix) => name
+            .slice(prefix.length)
+            .split('/')
+            .some(part => part.startsWith('.') || part === '__pycache__');
+          const affectsDependencies = name => {
+            if (depPaths.includes(name)) {
+              return true;
+            }
+            if (ignoredPaths.includes(name) || ignoredPrefixes.some(prefix => name.startsWith(prefix))) {
+              return false;
+            }
+            const prefix = depPrefixes.find(prefix => name.startsWith(prefix));
+            return prefix !== undefined && !isFilteredBelow(name, prefix);
+          };
           // .deps/ holds what resolution publishes: the lockfiles, the pinned
           // input hashes and the image digests. A commit touching it is a commit
           // where resolution landed its output on this branch.
-          const isResolutionOutput = name => name.startsWith('.deps/');
+          const isResolutionOutput = name => name.startsWith('.deps/') && !isFilteredBelow(name, '.deps/');
 
           const files = await github.paginate(github.rest.pulls.listFiles, {
             owner: context.repo.owner,
