@@ -408,6 +408,7 @@ VALID_UNIT_NAMES = {
     'milliwatt-hour',
     'watt-hour',
     'kilowatt-hour',
+    'investigation',
 }
 
 ALLOWED_PREFIXES = ('system.', 'jvm.', 'http.', 'datadog.', 'sftp.', 'process.', 'runtime.', 'otelcol_')
