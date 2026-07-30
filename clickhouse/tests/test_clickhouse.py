@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.utils import CLUSTER_TAG
+from datadog_checks.clickhouse.utils import CLUSTER_TAG, HOSTING_TYPE_TAG
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -60,6 +60,8 @@ def test_custom_queries(aggregator, instance, dd_run_check):
     # too), so every metric carries the clickhouse_cluster tag when a cluster resolves.
     if check.cluster_name:
         expected_tags.append('{}:{}'.format(CLUSTER_TAG, check.cluster_name))
+    # Unlike the cluster, hosting type always resolves to a value, so the tag is always present.
+    expected_tags.append('{}:{}'.format(HOSTING_TYPE_TAG, check.hosting_type))
 
     aggregator.assert_metric('clickhouse.settings.changed', metric_type=0, tags=expected_tags)
 

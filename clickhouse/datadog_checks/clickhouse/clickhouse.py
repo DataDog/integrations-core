@@ -24,10 +24,14 @@ from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .table_metrics import ClickhouseTableMetrics
 from .utils import (
+    CLOUD_MODE_QUERY,
     CLUSTER_MACRO_QUERY,
     CLUSTER_NAME_QUERY,
     CLUSTER_TAG,
+    HOSTING_TYPE_TAG,
+    SHARED_MERGE_TREE_QUERY,
     ErrorSanitizer,
+    HostingType,
     cluster_aware_query,
 )
 
@@ -68,6 +72,8 @@ class ClickhouseCheck(DatabaseCheck):
         self._dbms_version = None
         self._cluster_name = None
         self._cluster_name_resolved = False
+        self._hosting_type = None
+        self._hosting_type_resolved = False
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
@@ -255,6 +261,7 @@ class ClickhouseCheck(DatabaseCheck):
         # self.tags below, since both snapshot the tag list.
         if self.cluster_name:
             self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
+        self.tag_manager.set_tag(HOSTING_TYPE_TAG, self.hosting_type, replace=True)
 
         if self._query_manager is None or self._query_manager_version != self._server_version:
             self._query_manager = self._build_query_manager()
@@ -396,6 +403,59 @@ class ClickhouseCheck(DatabaseCheck):
         # Deliberately no 'default' fallback: an absent tag is better than a wrong one.
         self.log.debug('No ClickHouse cluster name found; %s tag will not be emitted', CLUSTER_TAG)
         return None
+
+    @property
+    def hosting_type(self) -> str:
+        """Whether this instance is ClickHouse Cloud or self-hosted.
+
+        Requires a live client, so this resolves on the first check run rather than at
+        init. The unknown outcome is cached too: an instance whose probes are blocked
+        should not re-query on every run.
+        """
+        if not self._hosting_type_resolved:
+            self._hosting_type = self._resolve_hosting_type()
+            self._hosting_type_resolved = True
+        return self._hosting_type
+
+    def _resolve_hosting_type(self) -> str:
+        """Resolve the hosting type from two independent server-side signals.
+
+        Both signals must agree before reporting cloud. A probe that succeeds without
+        finding its marker is a definite negative and settles the conjunction on its own,
+        so it short-circuits to self-hosted. A probe that raises is indeterminate, and
+        yields unknown rather than a self-hosted verdict built on nothing more than a
+        permission error or a system table the server is too old to have.
+        """
+        cloud_mode = self._probe_cloud_mode()
+        shared_merge_tree = self._probe_shared_merge_tree()
+        self.log.debug('Hosting type signals: cloud_mode=%s, shared_merge_tree=%s', cloud_mode, shared_merge_tree)
+
+        if cloud_mode is False or shared_merge_tree is False:
+            return HostingType.SELF_HOSTED
+        if cloud_mode and shared_merge_tree:
+            return HostingType.CLOUD
+        return HostingType.UNKNOWN
+
+    def _probe_cloud_mode(self) -> bool | None:
+        """Whether the server reports cloud_mode enabled, or None when the probe failed."""
+        try:
+            rows = self.execute_query_raw(CLOUD_MODE_QUERY)
+            # No row means the setting does not exist, true of every version predating it.
+            if not rows or not rows[0]:
+                return False
+            return str(rows[0][0]) not in ('', '0')
+        except Exception as e:
+            self.log.debug('Unable to read the cloud_mode setting: %s', e)
+            return None
+
+    def _probe_shared_merge_tree(self) -> bool | None:
+        """Whether the Cloud-only SharedMergeTree engine exists, or None when the probe failed."""
+        try:
+            rows = self.execute_query_raw(SHARED_MERGE_TREE_QUERY)
+            return bool(rows and rows[0] and int(rows[0][0]) > 0)
+        except Exception as e:
+            self.log.debug('Unable to check for the SharedMergeTree engine: %s', e)
+            return None
 
     @property
     def database_identifier_template(self) -> str:
