@@ -323,8 +323,16 @@ class CreatePullRequestStep(PortStep):
         import httpx
         from pydantic import ValidationError
 
+        from ddev.utils.github_errors import GitHubAuthenticationError
+
         try:
             asyncio.run(self._create_pr())
+        except GitHubAuthenticationError:
+            if self.pr_url:
+                self.app.display_warning(
+                    f'Pull request created at {self.pr_url} but labeling failed. Add the labels manually on the PR.'
+                )
+            raise
         except (httpx.HTTPError, ValidationError) as e:
             if self.pr_url:
                 raise PortStepError(
@@ -410,6 +418,8 @@ def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) ->
     import httpx
     from pydantic import ValidationError
 
+    from ddev.utils.github_errors import GitHubAuthenticationError
+
     if not app.config.github.token:
         app.abort(
             'GitHub token required to resolve a PR reference. Set `github.token`, or pass the '
@@ -420,15 +430,12 @@ def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) ->
     app.display_info(f'Resolving PR #{pr_number} via GitHub...')
     try:
         pr = asyncio.run(_fetch_pr(app.config.github.token, owner, repo, pr_number))
+    except GitHubAuthenticationError:
+        raise
     except httpx.HTTPStatusError as exc:
         status = exc.response.status_code
         if status == 404:
             raise _PRNotFound(str(pr_number)) from exc
-        if status in (401, 403):
-            app.abort(
-                f'GitHub denied the request for PR #{pr_number} (HTTP {status}). '
-                'Check that `github.token` is set and has `repo` scope.'
-            )
         app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')
     except (httpx.HTTPError, ValidationError) as exc:
         app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')
