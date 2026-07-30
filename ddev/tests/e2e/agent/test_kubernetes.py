@@ -456,3 +456,12 @@ def test_kubeconfig_validation(app, get_integration, config_file):
     agent = KubernetesAgent(app, get_integration('velero'), 'py3.12', {'kubernetes': {}}, config_file)
     with pytest.raises(ValueError, match='non-empty `kubeconfig`'):
         _ = agent._kubeconfig
+
+
+@pytest.mark.parametrize('kubernetes_metadata', [None, 'kubeconfig'], ids=['missing', 'not_a_mapping'])
+def test_rejects_metadata_without_kubernetes_mapping(app, get_integration, config_file, kubernetes_metadata):
+    metadata = {} if kubernetes_metadata is None else {'kubernetes': kubernetes_metadata}
+    agent = KubernetesAgent(app, get_integration('velero'), 'py3.12', metadata, config_file)
+
+    with pytest.raises(ValueError, match='requires a `kubernetes` metadata mapping'):
+        _ = agent._kubeconfig
