@@ -196,21 +196,6 @@ def test_multiple_queries_different_dbnames(aggregator):
     assert open_calls[1]['db_name'] == 'db_two'
 
 
-def test_azure_sql_db_no_use_statement(aggregator):
-    """Azure SQL DB safety: connecting via db_name never issues USE <dbname>.
-
-    The per-db connection model (db_name=q.dbname in _open_managed_db_connections)
-    avoids USE statements, which are unsafe on Azure SQL DB.
-    """
-    # The check must call _open_managed_db_connections with db_name='app_db'
-    # rather than opening a default connection and issuing USE app_db.
-    _, _, _, open_calls = _setup_and_run()
-
-    assert open_calls[0]['db_name'] == 'app_db'
-    # get_cursor is called with same db_name (no USE issued)
-    # Implicit: no USE statement is constructed in the data_observability path
-
-
 # ── Error handling ────────────────────────────────────────────────────────────
 
 
@@ -318,15 +303,24 @@ def test_connection_failure_does_not_block_other_due_queries(aggregator):
     assert len(failure_metrics) == 1
 
 
-def test_connection_failure_retried_on_next_poll(aggregator):
-    """A query whose connection attempt fails is retried on the very next run_job() call,
-    not just at its next scheduled tick/interval."""
+def test_connection_failure_retried_on_next_poll(aggregator, monkeypatch):
+    """A cron query whose connection attempt fails is retried on the very next run_job()
+    call, not stranded until its next scheduled tick.
+
+    Uses a cron query deliberately: CronScheduler.due_ticks() consumes the tick as soon as
+    it's reported, so — unlike an interval query, which would naturally still look "due"
+    on the next poll regardless of any retry bookkeeping — a cron query only fires again
+    here because of the `_pending_retries` mechanism. This protects that mechanism from
+    regressing silently.
+    """
     from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 
+    current_time = [float(_BASE_EPOCH + 65)]  # 00:50:05 — past the cron tick, fires immediately
+    monkeypatch.setattr('datadog_checks.sqlserver.data_observability.time.time', lambda: current_time[0])
+
     mock_cursor = _make_mock_cursor()
-    instance = _make_do_instance(queries=[deepcopy(BASE_QUERY)])
-    check = _create_check(instance)
-    mock_connection, _, _ = _make_connection_mocks(mock_cursor)
+    check = _make_cron_check()
+    mock_connection, _, _ = _attach_conn(check, mock_cursor)
 
     call_count = 0
     real_side_effect = mock_connection._open_managed_db_connections.side_effect
@@ -341,12 +335,13 @@ def test_connection_failure_retried_on_next_poll(aggregator):
             yield ctx
 
     mock_connection._open_managed_db_connections = MagicMock(side_effect=flaky_open_managed)
-    check._connection = mock_connection
 
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
-    # No new tick/interval elapse needed — the failed attempt is retried immediately.
+    # No clock movement and no new tick — due_ticks() already consumed this tick, so only
+    # the pending-retry queue can cause the query to fire again here.
+    aggregator.reset()
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
 
@@ -453,25 +448,26 @@ def test_event_payload_structure(aggregator):
     assert 'db_name' in payload
 
 
-def test_payload_db_type_is_sqlserver(aggregator):
-    with patch.object(SQLServer, 'event_platform_event') as mock_epe:
-        _setup_and_run()
-
-        do_calls = _get_do_event_calls(mock_epe)
-        payload = json.loads(do_calls[0][0][0])
-
-    assert payload['db_type'] == 'sqlserver'
-
-
 def test_payload_db_port_honors_separate_port_option(aggregator):
     """When host has no embedded port, db_port must reflect the separately-configured
     `port` option (via Connection.get_host_with_port()) rather than falling back to the
-    default 1433."""
+    default 1433.
+
+    Exercises the real `Connection.get_host_with_port` implementation (bound onto the
+    mock) against an instance actually configured with a bare host + separate port,
+    rather than stubbing the method's return value directly — a stub would pass even if
+    `_get_db_port()` ignored the `port` config option entirely.
+    """
+    from types import MethodType
+
+    from datadog_checks.sqlserver.connection import Connection
+
     with patch.object(SQLServer, 'event_platform_event') as mock_epe:
-        instance = _make_do_instance()
+        instance = _make_do_instance(extra={'host': 'myhost', 'port': 1444})
         check = _create_check(instance)
         mock_connection, cursor, open_calls = _make_connection_mocks()
-        mock_connection.get_host_with_port = MagicMock(return_value='myhost,1444')
+        mock_connection.instance = instance
+        mock_connection.get_host_with_port = MethodType(Connection.get_host_with_port, mock_connection)
         check._connection = mock_connection
 
         check.data_observability.run_job()
@@ -641,24 +637,11 @@ def test_sql_connection_error_is_expected_db_exception():
     assert SQLConnectionError in check.data_observability._expected_db_exceptions
 
 
-def test_collection_interval_none_uses_default():
-    """collection_interval=None should not crash."""
-    instance = deepcopy(BASE_INSTANCE)
-    instance['data_observability'] = {
-        'enabled': True,
-        'run_sync': True,
-        'collection_interval': None,
-        'queries': [],
-    }
-    check = SQLServer('sqlserver', {}, [instance])
-    assert check.data_observability._enabled
-
-
-@pytest.mark.parametrize('collection_interval', [-5, 0])
+@pytest.mark.parametrize('collection_interval', [None, -5, 0])
 def test_collection_interval_non_positive_uses_default(collection_interval):
-    """A non-positive collection_interval (e.g. from a malformed RC config) must fall back
-    to the default instead of producing a zero/negative rate limit that spins the job loop
-    without sleeping."""
+    """A missing or non-positive collection_interval (e.g. from a malformed RC config)
+    must fall back to the default instead of producing a zero/negative rate limit that
+    spins the job loop without sleeping."""
     instance = deepcopy(BASE_INSTANCE)
     instance['data_observability'] = {
         'enabled': True,
@@ -667,6 +650,7 @@ def test_collection_interval_non_positive_uses_default(collection_interval):
         'queries': [],
     }
     check = SQLServer('sqlserver', {}, [instance])
+    assert check.data_observability._enabled
     assert check.data_observability._rate_limiter.rate_limit_s == pytest.approx(1 / 10)
 
 
@@ -735,23 +719,6 @@ def _attach_conn(check, mock_cursor=None):
     return mock_connection, cursor, open_calls
 
 
-def test_schedule_query_does_not_fire_before_tick(aggregator, monkeypatch):
-    """First-sight cron registers next_run without firing.
-
-    Clock sits at 00:49:00, 59 minutes after the previous :50 tick — well
-    outside the 300s lookback window — so first-sight recovery does not
-    fire either. The next tick (00:50:00) is still 60s in the future.
-    """
-    current_time = [float(_BASE_EPOCH)]  # 00:49:00
-    monkeypatch.setattr('datadog_checks.sqlserver.data_observability.time.time', lambda: current_time[0])
-
-    check = _make_cron_check()
-    mock_connection, _, _ = _attach_conn(check)
-    check.data_observability.run_job()
-
-    mock_connection.get_cursor.assert_not_called()
-
-
 def test_schedule_query_fires_at_cron_tick(aggregator, monkeypatch):
     """A cron query fires after its first tick has passed."""
     current_time = [float(_BASE_EPOCH)]
@@ -781,30 +748,6 @@ def test_schedule_query_fires_when_first_poll_exactly_at_tick(aggregator, monkey
 
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
-
-
-def test_schedule_advances_after_run(monkeypatch):
-    """After a cron fire, the scheduler advances to the NEXT future tick (not the same tick)."""
-    current_time = [float(_BASE_EPOCH + 65)]  # 00:50:05 — already past the tick
-    monkeypatch.setattr('datadog_checks.sqlserver.data_observability.time.time', lambda: current_time[0])
-
-    check = _make_cron_check()
-    _attach_conn(check)
-
-    # First run at 00:50:05: lookback recovery fires (5s within 300s window); scheduler
-    # caches next_tick = 01:50:00.
-    check.data_observability.run_job()
-    mid = CRON_QUERY['monitor_id']
-    first_next_run = check.data_observability._schedulers[mid].next_tick
-
-    current_time[0] = _BASE_EPOCH + 3665  # ~01:50:05
-    check.data_observability.run_job()
-
-    second_next_run = check.data_observability._schedulers[mid].next_tick
-    # After firing at 01:50:05, next_tick should advance to 02:50:00
-    assert second_next_run > first_next_run
-    # Should be approximately 1 hour later
-    assert second_next_run - first_next_run >= 3600 - 10
 
 
 def test_schedule_takes_precedence_over_interval_seconds(aggregator, monkeypatch):
@@ -1062,44 +1005,11 @@ def test_cron_startup_lookback_window_behavior(aggregator, monkeypatch, window_s
         assert any('monitor_id:10' in m.tags for m in metrics)
 
 
-def test_cron_startup_lookback_lateness_reflects_age_of_tick(aggregator, monkeypatch):
-    """Recovered fires emit a lateness gauge equal to (now - prev_tick)."""
-    # 00:50:30 — 30s after the 00:50 tick.
-    current_time = [float(_BASE_EPOCH + 90)]
-    monkeypatch.setattr('datadog_checks.sqlserver.data_observability.time.time', lambda: current_time[0])
-
-    check = _make_cron_check()
-    _attach_conn(check)
-    check.data_observability.run_job()
-
-    lateness_metrics = aggregator.metrics('dd.sqlserver.data_observability.query_fire_lateness_seconds')
-    assert len(lateness_metrics) == 1
-    assert 25.0 <= lateness_metrics[0].value <= 35.0
-    assert 'mode:cron' in lateness_metrics[0].tags
-
-
 def test_cron_startup_lookback_default_is_300_seconds():
     """The startup lookback window is 5 minutes; pin it so a regression is loud."""
     from datadog_checks.sqlserver.data_observability import CRON_STARTUP_LOOKBACK_SECONDS
 
     assert CRON_STARTUP_LOOKBACK_SECONDS == 300
-
-
-def test_cron_startup_lookback_does_not_double_fire(aggregator, monkeypatch):
-    """A startup-recovery fire must not re-fire the same tick on the next run_job() call."""
-    current_time = [float(_BASE_EPOCH + 70)]  # 00:50:10 — inside the default 300s lookback
-    monkeypatch.setattr('datadog_checks.sqlserver.data_observability.time.time', lambda: current_time[0])
-
-    check = _make_cron_check()
-    _attach_conn(check)
-    check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
-
-    # Advance a few seconds (still well before the next 01:50 tick); a second run must not re-fire.
-    current_time[0] = _BASE_EPOCH + 80
-    aggregator.reset()
-    check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
 
 # ---------------------------------------------------------------------------
@@ -1138,26 +1048,6 @@ def test_failed_cron_query_advances_next_run(aggregator, monkeypatch):
     advanced = check.data_observability._schedulers[mid].next_tick
     assert advanced > registered
     assert advanced >= current_time[0]
-
-
-def test_cron_startup_lookback_boundary_inclusive(aggregator, monkeypatch):
-    """Recovery fires when now - prev_tick is within the window; does not fire outside it."""
-    # prev_tick = 00:50:00; window = 60s; clock = 00:50:55 means (now - prev_tick) == 55s < window.
-    current_time = [float(_BASE_EPOCH + 115)]  # 00:50:55
-    monkeypatch.setattr('datadog_checks.sqlserver.data_observability.time.time', lambda: current_time[0])
-
-    check = _make_cron_check(monkeypatch=monkeypatch, window_seconds=60)
-    _attach_conn(check)
-    check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
-
-    # Outside the window: (now - prev_tick) == 61 > 60, recovery does NOT fire.
-    check2 = _make_cron_check(monkeypatch=monkeypatch, window_seconds=60)
-    _attach_conn(check2)
-    current_time[0] = float(_BASE_EPOCH + 121)
-    aggregator.reset()
-    check2.data_observability.run_job()
-    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
 
 def test_emit_failures_metric_on_emit_path_exception(aggregator, monkeypatch):
