@@ -7,7 +7,6 @@ import json
 import time
 from typing import TYPE_CHECKING, Any, cast
 
-from ddev.e2e.agent.docker import normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
 
 if TYPE_CHECKING:
@@ -353,9 +352,7 @@ class KubernetesAgent(AgentInterface):
             )
 
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
-        agent_build = normalize_agent_image_name(
-            agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
-        )
+        agent_build = self.normalize_agent_image_name(agent_build)
         _ = self._wait_timeout
         self._validate_context()
         self._validate_topology()
