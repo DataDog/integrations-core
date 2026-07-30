@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -14,6 +15,7 @@ from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, run_goal_
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.checkpoints import (
+    CancelledCheckpoint,
     CheckpointManager,
     CheckpointStatus,
     CheckpointTokenInfo,
@@ -311,6 +313,16 @@ class AgenticPhase(Phase):
     def build_failed_checkpoint(self, error: BaseException) -> FailedCheckpoint:
         """Include partial token and goal progress in a failed checkpoint."""
         checkpoint = super().build_failed_checkpoint(error)
+        checkpoint.tokens = CheckpointTokenInfo(
+            total_input=self._total_input_tokens,
+            total_output=self._total_output_tokens,
+        )
+        checkpoint.goal_validations = self._goal_attempt_log or None
+        return checkpoint
+
+    def build_cancelled_checkpoint(self, error: asyncio.CancelledError) -> CancelledCheckpoint:
+        """Include partial token and goal progress in a cancelled checkpoint."""
+        checkpoint = super().build_cancelled_checkpoint(error)
         checkpoint.tokens = CheckpointTokenInfo(
             total_input=self._total_input_tokens,
             total_output=self._total_output_tokens,

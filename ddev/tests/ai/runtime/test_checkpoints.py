@@ -8,13 +8,14 @@ import pytest
 import yaml
 
 from ddev.ai.runtime.checkpoints import (
+    CancelledCheckpoint,
     CheckpointManager,
     CheckpointReadError,
     FailedCheckpoint,
     SuccessCheckpoint,
 )
 
-from .helpers import make_failed_checkpoint, make_success_checkpoint
+from .helpers import make_cancelled_checkpoint, make_failed_checkpoint, make_success_checkpoint
 
 
 @pytest.fixture
@@ -86,9 +87,12 @@ def test_write_creates_parent_dirs(tmp_path: Path):
 def test_write_multiple_phases(manager: CheckpointManager):
     manager.write_phase_checkpoint("phase1", make_success_checkpoint())
     manager.write_phase_checkpoint("phase2", make_failed_checkpoint())
+    manager.write_phase_checkpoint("phase3", make_cancelled_checkpoint(reason="maximum runtime reached"))
     data = manager.read()
     assert isinstance(data["phase1"], SuccessCheckpoint)
     assert isinstance(data["phase2"], FailedCheckpoint)
+    assert isinstance(data["phase3"], CancelledCheckpoint)
+    assert data["phase3"].reason == "maximum runtime reached"
 
 
 def test_write_overwrites_existing_phase(manager: CheckpointManager):
@@ -180,6 +184,7 @@ def test_successful_phases_returns_only_succeeded(manager: CheckpointManager):
     manager.write_phase_checkpoint("a", make_success_checkpoint())
     manager.write_phase_checkpoint("b", make_failed_checkpoint())
     manager.write_phase_checkpoint("c", make_success_checkpoint())
+    manager.write_phase_checkpoint("d", make_cancelled_checkpoint())
     assert manager.successful_phases() == {"a", "c"}
 
 

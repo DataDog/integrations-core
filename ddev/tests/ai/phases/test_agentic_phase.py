@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
+    CancelledCheckpoint,
     CheckpointManager,
     CheckpointTokenInfo,
     FailedCheckpoint,
@@ -613,6 +615,29 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
     assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
     assert cp.error == "something went wrong"
+
+
+async def test_cancellation_writes_partial_tokens_and_goal_validations(flow_dir, monkeypatch, message_queue):
+    worker = MockAgent([make_response("done", 0, 0)])
+    phase, mgr = make_agent_phase(flow_dir, worker, monkeypatch, message_queue)
+
+    phase._total_input_tokens = 42
+    phase._total_output_tokens = 17
+    phase._goal_attempt_log = [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+
+    async def cancel(_context):
+        raise asyncio.CancelledError("maximum runtime reached")
+
+    monkeypatch.setattr(phase, "execute", cancel)
+
+    with pytest.raises(asyncio.CancelledError, match="maximum runtime reached"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    checkpoint = mgr.read()["p1"]
+    assert isinstance(checkpoint, CancelledCheckpoint)
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
+    assert checkpoint.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+    assert checkpoint.reason == "maximum runtime reached"
 
 
 # ---------------------------------------------------------------------------

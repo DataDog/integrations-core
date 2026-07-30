@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from abc import abstractmethod
 from collections.abc import Callable
@@ -15,6 +16,7 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import PhaseConfig, RuntimeVariables
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
+    CancelledCheckpoint,
     CheckpointManager,
     CheckpointTokenInfo,
     FailedCheckpoint,
@@ -129,17 +131,27 @@ class Phase(AsyncProcessor[PhaseTrigger]):
     async def process_message(self, message: PhaseTrigger) -> None:
         """Immutable pipeline skeleton. Not intended to be overridden — implement execute() instead."""
         self._started_at = datetime.now(UTC)
-        await self._callbacks.fire_phase_start(self._phase_id)
+        try:
+            await self._callbacks.fire_phase_start(self._phase_id)
 
-        context: dict[str, Any] = {
-            **self._flow_variables,
-            **self._runtime_variables,
-            "phase_name": self._phase_id,
-            "checkpoints": self._checkpoint_manager.read(),
-        }
-        self._resolver = self._checkpoint_manager.resolve_template_variable
+            context: dict[str, Any] = {
+                **self._flow_variables,
+                **self._runtime_variables,
+                "phase_name": self._phase_id,
+                "checkpoints": self._checkpoint_manager.read(),
+            }
+            self._resolver = self._checkpoint_manager.resolve_template_variable
 
-        outcome = await self.execute(context)
+            outcome = await self.execute(context)
+        except asyncio.CancelledError as error:
+            try:
+                self._checkpoint_manager.write_phase_checkpoint(
+                    self._phase_id,
+                    self.build_cancelled_checkpoint(error),
+                )
+            except Exception:
+                self._logger.exception("Failed to write cancellation checkpoint for phase %s", self._phase_id)
+            raise
 
         checkpoint = SuccessCheckpoint(
             started_at=self._started_at.isoformat(),
@@ -156,6 +168,17 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._checkpoint_manager.write_memory(self._phase_id, outcome.memory_text)
         self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint)
         await self._callbacks.fire_phase_finish(self._phase_id)
+
+    def build_cancelled_checkpoint(self, error: asyncio.CancelledError) -> CancelledCheckpoint:
+        """Build a checkpoint for a phase interrupted by cancellation."""
+        if self._started_at is None:  # pragma: no cover - process_message sets this before cancellation is possible
+            raise RuntimeError("Cannot build a cancellation checkpoint before the phase starts")
+        return CancelledCheckpoint(
+            started_at=self._started_at.isoformat(),
+            finished_at=datetime.now(UTC).isoformat(),
+            reason=str(error) or None,
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+        )
 
     async def on_success(self, message: PhaseTrigger) -> None:
         """Emit PhaseTrigger to unblock dependent phases."""
