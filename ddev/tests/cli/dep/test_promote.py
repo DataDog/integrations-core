@@ -11,6 +11,17 @@ RUN_DETAILS = {
     'html_url': 'https://github.com/DataDog/integrations-core/actions/runs/999',
 }
 
+RESOLUTION_RUN = {
+    'status': 'in_progress',
+    'html_url': 'https://github.com/DataDog/integrations-core/actions/runs/555',
+}
+
+
+@pytest.fixture(autouse=True)
+def resolution_runs(mocker):
+    """Default every test to a head commit with no resolution run in flight."""
+    return mocker.patch('ddev.utils.github.GitHubManager.get_unfinished_workflow_runs', return_value=[])
+
 
 def test_promote_dispatches_workflow_and_prints_run_url(ddev, mocker):
     mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
@@ -66,6 +77,31 @@ def test_promote_suppresses_httpx_logs_and_restores_level(ddev, mocker, httpx_at
     assert result.exit_code == 0, result.output
     assert captured_levels == [logging.WARNING]
     assert httpx_at_debug.level == logging.DEBUG
+
+
+def test_promote_checks_resolution_for_the_head_commit(ddev, mocker, resolution_runs):
+    mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
+    mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow', return_value=RUN_DETAILS)
+
+    result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+
+    assert result.exit_code == 0, result.output
+    resolution_runs.assert_called_once_with('resolve-build-deps.yaml', 'deadbeef')
+
+
+def test_promote_refuses_while_resolution_is_running(ddev, mocker, resolution_runs):
+    """Promotion copies whatever is in dev storage, so it must wait for the lockfiles."""
+    resolution_runs.return_value = [RESOLUTION_RUN]
+    mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', return_value=('deadbeef', 'feature-branch'))
+    dispatch = mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow')
+
+    result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+
+    assert result.exit_code != 0
+    assert 'still running for deadbeef' in result.output
+    assert RESOLUTION_RUN['html_url'] in result.output
+    assert 'Wait for it to commit the lockfiles' in result.output
+    dispatch.assert_not_called()
 
 
 def test_promote_restores_httpx_log_level_on_failure(ddev, mocker, httpx_at_debug):

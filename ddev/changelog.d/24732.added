@@ -1,0 +1,1 @@
+Refuse to dispatch ``ddev dep promote`` while dependency resolution is still running for the pull request head, since promotion would publish the wheels from the previous run.

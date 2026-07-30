@@ -133,6 +133,37 @@ def test_dispatch_workflow_return_run_details_sends_flag_and_returns_json(github
     assert payload['inputs'] == {'pr_number': '123', 'head_sha': 'deadbeef'}
 
 
+@pytest.mark.parametrize(
+    ('runs', 'expected_urls'),
+    [
+        pytest.param([], [], id='no-runs'),
+        pytest.param([{'status': 'completed', 'html_url': 'u1'}], [], id='finished'),
+        pytest.param([{'status': 'in_progress', 'html_url': 'u1'}], ['u1'], id='in-progress'),
+        pytest.param([{'status': 'queued', 'html_url': 'u1'}], ['u1'], id='queued'),
+        pytest.param(
+            [
+                {'status': 'completed', 'html_url': 'u1'},
+                {'status': 'queued', 'html_url': 'u2'},
+                {'status': 'in_progress', 'html_url': 'u3'},
+            ],
+            ['u2', 'u3'],
+            id='mixed',
+        ),
+    ],
+)
+def test_get_unfinished_workflow_runs(github_manager, mocker, runs, expected_urls):
+    """Only runs that have not completed are reported."""
+    response = mocker.MagicMock()
+    response.json.return_value = {'workflow_runs': runs}
+    api_get = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
+
+    result = github_manager.get_unfinished_workflow_runs('example.yaml', 'deadbeef')
+
+    assert [run['html_url'] for run in result] == expected_urls
+    assert api_get.call_args.kwargs['params'] == {'head_sha': 'deadbeef', 'per_page': '100'}
+    assert api_get.call_args.args[0].endswith('/actions/workflows/example.yaml/runs')
+
+
 @pytest.mark.parametrize('status_code', [401, 403])
 def test_authentication_error_has_actionable_token_guidance(
     github_manager: GitHubManager, mocker: MockerFixture, status_code: int

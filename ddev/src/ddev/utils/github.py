@@ -98,6 +98,9 @@ class GitHubManager:
     # https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
     WORKFLOW_DISPATCH_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/dispatches'
 
+    # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-workflow
+    WORKFLOW_RUNS_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/runs'
+
     # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
     ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
 
@@ -274,6 +277,14 @@ class GitHubManager:
         if not return_run_details:
             return None
         return response.json()
+
+    def get_unfinished_workflow_runs(self, workflow_id: str, head_sha: str) -> list[dict[str, Any]]:
+        """Return the queued or in-progress runs of `workflow_id` for `head_sha`."""
+        response = self.__api_get(
+            self.WORKFLOW_RUNS_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
+            params={'head_sha': head_sha, 'per_page': '100'},
+        )
+        return [run for run in response.json().get('workflow_runs', []) if run.get('status') not in ('completed', None)]
 
     def get_pull_request_comments(self, pr_number: int) -> list[dict]:
         response = self.__api_get(

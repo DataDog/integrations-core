@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 PR_URL_RE = re.compile(r"https://github\.com/[^/]+/[^/]+/pull/(\d+)")
 PROMOTE_WORKFLOW = "dependency-wheel-promotion.yaml"
 PROMOTE_WORKFLOW_REF = "master"
+RESOLUTION_WORKFLOW = "resolve-build-deps.yaml"
 
 
 @click.command(short_help='Promote dependency wheels from dev to stable')
@@ -27,6 +28,9 @@ def promote(app: Application, pr_url: str):
     Dispatches the dependency-wheel-promotion workflow for PR_URL, which copies
     wheels from the dev/ GCS prefix to stable/ so the Agent can reference them
     after merge.
+
+    Refuses to dispatch while dependency resolution is still running for the head
+    commit, because promotion publishes whatever is in dev storage at the time.
 
     Example:
 
@@ -48,6 +52,19 @@ def promote(app: Application, pr_url: str):
             head_sha, head_ref = app.github.get_pr_head(pr_number)
 
         app.display_info(f'PR #{pr_number}: branch {head_ref}, SHA {head_sha}')
+
+        with app.status('Checking for dependency resolution in flight...'):
+            unfinished_runs = app.github.get_unfinished_workflow_runs(RESOLUTION_WORKFLOW, head_sha)
+
+        if unfinished_runs:
+            # Promotion copies whatever is in dev storage when it runs. A resolution
+            # run that has not finished has neither uploaded its wheels nor committed
+            # its lockfiles, so promoting now publishes the previous set, and the run
+            # moves the PR head out from under this promotion when it commits.
+            app.display_error(f'Dependency resolution is still running for {head_sha}.')
+            for run in unfinished_runs:
+                app.display_info(f'  {run["status"]}: {run["html_url"]}')
+            app.abort('Wait for it to commit the lockfiles, then promote the new head.')
 
         with app.status('Dispatching promote workflow...'):
             run_details = app.github.dispatch_workflow(
