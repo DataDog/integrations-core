@@ -6,7 +6,11 @@
 ad_identifiers:
   - n8n
 
-## Enables configuration discovery
+## Enables configuration discovery.
+##
+## When this integration's metric prefix differs from its own name, `metrics_prefix` is set
+## to that prefix automatically, so Autodiscovery can detect metric-duplicating generic
+## (`openmetrics`/`prometheus`) integrations targeting the same service.
 #
 discovery: {}
 
