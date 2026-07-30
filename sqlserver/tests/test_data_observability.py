@@ -146,16 +146,6 @@ def test_no_queries_does_nothing(aggregator):
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
 
-def test_single_query_success(aggregator):
-    _setup_and_run()
-
-    aggregator.assert_metric('dd.sqlserver.data_observability.query_execution_time')
-    metrics = aggregator.metrics('dd.sqlserver.data_observability.query_executions')
-    assert len(metrics) == 1
-    assert metrics[0].value == 1
-    assert 'status:success' in metrics[0].tags
-
-
 def test_multi_query_execution(aggregator):
     _setup_and_run(queries=deepcopy(MULTI_QUERIES))
 
@@ -169,16 +159,6 @@ def test_multi_query_execution(aggregator):
 
 
 # ── Per-dbname connections ────────────────────────────────────────────────────
-
-
-def test_per_dbname_connection_opened(aggregator):
-    """_open_managed_db_connections is called with db_name=q.dbname."""
-    query = deepcopy(BASE_QUERY)
-    query['dbname'] = 'other_db'
-    _, mock_conn, _, open_calls = _setup_and_run(queries=[query])
-
-    assert len(open_calls) == 1
-    assert open_calls[0]['db_name'] == 'other_db'
 
 
 def test_multiple_queries_different_dbnames(aggregator):
@@ -446,6 +426,8 @@ def test_event_payload_structure(aggregator):
     assert 'db_host' in payload
     assert 'db_port' in payload
     assert 'db_name' in payload
+    assert payload['entity']['platform'] == 'mssql'
+    assert 'cloud_metadata' not in payload
 
 
 def test_payload_db_port_honors_separate_port_option(aggregator):
@@ -465,7 +447,7 @@ def test_payload_db_port_honors_separate_port_option(aggregator):
     with patch.object(SQLServer, 'event_platform_event') as mock_epe:
         instance = _make_do_instance(extra={'host': 'myhost', 'port': 1444})
         check = _create_check(instance)
-        mock_connection, cursor, open_calls = _make_connection_mocks()
+        mock_connection, _, _ = _make_connection_mocks()
         mock_connection.instance = instance
         mock_connection.get_host_with_port = MethodType(Connection.get_host_with_port, mock_connection)
         check._connection = mock_connection
@@ -476,17 +458,6 @@ def test_payload_db_port_honors_separate_port_option(aggregator):
         payload = json.loads(do_calls[0][0][0])
 
     assert payload['db_port'] == 1444
-
-
-def test_payload_entity_platform_mssql(aggregator):
-    """Entity object is serialised verbatim from the query spec; platform=mssql for SQL Server queries."""
-    with patch.object(SQLServer, 'event_platform_event') as mock_epe:
-        _setup_and_run()
-
-        do_calls = _get_do_event_calls(mock_epe)
-        payload = json.loads(do_calls[0][0][0])
-
-    assert payload['entity']['platform'] == 'mssql'
 
 
 def test_payload_db_name_reflects_query_dbname(aggregator):
@@ -518,17 +489,6 @@ def test_payload_cloud_metadata_included(aggregator):
 
     assert 'cloud_metadata' in payload
     assert 'azure' in payload['cloud_metadata']
-
-
-def test_payload_cloud_metadata_absent_when_not_configured(aggregator):
-    """cloud_metadata key is not present when no cloud provider is configured."""
-    with patch.object(SQLServer, 'event_platform_event') as mock_epe:
-        _setup_and_run()
-
-        do_calls = _get_do_event_calls(mock_epe)
-        payload = json.loads(do_calls[0][0][0])
-
-    assert 'cloud_metadata' not in payload
 
 
 def test_entity_schema_alias(aggregator):
