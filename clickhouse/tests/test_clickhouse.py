@@ -55,13 +55,12 @@ def test_custom_queries(aggregator, instance, dd_run_check):
         'test:clickhouse',
         'database_hostname:{}'.format(check.database_hostname),
         'database_instance:{}:{}:default'.format(instance['server'], instance['port']),
+        '{}:{}'.format(HOSTING_TYPE_TAG, check.hosting_type),
     ]
     # ClickHouse ships a built-in is_local `default` cluster on some versions (and Cloud reports one
     # too), so every metric carries the clickhouse_cluster tag when a cluster resolves.
     if check.cluster_name:
         expected_tags.append('{}:{}'.format(CLUSTER_TAG, check.cluster_name))
-    # Unlike the cluster, hosting type always resolves to a value, so the tag is always present.
-    expected_tags.append('{}:{}'.format(HOSTING_TYPE_TAG, check.hosting_type))
 
     aggregator.assert_metric('clickhouse.settings.changed', metric_type=0, tags=expected_tags)
 
