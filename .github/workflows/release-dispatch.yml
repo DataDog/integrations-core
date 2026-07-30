@@ -24,6 +24,11 @@ on:
         description: "Branch that contains source-repo-ref, used to determine stable vs pre-release behavior"
         required: false
         type: string
+      create-tags:
+        description: "Create and push release tags before dispatching; disable when the legacy pipeline already created tags"
+        required: false
+        type: boolean
+        default: true
       dry-run:
         description: >-
           When true, print what would be released and where without pushing tags
@@ -47,12 +52,12 @@ permissions:
 env:
   # Default ddev version when callers don't pass `ddev-version`. Tracked by Renovate.
   # renovate: datasource=pypi depName=ddev
-  DEFAULT_DDEV_VERSION: "16.1.1"
+  DEFAULT_DDEV_VERSION: "17.0.1"
   PYTHON_VERSION: "3.13"
 
 jobs:
   prepare:
-    name: Tag releases and build dispatch batches
+    name: Prepare releases and build dispatch batches
     runs-on: ubuntu-latest
 
     outputs:
@@ -74,8 +79,8 @@ jobs:
           sparse-checkout: .github
           path: tooling
 
-      # Source tree to tag and validate. ddev release tag operates on HEAD of
-      # this checkout, so it must be at the ref the caller asked to release.
+      # Source tree to detect and validate. When tag creation is enabled, ddev
+      # release tag operates on HEAD, so this must be the requested release ref.
       - name: Checkout source repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -122,6 +127,7 @@ jobs:
         id: prepare
         working-directory: source
         env:
+          CREATE_TAGS: ${{ inputs.create-tags }}
           DRY_RUN: ${{ inputs.dry-run }}
           SELECTED_PACKAGES: ${{ inputs.packages }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
@@ -132,7 +138,7 @@ jobs:
       # Only mint a write token when validated local tags need to be pushed.
       # Dry runs and no-op reruns therefore do not consume App token quota.
       - name: Get source tag token via dd-octo-sts
-        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        if: inputs.create-tags && steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
         id: source-octo-sts
         uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         with:
@@ -140,7 +146,7 @@ jobs:
           policy: self.release.tag-push
 
       - name: Configure source tag credentials
-        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        if: inputs.create-tags && steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ inputs.source-repo-ref || github.sha }}
@@ -152,7 +158,7 @@ jobs:
           clean: false # Preserve the local tags created during preparation
 
       - name: Push release tags
-        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        if: inputs.create-tags && steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
         working-directory: source
         env:
           NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
