@@ -105,6 +105,7 @@ def _make_connection_mocks(mock_cursor=None):
     mock_connection.get_cursor = MagicMock(return_value=mock_cursor)
     mock_connection.close_cursor = MagicMock()
     mock_connection.set_command_timeout = MagicMock()
+    mock_connection.get_host_with_port = MagicMock(return_value=BASE_INSTANCE['host'])
     mock_connection.DEFAULT_DB_KEY = 'database'
 
     return mock_connection, mock_cursor, open_calls
@@ -282,6 +283,74 @@ def test_query_with_no_description(aggregator):
     assert 'status:error' in metrics[0].tags
 
 
+def test_connection_failure_does_not_block_other_due_queries(aggregator):
+    """A connection failure opening the first due query's db must not abort processing of
+    other queries already due in the same pass (they were already ticked/collected before
+    the failure)."""
+    from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+
+    mock_cursor = _make_mock_cursor()
+    instance = _make_do_instance(queries=deepcopy(MULTI_QUERIES))
+    check = _create_check(instance)
+    mock_connection, _, open_calls = _make_connection_mocks(mock_cursor)
+
+    call_count = 0
+    real_side_effect = mock_connection._open_managed_db_connections.side_effect
+
+    @contextmanager
+    def flaky_open_managed(db_key, db_name=None, key_prefix=None):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            raise SQLConnectionError("could not connect")
+        with real_side_effect(db_key, db_name=db_name, key_prefix=key_prefix) as ctx:
+            yield ctx
+
+    mock_connection._open_managed_db_connections = MagicMock(side_effect=flaky_open_managed)
+    check._connection = mock_connection
+
+    check.data_observability.run_job()
+
+    # First query's connection failed, but the second (already-due) query still ran.
+    status_metrics = aggregator.metrics('dd.sqlserver.data_observability.query_executions')
+    assert len(status_metrics) == 1
+    failure_metrics = aggregator.metrics('dd.sqlserver.data_observability.connection_failures')
+    assert len(failure_metrics) == 1
+
+
+def test_connection_failure_retried_on_next_poll(aggregator):
+    """A query whose connection attempt fails is retried on the very next run_job() call,
+    not just at its next scheduled tick/interval."""
+    from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+
+    mock_cursor = _make_mock_cursor()
+    instance = _make_do_instance(queries=[deepcopy(BASE_QUERY)])
+    check = _create_check(instance)
+    mock_connection, _, _ = _make_connection_mocks(mock_cursor)
+
+    call_count = 0
+    real_side_effect = mock_connection._open_managed_db_connections.side_effect
+
+    @contextmanager
+    def flaky_open_managed(db_key, db_name=None, key_prefix=None):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            raise SQLConnectionError("could not connect")
+        with real_side_effect(db_key, db_name=db_name, key_prefix=key_prefix) as ctx:
+            yield ctx
+
+    mock_connection._open_managed_db_connections = MagicMock(side_effect=flaky_open_managed)
+    check._connection = mock_connection
+
+    check.data_observability.run_job()
+    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
+
+    # No new tick/interval elapse needed — the failed attempt is retried immediately.
+    check.data_observability.run_job()
+    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
+
+
 def test_error_event_payload(aggregator):
     """Failed query emits an event payload with error details."""
     import pyodbc
@@ -392,6 +461,25 @@ def test_payload_db_type_is_sqlserver(aggregator):
         payload = json.loads(do_calls[0][0][0])
 
     assert payload['db_type'] == 'sqlserver'
+
+
+def test_payload_db_port_honors_separate_port_option(aggregator):
+    """When host has no embedded port, db_port must reflect the separately-configured
+    `port` option (via Connection.get_host_with_port()) rather than falling back to the
+    default 1433."""
+    with patch.object(SQLServer, 'event_platform_event') as mock_epe:
+        instance = _make_do_instance()
+        check = _create_check(instance)
+        mock_connection, cursor, open_calls = _make_connection_mocks()
+        mock_connection.get_host_with_port = MagicMock(return_value='myhost,1444')
+        check._connection = mock_connection
+
+        check.data_observability.run_job()
+
+        do_calls = _get_do_event_calls(mock_epe)
+        payload = json.loads(do_calls[0][0][0])
+
+    assert payload['db_port'] == 1444
 
 
 def test_payload_entity_platform_mssql(aggregator):
@@ -542,6 +630,17 @@ def test_no_query_timeout_skips_set_command_timeout(aggregator):
 # ── Miscellaneous ─────────────────────────────────────────────────────────────
 
 
+def test_sql_connection_error_is_expected_db_exception():
+    """SQLConnectionError (raised by Connection.open_db_connections on failure) must be
+    classified as an expected DB exception so DBMAsyncJob reports it as a database error
+    rather than an async-job crash if it ever escapes run_job()."""
+    from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+
+    instance = _make_do_instance(queries=[])
+    check = _create_check(instance)
+    assert SQLConnectionError in check.data_observability._expected_db_exceptions
+
+
 def test_collection_interval_none_uses_default():
     """collection_interval=None should not crash."""
     instance = deepcopy(BASE_INSTANCE)
@@ -553,6 +652,22 @@ def test_collection_interval_none_uses_default():
     }
     check = SQLServer('sqlserver', {}, [instance])
     assert check.data_observability._enabled
+
+
+@pytest.mark.parametrize('collection_interval', [-5, 0])
+def test_collection_interval_non_positive_uses_default(collection_interval):
+    """A non-positive collection_interval (e.g. from a malformed RC config) must fall back
+    to the default instead of producing a zero/negative rate limit that spins the job loop
+    without sleeping."""
+    instance = deepcopy(BASE_INSTANCE)
+    instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': collection_interval,
+        'queries': [],
+    }
+    check = SQLServer('sqlserver', {}, [instance])
+    assert check.data_observability._rate_limiter.rate_limit_s == pytest.approx(1 / 10)
 
 
 def test_fetchmany_called_with_max_rows(aggregator):

@@ -14,6 +14,7 @@ from datadog_checks.base.utils.cron import CronScheduler
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 
 from .connection import split_sqlserver_host_port
+from .connection_errors import SQLConnectionError
 
 try:
     import pyodbc
@@ -42,6 +43,8 @@ CONN_KEY_PREFIX = "dbm-do-"
 # catch-up.
 CRON_STARTUP_LOOKBACK_SECONDS = 300
 
+DEFAULT_COLLECTION_INTERVAL_SECONDS = 10
+
 Mode = Literal["cron", "interval"]
 
 
@@ -52,7 +55,7 @@ class DueQuery:
     mode: Mode
 
 
-_EXPECTED_DB_EXCEPTIONS: list[type[Exception]] = []
+_EXPECTED_DB_EXCEPTIONS: list[type[Exception]] = [SQLConnectionError]
 if pyodbc is not None:
     _EXPECTED_DB_EXCEPTIONS.append(pyodbc.Error)
 if adodbapi is not None:
@@ -64,7 +67,13 @@ class SqlServerDataObservability(DBMAsyncJob):
         self._check = check
         self._config = config
         self._last_execution: dict[int, float] = {}
-        collection_interval = config.data_observability.collection_interval or 10
+        # Due queries whose connection attempt failed last pass. Retried on the next
+        # poll regardless of mode, since CronScheduler.due_ticks() already consumed
+        # the tick for cron queries and cannot be "un-consumed".
+        self._pending_retries: dict[int, DueQuery] = {}
+        collection_interval = config.data_observability.collection_interval
+        if not collection_interval or collection_interval <= 0:
+            collection_interval = DEFAULT_COLLECTION_INTERVAL_SECONDS
         super(SqlServerDataObservability, self).__init__(
             check,
             rate_limit=1 / float(collection_interval),
@@ -141,7 +150,7 @@ class SqlServerDataObservability(DBMAsyncJob):
         return tags
 
     def _get_db_port(self) -> int | None:
-        host = getattr(self._config, 'connection_host', None)
+        host = self._check.connection.get_host_with_port()
         if not host:
             return None
         _, port = split_sqlserver_host_port(host)
@@ -223,9 +232,12 @@ class SqlServerDataObservability(DBMAsyncJob):
         return payload
 
     def run_job(self):
-        # Connection errors propagate to _job_loop, which handles
-        # expected_db_exceptions with retry semantics.
-        due_queries = self._get_due_queries()
+        # Merge queries still pending retry from a previous failed connection attempt
+        # with newly due queries, keyed by monitor_id so a fresher tick wins.
+        due_by_monitor_id = dict(self._pending_retries)
+        self._pending_retries = {}
+        due_by_monitor_id.update({due.query.monitor_id: due for due in self._get_due_queries()})
+        due_queries = list(due_by_monitor_id.values())
         if not due_queries:
             self._log.debug("No data observability queries due for execution.")
             return
@@ -237,24 +249,41 @@ class SqlServerDataObservability(DBMAsyncJob):
             tags = base_tags + [f'monitor_id:{q.monitor_id}']
 
             now_at_fire_start = time.time()
-            with self._check.connection._open_managed_db_connections(
-                self._check.connection.DEFAULT_DB_KEY,
-                db_name=q.dbname,
-                key_prefix=CONN_KEY_PREFIX,
-            ):
-                if q.query_timeout:
-                    timeout_s = max(1, math.ceil(q.query_timeout / 1000))
-                    self._check.connection.set_command_timeout(CONN_KEY_PREFIX, timeout_s, db_name=q.dbname)
-
-                cursor = self._check.connection.get_cursor(
+            try:
+                with self._check.connection._open_managed_db_connections(
                     self._check.connection.DEFAULT_DB_KEY,
                     db_name=q.dbname,
                     key_prefix=CONN_KEY_PREFIX,
+                ):
+                    if q.query_timeout:
+                        timeout_s = max(1, math.ceil(q.query_timeout / 1000))
+                        self._check.connection.set_command_timeout(CONN_KEY_PREFIX, timeout_s, db_name=q.dbname)
+
+                    cursor = self._check.connection.get_cursor(
+                        self._check.connection.DEFAULT_DB_KEY,
+                        db_name=q.dbname,
+                        key_prefix=CONN_KEY_PREFIX,
+                    )
+                    try:
+                        result = self._execute_single_query(cursor, q)
+                    finally:
+                        self._check.connection.close_cursor(cursor)
+            except tuple(_EXPECTED_DB_EXCEPTIONS) as e:
+                self._log.warning(
+                    "Failed to open connection for monitor_id=%d db_name=%s; will retry next poll: %s",
+                    q.monitor_id,
+                    q.dbname,
+                    e,
                 )
-                try:
-                    result = self._execute_single_query(cursor, q)
-                finally:
-                    self._check.connection.close_cursor(cursor)
+                self._pending_retries[q.monitor_id] = due
+                self._check.count(
+                    'dd.sqlserver.data_observability.connection_failures',
+                    1,
+                    tags=tags,
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+                continue
 
             # Advance scheduling state before emission so an emit-side error cannot
             # leave the query stuck re-firing the same tick.
