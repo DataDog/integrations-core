@@ -428,7 +428,6 @@ class ClickhouseCheck(DatabaseCheck):
         """Whether the server reports cloud_mode enabled, or None when the probe failed."""
         try:
             rows = self.execute_query_raw(CLOUD_MODE_QUERY)
-            # No row means the setting does not exist, true of every version predating it.
             if not rows or not rows[0]:
                 return False
             return str(rows[0][0]) not in ('', '0')

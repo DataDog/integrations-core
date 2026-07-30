@@ -74,7 +74,6 @@ CLUSTER_NAME_QUERY = (
 )
 
 
-# Key and value vocabulary follow the mongo integration's hosting tag.
 HOSTING_TYPE_TAG = 'hosting_type'
 
 
