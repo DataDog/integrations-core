@@ -270,8 +270,10 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
         f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
     )
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
-    prepared_index = find_exec_command(calls, ['touch', TEST_PREPARED_MARKER])
-    assert start_index < post_install_index < restart_index < prepared_index
+    marker_index = find_exec_command(calls, ['touch', TEST_PREPARED_MARKER])
+    prepared_indices = exec_command_indices(calls, ['test', '-f', TEST_PREPARED_MARKER])
+    assert len(prepared_indices) == 1
+    assert start_index < post_install_index < marker_index < restart_index < prepared_indices[0]
     assert metadata['kubernetes']['local_packages'] == {
         str(local_base): '[kube]',
         str(integration): '[deps]',
@@ -289,6 +291,24 @@ def test_rejects_invalid_wait_timeout_before_creating_resources(agent, metadata,
         agent.start(agent_build='', local_packages={}, env_vars={})
 
     run_command.assert_not_called()
+
+
+def test_start_detects_container_replacement_during_restart(agent, app, mocker):
+    def run(command, **kwargs):
+        if command[-2:] == ['config', 'current-context']:
+            return successful_process(command, stdout=b'kind-test\n')
+        if command[-4:] == ['get', 'nodes', '-o', 'json']:
+            nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
+            return successful_process(command, stdout=json.dumps(nodes).encode())
+        # A replaced container no longer carries the marker stamped before the restart.
+        if command[-3:] == ['test', '-f', TEST_PREPARED_MARKER]:
+            return subprocess.CompletedProcess(command, 1)
+        return successful_process(command)
+
+    mocker.patch.object(app.platform, 'run_command', side_effect=run)
+
+    with pytest.raises(RuntimeError, match='may have restarted'):
+        agent.start(agent_build='', local_packages={}, env_vars={})
 
 
 def test_rejects_non_kind_context_before_inspecting_cluster(agent, app, mocker):

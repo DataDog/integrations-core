@@ -367,8 +367,12 @@ class KubernetesAgent(AgentInterface):
         self._sync_config()
         self._sync_auto_conf()
         self._run_metadata_commands('post_install_commands')
-        self._restart_agent_process()
+        # Stamp the marker before the restart so the check below can still observe a
+        # container replacement: the marker lives in the container filesystem, so a
+        # fresh container loses it along with the copied configuration and packages.
         self._exec(['touch', PREPARED_MARKER])
+        self._restart_agent_process()
+        self._require_prepared()
 
     def stop(self) -> None:
         """Leave cleanup to the fixture that deletes the disposable cluster."""
