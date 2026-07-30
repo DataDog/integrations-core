@@ -73,7 +73,6 @@ class ClickhouseCheck(DatabaseCheck):
         self._cluster_name = None
         self._cluster_name_resolved = False
         self._hosting_type = None
-        self._hosting_type_resolved = False
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
@@ -407,9 +406,8 @@ class ClickhouseCheck(DatabaseCheck):
     @property
     def hosting_type(self) -> str:
         """Whether this instance is ClickHouse Cloud or self-hosted, cached after the first check run."""
-        if not self._hosting_type_resolved:
+        if self._hosting_type is None:
             self._hosting_type = self._resolve_hosting_type()
-            self._hosting_type_resolved = True
         return self._hosting_type
 
     def _resolve_hosting_type(self) -> str:
