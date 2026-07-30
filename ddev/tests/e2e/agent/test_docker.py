@@ -1163,9 +1163,7 @@ class TestStart:
             in run.call_args_list
         )
 
-    def test_apt_mirror_not_reset_without_lifecycle_commands(
-        self, app, temp_dir, get_integration, docker_path, mocker
-    ):
+    def test_apt_mirror_not_reset_without_lifecycle_commands(self, app, temp_dir, get_integration, docker_path, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         config_file = temp_dir / 'config' / 'config.yaml'
