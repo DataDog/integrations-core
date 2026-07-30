@@ -1,0 +1,1 @@
+Document how to collect Flink custom/user metrics via `extra_metrics` in OpenMetrics collection mode.
