@@ -14,6 +14,7 @@ from textual.widgets import Button, Static
 class CancelRunModal(ModalScreen[bool]):
     """Confirm whether to cancel an active flow."""
 
+    AUTO_FOCUS = "#btn-keep-running"
     BINDINGS = [Binding("escape", "keep_running", "Keep running")]
 
     def compose(self) -> ComposeResult:
@@ -27,9 +28,6 @@ class CancelRunModal(ModalScreen[bool]):
             with Horizontal(classes="modal-actions"):
                 yield Button("Keep running", id="btn-keep-running", variant="primary")
                 yield Button("Cancel flow", id="btn-cancel-flow", variant="error")
-
-    def on_mount(self) -> None:
-        self.query_one("#btn-keep-running", Button).focus()
 
     def action_keep_running(self) -> None:
         """Dismiss the confirmation and continue the flow."""

@@ -6,8 +6,10 @@
 from __future__ import annotations
 
 from rich.text import Text
+from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.message import Message
+from textual.widget import Widget
 from textual.widgets import Static
 
 from ddev.ai.config.models import ConfigStatus, FlowResult
@@ -15,7 +17,30 @@ from ddev.cli.meta.ai.palette import ERROR, SUCCESS
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import COLOR_RUNNING
 
 
-class FlowCard(Static):
+class FlowCardDescription(Static):
+    """Flow description that marks clipped text with an ellipsis."""
+
+    def __init__(self, description: str) -> None:
+        super().__init__(description, classes="flow-card-description", markup=False)
+        self.description = description
+
+    def render(self) -> Text:
+        width, height = self.content_size
+        if width <= 0 or height <= 0:
+            return Text(self.description)
+
+        lines = Text(self.description).wrap(self.app.console, width)
+        if len(lines) <= height:
+            return Text("\n").join(lines)
+
+        visible_lines = lines[:height]
+        last_line = visible_lines[-1]
+        last_line.truncate(max(width - 3, 0))
+        last_line.append("...")
+        return Text("\n").join(visible_lines)
+
+
+class FlowCard(Widget):
     """Focusable card for one validated or broken flow result."""
 
     can_focus = True
@@ -42,17 +67,19 @@ class FlowCard(Static):
         """Number of phases in the flow."""
         return len(self.flow.flow) if self.flow is not None else 0
 
-    def render(self) -> Text:
+    def compose(self) -> ComposeResult:
         name = self.result.name or "(unnamed)"
         desc = self.flow.description if self.flow is not None and self.flow.description else ""
         if self.result.status is ConfigStatus.BROKEN:
             desc = self.result.errors[0].message if self.result.errors else "Invalid flow configuration"
-        n = self.phase_count
-        content = Text(name, style="bold", no_wrap=True, overflow="ellipsis")
+
+        yield Static(name, classes="flow-card-name", markup=False)
         if desc:
-            content.append("\n")
-            content.append(desc, style="dim")
-        content.append("\n\n")
+            yield FlowCardDescription(desc)
+        yield Static(self._render_footer(), classes="flow-card-footer")
+
+    def _render_footer(self) -> Text:
+        content = Text()
         if self.result.status is ConfigStatus.BROKEN:
             count = len(self.result.errors)
             content.append(
@@ -61,6 +88,7 @@ class FlowCard(Static):
             )
             content.append("\nEnter to inspect diagnostics", style="dim")
         else:
+            n = self.phase_count
             phase_word = "phase" if n == 1 else "phases"
             content.append("●", style=SUCCESS)
             content.append(f" {n} {phase_word}")

@@ -33,7 +33,7 @@ def real_phase_registry():
 
 
 PHASE_AND_FLOW = (
-    "- type: phase\n  config:\n    name: p\n    agent: ag\n"
+    "- type: phase\n  config:\n    name: p\n    description: Prepare the integration\n    agent: ag\n"
     "    tasks:\n      - name: t\n        prompt_ref: intro\n        goal_ref: g\n"
     "    checkpoint:\n      memory_prompt_ref: mem\n"
     "- type: flow\n  config:\n    name: demo\n    description: Generate an integration\n"
@@ -85,6 +85,7 @@ def test_get_flow_resolves_all_refs_and_variables(tmp_path):
     assert rf.phases["p"].checkpoint.memory_prompt_ref is None
     assert rf.variables == {"x": "hi"}
     assert rf.agents["ag"].system_prompt == "sys"
+    assert rf.phases["p"].description == "Prepare the integration"
     assert rf.description == "Generate an integration"
     assert "topic" in [flow_input.name for flow_input in rf.inputs]
 
