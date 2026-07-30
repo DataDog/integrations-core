@@ -242,7 +242,9 @@ async def test_flow_card_uses_available_width_before_truncating(make_flow, make_
 
         assert card.content_region.width > len(name)
         assert rendered_name == name
-        assert card.query_one(".flow-card-description").region.height == 1
+        description = card.query_one(".flow-card-description")
+        assert description.region.height == 1
+        assert str(description.render()) == flow.description
 
 
 async def test_flow_card_limits_description_without_hiding_phase_count(make_flow, make_togo_app) -> None:
@@ -257,10 +259,13 @@ async def test_flow_card_limits_description_without_hiding_phase_count(make_flow
         card = app.screen.query_one("FlowCard")
         description = card.query_one(".flow-card-description")
         footer = card.query_one(".flow-card-footer")
+        rendered_description = str(description.render())
 
         assert description.content == flow.description
         assert description.region.height == 2
         assert len(flow.description) > description.content_region.width * description.region.height
+        assert len(rendered_description.splitlines()) == 2
+        assert rendered_description.endswith("...")
         assert str(footer.render()) == "● 2 phases"
         assert footer.region.bottom <= card.content_region.bottom
 

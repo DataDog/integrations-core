@@ -17,6 +17,29 @@ from ddev.cli.meta.ai.palette import ERROR, SUCCESS
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import COLOR_RUNNING
 
 
+class FlowCardDescription(Static):
+    """Flow description that marks clipped text with an ellipsis."""
+
+    def __init__(self, description: str) -> None:
+        super().__init__(description, classes="flow-card-description", markup=False)
+        self.description = description
+
+    def render(self) -> Text:
+        width, height = self.content_size
+        if width <= 0 or height <= 0:
+            return Text(self.description)
+
+        lines = Text(self.description).wrap(self.app.console, width)
+        if len(lines) <= height:
+            return Text("\n").join(lines)
+
+        visible_lines = lines[:height]
+        last_line = visible_lines[-1]
+        last_line.truncate(max(width - 3, 0))
+        last_line.append("...")
+        return Text("\n").join(visible_lines)
+
+
 class FlowCard(Widget):
     """Focusable card for one validated or broken flow result."""
 
@@ -52,7 +75,7 @@ class FlowCard(Widget):
 
         yield Static(name, classes="flow-card-name", markup=False)
         if desc:
-            yield Static(desc, classes="flow-card-description", markup=False)
+            yield FlowCardDescription(desc)
         yield Static(self._render_footer(), classes="flow-card-footer")
 
     def _render_footer(self) -> Text:
