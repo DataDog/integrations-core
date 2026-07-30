@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ipaddress
 from collections.abc import Iterable, Iterator
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from .cache import Cache
 from .filter import Filter
@@ -18,13 +20,30 @@ class Port(BaseModel):
     name: str = ""
 
 
+def _is_ipv6_literal(host: str) -> bool:
+    try:
+        return isinstance(ipaddress.ip_address(host), ipaddress.IPv6Address)
+    except ValueError:
+        return False
+
+
+class Host(str):
+    """A host that brackets IPv6 literals for URL templates; use ``!s`` when a template needs the raw value."""
+
+    def __format__(self, format_spec: str) -> str:
+        plain = str(self)  # plain copy: f'[{self}]' would recurse through __format__
+        if not format_spec and _is_ipv6_literal(plain):
+            return f'[{plain}]'
+        return super().__format__(format_spec)
+
+
 class Service(BaseModel):
     """An Autodiscovery-discovered service instance."""
 
     model_config = ConfigDict(frozen=True)
 
     id: str
-    host: str
+    host: Annotated[str, AfterValidator(Host)]
     ports: tuple[Port, ...] = ()
 
 
