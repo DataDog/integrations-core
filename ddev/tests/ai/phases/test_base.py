@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import asyncio
+import logging
 from datetime import UTC, datetime
 
 import pytest
@@ -285,16 +286,41 @@ async def test_process_message_writes_cancelled_checkpoint_and_reraises(
     assert message_queue.empty()
 
 
-async def test_cancellation_checkpoint_failure_does_not_mask_cancellation(
+async def test_process_message_writes_cancelled_checkpoint_with_no_reason(
     flow_dir, flow_context, message_queue, monkeypatch
+):
+    """A bare CancelledError (e.g. a plain Ctrl+C) carries no message, so reason stays None."""
+    phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue)
+
+    async def cancel(_context):
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(phase, "execute", cancel)
+
+    with pytest.raises(asyncio.CancelledError):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    checkpoint = mgr.read()["p1"]
+    assert isinstance(checkpoint, CancelledCheckpoint)
+    assert checkpoint.reason is None
+
+
+async def test_cancellation_checkpoint_failure_does_not_mask_cancellation(
+    flow_dir, flow_context, message_queue, monkeypatch, caplog
 ):
     phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue)
 
     async def cancel(_context):
         raise asyncio.CancelledError("stop")
 
-    monkeypatch.setattr(phase, "execute", cancel)
-    monkeypatch.setattr(mgr, "write_phase_checkpoint", lambda *_: (_ for _ in ()).throw(OSError("read only")))
+    def fail_to_write(*_args):
+        raise OSError("read only")
 
-    with pytest.raises(asyncio.CancelledError, match="stop"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+    monkeypatch.setattr(phase, "execute", cancel)
+    monkeypatch.setattr(mgr, "write_phase_checkpoint", fail_to_write)
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(asyncio.CancelledError, match="stop"):
+            await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert any("Failed to write cancellation checkpoint for phase p1" in r.getMessage() for r in caplog.records)

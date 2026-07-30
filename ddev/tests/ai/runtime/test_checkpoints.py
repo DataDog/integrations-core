@@ -7,12 +7,14 @@ from pathlib import Path
 import pytest
 import yaml
 
+from ddev.ai.config.models import FlowEntry, ResolvedFlow
 from ddev.ai.runtime.checkpoints import (
     CancelledCheckpoint,
     CheckpointManager,
     CheckpointReadError,
     FailedCheckpoint,
     SuccessCheckpoint,
+    resolve_resume_state,
 )
 
 from .helpers import make_cancelled_checkpoint, make_failed_checkpoint, make_success_checkpoint
@@ -195,3 +197,25 @@ def test_read_raises_on_invalid_checkpoint_entry(manager: CheckpointManager):
     manager._path.write_text(yaml.dump(raw))
     with pytest.raises(CheckpointReadError, match="phase 'b'"):
         manager.read()
+
+
+# ---------------------------------------------------------------------------
+# resolve_resume_state
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_resume_state_cancelled_checkpoint_stays_in_frontier(manager: CheckpointManager):
+    """A cancelled phase did not succeed, so it belongs in the resume frontier, not completed."""
+    manager.write_phase_checkpoint("p1", make_cancelled_checkpoint(reason="maximum runtime reached"))
+    flow = ResolvedFlow(
+        name="test-flow",
+        agents={},
+        phases={},
+        flow=[FlowEntry(phase="p1"), FlowEntry(phase="p2", dependencies=["p1"])],
+        variables={},
+    )
+
+    completed, frontier = resolve_resume_state(flow, manager)
+
+    assert completed == set()
+    assert frontier == {"p1"}

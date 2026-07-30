@@ -144,13 +144,9 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
             outcome = await self.execute(context)
         except asyncio.CancelledError as error:
-            try:
-                self._checkpoint_manager.write_phase_checkpoint(
-                    self._phase_id,
-                    self.build_cancelled_checkpoint(error),
-                )
-            except Exception:
-                self._logger.exception("Failed to write cancellation checkpoint for phase %s", self._phase_id)
+            self._write_checkpoint_safely(
+                self.build_cancelled_checkpoint(error), "Failed to write cancellation checkpoint for phase %s"
+            )
             raise
 
         checkpoint = SuccessCheckpoint(
@@ -180,6 +176,15 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             tokens=CheckpointTokenInfo(total_input=0, total_output=0),
         )
 
+    def _write_checkpoint_safely(
+        self, checkpoint: FailedCheckpoint | CancelledCheckpoint, failure_message: str
+    ) -> None:
+        """Persist a checkpoint, logging rather than raising if the write itself fails."""
+        try:
+            self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint)
+        except Exception:
+            self._logger.exception(failure_message, self._phase_id)
+
     async def on_success(self, message: PhaseTrigger) -> None:
         """Emit PhaseTrigger to unblock dependent phases."""
         self.submit_message(
@@ -201,19 +206,14 @@ class Phase(AsyncProcessor[PhaseTrigger]):
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
         """Persist and publish a phase failure."""
         original_error = error.original_exception
-        try:
-            self._checkpoint_manager.write_phase_checkpoint(
-                self._phase_id,
-                self.build_failed_checkpoint(original_error),
+        self._write_checkpoint_safely(
+            self.build_failed_checkpoint(original_error), "Failed to write failure checkpoint for phase %s"
+        )
+        await self._callbacks.fire_phase_error(self._phase_id, original_error)
+        self.submit_message(
+            PhaseFailedMessage(
+                id=f"{self._phase_id}_failed",
+                phase_id=self._phase_id,
+                error=str(original_error),
             )
-        except Exception:
-            self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)
-        finally:
-            await self._callbacks.fire_phase_error(self._phase_id, original_error)
-            self.submit_message(
-                PhaseFailedMessage(
-                    id=f"{self._phase_id}_failed",
-                    phase_id=self._phase_id,
-                    error=str(original_error),
-                )
-            )
+        )

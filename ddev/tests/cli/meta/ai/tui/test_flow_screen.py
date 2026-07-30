@@ -239,6 +239,29 @@ def test_has_resumable_run_failed_checkpoint(tmp_path: Path) -> None:
     assert has_resumable_run(flow, runs_dir=tmp_path)
 
 
+def test_has_resumable_run_cancelled_checkpoint(tmp_path: Path) -> None:
+    """A phase checkpoint with status: cancelled is resumable (not complete)."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug, has_resumable_run
+
+    flow = _make_flow(n_phases=2)
+    run_dir = tmp_path / flow_slug(flow)
+    run_dir.mkdir()
+    # Write a cancelled checkpoint for the first phase only
+    first_phase = flow.flow[0].phase
+    (run_dir / "checkpoints.yaml").write_text(
+        f"{first_phase}:\n"
+        "  status: cancelled\n"
+        "  started_at: '2024-01-01T00:00:00'\n"
+        "  finished_at: '2024-01-01T00:01:00'\n"
+        "  reason: Orchestrator exceeded max_timeout\n"
+        "  tokens:\n"
+        "    total_input: 0\n"
+        "    total_output: 0\n"
+    )
+    # A cancelled phase means the run was interrupted before completing → resumable
+    assert has_resumable_run(flow, runs_dir=tmp_path)
+
+
 # ---------------------------------------------------------------------------
 # FlowScreen structure
 # ---------------------------------------------------------------------------

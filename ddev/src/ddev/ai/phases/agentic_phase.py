@@ -312,17 +312,14 @@ class AgenticPhase(Phase):
 
     def build_failed_checkpoint(self, error: BaseException) -> FailedCheckpoint:
         """Include partial token and goal progress in a failed checkpoint."""
-        checkpoint = super().build_failed_checkpoint(error)
-        checkpoint.tokens = CheckpointTokenInfo(
-            total_input=self._total_input_tokens,
-            total_output=self._total_output_tokens,
-        )
-        checkpoint.goal_validations = self._goal_attempt_log or None
-        return checkpoint
+        return self._with_partial_progress(super().build_failed_checkpoint(error))
 
     def build_cancelled_checkpoint(self, error: asyncio.CancelledError) -> CancelledCheckpoint:
         """Include partial token and goal progress in a cancelled checkpoint."""
-        checkpoint = super().build_cancelled_checkpoint(error)
+        return self._with_partial_progress(super().build_cancelled_checkpoint(error))
+
+    def _with_partial_progress[T: FailedCheckpoint | CancelledCheckpoint](self, checkpoint: T) -> T:
+        """Attach tokens and goal progress accumulated before an interrupted phase stopped."""
         checkpoint.tokens = CheckpointTokenInfo(
             total_input=self._total_input_tokens,
             total_output=self._total_output_tokens,
