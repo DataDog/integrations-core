@@ -17,7 +17,6 @@ from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.checkpoints import (
     CancelledCheckpoint,
     CheckpointManager,
-    CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
     GoalValidationRecord,
@@ -47,7 +46,7 @@ Treat the on-disk state as the source of truth and bring it to a correct, comple
 
 RESUME_NOTICE_ERROR = """
 
-The previous attempt recorded this error:
+The previous attempt recorded this before stopping:
 
 {error}"""
 
@@ -286,8 +285,14 @@ class AgenticPhase(Phase):
         system_prompt = render_inline(self._agent_config.system_prompt, context, self._resolver)
         if self._is_resume_frontier:
             prior = (context.get("checkpoints") or {}).get(self._phase_id)
-            error = prior.error if prior is not None and prior.status == CheckpointStatus.FAILED else None
-            system_prompt += build_resume_notice(error)
+            match prior:
+                case FailedCheckpoint():
+                    notice_error = prior.error
+                case CancelledCheckpoint():
+                    notice_error = prior.reason
+                case _:
+                    notice_error = None
+            system_prompt += build_resume_notice(notice_error)
         try:
             process = self._process_factory.create(
                 scope=self._scope,

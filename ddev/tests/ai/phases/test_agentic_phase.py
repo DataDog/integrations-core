@@ -875,7 +875,35 @@ async def test_resume_frontier_phase_injects_notice_without_error(flow_dir, monk
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert "RESUMED RUN" in captured["system_prompt"]
-    assert "previous attempt recorded this error" not in captured["system_prompt"]
+    assert "previous attempt recorded this before stopping" not in captured["system_prompt"]
+
+
+async def test_resume_frontier_phase_injects_notice_with_cancellation_reason(flow_dir, monkeypatch, message_queue):
+    """A frontier phase with a prior cancelled checkpoint gets the resume notice plus the reason."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset({"p1"}),
+        captured_worker_kwargs=captured,
+    )
+    mgr.write_phase_checkpoint(
+        "p1",
+        CancelledCheckpoint(
+            started_at="2026-01-01T00:00:00+00:00",
+            finished_at="2026-01-01T00:00:05+00:00",
+            reason="Orchestrator exceeded max_timeout of 0.05s",
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+        ),
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" in captured["system_prompt"]
+    assert "Orchestrator exceeded max_timeout of 0.05s" in captured["system_prompt"]
 
 
 async def test_non_frontier_phase_gets_no_resume_notice(flow_dir, monkeypatch, message_queue):
