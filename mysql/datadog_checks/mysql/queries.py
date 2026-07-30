@@ -163,7 +163,7 @@ SELECT
     group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
     kcu.referenced_table_schema as referenced_table_schema,
     kcu.referenced_table_name as referenced_table_name,
-    group_concat(kcu.referenced_column_name) as referenced_column_names,
+    group_concat(kcu.referenced_column_name order by kcu.ordinal_position asc) as referenced_column_names,
     rc.update_rule as update_action,
     rc.delete_rule as delete_action
 FROM

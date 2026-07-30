@@ -1,0 +1,1 @@
+Sort referenced_column_names by ordinal position in the schema collection foreign key query, so composite foreign keys report their referenced columns deterministically.

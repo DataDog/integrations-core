@@ -23,12 +23,6 @@ def dbm_instance(instance_complex):
     return instance_complex
 
 
-def sort_names_split_by_coma(names):
-    names_arr = names.split(',')
-    sorted_columns = sorted(names_arr)
-    return ','.join(sorted_columns)
-
-
 def normalize_values(actual_payload):
     actual_payload["default_character_set_name"] = "normalized_value"
     actual_payload["default_collation_name"] = "normalized_value"
@@ -39,9 +33,6 @@ def normalize_values(actual_payload):
             table['columns'].sort(key=lambda x: x['name'])
         if 'indexes' in table:
             table['indexes'].sort(key=lambda x: x['name'])
-        if 'foreign_keys' in table:
-            for f_key in table['foreign_keys']:
-                f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"])
         if 'columns' in table:
             for column in table['columns']:
                 if column['column_type'] == 'int':
@@ -159,7 +150,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "column_names": "RestaurantName,District",
                         "referenced_table_schema": "datadog_test_schemas",
                         "referenced_table_name": "Restaurants",
-                        "referenced_column_names": "District,RestaurantName",
+                        "referenced_column_names": "RestaurantName,District",
                         "update_action": "NO ACTION",
                         "delete_action": "CASCADE",
                     }
