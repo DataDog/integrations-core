@@ -928,10 +928,6 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    # The empty second tag configuration is required, not an oversight: it is what puts a
-    # zero-length option in this branch's tag list so counters emitted without a
-    # `stat_prefix` still parse. The prefix is read from the branch, so every counter here
-    # is tagged when one is present. `cluster.ext_authz` relies on the same arrangement.
     'cluster.ratelimit.failure_mode_allowed': {
         'tags': (
             ('envoy_cluster', ),
