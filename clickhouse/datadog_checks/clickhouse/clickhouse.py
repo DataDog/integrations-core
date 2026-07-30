@@ -406,32 +406,14 @@ class ClickhouseCheck(DatabaseCheck):
 
     @property
     def hosting_type(self) -> str:
-        """Whether this instance is ClickHouse Cloud or self-hosted.
-
-        Requires a live client, so this resolves on the first check run rather than at
-        init. The unknown outcome is cached too: an instance whose probes are blocked
-        should not re-query on every run.
-        """
+        """Whether this instance is ClickHouse Cloud or self-hosted, cached after the first check run."""
         if not self._hosting_type_resolved:
             self._hosting_type = self._resolve_hosting_type()
             self._hosting_type_resolved = True
         return self._hosting_type
 
     def _resolve_hosting_type(self) -> str:
-        """Resolve the hosting type from two independent server-side signals.
-
-        Both probes are always issued, and both signals must agree before reporting cloud.
-        Either one succeeding without finding its marker is a definite negative that decides
-        the result on its own. Neither probe is skipped on the strength of the other: the two
-        read unrelated parts of the server, and a deployment that satisfies only one of them
-        is exactly the ambiguous case worth spending a second query to see.
-
-        A probe that raises is indeterminate, and yields unknown rather than a self-hosted
-        verdict built on nothing more than a transport error or a system table the server is
-        too old to have. Note that a lack of privileges is not such a case: neither
-        system.settings nor system.table_engines is gated behind grants, so a restricted
-        monitoring user reads both in full.
-        """
+        """Combine two independent Cloud signals; both must agree to report cloud, either can veto it."""
         cloud_mode = self._probe_cloud_mode()
         shared_merge_tree = self._probe_shared_merge_tree()
         self.log.debug('Hosting type signals: cloud_mode=%s, shared_merge_tree=%s', cloud_mode, shared_merge_tree)

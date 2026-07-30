@@ -471,8 +471,7 @@ def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advan
 def make_query_replaying_check(query_results):
     """Build a check whose execute_query_raw replays query_results keyed by SQL.
 
-    A value that is an Exception instance is raised instead of returned, which is how the
-    tests below simulate a probe the server refuses or does not understand.
+    An Exception value is raised instead of returned, to simulate a failed probe.
     """
     check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
 
@@ -598,19 +597,15 @@ PROBE_FAILED = Error('Not enough privileges')
 @pytest.mark.parametrize(
     'cloud_mode, shared_merge_tree, expected',
     [
-        # Both signals agree: the only combination that reports cloud.
         pytest.param([['1']], [[1]], HostingType.CLOUD, id='cloud'),
-        # Either signal answering in the negative settles the conjunction on its own, so it
-        # decides even when the other signal never answered.
+        # A negative signal decides on its own, even if the other never answered.
         pytest.param([], [[1]], HostingType.SELF_HOSTED, id='self-hosted-setting-absent'),
         pytest.param([['0']], [[1]], HostingType.SELF_HOSTED, id='self-hosted-cloud-mode-off'),
         pytest.param([['']], [[1]], HostingType.SELF_HOSTED, id='self-hosted-cloud-mode-empty'),
         pytest.param([['1']], [[0]], HostingType.SELF_HOSTED, id='self-hosted-no-shared-merge-tree'),
         pytest.param(PROBE_FAILED, [[0]], HostingType.SELF_HOSTED, id='self-hosted-despite-failed-probe'),
         pytest.param([['0']], PROBE_FAILED, HostingType.SELF_HOSTED, id='self-hosted-despite-failed-engine-probe'),
-        # A failed probe is indeterminate, never a negative: reporting self-hosted off the back
-        # of a permission error or a system table too old to exist would be a wrong answer
-        # dressed up as a real one.
+        # A failed probe is indeterminate, not a negative.
         pytest.param(PROBE_FAILED, [[1]], HostingType.UNKNOWN, id='unknown-cloud-mode-unreadable'),
         pytest.param([['1']], PROBE_FAILED, HostingType.UNKNOWN, id='unknown-engines-unreadable'),
         pytest.param(PROBE_FAILED, PROBE_FAILED, HostingType.UNKNOWN, id='unknown-both-unreadable'),

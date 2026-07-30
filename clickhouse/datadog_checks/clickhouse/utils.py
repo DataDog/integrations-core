@@ -74,8 +74,7 @@ CLUSTER_NAME_QUERY = (
 )
 
 
-# Tag identifying whether this instance is ClickHouse Cloud or self-hosted. The key and the value
-# vocabulary follow the mongo integration, the other DBM check that reports a hosting model.
+# Key and value vocabulary follow the mongo integration's hosting tag.
 HOSTING_TYPE_TAG = 'hosting_type'
 
 
@@ -85,20 +84,10 @@ class HostingType:
     UNKNOWN = 'unknown'
 
 
-# First hosting-type signal: the server-level cloud_mode setting, which ClickHouse Cloud ships
-# enabled and self-hosted servers leave at its 0 default. Read from system.settings rather than
-# calling getSetting('cloud_mode'): the function raises on the versions predating the setting
-# (before 23.x), which increments FailedQuery/FailedSelectQuery and pollutes the customer's
-# clickhouse.query.failed metric. Selecting from the table returns zero rows instead, no error —
-# and zero rows is itself a definite negative, since Cloud only ever runs recent versions.
+# system.settings avoids raising on versions predating cloud_mode (before 23.x).
 CLOUD_MODE_QUERY = "SELECT value FROM system.settings WHERE name = 'cloud_mode'"
 
-# Second hosting-type signal: availability of SharedMergeTree, an engine that exists only in
-# ClickHouse Cloud. Probes system.table_engines (which engines the server supports) rather than
-# system.tables (which engines are in use), because a freshly provisioned Cloud service has no
-# user tables yet but still lists the engine, and this avoids scanning every table. Filters with
-# exact equality rather than LIKE: ClickHouse compiles a re2 regex for a LIKE pattern, bumping
-# RegexpCreated, which surfaces as clickhouse.compilation.regex on the customer's own metrics.
+# table_engines lists supported engines even before any tables exist; exact match avoids a LIKE regex compile.
 SHARED_MERGE_TREE_QUERY = "SELECT count() FROM system.table_engines WHERE name = 'SharedMergeTree'"
 
 
