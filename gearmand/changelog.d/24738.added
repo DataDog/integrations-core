@@ -1,0 +1,1 @@
+Add `metrics_prefix: gearman` to the `discovery` block of `auto_conf.yaml` to reflect the integration's metric prefix.
