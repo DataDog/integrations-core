@@ -23,11 +23,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.headers import DEFAULT_ACCEPT
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPConnectionError,
-    HTTPConnectTimeoutError,
-    HTTPReadTimeoutError,
-)
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
 
 class OpenMetricsScraper:
@@ -408,15 +404,11 @@ class OpenMetricsScraper:
             with self.get_connection() as connection:
                 # Media type will be used to select parser dynamically
                 self._content_type = connection.headers.get('Content-Type', '')
-                try:
-                    for line in connection.iter_lines(decode_unicode=True):
-                        yield line
-                except HTTPReadTimeoutError:
-                    if self.ignore_connection_errors:
-                        self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
-                    else:
-                        raise
-        except (HTTPConnectionError, HTTPConnectTimeoutError):
+                for line in connection.iter_lines(decode_unicode=True):
+                    yield line
+        # A read timeout can surface either while opening the connection or midway through the body,
+        # so both phases are treated as the endpoint being unreachable.
+        except (HTTPConnectionError, HTTPTimeoutError):
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:

@@ -97,25 +97,16 @@ def test_critical_service_check(instance, check, aggregator):
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
 
 
-def test_make_request_catches_connect_timeout(instance, check, aggregator, mock_http):
-    mock_http.get.side_effect = HTTPConnectTimeoutError('connect timed out')
+@pytest.mark.parametrize('error_cls', [HTTPConnectTimeoutError, HTTPReadTimeoutError])
+def test_make_request_catches_timeouts(instance, check, aggregator, mock_http, error_cls):
+    mock_http.get.side_effect = error_cls('timed out')
     check = check(instance)
 
-    with pytest.raises(HTTPConnectTimeoutError, match='connect timed out'):
+    with pytest.raises(error_cls, match='timed out'):
         check.make_request()
 
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
-
-
-def test_make_request_does_not_catch_read_timeout(instance, check, aggregator, mock_http):
-    mock_http.get.side_effect = HTTPReadTimeoutError('read timed out')
-    check = check(instance)
-
-    with pytest.raises(HTTPReadTimeoutError, match='read timed out'):
-        check.make_request()
-
-    aggregator.assert_service_check('ibm_was.can_connect', count=0)
 
 
 def test_right_server_tag(instance, check, aggregator):

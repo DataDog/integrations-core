@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPConnectTimeoutError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
 from .metrics import METRICS_LIST
 
@@ -51,7 +51,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         try:
             self.process(scraper_config)
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, tags=custom_tags)
-        except (HTTPConnectionError, HTTPConnectTimeoutError) as e:
+        except (HTTPConnectionError, HTTPTimeoutError) as e:
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,

@@ -1,2 +1,3 @@
 The HTTP request wrapper now raises backend-agnostic exception types (``http_exceptions``) instead of ``requests``-specific ones. Checks that catch HTTP errors from ``self.http`` should catch the agnostic types.
 Legacy OpenMetrics and Prometheus checks now honor an ``Accept`` or ``Accept-Encoding`` header set through the ``headers`` option instead of silently overwriting it with ``text/plain`` and ``gzip``.
+The OpenMetrics ``ignore_connection_errors`` option now also suppresses read timeouts that occur while opening the scrape connection, not only those that occur midway through the response body.

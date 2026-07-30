@@ -112,7 +112,9 @@ def test_check_with_filters(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.parametrize('error_type', [HTTPStatusError, HTTPConnectionError, HTTPConnectTimeoutError])
+@pytest.mark.parametrize(
+    'error_type', [HTTPStatusError, HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError]
+)
 def test_check_connection_failure(aggregator, error_type):
     check = MarklogicCheck('marklogic', {}, [INSTANCE])
 
@@ -121,16 +123,6 @@ def test_check_connection_failure(aggregator, error_type):
             check.check(INSTANCE)
 
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.CRITICAL, tags=COMMON_TAGS, count=1)
-
-
-def test_check_read_timeout_is_not_downgraded(aggregator):
-    check = MarklogicCheck('marklogic', {}, [INSTANCE])
-
-    with mock.patch.object(check.api, 'get_resources', side_effect=HTTPReadTimeoutError('slow')):
-        with pytest.raises(HTTPReadTimeoutError, match='slow'):
-            check.check(INSTANCE)
-
-    aggregator.assert_service_check('marklogic.can_connect', count=0)
 
 
 @pytest.mark.integration

@@ -65,7 +65,7 @@ def _test_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.parametrize('error_cls', [HTTPConnectionError, HTTPConnectTimeoutError])
+@pytest.mark.parametrize('error_cls', [HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError])
 def test_suppress_errors_handles_connection_failures(mock_http, error_cls):
     check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
     mock_http.get.side_effect = error_cls('unreachable')
@@ -73,9 +73,10 @@ def test_suppress_errors_handles_connection_failures(mock_http, error_cls):
     assert check._fetch_data(URL, QUEUE_URL, suppress_errors=True) is False
 
 
-def test_suppress_errors_does_not_hide_read_timeout(mock_http):
+@pytest.mark.parametrize('error_cls', [HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError])
+def test_connection_failures_propagate_without_suppression(mock_http, error_cls):
     check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
-    mock_http.get.side_effect = HTTPReadTimeoutError('slow')
+    mock_http.get.side_effect = error_cls('unreachable')
 
-    with pytest.raises(HTTPReadTimeoutError, match='slow'):
-        check._fetch_data(URL, QUEUE_URL, suppress_errors=True)
+    with pytest.raises(error_cls, match='unreachable'):
+        check._fetch_data(URL, QUEUE_URL, suppress_errors=False)

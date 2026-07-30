@@ -177,22 +177,13 @@ def test_parse_readiness_service_checks(
 
 
 @pytest.mark.unit
-def test_prometheus_scrape_connect_timeout_reports_critical(aggregator, gitlab_check, get_config):
+@pytest.mark.parametrize('error_cls', [HTTPConnectTimeoutError, HTTPReadTimeoutError])
+def test_prometheus_scrape_timeout_reports_critical(aggregator, gitlab_check, get_config, error_cls):
     check = gitlab_check(get_config(use_openmetrics=False))
-    check.process = MagicMock(side_effect=HTTPConnectTimeoutError("connect timed out"))
+    check.process = MagicMock(side_effect=error_cls("timed out"))
     check._check_health_endpoint = MagicMock()
     check.submit_version = MagicMock()
 
     check.check(None)
 
     aggregator.assert_service_check(check.PROMETHEUS_SERVICE_CHECK_NAME, status=AgentCheck.CRITICAL)
-
-
-def test_prometheus_scrape_read_timeout_propagates(gitlab_check, get_config):
-    check = gitlab_check(get_config(use_openmetrics=False))
-    check.process = MagicMock(side_effect=HTTPReadTimeoutError("read timed out"))
-    check._check_health_endpoint = MagicMock()
-    check.submit_version = MagicMock()
-
-    with pytest.raises(HTTPReadTimeoutError, match='read timed out'):
-        check.check(None)

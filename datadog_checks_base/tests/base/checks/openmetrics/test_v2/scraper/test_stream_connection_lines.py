@@ -14,7 +14,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPReadTimeoutError,
 )
 
-AGNOSTIC_CONNECTION_ERRORS = [HTTPConnectionError, HTTPConnectTimeoutError]
+AGNOSTIC_CONNECTION_ERRORS = [HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError]
 
 
 def _scraper(*, ignore_connection_errors):
@@ -45,14 +45,6 @@ def test_connection_error_reraised_when_not_ignored(error_cls):
     scraper.get_connection = mock.Mock(side_effect=error_cls('refused'))
 
     with pytest.raises(error_cls):
-        list(scraper.stream_connection_lines())
-
-
-def test_setup_read_timeout_propagates_when_connection_errors_are_ignored() -> None:
-    scraper = _scraper(ignore_connection_errors=True)
-    scraper.get_connection = mock.Mock(side_effect=HTTPReadTimeoutError('slow'))
-
-    with pytest.raises(HTTPReadTimeoutError, match='slow'):
         list(scraper.stream_connection_lines())
 
 
