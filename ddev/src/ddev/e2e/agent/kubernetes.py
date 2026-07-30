@@ -35,7 +35,12 @@ class KubernetesAgent(AgentInterface):
 
     @property
     def _kubernetes_metadata(self) -> dict[str, Any]:
-        return cast(dict[str, Any], self.metadata['kubernetes'])
+        metadata = self.metadata.get('kubernetes')
+        if not isinstance(metadata, dict):
+            raise ValueError(
+                'Agent type `kubernetes` requires a `kubernetes` metadata mapping with a `kubeconfig` path'
+            )
+        return cast(dict[str, Any], metadata)
 
     @property
     def _kubeconfig(self) -> str:
