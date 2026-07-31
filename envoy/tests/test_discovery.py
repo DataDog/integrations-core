@@ -45,7 +45,8 @@ def test_openmetrics_endpoint_disables_server_info_for_all_candidates() -> None:
 
 
 def test_ipv6_host_is_bracketed_in_generated_endpoint() -> None:
-    # The generated template leaves IPv6 hosts unbracketed; the override must repair it.
+    # Service.host brackets IPv6 hosts itself on interpolation (datadog_checks.base.utils.discovery);
+    # this integration no longer needs to repair the URL.
     service = Service(
         id='envoy',
         host='fd00::1',

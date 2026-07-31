@@ -587,6 +587,61 @@ def test_discovery_port_hints_optional():
     assert not spec.errors
 
 
+def test_discovery_candidate_accepts_literal_bool_field():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+                collect_server_info: false
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_candidate_rejects_non_literal_field():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+                tags:
+                - a
+                - b
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, tags: '
+        'Candidate value must be a template string or a literal bool/int/float'
+    ) in spec.errors
+
+
 def test_discovery_candidate_field_cross_check():
     spec = get_spec(
         """

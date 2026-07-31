@@ -29,6 +29,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
             'openmetrics_endpoint': 'http://{service.host}:{port.number}/stats/prometheus'.format(
                 service=service, **ctx
             ),
+            'collect_server_info': False,
         }
         instance = InstanceConfig.model_validate(
             instance_data, context={'configured_fields': frozenset(instance_data)}
