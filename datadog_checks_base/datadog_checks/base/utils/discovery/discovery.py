@@ -46,8 +46,11 @@ class Discovery:
         return self._filter.get_items(items)
 
 
-def candidate_ports(service: Service, hints: Iterable[int]) -> Iterator[Port]:
-    """Yield hinted ports first, then remaining service ports."""
+def candidate_ports(service: Service, hints: Iterable[int], *, fallback: bool = True) -> Iterator[Port]:
+    """Yield hinted ports first, then remaining service ports.
+
+    Set `fallback` to false to yield only hinted service ports.
+    """
     by_number = {port.number: port for port in service.ports}
     seen: set[int] = set()
 
@@ -55,6 +58,9 @@ def candidate_ports(service: Service, hints: Iterable[int]) -> Iterator[Port]:
         if hint in by_number and hint not in seen:
             seen.add(hint)
             yield by_number[hint]
+
+    if not fallback:
+        return
 
     for port in service.ports:
         if port.number not in seen:

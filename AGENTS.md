@@ -86,8 +86,8 @@ Extract duplicated logic when it represents the same concept and a shared helper
 Don't modify files in `**/config_models/*.py` directly. To change those files, edit `assets/configuration/spec.yaml` and then run:
 
 ```shell
-ddev -x validate config -s <INTEGRATION_NAME>
-ddev -x validate models -s <INTEGRATION_NAME>
+ddev validate config -s <INTEGRATION_NAME>
+ddev validate models -s <INTEGRATION_NAME>
 ```
 
 ## Development Workflow

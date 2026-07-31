@@ -679,7 +679,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
                 tags = self.tags + [
                     f'database:{database}',
                     f'table:{table}',
-                    f'server_node:{server_node}',
+                    f'clickhouse_node:{server_node}',
                     f'partition:{partition}',
                 ]
             else:
@@ -687,7 +687,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
                 tags = self.tags + [
                     f'database:{database}',
                     f'table:{table}',
-                    f'server_node:{server_node}',
+                    f'clickhouse_node:{server_node}',
                 ]
             self._check.gauge('table.parts.active', agg['active'], tags=tags)
             self._check.gauge('table.parts.level_zero', agg['level_zero'], tags=tags)
@@ -735,7 +735,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{database}',
                 f'table:{table}',
-                f'server_node:{server_node}',
+                f'clickhouse_node:{server_node}',
             ]
             avg_progress = agg['progress_sum'] / agg['progress_count'] if agg['progress_count'] > 0 else 0.0
             self._check.gauge('merges.active', agg['active'], tags=tags)
@@ -750,7 +750,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{row["database"]}',
                 f'table:{row["table"]}',
-                f'server_node:{row.get("server_node", "")}',
+                f'clickhouse_node:{row.get("server_node", "")}',
             ]
             oldest_create_time = row.get('oldest_create_time')
             oldest_age = now - oldest_create_time if oldest_create_time is not None else 0
@@ -764,7 +764,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{row["database"]}',
                 f'table:{row["table"]}',
-                f'server_node:{row.get("server_node", "")}',
+                f'clickhouse_node:{row.get("server_node", "")}',
             ]
             self._check.gauge('replication.queue_depth', row['depth'], tags=tags)
             self._check.gauge('replication.stuck_tasks', row['stuck'], tags=tags)
@@ -788,7 +788,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{database}',
                 f'table:{table}',
-                f'server_node:{server_node}',
+                f'clickhouse_node:{server_node}',
             ]
             self._check.gauge('table.detached_parts.count', agg['total'], tags=tags)
             self._check.gauge('table.detached_parts.manual', agg['manual'], tags=tags)
@@ -798,7 +798,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         # --- Thresholds (server-level MergeTree settings) ---
         for row in thresholds or []:
             server_node = row.get('server_node', '')
-            tags = self.tags + [f'server_node:{server_node}']
+            tags = self.tags + [f'clickhouse_node:{server_node}']
             if row['name'] == 'parts_to_delay_insert':
                 self._check.gauge('parts.threshold.delay_insert', row['value'], tags=tags)
             elif row['name'] == 'parts_to_throw_insert':

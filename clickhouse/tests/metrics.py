@@ -91,6 +91,9 @@ OPTIONAL_METRICS = [
     'clickhouse.cache_dictionary.update_queue.keys',
     'clickhouse.compilation.llvm.attempt.count',
     'clickhouse.compilation.llvm.attempt.total',
+    # JIT execution counter; only appears once a compiled function is actually run, so it is optional.
+    'clickhouse.compilation.function.execute.count',
+    'clickhouse.compilation.function.execute.total',
     'clickhouse.compilation.size.count',
     'clickhouse.compilation.size.total',
     'clickhouse.compilation.time',

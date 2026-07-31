@@ -1,0 +1,1 @@
+Fix MySQL query metrics inflation when new digest variants share a normalized query signature.
