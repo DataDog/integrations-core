@@ -10,7 +10,6 @@ files:
       - 9901
       candidates:
       - openmetrics_endpoint: "http://{service.host}:{port.number}/stats/prometheus"
-      - stats_url: "http://{service.host}:{port.number}/stats"
   options:
   - template: init_config
     options:

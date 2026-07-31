@@ -9,30 +9,6 @@ def generated_instances(service: Service) -> list[dict]:
     return [config['instances'][0] for config in Envoy.generate_configs(service)]
 
 
-def test_stats_url_candidates_restricted_to_admin_ports():
-    service = Service(
-        id='envoy',
-        host='127.0.0.1',
-        ports=(Port(number=8001), Port(number=9901), Port(number=8080)),
-    )
-
-    stats_url_ports = {
-        int(instance['stats_url'].rsplit(':', 1)[1].split('/')[0])
-        for instance in generated_instances(service)
-        if 'stats_url' in instance
-    }
-
-    assert stats_url_ports == {8001, 9901}
-
-
-def test_stats_url_candidate_not_generated_for_arbitrary_port():
-    service = Service(id='envoy', host='127.0.0.1', ports=(Port(number=8080),))
-
-    instances = generated_instances(service)
-
-    assert not any('stats_url' in instance for instance in instances)
-
-
 def test_openmetrics_endpoint_candidates_generated_for_all_ports():
     service = Service(
         id='envoy',
@@ -50,9 +26,8 @@ def test_openmetrics_endpoint_candidates_generated_for_all_ports():
 
 
 def test_openmetrics_endpoint_disables_server_info_on_non_admin_port():
-    # A fallback openmetrics_endpoint candidate on a non-admin port carries the same
-    # misidentification risk /server_info probing was restricted for on stats_url: it must
-    # not be left to default to collecting server info against an arbitrary upstream.
+    # A fallback openmetrics_endpoint candidate on a non-admin port risks hitting an
+    # unrelated upstream's /server_info if left to default to collecting server info.
     service = Service(
         id='envoy',
         host='127.0.0.1',
