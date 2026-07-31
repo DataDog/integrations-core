@@ -22,10 +22,7 @@ from .common import (
 pytestmark = [requires_new_environment]
 
 
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, exercise_envoy):
-    aggregator = dd_agent_check(DEFAULT_INSTANCE, rate=True)
-
+def assert_prometheus_metrics(aggregator) -> None:
     for metric in (
         PROMETHEUS_METRICS
         + LOCAL_RATE_LIMIT_METRICS
@@ -41,6 +38,13 @@ def test_e2e(dd_agent_check, exercise_envoy):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, exercise_envoy):
+    aggregator = dd_agent_check(DEFAULT_INSTANCE, rate=True)
+
+    assert_prometheus_metrics(aggregator)
     aggregator.assert_service_check(
         'envoy.openmetrics.health', Envoy.OK, tags=['endpoint:{}'.format(DEFAULT_INSTANCE['openmetrics_endpoint'])]
     )
@@ -50,21 +54,7 @@ def test_e2e(dd_agent_check, exercise_envoy):
 def test_e2e_discovery(dd_agent_check_discovery, exercise_envoy):
     aggregator = dd_agent_check_discovery(rate=True)
 
-    for metric in (
-        PROMETHEUS_METRICS
-        + LOCAL_RATE_LIMIT_METRICS
-        + CONNECTION_LIMIT_METRICS
-        + TLS_INSPECTOR_METRICS
-        + ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS
-    ):
-        formatted_metric = "envoy.{}".format(metric)
-        if metric in FLAKY_METRICS:
-            aggregator.assert_metric(formatted_metric, at_least=0)
-            continue
-        aggregator.assert_metric(formatted_metric)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    assert_prometheus_metrics(aggregator)
     # discovery can't know the endpoint ahead of time, and Autodiscovery-injected
     # container tags (docker_image, image_id, etc.) would break an exact tag match,
     # so the endpoint tag isn't asserted here, unlike in test_e2e above.
