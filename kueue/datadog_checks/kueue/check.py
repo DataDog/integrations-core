@@ -15,8 +15,6 @@ from .metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
 RESOURCE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in RESOURCE_METRIC_MAP) + ')$'
 LOCAL_QUEUE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in LOCAL_QUEUE_METRIC_MAP) + ')$'
-# Kueue's real message is `... a workload (UID: <uid>, JobUID: <uid>) due to ...`, so the capture has to
-# stop at the first separator rather than run to the closing parenthesis and swallow the JobUID.
 PREEMPTING_WORKLOAD_UID_PATTERN = re.compile(r'\bworkload \(UID: ([^),\s]+)', re.IGNORECASE)
 
 RESOURCE_NAME_MAP = {
