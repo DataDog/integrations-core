@@ -43,3 +43,18 @@ def test_openmetrics_endpoint_disables_server_info_on_non_admin_port():
     assert instances_by_port[8080]['collect_server_info'] is False
     assert instances_by_port[8001]['collect_server_info'] is True
     assert instances_by_port[9901]['collect_server_info'] is True
+
+
+def test_ipv6_host_does_not_abort_candidate_generation():
+    # An unbracketed IPv6 literal in the generated URL makes urlsplit(...).port raise
+    # ValueError; that must not propagate and abort generation for the whole service.
+    service = Service(
+        id='envoy',
+        host='fd00::1',
+        ports=(Port(number=8080),),
+    )
+
+    instances = generated_instances(service)
+
+    assert len(instances) == 1
+    assert instances[0]['collect_server_info'] is False
