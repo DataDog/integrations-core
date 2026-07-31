@@ -9,7 +9,6 @@ from collections.abc import Iterator
 
 import pytest
 
-from datadog_checks.dev._env import e2e_active
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.dev.utils import get_active_env
 from datadog_checks.kueue import KueueCheck
@@ -54,8 +53,7 @@ def test_e2e(dd_agent_check, dd_get_state):
 
 
 @pytest.mark.e2e
-@pytest.mark.skipif(not e2e_active(), reason='Requires the Kueue kind environment to be running')
-def test_e2e_workload_events(aggregator, kubectl_env, dd_get_state):
+def test_e2e_workload_events(dd_agent_check, aggregator, kubectl_env, dd_get_state):
     check = KueueCheck(CHECK_NAME, {}, [live_instance(dd_get_state)])
     run_check(check)
 
