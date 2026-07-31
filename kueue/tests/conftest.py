@@ -27,27 +27,12 @@ from .kube import (
     wait_for_job_workload_condition,
 )
 
-KUEUE_VERSION_ENV = 'KUEUE_VERSION'  # exported by the hatch.toml env matrix
+KUEUE_VERSION_ENV = 'KUEUE_VERSION'
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
-MANAGER_CONTAINER = 'manager'  # container name in the upstream controller deployment
-# Two independent failures crashloop the controller on a fresh cluster, and both mitigations below
-# are needed because they address different causes:
-#   1. A kind service or pod subnet overlapping a host route (for example a VPN) hijacks in-cluster
-#      traffic to the API server, so the webhook's cert bootstrap never completes. Handled by the
-#      subnet selection here.
-#   2. The visibility server's own cert bootstrap fails independently of networking. Handled by
-#      `disable_visibility_server`.
-# Set to `<serviceSubnet>,<podSubnet>` to pin the kind networks and skip detection entirely.
+MANAGER_CONTAINER = 'manager'
 KIND_SUBNETS_ENV = 'KUEUE_KIND_SUBNETS'
-# Swept descending, because the low end of 10/8 is where hosts and corporate VPNs concentrate: a GitHub
-# runner sits on 10.1.x, so counting down from 10.255 reaches a free block without probing the busy end.
 SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in range(255, -1, -1)]
-# RFC 2544 benchmarking space, used only when the sweep comes up empty. It is exactly two /16s, which is
-# the pair needed here, and neither Docker's address pool nor a VPN routes it. It is not RFC1918, so it is
-# bogon space off-host, which is why it is a last resort rather than a candidate.
 FALLBACK_SUBNETS = ('198.18.0.0/16', '198.19.0.0/16')
-# 172.16.0.0/12 is deliberately absent: Docker hands out /16s from 172.17.0.0 upward for every compose
-# network, so a block that is free at env-start can be taken by the time the next suite runs.
 
 
 def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
@@ -67,8 +52,6 @@ def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
         octets = dest.split('.')
         if not (1 <= len(octets) <= 4) or not all(octet.isdigit() for octet in octets):
             continue
-        # macOS `netstat -rn` abbreviates network routes, so `10` means 10.0.0.0/8 rather than /32.
-        # Deriving the prefix from the octet count keeps those routes wide enough to detect a collision.
         prefix = prefix or str(8 * len(octets))
         octets += ['0'] * (4 - len(octets))
         try:
@@ -161,8 +144,6 @@ def build_kind_config() -> Iterator[str]:
         return
 
     networking['serviceSubnet'], networking['podSubnet'] = subnets
-    # When the controller crashloops, the subnets are the first thing to check, so record that the
-    # committed pair was replaced and what replaced it.
     print(f'Committed kind subnets {committed[0]} / {committed[1]} collide; using {subnets[0]} / {subnets[1]}')
 
     fd, path = tempfile.mkstemp(prefix='kueue-kind-', suffix='.yaml')
@@ -231,8 +212,6 @@ def disable_visibility_server():
     This appends a second `--feature-gates` flag rather than editing any existing one, which relies on
     Kueue merging repeated occurrences. That holds for the versions this env pins.
     """
-    # Patching by index would silently append the flag to a sidecar's args if upstream ever adds or
-    # reorders containers, producing a crashloop with an unrelated-looking error.
     index = manager_container_index()
     kubectl(
         [
@@ -246,7 +225,6 @@ def disable_visibility_server():
             '"value": "--feature-gates=VisibilityOnDemand=false"}]',
         ]
     )
-    # Left in place, the endpoint-less visibility APIServices can stall namespace deletion.
     kubectl(
         [
             'delete',
@@ -284,7 +262,6 @@ def workload_images():
 
 def preload_workload_images():
     """Pull the workload images once and side-load them, instead of once per Job pod from Docker Hub."""
-    # Cluster naming matches datadog_checks_dev/dev/kind.py.
     cluster_name = f'cluster-{CHECK_NAME}-{get_active_env()}'
     for image in sorted(workload_images()):
         run_command(['docker', 'pull', image])
@@ -366,14 +343,10 @@ def trigger_preemption():
     retry_apply('preempt-low-workload.yaml')
     wait_for_job_workload_condition('preempt-low-workload', 'Admitted=True')
     retry_apply('preempt-high-workload.yaml')
-    # Once the high-priority workload is admitted, the low-priority one has been preempted and evicted.
     wait_for_job_workload_condition('preempt-high-workload', 'Admitted=True')
 
 
 def get_service_account_token():
-    # The token is minted once and baked into the instance config, so it has to outlive a
-    # `ddev env start --dev` session. Without `--duration` the apiserver default is one hour,
-    # after which the scrape 401s and the failure looks like missing metrics.
     return kubectl_output(['create', 'token', 'kueue-metrics-reader', '-n', 'default', '--duration=24h'])
 
 
@@ -396,12 +369,8 @@ def dd_environment(dd_save_state):
             'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
             'collect_workload_events': True,
             'kube_config_dict': kubeconfig_content,
-            # The workload-events test drives several consecutive check runs and needs the event
-            # state to advance, which a once-per-env interval prevented.
             'min_collection_interval': 30,
         }
-        # The workload-events test builds its own check instance in-process. Handing it the instance
-        # through the e2e state avoids reconstructing ddev's per-platform config path by hand.
         dd_save_state(INSTANCE_STATE_KEY, instance)
 
         yield {'instances': [instance]}
