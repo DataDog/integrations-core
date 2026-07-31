@@ -44,7 +44,8 @@ def dd_environment():
         attempts=5,
         attempts_wait=10,
     ):
-        yield instance, get_e2e_discovery_metadata()
+        metadata = {} if FLAVOR == 'api_v2' else get_e2e_discovery_metadata()
+        yield instance, metadata
 
 
 @pytest.fixture
