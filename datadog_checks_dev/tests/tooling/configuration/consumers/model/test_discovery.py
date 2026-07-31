@@ -152,6 +152,39 @@ def test_literal_candidate_values():
     )
 
 
+def test_can_disable_port_fallback():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              fallback: false
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/m
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    assert 'for port in candidate_ports(service, [9090], fallback=False):' in discovery_contents
+
+
 def test_local_strategy():
     consumer = get_model_consumer(
         """
