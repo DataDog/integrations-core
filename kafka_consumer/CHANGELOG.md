@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.2 / 2026-07-23
+
+***Fixed***:
+
+* Call malloc_trim after each run to return librdkafka's per-arena free memory to the OS and curb agent memory growth. ([#24553](https://github.com/DataDog/integrations-core/pull/24553))
+* Keep the DSM broker_timestamps cache in memory and persist it at most every 5 minutes to reduce per-run allocation churn and memory growth. ([#24554](https://github.com/DataDog/integrations-core/pull/24554))
+
+## 8.1.1 / 2026-07-17
+
+***Fixed***:
+
+* Cache the earliest (log-start) offset used for `kafka.topic.size` and `kafka.partition.size` across collection intervals instead of refetching it from the broker on every run. ([#24515](https://github.com/DataDog/integrations-core/pull/24515))
+* Allow reusing the Kafka AdminClient and Consumer across check runs (via close_admin_client: false) to avoid unbounded agent memory growth from librdkafka thread churn. ([#24552](https://github.com/DataDog/integrations-core/pull/24552))
+
 ## 8.1.0 / 2026-07-08
 
 ***Added***:

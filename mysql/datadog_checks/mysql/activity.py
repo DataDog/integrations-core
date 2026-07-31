@@ -191,7 +191,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
             enabled=is_affirmative(config.activity_config.get("enabled", True)),
             expected_db_exceptions=(pymysql.err.OperationalError, pymysql.err.InternalError),
             min_collection_interval=config.min_collection_interval,
-            dbms="mysql",
+            dbms=check.dbms,
             rate_limit=1 / float(self.collection_interval),
             job_name="query-activity",
             shutdown_callback=self._close_db_conn,

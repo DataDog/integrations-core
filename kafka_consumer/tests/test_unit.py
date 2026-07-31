@@ -5,6 +5,7 @@ import base64
 import json
 import logging
 import marshal
+from collections import defaultdict
 from contextlib import nullcontext as does_not_raise
 
 import mock
@@ -526,6 +527,30 @@ def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check
     timestamps = written["topic1_0"]
     assert len(timestamps) == 1
     assert 100 in timestamps
+
+
+def test_max_history_scales_with_partition_count(check, kafka_instance):
+    kafka_consumer_check = check(kafka_instance)  # default timestamp_history_size = 1000
+    assert kafka_consumer_check._max_history(0) == 1000
+    assert kafka_consumer_check._max_history(1) == 1000
+    assert kafka_consumer_check._max_history(6000) == 1000  # 6M / 6000 = 1000 (breakeven)
+    assert kafka_consumer_check._max_history(60000) == 100  # 6M / 60000
+    assert kafka_consumer_check._max_history(6_000_000) == 2  # floored at 2
+
+
+def test_add_broker_timestamps_caps_total_by_budget(check, kafka_instance, monkeypatch):
+    import datadog_checks.kafka_consumer.kafka_consumer as kc
+
+    monkeypatch.setattr(kc, 'MAX_TIMESTAMP_ENTRIES', 1000)
+    kafka_consumer_check = check(kafka_instance)
+    # 100 partitions against a 1000-entry budget -> per-partition cap of 10.
+    highwater_offsets = {("topic1", p): 500 for p in range(100)}
+    broker_timestamps = defaultdict(dict)
+    broker_timestamps["topic1_0"] = {i: float(i) for i in range(60)}
+
+    kafka_consumer_check._add_broker_timestamps(broker_timestamps, highwater_offsets)
+
+    assert len(broker_timestamps["topic1_0"]) <= 10
 
 
 @pytest.mark.parametrize(

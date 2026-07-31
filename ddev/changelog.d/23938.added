@@ -1,0 +1,1 @@
+Add TaskTestGatherer processor and a JUnit parsing utility for the CI dispatcher.
