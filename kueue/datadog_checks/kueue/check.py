@@ -364,8 +364,6 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if transition == 'evicted' and condition:
             if reason := condition.get('reason'):
                 tags.append(f'kueue_eviction_reason:{reason}')
-            # Gated on the reason because a `FlavorMigration` eviction carries a lookalike message that
-            # would otherwise be mined for a preemptor UID that does not exist.
             if reason == 'Preempted':
                 preempted_condition = self.get_condition(workload, 'Preempted')
                 if preempted_condition and preempted_condition.get('reason'):
