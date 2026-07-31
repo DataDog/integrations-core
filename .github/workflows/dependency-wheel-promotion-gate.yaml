@@ -400,15 +400,102 @@ jobs:
       statuses: write
       contents: read
     steps:
-    - name: Set dependency-wheel-promotion status to success
+    # The queue evaluates required checks against the merge group and not against
+    # the pull request, so a head left pending still lands unless the invariant is
+    # rechecked here, on the tree that is about to merge.
+    - name: Assess the merge group
+      id: assess
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       with:
         script: |
+          const mergeGroup = context.payload.merge_group;
+          // The comparison lists at most this many files for the whole diff and
+          // only on its first page, so a response that size may be hiding a
+          // lockfile change.
+          const COMPARE_FILE_LIMIT = 300;
+          // A rename either way moves the lockfiles, and the API reports the
+          // destination in `filename` and the source in `previous_filename`.
+          const touchesLockfiles = file => [file.filename, file.previous_filename].some(
+            name => name != null && name.startsWith('.deps/resolved/')
+          );
+
+          // Verifying is the only safe fallback: whatever we cannot read for
+          // certain has to count as a lockfile change.
+          let checkPromotion = true;
+          try {
+            const { data: comparison } = await github.rest.repos.compareCommitsWithBasehead({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              basehead: `${mergeGroup.base_sha}...${mergeGroup.head_sha}`,
+            });
+            const files = comparison.files;
+            if (!Array.isArray(files)) {
+              core.info('The comparison did not list its files; verifying the wheels.');
+            } else if (files.length >= COMPARE_FILE_LIMIT) {
+              core.info('The merge group touches too many files to inspect; verifying the wheels.');
+            } else {
+              checkPromotion = files.some(touchesLockfiles);
+            }
+          } catch (error) {
+            core.info(`Could not compare the merge group: ${error.message}; verifying the wheels.`);
+          }
+          core.setOutput('check_promotion', checkPromotion ? 'true' : 'false');
+
+    # The base branch's copy, never the merge group's: that tree carries the pull
+    # request's code.
+    - name: Checkout the promotion script
+      if: steps.assess.outputs.check_promotion == 'true'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.merge_group.base_ref }}
+        sparse-checkout: .builders/promote.py
+        sparse-checkout-cone-mode: false
+
+    - name: Checkout the merge group's lockfiles
+      if: steps.assess.outputs.check_promotion == 'true'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.merge_group.head_sha }}
+        path: pr
+        sparse-checkout: .deps/resolved
+        sparse-checkout-cone-mode: false
+
+    - name: Check whether the wheels are already promoted
+      id: verify
+      if: steps.assess.outputs.check_promotion == 'true'
+      env:
+        PROMOTE_LOCKFILE_DIR: pr/.deps/resolved
+      run: python3 .builders/promote.py --verify
+
+    # Runs even when a step above failed: a verification that cannot complete has
+    # to report red rather than leave the queue waiting on a status that never
+    # arrives.
+    - name: Set the dependency-wheel-promotion status
+      if: ${{ !cancelled() }}
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        CHECK_PROMOTION: ${{ steps.assess.outputs.check_promotion }}
+        PROMOTED: ${{ steps.verify.outputs.promoted }}
+      with:
+        script: |
+          // Lockfiles the merge group leaves alone are master's own problem, and
+          // failing on them would block every unrelated pull request in the queue.
+          let outcome = ['success', 'No dependency changes.'];
+          if (process.env.CHECK_PROMOTION === 'true') {
+            // The merge box truncates descriptions to about 30 characters, so the
+            // missing wheels are left to the run log.
+            outcome = process.env.PROMOTED === 'true'
+              ? ['success', 'Wheels are promoted.']
+              : ['failure', 'Promote wheels and requeue.'];
+          }
+
+          const [state, description] = outcome;
           await github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: context.sha,
-            state: 'success',
+            sha: context.payload.merge_group.head_sha,
+            state,
             context: 'dependency-wheel-promotion',
-            description: 'Promotion requirement was already validated on the PR head.',
+            description,
+            target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
           });
