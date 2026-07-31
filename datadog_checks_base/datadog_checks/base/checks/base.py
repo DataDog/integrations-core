@@ -1636,7 +1636,7 @@ class AgentCheck(object):
             emit_agent_telemetry = getattr(datadog_agent, 'emit_agent_telemetry', None)
             if callable(emit_agent_telemetry):
                 emit_agent_telemetry(
-                    'openmetrics',
+                    'checks',
                     'max_returned_metrics_reached',
                     1,
                     'counter',

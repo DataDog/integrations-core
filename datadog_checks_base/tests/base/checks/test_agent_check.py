@@ -1186,7 +1186,7 @@ OPENMETRICS_INSTANCE = {
     'namespace': 'test',
     'metrics': ['foo'],
 }
-OPENMETRICS_LIMIT_TELEMETRY = ('openmetrics', 'max_returned_metrics_reached', 1, 'counter')
+OPENMETRICS_LIMIT_TELEMETRY = ('checks', 'max_returned_metrics_reached', 1, 'counter')
 METRIC_LIMIT_WARNING = 'Check test exceeded limit of 3 metrics, ignoring next ones'
 
 
