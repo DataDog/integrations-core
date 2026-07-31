@@ -23,7 +23,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         by_alias=True, mode='json', exclude_none=True
     )
     # discovery[0]: from_ports
-    for port in candidate_ports(service, [8001]):
+    for port in candidate_ports(service, [8001, 9901]):
         ctx = {'port': port}
         instance_data = {
             'openmetrics_endpoint': 'http://{service.host}:{port.number}/stats/prometheus'.format(
@@ -33,6 +33,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         instance = InstanceConfig.model_validate(
             instance_data, context={'configured_fields': frozenset(instance_data)}
         ).model_dump(by_alias=True, mode='json', exclude_none=True)
+        instance.pop('stats_url', None)
         yield {'init_config': shared, 'instances': [instance]}
         instance_data = {
             'stats_url': 'http://{service.host}:{port.number}/stats'.format(service=service, **ctx),
@@ -40,6 +41,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         instance = InstanceConfig.model_validate(
             instance_data, context={'configured_fields': frozenset(instance_data)}
         ).model_dump(by_alias=True, mode='json', exclude_none=True)
+        instance.pop('openmetrics_endpoint', None)
         yield {'init_config': shared, 'instances': [instance]}
 
 

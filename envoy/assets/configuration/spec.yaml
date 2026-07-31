@@ -7,6 +7,7 @@ files:
     - strategy: from_ports
       port_hints:
       - 8001
+      - 9901
       candidates:
       - openmetrics_endpoint: "http://{service.host}:{port.number}/stats/prometheus"
       - stats_url: "http://{service.host}:{port.number}/stats"
