@@ -89,10 +89,6 @@ EXPECTED_METRIC_TAGS = {
     'kueue.cluster_queue.resource_usage.gpu': CLUSTER_QUEUE_FLAVOR_TAGS,
     'kueue.cluster_queue.resource_usage.other': CLUSTER_QUEUE_FLAVOR_TAGS,
     'kueue.finished_workloads': [],
-    # Preemption and eviction counters. `trigger_preemption` blocks until the high-priority workload is
-    # admitted, which by construction means the low-priority one was already preempted and evicted, so
-    # these are deterministic rather than timing-dependent. `dd_agent_check(rate=True)` runs the check
-    # twice so the monotonic counters flush their `.count` submission.
     'kueue.preempted_workloads.count': ['reason:InClusterQueue'],
     'kueue.evicted_workloads.count': ['reason:Preempted'],
     'kueue.evicted_workloads_once.count': ['reason:Preempted'],
@@ -116,11 +112,6 @@ FIXTURE_ONLY_METRICS = (
 # All metrics for unit test_check presence + instance tag assertions.
 UNIT_METRICS = (*UNIT_E2E_METRICS, *FIXTURE_ONLY_METRICS)
 
-# Metric families Kueue only emits under configuration this environment deliberately does not enable, so
-# they belong in metadata.csv — the unit fixture covers them — but never appear on the live cluster. The
-# first five need `waitForPodsReady`, which would make the GPU workload evict and requeue in a loop; the
-# admission-check families need an AdmissionCheck resource, and the last two a preemption-skip cycle and
-# the workload-slicing feature gate.
 CONFIG_GATED_METRIC_PREFIXES = (
     'kueue.ready_wait_time.seconds',
     'kueue.local_queue.ready_wait_time.seconds',
@@ -147,6 +138,4 @@ def live_metadata_metrics():
     return {name: metadata for name, metadata in all_metadata.items() if name not in config_gated}, config_gated
 
 
-# `invalid-queue` references a missing flavor, so it is the only inactive ClusterQueue in the env and the
-# only coverage of the non-`active` side of `cluster_queue.status`.
 INACTIVE_CLUSTER_QUEUE_TAGS = ['kueue_cluster_queue:invalid-queue', 'status:pending']
