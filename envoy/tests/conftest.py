@@ -9,7 +9,7 @@ import time
 import pytest
 import requests
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.envoy import Envoy
 
 from .common import DEFAULT_INSTANCE, DOCKER_DIR, FIXTURE_DIR, HOST, URL
@@ -44,7 +44,7 @@ def dd_environment():
         attempts=5,
         attempts_wait=10,
     ):
-        yield instance
+        yield instance, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
