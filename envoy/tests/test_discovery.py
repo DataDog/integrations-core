@@ -47,3 +47,24 @@ def test_openmetrics_endpoint_candidates_generated_for_all_ports():
     }
 
     assert openmetrics_ports == {8001, 9901, 8080}
+
+
+def test_openmetrics_endpoint_disables_server_info_on_non_admin_port():
+    # A fallback openmetrics_endpoint candidate on a non-admin port carries the same
+    # misidentification risk /server_info probing was restricted for on stats_url: it must
+    # not be left to default to collecting server info against an arbitrary upstream.
+    service = Service(
+        id='envoy',
+        host='127.0.0.1',
+        ports=(Port(number=8001), Port(number=9901), Port(number=8080)),
+    )
+
+    instances_by_port = {
+        int(instance['openmetrics_endpoint'].rsplit(':', 1)[1].split('/')[0]): instance
+        for instance in generated_instances(service)
+        if 'openmetrics_endpoint' in instance
+    }
+
+    assert instances_by_port[8080]['collect_server_info'] is False
+    assert instances_by_port[8001]['collect_server_info'] is True
+    assert instances_by_port[9901]['collect_server_info'] is True
