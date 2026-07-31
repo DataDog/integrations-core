@@ -44,6 +44,9 @@ class OrchestratorStub:
     async def run_async(self) -> None:
         pass
 
+    def request_summary_cancellation(self) -> None:
+        pass
+
 
 def export_screenshot_text(app: App[Any]) -> str:
     """Return Textual's exported screenshot with HTML spaces normalized."""

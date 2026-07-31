@@ -57,6 +57,7 @@ ROLE_STYLES: dict[AgentRole, dict[str, str]] = {
         "color": ROLE_GOAL_REVIEWER,
         "prompt_border": ROLE_GOAL_REVIEWER,
     },
+    AgentRole.RUN_SUMMARY: {"label": "run summary", "color": ROLE_PHASE, "prompt_border": STATUS_RUNNING},
 }
 
 

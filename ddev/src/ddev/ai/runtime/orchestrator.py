@@ -21,9 +21,12 @@ from ddev.ai.runtime.outcome import (
     RunOutcomeError,
     RunOutcomePersistenceError,
     RunOutcomeStore,
+    RunSummaryMetadata,
+    RunSummaryStatus,
     build_run_outcome,
 )
 from ddev.ai.runtime.resources import RunResources
+from ddev.ai.runtime.summary import RunSummarizer, RunSummarizerLike, RunSummaryAttempt
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
@@ -80,6 +83,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._resume_completed: set[str] = set()
         self._outcome: RunOutcome | None = None
         self._outcome_recording_error: RunOutcomeError | None = None
+        self._resources: RunResources | None = None
+        self._summary_task: asyncio.Task[RunSummaryAttempt] | None = None
+        self._summary_cancellation_requested = False
 
     @property
     def failed_phase(self) -> str | None:
@@ -102,6 +108,12 @@ class PhaseOrchestrator(EventBusOrchestrator):
     async def run_async(self) -> None:
         """Run the flow on the caller's event loop and record its deterministic outcome."""
         await self._run_with_outcome()
+
+    def request_summary_cancellation(self) -> None:
+        """Cancel only final-summary generation while preserving the deterministic result."""
+        self._summary_cancellation_requested = True
+        if self._summary_task is not None and not self._summary_task.done():
+            self._summary_task.cancel()
 
     async def _run_with_outcome(self) -> None:
         self._started_at = datetime.now(UTC)
@@ -142,18 +154,90 @@ class PhaseOrchestrator(EventBusOrchestrator):
         except Exception as e:
             raise RunOutcomeBuildError(f"Failed to build the flow outcome: {e}") from e
 
+        summary_started_at = datetime.now(UTC)
+        outcome = outcome.model_copy(
+            update={
+                "summary": RunSummaryMetadata(
+                    status=RunSummaryStatus.GENERATING,
+                    started_at=summary_started_at.isoformat(),
+                )
+            }
+        )
         self._outcome = outcome
-        persistence_error: RunOutcomePersistenceError | None = None
-        persistence_cause: Exception | None = None
         try:
             self._outcome_store.write(outcome)
         except Exception as e:
-            persistence_cause = e
-            persistence_error = RunOutcomePersistenceError(f"Failed to persist the flow outcome: {e}")
+            unavailable = _unavailable_summary(summary_started_at, f"Initial run outcome persistence failed: {e}")
+            self._outcome = outcome.model_copy(update={"summary": unavailable})
+            await self._callbacks.fire_run_finished(self._outcome)
+            raise RunOutcomePersistenceError(f"Failed to persist the flow outcome: {e}") from e
 
-        await self._callbacks.fire_run_finished(outcome)
+        try:
+            await self._callbacks.fire_run_finalizing(outcome)
+            attempt = await self._summarize_outcome(outcome, summary_started_at)
+        except asyncio.CancelledError:
+            interrupted_outcome = outcome.model_copy(
+                update={
+                    "summary": _unavailable_summary(
+                        summary_started_at,
+                        "Final summary generation was interrupted before completion",
+                    )
+                }
+            )
+            self._outcome = interrupted_outcome
+            try:
+                self._outcome_store.write(interrupted_outcome)
+            except Exception:
+                self._logger.exception("Failed to persist the interrupted final-summary state")
+            raise
+        final_outcome = outcome.model_copy(update={"summary": attempt.metadata})
+        self._outcome = final_outcome
+        persistence_error: RunOutcomePersistenceError | None = None
+        persistence_cause: Exception | None = None
+        try:
+            self._outcome_store.write(final_outcome)
+        except Exception as e:
+            persistence_cause = e
+            persistence_error = RunOutcomePersistenceError(f"Failed to persist the final flow outcome: {e}")
+
+        await self._callbacks.fire_run_finished(final_outcome)
         if persistence_error is not None:
             raise persistence_error from persistence_cause
+
+    async def _summarize_outcome(self, outcome: RunOutcome, started_at: datetime) -> RunSummaryAttempt:
+        if self._resources is None:
+            return RunSummaryAttempt(
+                metadata=_unavailable_summary(started_at, "Run resources were unavailable for summary generation")
+            )
+        try:
+            summarizer = self._build_run_summarizer()
+        except Exception as e:
+            return RunSummaryAttempt(metadata=_unavailable_summary(started_at, f"Summary construction failed: {e}"))
+
+        self._summary_task = asyncio.create_task(summarizer.summarize(outcome))
+        if self._summary_cancellation_requested:
+            self._summary_task.cancel()
+        try:
+            return await self._summary_task
+        except asyncio.CancelledError:
+            current_task = asyncio.current_task()
+            if not self._summary_cancellation_requested or (current_task is not None and current_task.cancelling()):
+                raise
+            return RunSummaryAttempt(
+                metadata=_unavailable_summary(started_at, "Final summary generation was stopped by the user")
+            )
+        finally:
+            self._summary_task = None
+
+    def _build_run_summarizer(self) -> RunSummarizerLike:
+        if self._resources is None:
+            raise RuntimeError("Run resources are not initialized")
+        return RunSummarizer(
+            resolved_flow=self._resolved_flow,
+            checkpoint_manager=self._checkpoint_manager,
+            resources=self._resources,
+            runtime_variables=self._runtime_variables,
+        )
 
     def _current_run_checkpoints(self, started_at: datetime) -> dict[str, PhaseCheckpoint]:
         checkpoints = self._checkpoint_manager.read()
@@ -246,3 +330,14 @@ def _checkpoint_finished_at(checkpoint: PhaseCheckpoint) -> datetime:
         return finished_at.replace(tzinfo=UTC)
 
     return finished_at
+
+
+def _unavailable_summary(started_at: datetime, error: str) -> RunSummaryMetadata:
+    finished_at = datetime.now(UTC)
+    return RunSummaryMetadata(
+        status=RunSummaryStatus.UNAVAILABLE,
+        started_at=started_at.isoformat(),
+        finished_at=finished_at.isoformat(),
+        duration_seconds=max(0.0, (finished_at - started_at).total_seconds()),
+        error=error[:500],
+    )

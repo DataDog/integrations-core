@@ -27,6 +27,7 @@ from ddev.ai.runtime.outcome import (
     RunOutcome,
     RunOutcomeBuildError,
     RunOutcomeError,
+    RunSummaryStatus,
     RunVerdict,
 )
 from ddev.cli.meta.ai.rendering import (
@@ -63,6 +64,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseFinished,
     PhaseStarted,
     RunErrored,
+    RunFinalizing,
     RunFinished,
     RunOutcomeErrored,
 )
@@ -142,14 +144,19 @@ class ExecutionScreen(TogoScreen):
         self._output_write_count: int = 0
 
     def compose_body(self) -> Iterator[Widget]:
-        error = Static("", id="execution-error")
+        error = Static("", id="execution-error", markup=False)
         error.display = False
         yield error
+        summary_status = Static("", id="execution-summary-status", markup=False)
+        summary_status.display = False
         pipeline = PipelineGraph(self.flow, self._phase_statuses, id="pipeline")
         pipeline.border_title = "Pipeline"
         yield pipeline
+        view_summary = Button("View summary", id="view-summary", variant="primary")
+        view_summary.display = self._outcome is not None
         actions = Horizontal(
-            Button("View summary", id="view-summary", variant="primary"),
+            summary_status,
+            view_summary,
             id="execution-actions",
         )
         actions.display = self._outcome is not None
@@ -187,7 +194,7 @@ class ExecutionScreen(TogoScreen):
 
     def action_copy_or_cancel_run(self) -> None:
         if not self.copy_selection():
-            self.action_cancel_run()
+            self.action_back()
 
     def action_show_outcome(self) -> None:
         if self._outcome is not None:
@@ -206,12 +213,17 @@ class ExecutionScreen(TogoScreen):
             return
         from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
 
+        finalizing = self.togo_app.execution_status is ExecutionStatus.FINISHING
+
         def on_dismiss(confirmed: bool) -> None:
-            if confirmed:
+            if confirmed and finalizing:
+                if self._orchestrator is not None:
+                    self._orchestrator.request_summary_cancellation()
+            elif confirmed:
                 self.action_cancel_run()
                 self.app.pop_screen()
 
-        self.app.push_screen(CancelRunModal(), on_dismiss)
+        self.app.push_screen(CancelRunModal(finalizing=finalizing), on_dismiss)
 
     def on_key(self, event: events.Key) -> None:
         if event.key == "escape":
@@ -244,7 +256,7 @@ class ExecutionScreen(TogoScreen):
                         None,
                     )
                 )
-            else:
+            elif self._orchestrator_builder is not None and self._outcome is None:
                 self.post_message(RunFinished(orchestrator.outcome))
         except asyncio.CancelledError:
             if self.togo_app.bridge_target is self:
@@ -365,9 +377,24 @@ class ExecutionScreen(TogoScreen):
         try:
             actions = self.query_one("#execution-actions", Horizontal)
             actions.display = True
-            actions.query_one("#view-summary", Button).focus()
+            view_summary = actions.query_one("#view-summary", Button)
+            view_summary.display = True
+            view_summary.focus()
         except NoMatches:
             pass
+        self._show_summary_status(outcome)
+
+    def _show_summary_status(self, outcome: RunOutcome) -> None:
+        try:
+            widget = self.query_one("#execution-summary-status", Static)
+        except NoMatches:
+            return
+        if outcome.summary.status is RunSummaryStatus.UNAVAILABLE:
+            widget.update("AI summary unavailable")
+            widget.add_class("outcome-warning")
+            widget.display = True
+        else:
+            widget.display = False
 
     def register_phase_log_screen(self, screen: PhaseLogScreen) -> None:
         self._open_phase_log_screens.setdefault(screen.phase_id, []).append(screen)
@@ -453,6 +480,20 @@ class ExecutionScreen(TogoScreen):
         else:
             self._show_error_banner("Run failed.")
 
+    def on_run_finalizing(self, msg: RunFinalizing) -> None:
+        self._apply_outcome_statuses(msg.outcome)
+        self.togo_app.execution_status = ExecutionStatus.FINISHING
+        try:
+            actions = self.query_one("#execution-actions", Horizontal)
+            widget = self.query_one("#execution-summary-status", Static)
+            actions.display = True
+            actions.query_one("#view-summary", Button).display = False
+            widget.update("Generating final summary...")
+            widget.remove_class("outcome-warning")
+            widget.display = True
+        except NoMatches:
+            pass
+
     def on_run_finished(self, msg: RunFinished) -> None:
         if self._outcome is None:
             self._accept_outcome(msg.outcome)
@@ -494,12 +535,16 @@ class ExecutionScreen(TogoScreen):
 
     def on_agent_started(self, msg: AgentStarted) -> None:
         phase_id = msg.scope.phase_id
+        if phase_id is None:
+            return
         self._write_output(render_agent_start_header(msg.scope), phase_id=phase_id)
         if msg.tools:
             self._write_output(render_agent_tools_line(msg.tools), phase_id=phase_id)
 
     def on_agent_before_send(self, msg: AgentBeforeSend) -> None:
         phase_id = msg.scope.phase_id
+        if phase_id is None:
+            return
         if msg.prompt != TOOL_RESULTS_SENTINEL:
             self._write_output(render_prompt_panel(msg.scope, msg.prompt, "run artifacts"), phase_id=phase_id)
         key = self._thinking_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
@@ -507,6 +552,8 @@ class ExecutionScreen(TogoScreen):
 
     def on_agent_response_received(self, msg: AgentResponseReceived) -> None:
         phase_id = msg.scope.phase_id
+        if phase_id is None:
+            return
         key = self._thinking_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
         self._stop_thinking(phase_id, key)
         self._write_output(render_response_header(msg.scope), phase_id=phase_id)
@@ -520,21 +567,31 @@ class ExecutionScreen(TogoScreen):
             self._write_output(render_web_fetch_line(fetch), phase_id=phase_id)
 
     def on_agent_tool_called(self, msg: AgentToolCalled) -> None:
+        if msg.scope.phase_id is None:
+            return
         self._write_output(render_tool_result_line(msg.tool_call, msg.result), phase_id=msg.scope.phase_id)
 
     def on_before_compact(self, msg: BeforeCompact) -> None:
+        if msg.scope.phase_id is None:
+            return
         self._write_output(render_compact_notice(), phase_id=msg.scope.phase_id)
 
     def on_context_cleared(self, msg: ContextCleared) -> None:
+        if msg.scope.phase_id is None:
+            return
         self._write_output(render_context_cleared_notice(), phase_id=msg.scope.phase_id)
 
     def on_agent_finished(self, msg: AgentFinished) -> None:
         phase_id = msg.scope.phase_id
+        if phase_id is None:
+            return
         self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
         self._write_output(render_agent_finish_line(msg.scope, msg.result), phase_id=phase_id)
 
     def on_agent_errored(self, msg: AgentErrored) -> None:
         phase_id = msg.scope.phase_id
+        if phase_id is None:
+            return
         self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
         self._write_output(render_agent_error_line(msg.scope, msg.error), phase_id=phase_id)
         if phase_id is not None:

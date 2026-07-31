@@ -12,6 +12,7 @@ class AgentRole(str, Enum):
     PHASE = "phase"
     SUBAGENT = "subagent"
     GOAL_REVIEWER = "goal_reviewer"
+    RUN_SUMMARY = "run_summary"
 
 
 @dataclass(frozen=True)
@@ -20,4 +21,11 @@ class AgentScope:
 
     owner_id: str
     role: AgentRole
-    phase_id: str
+    phase_id: str | None
+
+    def __post_init__(self) -> None:
+        if self.role is AgentRole.RUN_SUMMARY:
+            if self.phase_id is not None:
+                raise ValueError("Run-summary agents cannot belong to a phase")
+        elif self.phase_id is None:
+            raise ValueError(f"{self.role.value} agents must belong to a phase")

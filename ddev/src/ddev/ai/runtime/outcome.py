@@ -9,7 +9,7 @@ from enum import StrEnum, auto
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.runtime.checkpoints import (
@@ -19,6 +19,7 @@ from ddev.ai.runtime.checkpoints import (
     GoalValidationRecord,
     PhaseCheckpoint,
 )
+from ddev.ai.runtime.helpers import atomic_write_text
 
 
 class RunOutcomeReadError(Exception):
@@ -61,6 +62,27 @@ class PhaseReportStatus(StrEnum):
     SKIPPED_ON_RESUME = auto()
 
 
+class RunSummaryStatus(StrEnum):
+    GENERATING = auto()
+    SUCCEEDED = auto()
+    UNAVAILABLE = auto()
+
+
+class RunSummaryMetadata(BaseModel):
+    """Metadata for the best-effort LLM narrative attached to a run outcome."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: RunSummaryStatus = RunSummaryStatus.UNAVAILABLE
+    markdown_path: str | None = None
+    started_at: str | None = None
+    finished_at: str | None = None
+    duration_seconds: float | None = None
+    input_tokens: int = 0
+    output_tokens: int = 0
+    error: str | None = None
+
+
 class PhaseReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -95,6 +117,7 @@ class RunOutcome(BaseModel):
     resumed: bool
     skipped_on_resume: list[str]
     run_dir: str
+    summary: RunSummaryMetadata = Field(default_factory=RunSummaryMetadata)
 
 
 GOAL_ERROR_TYPES = frozenset({"GoalAttemptsExhausted", "GoalParseError", "GoalValidationError"})
@@ -253,10 +276,9 @@ class RunOutcomeStore:
         self.path = path
 
     def write(self, outcome: RunOutcome) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(
+        atomic_write_text(
+            self.path,
             yaml.dump(outcome.model_dump(mode="json"), default_flow_style=False, sort_keys=False),
-            encoding="utf-8",
         )
 
     def read(self) -> RunOutcome:

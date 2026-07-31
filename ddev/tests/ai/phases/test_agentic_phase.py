@@ -20,6 +20,7 @@ from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
+    PHASE_MEMORY_PROMPT,
     CancelledCheckpoint,
     CheckpointManager,
     CheckpointTokenInfo,
@@ -87,7 +88,7 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
     assert isinstance(checkpoint, SuccessCheckpoint)
     assert checkpoint.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
     assert mock_agent.send_calls[0] == "Do the work."
-    assert "Write a brief summary" in mock_agent.send_calls[1]
+    assert PHASE_MEMORY_PROMPT in mock_agent.send_calls[1]
     # checkpoint memory_path points to the written file
     memory_path = Path(checkpoint.memory_path)
     assert memory_path.is_absolute() and memory_path.exists() and memory_path.name == "p1_memory.md"

@@ -17,17 +17,34 @@ class CancelRunModal(ModalScreen[bool]):
     AUTO_FOCUS = "#btn-keep-running"
     BINDINGS = [Binding("escape", "keep_running", "Keep running")]
 
+    def __init__(self, *, finalizing: bool = False) -> None:
+        super().__init__()
+        self._finalizing = finalizing
+
     def compose(self) -> ComposeResult:
         dialog = Widget(id="dialog", classes="cancel-run")
-        dialog.border_title = "Cancel flow"
+        dialog.border_title = "Stop final summary" if self._finalizing else "Cancel flow"
         with dialog:
-            yield Static(
-                "The active run will stop. Files already changed will not be reverted.\n"
-                "Completed phases may be available when you resume the flow."
-            )
+            if self._finalizing:
+                yield Static(
+                    "Phase execution is complete. Stop only the AI summary and finish with the deterministic result?"
+                )
+            else:
+                yield Static(
+                    "The active run will stop. Files already changed will not be reverted.\n"
+                    "Completed phases may be available when you resume the flow."
+                )
             with Horizontal(classes="modal-actions"):
-                yield Button("Keep running", id="btn-keep-running", variant="primary")
-                yield Button("Cancel flow", id="btn-cancel-flow", variant="error")
+                yield Button(
+                    "Keep summarizing" if self._finalizing else "Keep running",
+                    id="btn-keep-running",
+                    variant="primary",
+                )
+                yield Button(
+                    "Stop summary" if self._finalizing else "Cancel flow",
+                    id="btn-cancel-flow",
+                    variant="error",
+                )
 
     def action_keep_running(self) -> None:
         """Dismiss the confirmation and continue the flow."""

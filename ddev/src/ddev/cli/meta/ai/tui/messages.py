@@ -47,7 +47,15 @@ class RunErrored(Message):
 
 
 class RunFinished(Message):
-    """Fired after a non-cancelled run has a deterministic outcome."""
+    """Fired after final summary generation has settled."""
+
+    def __init__(self, outcome: RunOutcome) -> None:
+        super().__init__()
+        self.outcome = outcome
+
+
+class RunFinalizing(Message):
+    """Fired after the deterministic outcome is durable and summary generation begins."""
 
     def __init__(self, outcome: RunOutcome) -> None:
         super().__init__()

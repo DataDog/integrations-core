@@ -29,8 +29,11 @@ from ddev.ai.runtime.outcome import (
     RunOutcomeBuildError,
     RunOutcomePersistenceError,
     RunOutcomeStore,
+    RunSummaryMetadata,
+    RunSummaryStatus,
     RunVerdict,
 )
+from ddev.ai.runtime.summary import RunSummaryAttempt
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, HookName, OrchestratorHookError
 
@@ -670,3 +673,124 @@ async def test_resume_closure_independent_of_flow_declaration_order(tmp_path, ma
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
     assert {p.name for p in processors} == {"c"}  # a and b skipped, c is the frontier
     assert processors[0]._is_resume_frontier is True
+
+
+async def test_finalization_persists_generating_before_awaiting_summary(core_dir, make_orchestrator, tmp_path):
+    events: list[str] = []
+    callback_set = CallbackSet()
+    checkpoint_path = tmp_path / "finalization-checkpoints.yaml"
+
+    @callback_set.on_run_finalizing
+    async def on_run_finalizing(outcome: RunOutcome) -> None:
+        persisted = RunOutcomeStore(tmp_path / "run.yaml").read()
+        assert outcome.summary.status is RunSummaryStatus.GENERATING
+        assert persisted.summary.status is RunSummaryStatus.GENERATING
+        events.append("finalizing")
+
+    @callback_set.on_run_finished
+    async def on_run_finished(outcome: RunOutcome) -> None:
+        events.append("finished")
+
+    class FakeSummarizer:
+        async def summarize(self, outcome: RunOutcome) -> RunSummaryAttempt:
+            events.append("summarize")
+            return RunSummaryAttempt(
+                metadata=RunSummaryMetadata(status=RunSummaryStatus.SUCCEEDED, markdown_path="summary.md")
+            )
+
+    orchestrator, _, _ = make_orchestrator(
+        core_dir,
+        checkpoint_path=checkpoint_path,
+        callbacks=Callbacks([callback_set]),
+    )
+    orchestrator._resources = MagicMock()
+    orchestrator._started_at = datetime.now(UTC)
+    orchestrator._build_run_summarizer = lambda: FakeSummarizer()
+
+    await orchestrator._record_outcome(None)
+
+    assert events == ["finalizing", "summarize", "finished"]
+    assert orchestrator.outcome is not None
+    assert orchestrator.outcome.summary.status is RunSummaryStatus.SUCCEEDED
+
+
+async def test_summary_only_cancellation_finishes_with_deterministic_outcome(core_dir, make_orchestrator):
+    started = asyncio.Event()
+    finished: list[RunOutcome] = []
+    callback_set = CallbackSet()
+
+    @callback_set.on_run_finished
+    async def on_run_finished(outcome: RunOutcome) -> None:
+        finished.append(outcome)
+
+    class WaitingSummarizer:
+        async def summarize(self, outcome: RunOutcome) -> RunSummaryAttempt:
+            started.set()
+            await asyncio.Event().wait()
+            raise AssertionError("unreachable")
+
+    orchestrator, _, _ = make_orchestrator(core_dir, callbacks=Callbacks([callback_set]))
+    orchestrator._resources = MagicMock()
+    orchestrator._started_at = datetime.now(UTC)
+    orchestrator._build_run_summarizer = lambda: WaitingSummarizer()
+
+    finalization = asyncio.create_task(orchestrator._record_outcome(None))
+    await started.wait()
+    orchestrator.request_summary_cancellation()
+    await finalization
+
+    assert orchestrator.outcome is not None
+    assert orchestrator.outcome.summary.status is RunSummaryStatus.UNAVAILABLE
+    assert "stopped by the user" in (orchestrator.outcome.summary.error or "")
+    assert finished == [orchestrator.outcome]
+
+
+async def test_orchestrator_task_cancellation_during_summary_propagates(core_dir, make_orchestrator):
+    started = asyncio.Event()
+    callback_set = CallbackSet()
+    finished: list[RunOutcome] = []
+
+    @callback_set.on_run_finished
+    async def on_run_finished(outcome: RunOutcome) -> None:
+        finished.append(outcome)
+
+    class WaitingSummarizer:
+        async def summarize(self, outcome: RunOutcome) -> RunSummaryAttempt:
+            started.set()
+            await asyncio.Event().wait()
+            raise AssertionError("unreachable")
+
+    orchestrator, _, _ = make_orchestrator(core_dir, callbacks=Callbacks([callback_set]))
+    orchestrator._resources = MagicMock()
+    orchestrator._started_at = datetime.now(UTC)
+    orchestrator._build_run_summarizer = lambda: WaitingSummarizer()
+
+    finalization = asyncio.create_task(orchestrator._record_outcome(None))
+    await started.wait()
+    finalization.cancel()
+
+    with pytest.raises(asyncio.CancelledError):
+        await finalization
+    persisted = RunOutcomeStore(orchestrator._checkpoint_manager.outcome_path).read()
+    assert persisted.summary.status is RunSummaryStatus.UNAVAILABLE
+    assert "interrupted" in (persisted.summary.error or "")
+    assert orchestrator.outcome == persisted
+    assert finished == []
+
+
+async def test_summary_cancellation_requested_before_child_creation_is_honored(core_dir, make_orchestrator):
+    class WaitingSummarizer:
+        async def summarize(self, outcome: RunOutcome) -> RunSummaryAttempt:
+            await asyncio.Event().wait()
+            raise AssertionError("unreachable")
+
+    orchestrator, _, _ = make_orchestrator(core_dir)
+    orchestrator._resources = MagicMock()
+    orchestrator._build_run_summarizer = lambda: WaitingSummarizer()
+    orchestrator.request_summary_cancellation()
+    outcome = RunOutcome.model_construct(flow_name="demo")
+
+    attempt = await orchestrator._summarize_outcome(outcome, datetime.now(UTC))
+
+    assert attempt.metadata.status is RunSummaryStatus.UNAVAILABLE
+    assert "stopped by the user" in (attempt.metadata.error or "")

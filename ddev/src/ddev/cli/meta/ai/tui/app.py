@@ -36,6 +36,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseFinished,
     PhaseStarted,
     RunErrored,
+    RunFinalizing,
     RunFinished,
     RunOutcomeErrored,
 )
@@ -61,6 +62,8 @@ class OrchestratorLike(Protocol):
     def outcome_recording_error(self) -> RunOutcomeError | None: ...
 
     async def run_async(self) -> None: ...
+
+    def request_summary_cancellation(self) -> None: ...
 
 
 class TogoApp(App):
@@ -172,6 +175,9 @@ class TogoApp(App):
         self._record(msg)
 
     async def on_run_finished(self, msg: RunFinished) -> None:
+        self._record(msg)
+
+    async def on_run_finalizing(self, msg: RunFinalizing) -> None:
         self._record(msg)
 
     async def on_run_outcome_errored(self, msg: RunOutcomeErrored) -> None:

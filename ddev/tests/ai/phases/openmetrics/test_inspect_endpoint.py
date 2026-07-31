@@ -653,8 +653,12 @@ async def test_memory_text_includes_jsonl_path(flow_dir, message_queue, monkeypa
 async def test_jsonl_sidecar_atomic_on_os_replace_failure(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
 
+    orig_replace = inspect_endpoint_module.os.replace
+
     def boom(_src, _dst):
-        raise OSError("simulated atomic replace failure")
+        if str(_dst).endswith(".jsonl"):
+            raise OSError("simulated atomic replace failure")
+        return orig_replace(_src, _dst)
 
     monkeypatch.setattr(inspect_endpoint_module.os, "replace", boom)
 

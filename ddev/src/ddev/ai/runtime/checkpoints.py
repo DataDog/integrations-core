@@ -12,6 +12,7 @@ import yaml
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
 from ddev.ai.config.errors import ConfigError
+from ddev.ai.runtime.helpers import atomic_write_text
 
 if TYPE_CHECKING:
     from ddev.ai.config.models import ResolvedFlow
@@ -81,6 +82,27 @@ PhaseCheckpoint = Annotated[
 # TypeAdapter provides model_validate() for annotated union types that aren't BaseModel subclasses.
 CheckpointAdapter: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)
 
+PHASE_MEMORY_PROMPT = """Write a detailed Markdown handoff for this phase using exactly these sections:
+
+## What the agent was asked for
+State the phase's assignment, expected outputs, and boundaries.
+
+## What information it had from before
+Record the relevant inputs, prior-phase memory, existing artifacts, and repository context available to you.
+
+## Decisions it took
+Explain the important technical or scope decisions and why they were made.
+
+## What it did
+Describe the work performed, results produced, validation completed, and any unfinished or uncertain work.
+
+## Files it edited, created, or worked in
+List every important file or directory inspected, edited, or created, and describe its role.
+Explicitly say when no files were involved.
+
+Be concrete enough that a later agent can understand the phase without access to this conversation.
+Do not claim success for work that was not completed."""
+
 
 class CheckpointManager:
     """Manages checkpoints.yaml and per-phase memory files for the full pipeline."""
@@ -104,12 +126,19 @@ class CheckpointManager:
         return self.run_dir / "run.yaml"
 
     @property
+    def checkpoints_path(self) -> Path:
+        """Path to the durable phase checkpoint record."""
+        return self._path
+
+    @property
+    def summary_markdown_path(self) -> Path:
+        """Path to the current run's generated Markdown narrative."""
+        return self.run_dir / "summary.md"
+
+    @property
     def agent_log_root(self) -> Path:
         """Directory under which per-agent logs are persisted."""
         return self.run_dir
-
-    def _ensure_dir(self) -> None:
-        self.run_dir.mkdir(parents=True, exist_ok=True)
 
     def read(self) -> dict[str, PhaseCheckpoint]:
         """Return validated checkpoints keyed by phase_id.
@@ -119,8 +148,10 @@ class CheckpointManager:
             return {}
         try:
             raw = yaml.safe_load(self._path.read_text(encoding="utf-8")) or {}
-        except (OSError, yaml.YAMLError) as e:
+        except (OSError, UnicodeError, yaml.YAMLError) as e:
             raise CheckpointReadError(f"Failed to load checkpoints from {self._path}: {e}") from e
+        if not isinstance(raw, dict):
+            raise CheckpointReadError(f"Checkpoints in {self._path} must be a mapping")
 
         result: dict[str, PhaseCheckpoint] = {}
         for phase_id, data in raw.items():
@@ -135,8 +166,10 @@ class CheckpointManager:
         Raises CheckpointReadError if the existing file is corrupted."""
         all_checkpoints = {pid: cp.model_dump(mode="json") for pid, cp in self.read().items()}
         all_checkpoints[phase_id] = data.model_dump(mode="json")
-        self._ensure_dir()
-        self._path.write_text(yaml.dump(all_checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
+        atomic_write_text(
+            self._path,
+            yaml.dump(all_checkpoints, default_flow_style=False, sort_keys=False),
+        )
 
     def successful_phases(self) -> set[str]:
         """Phase ids whose last recorded checkpoint reached 'success'."""
@@ -144,8 +177,17 @@ class CheckpointManager:
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""
-        base_prompt = "Write a brief summary of what you accomplished in this phase."
-        return f"{user_additions}\n\n{base_prompt}" if user_additions else base_prompt
+        return f"{user_additions}\n\n{PHASE_MEMORY_PROMPT}" if user_additions else PHASE_MEMORY_PROMPT
+
+    def resolve_run_artifact(self, relative_path: str) -> Path:
+        """Resolve a persisted relative artifact path without allowing run-directory escape."""
+        path = Path(relative_path)
+        if path.is_absolute():
+            raise ValueError("Run artifact paths must be relative")
+        resolved = (self.run_dir / path).resolve()
+        if not resolved.is_relative_to(self.run_dir.resolve()):
+            raise ValueError(f"Run artifact path escapes the run directory: {relative_path!r}")
+        return resolved
 
     @property
     def memory_dir(self) -> Path:
@@ -158,8 +200,7 @@ class CheckpointManager:
 
     def write_memory(self, phase_id: str, text: str) -> None:
         """Write agent-authored text to this phase's memory file."""
-        self._ensure_dir()
-        self.memory_path(phase_id).write_text(text, encoding="utf-8")
+        atomic_write_text(self.memory_path(phase_id), text)
 
     def memory_content(self, phase_id: str) -> str:
         """Return the contents of a phase's memory file, or a NOT FOUND placeholder."""

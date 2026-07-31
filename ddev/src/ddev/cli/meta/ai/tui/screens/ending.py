@@ -6,15 +6,17 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from pathlib import Path
 
 from rich.table import Table
 from rich.text import Text
 from textual.binding import Binding
 from textual.containers import VerticalScroll
 from textual.widget import Widget
-from textual.widgets import Static
+from textual.widgets import Markdown, Static
 
-from ddev.ai.runtime.outcome import PhaseReport, PhaseReportStatus, RunOutcome, RunVerdict
+from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.outcome import PhaseReport, PhaseReportStatus, RunOutcome, RunSummaryStatus, RunVerdict
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.formatting import compact_error_detail
 
@@ -43,11 +45,13 @@ class EndingScreen(TogoScreen):
     def compose_body(self) -> Iterator[Widget]:
         error = Static(self._error_text(), id="ending-error", classes="panel")
         error.display = self.outcome.verdict is RunVerdict.FAILED
+        summary = self._summary_widget()
         yield VerticalScroll(
             Static(self._verdict_text(), id="ending-verdict", classes=f"verdict-{self.outcome.verdict.value}"),
             Static(self._stats_text(), id="ending-stats"),
             Static(self._phase_table(), id="ending-phases", classes="panel"),
             error,
+            summary,
             id="ending-content",
         )
 
@@ -110,6 +114,19 @@ class EndingScreen(TogoScreen):
             else ""
         )
         return Text(f"{location}{error_type}: {detail}{hint}")
+
+    def _summary_widget(self) -> Widget:
+        metadata = self.outcome.summary
+        if metadata.status is not RunSummaryStatus.SUCCEEDED or metadata.markdown_path is None:
+            detail = metadata.error or "No generated narrative is available for this run."
+            return Static(f"AI summary unavailable\n\n{detail}", id="ending-summary", classes="panel")
+        try:
+            manager = CheckpointManager(Path(self.outcome.run_dir) / "checkpoints.yaml")
+            path = manager.resolve_run_artifact(metadata.markdown_path)
+            markdown = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError, ValueError) as error:
+            return Static(f"AI summary unavailable\n\n{error}", id="ending-summary", classes="panel")
+        return Markdown(markdown, id="ending-summary", classes="panel")
 
 
 def _format_duration(seconds: float | None) -> str:

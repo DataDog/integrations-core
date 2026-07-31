@@ -31,6 +31,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseFinished,
     PhaseStarted,
     RunErrored,
+    RunFinalizing,
     RunFinished,
 )
 
@@ -80,6 +81,7 @@ class StubOrchestrator:
         await self.cb_set.fire_phase_finish("phase1")
         await self.cb_set.fire_phase_error("phase1", ValueError("phase boom"))
         await self.cb_set.fire_run_error()
+        await self.cb_set.fire_run_finalizing(RunOutcome.model_construct(flow_name="demo"))
         await self.cb_set.fire_run_finished(RunOutcome.model_construct(flow_name="demo"))
         await self.cb_set.fire_agent_start(SCOPE, "sys_prompt", ["bash", "python"])
         await self.cb_set.fire_agent_response(SCOPE, _make_response(), 1)
@@ -166,6 +168,12 @@ async def test_run_finished_payload(received_from_stub):
     assert msgs[0].outcome.flow_name == "demo"
 
 
+async def test_run_finalizing_payload(received_from_stub):
+    msgs = [m for m in received_from_stub if isinstance(m, RunFinalizing)]
+    assert len(msgs) == 1
+    assert msgs[0].outcome.flow_name == "demo"
+
+
 async def test_agent_started_payload(received_from_stub):
     msgs = [m for m in received_from_stub if isinstance(m, AgentStarted)]
     assert len(msgs) == 1
@@ -240,7 +248,7 @@ async def test_after_goal_check_payload(received_from_stub):
     assert msgs[0].reason == "looks good"
 
 
-async def test_all_15_messages_delivered(make_togo_app):
+async def test_all_16_messages_delivered(make_togo_app):
     """Every bridge event type delivers exactly one message to the sink."""
     app = make_togo_app([])
     async with app.run_test() as pilot:
@@ -249,7 +257,7 @@ async def test_all_15_messages_delivered(make_togo_app):
         app.run_flow(stub)
         await pilot.pause(0.3)
 
-    assert len(app.received) == 15
+    assert len(app.received) == 16
 
 
 # ---------------------------------------------------------------------------
