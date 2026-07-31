@@ -32,25 +32,18 @@ KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
 MANAGER_CONTAINER = 'manager'
 KIND_SUBNETS_ENV = 'KUEUE_KIND_SUBNETS'
 SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in range(255, -1, -1)]
-FALLBACK_SUBNETS = ('198.18.0.0/16', '198.19.0.0/16')
 
 
 def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
     """Parse route destinations from `ip route` or `netstat -rn` output into networks."""
     networks = []
-    skip = {'default', 'destination', 'internet:', 'routing'}
     for line in output.splitlines():
         parts = line.split()
         if not parts:
             continue
-        dest = parts[0].split('%')[0]
-        if dest.lower() in skip:
-            continue
-        prefix = ''
-        if '/' in dest:
-            dest, prefix = dest.split('/', 1)
+        dest, _, prefix = parts[0].split('%')[0].partition('/')
         octets = dest.split('.')
-        if not (1 <= len(octets) <= 4) or not all(octet.isdigit() for octet in octets):
+        if len(octets) > 4 or not all(octet.isdigit() for octet in octets):
             continue
         prefix = prefix or str(8 * len(octets))
         octets += ['0'] * (4 - len(octets))
@@ -64,9 +57,7 @@ def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
 def host_routed_networks() -> list[ipaddress.IPv4Network]:
     """Return the IPv4 networks in the host routing table, raising if it could not be read.
 
-    Raising matters because an empty table would make every candidate look free. `netstat` is only a
-    fallback for hosts without iproute2; it is absent from the GitHub runner image, so on CI a failure of
-    `ip` leaves the table unreadable rather than merely slower to read.
+    Raising matters because an empty table would make every candidate look free.
     """
     for command in (['ip', '-4', 'route', 'show'], ['netstat', '-rn', '-f', 'inet']):
         try:
@@ -83,34 +74,20 @@ def host_routed_networks() -> list[ipaddress.IPv4Network]:
     )
 
 
-def is_free(candidate: str, routed: list[ipaddress.IPv4Network]) -> bool:
-    network = ipaddress.ip_network(candidate)
-    return not any(network.overlaps(route) for route in routed)
-
-
-def choose_free_subnets(preferred: tuple[str, str]) -> tuple[str, str]:
-    """Return the service and pod subnets to use, keeping `preferred` whenever both are free.
-
-    Preferring the committed pair keeps the subnets identical on every host that has no collision, so CI
-    always runs the same networks and a failure there reproduces locally. The sweep is a fallback for
-    hosts, typically laptops on a VPN, where the committed pair is actually routed.
-    """
+def free_subnets() -> tuple[str, str]:
+    """Return the service and pod subnets to use, picking /16s that no host route claims."""
     routed = host_routed_networks()
-    if all(is_free(subnet, routed) for subnet in preferred):
-        return preferred
-
-    free = []
-    for candidate in (*SUBNET_CANDIDATES, *FALLBACK_SUBNETS):
-        if is_free(candidate, routed) and candidate not in free:
-            free.append(candidate)
-            if len(free) == 2:
-                return free[0], free[1]
-
-    raise RuntimeError(
-        f'No two free /16 subnets among {len(SUBNET_CANDIDATES)} candidates and {FALLBACK_SUBNETS}. '
-        f'Every block collides with a host route. Disconnect the VPN, or pin the subnets with '
-        f'{KIND_SUBNETS_ENV}=<serviceSubnet>,<podSubnet>.'
-    )
+    free = [
+        candidate
+        for candidate in SUBNET_CANDIDATES
+        if not any(ipaddress.ip_network(candidate).overlaps(route) for route in routed)
+    ]
+    if len(free) < 2:
+        raise RuntimeError(
+            f'Fewer than two of the {len(SUBNET_CANDIDATES)} candidate /16s are free of a host route. '
+            f'Disconnect the VPN, or pin the subnets with {KIND_SUBNETS_ENV}=<serviceSubnet>,<podSubnet>.'
+        )
+    return free[0], free[1]
 
 
 def pinned_subnets() -> tuple[str, str] | None:
@@ -129,22 +106,15 @@ def pinned_subnets() -> tuple[str, str] | None:
 
 @contextmanager
 def build_kind_config() -> Iterator[str]:
-    """Yield a kind config whose subnets are known not to collide with a host route or a Docker network."""
-    base_config = manifest_path('kind-config.yaml')
-    with open(base_config) as f:
+    """Yield a kind config whose subnets are known not to collide with a host route."""
+    with open(manifest_path('kind-config.yaml')) as f:
         config = yaml.safe_load(f)
 
+    service_subnet, pod_subnet = pinned_subnets() or free_subnets()
     networking = config.setdefault('networking', {})
-    committed = (networking.get('serviceSubnet'), networking.get('podSubnet'))
-    subnets = pinned_subnets()
-    if subnets is None:
-        subnets = choose_free_subnets(committed)
-    if subnets == committed:
-        yield base_config
-        return
-
-    networking['serviceSubnet'], networking['podSubnet'] = subnets
-    print(f'Committed kind subnets {committed[0]} / {committed[1]} collide; using {subnets[0]} / {subnets[1]}')
+    networking['serviceSubnet'] = service_subnet
+    networking['podSubnet'] = pod_subnet
+    print(f'Using kind subnets {service_subnet} (service) and {pod_subnet} (pod)')
 
     fd, path = tempfile.mkstemp(prefix='kueue-kind-', suffix='.yaml')
     try:
