@@ -21,7 +21,6 @@ from .common import (
     INACTIVE_CLUSTER_QUEUE_TAGS,
     INSTANCE_STATE_KEY,
     LOCAL_QUEUE_TAGS,
-    assert_series_with_tags,
     live_metadata_metrics,
 )
 from .kube import delete_jobs, retry_apply, wait_for_job_workload_condition
@@ -31,7 +30,7 @@ EVENT_POLL_ATTEMPTS = 15
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_e2e(dd_agent_check, dd_get_state):
     aggregator = dd_agent_check(rate=True)
 
     metadata_metrics, config_gated = live_metadata_metrics()
@@ -46,9 +45,12 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric, at_least=1)
         aggregator.assert_metric_has_tags(metric, tags)
 
-    assert_series_with_tags(aggregator, 'kueue.cluster_queue.status', [*CLUSTER_QUEUE_TAGS, 'status:active'], value=1)
-    assert_series_with_tags(aggregator, 'kueue.local_queue.status', [*LOCAL_QUEUE_TAGS, 'active:True'], value=1)
-    assert_series_with_tags(aggregator, 'kueue.cluster_queue.status', INACTIVE_CLUSTER_QUEUE_TAGS, value=1)
+    endpoint_tag = f'endpoint:{live_instance(dd_get_state)["openmetrics_endpoint"]}'
+    aggregator.assert_metric(
+        'kueue.cluster_queue.status', value=1, tags=[endpoint_tag, *CLUSTER_QUEUE_TAGS, 'status:active']
+    )
+    aggregator.assert_metric('kueue.local_queue.status', value=1, tags=[endpoint_tag, *LOCAL_QUEUE_TAGS, 'active:True'])
+    aggregator.assert_metric('kueue.cluster_queue.status', value=1, tags=[endpoint_tag, *INACTIVE_CLUSTER_QUEUE_TAGS])
 
 
 @pytest.mark.e2e

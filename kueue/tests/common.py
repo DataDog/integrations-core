@@ -13,20 +13,6 @@ def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
 
 
-def assert_series_with_tags(aggregator, metric_name, tags, value=None):
-    """Assert a single series of a metric carries all of the tags at once, optionally with a value."""
-    expected = set(tags)
-    submitted = aggregator.metrics(metric_name)
-    for series in submitted:
-        if expected <= set(series.tags) and (value is None or series.value == value):
-            return
-    raise AssertionError(
-        f'No {metric_name} series carries all of {sorted(expected)}'
-        + (f' with value {value}' if value is not None else '')
-        + f'. Submitted tag sets: {[sorted(series.tags) for series in submitted]}'
-    )
-
-
 CHECK_NAME = 'kueue'
 # Key under which `dd_environment` publishes the live instance config for the e2e tests to pick up.
 INSTANCE_STATE_KEY = 'kueue_instance'
@@ -133,4 +119,4 @@ def live_metadata_metrics():
     return {name: metadata for name, metadata in all_metadata.items() if name not in config_gated}, config_gated
 
 
-INACTIVE_CLUSTER_QUEUE_TAGS = ['kueue_cluster_queue:invalid-queue', 'status:pending']
+INACTIVE_CLUSTER_QUEUE_TAGS = ['kueue_cluster_queue:invalid-queue', 'replica_role:leader', 'status:pending']
