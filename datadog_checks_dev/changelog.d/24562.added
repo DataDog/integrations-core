@@ -1,1 +1,0 @@
-Allow discovery candidate fields to declare literal boolean, integer, and float values in addition to template strings.
