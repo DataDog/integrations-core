@@ -54,7 +54,6 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
 
     check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
-    # Run twice so OpenMetrics monotonic counters flush their `.count` submission (skipped on first run).
     dd_run_check(check)
     dd_run_check(check)
 
@@ -88,8 +87,6 @@ def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_respons
     aggregator.assert_metric_has_tag('kueue.pending_workloads', 'cluster_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.gpu', 'cluster_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.gpu', 'resource_flavor_tag:value')
-    # Local-queue series carry only name/namespace, never cluster_queue, so they pick up the local-queue
-    # tagger tags but not the cluster-queue ones.
     aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'local_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.local_queue.resource_reservation.cpu', 'local_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.local_queue.resource_usage.cpu', 'local_queue_tag:value')
@@ -363,8 +360,6 @@ def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance
         'kueue_preemption_reason:InClusterQueue',
         'kueue_preempted_by:preempting-workload-uid',
     ]
-    # The message mirrors real Kueue output, including the JobUID and preemptor/preemptee paths, so
-    # `kueue_preempted_by` above is a regression test for the UID capture stopping at the first separator.
     aggregator.assert_event(
         'Workload team-a/training-job evicted. Preempted to accommodate a workload '
         '(UID: preempting-workload-uid, JobUID: preempting-job-uid) due to prioritization in the ClusterQueue; '
@@ -398,8 +393,6 @@ def test_workload_events_flavor_migration_is_not_tagged_as_preemption(
         ['kueue_eviction_reason:FlavorMigration'],
         alert_type='warning',
     )
-    # The migration message carries the UID of the workload being accommodated, not of a preemptor, so
-    # neither preemption tag may be derived from it.
     evicted_event = next(event for event in aggregator.events if 'evicted.' in event['msg_text'])
     preemption_tags = [
         tag for tag in evicted_event['tags'] if tag.startswith(('kueue_preempted_by:', 'kueue_preemption_reason:'))
