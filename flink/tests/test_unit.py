@@ -41,16 +41,18 @@ def test_custom_metric_not_collected_by_default(dd_run_check, aggregator, check,
 
 
 def test_custom_metric_collected_via_extra_metrics(dd_run_check, aggregator, instance, mock_metrics):
-    """`extra_metrics` with an explicit rename collects the custom metric under a clean DD name."""
+    """`extra_metrics` with an explicit rename collects the custom metric under a clean DD name.
+    No `type:` override is given, so it's submitted as a gauge -- Flink's Prometheus reporter
+    always exposes custom metrics as `# TYPE ... gauge`, regardless of their real Flink type."""
     instance = copy.deepcopy(instance)
     instance["extra_metrics"] = [{"flink_taskmanager_job_task_operator_messageLatency": "operator.messageLatency"}]
     check = FlinkCheck('flink', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric(
-        "flink.operator.messageLatency.count",
+        "flink.operator.messageLatency",
         value=7.0,
-        metric_type=aggregator.MONOTONIC_COUNT,
+        metric_type=aggregator.GAUGE,
         tags=OPERATOR_TAGS,
     )
 
@@ -64,9 +66,9 @@ def test_custom_metric_collected_via_extra_metrics_regex(dd_run_check, aggregato
     dd_run_check(check)
 
     aggregator.assert_metric(
-        "flink.flink_taskmanager_job_task_operator_messageLatency.count",
+        "flink.flink_taskmanager_job_task_operator_messageLatency",
         value=7.0,
-        metric_type=aggregator.MONOTONIC_COUNT,
+        metric_type=aggregator.GAUGE,
         tags=OPERATOR_TAGS,
     )
 
