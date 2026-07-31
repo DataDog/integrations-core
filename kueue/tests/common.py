@@ -14,7 +14,6 @@ def get_fixture_path(filename):
 
 
 CHECK_NAME = 'kueue'
-# Key under which `dd_environment` publishes the live instance config for the e2e tests to pick up.
 INSTANCE_STATE_KEY = 'kueue_instance'
 
 MOCKED_INSTANCE = {
@@ -22,9 +21,7 @@ MOCKED_INSTANCE = {
     'tags': ['test:tag'],
 }
 
-# Tags defined in the YAML files for the e2e tests. Grouped by the label set Kueue actually attaches to
-# each family, so an assertion never demands a tag the series cannot carry: the quota and usage families
-# are cohort- and flavor-aware, while `resource_pending` and the workload counts are neither.
+# Tags defined in the YAML files for the e2e tests
 CLUSTER_QUEUE_TAGS = ['kueue_cluster_queue:cluster-queue', 'replica_role:leader']
 CLUSTER_QUEUE_COHORT_TAGS = [*CLUSTER_QUEUE_TAGS, 'cohort:shared-cohort']
 CLUSTER_QUEUE_FLAVOR_TAGS = [*CLUSTER_QUEUE_COHORT_TAGS, 'kueue_resource_flavor:default-flavor']
@@ -58,14 +55,12 @@ EXPECTED_METRIC_TAGS = {
     'kueue.local_queue.resource_reservation.memory': LOCAL_QUEUE_FLAVOR_TAGS,
     'kueue.local_queue.resource_usage.cpu': LOCAL_QUEUE_FLAVOR_TAGS,
     'kueue.local_queue.resource_usage.memory': LOCAL_QUEUE_FLAVOR_TAGS,
-    # Cohort and fair-sharing metrics, emitted because `queue.yaml` declares an explicit cohort.
     'kueue.cluster_queue.weighted_share': CLUSTER_QUEUE_COHORT_TAGS,
     'kueue.cohort.info': ['cohort:shared-cohort', 'root_cohort:shared-cohort'],
     'kueue.cohort.weighted_share': COHORT_TAGS,
     'kueue.cohort_subtree.quota.cpu': COHORT_FLAVOR_TAGS,
     'kueue.cohort_subtree.resource_reservations.cpu': COHORT_FLAVOR_TAGS,
     'kueue.cohort_subtree.admitted.active_workloads': COHORT_TAGS,
-    # GPU quota comes from the `nvidia.com/gpu` covered resource, and `other` from `example.com/foo`.
     'kueue.cluster_queue.nominal_quota.gpu': CLUSTER_QUEUE_FLAVOR_TAGS,
     'kueue.cluster_queue.resource_usage.gpu': CLUSTER_QUEUE_FLAVOR_TAGS,
     'kueue.cluster_queue.resource_usage.other': CLUSTER_QUEUE_FLAVOR_TAGS,
@@ -84,11 +79,7 @@ EXPECTED_METRIC_TAGS = {
 UNIT_E2E_METRICS = tuple(EXPECTED_METRIC_TAGS)
 
 # Extra Datadog metric names covered by tests/fixtures/metrics.txt but not required on the e2e cluster.
-FIXTURE_ONLY_METRICS = (
-    # Nothing pends on GPU quota, so this series stays absent live. Making it deterministic would need a
-    # second GPU job requesting more than the flavor's single GPU.
-    'kueue.cluster_queue.resource_pending.gpu',
-)
+FIXTURE_ONLY_METRICS = ('kueue.cluster_queue.resource_pending.gpu',)
 
 # All metrics for unit test_check presence + instance tag assertions.
 UNIT_METRICS = (*UNIT_E2E_METRICS, *FIXTURE_ONLY_METRICS)
