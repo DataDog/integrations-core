@@ -400,6 +400,10 @@ jobs:
       statuses: write
       contents: read
     steps:
+    # Nothing to re-derive: a pull request cannot enter the queue until its required
+    # checks pass, and master's queue is ALLGREEN so that holds for every entry in a
+    # group. The status is written only because the queue waits on a required context
+    # reporting for the group, and the check job above is its sole writer on the head.
     - name: Set dependency-wheel-promotion status to success
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       with:
