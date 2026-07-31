@@ -1,7 +1,5 @@
 # CHANGELOG - kubelet
 
-<!-- towncrier release notes start -->
-
 ## 10.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

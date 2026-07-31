@@ -2,6 +2,8 @@
 
 ## Overview
 
+**Note:** Starting with the Agent version that includes this change, the kubelet integration is implemented only as a core check in the Datadog Agent. Only integration assets are maintained in this repository.
+
 This integration gets container metrics from kubelet
 
 - Visualize and monitor kubelet stats
@@ -79,6 +81,6 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubelet/assets/service_checks.json
 [6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/kubelet/datadog_checks/kubelet/data/conf.yaml.default
+[7]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/kubelet.d/conf.yaml.default
 [8]: https://docs.datadoghq.com/agent/guide/autodiscovery-management/?tab=containerizedagent
 [9]: https://github.com/DataDog/integrations-core/blob/master/kubelet/metadata.csv

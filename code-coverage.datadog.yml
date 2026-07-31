@@ -406,9 +406,6 @@ services:
 - id: kubeflow
   paths:
   - kubeflow/datadog_checks/kubeflow/
-- id: kubelet
-  paths:
-  - kubelet/datadog_checks/kubelet/
 - id: kubernetes_cluster_autoscaler
   paths:
   - kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler/
