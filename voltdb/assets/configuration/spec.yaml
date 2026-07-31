@@ -13,11 +13,11 @@ files:
         options:
           - name: host
             description: |
-              Host of the VoltDB cluster member to connect to via the native binary
-              protocol. Use this (with `port`) for direct connections to a database
-              node. Set `url` instead to talk to the VoltDB Management Center (VMC)
-              over HTTP/JSON. For failover across multiple cluster members, use
-              `hosts` instead.
+              Host of the VoltDB cluster member to connect to using the native binary
+              protocol. Use this option (with `port`) for direct connections to a
+              database node. To connect to the VoltDB Management Center (VMC) over
+              HTTP/JSON instead, leave `host` unset and set `url`. For failover across
+              multiple cluster members, use `hosts` instead of `host`.
             fleet_configurable: true
             display_priority: 5
             value:
@@ -26,7 +26,7 @@ files:
 
           - name: hosts
             description: |
-              List of VoltDB cluster members to try when connecting via the native
+              List of VoltDB cluster members to try when connecting using the native
               binary protocol. Each entry is either `hostname` (uses the global
               `port`) or `hostname:port`. The Agent connects to the first
               reachable entry and silently fails over to subsequent entries if
@@ -69,14 +69,14 @@ files:
               default: 21212
 
           - name: username
-            description: The username to use to authenticate with VoltDB.
+            description: The username to authenticate with VoltDB.
             display_priority: 3
             value:
               type: string
               example: <USERNAME>
 
           - name: password
-            description: The password to use to authenticate with VoltDB.
+            description: The password to authenticate with VoltDB.
             display_priority: 3
             secret: true
             value:

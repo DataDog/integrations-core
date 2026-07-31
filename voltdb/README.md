@@ -30,9 +30,9 @@ No additional installation is needed on your server.
 
 2. Edit the `voltdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your VoltDB performance data. See the [sample voltdb.d/conf.yaml][4] for all available configuration options.
 
-    The integration supports two transports. Pick the one that matches your network topology:
+    The integration supports two transports. Use the one that matches your network topology:
 
-    **Native binary client** - direct connection to a database node on the VoltDB client port (default `21212`), using the [VoltDB Python client][12]. Recommended when the Agent host can reach the database nodes directly:
+    **Native binary client** - direct connection to a database node on the VoltDB client port (default `21212`), using the [VoltDB Python client][12]. Datadog recommends the native binary client transport when the Agent host can reach the database nodes directly:
 
     ```yaml
     init_config:
@@ -56,7 +56,7 @@ No additional installation is needed on your server.
         password: "<PASSWORD>"
     ```
 
-    **HTTP/JSON via the VoltDB Management Center (VMC)** - useful when database nodes aren't directly reachable but the VMC endpoint is, or when you prefer to keep the existing HTTP/JSON wire format. Set `url` to the VMC endpoint:
+    **HTTP/JSON using the VoltDB Management Center (VMC)** - useful when database nodes aren't directly reachable but the VMC endpoint is, or when you prefer to keep the existing HTTP/JSON wire format. Set `url` to the VMC endpoint:
 
     ```yaml
     instances:
@@ -65,15 +65,15 @@ No additional installation is needed on your server.
         password: "<PASSWORD>"
     ```
 
-    The check picks the transport based on which option is set: `url` selects HTTP mode, `host`/`hosts` selects native mode. HTTP mode keeps all the options earlier releases supported (`password_hashed`, `tls_cert`, `tls_ca_cert`, `tls_verify`, `proxy`, `headers`, etc.) - see the [sample config][4] for the full list.
+    The check picks the transport based on which option is set: `url` selects HTTP mode, `host`/`hosts` selects native mode. HTTP mode keeps all options supported by earlier releases (`password_hashed`, `tls_cert`, `tls_ca_cert`, `tls_verify`, `proxy`, `headers`, etc.). See the [sample config][4] for the full list.
 
-    **Backwards compatibility**: existing configurations that point `url` at the legacy HTTP endpoint continue to work without changes. This release adds the native binary transport as an option; it does not remove the HTTP one. The `url`-style config still emits the same metrics and service checks against the same VMC or HTTP-enabled database node it always pointed at.
+    **Backwards compatibility**: existing configurations that point `url` at the legacy HTTP endpoint continue to work without changes. This release adds the native binary transport as an option; it does not remove the HTTP one. The `url`-style config still emits the same metrics and service checks against the same VMC- or HTTP-enabled database node it always pointed to.
 
 3. [Restart the Agent][5].
 
 #### TLS support
 
-If [TLS/SSL][6] is enabled on the VoltDB client port, set `use_ssl: true` and point `ssl_config_file` at a VoltDB SSL properties file that describes how to locate the truststore (and optionally a client keystore for mutual TLS):
+If [TLS/SSL][6] is enabled on the VoltDB client port, set `use_ssl: true` and point `ssl_config_file` to a VoltDB SSL properties file that describes how to locate the truststore (and optionally a client keystore for mutual TLS):
 
 ```yaml
 instances:
@@ -102,7 +102,7 @@ keystore=/etc/voltdb/certs/agent-keystore.jks
 keystorepassword=<KEYSTORE_PASSWORD>
 ```
 
-If you have a PEM CA bundle instead of a Java keystore, you can either point `ssl_config_file` directly at the PEM file (it is treated as the truststore), or reference it explicitly with `cacerts=<PATH>` inside the properties file.
+If you have a PEM CA bundle instead of a Java keystore, you can either point `ssl_config_file` directly at the PEM file, which is treated as the truststore, or reference it explicitly with `cacerts=<PATH>` inside the properties file.
 
 When the Agent runs in a container, make sure the properties file and every path it references are mounted into the container. See the [VoltDB TLS/SSL documentation][6] for details on generating keystores with `keytool` and rotating certificates.
 

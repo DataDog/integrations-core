@@ -59,16 +59,16 @@ instances:
 
   -
     ## @param host - string - optional - default: localhost
-    ## Host of the VoltDB cluster member to connect to via the native binary
-    ## protocol. Use this (with `port`) for direct connections to a database
-    ## node. Set `url` instead to talk to the VoltDB Management Center (VMC)
-    ## over HTTP/JSON. For failover across multiple cluster members, use
-    ## `hosts` instead.
+    ## Host of the VoltDB cluster member to connect to using the native binary
+    ## protocol. Use this option (with `port`) for direct connections to a
+    ## database node. To connect to the VoltDB Management Center (VMC) over
+    ## HTTP/JSON instead, leave `host` unset and set `url`. For failover across
+    ## multiple cluster members, use `hosts` instead of `host`.
     #
     # host: localhost
 
     ## @param hosts - list of strings - optional
-    ## List of VoltDB cluster members to try when connecting via the native
+    ## List of VoltDB cluster members to try when connecting using the native
     ## binary protocol. Each entry is either `hostname` (uses the global
     ## `port`) or `hostname:port`. The Agent connects to the first
     ## reachable entry and silently fails over to subsequent entries if
@@ -98,12 +98,12 @@ instances:
     # port: 21212
 
     ## @param username - string - optional
-    ## The username to use to authenticate with VoltDB.
+    ## The username to authenticate with VoltDB.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## The password to use to authenticate with VoltDB.
+    ## The password to authenticate with VoltDB.
     #
     # password: <PASSWORD>
 
