@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 import logging
+from datetime import UTC, datetime
 from pathlib import Path
 
 from ddev.ai.agent.registry import AgentProviderRegistry
@@ -12,7 +14,15 @@ from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
-from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
+from ddev.ai.runtime.checkpoints import CheckpointManager, PhaseCheckpoint, resolve_resume_state
+from ddev.ai.runtime.outcome import (
+    RunOutcome,
+    RunOutcomeBuildError,
+    RunOutcomeError,
+    RunOutcomePersistenceError,
+    RunOutcomeStore,
+    build_run_outcome,
+)
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
@@ -56,34 +66,117 @@ class PhaseOrchestrator(EventBusOrchestrator):
         )
         self._resolved_flow = resolved_flow
         self._phase_registry = phase_registry
-        self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
         self._provider_registry = provider_registry
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._resume = resume
+        self._checkpoint_manager = CheckpointManager(checkpoint_path)
+        self._outcome_store = RunOutcomeStore(self._checkpoint_manager.outcome_path)
         self._agent_logger: AgentLogger | None = None
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
+        self._started_at: datetime | None = None
+        self._resume_completed: set[str] = set()
+        self._outcome: RunOutcome | None = None
+        self._outcome_recording_error: RunOutcomeError | None = None
 
     @property
     def failed_phase(self) -> str | None:
         return self._failed_phase
 
+    @property
+    def outcome(self) -> RunOutcome | None:
+        """Return the deterministic outcome after the run ends."""
+        return self._outcome
+
+    @property
+    def outcome_recording_error(self) -> RunOutcomeError | None:
+        """Return the error that prevented the outcome from being recorded for a failed run, if any."""
+        return self._outcome_recording_error
+
+    def run(self) -> None:
+        """Run the flow and record its deterministic outcome."""
+        asyncio.run(self._run_with_outcome())
+
+    async def run_async(self) -> None:
+        """Run the flow on the caller's event loop and record its deterministic outcome."""
+        await self._run_with_outcome()
+
+    async def _run_with_outcome(self) -> None:
+        self._started_at = datetime.now(UTC)
+        try:
+            await super().run_async()
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            try:
+                await self._record_outcome(e)
+            except RunOutcomeError as outcome_error:
+                self._logger.exception("Failed to record the outcome for a failed flow")
+                self._outcome_recording_error = outcome_error
+                e.add_note(f"Outcome recording also failed: {outcome_error}")
+            raise
+        else:
+            await self._record_outcome(None)
+        finally:
+            if self._agent_logger is not None:
+                self._agent_logger.close()
+
+    async def _record_outcome(self, exception: BaseException | None) -> None:
+        try:
+            finished_at = datetime.now(UTC)
+            started_at = self._started_at or finished_at
+            checkpoints = self._current_run_checkpoints(started_at)
+            outcome = build_run_outcome(
+                resolved_flow=self._resolved_flow,
+                checkpoints=checkpoints,
+                skipped_on_resume=self._resume_completed,
+                started_at=started_at,
+                finished_at=finished_at,
+                run_dir=self._checkpoint_manager.run_dir,
+                resumed=self._resume,
+                exception=exception,
+                failed_phase=self._failed_phase,
+            )
+        except Exception as e:
+            raise RunOutcomeBuildError(f"Failed to build the flow outcome: {e}") from e
+
+        self._outcome = outcome
+        persistence_error: RunOutcomePersistenceError | None = None
+        persistence_cause: Exception | None = None
+        try:
+            self._outcome_store.write(outcome)
+        except Exception as e:
+            persistence_cause = e
+            persistence_error = RunOutcomePersistenceError(f"Failed to persist the flow outcome: {e}")
+
+        await self._callbacks.fire_run_finished(outcome)
+        if persistence_error is not None:
+            raise persistence_error from persistence_cause
+
+    def _current_run_checkpoints(self, started_at: datetime) -> dict[str, PhaseCheckpoint]:
+        checkpoints = self._checkpoint_manager.read()
+        return {
+            phase_id: checkpoint
+            for phase_id, checkpoint in checkpoints.items()
+            if phase_id in self._resume_completed or _checkpoint_finished_at(checkpoint) >= started_at
+        }
+
     async def on_initialize(self) -> None:
         """Construct phases from the resolved flow and submit the start PhaseTrigger."""
-        checkpoint_manager = CheckpointManager(self._checkpoint_path)
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
 
         completed, frontier = (
-            resolve_resume_state(self._resolved_flow, checkpoint_manager) if self._resume else (set(), set())
+            resolve_resume_state(self._resolved_flow, self._checkpoint_manager) if self._resume else (set(), set())
         )
+        self._resume_completed = completed
         if self._resume:
             self._logger.info(
                 "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
             )
 
-        self._agent_logger = AgentLogger(checkpoint_manager.root)
+        self._agent_logger = AgentLogger(self._checkpoint_manager.agent_log_root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
 
         self._resources = RunResources(
@@ -110,7 +203,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 config=phase_config,
                 deps=dependency_map[entry.phase],
                 resources=self._resources,
-                checkpoint_manager=checkpoint_manager,
+                checkpoint_manager=self._checkpoint_manager,
                 context=context,
             )
             self.register_processor(phase, [PhaseTrigger])
@@ -134,11 +227,22 @@ class PhaseOrchestrator(EventBusOrchestrator):
         raise FatalProcessingError(str(error)) from error.original_exception
 
     async def on_finalize(self, exception: Exception | None) -> None:
-        if self._agent_logger is not None:
-            self._agent_logger.close()
         if exception is not None and self._failed_phase is not None:
             self._logger.error(
                 "Pipeline aborted: phase '%s' failed: %s",
                 self._failed_phase,
                 self._failed_error or "<unknown>",
             )
+
+
+def _checkpoint_finished_at(checkpoint: PhaseCheckpoint) -> datetime:
+    """Return an aware timestamp suitable for filtering checkpoints from older attempts."""
+    try:
+        finished_at = datetime.fromisoformat(checkpoint.finished_at)
+    except ValueError as e:
+        raise ValueError(f"Checkpoint has invalid finished_at timestamp {checkpoint.finished_at!r}") from e
+
+    if finished_at.tzinfo is None:
+        return finished_at.replace(tzinfo=UTC)
+
+    return finished_at

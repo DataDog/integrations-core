@@ -140,6 +140,11 @@ TogoHeader {
     color: $status-done;
 }
 
+#header-right.status-incomplete,
+#header-right.status-outcome_error {
+    color: $warning;
+}
+
 #header-right.status-failed {
     color: $status-failed;
 }
@@ -485,6 +490,11 @@ MarkdownH3 {
     margin: 0 0 1 0;
 }
 
+#execution-error.outcome-warning {
+    border: round $warning;
+    color: $warning;
+}
+
 #pipeline {
     layers: connectors nodes;
     width: 1fr;
@@ -496,6 +506,14 @@ MarkdownH3 {
     background: $surface;
     padding: 1 2;
     overflow: auto auto;
+}
+
+#execution-actions {
+    display: none;
+    width: 100%;
+    height: auto;
+    align-horizontal: right;
+    padding: 0 1 1 1;
 }
 
 #pipeline-connectors {
@@ -530,6 +548,11 @@ MarkdownH3 {
 .phase-node.status-failed {
     border: round $status-failed;
     color: $status-failed;
+}
+
+.phase-node.status-cancelled {
+    border: round $status-cancelled;
+    color: $status-cancelled;
 }
 
 .phase-node:focus {
@@ -570,6 +593,57 @@ MarkdownH3 {
     border: round $status-running;
     padding: 0 1;
     background: $surface;
+}
+
+/* ── Run ending view ──────────────────────────────────────────────────── */
+
+#ending-content {
+    width: 1fr;
+    height: 1fr;
+}
+
+#ending-verdict {
+    height: auto;
+    border: round $border;
+    background: $panel;
+    text-style: bold;
+    padding: 1 2;
+    margin-bottom: 1;
+}
+
+#ending-verdict.verdict-succeeded {
+    border: round $status-done;
+    color: $status-done;
+}
+
+#ending-verdict.verdict-failed {
+    border: round $status-failed;
+    color: $status-failed;
+}
+
+#ending-verdict.verdict-incomplete {
+    border: round $warning;
+    color: $warning;
+}
+
+#ending-stats {
+    height: auto;
+    color: $text-muted;
+    margin: 0 1 1 1;
+}
+
+#ending-phases {
+    height: auto;
+    min-height: 8;
+    margin-bottom: 1;
+}
+
+#ending-error {
+    display: none;
+    height: auto;
+    border: round $error;
+    color: $error;
+    margin-bottom: 1;
 }
 
 /* ── Modal / dialog / badge / prompt ──────────────────────────────────── */

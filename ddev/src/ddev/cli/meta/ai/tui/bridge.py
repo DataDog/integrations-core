@@ -17,6 +17,7 @@ from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolCall
 from ddev.ai.callbacks.callbacks import CallbackSet
 from ddev.ai.react.types import ReActResult
+from ddev.ai.runtime.outcome import RunOutcome
 from ddev.ai.tools.core.types import ToolResult
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
@@ -34,6 +35,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseFinished,
     PhaseStarted,
     RunErrored,
+    RunFinished,
 )
 
 
@@ -76,6 +78,10 @@ def build_app_callback_set(app: BridgeApp) -> CallbackSet:
     @cb.on_run_error
     async def _() -> None:
         _target().post_message(RunErrored())
+
+    @cb.on_run_finished
+    async def _(outcome: RunOutcome) -> None:
+        _target().post_message(RunFinished(outcome))
 
     @cb.on_before_agent_send
     async def _(scope: AgentScope, prompt: str, iteration: int) -> None:

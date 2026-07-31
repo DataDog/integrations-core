@@ -651,7 +651,7 @@ async def test_launch_dismissal_passes_runtime_variables_and_timeout(tmp_path: P
         pilot.app.screen.query_one("#input-max_timeout", Input).value = "120"
         await pilot.click("#btn-launch")
         await pilot.pause()
-        screen: ExecutionScreen = pilot.app.screen  # type: ignore[assignment]
+        screen = next(screen for screen in pilot.app.screen_stack if isinstance(screen, ExecutionScreen))
         assert screen.runtime_variables == {"prd": prd, "max_timeout": "120"}
 
 
@@ -680,8 +680,7 @@ async def test_resume_pushes_execution_screen_with_resume_flag(tmp_path: Path) -
         _provide_prd(pilot.app.screen, tmp_path)
         await pilot.click("#btn-launch")
         await pilot.pause()
-        screen = pilot.app.screen
-        assert isinstance(screen, ExecutionScreen)
+        screen = next(screen for screen in pilot.app.screen_stack if isinstance(screen, ExecutionScreen))
         assert screen.resume is True
 
 
@@ -712,7 +711,6 @@ async def test_resume_with_inputs_reopens_modal_and_passes_converted_values(tmp_
         prd = _provide_prd(pilot.app.screen, tmp_path)
         await pilot.click("#btn-launch")
         await pilot.pause()
-        screen = pilot.app.screen
-        assert isinstance(screen, ExecutionScreen)
+        screen = next(screen for screen in pilot.app.screen_stack if isinstance(screen, ExecutionScreen))
         assert screen.resume is True
         assert screen.runtime_variables == {"token": "fresh-value", "prd": prd}

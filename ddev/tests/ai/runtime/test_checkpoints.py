@@ -25,6 +25,13 @@ def manager(tmp_path: Path) -> CheckpointManager:
     return CheckpointManager(tmp_path / "checkpoints.yaml")
 
 
+def test_run_artifact_locations_are_derived_from_checkpoint_path(manager: CheckpointManager, tmp_path: Path) -> None:
+    # This tests that run artifacts are written where we expect them to be in the rest of this test suite.
+    assert manager.run_dir == tmp_path
+    assert manager.outcome_path == tmp_path / "run.yaml"
+    assert manager.agent_log_root == tmp_path
+
+
 # ---------------------------------------------------------------------------
 # read
 # ---------------------------------------------------------------------------
@@ -95,6 +102,30 @@ def test_write_multiple_phases(manager: CheckpointManager):
     assert isinstance(data["phase2"], FailedCheckpoint)
     assert isinstance(data["phase3"], CancelledCheckpoint)
     assert data["phase3"].reason == "maximum runtime reached"
+
+
+def test_failed_checkpoint_error_type_round_trips(manager: CheckpointManager):
+    manager.write_phase_checkpoint(
+        "phase1",
+        make_failed_checkpoint(error_type="GoalAttemptsExhausted"),
+    )
+
+    checkpoint = manager.read()["phase1"]
+
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.error_type == "GoalAttemptsExhausted"
+
+
+def test_failed_checkpoint_without_error_type_still_parses(manager: CheckpointManager):
+    manager.write_phase_checkpoint("phase1", make_failed_checkpoint())
+    raw = yaml.safe_load(manager._path.read_text())
+    raw["phase1"].pop("error_type")
+    manager._path.write_text(yaml.dump(raw))
+
+    checkpoint = manager.read()["phase1"]
+
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.error_type is None
 
 
 def test_write_overwrites_existing_phase(manager: CheckpointManager):
