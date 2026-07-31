@@ -25,8 +25,8 @@ def test_openmetrics_endpoint_candidates_generated_for_all_ports() -> None:
     assert openmetrics_ports == {8001, 9901, 8080}
 
 
-def test_openmetrics_endpoint_disables_server_info_on_non_admin_port() -> None:
-    # A non-admin-port candidate must not default to collecting server info from it.
+def test_openmetrics_endpoint_disables_server_info_for_all_candidates() -> None:
+    # Port hints never confirm admin status, so no candidate should default to collecting server info.
     service = Service(
         id='envoy',
         host='127.0.0.1',
@@ -40,8 +40,8 @@ def test_openmetrics_endpoint_disables_server_info_on_non_admin_port() -> None:
     }
 
     assert instances_by_port[8080]['collect_server_info'] is False
-    assert instances_by_port[8001]['collect_server_info'] is True
-    assert instances_by_port[9901]['collect_server_info'] is True
+    assert instances_by_port[8001]['collect_server_info'] is False
+    assert instances_by_port[9901]['collect_server_info'] is False
 
 
 def test_ipv6_host_is_bracketed_in_generated_endpoint() -> None:
