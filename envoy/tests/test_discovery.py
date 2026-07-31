@@ -9,7 +9,7 @@ def generated_instances(service: Service) -> list[dict]:
     return [config['instances'][0] for config in Envoy.generate_configs(service)]
 
 
-def test_openmetrics_endpoint_candidates_generated_for_all_ports():
+def test_openmetrics_endpoint_candidates_generated_for_all_ports() -> None:
     service = Service(
         id='envoy',
         host='127.0.0.1',
@@ -25,9 +25,8 @@ def test_openmetrics_endpoint_candidates_generated_for_all_ports():
     assert openmetrics_ports == {8001, 9901, 8080}
 
 
-def test_openmetrics_endpoint_disables_server_info_on_non_admin_port():
-    # A fallback openmetrics_endpoint candidate on a non-admin port risks hitting an
-    # unrelated upstream's /server_info if left to default to collecting server info.
+def test_openmetrics_endpoint_disables_server_info_on_non_admin_port() -> None:
+    # A non-admin-port candidate must not default to collecting server info from it.
     service = Service(
         id='envoy',
         host='127.0.0.1',
@@ -45,9 +44,8 @@ def test_openmetrics_endpoint_disables_server_info_on_non_admin_port():
     assert instances_by_port[9901]['collect_server_info'] is True
 
 
-def test_ipv6_host_is_bracketed_in_generated_endpoint():
-    # The generated template interpolates service.host unbracketed, producing an invalid
-    # URL for IPv6 literals. The override must repair it, not just avoid crashing on it.
+def test_ipv6_host_is_bracketed_in_generated_endpoint() -> None:
+    # The generated template leaves IPv6 hosts unbracketed; the override must repair it.
     service = Service(
         id='envoy',
         host='fd00::1',
