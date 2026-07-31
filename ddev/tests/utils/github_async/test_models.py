@@ -10,8 +10,9 @@ from ddev.utils.github_async.models import (
     PullRequest,
     PullRequestRef,
     PullRequestState,
+    WorkflowRun,
 )
-from tests.utils.github_async.payloads import full_pull_request_payload
+from tests.utils.github_async.payloads import full_pull_request_payload, workflow_run_payload
 
 
 def test_pull_request_parses_full_response() -> None:
@@ -45,6 +46,14 @@ def test_pull_request_ignores_extra_fields() -> None:
     payload = full_pull_request_payload(mergeable_state="clean", additions=42, unknown_future_field={"nested": True})
     pr = PullRequest.model_validate(payload)
     assert pr.number == 42
+
+
+def test_workflow_run_parses_null_status() -> None:
+    """The `workflow-run` schema declares `status` nullable, so a null value must parse."""
+    run = WorkflowRun.model_validate(workflow_run_payload(status=None))
+
+    assert run.status is None
+    assert run.is_completed is False
 
 
 def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:
