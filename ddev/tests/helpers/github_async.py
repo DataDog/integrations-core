@@ -107,6 +107,8 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
                 status='completed',
                 conclusion='success',
                 html_url='https://github.com/o/r/actions/runs/123',
+                head_sha='deadbeef',
+                run_number=1,
             ),
             headers={},
         ),

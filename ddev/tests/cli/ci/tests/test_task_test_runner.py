@@ -69,6 +69,8 @@ def make_workflow_run(status: str = "completed", conclusion: str | None = "succe
         status=status,
         conclusion=conclusion if status == "completed" else None,
         html_url="https://github.com/o/r/actions/runs/123",
+        head_sha="deadbeef",
+        run_number=1,
     )
 
 

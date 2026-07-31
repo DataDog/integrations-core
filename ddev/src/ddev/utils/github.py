@@ -98,9 +98,6 @@ class GitHubManager:
     # https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
     WORKFLOW_DISPATCH_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/dispatches'
 
-    # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-workflow
-    WORKFLOW_RUNS_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/runs'
-
     # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
     ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
 
@@ -277,21 +274,6 @@ class GitHubManager:
         if not return_run_details:
             return None
         return response.json()
-
-    def get_latest_workflow_run(self, workflow_id: str, head_sha: str) -> dict[str, Any] | None:
-        """Return the most recent run of `workflow_id` for `head_sha`, or None if it never ran.
-
-        Ordered by run number rather than by the API's own ordering, which does not
-        promise that a re-run of an earlier run comes back last.
-        """
-        response = self.__api_get(
-            self.WORKFLOW_RUNS_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
-            params={'head_sha': head_sha, 'per_page': '100'},
-        )
-        runs = response.json().get('workflow_runs', [])
-        if not runs:
-            return None
-        return max(runs, key=lambda run: (run.get('run_number') or 0, run.get('run_attempt') or 0))
 
     def pull_request_is_from_fork(self, pr_number: int) -> bool:
         """Whether the pull request's head branch lives outside this repository.
