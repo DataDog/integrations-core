@@ -30,7 +30,7 @@ from ddev.ai.runtime.outcome import (
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
 
-from .conftest import StaticConfigurationEngine, export_screenshot_text
+from .conftest import OrchestratorStub, StaticConfigurationEngine, export_screenshot_text
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -186,7 +186,7 @@ def _make_outcome(
     )
 
 
-class _FakeOrchestrator:
+class _FakeOrchestrator(OrchestratorStub):
     """Scripted fake orchestrator for tests — no API key, no real agents.
 
     Fires a deterministic sequence of callback events (phase/agent/tool/goal)
@@ -467,7 +467,7 @@ async def test_execution_screen_uses_injectable_builder():
     def _builder(cb: Callbacks) -> Any:
         received_callbacks.append(cb)
 
-        class _Noop:
+        class _Noop(OrchestratorStub):
             async def run_async(self) -> None:
                 pass
 
@@ -1052,7 +1052,7 @@ async def test_phase_log_shows_thinking_block_until_agent_response():
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen, ThinkingBlock
 
-    class _IdleOrchestrator:
+    class _IdleOrchestrator(OrchestratorStub):
         async def run_async(self) -> None:
             pass
 
@@ -1091,7 +1091,7 @@ async def test_sentinel_send_shows_thinking_without_prompt_block():
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen, ThinkingBlock
 
-    class _IdleOrchestrator:
+    class _IdleOrchestrator(OrchestratorStub):
         async def run_async(self) -> None:
             pass
 
@@ -1127,7 +1127,7 @@ async def test_phase_log_replays_entries_before_active_thinking_block():
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogBlock, PhaseLogScreen, ThinkingBlock
 
-    class _IdleOrchestrator:
+    class _IdleOrchestrator(OrchestratorStub):
         async def run_async(self) -> None:
             pass
 
@@ -1328,7 +1328,7 @@ async def test_execution_finishes_phases_before_reporting_success() -> None:
 
     release = asyncio.Event()
 
-    class ControlledOrchestrator:
+    class ControlledOrchestrator(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, callbacks: Any) -> None:
@@ -1370,7 +1370,7 @@ async def test_execution_failure_during_finalization_never_reports_success() -> 
 
     release = asyncio.Event()
 
-    class FailingFinalizer:
+    class FailingFinalizer(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, callbacks: Any) -> None:
@@ -1411,7 +1411,7 @@ async def test_phase_log_header_keeps_running_status() -> None:
 
     release = asyncio.Event()
 
-    class RunningPhase:
+    class RunningPhase(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, callbacks: Any) -> None:
@@ -1446,13 +1446,24 @@ async def test_phase_log_header_keeps_running_status() -> None:
 
 
 async def test_incomplete_outcome_reconciles_cancelled_phase_and_stops_thinking() -> None:
+    import asyncio
+
     from ddev.cli.meta.ai.tui.messages import RunFinished
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.status import ExecutionStatus
 
+    release = asyncio.Event()
+
+    class ControlledOrchestrator(OrchestratorStub):
+        failed_phase = None
+        outcome = None
+
+        async def run_async(self) -> None:
+            await release.wait()
+
     flow = _make_flow()
     app = _app(flow)
-    screen = ExecutionScreen(flow, orchestrator_builder=_make_builder())
+    screen = ExecutionScreen(flow, orchestrator_builder=lambda callbacks: ControlledOrchestrator())
     outcome = _make_outcome(
         DEMO_PHASES,
         verdict=RunVerdict.INCOMPLETE,
@@ -1468,6 +1479,7 @@ async def test_incomplete_outcome_reconciles_cancelled_phase_and_stops_thinking(
         await pilot.pause()
         screen._phase_statuses = {"phase_1": RunStatus.RUNNING, "phase_2": RunStatus.RUNNING}
         screen._task_statuses[("phase_1", "task_one")] = RunStatus.RUNNING
+        screen._task_statuses[("phase_1", "not_started")] = RunStatus.PENDING
         screen._task_statuses[("phase_2", "task_two")] = RunStatus.RUNNING
         screen._active_thinking["phase_1"]["agent:phase:1"] = "thinking"
 
@@ -1480,6 +1492,7 @@ async def test_incomplete_outcome_reconciles_cancelled_phase_and_stops_thinking(
             "phase_2": RunStatus.PENDING,
         }
         assert screen._task_statuses[("phase_1", "task_one")] is RunStatus.CANCELLED
+        assert screen._task_statuses[("phase_1", "not_started")] is RunStatus.PENDING
         assert screen._task_statuses[("phase_2", "task_two")] is RunStatus.PENDING
         assert screen._active_thinking["phase_1"] == {}
 
@@ -1491,7 +1504,7 @@ async def test_outcome_build_error_is_not_reported_as_flow_failure() -> None:
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.status import ExecutionStatus
 
-    class OutcomeBuildFailure:
+    class OutcomeBuildFailure(OrchestratorStub):
         failed_phase = None
         outcome = None
 
@@ -1522,7 +1535,7 @@ async def test_outcome_persistence_error_keeps_flow_verdict_and_summary() -> Non
 
     outcome = _make_outcome(DEMO_PHASES)
 
-    class OutcomePersistenceFailure:
+    class OutcomePersistenceFailure(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, callbacks: Any) -> None:
@@ -1563,7 +1576,7 @@ async def test_cancel_stops_worker_without_crash():
 
     cancelled = asyncio.Event()
 
-    class _InfiniteDemo:
+    class _InfiniteDemo(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, cb: Any) -> None:
@@ -1598,7 +1611,7 @@ async def test_execution_ctrl_c_copies_selection_before_cancelling(monkeypatch):
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    class _InfiniteDemo:
+    class _InfiniteDemo(OrchestratorStub):
         async def run_async(self) -> None:
             await asyncio.sleep(999)
 
@@ -1629,7 +1642,7 @@ async def test_unmount_cancels_worker():
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
 
-    class _InfiniteDemo:
+    class _InfiniteDemo(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, cb: Any) -> None:
@@ -1662,7 +1675,7 @@ async def test_escape_requires_confirmation_before_cancelling_active_run():
 
     cancelled = asyncio.Event()
 
-    class _InfiniteDemo:
+    class _InfiniteDemo(OrchestratorStub):
         failed_phase = None
 
         async def run_async(self) -> None:
@@ -1705,7 +1718,7 @@ async def test_back_pops_immediately_after_run_finishes():
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
     from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
 
-    class _FinishedDemo:
+    class _FinishedDemo(OrchestratorStub):
         failed_phase = None
 
         async def run_async(self) -> None:
@@ -1781,7 +1794,7 @@ async def test_phase_error_callback_only_marks_reported_failed_phase() -> None:
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    class ConcurrentFailure:
+    class ConcurrentFailure(OrchestratorStub):
         failed_phase = "phase_1"
 
         def __init__(self, callbacks: Any) -> None:
@@ -1816,7 +1829,7 @@ async def test_orchestrator_exception_without_failed_phase_is_not_attributed() -
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    class UnknownFailure:
+    class UnknownFailure(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, callbacks: Any) -> None:
@@ -1933,7 +1946,7 @@ async def test_resume_flag_passed_to_orchestrator():
     flow = _make_flow()
 
     def _builder(cb: Any) -> Any:
-        class _Noop:
+        class _Noop(OrchestratorStub):
             async def run_async(self) -> None:
                 pass
 
@@ -1967,7 +1980,7 @@ final_review:
 """
     )
 
-    class Noop:
+    class Noop(OrchestratorStub):
         failed_phase = None
 
         async def run_async(self) -> None:
@@ -2005,7 +2018,7 @@ async def test_resume_transitions_to_finishing_after_remaining_phase(tmp_path: P
     )
     release = asyncio.Event()
 
-    class ResumeOrchestrator:
+    class ResumeOrchestrator(OrchestratorStub):
         failed_phase = None
 
         def __init__(self, callbacks: Any) -> None:
@@ -2054,6 +2067,7 @@ def _setup_default_builder_mocks(tmp_path: Path):
 
     mock_orch_instance = MagicMock()
     mock_orch_instance.run_async = AsyncMock()
+    mock_orch_instance.outcome = None
     return fake_ddev_app, mock_orch_instance
 
 
@@ -2239,6 +2253,7 @@ async def test_launch_from_flow_screen_no_runtime_error(tmp_path: Path) -> None:
 
     mock_orch_instance = MagicMock()
     mock_orch_instance.run_async = AsyncMock()
+    mock_orch_instance.outcome = None
 
     with patch("ddev.ai.runtime.orchestrator.PhaseOrchestrator") as MockOrch:
         MockOrch.return_value = mock_orch_instance

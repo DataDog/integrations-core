@@ -449,8 +449,14 @@ def test_outcome_recording_failure_does_not_mask_run_failure(tmp_path, make_orch
     else:
         monkeypatch.setattr(orchestrator._outcome_store, "write", MagicMock(side_effect=OSError("disk full")))
 
-    with pytest.raises(FatalProcessingError, match="original failure"):
+    with pytest.raises(FatalProcessingError, match="original failure") as exc_info:
         orchestrator.run()
+
+    operation = "build" if failure_point == "build" else "persist"
+    detail = "checkpoint unreadable" if failure_point == "build" else "disk full"
+    assert exc_info.value.__notes__ == [
+        f"Outcome recording also failed: Failed to {operation} the flow outcome: {detail}"
+    ]
 
 
 async def test_outcome_build_failure_after_success_is_reported_distinctly(core_dir, make_orchestrator, monkeypatch):
@@ -489,6 +495,38 @@ async def test_outcome_persistence_failure_retains_and_publishes_outcome(
     assert orchestrator.outcome.verdict is RunVerdict.INCOMPLETE
     assert finished == [orchestrator.outcome]
     assert not (tmp_path / "run.yaml").exists()
+
+
+def test_current_run_checkpoints_excludes_stale_checkpoint(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+    orchestrator._checkpoint_manager.write_phase_checkpoint(
+        "a",
+        make_checkpoint(
+            CheckpointStatus.SUCCESS,
+            {
+                "started_at": "2026-01-01T00:00:00+00:00",
+                "finished_at": "2026-01-01T00:01:00+00:00",
+            },
+        ),
+    )
+
+    checkpoints = orchestrator._current_run_checkpoints(datetime(2026, 1, 2, tzinfo=UTC))
+
+    assert checkpoints == {}
+
+
+async def test_invalid_checkpoint_timestamp_fails_outcome_build(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+    orchestrator._started_at = datetime.now(UTC)
+    orchestrator._checkpoint_manager.write_phase_checkpoint(
+        "a",
+        make_checkpoint(CheckpointStatus.SUCCESS, {"finished_at": "not-a-timestamp"}),
+    )
+
+    with pytest.raises(RunOutcomeBuildError, match="invalid finished_at timestamp 'not-a-timestamp'"):
+        await orchestrator._record_outcome(None)
+
+    assert orchestrator.outcome is None
 
 
 # ---------------------------------------------------------------------------

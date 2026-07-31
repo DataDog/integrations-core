@@ -646,11 +646,6 @@ MarkdownH3 {
     margin-bottom: 1;
 }
 
-#ending-summary {
-    display: none;
-    height: auto;
-}
-
 /* ── Modal / dialog / badge / prompt ──────────────────────────────────── */
 
 ModalScreen {

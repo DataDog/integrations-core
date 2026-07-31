@@ -631,7 +631,7 @@ async def test_valid_launch_dismissal_pushes_execution_screen(tmp_path: Path) ->
         _provide_prd(pilot.app.screen, tmp_path)
         await pilot.click("#btn-launch")
         await pilot.pause()
-        assert any(isinstance(screen, ExecutionScreen) for screen in pilot.app.screen_stack)
+        assert isinstance(pilot.app.screen, ExecutionScreen)
 
 
 async def test_launch_dismissal_passes_runtime_variables_and_timeout(tmp_path: Path) -> None:

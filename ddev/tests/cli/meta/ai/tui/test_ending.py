@@ -9,10 +9,9 @@ from ddev.ai.runtime.outcome import (
     RunOutcome,
     RunVerdict,
 )
-from ddev.cli.meta.ai.tui.messages import RunFinished
 from ddev.cli.meta.ai.tui.status import ExecutionStatus, RunStatus
 
-from .conftest import export_screenshot_text
+from .conftest import OrchestratorStub, export_screenshot_text
 
 
 def make_phase(
@@ -172,23 +171,28 @@ async def test_failed_ending_screen_renders_error_details(make_togo_app):
 
 
 async def test_execution_screen_offers_summary_without_opening_it_automatically(make_flow, make_togo_app):
+    import asyncio
+
     from textual.containers import Horizontal
-    from textual.widgets import Button
+    from textual.widgets import Button, Static
 
     from ddev.cli.meta.ai.tui.screens.ending import EndingScreen
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    class NoopOrchestrator:
+    release = asyncio.Event()
+    outcome = make_outcome(RunVerdict.SUCCEEDED)
+
+    class ControlledOrchestrator(OrchestratorStub):
         failed_phase = None
-        outcome = None
+        outcome: RunOutcome | None = None
 
         async def run_async(self) -> None:
-            pass
+            await release.wait()
+            self.outcome = outcome
 
     flow = make_flow()
     app = make_togo_app([flow])
-    screen = ExecutionScreen(flow, orchestrator_builder=lambda callbacks: NoopOrchestrator())
-    outcome = make_outcome(RunVerdict.SUCCEEDED)
+    screen = ExecutionScreen(flow, orchestrator_builder=lambda callbacks: ControlledOrchestrator())
 
     async with app.run_test() as pilot:
         await pilot.pause()
@@ -197,11 +201,12 @@ async def test_execution_screen_offers_summary_without_opening_it_automatically(
         assert screen.query_one("#execution-actions", Horizontal).display is False
         assert screen.check_action("show_outcome", ()) is False
 
-        screen.on_run_finished(RunFinished(outcome))
+        release.set()
         await pilot.pause()
 
         assert app.screen is screen
         assert app.execution_status is ExecutionStatus.COMPLETED
+        assert screen.query_one("#execution-error", Static).display is False
         assert screen.query_one("#execution-actions", Horizontal).display is True
         assert screen.check_action("show_outcome", ()) is True
         assert screen.query_one("#view-summary", Button).has_focus
@@ -220,6 +225,8 @@ async def test_execution_screen_offers_summary_without_opening_it_automatically(
 
 
 async def test_run_finishing_does_not_interrupt_an_open_phase_log(make_flow, make_togo_app):
+    import asyncio
+
     from textual.containers import Horizontal
     from textual.widgets import Button
 
@@ -227,15 +234,20 @@ async def test_run_finishing_does_not_interrupt_an_open_phase_log(make_flow, mak
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
     from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected
 
-    class NoopOrchestrator:
+    release = asyncio.Event()
+    outcome = make_outcome(RunVerdict.SUCCEEDED)
+
+    class ControlledOrchestrator(OrchestratorStub):
         failed_phase = None
+        outcome: RunOutcome | None = None
 
         async def run_async(self) -> None:
-            pass
+            await release.wait()
+            self.outcome = outcome
 
     flow = make_flow()
     app = make_togo_app([flow])
-    screen = ExecutionScreen(flow, orchestrator_builder=lambda callbacks: NoopOrchestrator())
+    screen = ExecutionScreen(flow, orchestrator_builder=lambda callbacks: ControlledOrchestrator())
 
     async with app.run_test() as pilot:
         await pilot.pause()
@@ -248,7 +260,7 @@ async def test_run_finishing_does_not_interrupt_an_open_phase_log(make_flow, mak
         phase_log = app.screen
         assert isinstance(phase_log, PhaseLogScreen)
 
-        screen.on_run_finished(RunFinished(make_outcome(RunVerdict.SUCCEEDED)))
+        release.set()
         await pilot.pause()
 
         assert app.screen is phase_log

@@ -106,8 +106,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
         except Exception as e:
             try:
                 await self._record_outcome(e)
-            except RunOutcomeError:
+            except RunOutcomeError as outcome_error:
                 self._logger.exception("Failed to record the outcome for a failed flow")
+                e.add_note(f"Outcome recording also failed: {outcome_error}")
             raise
         else:
             await self._record_outcome(None)
@@ -231,8 +232,8 @@ def _checkpoint_finished_at(checkpoint: PhaseCheckpoint) -> datetime:
     """Return an aware timestamp suitable for filtering checkpoints from older attempts."""
     try:
         finished_at = datetime.fromisoformat(checkpoint.finished_at)
-    except ValueError:
-        return datetime.min.replace(tzinfo=UTC)
+    except ValueError as e:
+        raise ValueError(f"Checkpoint has invalid finished_at timestamp {checkpoint.finished_at!r}") from e
 
     if finished_at.tzinfo is None:
         return finished_at.replace(tzinfo=UTC)

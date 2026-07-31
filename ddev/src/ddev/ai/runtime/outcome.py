@@ -95,15 +95,16 @@ class RunOutcome(BaseModel):
     resumed: bool
     skipped_on_resume: list[str]
     run_dir: str
-    summary: str | None = None
-    summary_input_tokens: int = 0
-    summary_output_tokens: int = 0
-    summary_error: str | None = None
 
 
 GOAL_ERROR_TYPES = frozenset({"GoalAttemptsExhausted", "GoalParseError", "GoalValidationError"})
 AGENT_ERROR_TYPES = frozenset({"AgentError", "AgentConnectionError", "AgentRateLimitError", "AgentAPIError"})
 CONFIG_ERROR_TYPES = frozenset({"ConfigError", "ResourceUnavailableError"})
+CHECKPOINT_REPORT_STATUSES = {
+    CheckpointStatus.SUCCESS: PhaseReportStatus.SUCCEEDED,
+    CheckpointStatus.FAILED: PhaseReportStatus.FAILED,
+    CheckpointStatus.CANCELLED: PhaseReportStatus.CANCELLED,
+}
 
 
 def classify_failure(
@@ -160,21 +161,20 @@ def build_run_outcome(
     if failed_report is None and failed:
         failed_report = failed[0]
     original_exception = _original_exception(exception)
-    error = (
-        failed_report.error
-        if failed_report is not None
-        else str(original_exception)
-        if original_exception is not None
-        else None
-    )
-    error_type = (
-        failed_report.error_type
-        if failed_report is not None
-        else type(original_exception).__name__
-        if original_exception is not None
-        else None
-    )
-    resolved_failed_phase = failed_report.phase_id if failed_report is not None else failed_phase
+    error: str | None
+    error_type: str | None
+    resolved_failed_phase: str | None
+    if failed_report is not None:
+        error = failed_report.error
+        error_type = failed_report.error_type
+        resolved_failed_phase = failed_report.phase_id
+    elif original_exception is not None:
+        error = str(original_exception)
+        error_type = type(original_exception).__name__
+        resolved_failed_phase = failed_phase
+    else:
+        error = error_type = None
+        resolved_failed_phase = failed_phase
 
     return RunOutcome(
         flow_name=resolved_flow.name,
@@ -215,15 +215,7 @@ def _build_phase_report(
             cancellation_reason=None,
         )
 
-    status = (
-        PhaseReportStatus.SKIPPED_ON_RESUME
-        if skipped_on_resume
-        else PhaseReportStatus.SUCCEEDED
-        if checkpoint.status is CheckpointStatus.SUCCESS
-        else PhaseReportStatus.CANCELLED
-        if checkpoint.status is CheckpointStatus.CANCELLED
-        else PhaseReportStatus.FAILED
-    )
+    status = PhaseReportStatus.SKIPPED_ON_RESUME if skipped_on_resume else CHECKPOINT_REPORT_STATUSES[checkpoint.status]
     return PhaseReport(
         phase_id=phase_id,
         status=status,
@@ -249,8 +241,8 @@ def _duration_seconds(started_at: str | None, finished_at: str | None) -> float 
 
 
 def _original_exception(exception: BaseException | None) -> BaseException | None:
-    while exception is not None and exception.__cause__ is not None:
-        exception = exception.__cause__
+    if exception is not None and exception.__cause__ is not None:
+        return exception.__cause__
     return exception
 
 

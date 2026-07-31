@@ -80,6 +80,21 @@ if TYPE_CHECKING:
 
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
 
+PHASE_REPORT_RUN_STATUSES = {
+    PhaseReportStatus.SUCCEEDED: RunStatus.DONE,
+    PhaseReportStatus.SKIPPED_ON_RESUME: RunStatus.DONE,
+    PhaseReportStatus.FAILED: RunStatus.FAILED,
+    PhaseReportStatus.CANCELLED: RunStatus.CANCELLED,
+    PhaseReportStatus.NOT_RUN: RunStatus.PENDING,
+}
+
+
+def _task_status_for(report_status: PhaseReportStatus, current_status: RunStatus) -> RunStatus | None:
+    """Return the reconciled task status, preserving tasks not started before cancellation."""
+    if report_status is PhaseReportStatus.CANCELLED and current_status is not RunStatus.RUNNING:
+        return None
+    return PHASE_REPORT_RUN_STATUSES[report_status]
+
 
 class ExecutionScreen(TogoScreen):
     """Live execution screen: pipeline graph plus per-phase drill-down logs."""
@@ -227,6 +242,8 @@ class ExecutionScreen(TogoScreen):
                         None,
                     )
                 )
+            else:
+                self.post_message(RunFinished(orchestrator.outcome))
         except asyncio.CancelledError:
             if self.togo_app.bridge_target is self:
                 self.togo_app.execution_status = ExecutionStatus.IDLE
@@ -314,27 +331,14 @@ class ExecutionScreen(TogoScreen):
                 self._task_statuses[(task_phase, task_name)] = RunStatus.FAILED
 
     def _apply_outcome_statuses(self, outcome: RunOutcome) -> None:
-        phase_statuses = {
-            PhaseReportStatus.SUCCEEDED: RunStatus.DONE,
-            PhaseReportStatus.SKIPPED_ON_RESUME: RunStatus.DONE,
-            PhaseReportStatus.FAILED: RunStatus.FAILED,
-            PhaseReportStatus.CANCELLED: RunStatus.CANCELLED,
-            PhaseReportStatus.NOT_RUN: RunStatus.PENDING,
-        }
         for report in outcome.phases:
             self._stop_phase_thinking(report.phase_id)
-            self._phase_statuses[report.phase_id] = phase_statuses[report.status]
+            self._phase_statuses[report.phase_id] = PHASE_REPORT_RUN_STATUSES[report.status]
             for (task_phase, task_name), status in list(self._task_statuses.items()):
                 if task_phase != report.phase_id:
                     continue
-                if report.status in (PhaseReportStatus.SUCCEEDED, PhaseReportStatus.SKIPPED_ON_RESUME):
-                    self._task_statuses[(task_phase, task_name)] = RunStatus.DONE
-                elif report.status is PhaseReportStatus.FAILED:
-                    self._task_statuses[(task_phase, task_name)] = RunStatus.FAILED
-                elif report.status is PhaseReportStatus.CANCELLED and status is RunStatus.RUNNING:
-                    self._task_statuses[(task_phase, task_name)] = RunStatus.CANCELLED
-                elif report.status is PhaseReportStatus.NOT_RUN:
-                    self._task_statuses[(task_phase, task_name)] = RunStatus.PENDING
+                if task_status := _task_status_for(report.status, status):
+                    self._task_statuses[(task_phase, task_name)] = task_status
         self._update_display()
 
     def _accept_outcome(self, outcome: RunOutcome) -> None:
@@ -438,7 +442,8 @@ class ExecutionScreen(TogoScreen):
             self._show_error_banner("Run failed.")
 
     def on_run_finished(self, msg: RunFinished) -> None:
-        self._accept_outcome(msg.outcome)
+        if self._outcome is None:
+            self._accept_outcome(msg.outcome)
 
     def on_run_outcome_errored(self, msg: RunOutcomeErrored) -> None:
         if msg.outcome is not None:

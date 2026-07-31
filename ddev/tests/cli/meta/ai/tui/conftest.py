@@ -27,11 +27,22 @@ from ddev.ai.config.models import (
     TaskConfig,
 )
 from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.runtime.outcome import RunOutcome
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.theme import togo_theme
 
 LARGE_TERMINAL = (120, 50)
 STATUS_VARIABLE_KEYS = ("status-running", "status-pending", "status-done", "status-failed", "status-cancelled")
+
+
+class OrchestratorStub:
+    """Minimal test implementation of the execution screen's orchestrator contract."""
+
+    failed_phase: str | None = None
+    outcome: RunOutcome | None = None
+
+    async def run_async(self) -> None:
+        pass
 
 
 def export_screenshot_text(app: App[Any]) -> str:

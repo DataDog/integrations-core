@@ -43,14 +43,11 @@ class EndingScreen(TogoScreen):
     def compose_body(self) -> Iterator[Widget]:
         error = Static(self._error_text(), id="ending-error", classes="panel")
         error.display = self.outcome.verdict is RunVerdict.FAILED
-        summary = Static("", id="ending-summary", classes="panel")
-        summary.display = False
         yield VerticalScroll(
             Static(self._verdict_text(), id="ending-verdict", classes=f"verdict-{self.outcome.verdict.value}"),
             Static(self._stats_text(), id="ending-stats"),
             Static(self._phase_table(), id="ending-phases", classes="panel"),
             error,
-            summary,
             id="ending-content",
         )
 
