@@ -197,10 +197,7 @@ class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
         super().__init__()
         self.collection_interval = schemas_config.get("collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
         self.payload_chunk_size = schemas_config.get("payload_chunk_size", DEFAULT_PAYLOAD_CHUNK_SIZE)
-        # Capped by the collection interval, matching the previously shipped collector.
-        self.max_execution_time = min(
-            schemas_config.get("max_execution_time", DEFAULT_MAX_EXECUTION_TIME), self.collection_interval
-        )
+        self.max_execution_time = schemas_config.get("max_execution_time", DEFAULT_MAX_EXECUTION_TIME)
         # None chooses by server version (see MYSQL_MIN_SINGLE_QUERY_VERSION). An explicit value
         # forces that strategy on MySQL (debugging escape hatch); MariaDB is always chunked.
         self.collection_strategy = schemas_config.get("collection_strategy")
@@ -230,6 +227,7 @@ class MySqlSchemaCollector(SchemaCollector):
         super().__init__(check, config or MySqlSchemaCollectorConfig(check._config.schemas_config))
 
     def _query_timeout(self) -> float | None:
+        """Per-query timeout in seconds, or None when disabled by a max_execution_time of 0 or less."""
         max_execution_time = float(self._config.max_execution_time)
         if max_execution_time > 0:
             return max_execution_time

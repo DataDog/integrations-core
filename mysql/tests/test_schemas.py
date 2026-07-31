@@ -261,6 +261,16 @@ def test_execute_applies_supported_query_timeout(is_mariadb, version, expected_q
     cursor.execute.assert_called_once_with(expected_query, None)
 
 
+@pytest.mark.parametrize("max_execution_time", [0, -1])
+def test_non_positive_max_execution_time_disables_query_timeout(max_execution_time):
+    collector = _make_collector(STRATEGY_CHUNKED, config={"max_execution_time": max_execution_time})
+    cursor = mock.MagicMock()
+
+    assert collector._query_timeout() is None
+    collector._execute(cursor, "SELECT 1")
+    cursor.execute.assert_called_once_with("SELECT 1", None)
+
+
 def _single_query_row():
     return {
         "name": "cities",
