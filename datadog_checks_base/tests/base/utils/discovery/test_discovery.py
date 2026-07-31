@@ -209,6 +209,21 @@ def test_candidate_ports_prefers_hints_and_deduplicates():
     ]
 
 
+def test_candidate_ports_can_disable_fallback():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='http'),
+            Port(number=9090, name='metrics'),
+            Port(number=8081, name='admin'),
+        ),
+    )
+
+    assert list(candidate_ports(service, [9090, 9090, 1234], fallback=False)) == [Port(number=9090, name='metrics')]
+    assert list(candidate_ports(service, [1234], fallback=False)) == []
+
+
 @pytest.mark.parametrize(
     'host, expected',
     [

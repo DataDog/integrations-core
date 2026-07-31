@@ -66,8 +66,9 @@ jobs:
               commit_sha: context.sha,
             });
 
+            const openPullRequests = prs.filter(pr => pr.state === 'open');
             let hasResolutionOutput = false;
-            for (const pr of prs.filter(pr => pr.state === 'open')) {
+            for (const pr of openPullRequests) {
               const files = await github.paginate(github.rest.pulls.listFiles, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -81,6 +82,7 @@ jobs:
             }
 
             const promotionRequired = needsResolution || hasResolutionOutput;
+            const promoteTarget = openPullRequests[0]?.html_url ?? '<PR_URL>';
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -88,7 +90,7 @@ jobs:
               state: promotionRequired ? 'pending' : 'success',
               context: 'dependency-wheel-promotion',
               description: promotionRequired
-                ? 'Wheels must be promoted to stable before merge. Run: ddev dep promote <PR_URL>'
+                ? `Wheels must be promoted to stable before merge. Run: ddev dep promote ${promoteTarget}`
                 : 'No dependency resolution needed; promotion not required.',
             });
 
