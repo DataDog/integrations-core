@@ -4,6 +4,7 @@
 import os
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev.utils import get_metadata_metrics
 
 HERE = get_here()
 
@@ -12,16 +13,44 @@ def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
 
 
+def assert_series_with_tags(aggregator, metric_name, tags, value=None):
+    """Assert a single series of a metric carries all of the tags at once.
+
+    `assert_metric_has_tags` checks each tag independently, so it passes when the tags are spread across
+    different series; that is too weak for label sets that are only meaningful together, such as a
+    ClusterQueue name paired with its status.
+    """
+    expected = set(tags)
+    submitted = aggregator.metrics(metric_name)
+    for series in submitted:
+        if expected <= set(series.tags) and (value is None or series.value == value):
+            return
+    raise AssertionError(
+        f'No {metric_name} series carries all of {sorted(expected)}'
+        + (f' with value {value}' if value is not None else '')
+        + f'. Submitted tag sets: {[sorted(series.tags) for series in submitted]}'
+    )
+
+
+CHECK_NAME = 'kueue'
+# Key under which `dd_environment` publishes the live instance config for the e2e tests to pick up.
+INSTANCE_STATE_KEY = 'kueue_instance'
+
 MOCKED_INSTANCE = {
     'openmetrics_endpoint': 'http://localhost:8080/metrics',
     'tags': ['test:tag'],
 }
 
-# Tags defined in the YAML files for the e2e tests
-_cluster_queue_tags = ['kueue_cluster_queue:cluster-queue', 'replica_role:leader']
-_cluster_queue_flavor_tags = [*_cluster_queue_tags, 'kueue_resource_flavor:default-flavor']
-_local_queue_tags = ['kueue_local_queue:user-queue', 'namespace:default', 'replica_role:leader']
-_local_queue_flavor_tags = [*_local_queue_tags, 'kueue_resource_flavor:default-flavor']
+# Tags defined in the YAML files for the e2e tests. Grouped by the label set Kueue actually attaches to
+# each family, so an assertion never demands a tag the series cannot carry: the quota and usage families
+# are cohort- and flavor-aware, while `resource_pending` and the workload counts are neither.
+CLUSTER_QUEUE_TAGS = ['kueue_cluster_queue:cluster-queue', 'replica_role:leader']
+CLUSTER_QUEUE_COHORT_TAGS = [*CLUSTER_QUEUE_TAGS, 'cohort:shared-cohort']
+CLUSTER_QUEUE_FLAVOR_TAGS = [*CLUSTER_QUEUE_COHORT_TAGS, 'kueue_resource_flavor:default-flavor']
+LOCAL_QUEUE_TAGS = ['kueue_local_queue:user-queue', 'namespace:default', 'replica_role:leader']
+LOCAL_QUEUE_FLAVOR_TAGS = [*LOCAL_QUEUE_TAGS, 'kueue_resource_flavor:default-flavor']
+COHORT_TAGS = ['cohort:shared-cohort', 'replica_role:leader']
+COHORT_FLAVOR_TAGS = [*COHORT_TAGS, 'kueue_resource_flavor:default-flavor']
 
 # Keys: metrics we assert in both unit (mock metrics.txt) and e2e (live cluster).
 # Values: tags that must appear on at least one series for that metric (empty = metric presence only, no tags checked).
@@ -29,36 +58,46 @@ EXPECTED_METRIC_TAGS = {
     'kueue.build_info': [],
     'kueue.go.goroutines': [],
     'kueue.go.info': ['go_version:go1.26.3'],
-    'kueue.cluster_queue.info': ['kueue_cluster_queue:cluster-queue'],
-    'kueue.cluster_queue.status': ['kueue_cluster_queue:cluster-queue'],
-    'kueue.cluster_queue.nominal_quota.cpu': _cluster_queue_flavor_tags,
-    'kueue.cluster_queue.nominal_quota.memory': _cluster_queue_flavor_tags,
-    'kueue.cluster_queue.resource_pending.cpu': _cluster_queue_tags,
-    'kueue.cluster_queue.resource_pending.memory': _cluster_queue_tags,
-    'kueue.cluster_queue.resource_reservation.cpu': _cluster_queue_flavor_tags,
-    'kueue.cluster_queue.resource_reservation.memory': _cluster_queue_flavor_tags,
-    'kueue.cluster_queue.resource_usage.cpu': _cluster_queue_flavor_tags,
-    'kueue.cluster_queue.resource_usage.memory': _cluster_queue_flavor_tags,
-    'kueue.local_queue.status': [],
-    'kueue.admitted.active_workloads': _cluster_queue_tags,
-    'kueue.local_queue.admitted.active_workloads': _local_queue_tags,
-    'kueue.pending_workloads': [*_cluster_queue_tags, 'status:inadmissible'],
-    'kueue.local_queue.pending_workloads': [*_local_queue_tags, 'status:inadmissible'],
-    'kueue.local_queue.resource_reservation.cpu': _local_queue_flavor_tags,
-    'kueue.local_queue.resource_reservation.memory': _local_queue_flavor_tags,
-    'kueue.local_queue.resource_usage.cpu': _local_queue_flavor_tags,
-    'kueue.local_queue.resource_usage.memory': _local_queue_flavor_tags,
-    # Cohort, fair-sharing, GPU, and preemption/eviction metrics; presence-only since tag values differ across envs.
-    'kueue.cluster_queue.weighted_share': [],
-    'kueue.cohort.info': [],
-    'kueue.cohort.weighted_share': [],
-    'kueue.cohort_subtree.quota.cpu': [],
-    'kueue.cohort_subtree.resource_reservations.cpu': [],
-    'kueue.cohort_subtree.admitted.active_workloads': [],
-    'kueue.cluster_queue.nominal_quota.gpu': [],
-    'kueue.cluster_queue.resource_usage.gpu': [],
+    'kueue.cluster_queue.info': ['kueue_cluster_queue:cluster-queue', 'root_cohort:shared-cohort'],
+    'kueue.cluster_queue.status': [*CLUSTER_QUEUE_TAGS, 'status:active'],
+    'kueue.cluster_queue.nominal_quota.cpu': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.cluster_queue.nominal_quota.memory': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.cluster_queue.resource_pending.cpu': CLUSTER_QUEUE_TAGS,
+    'kueue.cluster_queue.resource_pending.memory': CLUSTER_QUEUE_TAGS,
+    'kueue.cluster_queue.resource_reservation.cpu': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.cluster_queue.resource_reservation.memory': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.cluster_queue.resource_usage.cpu': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.cluster_queue.resource_usage.memory': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.local_queue.status': [*LOCAL_QUEUE_TAGS, 'active:True'],
+    'kueue.admitted.active_workloads': CLUSTER_QUEUE_TAGS,
+    'kueue.local_queue.admitted.active_workloads': LOCAL_QUEUE_TAGS,
+    'kueue.pending_workloads': [*CLUSTER_QUEUE_TAGS, 'status:inadmissible'],
+    'kueue.local_queue.pending_workloads': [*LOCAL_QUEUE_TAGS, 'status:inadmissible'],
+    'kueue.local_queue.resource_reservation.cpu': LOCAL_QUEUE_FLAVOR_TAGS,
+    'kueue.local_queue.resource_reservation.memory': LOCAL_QUEUE_FLAVOR_TAGS,
+    'kueue.local_queue.resource_usage.cpu': LOCAL_QUEUE_FLAVOR_TAGS,
+    'kueue.local_queue.resource_usage.memory': LOCAL_QUEUE_FLAVOR_TAGS,
+    # Cohort and fair-sharing metrics, emitted because `queue.yaml` declares an explicit cohort.
+    'kueue.cluster_queue.weighted_share': CLUSTER_QUEUE_COHORT_TAGS,
+    'kueue.cohort.info': ['cohort:shared-cohort', 'root_cohort:shared-cohort'],
+    'kueue.cohort.weighted_share': COHORT_TAGS,
+    'kueue.cohort_subtree.quota.cpu': COHORT_FLAVOR_TAGS,
+    'kueue.cohort_subtree.resource_reservations.cpu': COHORT_FLAVOR_TAGS,
+    'kueue.cohort_subtree.admitted.active_workloads': COHORT_TAGS,
+    # GPU quota comes from the `nvidia.com/gpu` covered resource, and `other` from `example.com/foo`.
+    'kueue.cluster_queue.nominal_quota.gpu': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.cluster_queue.resource_usage.gpu': CLUSTER_QUEUE_FLAVOR_TAGS,
+    'kueue.cluster_queue.resource_usage.other': CLUSTER_QUEUE_FLAVOR_TAGS,
     'kueue.finished_workloads': [],
-    'kueue.cluster_queue.resource_usage.other': [],
+    # Preemption and eviction counters. `trigger_preemption` blocks until the high-priority workload is
+    # admitted, which by construction means the low-priority one was already preempted and evicted, so
+    # these are deterministic rather than timing-dependent. `dd_agent_check(rate=True)` runs the check
+    # twice so the monotonic counters flush their `.count` submission.
+    'kueue.preempted_workloads.count': ['reason:InClusterQueue'],
+    'kueue.evicted_workloads.count': ['reason:Preempted'],
+    'kueue.evicted_workloads_once.count': ['reason:Preempted'],
+    'kueue.finished_workloads.count': [],
+    'kueue.local_queue.finished_workloads.count': [],
     'kueue.controller.runtime.active_workers': [],
     'kueue.process.uptime.seconds': [],
     'kueue.workqueue.depth': [],
@@ -69,16 +108,45 @@ UNIT_E2E_METRICS = tuple(EXPECTED_METRIC_TAGS)
 
 # Extra Datadog metric names covered by tests/fixtures/metrics.txt but not required on the e2e cluster.
 FIXTURE_ONLY_METRICS = (
+    # Nothing pends on GPU quota, so this series stays absent live. Making it deterministic would need a
+    # second GPU job requesting more than the flavor's single GPU.
     'kueue.cluster_queue.resource_pending.gpu',
-    # Monotonic counters. `trigger_preemption` makes the env emit them and `dd_agent_check(rate=True)`
-    # runs the check twice so they flush, but the values depend on preemption having actually happened
-    # by scrape time, which is timing-dependent. Asserted from the fixture only to keep e2e stable.
-    'kueue.preempted_workloads.count',
-    'kueue.evicted_workloads.count',
-    'kueue.evicted_workloads_once.count',
-    'kueue.finished_workloads.count',
-    'kueue.local_queue.finished_workloads.count',
 )
 
 # All metrics for unit test_check presence + instance tag assertions.
 UNIT_METRICS = (*UNIT_E2E_METRICS, *FIXTURE_ONLY_METRICS)
+
+# Metric families Kueue only emits under configuration this environment deliberately does not enable, so
+# they belong in metadata.csv — the unit fixture covers them — but never appear on the live cluster. The
+# first five need `waitForPodsReady`, which would make the GPU workload evict and requeue in a loop; the
+# admission-check families need an AdmissionCheck resource, and the last two a preemption-skip cycle and
+# the workload-slicing feature gate.
+CONFIG_GATED_METRIC_PREFIXES = (
+    'kueue.ready_wait_time.seconds',
+    'kueue.local_queue.ready_wait_time.seconds',
+    'kueue.admitted_until_ready.wait_time.seconds',
+    'kueue.local_queue.admitted_until_ready.wait_time.seconds',
+    'kueue.pods_ready_to_evicted_time.seconds',
+    'kueue.admission_checks.wait_time.seconds',
+    'kueue.local_queue.admission_checks.wait_time.seconds',
+    'kueue.admission_cycle.preemption_skips',
+    'kueue.replaced_workload_slices.count',
+)
+
+
+def live_metadata_metrics():
+    """Return the metadata.csv metrics the live cluster emits, plus the config-gated names to exclude.
+
+    Splitting them lets the e2e assert symmetric inclusion: every other metadata.csv row has to be
+    emitted by the cluster, and every emitted metric has to have a row. `exclude` alone is not enough,
+    because `assert_metrics_using_metadata` only applies it to submitted metrics, never to the
+    metadata.csv keys it checks for absence.
+    """
+    all_metadata = get_metadata_metrics()
+    config_gated = [name for name in all_metadata if name.startswith(CONFIG_GATED_METRIC_PREFIXES)]
+    return {name: metadata for name, metadata in all_metadata.items() if name not in config_gated}, config_gated
+
+
+# `invalid-queue` references a missing flavor, so it is the only inactive ClusterQueue in the env and the
+# only coverage of the non-`active` side of `cluster_queue.status`.
+INACTIVE_CLUSTER_QUEUE_TAGS = ['kueue_cluster_queue:invalid-queue', 'status:pending']

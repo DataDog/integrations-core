@@ -56,19 +56,21 @@ See the [sample kueue.d/conf.yaml][4] for all available configuration options.
 
 ### Log collection
 
-The Kueue controller manager writes logs to its container's standard output. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
+The Kueue controller manager writes logs to its container output, which Kubernetes captures as container logs. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12]. Logs are collected by the node Agent running on the node that hosts the Kueue controller manager, not by the Cluster Agent that runs this cluster check.
 
-Then, set the Kueue log configuration as an Autodiscovery annotation on the Kueue controller manager pod:
+Then, set the Kueue log configuration as an Autodiscovery annotation on the controller manager's pod template, so it survives pod restarts. Add it under `spec.template.metadata.annotations` of the `kueue-controller-manager` Deployment, or set `controllerManager.manager.podAnnotations` if you install Kueue with the Helm chart:
 
 ```yaml
-ad.datadoghq.com/kueue.logs: |
+ad.datadoghq.com/manager.logs: |
   [
     {
       "source": "kueue",
-      "service": "<SERVICE_NAME>"
+      "service": "<SERVICE>"
     }
   ]
 ```
+
+This annotation targets the container named `manager`, which is the container name used by both the Kueue release manifests and the Helm chart. Replace `manager` with the name (`.spec.containers[i].name`) of your Kueue container if yours differs.
 
 ### Validation
 

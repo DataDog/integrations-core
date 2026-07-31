@@ -4,7 +4,6 @@
 import ipaddress
 import os
 import tempfile
-import time
 from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 
@@ -12,16 +11,21 @@ import pytest
 import yaml
 
 from datadog_checks.base.stubs import tagger
-from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.dev.utils import get_active_env
 
-from .common import MOCKED_INSTANCE
+from .common import CHECK_NAME, INSTANCE_STATE_KEY, MOCKED_INSTANCE
+from .kube import (
+    WAIT_TIMEOUT,
+    kubectl,
+    kubectl_output,
+    manifest_path,
+    retry_apply,
+    wait_for_job_workload_condition,
+)
 
-HERE = get_here()
-CHECK_NAME = 'kueue'
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
 MANAGER_CONTAINER = 'manager'  # container name in the upstream controller deployment
@@ -33,10 +37,17 @@ WORKLOAD_IMAGE = 'alpine:3.19.1'  # keep in sync with the Job manifests under te
 #      subnet selection here.
 #   2. The visibility server's own cert bootstrap fails independently of networking. Handled by
 #      `disable_visibility_server`.
-# Candidate /16 blocks for the kind service and pod networks.
-SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in (250, 251, 252, 253, 199, 198, 60, 61)] + [
-    f'172.{octet}.0.0/16' for octet in (28, 29, 30, 31)
-]
+# Set to `<serviceSubnet>,<podSubnet>` to pin the kind networks and skip detection entirely.
+KIND_SUBNETS_ENV = 'KUEUE_KIND_SUBNETS'
+# Swept descending, because the low end of 10/8 is where hosts and corporate VPNs concentrate: a GitHub
+# runner sits on 10.1.x, so counting down from 10.255 reaches a free block without probing the busy end.
+SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in range(255, -1, -1)]
+# RFC 2544 benchmarking space, used only when the sweep comes up empty. It is exactly two /16s, which is
+# the pair needed here, and neither Docker's address pool nor a VPN routes it. It is not RFC1918, so it is
+# bogon space off-host, which is why it is a last resort rather than a candidate.
+FALLBACK_SUBNETS = ('198.18.0.0/16', '198.19.0.0/16')
+# 172.16.0.0/12 is deliberately absent: Docker hands out /16s from 172.17.0.0 upward for every compose
+# network, so a block that is free at env-start can be taken by the time the next suite runs.
 
 
 def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
@@ -68,10 +79,11 @@ def parse_route_networks(output: str) -> list[ipaddress.IPv4Network]:
 
 
 def host_routed_networks() -> list[ipaddress.IPv4Network]:
-    """Return the IPv4 networks currently present in the host routing table.
+    """Return the IPv4 networks in the host routing table, raising if it could not be read.
 
-    On macOS this cannot see Docker Desktop's own bridge networks, which live inside the LinuxKit VM
-    and never reach the host routing table, so a collision with those is not detectable here.
+    Raising matters because an empty table would make every candidate look free. `netstat` is only a
+    fallback for hosts without iproute2; it is absent from the GitHub runner image, so on CI a failure of
+    `ip` leaves the table unreadable rather than merely slower to read.
     """
     for command in (['ip', '-4', 'route', 'show'], ['netstat', '-rn', '-f', 'inet']):
         try:
@@ -80,46 +92,78 @@ def host_routed_networks() -> list[ipaddress.IPv4Network]:
             continue
         if output.strip():
             return parse_route_networks(output)
-    return []
+
+    raise RuntimeError(
+        'Could not read the host routing table with `ip -4 route show` or `netstat -rn -f inet`. '
+        'Without it a colliding kind subnet cannot be detected, and the Kueue webhook would crashloop '
+        f'instead. Pin the subnets with {KIND_SUBNETS_ENV}=<serviceSubnet>,<podSubnet>.'
+    )
 
 
-def choose_free_subnets() -> tuple[str, str] | None:
-    """Pick two non-overlapping /16 subnets that avoid host routes, for the kind service and pod networks."""
+def is_free(candidate: str, routed: list[ipaddress.IPv4Network]) -> bool:
+    network = ipaddress.ip_network(candidate)
+    return not any(network.overlaps(route) for route in routed)
+
+
+def choose_free_subnets(preferred: tuple[str, str]) -> tuple[str, str]:
+    """Return the service and pod subnets to use, keeping `preferred` whenever both are free.
+
+    Preferring the committed pair keeps the subnets identical on every host that has no collision, so CI
+    always runs the same networks and a failure there reproduces locally. The sweep is a fallback for
+    hosts, typically laptops on a VPN, where the committed pair is actually routed.
+    """
     routed = host_routed_networks()
+    if all(is_free(subnet, routed) for subnet in preferred):
+        return preferred
+
     free = []
-    for candidate in SUBNET_CANDIDATES:
-        network = ipaddress.ip_network(candidate)
-        if any(network.overlaps(route) for route in routed):
-            continue
-        if any(network.overlaps(ipaddress.ip_network(chosen)) for chosen in free):
-            continue
-        free.append(candidate)
-        if len(free) == 2:
-            return free[0], free[1]
-    return None
+    for candidate in (*SUBNET_CANDIDATES, *FALLBACK_SUBNETS):
+        if is_free(candidate, routed) and candidate not in free:
+            free.append(candidate)
+            if len(free) == 2:
+                return free[0], free[1]
+
+    raise RuntimeError(
+        f'No two free /16 subnets among {len(SUBNET_CANDIDATES)} candidates and {FALLBACK_SUBNETS}. '
+        f'Every block collides with a host route. Disconnect the VPN, or pin the subnets with '
+        f'{KIND_SUBNETS_ENV}=<serviceSubnet>,<podSubnet>.'
+    )
+
+
+def pinned_subnets() -> tuple[str, str] | None:
+    """Return the subnets pinned through the environment, validating them so a typo fails loudly."""
+    raw = os.environ.get(KIND_SUBNETS_ENV, '').strip()
+    if not raw:
+        return None
+
+    parts = [part.strip() for part in raw.split(',')]
+    if len(parts) != 2:
+        raise RuntimeError(f'{KIND_SUBNETS_ENV} must be `<serviceSubnet>,<podSubnet>`, got {raw!r}')
+    for part in parts:
+        ipaddress.ip_network(part)
+    return parts[0], parts[1]
 
 
 @contextmanager
 def build_kind_config() -> Iterator[str]:
-    """Yield a kind config whose subnets avoid host-route collisions, falling back to the committed file."""
-    base_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    """Yield a kind config whose subnets are known not to collide with a host route or a Docker network."""
+    base_config = manifest_path('kind-config.yaml')
     with open(base_config) as f:
         config = yaml.safe_load(f)
 
-    subnets = choose_free_subnets()
+    networking = config.setdefault('networking', {})
+    committed = (networking.get('serviceSubnet'), networking.get('podSubnet'))
+    subnets = pinned_subnets()
     if subnets is None:
-        # Log the fallback too: when the controller crashloops in CI, the subnets used are the first
-        # thing to check, and the committed pair is the one known to collide in some environments.
-        networking = config.get('networking', {})
-        service_subnet = networking.get('serviceSubnet')
-        pod_subnet = networking.get('podSubnet')
-        print(f'No free subnet pair found, falling back to {service_subnet} / {pod_subnet}')
+        subnets = choose_free_subnets(committed)
+    if subnets == committed:
         yield base_config
         return
 
-    config.setdefault('networking', {})
-    config['networking']['serviceSubnet'], config['networking']['podSubnet'] = subnets
-    print(f'Using kind subnets {subnets[0]} / {subnets[1]}')
+    networking['serviceSubnet'], networking['podSubnet'] = subnets
+    # When the controller crashloops, the subnets are the first thing to check, so record that the
+    # committed pair was replaced and what replaced it.
+    print(f'Committed kind subnets {committed[0]} / {committed[1]} collide; using {subnets[0]} / {subnets[1]}')
 
     fd, path = tempfile.mkstemp(prefix='kueue-kind-', suffix='.yaml')
     try:
@@ -138,44 +182,40 @@ def reset_tagger():
 
 
 def wait_for_controller():
-    run_command(
+    kubectl(
         [
-            'kubectl',
             'rollout',
             'status',
             'deployment/kueue-controller-manager',
             '-n',
             KUEUE_NAMESPACE,
-            '--timeout=300s',
+            f'--timeout={WAIT_TIMEOUT}',
         ]
     )
-    run_command(
+    kubectl(
         [
-            'kubectl',
             'wait',
             'deployment/kueue-controller-manager',
             '--for=condition=Available',
             '-n',
             KUEUE_NAMESPACE,
-            '--timeout=300s',
+            f'--timeout={WAIT_TIMEOUT}',
         ]
     )
 
 
 def manager_container_index() -> int:
     """Return the index of the Kueue manager container in the controller deployment."""
-    names = run_command(
+    names = kubectl_output(
         [
-            'kubectl',
             'get',
             'deployment/kueue-controller-manager',
             '-n',
             KUEUE_NAMESPACE,
             '-o',
             'jsonpath={.spec.template.spec.containers[*].name}',
-        ],
-        capture=True,
-    ).stdout.split()
+        ]
+    ).split()
     if MANAGER_CONTAINER not in names:
         raise RuntimeError(f'No {MANAGER_CONTAINER!r} container in the Kueue controller deployment: {names}')
     return names.index(MANAGER_CONTAINER)
@@ -194,9 +234,8 @@ def disable_visibility_server():
     # Patching by index would silently append the flag to a sidecar's args if upstream ever adds or
     # reorders containers, producing a crashloop with an unrelated-looking error.
     index = manager_container_index()
-    run_command(
+    kubectl(
         [
-            'kubectl',
             'patch',
             'deployment/kueue-controller-manager',
             '-n',
@@ -208,9 +247,8 @@ def disable_visibility_server():
         ]
     )
     # Left in place, the endpoint-less visibility APIServices can stall namespace deletion.
-    run_command(
+    kubectl(
         [
-            'kubectl',
             'delete',
             'apiservice',
             'v1beta1.visibility.kueue.x-k8s.io',
@@ -229,11 +267,31 @@ def preload_workload_image():
     )
 
 
+def wait_for_queues_active():
+    """Wait for every queue the tests assert on to become Active.
+
+    `invalid-queue` is deliberately excluded: it references a missing flavor so that it never activates,
+    which is what gives the tests coverage of the non-active side of `cluster_queue.status`.
+    """
+    for cluster_queue in ('cluster-queue', 'borrow-queue', 'preempt-queue'):
+        kubectl(['wait', f'clusterqueue/{cluster_queue}', '--for=condition=Active', f'--timeout={WAIT_TIMEOUT}'])
+    for local_queue in ('user-queue', 'preempt-queue'):
+        kubectl(
+            [
+                'wait',
+                f'localqueue/{local_queue}',
+                '-n',
+                'default',
+                '--for=condition=Active',
+                f'--timeout={WAIT_TIMEOUT}',
+            ]
+        )
+
+
 def setup_kueue():
     preload_workload_image()
-    run_command(
+    kubectl(
         [
-            'kubectl',
             'apply',
             '--server-side',
             '-f',
@@ -246,32 +304,27 @@ def setup_kueue():
     # Ensure the controller is ready
     wait_for_controller()
 
-    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'kueue-config.yaml')])
+    kubectl(['apply', '-f', manifest_path('kueue-config.yaml')])
     # Restart the controller to pick up the new config
-    run_command(['kubectl', 'rollout', 'restart', 'deployment/kueue-controller-manager', '-n', KUEUE_NAMESPACE])
+    kubectl(['rollout', 'restart', 'deployment/kueue-controller-manager', '-n', KUEUE_NAMESPACE])
     wait_for_controller()
 
-    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'metrics-reader.yaml')])
+    kubectl(['apply', '-f', manifest_path('metrics-reader.yaml')])
     # The deployment can be `Available` before the webhook server is actually serving, so wait until the
     # webhook service has ready endpoints before applying resources that go through the mutating webhooks.
-    run_command(
+    kubectl(
         [
-            'kubectl',
             'wait',
             '--for=jsonpath={.subsets[*].addresses[*].ip}',
             'endpoints/kueue-webhook-service',
             '-n',
             KUEUE_NAMESPACE,
-            '--timeout=300s',
+            f'--timeout={WAIT_TIMEOUT}',
         ]
     )
-    apply_queue_manifests()
-    run_command(['kubectl', 'wait', 'clusterqueue/cluster-queue', '--for=condition=Active', '--timeout=300s'])
-    run_command(['kubectl', 'wait', 'clusterqueue/preempt-queue', '--for=condition=Active', '--timeout=300s'])
-    run_command(
-        ['kubectl', 'wait', 'localqueue/user-queue', '-n', 'default', '--for=condition=Active', '--timeout=300s']
-    )
-    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'workloads.yaml')])
+    retry_apply('queue.yaml')
+    wait_for_queues_active()
+    retry_apply('workloads.yaml')
     wait_for_job_workload_condition('scheduled-workload', 'Admitted=True')
     wait_for_job_workload_condition('unschedulable-workload', 'QuotaReserved=False')
     wait_for_job_workload_condition('gpu-workload', 'Admitted=True')
@@ -280,80 +333,28 @@ def setup_kueue():
 
 
 def trigger_preemption():
-    """Admit a low-priority workload, then a higher-priority one that preempts it, for preemption/eviction metrics."""
-    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'preempt-low-workload.yaml')])
+    """Admit a low-priority workload, then a higher-priority one that preempts it, for preemption/eviction metrics.
+
+    This runs at env-start so the counters are already non-zero when the metrics test scrapes. It does
+    not give the check an observable Evicted *transition*: Kueue clears that condition as soon as it
+    requeues the preempted workload, well inside a collection interval.
+    """
+    retry_apply('preempt-low-workload.yaml')
     wait_for_job_workload_condition('preempt-low-workload', 'Admitted=True')
-    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'preempt-high-workload.yaml')])
+    retry_apply('preempt-high-workload.yaml')
     # Once the high-priority workload is admitted, the low-priority one has been preempted and evicted.
     wait_for_job_workload_condition('preempt-high-workload', 'Admitted=True')
-
-
-def apply_queue_manifests():
-    # The webhook can still reject calls for a short window after its endpoints become ready (cert
-    # propagation), so retry the apply a few times before giving up.
-    queue_manifest = os.path.join(HERE, 'kind', 'queue.yaml')
-    last_error = None
-    for _ in range(10):
-        try:
-            run_command(['kubectl', 'apply', '-f', queue_manifest], check=True)
-            return
-        except Exception as e:
-            last_error = e
-            time.sleep(5)
-    raise RuntimeError(f'Failed to apply queue manifests after retries: {last_error}')
-
-
-def wait_for_job_workload_condition(job_name: str, condition: str) -> None:
-    job_uid = run_command(
-        ['kubectl', 'get', 'job', job_name, '-n', 'default', '-o', 'jsonpath={.metadata.uid}'], capture=True
-    ).stdout.strip()
-    workload_name = ''
-    for _ in range(10):
-        workload_name = run_command(
-            [
-                'kubectl',
-                'get',
-                'workloads.kueue.x-k8s.io',
-                '-n',
-                'default',
-                '-l',
-                f'kueue.x-k8s.io/job-uid={job_uid}',
-                '-o',
-                'jsonpath={.items[0].metadata.name}',
-            ],
-            capture=True,
-        ).stdout.strip()
-        if workload_name:
-            break
-        time.sleep(1)
-    if not workload_name:
-        raise RuntimeError(f'Failed to find Kueue Workload for Job {job_name}')
-    run_command(
-        [
-            'kubectl',
-            'wait',
-            f'workload/{workload_name}',
-            '-n',
-            'default',
-            f'--for=condition={condition}',
-            '--timeout=300s',
-        ]
-    )
 
 
 def get_service_account_token():
     # The token is minted once and baked into the instance config, so it has to outlive a
     # `ddev env start --dev` session. Without `--duration` the apiserver default is one hour,
     # after which the scrape 401s and the failure looks like missing metrics.
-    result = run_command(
-        ['kubectl', 'create', 'token', 'kueue-metrics-reader', '-n', 'default', '--duration=24h'],
-        capture=True,
-    )
-    return result.stdout.strip()
+    return kubectl_output(['create', 'token', 'kueue-metrics-reader', '-n', 'default', '--duration=24h'])
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(dd_save_state):
     with (
         build_kind_config() as kind_config,
         kind_run(conditions=[setup_kueue], kind_config=kind_config, sleep=10) as kubeconfig,
@@ -365,20 +366,21 @@ def dd_environment():
         kueue_host, kueue_port = stack.enter_context(
             port_forward(kubeconfig, 'kueue-system', 8443, 'service', 'kueue-controller-manager-metrics-service')
         )
-        instances = [
-            {
-                'openmetrics_endpoint': f'https://{kueue_host}:{kueue_port}/metrics',
-                'tls_verify': False,
-                'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
-                'collect_workload_events': True,
-                'kube_config_dict': kubeconfig_content,
-                # The workload-events test drives several consecutive check runs and needs the event
-                # state to advance, which a once-per-env interval prevented.
-                'min_collection_interval': 30,
-            }
-        ]
+        instance = {
+            'openmetrics_endpoint': f'https://{kueue_host}:{kueue_port}/metrics',
+            'tls_verify': False,
+            'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
+            'collect_workload_events': True,
+            'kube_config_dict': kubeconfig_content,
+            # The workload-events test drives several consecutive check runs and needs the event
+            # state to advance, which a once-per-env interval prevented.
+            'min_collection_interval': 30,
+        }
+        # The workload-events test builds its own check instance in-process. Handing it the instance
+        # through the e2e state avoids reconstructing ddev's per-platform config path by hand.
+        dd_save_state(INSTANCE_STATE_KEY, instance)
 
-        yield {'instances': instances}
+        yield {'instances': [instance]}
 
 
 @pytest.fixture

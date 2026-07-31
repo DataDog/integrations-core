@@ -15,7 +15,9 @@ from .metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
 RESOURCE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in RESOURCE_METRIC_MAP) + ')$'
 LOCAL_QUEUE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in LOCAL_QUEUE_METRIC_MAP) + ')$'
-PREEMPTING_WORKLOAD_UID_PATTERN = re.compile(r'\bworkload \(UID: ([^)]+)\)', re.IGNORECASE)
+# Kueue's real message is `... a workload (UID: <uid>, JobUID: <uid>) due to ...`, so the capture has to
+# stop at the first separator rather than run to the closing parenthesis and swallow the JobUID.
+PREEMPTING_WORKLOAD_UID_PATTERN = re.compile(r'\bworkload \(UID: ([^),\s]+)', re.IGNORECASE)
 
 RESOURCE_NAME_MAP = {
     'cpu': 'cpu',
@@ -364,11 +366,14 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if transition == 'evicted' and condition:
             if reason := condition.get('reason'):
                 tags.append(f'kueue_eviction_reason:{reason}')
-            preempted_condition = self.get_condition(workload, 'Preempted')
-            if reason == 'Preempted' and preempted_condition and preempted_condition.get('reason'):
-                tags.append(f'kueue_preemption_reason:{preempted_condition["reason"]}')
-            if preempted_by := self.preempting_workload_uid(condition, preempted_condition):
-                tags.append(f'kueue_preempted_by:{preempted_by}')
+            # Gated on the reason because a `FlavorMigration` eviction carries a lookalike message that
+            # would otherwise be mined for a preemptor UID that does not exist.
+            if reason == 'Preempted':
+                preempted_condition = self.get_condition(workload, 'Preempted')
+                if preempted_condition and preempted_condition.get('reason'):
+                    tags.append(f'kueue_preemption_reason:{preempted_condition["reason"]}')
+                if preempted_by := self.preempting_workload_uid(condition, preempted_condition):
+                    tags.append(f'kueue_preempted_by:{preempted_by}')
 
         return tags
 

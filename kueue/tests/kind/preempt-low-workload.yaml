@@ -16,7 +16,7 @@ spec:
       containers:
       - name: workload
         image: alpine:3.19.1
-        command: ['sh', '-c', 'sleep 3600']
+        command: ['sh', '-c', 'while true; do sleep 3600; done']
         resources:
           requests:
             cpu: 200m
