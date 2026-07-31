@@ -478,15 +478,19 @@ jobs:
         PROMOTED: ${{ steps.verify.outputs.promoted }}
       with:
         script: |
-          // Lockfiles the merge group leaves alone are master's own problem, and
-          // failing on them would block every unrelated pull request in the queue.
-          let outcome = ['success', 'No dependency changes.'];
-          if (process.env.CHECK_PROMOTION === 'true') {
-            // The merge box truncates descriptions to about 30 characters, so the
-            // missing wheels are left to the run log.
-            outcome = process.env.PROMOTED === 'true'
-              ? ['success', 'Wheels are promoted.']
-              : ['failure', 'Promote wheels and requeue.'];
+          // Only an explicit 'false' clears the merge group without verifying, so a
+          // step that died before writing its output still ends up red. Lockfiles
+          // the merge group leaves alone are master's own problem, and failing on
+          // them would block every unrelated pull request in the queue.
+          // The merge box truncates descriptions to about 30 characters, so the
+          // missing wheels are left to the run log.
+          let outcome;
+          if (process.env.CHECK_PROMOTION === 'false') {
+            outcome = ['success', 'No dependency changes.'];
+          } else if (process.env.PROMOTED === 'true') {
+            outcome = ['success', 'Wheels are promoted.'];
+          } else {
+            outcome = ['failure', 'Promote wheels and requeue.'];
           }
 
           const [state, description] = outcome;
