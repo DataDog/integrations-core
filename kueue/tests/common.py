@@ -14,12 +14,7 @@ def get_fixture_path(filename):
 
 
 def assert_series_with_tags(aggregator, metric_name, tags, value=None):
-    """Assert a single series of a metric carries all of the tags at once.
-
-    `assert_metric_has_tags` checks each tag independently, so it passes when the tags are spread across
-    different series; that is too weak for label sets that are only meaningful together, such as a
-    ClusterQueue name paired with its status.
-    """
+    """Assert a single series of a metric carries all of the tags at once, optionally with a value."""
     expected = set(tags)
     submitted = aggregator.metrics(metric_name)
     for series in submitted:

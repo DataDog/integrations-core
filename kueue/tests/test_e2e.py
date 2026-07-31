@@ -16,9 +16,11 @@ from datadog_checks.kueue import KueueCheck
 
 from .common import (
     CHECK_NAME,
+    CLUSTER_QUEUE_TAGS,
     EXPECTED_METRIC_TAGS,
     INACTIVE_CLUSTER_QUEUE_TAGS,
     INSTANCE_STATE_KEY,
+    LOCAL_QUEUE_TAGS,
     assert_series_with_tags,
     live_metadata_metrics,
 )
@@ -42,8 +44,10 @@ def test_e2e(dd_agent_check):
 
     for metric, tags in EXPECTED_METRIC_TAGS.items():
         aggregator.assert_metric(metric, at_least=1)
-        assert_series_with_tags(aggregator, metric, tags)
+        aggregator.assert_metric_has_tags(metric, tags)
 
+    assert_series_with_tags(aggregator, 'kueue.cluster_queue.status', [*CLUSTER_QUEUE_TAGS, 'status:active'], value=1)
+    assert_series_with_tags(aggregator, 'kueue.local_queue.status', [*LOCAL_QUEUE_TAGS, 'active:True'], value=1)
     assert_series_with_tags(aggregator, 'kueue.cluster_queue.status', INACTIVE_CLUSTER_QUEUE_TAGS, value=1)
 
 
