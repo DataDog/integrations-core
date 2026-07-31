@@ -6,6 +6,7 @@ import os
 import tempfile
 from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
+from glob import glob
 
 import pytest
 import yaml
@@ -26,10 +27,9 @@ from .kube import (
     wait_for_job_workload_condition,
 )
 
-KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
+KUEUE_VERSION_ENV = 'KUEUE_VERSION'  # exported by the hatch.toml env matrix
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
 MANAGER_CONTAINER = 'manager'  # container name in the upstream controller deployment
-WORKLOAD_IMAGE = 'alpine:3.19.1'  # keep in sync with the Job manifests under tests/kind
 # Two independent failures crashloop the controller on a fresh cluster, and both mitigations below
 # are needed because they address different causes:
 #   1. A kind service or pod subnet overlapping a host route (for example a VPN) hijacks in-cluster
@@ -258,13 +258,37 @@ def disable_visibility_server():
     )
 
 
-def preload_workload_image():
-    """Pull the workload image once and side-load it, instead of once per Job pod from Docker Hub."""
-    run_command(['docker', 'pull', WORKLOAD_IMAGE])
-    run_command(
-        # Cluster naming matches datadog_checks_dev/dev/kind.py.
-        ['kind', 'load', 'docker-image', WORKLOAD_IMAGE, '--name', f'cluster-{CHECK_NAME}-{get_active_env()}'],
-    )
+def kueue_version():
+    """Return the Kueue version under test, which the hatch.toml env matrix exports."""
+    version = os.environ.get(KUEUE_VERSION_ENV)
+    if not version:
+        raise RuntimeError(
+            f'{KUEUE_VERSION_ENV} is not set. The hatch.toml env matrix exports it, so run the suite through '
+            '`ddev test` or `ddev env start` rather than invoking pytest directly.'
+        )
+    return version
+
+
+def workload_images():
+    """Return the images the test Jobs run, read from the manifests so no constant has to track them."""
+    images = set()
+    for manifest in sorted(glob(manifest_path('*.yaml'))):
+        with open(manifest) as f:
+            for document in yaml.safe_load_all(f):
+                if not document or document.get('kind') != 'Job':
+                    continue
+                for container in document['spec']['template']['spec']['containers']:
+                    images.add(container['image'])
+    return images
+
+
+def preload_workload_images():
+    """Pull the workload images once and side-load them, instead of once per Job pod from Docker Hub."""
+    # Cluster naming matches datadog_checks_dev/dev/kind.py.
+    cluster_name = f'cluster-{CHECK_NAME}-{get_active_env()}'
+    for image in sorted(workload_images()):
+        run_command(['docker', 'pull', image])
+        run_command(['kind', 'load', 'docker-image', image, '--name', cluster_name])
 
 
 def wait_for_queues_active():
@@ -289,13 +313,13 @@ def wait_for_queues_active():
 
 
 def setup_kueue():
-    preload_workload_image()
+    preload_workload_images()
     kubectl(
         [
             'apply',
             '--server-side',
             '-f',
-            f'https://github.com/kubernetes-sigs/kueue/releases/download/{KUEUE_VERSION}/manifests.yaml',
+            f'https://github.com/kubernetes-sigs/kueue/releases/download/{kueue_version()}/manifests.yaml',
         ]
     )
 
