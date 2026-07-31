@@ -11,15 +11,15 @@ from urllib.parse import urlsplit
 # the container. The legacy check also calls /server_info before scraping
 # /stats, so letting that run against arbitrary ports risks hitting an
 # unrelated upstream and misidentifying it as Envoy's admin endpoint. Restrict
-# stats_url to the hinted admin port only; openmetrics_endpoint keeps the
+# stats_url to the hinted admin ports only; openmetrics_endpoint keeps the
 # default fallback across all candidate ports.
 #
 # Known limitation: this only discovers the legacy /stats endpoint when the
 # admin port matches one of the hinted ports used by this integration's
 # discovery strategy (8001, the port used in Datadog's own example configs and
-# test fixtures, and 9901, Envoy's own documented default). Envoy deployments
-# exposing admin on a different port still require a hand-written static
-# config.
+# test fixtures, and 9901, the port commonly used in Envoy documentation
+# examples). Envoy deployments exposing admin on a different port still
+# require a hand-written static config.
 ADMIN_PORTS = {8001, 9901}
 
 
