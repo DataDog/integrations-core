@@ -46,7 +46,7 @@
             "id": 3979223334086134,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n1. Transparent Firewall Events Over Time \n2. Number Of Times Failure Occured \n3. Top 10 Source Interface \n4. Top 10 Source IPs of the Packet \n5. Top 10 Destination IPs of the Packet \n6. Log Details \n7. Number of Times Routing Failed \n8. Events by Protocol \n9. Top 10 Source IP \n10. Top 10 Destination IP \n11. Top 10 Source Interface \n12. Log Details \n13. Log Details ",
+                "content": "## Widgets\n\n1. Transparent Firewall Events Over Time \n2. Number Of Times Failure Occurred \n3. Top 10 Source Interface \n4. Top 10 Source IPs of the Packet \n5. Top 10 Destination IPs of the Packet \n6. Log Details \n7. Number of Times Routing Failed \n8. Events by Protocol \n9. Top 10 Source IP \n10. Top 10 Destination IP \n11. Top 10 Source Interface \n12. Log Details \n13. Log Details ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -133,7 +133,7 @@
                     {
                         "id": 8203742635925598,
                         "definition": {
-                            "title": "Number Of Times Failure Occured",
+                            "title": "Number Of Times Failure Occurred",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
