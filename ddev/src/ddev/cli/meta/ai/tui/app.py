@@ -44,7 +44,7 @@ from ddev.cli.meta.ai.tui.theme import togo_markdown_theme, togo_theme
 
 if TYPE_CHECKING:
     from ddev.ai.config.engine import ConfigurationEngine
-    from ddev.ai.runtime.outcome import RunOutcome
+    from ddev.ai.runtime.outcome import RunOutcome, RunOutcomeError
     from ddev.cli.application import Application
 
 
@@ -56,6 +56,9 @@ class OrchestratorLike(Protocol):
 
     @property
     def outcome(self) -> RunOutcome | None: ...
+
+    @property
+    def outcome_recording_error(self) -> RunOutcomeError | None: ...
 
     async def run_async(self) -> None: ...
 

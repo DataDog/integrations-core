@@ -79,6 +79,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._started_at: datetime | None = None
         self._resume_completed: set[str] = set()
         self._outcome: RunOutcome | None = None
+        self._outcome_recording_error: RunOutcomeError | None = None
 
     @property
     def failed_phase(self) -> str | None:
@@ -88,6 +89,11 @@ class PhaseOrchestrator(EventBusOrchestrator):
     def outcome(self) -> RunOutcome | None:
         """Return the deterministic outcome after the run ends."""
         return self._outcome
+
+    @property
+    def outcome_recording_error(self) -> RunOutcomeError | None:
+        """Return the error that prevented the outcome from being recorded for a failed run, if any."""
+        return self._outcome_recording_error
 
     def run(self) -> None:
         """Run the flow and record its deterministic outcome."""
@@ -108,6 +114,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 await self._record_outcome(e)
             except RunOutcomeError as outcome_error:
                 self._logger.exception("Failed to record the outcome for a failed flow")
+                self._outcome_recording_error = outcome_error
                 e.add_note(f"Outcome recording also failed: {outcome_error}")
             raise
         else:

@@ -58,6 +58,7 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeGoalCheck,
     ContextCleared,
     ExecutionFailed,
+    OutcomeRecordingErrored,
     PhaseErrored,
     PhaseFinished,
     PhaseStarted,
@@ -134,6 +135,7 @@ class ExecutionScreen(TogoScreen):
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
         self._outcome: RunOutcome | None = None
+        self._error_banner_text: str | None = None
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -253,6 +255,10 @@ class ExecutionScreen(TogoScreen):
         except Exception as error:
             if orchestrator is None or orchestrator.failed_phase is None:
                 self.post_message(ExecutionFailed(error))
+            else:
+                recording_error = orchestrator.outcome_recording_error
+                if recording_error is not None:
+                    self.post_message(OutcomeRecordingErrored(recording_error))
 
     def _build_real_orchestrator(self, callbacks: Callbacks) -> PhaseOrchestrator:
         """Construct the real PhaseOrchestrator for production use."""
@@ -291,6 +297,7 @@ class ExecutionScreen(TogoScreen):
             pass
 
     def _show_error_banner(self, message: str, *, warning: bool = False) -> None:
+        self._error_banner_text = message
         try:
             widget = self.query_one("#execution-error", Static)
         except NoMatches:
@@ -298,6 +305,11 @@ class ExecutionScreen(TogoScreen):
         widget.update(message)
         widget.set_class(warning, "outcome-warning")
         widget.display = True
+
+    def _append_error_banner(self, message: str, *, warning: bool = False) -> None:
+        """Add a line to the error banner instead of replacing whatever it already shows."""
+        combined = f"- {self._error_banner_text}\n- {message}" if self._error_banner_text else message
+        self._show_error_banner(combined, warning=warning)
 
     def _show_run_error(self, error: BaseException, phase_id: str | None = None) -> None:
         detail = compact_error_detail(error, phase_id)
@@ -466,6 +478,10 @@ class ExecutionScreen(TogoScreen):
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED
         self._show_run_error(msg.error)
+
+    def on_outcome_recording_errored(self, msg: OutcomeRecordingErrored) -> None:
+        detail = compact_error_detail(msg.error)
+        self._append_error_banner(f"The flow outcome could not be recorded: {detail}", warning=True)
 
     def on_phase_selected(self, msg: PhaseSelected) -> None:
         status = self._phase_statuses.get(msg.phase_id, RunStatus.PENDING)

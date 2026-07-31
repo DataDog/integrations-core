@@ -63,6 +63,14 @@ class RunOutcomeErrored(Message):
         self.outcome = outcome
 
 
+class OutcomeRecordingErrored(Message):
+    """Fired when a failed run's outcome could not be built or persisted after the phase failure."""
+
+    def __init__(self, error: RunOutcomeError) -> None:
+        super().__init__()
+        self.error = error
+
+
 class ExecutionFailed(Message):
     """Fired when execution exits through an unexpected exception."""
 
