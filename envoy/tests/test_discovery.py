@@ -45,9 +45,9 @@ def test_openmetrics_endpoint_disables_server_info_on_non_admin_port():
     assert instances_by_port[9901]['collect_server_info'] is True
 
 
-def test_ipv6_host_does_not_abort_candidate_generation():
-    # An unbracketed IPv6 literal in the generated URL makes urlsplit(...).port raise
-    # ValueError; that must not propagate and abort generation for the whole service.
+def test_ipv6_host_is_bracketed_in_generated_endpoint():
+    # The generated template interpolates service.host unbracketed, producing an invalid
+    # URL for IPv6 literals. The override must repair it, not just avoid crashing on it.
     service = Service(
         id='envoy',
         host='fd00::1',
@@ -57,4 +57,5 @@ def test_ipv6_host_does_not_abort_candidate_generation():
     instances = generated_instances(service)
 
     assert len(instances) == 1
+    assert instances[0]['openmetrics_endpoint'] == 'http://[fd00::1]:8080/stats/prometheus'
     assert instances[0]['collect_server_info'] is False

@@ -24,17 +24,19 @@ from datadog_checks.base.utils.discovery import Service
 #
 # service.host is interpolated unbracketed for IPv6 literals by the generated
 # template (a pre-existing gap in the shared discovery templating, not specific to
-# this override), which makes urlsplit(...).port raise ValueError instead of
-# returning a port number. Treat that as "not a known admin port" rather than
-# letting the exception abort candidate generation entirely.
+# this override), which produces an invalid URL like http://fd00::1:8080/... and
+# makes urlsplit(...).port raise ValueError instead of returning a port number.
+# service.host itself is available here unmangled, so repair the URL by bracketing
+# it before parsing, rather than just swallowing the parse error.
 ADMIN_PORTS = {8001, 9901}
 
 
-def candidates(
-    service: Service, default: Callable[[Service], Iterator[dict[str, Any]]]
-) -> Iterator[dict[str, Any]]:
+def candidates(service: Service, default: Callable[[Service], Iterator[dict[str, Any]]]) -> Iterator[dict[str, Any]]:
+    bracketed_host = f'[{service.host}]' if ':' in service.host else service.host
     for candidate in default(service):
         instance = candidate['instances'][0]
+        if bracketed_host != service.host:
+            instance['openmetrics_endpoint'] = instance['openmetrics_endpoint'].replace(service.host, bracketed_host, 1)
         try:
             port = urlsplit(instance['openmetrics_endpoint']).port
         except ValueError:
