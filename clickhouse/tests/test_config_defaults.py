@@ -109,6 +109,12 @@ EXPECTED_DEFAULTS = {
         'collection_interval': 10,
         'max_samples_per_collection': 1000,
     },
+    # === DBM: Async insert flushes ===
+    'collect_async_inserts': {
+        'enabled': False,
+        'collection_interval': 60,
+        'max_samples_per_collection': 1000,
+    },
     # === Tagging ===
     'tags': (),
     'disable_generic_tags': False,

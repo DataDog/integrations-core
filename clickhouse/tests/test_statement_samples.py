@@ -167,6 +167,7 @@ def test_active_queries_query_format():
     assert 'current_database' in ACTIVE_QUERIES_QUERY
     assert 'thread_ids' in ACTIVE_QUERIES_QUERY
     assert 'is_cancelled' in ACTIVE_QUERIES_QUERY
+    assert 'hostName() as server_node' in ACTIVE_QUERIES_QUERY
 
 
 def test_active_connections_query_format():
@@ -195,7 +196,7 @@ def test_normalize_row_with_all_fields(check_with_dbm):
     """Test that all fields are properly normalized from system.processes"""
     samples = check_with_dbm.statement_samples
 
-    # Create a mock row with all 26 fields from ACTIVE_QUERIES_QUERY
+    # Create a mock row with all 27 fields from ACTIVE_QUERIES_QUERY
     mock_row = (
         1.234,  # elapsed
         'abc-123-def',  # query_id
@@ -223,6 +224,7 @@ def test_normalize_row_with_all_fields(check_with_dbm):
         'app-server-01',  # client_hostname
         0,  # is_cancelled
         'python-requests/2.28.0',  # http_user_agent
+        'ch-node-1',  # server_node
     )
 
     normalized_row = samples._normalize_row(mock_row)
@@ -261,6 +263,9 @@ def test_normalize_row_with_all_fields(check_with_dbm):
 
     # Verify HTTP field
     assert normalized_row['http_user_agent'] == 'python-requests/2.28.0'
+
+    # Verify node identity (surfaced as @clickhouse.clickhouse_node on the sample)
+    assert normalized_row['clickhouse_node'] == 'ch-node-1'
 
     # Verify obfuscation happened
     assert 'statement' in normalized_row

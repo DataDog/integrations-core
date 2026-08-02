@@ -907,7 +907,7 @@ METRICS = {
     'cluster.ratelimit.ok': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -915,7 +915,7 @@ METRICS = {
     'cluster.ratelimit.error': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -923,7 +923,7 @@ METRICS = {
     'cluster.ratelimit.over_limit': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
