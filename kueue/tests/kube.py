@@ -27,8 +27,8 @@ def kubectl(args: list[str], env: dict[str, str] | None = None, check: bool = Tr
     return run_command(['kubectl', *args], env=env, check=check, **kwargs)
 
 
-def kubectl_output(args: list[str], env: dict[str, str] | None = None) -> str:
-    return kubectl(args, env=env, capture='stdout').stdout.strip()
+def kubectl_output(args: list[str], env: dict[str, str] | None = None, check: bool = True) -> str:
+    return kubectl(args, env=env, check=check, capture=True).stdout.strip()
 
 
 def retry_apply(manifest: str, env: dict[str, str] | None = None) -> None:
@@ -60,6 +60,7 @@ def find_job_workload(job_name: str, env: dict[str, str] | None = None) -> str:
                 'jsonpath={.items[0].metadata.name}',
             ],
             env=env,
+            check=False,
         )
         if workload_name:
             return workload_name
