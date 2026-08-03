@@ -147,6 +147,19 @@ def test_get_template_metrics_raise_exception(aggregator, instance, dd_run_check
     aggregator.assert_metric("elasticsearch.templates.count", count=0)
 
 
+def test_get_template_metrics_non_json_body(aggregator, instance, dd_run_check, mock_es_endpoints):
+    # A 200 carrying a body that is not JSON is an upstream fault, not a reason to abort the run.
+    mock_es_endpoints(
+        {'{}/_cat/templates?format=json'.format(URL): [MockHTTPResponse(content='<html>proxy error</html>')]}
+    )
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    dd_run_check(check)
+
+    aggregator.assert_metric("elasticsearch.templates.count", count=0)
+    aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK)
+
+
 @pytest.mark.parametrize(
     'error, should_raise',
     [

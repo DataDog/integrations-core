@@ -185,6 +185,27 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
         aggregator.assert_metric(metric['name'], metric['value'], count=metric['count'], tags=metric['tags'])
 
 
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {'http_error': {'/v1/apps/example-app-1/volumes': MockHTTPResponse(content='<html>gateway</html>')}},
+            id='non-json body',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_non_json_body_logged_at_debug(dd_run_check, instance, caplog):
+    # A 200 carrying a body that is not JSON is an upstream fault, so it must not be reported as an agent fault.
+    caplog.set_level(logging.DEBUG)
+    check = FlyIoCheck('fly_io', {}, [instance])
+    dd_run_check(check)
+
+    assert "Encountered an HTTP error in '_collect_volumes_for_app'" in caplog.text
+    assert "Encountered an Exception in '_collect_volumes_for_app'" not in caplog.text
+
+
 @pytest.mark.usefixtures("mock_http_get")
 def test_external_host_tags(instance, datadog_agent, dd_run_check):
     check = FlyIoCheck('fly_io', {}, [instance])

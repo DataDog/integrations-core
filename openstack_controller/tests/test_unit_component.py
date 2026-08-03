@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import mock
 import openstack.exceptions
 import pytest
@@ -35,6 +37,8 @@ CAUGHT_HTTP_EXCEPTIONS = [
     pytest.param(openstack.exceptions.HttpException(), id='sdk HttpException'),
     pytest.param(HTTPRequestError('boom'), id='agnostic HTTPRequestError'),
     pytest.param(HTTPStatusError('boom'), id='agnostic HTTPStatusError'),
+    # A 2xx carrying a body that is not JSON is an upstream fault, not an agent fault.
+    pytest.param(json.JSONDecodeError('Expecting value', '<html>', 0), id='json decode error'),
 ]
 
 # Exceptions the decorator must let fall through to the generic handler: logged at ERROR,

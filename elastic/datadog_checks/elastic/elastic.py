@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import re
 import time
 from collections import defaultdict, namedtuple
@@ -279,7 +280,8 @@ class ESCheck(AgentCheck):
     def _get_template_metrics(self, admin_forwarder, base_tags):
         try:
             template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
-        except AgentHTTPError as e:
+        # The body is decoded outside _get_data's own guard, so the decode error surfaces here.
+        except (AgentHTTPError, json.JSONDecodeError) as e:
             self.log.debug("Error reading templates info from servers (%s) - template metrics will be missing", e)
             return
 

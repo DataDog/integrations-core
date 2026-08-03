@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import inspect
+import json
 from enum import Enum, unique
 from functools import wraps
 
@@ -77,7 +78,8 @@ class Component:
                         tags = argument_value('tags', func, *args, **kwargs)
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.OK, tags=tags)
                     return result if result is not None else True
-                except (HttpException, HTTPRequestError, HTTPStatusError) as e:
+                # A body that fails to decode is an upstream fault, so it stays on the debug arm.
+                except (HttpException, HTTPRequestError, HTTPStatusError, json.JSONDecodeError) as e:
                     self.check.log.debug(
                         "Encountered an HTTP error in '%s:%s' [%s]: %s",
                         self.__class__.__name__,
