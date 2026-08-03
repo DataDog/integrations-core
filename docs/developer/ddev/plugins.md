@@ -142,4 +142,4 @@ is desired. This fixture is responsible for starting and stopping environments a
 - `docker_volumes` - A `list` of `str` representing [Docker volume mounts][docker-volume-docs] if `agent_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
 - `docker_platform` - The container architecture to use if `agent_type` is `docker`. Currently, we support `linux` (default) and `windows`.
 - `kubernetes` - Configuration used when `agent_type` is `kubernetes`. It requires `kubeconfig` and optionally accepts `auto_conf`, `image_pull_policy`, and `wait_timeout`. The backend is supported only with a disposable, fixture-owned cluster provisioned by `kind_run`; it uses the fixed `ddev-agent` namespace, and fixture teardown deletes the whole cluster.
-- `logs_config` - A `list` of configs that will be used by the Logs Agent. You will never need to use this directly, but rather via [higher level abstractions](test.md#logs).
+- `logs_config` - A `list` of configs used by the Logs Agent. The [higher-level shared-file log helper](test.md#logs) currently supports only `agent_type: docker`.
