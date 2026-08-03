@@ -1168,6 +1168,10 @@ class UnlimitedCheck(LimitedCheck):
     DEFAULT_METRIC_LIMIT = 0
 
 
+class DefaultLimitedCheck(LimitedCheck):
+    DEFAULT_METRIC_LIMIT = 3
+
+
 class TestLimits:
     def test_context_uid(self, aggregator):
         check = LimitedCheck()
@@ -1307,10 +1311,11 @@ class TestLimits:
         return emit
 
     @staticmethod
-    def expected_telemetry_calls(check_name, dropped):
+    def expected_telemetry_calls(check_name, dropped, limit_type='custom'):
+        labels = {'check_name': check_name, 'limit_type': limit_type}
         return [
-            mock.call('checks', 'max_returned_metrics_reached', 1, 'counter', labels={'check_name': check_name}),
-            mock.call('checks', 'max_returned_metrics_dropped', dropped, 'counter', labels={'check_name': check_name}),
+            mock.call('checks', 'max_returned_metrics_reached', 1, 'counter', labels=labels),
+            mock.call('checks', 'max_returned_metrics_dropped', dropped, 'counter', labels=labels),
         ]
 
     @pytest.mark.parametrize('debug_metrics', [False, True])
@@ -1326,6 +1331,13 @@ class TestLimits:
 
         assert emit_agent_telemetry.call_args_list == self.expected_telemetry_calls('a_check', 2) * 2
         assert len(aggregator.metrics('foo')) == 6
+
+    def test_metric_limit_telemetry_default_limit_type(self, dd_run_check, emit_agent_telemetry):
+        check = DefaultLimitedCheck('a_check', {}, [{}])
+
+        dd_run_check(check)
+
+        assert emit_agent_telemetry.call_args_list == self.expected_telemetry_calls('a_check', 2, 'default')
 
     @pytest.mark.parametrize(
         'check_class, instance',

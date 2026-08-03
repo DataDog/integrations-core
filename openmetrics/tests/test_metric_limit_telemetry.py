@@ -45,5 +45,6 @@ def test_metric_limit_telemetry_emitted_when_limit_reached(
     dd_run_check(check)
 
     assert len(check.get_warnings()) == 1
-    datadog_agent.assert_labeled_telemetry(*REACHED_TELEMETRY, 1, {'check_name': 'openmetrics'})
-    datadog_agent.assert_labeled_telemetry(*DROPPED_TELEMETRY, expected_dropped, {'check_name': 'openmetrics'})
+    labels = {'check_name': 'openmetrics', 'limit_type': 'custom'}
+    datadog_agent.assert_labeled_telemetry(*REACHED_TELEMETRY, 1, labels)
+    datadog_agent.assert_labeled_telemetry(*DROPPED_TELEMETRY, expected_dropped, labels)
