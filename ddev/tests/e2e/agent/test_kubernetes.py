@@ -6,6 +6,7 @@ import subprocess
 
 import pytest
 
+from ddev.e2e.agent.constants import AgentEnvVars
 from ddev.e2e.agent.kubernetes import KubernetesAgent
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
@@ -289,6 +290,20 @@ def test_rejects_invalid_wait_timeout_before_creating_resources(agent, metadata,
 
     with pytest.raises(ValueError, match='wait_timeout'):
         agent.start(agent_build='', local_packages={}, env_vars={})
+
+    run_command.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ('env_vars', 'expected'),
+    [
+        ({AgentEnvVars.DOGSTATSD_PORT: '8125'}, 'DogStatsD'),
+        ({AgentEnvVars.LOGS_ENABLED: 'true'}, 'logs'),
+    ],
+)
+def test_rejects_unsupported_options_before_creating_resources(agent, run_command, env_vars, expected):
+    with pytest.raises(NotImplementedError, match=expected):
+        agent.start(agent_build='', local_packages={}, env_vars=env_vars)
 
     run_command.assert_not_called()
 
