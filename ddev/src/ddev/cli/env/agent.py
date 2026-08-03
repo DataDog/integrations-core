@@ -49,6 +49,18 @@ def _validate_env_vars(ctx: click.Context, param: click.Parameter, value: tuple[
     return env_vars or None
 
 
+def _sync_restored_config(app: Application, agent: AgentInterface) -> None:
+    import sys
+
+    original_error = sys.exception()
+    try:
+        agent.sync_config()
+    except Exception as e:
+        if original_error is None:
+            raise
+        app.display_warning(f'Unable to restore the Agent configuration: {e}')
+
+
 @click.command(
     short_help='Invoke the Agent', context_settings={'help_option_names': [], 'ignore_unknown_options': True}
 )
@@ -129,7 +141,7 @@ def agent(
             app.abort(str(e))
         finally:
             env_data.config_file.unlink()
-            agent.sync_config()
+            _sync_restored_config(app, agent)
     else:
         temp_config_file = env_data.config_file.parent / f'{env_data.config_file.name}.bak.example'
         env_data.config_file.replace(temp_config_file)
@@ -140,4 +152,4 @@ def agent(
             app.abort(str(e))
         finally:
             temp_config_file.replace(env_data.config_file)
-            agent.sync_config()
+            _sync_restored_config(app, agent)
