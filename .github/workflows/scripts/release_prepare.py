@@ -1,7 +1,7 @@
 """Prepare a release: tag packages, detect the release list, and validate readiness.
 
 Environment variables:
-  TARGET            'prod' pushes tags; 'dev' (default) creates them locally only
+  CREATE_TAGS       When false, never create tags and detect packages only from existing tags
   DRY_RUN           When true, tags are created locally but never pushed
   SELECTED_PACKAGES JSON array of packages to tag, 'all', or empty to tag all
   SOURCE_REPO       Source repository name (integrations-core, integrations-extras, marketplace)
@@ -201,15 +201,28 @@ def _validate(
 
 
 def main() -> None:
+    create_tags = parse_bool_env("CREATE_TAGS", default=True)
     dry_run = parse_bool_env("DRY_RUN", default=False)
     selected = os.environ.get("SELECTED_PACKAGES", "")
     source_repo = os.environ.get("SOURCE_REPO", "integrations-core")
     ref = os.environ.get("REF", "")
     is_stable_release = _parse_is_stable_release()
 
-    new_tags = _tag(dry_run, selected)
+    new_tags = _tag(dry_run, selected) if create_tags else []
 
     packages, mode = _detect(selected)
+    if not create_tags and not selected.strip() and not packages:
+        print(
+            "Release preparation failed: no release tags point at the supplied source ref. "
+            "The legacy release pipeline must push tags before dispatching this workflow.",
+            file=sys.stderr,
+        )
+        write_summary(
+            "## Wheel Release\n\n"
+            "> ⚠️ No release tags point at the supplied source ref. "
+            "Confirm the legacy tag push completed before retrying.\n"
+        )
+        sys.exit(1)
 
     set_outputs(
         packages=json.dumps(packages),

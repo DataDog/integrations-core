@@ -6,6 +6,7 @@ import subprocess
 
 import pytest
 
+from ddev.e2e.agent.constants import AgentEnvVars
 from ddev.e2e.agent.kubernetes import KubernetesAgent
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
@@ -55,8 +56,8 @@ def agent(app, get_integration, metadata, config_file):
     return KubernetesAgent(app, get_integration('velero'), 'py3.12', metadata, config_file)
 
 
-def successful_process(command, *, stdout=b''):
-    return subprocess.CompletedProcess(command, 0, stdout=stdout)
+def successful_process(command, *, stdout=b'', stderr=None):
+    return subprocess.CompletedProcess(command, 0, stdout=stdout, stderr=stderr)
 
 
 @pytest.fixture
@@ -270,8 +271,10 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
         f'{TEST_NAMESPACE}/{TEST_POD}:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
     )
     restart_index = find_exec_command(calls, ['sh', '-c'], prefix=True)
-    prepared_index = find_exec_command(calls, ['touch', TEST_PREPARED_MARKER])
-    assert start_index < post_install_index < restart_index < prepared_index
+    marker_index = find_exec_command(calls, ['touch', TEST_PREPARED_MARKER])
+    prepared_indices = exec_command_indices(calls, ['test', '-f', TEST_PREPARED_MARKER])
+    assert len(prepared_indices) == 1
+    assert start_index < post_install_index < marker_index < restart_index < prepared_indices[0]
     assert metadata['kubernetes']['local_packages'] == {
         str(local_base): '[kube]',
         str(integration): '[deps]',
@@ -291,6 +294,38 @@ def test_rejects_invalid_wait_timeout_before_creating_resources(agent, metadata,
     run_command.assert_not_called()
 
 
+@pytest.mark.parametrize(
+    ('env_vars', 'expected'),
+    [
+        ({AgentEnvVars.DOGSTATSD_PORT: '8125'}, 'DogStatsD exposure'),
+        ({AgentEnvVars.LOGS_ENABLED: 'true'}, 'shared-file log collection'),
+    ],
+)
+def test_rejects_unsupported_options_before_creating_resources(agent, run_command, env_vars, expected):
+    with pytest.raises(NotImplementedError, match=expected):
+        agent.start(agent_build='', local_packages={}, env_vars=env_vars)
+
+    run_command.assert_not_called()
+
+
+def test_start_detects_container_replacement_during_restart(agent, app, mocker):
+    def run(command, **kwargs):
+        if command[-2:] == ['config', 'current-context']:
+            return successful_process(command, stdout=b'kind-test\n')
+        if command[-4:] == ['get', 'nodes', '-o', 'json']:
+            nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
+            return successful_process(command, stdout=json.dumps(nodes).encode())
+        # A replaced container no longer carries the marker stamped before the restart.
+        if command[-3:] == ['test', '-f', TEST_PREPARED_MARKER]:
+            return subprocess.CompletedProcess(command, 1)
+        return successful_process(command)
+
+    mocker.patch.object(app.platform, 'run_command', side_effect=run)
+
+    with pytest.raises(RuntimeError, match='may have restarted'):
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+
 def test_rejects_non_kind_context_before_inspecting_cluster(agent, app, mocker):
     run_command = mocker.patch.object(
         app.platform,
@@ -304,7 +339,7 @@ def test_rejects_non_kind_context_before_inspecting_cluster(agent, app, mocker):
     run_command.assert_called_once_with(
         ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'config', 'current-context'],
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.PIPE,
     )
 
 
@@ -328,7 +363,25 @@ def test_rejects_multi_node_clusters(agent, app, mocker):
     assert not any('create' in command for command in calls)
     for index in (context_index, topology_index):
         assert run_command.call_args_list[index].kwargs['stdout'] is subprocess.PIPE
-        assert run_command.call_args_list[index].kwargs['stderr'] is subprocess.STDOUT
+        assert run_command.call_args_list[index].kwargs['stderr'] is subprocess.PIPE
+
+
+def test_validation_ignores_kubectl_warnings(agent, app, mocker):
+    warning = b'Warning: deprecated API\n'
+    nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
+    run_command = mocker.patch.object(
+        app.platform,
+        'run_command',
+        side_effect=[
+            successful_process([], stdout=b'kind-test\n', stderr=warning),
+            successful_process([], stdout=json.dumps(nodes).encode(), stderr=warning),
+        ],
+    )
+
+    agent._validate_context()
+    agent._validate_topology()
+
+    assert all(call.kwargs['stderr'] is subprocess.PIPE for call in run_command.call_args_list)
 
 
 def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
@@ -455,4 +508,13 @@ def test_show_logs_targets_agent_container(agent, run_command):
 def test_kubeconfig_validation(app, get_integration, config_file):
     agent = KubernetesAgent(app, get_integration('velero'), 'py3.12', {'kubernetes': {}}, config_file)
     with pytest.raises(ValueError, match='non-empty `kubeconfig`'):
+        _ = agent._kubeconfig
+
+
+@pytest.mark.parametrize('kubernetes_metadata', [None, 'kubeconfig'], ids=['missing', 'not_a_mapping'])
+def test_rejects_metadata_without_kubernetes_mapping(app, get_integration, config_file, kubernetes_metadata):
+    metadata = {} if kubernetes_metadata is None else {'kubernetes': kubernetes_metadata}
+    agent = KubernetesAgent(app, get_integration('velero'), 'py3.12', metadata, config_file)
+
+    with pytest.raises(ValueError, match='requires a `kubernetes` metadata mapping'):
         _ = agent._kubeconfig

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import os
-import re
 import sys
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from functools import cache, cached_property, partial
@@ -12,6 +11,7 @@ from typing import TYPE_CHECKING, Callable, Type
 
 import stamina
 
+from ddev.e2e.agent.image import normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
 from ddev.utils.structures import EnvVars
 
@@ -19,16 +19,6 @@ if TYPE_CHECKING:
     import subprocess
 
     from ddev.utils.fs import Path
-
-AGENT_IMAGE_REGEX = r'^([^/]+)/([^:]+):(.*)$'
-AGENT_VERSION_REGEX = (
-    # Main version: 7, 7.69, 7.69.0 ...
-    r"^(?P<version>\d+(?:\.[\dx]+)*|latest|main|master|nightly)"
-    # rcs: rc.1, rc ...
-    r"(?P<rc>-rc(?:\.\d+)?)?"
-    # Anny suffixes: -jmx, -linux, -full...
-    r"(?P<suffixes>(?:-[a-zA-Z0-9]+)*)$"
-)
 
 
 @contextmanager
@@ -43,42 +33,6 @@ def disable_integration_before_install(config_file):
     new = config_file.rename(config_file.parent / (config_file.name + ".example"))
     yield
     new.rename(config_file.parent / old)
-
-
-def normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
-    if not agent_build:
-        return 'registry.datadoghq.com/agent-dev:master-py3'
-
-    if match := re.match(AGENT_IMAGE_REGEX, agent_build):
-        org, image, tag = match.groups()
-
-        if org != 'datadog' and org != 'registry.datadoghq.com':
-            # Some non datadog image has been selected
-            return agent_build
-
-        version_match = re.match(AGENT_VERSION_REGEX, tag)
-
-        if version_match is None:
-            # Not sure how to extract information for a version of this shape
-            return agent_build
-
-        version = version_match.group('version')
-        rc = version_match.group('rc')
-        rc = rc if rc else ''
-        suffixes = version_match.group('suffixes')
-
-        # Add -py suffix if missing, only in agent-dev the agent does not have py3 suffix after agent 6
-        if image == 'agent-dev':
-            if not (rc != '' or any(suffix in suffixes for suffix in ['py', 'fips']) or version[0].isdigit()):
-                suffixes = f'-py{python_major}{suffixes}'
-
-        # Add jmx suffix if missing
-        if use_jmx and '-jmx' not in suffixes:
-            suffixes += '-jmx'
-
-        return f'{org}/{image}:{version}{rc}{suffixes}'
-
-    return agent_build
 
 
 class DockerAgent(AgentInterface):

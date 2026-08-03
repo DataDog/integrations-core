@@ -1,0 +1,1 @@
+Emit a `consumer_membership` data-streams-message per consumer group with the Kafka cluster id, group id and current member ids.
