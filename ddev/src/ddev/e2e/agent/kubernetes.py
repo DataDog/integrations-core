@@ -84,20 +84,21 @@ class KubernetesAgent(AgentInterface):
     def _kubectl(self, args: list[str], **kwargs) -> subprocess.CompletedProcess:
         return self.platform.run_command([*self._kubectl_prefix, *args], **kwargs)
 
-    def _captured_kubectl(self, args: list[str], **kwargs) -> subprocess.CompletedProcess:
+    def _captured_kubectl(self, args: list[str], *, merge_stderr: bool = True, **kwargs) -> subprocess.CompletedProcess:
         return self._kubectl(
             args,
             stdout=self.platform.modules.subprocess.PIPE,
-            stderr=self.platform.modules.subprocess.STDOUT,
+            stderr=(self.platform.modules.subprocess.STDOUT if merge_stderr else self.platform.modules.subprocess.PIPE),
             **kwargs,
         )
 
     @staticmethod
-    def _process_output(process: subprocess.CompletedProcess) -> str:
-        output = process.stdout or b''
-        if isinstance(output, bytes):
-            return output.decode('utf-8', errors='replace')
-        return output
+    def _process_output(process: subprocess.CompletedProcess, *, include_stderr: bool = False) -> str:
+        streams = (process.stdout, process.stderr) if include_stderr else (process.stdout,)
+        return ''.join(
+            stream.decode('utf-8', errors='replace') if isinstance(stream, bytes) else stream or ''
+            for stream in streams
+        )
 
     def _exec(
         self,
@@ -117,18 +118,22 @@ class KubernetesAgent(AgentInterface):
         return self._kubectl(args, check=check)
 
     def _validate_context(self) -> None:
-        process = self._captured_kubectl(['config', 'current-context'])
+        process = self._captured_kubectl(['config', 'current-context'], merge_stderr=False)
         if process.returncode:
-            raise RuntimeError(f'Unable to inspect Kubernetes context: {self._process_output(process)}')
+            raise RuntimeError(
+                f'Unable to inspect Kubernetes context: {self._process_output(process, include_stderr=True)}'
+            )
 
         context = self._process_output(process).strip()
         if not context.startswith('kind-'):
             raise RuntimeError(f'Refusing to use non-Kind Kubernetes context `{context}`')
 
     def _validate_topology(self) -> None:
-        process = self._captured_kubectl(['get', 'nodes', '-o', 'json'])
+        process = self._captured_kubectl(['get', 'nodes', '-o', 'json'], merge_stderr=False)
         if process.returncode:
-            raise RuntimeError(f'Unable to inspect Kubernetes nodes: {self._process_output(process)}')
+            raise RuntimeError(
+                f'Unable to inspect Kubernetes nodes: {self._process_output(process, include_stderr=True)}'
+            )
 
         try:
             node_data = json.loads(self._process_output(process))
