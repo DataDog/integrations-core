@@ -7,6 +7,7 @@ import json
 import time
 from typing import TYPE_CHECKING, Any, cast
 
+from ddev.e2e.agent.constants import AgentEnvVars
 from ddev.e2e.agent.image import normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
 
@@ -83,20 +84,21 @@ class KubernetesAgent(AgentInterface):
     def _kubectl(self, args: list[str], **kwargs) -> subprocess.CompletedProcess:
         return self.platform.run_command([*self._kubectl_prefix, *args], **kwargs)
 
-    def _captured_kubectl(self, args: list[str], **kwargs) -> subprocess.CompletedProcess:
+    def _captured_kubectl(self, args: list[str], *, merge_stderr: bool = True, **kwargs) -> subprocess.CompletedProcess:
         return self._kubectl(
             args,
             stdout=self.platform.modules.subprocess.PIPE,
-            stderr=self.platform.modules.subprocess.STDOUT,
+            stderr=(self.platform.modules.subprocess.STDOUT if merge_stderr else self.platform.modules.subprocess.PIPE),
             **kwargs,
         )
 
     @staticmethod
-    def _process_output(process: subprocess.CompletedProcess) -> str:
-        output = process.stdout or b''
-        if isinstance(output, bytes):
-            return output.decode('utf-8', errors='replace')
-        return output
+    def _process_output(process: subprocess.CompletedProcess, *, include_stderr: bool = False) -> str:
+        streams = (process.stdout, process.stderr) if include_stderr else (process.stdout,)
+        return ''.join(
+            stream.decode('utf-8', errors='replace') if isinstance(stream, bytes) else stream or ''
+            for stream in streams
+        )
 
     def _exec(
         self,
@@ -116,18 +118,22 @@ class KubernetesAgent(AgentInterface):
         return self._kubectl(args, check=check)
 
     def _validate_context(self) -> None:
-        process = self._captured_kubectl(['config', 'current-context'])
+        process = self._captured_kubectl(['config', 'current-context'], merge_stderr=False)
         if process.returncode:
-            raise RuntimeError(f'Unable to inspect Kubernetes context: {self._process_output(process)}')
+            raise RuntimeError(
+                f'Unable to inspect Kubernetes context: {self._process_output(process, include_stderr=True)}'
+            )
 
         context = self._process_output(process).strip()
         if not context.startswith('kind-'):
             raise RuntimeError(f'Refusing to use non-Kind Kubernetes context `{context}`')
 
     def _validate_topology(self) -> None:
-        process = self._captured_kubectl(['get', 'nodes', '-o', 'json'])
+        process = self._captured_kubectl(['get', 'nodes', '-o', 'json'], merge_stderr=False)
         if process.returncode:
-            raise RuntimeError(f'Unable to inspect Kubernetes nodes: {self._process_output(process)}')
+            raise RuntimeError(
+                f'Unable to inspect Kubernetes nodes: {self._process_output(process, include_stderr=True)}'
+            )
 
         try:
             node_data = json.loads(self._process_output(process))
@@ -344,6 +350,15 @@ class KubernetesAgent(AgentInterface):
         for command in commands:
             self._exec(self.platform.modules.shlex.split(command))
 
+    @staticmethod
+    def _validate_options(env_vars: dict[str, str]) -> None:
+        if AgentEnvVars.DOGSTATSD_PORT in env_vars:
+            raise NotImplementedError('The Kubernetes Agent backend does not currently support DogStatsD exposure')
+        if env_vars.get(AgentEnvVars.LOGS_ENABLED, '').lower() == 'true':
+            raise NotImplementedError(
+                'The Kubernetes Agent backend does not currently support shared-file log collection'
+            )
+
     def _require_prepared(self) -> None:
         process = self._exec(['test', '-f', PREPARED_MARKER], check=False)
         if process.returncode:
@@ -353,6 +368,7 @@ class KubernetesAgent(AgentInterface):
             )
 
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
+        self._validate_options(env_vars)
         agent_build = normalize_agent_image_name(
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
         )
