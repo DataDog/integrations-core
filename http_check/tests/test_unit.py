@@ -14,6 +14,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPInvalidURLError,
     HTTPRequestError,
     HTTPSSLError,
+    HTTPStatusError,
     HTTPTimeoutError,
 )
 from datadog_checks.dev.http import MockHTTPResponse
@@ -202,6 +203,9 @@ def test_http_outcome_tag_reports_status_code_when_content_match_fails(aggregato
         pytest.param(socket.timeout('too slow'), 'timeout', id='socket_timeout'),
         pytest.param(HTTPConnectionError('refused'), 'connection_error', id='connection_error'),
         pytest.param(OSError('no such file'), 'socket_error', id='socket_error'),
+        # A bad status from the auth-token fetch fails the request itself. Requests raised that as an
+        # OSError subclass, so it reported the endpoint down rather than aborting the check.
+        pytest.param(HTTPStatusError('503 Server Error'), 'socket_error', id='status_error'),
     ],
 )
 def test_http_outcome_tag_on_failure_paths(aggregator, mock_http, error, expected_value):

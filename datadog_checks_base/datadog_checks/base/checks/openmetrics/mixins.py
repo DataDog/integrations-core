@@ -841,7 +841,9 @@ class OpenMetricsScraperMixin(object):
         except HTTPSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        except (IOError, HTTPRequestError):
+        # HTTPStatusError is a sibling of HTTPRequestError, not a subclass. It reaches here from the
+        # auth-token fetch, which requests raised as an OSError subclass, so the IOError arm caught it.
+        except (IOError, HTTPRequestError, HTTPStatusError):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise

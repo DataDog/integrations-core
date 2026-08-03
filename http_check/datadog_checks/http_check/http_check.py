@@ -18,6 +18,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError,
     HTTPRequestError,
     HTTPSSLError,
+    HTTPStatusError,
     HTTPTimeoutError,
 )
 from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
@@ -164,7 +165,10 @@ class HTTPCheck(AgentCheck):
                 )
             )
 
-        except socket.error as e:
+        # HTTPStatusError is a sibling of HTTPRequestError, not a subclass, so the arm above misses it.
+        # It reaches here from the auth-token fetch, which requests raised as an OSError subclass, so
+        # this arm caught it and reported the endpoint down instead of aborting the whole check.
+        except (socket.error, HTTPStatusError) as e:
             length = int((time.time() - start) * 1000)
             self.log.info(
                 "%s is DOWN, error: %s. Connection failed after %s ms",

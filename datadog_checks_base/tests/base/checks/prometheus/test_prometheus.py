@@ -9,7 +9,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
@@ -1869,6 +1869,26 @@ def test_health_service_check_failing():
     check.service_check = mock.MagicMock()
     with pytest.raises(HTTPConnectionError):
         check.process("http://fake.endpoint:10055/metrics")
+    check.service_check.assert_called_with(
+        "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
+    )
+
+
+def test_health_service_check_failing_on_status_error(mock_prometheus_http):
+    """A status error surfacing from the request reports the endpoint down.
+
+    The auth token is fetched inside the request, so a bad status there fails the request itself.
+    Requests raised that as an OSError subclass, which the IOError arm caught.
+    """
+    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check.NAMESPACE = 'ksm'
+    check.health_service_check = True
+    check.service_check = mock.MagicMock()
+    mock_prometheus_http.get.side_effect = HTTPStatusError('503 Server Error')
+
+    with pytest.raises(HTTPStatusError):
+        check.process("http://fake.endpoint:10055/metrics")
+
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )

@@ -16,7 +16,7 @@ from mock import patch
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockHTTPResponse
@@ -2576,6 +2576,30 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
     mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
     with pytest.raises(HTTPConnectionError):
         check.process(mocked_prometheus_scraper_config)
+    aggregator.assert_service_check(
+        'ksm.prometheus.health',
+        status=OpenMetricsBaseCheck.CRITICAL,
+        tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
+        count=1,
+    )
+
+
+def test_health_service_check_failing_on_status_error(
+    aggregator, mock_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
+    """A status error surfacing from send_request reports the endpoint down.
+
+    The auth token is fetched inside the request, so a bad status there fails the request itself.
+    Requests raised that as an OSError subclass, which the IOError arm caught.
+    """
+    check = mocked_prometheus_check
+    mock_openmetrics_http.get.side_effect = HTTPStatusError('503 Server Error')
+
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
+    with pytest.raises(HTTPStatusError):
+        check.process(mocked_prometheus_scraper_config)
+
     aggregator.assert_service_check(
         'ksm.prometheus.health',
         status=OpenMetricsBaseCheck.CRITICAL,
