@@ -1,1 +1,0 @@
-Use parameterized queries for replication channel configuration to safely handle special characters in channel names

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.8.0 / 2026-04-15
+## 8.9.0 / 2026-07-08
+
+***Added***:
+
+* Allow setting ``client_name`` on Redis connections for easier identification in CLIENT LIST output. ([#23734](https://github.com/DataDog/integrations-core/pull/23734))
+
+## 8.8.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 

@@ -12,7 +12,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum, auto
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
 from cachetools import TTLCache
@@ -162,12 +162,28 @@ class RateLimitingTTLCache(TTLCache):
         return True
 
 
+def _try_parse_db_host_ip(db_host: str) -> IPv4Address | IPv6Address | None:
+    """Try to parse db_host as an IP address."""
+    try:
+        return ip_address(db_host.strip())
+    except ValueError:
+        return None
+
+
+def _is_local_db_host(db_host: str | None) -> bool:
+    """Return True when the DB is reached via localhost, a unix socket, or a loopback IP."""
+    if not db_host or db_host == 'localhost' or db_host.startswith('/'):
+        return True
+    addr = _try_parse_db_host_ip(db_host)
+    return addr is not None and addr.is_loopback
+
+
 def resolve_db_host(db_host):
     if db_host and db_host.endswith('.local'):
         return db_host
 
     agent_hostname = datadog_agent.get_hostname()
-    if not db_host or db_host in {'localhost', '127.0.0.1'} or db_host.startswith('/'):
+    if _is_local_db_host(db_host):
         return agent_hostname
 
     try:
@@ -329,11 +345,25 @@ class DBMAsyncJob(object):
         if self._features is None:
             self._features = [None]
 
+    @property
+    def job_name(self) -> Optional[str]:
+        """The job's name"""
+        return self._job_name
+
     def cancel(self):
         """
         Send a signal to cancel the job loop asynchronously.
         """
         self._cancel_event.set()
+
+    def wait_for_completion(self) -> None:
+        """
+        Block until the job loop has finished running, then clear its future. No-op if the loop is
+        not running. Typically called after :meth:`cancel` to wait for the loop to stop.
+        """
+        if self._job_loop_future:
+            self._job_loop_future.result()
+            self._job_loop_future = None
 
     def run_job_loop(self, tags):
         """
@@ -451,6 +481,8 @@ class DBMAsyncJob(object):
                         )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
+            # Runs on every loop exit, including the inactivity stop above, after which the loop may
+            # restart on the next check run. For one-time teardown on unschedule, override shutdown().
             if self._shutdown_callback:
                 self._shutdown_callback()
 
@@ -481,6 +513,19 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
+
+    def shutdown(self) -> None:
+        """
+        Release resources the job holds for its whole lifetime, such as dedicated DB connections or
+        clients.
+
+        Called once when the owning check is unscheduled, after the loop has stopped. The default
+        is a no-op; override to close long-lived resources, and keep the implementation idempotent.
+
+        Unlike ``shutdown_callback``, which runs on every loop exit and may be followed by a
+        restart, this runs only during final teardown.
+        """
+        pass
 
 
 @contextlib.contextmanager
@@ -519,19 +564,41 @@ class TagType(Enum):
     KEYLESS = auto()
 
 
+# Tags under keys with this prefix are internal resource tags (e.g. "dd.internal.resource") that are
+# consumed by the agent's metric submission pipeline. They should be excluded from payloads that don't
+# go through that pipeline, such as DBM metadata events.
+INTERNAL_TAG_PREFIX = "dd.internal"
+
+# Key used for the per-database tag. DBM checks exclude this from instance-level views because
+# the data is collected across all databases and the `db` tag is re-applied during ingestion.
+DB_TAG_KEY = "db"
+
+
 class TagManager:
     """
     Manages tags for a check. Tags are stored as a dictionary of key-value pairs
     for key-value tags and as a list of values for keyless tags useful for easy update and deletion.
-    There's an internal cache of the tag list to avoid generating the list of tag strings
+    There's an internal cache of the rendered tag lists to avoid generating the tag strings
     multiple times.
     """
 
     def __init__(self, normalizer: Optional[Callable[[Union[str, bytes]], str]] = None) -> None:
         self._tags: Dict[Union[str, TagType], List[str]] = {}
-        self._cached_tag_list: Optional[tuple[str, ...]] = None
+        # Rendered tag strings split into three disjoint buckets. Each tag string is stored exactly
+        # once, and a single render pass populates all three:
+        #   - _internal_tags: keys prefixed with "dd.internal"
+        #   - _db_tags: the per-database "db" key
+        #   - _base_tags: everything else (including keyless tags)
+        # get_tags() returns _base_tags merged with the requested optional buckets.
+        self._base_tags: tuple[str, ...] = ()
+        self._internal_tags: tuple[str, ...] = ()
+        self._db_tags: tuple[str, ...] = ()
+        self._cache_valid: bool = False
         self._keyless: TagType = TagType.KEYLESS
         self._normalizer = normalizer
+
+    def _invalidate_cache(self) -> None:
+        self._cache_valid = False
 
     def set_tag(self, key: Optional[str], value: str, replace: bool = False, normalize: bool = False) -> None:
         """
@@ -551,13 +618,18 @@ class TagManager:
             key = self._keyless
 
         if replace or key not in self._tags:
+            # Skip the cache invalidation if the value is unchanged. Dynamic tags (e.g. version,
+            # replication_role) are re-set with replace=True every check run but rarely change, so
+            # this lets the cached tag lists survive across runs.
+            if self._tags.get(key) == [value]:
+                return
             self._tags[key] = [value]
-            # Invalidate the cache since tags have changed
-            self._cached_tag_list = None
+            # Invalidate the caches since tags have changed
+            self._invalidate_cache()
         elif value not in self._tags[key]:
             self._tags[key].append(value)
-            # Invalidate the cache since tags have changed
-            self._cached_tag_list = None
+            # Invalidate the caches since tags have changed
+            self._invalidate_cache()
 
     def set_tags_from_list(self, tag_list: List[str], replace: bool = False, normalize: bool = False) -> None:
         """
@@ -570,7 +642,7 @@ class TagManager:
         """
         if replace:
             self._tags.clear()
-            self._cached_tag_list = None
+            self._invalidate_cache()
 
         for tag in tag_list:
             if ':' in tag:
@@ -603,8 +675,8 @@ class TagManager:
         if value is None:
             # Delete the entire key
             del self._tags[key]
-            # Invalidate the cache
-            self._cached_tag_list = None
+            # Invalidate the caches
+            self._invalidate_cache()
             return True
         else:
             # Delete specific value if it exists
@@ -613,39 +685,58 @@ class TagManager:
                 # Clean up empty lists
                 if not self._tags[key]:
                     del self._tags[key]
-                # Invalidate the cache
-                self._cached_tag_list = None
+                # Invalidate the caches
+                self._invalidate_cache()
                 return True
         return False
 
-    def _generate_tag_strings(self, tags_dict: Dict[Union[str, TagType], List[str]]) -> tuple[str, ...]:
+    def _rebuild_cache(self) -> None:
         """
-        Generate a tuple of tag strings from a tags dictionary.
-        Args:
-            tags_dict (Dict[Union[str, TagType], List[str]]): Dictionary of tags to convert to strings
-        Returns:
-            tuple[str, ...]: Tuple of tag strings
+        Render the tags dict into the three disjoint buckets (base, internal, db) in a single pass.
+        For key-value tags the rendered form is "key:value"; for keyless tags it's just the value.
         """
-        return tuple(
-            value if key == self._keyless else f"{key}:{value}" for key, values in tags_dict.items() for value in values
-        )
+        base: List[str] = []
+        internal: List[str] = []
+        db: List[str] = []
+        for key, values in self._tags.items():
+            if key == self._keyless:
+                base.extend(values)
+                continue
+            if isinstance(key, str) and key.startswith(INTERNAL_TAG_PREFIX):
+                bucket = internal
+            elif key == DB_TAG_KEY:
+                bucket = db
+            else:
+                bucket = base
+            bucket.extend("{}:{}".format(key, value) for value in values)
+        self._base_tags = tuple(base)
+        self._internal_tags = tuple(internal)
+        self._db_tags = tuple(db)
+        self._cache_valid = True
 
-    def get_tags(self) -> List[str]:
+    def get_tags(self, include_internal: bool = True, include_db: bool = True) -> List[str]:
         """
         Get a list of tag strings.
         For key-value tags, returns "key:value" format.
         For keyless tags, returns just the value.
-        The returned list is always sorted alphabetically.
+        Args:
+            include_internal (bool): If False, excludes internal resource tags (keys prefixed with
+                "dd.internal"). Useful for payloads that don't go through the agent's metric
+                submission pipeline, such as DBM metadata events.
+            include_db (bool): If False, excludes the per-database tag (the "db" key). Useful for
+                instance-level metrics and DBM events where the database is determined per-row or
+                during ingestion.
         Returns:
-            list: Sorted list of tag strings
+            list: List of tag strings
         """
-        # Return cached list if available
-        if self._cached_tag_list is not None:
-            return list(self._cached_tag_list)
-
-        # Generate and cache regular tags
-        self._cached_tag_list = self._generate_tag_strings(self._tags)
-        return list(self._cached_tag_list)
+        if not self._cache_valid:
+            self._rebuild_cache()
+        tags = list(self._base_tags)
+        if include_internal:
+            tags.extend(self._internal_tags)
+        if include_db:
+            tags.extend(self._db_tags)
+        return tags
 
 
 def now_ms() -> int:

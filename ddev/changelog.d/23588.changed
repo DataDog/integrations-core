@@ -1,0 +1,1 @@
+Drop the `[tool.black]` block from `ddev/pyproject.toml` and the matching code path in `ddev meta scripts update-python-config` (formatting is fully handled by ruff).

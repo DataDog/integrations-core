@@ -1,6 +1,6 @@
 {
   "title": "Network Device Monitoring",
-  "description": "## Network Device Monitoring Dashboard\n\nKeep track of all of your monitored on-premise appliances monitored with SNMP all in one place. At a glance, see all of the devices currently responding metrics, top interfaces reporting bandwidth and forecasted performance.\nRead more about: \n\nRead more about:\n\n*  [Monitoring datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n* [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n* Learn more about the data collected in our [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+  "description": "Fleet-wide SNMP snapshot: reachability pulse, hot interfaces, device inventory, shift-level throughput and error trends, then capacity, L2/L3, and routing links. State transitions and flaps are clearer in Events or dedicated monitors than on SNMP gauges alone—see the tips in the first group and the reference note at the bottom.\n\n\n",
   "widgets": [
     {
       "id": 1317082135420750,
@@ -8,26 +8,144 @@
         "title": "Network overview",
         "background_color": "green",
         "show_title": true,
-        "powerpack_id": "bd1322fa-3972-11f1-9f25-da7ad0900002",
-        "template_variables": {
-          "controlled_externally": [
-            {
-              "name": "interface",
-              "prefix": "interface",
-              "values": [
-                "*"
-              ]
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8898845524674867,
+            "definition": {
+              "title": "Alerts sorted by severity",
+              "title_size": "13",
+              "title_align": "center",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "combined",
+              "show_priority": false,
+              "show_last_triggered": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
             }
-          ],
-          "controlled_by_powerpack": []
-        },
-        "type": "powerpack"
+          },
+          {
+            "id": 210150975625157,
+            "definition": {
+              "title": "NDM Devices",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "fixed",
+                "from": 0,
+                "to": 0
+              },
+              "type": "geomap",
+              "requests": [
+                {
+                  "request_type": "network_devices_geomap",
+                  "response_format": "tabular",
+                  "query": {
+                    "data_source": "network_devices",
+                    "query_string": ""
+                  },
+                  "style": {
+                    "color_by": "status"
+                  },
+                  "text_formats": [
+                    {
+                      "match": {
+                        "type": "is",
+                        "value": "ok"
+                      },
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "match": {
+                        "type": "is",
+                        "value": "unreachable"
+                      },
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "match": {
+                        "type": "is",
+                        "value": "unmonitored"
+                      },
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 1508401148634404,
+            "definition": {
+              "title": "NetFlow Traffic Sankey",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "sankey",
+              "requests": [
+                {
+                  "request_type": "netflow_sankey",
+                  "query": {
+                    "data_source": "network_device_flows",
+                    "mode": "target",
+                    "query_string": "",
+                    "group_by": [
+                      "@source.ip",
+                      "@ingress.interface.name",
+                      "@device.ip",
+                      "@egress.interface.name",
+                      "@destination.ip"
+                    ],
+                    "limit": 10,
+                    "sort": {
+                      "field": "@adjusted_bytes:sum",
+                      "order": "desc"
+                    }
+                  }
+                }
+              ],
+              "sort_nodes": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
       },
       "layout": {
         "x": 0,
         "y": 0,
         "width": 12,
-        "height": 1
+        "height": 14
       }
     },
     {
@@ -154,7 +272,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 1,
+        "y": 14,
         "width": 12,
         "height": 1
       }
@@ -618,7 +736,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 2,
+        "y": 15,
         "width": 12,
         "height": 1
       }
@@ -796,7 +914,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 3,
+        "y": 16,
         "width": 12,
         "height": 1
       }
@@ -914,7 +1032,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 4,
+        "y": 17,
         "width": 12,
         "height": 1
       }
@@ -1273,7 +1391,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 18,
         "width": 12,
         "height": 1
       }
@@ -1899,7 +2017,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 19,
         "width": 12,
         "height": 1
       }
@@ -2750,7 +2868,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 20,
         "width": 12,
         "height": 1
       }
@@ -3008,7 +3126,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 8,
+        "y": 21,
         "width": 12,
         "height": 1
       }
@@ -3265,7 +3383,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 9,
+        "y": 22,
         "width": 12,
         "height": 1
       }
@@ -3310,7 +3428,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 10,
+        "y": 23,
         "width": 12,
         "height": 1
       }
@@ -3728,7 +3846,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 11,
+        "y": 24,
         "width": 12,
         "height": 1
       }
@@ -3925,7 +4043,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 12,
+        "y": 25,
         "width": 12,
         "height": 1
       }
@@ -4124,7 +4242,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 13,
+        "y": 26,
         "width": 12,
         "height": 1
       }
@@ -4409,7 +4527,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 28,
+        "y": 27,
         "width": 12,
         "height": 1,
         "is_column_break": true
@@ -4542,7 +4660,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 29,
+        "y": 28,
         "width": 12,
         "height": 1
       }
@@ -4576,7 +4694,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 30,
+        "y": 29,
         "width": 12,
         "height": 3
       }

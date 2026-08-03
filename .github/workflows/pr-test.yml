@@ -33,7 +33,7 @@ jobs:
 
   test:
     needs:
-    - compute-matrix
+      - compute-matrix
     if: needs.compute-matrix.outputs.matrix != '[]' && github.event_name != 'merge_group'
     strategy:
       fail-fast: false
@@ -61,10 +61,15 @@ jobs:
       python-version: "${{ inputs.python-version }}"
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    permissions:
+      # needed for compute-matrix in test-target.yml
+      contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
 
   test-minimum-base-package:
     needs:
-    - compute-matrix
+      - compute-matrix
     if: needs.compute-matrix.outputs.matrix != '[]' && github.event_name != 'merge_group'
     strategy:
       fail-fast: false
@@ -93,59 +98,65 @@ jobs:
       pytest-args: ${{ inputs.pytest-args }}
       context: "pr"
     secrets: inherit
+    permissions:
+      # needed for compute-matrix in test-target.yml
+      contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
 
   save-event:
     needs:
-    - test
-    - test-minimum-base-package
+      - test
+      - test-minimum-base-package
     if: success() || failure()
 
     uses: ./.github/workflows/save-event.yml
 
   upload-coverage:
     needs:
-    - test
-    - test-minimum-base-package
+      - test
+      - test-minimum-base-package
     if: >
       !github.event.repository.private &&
       (success() || failure()) &&
       inputs.pytest-args != '-m flaky'
     runs-on: ubuntu-latest
     permissions:
-      # needed for codecov, allows the action to get a JWT signed by Github
-      id-token: write
       contents: read
+      # needed for dd-sts
+      id-token: write
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Download all coverage artifacts
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
-      with:
-        pattern: coverage-*
-        path: coverage-reports
-        merge-multiple: false
+      - name: Get Datadog credentials
+        id: dd-sts
+        # Coverage upload is optional; keep non-blocking so fork PRs and OIDC outages don't fail the job
+        continue-on-error: true
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-coverage-api-key
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
-      with:
-        use_oidc: true
-        directory: coverage-reports
-        fail_ci_if_error: false
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          pattern: coverage-*
+          path: coverage-reports
+          merge-multiple: false
 
-    - name: Upload coverage to Datadog
-      if: always()
-      continue-on-error: true
-      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1.0.0
-      with:
-        api_key: ${{ secrets.DD_API_KEY }}
-        files: coverage-reports
-        format: cobertura
+      - name: Upload coverage to Datadog
+        if: always()
+        continue-on-error: true
+        uses: DataDog/coverage-upload-github-action@6c4bd935248daa6f0ef94e3e6ba71ad5ad079998 # v1.0.3
+        with:
+          api_key: ${{ steps.dd-sts.outputs.api_key }}
+          files: coverage-reports
+          format: cobertura
 
   check:
     needs:
-    - test
-    - test-minimum-base-package
+      - test
+      - test-minimum-base-package
     # In integrations-core and integrations-extras repos the tests are flaky enough that
     # it would be a pain to merge PRs with the Merge Queue enabled.
     # While we work on the tests, we skip the job if it's triggered by Merge Queue.
@@ -154,8 +165,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check status of required jobs
-      uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
-      with:
-        jobs: ${{ toJSON(needs) }}
-        allowed-skips: test, test-minimum-base-package
+      - name: Check status of required jobs
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}
+          allowed-skips: test, test-minimum-base-package

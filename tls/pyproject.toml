@@ -36,8 +36,8 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "cryptography==46.0.7",
-    "service-identity[idna]==24.2.0",
+    "cryptography==48.0.1",
+    "service-identity[idna]==26.1.0",
 ]
 
 [project.urls]

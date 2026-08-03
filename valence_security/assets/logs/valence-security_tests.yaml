@@ -163,109 +163,109 @@ tests:
         creationTimestamp: 1767161389
         events:
          -
-          eventId: "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19"
-          actorType: "User"
-          eventSummary: ""
-          aux:
-            ModifiedProperties[1]:
-              OldValue: ""
-              NewValue: "Global Administrator"
-              Name: "Role.DisplayName"
-            Target[3]:
-              Type: "5"
-              ID: "test2@example.com"
-            AzureActiveDirectoryEventType: "1"
-            ModifiedProperties[3]:
-              OldValue: ""
-              NewValue: "TenantAdmins"
-              Name: "Role.WellKnownObjectName"
-            Target[1]:
-              Type: "2"
-              ID: "f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
-            UserKey: "9F2B7A603E4C1D85@crestdata.ai"
-            Actor[3]:
-              Type: "2"
-              ID: "00000006-0000-0bb1-ce00-000000000000"
-            Actor[1]:
-              Type: "3"
-              ID: "9F2B7A603E4C1D85"
-            Operation: "Add member to role."
-            OrganizationId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
-            IntraSystemId: "e3a1f9d8-7c2b-4a6e-91d4-b5f8c0a2e317"
-            RecordType: "8"
-            Version: "1"
-            Actor[5]:
-              Type: "2"
-              ID: "5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
-            SupportTicketId: ""
-            ExtendedProperties[1]:
-              Value: "Role"
-              Name: "extendedAuditEventCategory"
-            ActorContextId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
-            ModifiedProperties[2]:
-              OldValue: ""
-              NewValue: "b6a7e9f2-5d41-4c8a-9b73-2f0e1d6c8a55"
-              Name: "Role.TemplateId"
-            Target[2]:
-              Type: "2"
-              ID: "User"
-            Target[0]:
-              Type: "2"
-              ID: "User_f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
-            ObjectId: "test2@example.com"
-            ResultStatus: "Success"
-            ModifiedProperties[0]:
-              OldValue: ""
-              NewValue: "4d8f2c1b-9e73-4a56-8f9c-1e6b7a2d5c40"
-              Name: "Role.ObjectID"
-            Target[4]:
-              Type: "3"
-              ID: "C39E5B104A7D82F6"
-            Actor[2]:
-              Type: "1"
-              ID: "Microsoft Office 365 Portal"
-            Actor[0]:
-              Type: "5"
-              ID: "test1@example.com"
-            Workload: "AzureActiveDirectory"
-            Actor[6]:
-              Type: "2"
-              ID: "User"
-            TargetContextId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
-            UserId: "test1@example.com"
-            Actor[4]:
-              Type: "2"
-              ID: "User_5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
-            CreationTime: "2025-12-31T06:09:49"
-            ExtendedProperties[0]:
-              Value: "{\"User-Agent\":\"O365AdminPortal\"}"
-              Name: "additionalDetails"
-            Id: "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19"
-            InterSystemsId: "9b7e4c2a-1f6d-4b93-8a5e-2d9c6f1b7a44"
-            UserType: "0"
-          ip: "10.10.10.10"
-          connectorDisplayName: "Microsoft 365 Primary"
-          eventResultDetails: "Success"
-          targetType: ""
-          userAgent: "Mobile Safari - 17.5"
-          eventResult: "Success"
-          platform: "Microsoft 365"
-          actorUser:
-            name: "Test 1"
-            id: "9F2B7A603E4C1D85@crestdata.ai"
-            email: "test1@example.com"
-          target:
-            name: "Test 2"
-            id: "test2@example.com"
-            email: "test2@example.com"
-          connectorUid: "4___Microsoft365___Fetch___Microsoft365Primary"
-          eventTime:
-            timestampKind: "exact"
-            timestamp: 1767161389
           action:
-            actionType: "AzureActiveDirectory"
             actionDescription: "Added a user to an admin role in Microsoft 365."
             actionName: "Add member to role."
+            actionType: "AzureActiveDirectory"
+          actorType: "User"
+          actorUser:
+            email: "test1@example.com"
+            id: "9F2B7A603E4C1D85@crestdata.ai"
+            name: "Test 1"
+          aux:
+            ActorContextId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
+            Actor[0]:
+              ID: "test1@example.com"
+              Type: "5"
+            Actor[1]:
+              ID: "9F2B7A603E4C1D85"
+              Type: "3"
+            Actor[2]:
+              ID: "Microsoft Office 365 Portal"
+              Type: "1"
+            Actor[3]:
+              ID: "00000006-0000-0bb1-ce00-000000000000"
+              Type: "2"
+            Actor[4]:
+              ID: "User_5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
+              Type: "2"
+            Actor[5]:
+              ID: "5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
+              Type: "2"
+            Actor[6]:
+              ID: "User"
+              Type: "2"
+            AzureActiveDirectoryEventType: "1"
+            CreationTime: "2025-12-31T06:09:49"
+            ExtendedProperties[0]:
+              Name: "additionalDetails"
+              Value: "{\"User-Agent\":\"O365AdminPortal\"}"
+            ExtendedProperties[1]:
+              Name: "extendedAuditEventCategory"
+              Value: "Role"
+            Id: "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19"
+            InterSystemsId: "9b7e4c2a-1f6d-4b93-8a5e-2d9c6f1b7a44"
+            IntraSystemId: "e3a1f9d8-7c2b-4a6e-91d4-b5f8c0a2e317"
+            ModifiedProperties[0]:
+              Name: "Role.ObjectID"
+              NewValue: "4d8f2c1b-9e73-4a56-8f9c-1e6b7a2d5c40"
+              OldValue: ""
+            ModifiedProperties[1]:
+              Name: "Role.DisplayName"
+              NewValue: "Global Administrator"
+              OldValue: ""
+            ModifiedProperties[2]:
+              Name: "Role.TemplateId"
+              NewValue: "b6a7e9f2-5d41-4c8a-9b73-2f0e1d6c8a55"
+              OldValue: ""
+            ModifiedProperties[3]:
+              Name: "Role.WellKnownObjectName"
+              NewValue: "TenantAdmins"
+              OldValue: ""
+            ObjectId: "test2@example.com"
+            Operation: "Add member to role."
+            OrganizationId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
+            RecordType: "8"
+            ResultStatus: "Success"
+            SupportTicketId: ""
+            TargetContextId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
+            Target[0]:
+              ID: "User_f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
+              Type: "2"
+            Target[1]:
+              ID: "f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
+              Type: "2"
+            Target[2]:
+              ID: "User"
+              Type: "2"
+            Target[3]:
+              ID: "test2@example.com"
+              Type: "5"
+            Target[4]:
+              ID: "C39E5B104A7D82F6"
+              Type: "3"
+            UserId: "test1@example.com"
+            UserKey: "9F2B7A603E4C1D85@crestdata.ai"
+            UserType: "0"
+            Version: "1"
+            Workload: "AzureActiveDirectory"
+          connectorDisplayName: "Microsoft 365 Primary"
+          connectorUid: "4___Microsoft365___Fetch___Microsoft365Primary"
+          eventId: "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19"
+          eventResult: "Success"
+          eventResultDetails: "Success"
+          eventSummary: ""
+          eventTime:
+            timestamp: 1767161389
+            timestampKind: "exact"
+          ip: "10.10.10.10"
+          platform: "Microsoft 365"
+          target:
+            email: "test2@example.com"
+            id: "test2@example.com"
+            name: "Test 2"
+          targetType: ""
+          userAgent: "Mobile Safari - 17.5"
         status: "Open"
         vuid: "VALENCE:_:ynetlDeUbl:_:ALERT:_::_::_:a7c3f9d1-8b4e-4e6a-9f21-1c7b2a9d4e53"
       alert_type_details:
@@ -518,147 +518,147 @@ tests:
         creationTimestamp: 1766638612
         events:
          -
-          eventId: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
+          action:
+            actionDescription: ""
+            actionName: "AttachmentAccess"
+            actionType: "ExchangeItemAggregated"
+          actorApp:
+            email: "test1@example.com"
+            id: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+            name: "test1@example.com"
           actorType: "App"
-          eventSummary: ""
           aux:
-            auditLogRecordType: "ExchangeItemAggregated"
-            createdDateTime: "2025-12-25T04:56:52Z"
-            userId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+            ValenceData:
+              Country: "CA"
+              IPData:
+                city:
+                  geoname_id: "5027243"
+                  names:
+                    en: "Montreal"
+                continent:
+                  code: "NA"
+                  geoname_id: "1355149"
+                  names:
+                    en: "North America"
+                country:
+                  geoname_id: "1351999"
+                  is_in_european_union: "false"
+                  iso_code: "CA"
+                  names:
+                    en: "Canada"
+                location:
+                  latitude: "0.0"
+                  longitude: "-0.0"
+                  time_zone: "America/Toronto"
+                  weather_code: "CAXX1120"
+                postal:
+                  code: "H4X"
+                subdivisions[0]:
+                  geoname_id: "6115143"
+                  iso_code: "QC"
+                  names:
+                    en: "Quebec"
+                subdivisions[1]:
+                  geoname_id: "2177246"
+                  iso_code: ""
+                  names:
+                    en: "Montréal"
+                traits:
+                  autonomous_system_number: "0"
+                  autonomous_system_organization: ""
+                  connection_type: "Corporate"
+                  isp: "Microsoft Corporation"
+                  user_type: "business"
+              IsTorExitNode: "false"
             administrativeUnits[0]: ""
-            organizationId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
             auditData:
-              OrganizationName: "test.onmicrosoft.com"
-              ActorInfoString: "Client=REST;Client=RESTSystem;UserAgent=[NoUserAgent];"
-              Version@odata:
-                type: "#Int64"
-              UserKey: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
-              MailboxGuid: "5d07f441-3956-45f7-ab54-215f9357509d"
-              Operation: "AttachmentAccess"
-              OrganizationId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
-              ClientIPAddress: "20.20.20.20"
-              LogonUserSid: "S-1-5-21-2876401935-984563210-3650928741-1105"
-              OriginatingServer: "PN3PPF96113D681 (15.20.4200.000)\r\n"
-              RecordType: "50"
-              Version: "1"
-              ClientInfoString: "Client=REST;Client=RESTSystem;;"
-              ClientAppId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
               '@odata':
                 type: "#microsoft.graph.security.defaultAuditData"
-              MailboxOwnerUPN: "test1@example.com"
-              OperationCount: "1"
-              OperationProperties[0]:
-                Value: "Bind"
-                Name: "AttachmentAccessType"
-              MailboxOwnerSid: "S-1-5-21-2876401935-984563210-3650928741-1105"
-              ResultStatus: "Succeeded"
-              UserType@odata:
-                type: "#Int64"
-              ExternalAccess: "false"
-              LogonType: "0"
-              LogonType@odata:
-                type: "#Int64"
-              OperationCount@odata:
-                type: "#Int64"
-              TokenTenantId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
+              ActorInfoString: "Client=REST;Client=RESTSystem;UserAgent=[NoUserAgent];"
               AppAccessContext:
-                ClientAppId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
-                UniqueTokenId: "2f8a7d9c-4e13-4b6a-8c51-1d0e9f72a354"
                 '@odata':
                   type: "#microsoft.graph.security.defaultAuditData"
                 APIId: "a5d4b1c9-7e8f-4a62-93d0-2f6e8c1b5973"
+                ClientAppId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
                 IssuedAtTime: "2025-12-25T04:56:52Z"
+                UniqueTokenId: "2f8a7d9c-4e13-4b6a-8c51-1d0e9f72a354"
+              AppId: "a5d4b1c9-7e8f-4a62-93d0-2f6e8c1b5973"
+              ClientAppId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+              ClientIPAddress: "20.20.20.20"
+              ClientInfoString: "Client=REST;Client=RESTSystem;;"
+              CreationTime: "2025-12-25T04:56:52Z"
+              ExternalAccess: "false"
+              Id: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
+              InternalLogonType: "0"
               InternalLogonType@odata:
                 type: "#Int64"
-              Workload: "Exchange"
+              LogonType: "0"
+              LogonType@odata:
+                type: "#Int64"
+              LogonUserSid: "S-1-5-21-2876401935-984563210-3650928741-1105"
+              MailboxGuid: "5d07f441-3956-45f7-ab54-215f9357509d"
+              MailboxOwnerSid: "S-1-5-21-2876401935-984563210-3650928741-1105"
+              MailboxOwnerUPN: "test1@example.com"
               Messages[0]:
-                Path: "Messages"
                 Id: "test="
                 MessageItems[0]:
+                  Id: "test="
+                  SizeInBytes: "0"
                   SizeInBytes@odata:
                     type: "#Int64"
-                  SizeInBytes: "0"
-                  Id: "test="
-              InternalLogonType: "0"
-              AppId: "a5d4b1c9-7e8f-4a62-93d0-2f6e8c1b5973"
-              UserId: "test1@example.com"
-              CreationTime: "2025-12-25T04:56:52Z"
+                Path: "Messages"
+              Operation: "AttachmentAccess"
+              OperationCount: "1"
+              OperationCount@odata:
+                type: "#Int64"
+              OperationProperties[0]:
+                Name: "AttachmentAccessType"
+                Value: "Bind"
+              OrganizationId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
+              OrganizationName: "test.onmicrosoft.com"
+              OriginatingServer: "PN3PPF96113D681 (15.20.4200.000)\r\n"
+              RecordType: "50"
               RecordType@odata:
                 type: "#Int64"
-              Id: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
+              ResultStatus: "Succeeded"
+              TokenTenantId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
+              UserId: "test1@example.com"
+              UserKey: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
               UserType: "5"
-            service: "Exchange"
+              UserType@odata:
+                type: "#Int64"
+              Version: "1"
+              Version@odata:
+                type: "#Int64"
+              Workload: "Exchange"
+            auditLogRecordType: "ExchangeItemAggregated"
             clientIp: ""
+            createdDateTime: "2025-12-25T04:56:52Z"
             id: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
-            userType: "Application"
-            ValenceData:
-              IPData:
-                continent:
-                  code: "NA"
-                  names:
-                    en: "North America"
-                  geoname_id: "1355149"
-                country:
-                  names:
-                    en: "Canada"
-                  is_in_european_union: "false"
-                  iso_code: "CA"
-                  geoname_id: "1351999"
-                traits:
-                  user_type: "business"
-                  connection_type: "Corporate"
-                  isp: "Microsoft Corporation"
-                  autonomous_system_organization: ""
-                  autonomous_system_number: "0"
-                city:
-                  names:
-                    en: "Montreal"
-                  geoname_id: "5027243"
-                subdivisions[0]:
-                  names:
-                    en: "Quebec"
-                  iso_code: "QC"
-                  geoname_id: "6115143"
-                subdivisions[1]:
-                  names:
-                    en: "Montréal"
-                  iso_code: ""
-                  geoname_id: "2177246"
-                location:
-                  latitude: "0.0"
-                  time_zone: "America/Toronto"
-                  weather_code: "CAXX1120"
-                  longitude: "-0.0"
-                postal:
-                  code: "H4X"
-              Country: "CA"
-              IsTorExitNode: "false"
-            operation: "AttachmentAccess"
             objectId: ""
+            operation: "AttachmentAccess"
+            organizationId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
+            service: "Exchange"
+            userId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
             userPrincipalName: "test1@example.com"
-          ip: "20.20.20.20"
+            userType: "Application"
           connectorDisplayName: "Microsoft 365 Primary"
-          eventResultDetails: "Succeeded"
-          targetType: ""
-          userAgent: ""
+          connectorUid: "4___Microsoft365___Fetch___Microsoft365Primary"
+          eventId: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
           eventResult: "Success"
+          eventResultDetails: "Succeeded"
+          eventSummary: ""
+          eventTime:
+            timestamp: 1766638612
+            timestampKind: "exact"
+          ip: "20.20.20.20"
           platform: "Microsoft 365"
           target:
-            name: ""
-            id: ""
             email: ""
-          actorApp:
-            name: "test1@example.com"
-            id: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
-            email: "test1@example.com"
-          connectorUid: "4___Microsoft365___Fetch___Microsoft365Primary"
-          eventTime:
-            timestampKind: "exact"
-            timestamp: 1766638612
-          action:
-            actionType: "ExchangeItemAggregated"
-            actionDescription: ""
-            actionName: "AttachmentAccess"
+            id: ""
+            name: ""
+          targetType: ""
+          userAgent: ""
         status: "Open"
         vuid: "VALENCE:_:ynetlDeUbl:_:ALERT:_::_::_:c0e8d4a6-1b2f-4f95-8a73-9c5d7e6b2149"
       alert_type_details:

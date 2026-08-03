@@ -38,6 +38,58 @@ DEFAULT_METRICS_LEN = len(
 )
 
 
+MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS = {
+    'application thread time evicting (usecs)': 'mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps',
+    'page evict attempts by application threads': (
+        'mongodb.wiredtiger.cache.page_evict_attempts_by_application_threadsps'
+    ),
+    'page evict failures by application threads': (
+        'mongodb.wiredtiger.cache.page_evict_failures_by_application_threadsps'
+    ),
+    'modified page evict attempts by application threads': (
+        'mongodb.wiredtiger.cache.modified_page_evict_attempts_by_application_threadsps'
+    ),
+    'modified page evict failures by application threads': (
+        'mongodb.wiredtiger.cache.modified_page_evict_failures_by_application_threadsps'
+    ),
+    'evict page attempts by eviction server': 'mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_serverps',
+    'evict page failures by eviction server': 'mongodb.wiredtiger.cache.evict_page_failures_by_eviction_serverps',
+    'evict page attempts by eviction worker threads': (
+        'mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_worker_threadsps'
+    ),
+    'evict page failures by eviction worker threads': (
+        'mongodb.wiredtiger.cache.evict_page_failures_by_eviction_worker_threadsps'
+    ),
+}
+
+
+def test_wiredtiger_cache_keeps_legacy_application_thread_eviction_metric(aggregator):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    collector = MongoCollector(check, [])
+    collector._submit_payload(
+        {'wiredTiger': {'cache': {'pages evicted by application threads': 1}}},
+        metrics_to_collect=metrics.WIREDTIGER_METRICS,
+    )
+
+    aggregator.assert_metric('mongodb.wiredtiger.cache.pages_evicted_by_application_threadsps', value=1, count=1)
+    for metric_name in MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS.values():
+        aggregator.assert_metric(metric_name, count=0)
+
+
+def test_wiredtiger_cache_collects_mongodb_8_0_16_eviction_metrics(aggregator):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    collector = MongoCollector(check, [])
+    cache_payload = {metric: idx for idx, metric in enumerate(MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS, start=1)}
+    collector._submit_payload(
+        {'wiredTiger': {'cache': cache_payload}},
+        metrics_to_collect=metrics.WIREDTIGER_METRICS,
+    )
+
+    aggregator.assert_metric('mongodb.wiredtiger.cache.pages_evicted_by_application_threadsps', count=0)
+    for idx, metric_name in enumerate(MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS.values(), start=1):
+        aggregator.assert_metric(metric_name, value=idx, count=1)
+
+
 @mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
 def test_emits_critical_service_check_when_service_is_not_available(mock_command, dd_run_check, aggregator):
     # Given
@@ -668,6 +720,19 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         mocked_client.server_info = mock.MagicMock(return_value={'version': '3.6.23-13.0'})
         dd_run_check(check)
     datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
+
+
+def test_query_stats_does_not_use_server_side_sort_or_allow_disk_use() -> None:
+    api = MongoApi.__new__(MongoApi)
+    api._timeout = 123
+    admin_db = mock.MagicMock()
+    api._cli = {'admin': admin_db}
+
+    cursor = object()
+    admin_db.aggregate.return_value = cursor
+
+    assert api.query_stats(session='session') is cursor
+    admin_db.aggregate.assert_called_once_with([{'$queryStats': {}}], session='session', maxTimeMS=123)
 
 
 @mock.patch(

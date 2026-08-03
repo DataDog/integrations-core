@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 4.5.1 / 2026-04-15
+## 4.7.0 / 2026-07-08
+
+***Added***:
+
+* Add container-based config discovery support. ([#24043](https://github.com/DataDog/integrations-core/pull/24043))
+
+## 4.6.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add support for Temporal v1.29.2 metrics with unit of measurement suffixes and additional server metrics. ([#22379](https://github.com/DataDog/integrations-core/pull/22379))
+
+## 4.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

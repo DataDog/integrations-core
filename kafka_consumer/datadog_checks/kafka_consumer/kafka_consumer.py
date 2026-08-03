@@ -2,21 +2,20 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import base64
+import ctypes
+import ctypes.util
+import heapq
 import json
+import marshal
+import platform
 from collections import defaultdict
-from io import BytesIO
 from time import time
-
-from confluent_kafka import TopicPartition
-from fastavro import schemaless_reader
-from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
-from google.protobuf.json_format import MessageToJson
-from google.protobuf.message import DecodeError, EncodeError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
+from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
 from datadog_checks.kafka_consumer.constants import (
     HIGH_WATERMARK,
     KAFKA_INTERNAL_TOPICS,
@@ -24,8 +23,37 @@ from datadog_checks.kafka_consumer.constants import (
 )
 
 MAX_TIMESTAMPS = 1000
-SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
-DATA_STREAMS_MESSAGES_CACHE_KEY = 'get_messages_cache'
+
+# Total broker-timestamp entries retained per cluster, ~0.5 GiB at ~89 bytes/entry. The
+# per-partition history is scaled down from this budget as the partition count grows.
+MAX_TIMESTAMP_ENTRIES = 6_000_000
+
+LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
+
+BROKER_TIMESTAMPS_SAVE_INTERVAL = 300
+
+
+def load_malloc_trim():
+    """Return glibc's ``malloc_trim`` on Linux, or ``None`` where it is unavailable (macOS, musl)."""
+    if platform.system() != 'Linux':
+        return None
+    try:
+        libc = ctypes.CDLL(ctypes.util.find_library('c') or 'libc.so.6', use_errno=True)
+        trim = libc.malloc_trim
+    except (OSError, AttributeError):
+        return None
+    trim.argtypes = [ctypes.c_size_t]
+    trim.restype = ctypes.c_int
+    return trim
+
+
+MALLOC_TRIM = load_malloc_trim()
+
+
+def malloc_trim():
+    """Return glibc per-arena free memory to the OS after a run; no-op where unavailable."""
+    if MALLOC_TRIM is not None:
+        MALLOC_TRIM(0)
 
 
 class KafkaCheck(AgentCheck):
@@ -39,23 +67,39 @@ class KafkaCheck(AgentCheck):
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}
+        self.broker_timestamps = None
+        self.broker_timestamps_last_save = 0
         self.check_initializations.insert(0, self.config.validate_config)
 
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
+        # Eagerly constructed so the check object owns the collector's lifetime; collect() is a
+        # no-op when _kafka_connect_urls is empty, so this is safe without a URL guard.
+        self._connector_collector = KafkaConnectCollector(self, self.config, self.log)
 
     def check(self, _):
         """The main entrypoint of the check."""
+        try:
+            self._run_check()
+        finally:
+            malloc_trim()
+
+    def _run_check(self):
         # Fetch Kafka consumer offsets
 
         consumer_offsets = {}
 
         try:
             self.client.request_metadata_update()
-        except:
+        except Exception as e:
+            if self.config._cluster_monitoring_enabled:
+                try:
+                    self._send_cluster_monitoring_connection_error(str(e))
+                except Exception:
+                    self.log.warning("Failed to emit connection_error DSM event", exc_info=True)
             raise Exception(
                 "Unable to connect to the AdminClient. This is likely due to an error in the configuration."
-            )
+            ) from e
 
         try:
             # Fetch consumer offsets
@@ -68,11 +112,15 @@ class KafkaCheck(AgentCheck):
         # Fetch the broker highwater offsets
         highwater_offsets = {}
         broker_timestamps = defaultdict(dict)
+        low_watermark_offsets = {}
+        topic_partitions = {}
         cluster_id = ""
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            if consumer_contexts_count < self._context_limit:
+            # Cluster monitoring always requires highwater offsets (for topic.message_rate and other
+            # cluster metadata metrics), so bypass the consumer context limit in that case.
+            if consumer_contexts_count < self._context_limit or self.config._cluster_monitoring_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
                 # If cluster monitoring is enabled, always fetch all broker highwater marks
@@ -84,10 +132,18 @@ class KafkaCheck(AgentCheck):
                         for topic, partition in offsets:
                             partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.get_watermark_offsets(partitions, mode=HIGH_WATERMARK)
+                highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
+                if self.config._cluster_monitoring_enabled:
+                    topic_partitions = self.client.get_topic_partitions()
+                    low_watermark_offsets = self.metadata_collector.fetch_earliest_offsets(topic_partitions)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
-                    self._add_broker_timestamps(broker_timestamps, highwater_offsets)
+                    if low_watermark_offsets:
+                        prune_floors = low_watermark_offsets
+                    else:
+                        self.log.debug("No low watermarks available; pruning cache by earliest consumer offset")
+                        prune_floors = self._earliest_consumer_offsets(consumer_offsets)
+                    self._add_broker_timestamps(broker_timestamps, highwater_offsets, prune_floors)
                     self._save_broker_timestamps(broker_timestamps, persistent_cache_key)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
@@ -105,7 +161,10 @@ class KafkaCheck(AgentCheck):
             consumer_offsets,
             highwater_offsets,
         )
-        if total_contexts >= self._context_limit:
+        # When cluster monitoring is enabled, all offsets and lag metrics are reported regardless
+        # of context count so that the full cluster picture is always available.
+        reporting_limit = float('inf') if self.config._cluster_monitoring_enabled else self._context_limit
+        if total_contexts >= self._context_limit and not self.config._cluster_monitoring_enabled:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
@@ -118,21 +177,23 @@ class KafkaCheck(AgentCheck):
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
 
-        self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
+        self.report_highwater_offsets(highwater_offsets, reporting_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
             consumer_offsets,
             highwater_offsets,
-            self._context_limit - len(highwater_offsets),
+            reporting_limit - len(highwater_offsets),
             broker_timestamps,
             cluster_id,
+            low_watermark_offsets,
         )
-        self.data_streams_live_message(highwater_offsets or {}, cluster_id)
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
-            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
+            connect_status = self._collect_connect_status(cluster_id)
+            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id, connect_status)
+
             try:
-                self.metadata_collector.collect_all_metadata(highwater_offsets)
+                self.metadata_collector.collect_all_metadata(highwater_offsets, low_watermark_offsets, topic_partitions)
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
 
@@ -142,18 +203,54 @@ class KafkaCheck(AgentCheck):
     def count_consumer_contexts(self, consumer_offsets):
         return sum(len(offsets) for offsets in consumer_offsets.values())
 
-    def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+    def _get_broker_list(self) -> list[dict]:
+        cluster_metadata = self.client._cluster_metadata
+        if not (cluster_metadata and hasattr(cluster_metadata, 'brokers')):
+            return []
+        return [
+            {'id': str(broker_meta.id), 'host': broker_meta.host, 'port': broker_meta.port}
+            for broker_meta in cluster_metadata.brokers.values()
+        ]
+
+    def _emit_cluster_monitoring_event(self, payload: dict) -> None:
+        payload.setdefault('collection_timestamp', int(time() * 1000))
+        payload.setdefault('bootstrap_servers', self.config._kafka_connect_str)
+        self.event_platform_event(json.dumps(payload), "data-streams-message")
+
+    def _send_cluster_monitoring_connection_error(self, reason: str) -> None:
+        self._emit_cluster_monitoring_event(
+            {
+                'kafka_cluster_id': self.config._kafka_cluster_id_override or '',
+                'config_type': 'connection_error',
+                'reason': reason,
+            }
+        )
+
+    def _collect_connect_status(self, cluster_id: str) -> dict[str, bool] | None:
+        """Collect connector status for all configured Connect endpoints, or None if unconfigured."""
+        if not self.config._kafka_connect_urls:
+            return None
+        try:
+            return self._connector_collector.collect(self.config._kafka_cluster_id_override or cluster_id)
+        except Exception as e:
+            self.log.error("Error collecting connector metadata: %s", e)
+            return {}
+
+    def _send_cluster_monitoring_heartbeat(
+        self, total_contexts: int, cluster_id: str, connect_status: dict[str, bool] | None = None
+    ) -> None:
         payload = {
-            'collection_timestamp': int(time() * 1000),
             'kafka_cluster_id': cluster_id,
             'config_type': 'heartbeat',
             'contexts': total_contexts,
             'contexts_limit': self._context_limit,
-            'bootstrap_servers': self.config._kafka_connect_str,
+            'brokers': self._get_broker_list(),
         }
         if self.config._kafka_cluster_id_override:
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
-        self.event_platform_event(json.dumps(payload), "data-streams-message")
+        if connect_status is not None:
+            payload['connect_api_status'] = connect_status
+        self._emit_cluster_monitoring_event(payload)
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -223,60 +320,57 @@ class KafkaCheck(AgentCheck):
         return self.client.list_consumer_group_offsets(groups)
 
     def _load_broker_timestamps(self, persistent_cache_key):
-        """Loads broker timestamps from persistent cache."""
+        """Return the in-memory broker timestamps, loading from persistent cache once on first run."""
+        if self.broker_timestamps is not None:
+            return self.broker_timestamps
+
         broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(self.read_persistent_cache(persistent_cache_key)).items():
-                for offset, timestamp in content.items():
-                    broker_timestamps[topic_partition][int(offset)] = timestamp
+            broker_timestamps.update(marshal.loads(base64.b64decode(self.read_persistent_cache(persistent_cache_key))))
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
-        return broker_timestamps
+        self.broker_timestamps = broker_timestamps
+        return self.broker_timestamps
 
-    def _messages_have_been_retrieved(self, config_id):
-        """Check if messages have been retrieved for the given config ID."""
-        try:
-            content = self.read_persistent_cache(DATA_STREAMS_MESSAGES_CACHE_KEY)
-            if content:
-                config_ids = set(content.split(","))
-                return config_id in config_ids
-        except Exception as e:
-            self.log.warning('Could not read persistent cache: %s', str(e))
-        return False
+    def _earliest_consumer_offsets(self, consumer_offsets):
+        """Return the lowest committed offset per (topic, partition) across all consumer groups."""
+        earliest = {}
+        for offsets in consumer_offsets.values():
+            for topic_partition, offset in offsets.items():
+                if topic_partition not in earliest or offset < earliest[topic_partition]:
+                    earliest[topic_partition] = offset
+        return earliest
 
-    def _mark_messages_retrieved(self, config_id):
-        """Mark that messages have been retrieved for the given config ID."""
-        try:
-            content = self.read_persistent_cache(DATA_STREAMS_MESSAGES_CACHE_KEY)
-            if content:
-                config_ids = set(content.split(","))
-            else:
-                config_ids = set()
-            config_ids.add(config_id)
-            self.write_persistent_cache(DATA_STREAMS_MESSAGES_CACHE_KEY, ",".join(config_ids))
-        except Exception as e:
-            self.log.warning('Could not write to persistent cache: %s', str(e))
+    def _max_history(self, num_partitions):
+        """Per-partition timestamp cap, scaled so total retained entries stay within the budget."""
+        if num_partitions <= 0:
+            return self._max_timestamps
+        return max(2, min(self._max_timestamps, MAX_TIMESTAMP_ENTRIES // num_partitions))
 
-    def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
+    def _add_broker_timestamps(self, broker_timestamps, highwater_offsets, prune_floors=None):
+        prune_floors = prune_floors or {}
+        max_history = self._max_history(len(highwater_offsets))
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
-            # If the highwater offset went backwards (topic recreated,
-            # retention wipe, or offset reset) any cached pair with a larger
-            # offset points to a now-nonexistent message and would poison
-            # interpolation. Drop those entries.
-            stale = [o for o in timestamps if o > highwater_offset]
-            for o in stale:
-                del timestamps[o]
+            # Reset detected: clear the whole cache. Low-offset survivors are from the
+            # previous generation and VW pins the minimum endpoint, so they'd never age out.
+            if any(o > highwater_offset for o in timestamps):
+                timestamps.clear()
             timestamps[highwater_offset] = time()
-            # If there's too many timestamps, we delete the oldest one (by
-            # timestamp, not by offset — evicting by min offset would discard
-            # the fresh post-reset entries and keep poisonous stale ones).
-            if len(timestamps) > self._max_timestamps:
-                del timestamps[min(timestamps, key=timestamps.get)]
+            if len(timestamps) >= max_history:
+                prune_floor = prune_floors.get((topic, partition))
+                if prune_floor is not None:
+                    _prune_below_anchor(timestamps, prune_floor)
+                _visvalingam_whyatt(timestamps, max(2, max_history // 2))
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
-        """Saves broker timestamps to persistent cache."""
-        self.write_persistent_cache(persistent_cache_key, json.dumps(broker_timestamps))
+        """Persist broker timestamps to disk, but only periodically to avoid per-run marshal churn."""
+        now = time()
+        if now - self.broker_timestamps_last_save < BROKER_TIMESTAMPS_SAVE_INTERVAL:
+            return
+        blob = marshal.dumps(dict(broker_timestamps))
+        self.write_persistent_cache(persistent_cache_key, base64.b64encode(blob).decode('ascii'))
+        self.broker_timestamps_last_save = now
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
@@ -295,9 +389,16 @@ class KafkaCheck(AgentCheck):
         self.log.debug('%s highwater offsets reported', reported_contexts)
 
     def report_consumer_offsets_and_lag(
-        self, consumer_offsets, highwater_offsets, contexts_limit, broker_timestamps, cluster_id
+        self,
+        consumer_offsets,
+        highwater_offsets,
+        contexts_limit,
+        broker_timestamps,
+        cluster_id,
+        low_watermark_offsets=None,
     ):
         """Report the consumer offsets and consumer lag."""
+        low_watermark_offsets = low_watermark_offsets or {}
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
         for consumer_group, offsets in consumer_offsets.items():
@@ -371,7 +472,9 @@ class KafkaCheck(AgentCheck):
                     timestamps = broker_timestamps["{}_{}".format(topic, partition)]
                     # The producer timestamp can be not set if there was an error fetching broker offsets.
                     producer_timestamp = timestamps.get(producer_offset, None)
-                    consumer_timestamp = _get_interpolated_timestamp(timestamps, consumer_offset)
+                    low_watermark = low_watermark_offsets.get((topic, partition))
+                    effective_offset = consumer_offset if low_watermark is None else max(consumer_offset, low_watermark)
+                    consumer_timestamp = _get_interpolated_timestamp(timestamps, effective_offset)
                     if consumer_timestamp is None or producer_timestamp is None:
                         continue
                     lag = producer_timestamp - consumer_timestamp
@@ -403,10 +506,9 @@ class KafkaCheck(AgentCheck):
         )
         return consumer_group_state
 
-    def get_watermark_offsets(self, partitions=None, mode=HIGH_WATERMARK):
-        self.log.debug('Getting %s offsets', 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+    def get_highwater_offsets(self, partitions=None):
+        self.log.debug('Getting highwater offsets')
 
-        # Build partitions set
         topic_partitions_to_check = set()
         if partitions is None:
             all_topic_partitions = self.client.get_topic_partitions()
@@ -429,26 +531,22 @@ class KafkaCheck(AgentCheck):
 
         dd_consumer_group = "datadog-agent"
 
-        # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
         try:
             cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-            self.log.debug(
-                'Querying %s %s offsets',
-                len(topic_partitions_to_check),
-                'highwater' if mode == HIGH_WATERMARK else 'lowwater',
-            )
+            self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
             result = {}
-            for topic, partition, offset in self.client.consumer_offsets_for_times(
-                partitions=topic_partitions_to_check, offset=mode
+            for topic, partition, offset in self.client.get_partition_offsets(
+                partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
             ):
                 result[(topic, partition)] = offset
         finally:
-            self.client.close_consumer()
+            if self.config._close_admin_client:
+                self.client.close_consumer()
 
-        self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+        self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
@@ -463,128 +561,6 @@ class KafkaCheck(AgentCheck):
             'aggregation_key': aggregation_key,
         }
         self.event(event_dict)
-
-    def data_streams_live_message(self, highwater_offsets, cluster_id):
-        monitored_topics = None
-        for cfg in self.config.live_messages_configs:
-            monitored_topics = monitored_topics or {topic.lower() for (topic, _) in highwater_offsets.keys()}
-            kafka = cfg['kafka']
-            topic = kafka["topic"]
-            partition = kafka["partition"]
-            start_offset = kafka["start_offset"]
-            n_messages = kafka["n_messages"]
-            cluster = kafka["cluster"]
-            config_id = cfg["id"]
-            value_format = kafka["value_format"]
-            value_schema_str = kafka.get("value_schema", "")
-            value_uses_schema_registry = kafka.get("value_uses_schema_registry", False)
-            key_format = kafka["key_format"]
-            key_schema_str = kafka.get("key_schema", "")
-            key_uses_schema_registry = kafka.get("key_uses_schema_registry", False)
-            if self._messages_have_been_retrieved(config_id):
-                continue
-            if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
-                continue
-            if topic.lower() not in monitored_topics:
-                self.log.debug('Skipping live messages for topic %s because it is not monitored by this check', topic)
-                continue
-            start_offsets = resolve_start_offsets(highwater_offsets, topic, partition, start_offset, n_messages)
-
-            if not start_offsets:
-                self.log.warning('Unable to get a list of partitions to read from for live messages')
-                self.send_log(
-                    {
-                        'timestamp': int(time()),
-                        'config_id': config_id,
-                        'technology': 'kafka',
-                        'cluster': str(cluster),
-                        'topic': str(topic),
-                        'live_messages_error': 'Unable to list partitions to read from',
-                        'message': "Unable to list partitions to read from",
-                        'feature': 'data_streams_messages',
-                    }
-                )
-                continue
-
-            try:
-                value_schema, key_schema = (
-                    build_schema(value_format, value_schema_str),
-                    build_schema(key_format, key_schema_str),
-                )
-            except (
-                ValueError,
-                json.JSONDecodeError,
-                base64.binascii.Error,
-                IndexError,
-                KeyError,
-                TypeError,
-                DecodeError,
-                EncodeError,
-            ) as e:
-                self.log.error(
-                    "Failed to build schemas for config_id: %s, topic: %s, partition: %s. Error: %s",
-                    config_id,
-                    topic,
-                    partition,
-                    e,
-                )
-                continue
-
-            consumer_group = f"datadog_messages_{config_id}"
-            self.client.start_collecting_messages(start_offsets, consumer_group)
-            try:
-                for _ in range(n_messages):
-                    message = self.client.get_next_message()
-                    if message is None:
-                        self.log.debug('Live messages: no message to retrieve')
-                        self.send_log(
-                            {
-                                'timestamp': int(time()),
-                                'config_id': config_id,
-                                'technology': 'kafka',
-                                'cluster': str(cluster),
-                                'topic': str(topic),
-                                'live_messages_error': 'No more messages to retrieve',
-                                'message': "No more messages to retrieve",
-                                'feature': 'data_streams_messages',
-                            }
-                        )
-                        break
-                    data = {
-                        'timestamp': int(time()),
-                        'technology': 'kafka',
-                        'cluster': str(cluster),
-                        'config_id': config_id,
-                        'topic': str(topic),
-                        'partition': str(message.partition()),
-                        'offset': str(message.offset()),
-                        'feature': 'data_streams_messages',
-                    }
-                    decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(
-                        message,
-                        value_format,
-                        value_schema,
-                        value_uses_schema_registry,
-                        key_format,
-                        key_schema,
-                        key_uses_schema_registry,
-                    )
-                    if decoded_value:
-                        data['message_value'] = decoded_value
-                    else:
-                        data['message'] = "Message format not supported"
-                        data['live_messages_error'] = 'Message format not supported'
-                    if value_schema_id:
-                        data['value_schema_id'] = str(value_schema_id)
-                    if decoded_key:
-                        data['message_key'] = decoded_key
-                    if key_schema_id:
-                        data['key_schema_id'] = str(key_schema_id)
-                    self.send_log(data)
-            finally:
-                self.client.close_consumer()
-                self.client.delete_consumer_group(consumer_group)
-            self._mark_messages_retrieved(config_id)
 
 
 def _get_interpolated_timestamp(timestamps, offset):
@@ -613,280 +589,58 @@ def _get_interpolated_timestamp(timestamps, offset):
     timestamp_after = timestamps[offset_after]
     slope = (timestamp_after - timestamp_before) / float(offset_after - offset_before)
     timestamp = slope * (offset - offset_after) + timestamp_after
+
+    if offset < offset_before:
+        # Cap how far past the oldest cached sample we extrapolate, so estimated lag stays bounded.
+        timestamp = max(timestamp, timestamp_before - LAG_EXTRAPOLATION_LIMIT_SECONDS)
     return timestamp
 
 
-def resolve_start_offsets(highwater_offsets, target_topic, target_partition, start_offset, n_messages):
-    if int(target_partition) == -1:
-        # in this case, we get n_messages, starting at offset latest - n_messages on each partition.
-        # this doesn't match exactly to the latest messages, but if we don't do that, we could run into
-        # edge cases when some partitions don't get any traffic.
-        start_offsets = []
-        for topic, partition in highwater_offsets:
-            if topic == target_topic and highwater_offsets[(topic, partition)] >= 0:
-                start_offsets.append(
-                    TopicPartition(topic, partition, max(0, highwater_offsets[(topic, partition)] - n_messages + 1))
-                )
-                if len(start_offsets) >= n_messages:
-                    break
-        return start_offsets
-    if int(start_offset) == -1:
-        end_offset = highwater_offsets.get((target_topic, target_partition), -1)
-        return (
-            []
-            if end_offset < 0
-            else [TopicPartition(target_topic, target_partition, max(0, end_offset - n_messages + 1))]
-        )
-    return [TopicPartition(target_topic, target_partition, start_offset)]
+def _prune_below_anchor(timestamps, floor):
+    below = [o for o in timestamps if o < floor]
+    if len(below) <= 1:
+        return
+    anchor = max(below)
+    for o in below:
+        if o != anchor:
+            del timestamps[o]
 
 
-def deserialize_message(
-    message,
-    value_format,
-    value_schema,
-    value_uses_schema_registry,
-    key_format,
-    key_schema,
-    key_uses_schema_registry,
-):
-    try:
-        decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(
-            message.value(), value_format, value_schema, value_uses_schema_registry
-        )
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
-        return None, None, None, None
-    try:
-        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(
-            message.key(), key_format, key_schema, key_uses_schema_registry
-        )
-        return decoded_value, value_schema_id, decoded_key, key_schema_id
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
-        return decoded_value, value_schema_id, None, None
+def _visvalingam_whyatt(timestamps, target_count):
+    if len(timestamps) <= target_count:
+        return timestamps
+
+    offsets = sorted(timestamps)
+    prev = {o: (offsets[i - 1] if i > 0 else None) for i, o in enumerate(offsets)}
+    nxt = {o: (offsets[i + 1] if i < len(offsets) - 1 else None) for i, o in enumerate(offsets)}
+    alive = set(offsets)
+
+    current = {}
+    heap = []
+    for o in offsets:
+        if prev[o] is not None and nxt[o] is not None:
+            current[o] = _interpolation_error(o, prev, nxt, timestamps)
+            heap.append((current[o], o))
+    heapq.heapify(heap)
+
+    remaining = len(offsets)
+    while remaining > target_count and heap:
+        error, o = heapq.heappop(heap)
+        if o not in alive or error != current.get(o):
+            continue
+        before, after = prev[o], nxt[o]
+        alive.discard(o)
+        del timestamps[o]
+        remaining -= 1
+        nxt[before], prev[after] = after, before
+        for neighbor in (before, after):
+            if prev[neighbor] is not None and nxt[neighbor] is not None:
+                current[neighbor] = _interpolation_error(neighbor, prev, nxt, timestamps)
+                heapq.heappush(heap, (current[neighbor], neighbor))
+    return timestamps
 
 
-def _read_varint(data):
-    shift = 0
-    result = 0
-    bytes_read = 0
-
-    for byte in data:
-        bytes_read += 1
-        result |= (byte & 0x7F) << shift
-        if (byte & 0x80) == 0:
-            return result, bytes_read
-        shift += 7
-
-    raise ValueError("Incomplete varint")
-
-
-def _read_protobuf_message_indices(payload):
-    """
-    Read the Confluent Protobuf message indices array.
-
-    The Confluent Protobuf wire format includes message indices after the schema ID:
-    [message_indices_length:varint][message_indices:varint...]
-
-    The indices indicate which message type to use from the .proto schema.
-    For example, [0] = first message, [1] = second message, [0, 0] = nested message.
-
-    Args:
-        payload: bytes after the schema ID
-
-    Returns:
-        tuple: (message_indices list, remaining payload bytes)
-    """
-    array_len, bytes_read = _read_varint(payload)
-    payload = payload[bytes_read:]
-
-    indices = []
-    for _ in range(array_len):
-        index, bytes_read = _read_varint(payload)
-        indices.append(index)
-        payload = payload[bytes_read:]
-
-    return indices, payload
-
-
-def _deserialize_bytes_maybe_schema_registry(message, message_format, schema, uses_schema_registry):
-    if not message:
-        return "", None
-    if uses_schema_registry:
-        return _deserialize_bytes(message, message_format, schema, True)
-    else:
-        # Fallback behavior: try without schema registry format first, then with it
-        try:
-            return _deserialize_bytes(message, message_format, schema, False)
-        except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
-            return _deserialize_bytes(message, message_format, schema, True)
-
-
-def _deserialize_bytes(message, message_format, schema, uses_schema_registry):
-    """Deserialize a message from Kafka.
-    Args:
-        message: Raw message bytes from Kafka
-        message_format: Format of the message (protobuf, avro, json, etc.)
-        schema: Schema object (type depends on message_format)
-        uses_schema_registry: Whether message uses schema registry format
-    Returns:
-        Tuple of (decoded_message, schema_id) where schema_id is None if not using schema registry
-    """
-    if not message:
-        return "", None
-
-    schema_id = None
-    if uses_schema_registry:
-        if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
-            msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
-            raise ValueError(
-                f"Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
-                f"but message is too short or has wrong magic byte: {msg_hex}"
-            )
-        schema_id = int.from_bytes(message[1:5], 'big')
-        message = message[5:]
-
-    if message_format == 'protobuf':
-        return _deserialize_protobuf(message, schema, uses_schema_registry), schema_id
-    elif message_format == 'avro':
-        return _deserialize_avro(message, schema), schema_id
-    else:
-        return _deserialize_json(message), schema_id
-
-
-def _deserialize_json(message):
-    decoded = message.decode('utf-8')
-    json.loads(decoded)
-    return decoded
-
-
-def _get_protobuf_message_class(schema_info, message_indices):
-    """Get the protobuf message class based on schema info and message indices.
-
-    Args:
-        schema_info: Tuple of (descriptor_pool, file_descriptor_set)
-        message_indices: List of indices (e.g., [0], [1], [2, 0] for nested)
-
-    Returns:
-        Message class for the specified type
-    """
-    pool, descriptor_set = schema_info
-
-    # First index is the message type in the file
-    file_descriptor = descriptor_set.file[0]
-    message_descriptor_proto = file_descriptor.message_type[message_indices[0]]
-
-    package = file_descriptor.package
-    name_parts = [message_descriptor_proto.name]
-
-    # Handle nested messages if there are more indices
-    current_proto = message_descriptor_proto
-    for idx in message_indices[1:]:
-        current_proto = current_proto.nested_type[idx]
-        name_parts.append(current_proto.name)
-
-    if package:
-        full_name = f"{package}.{'.'.join(name_parts)}"
-    else:
-        full_name = '.'.join(name_parts)
-
-    message_descriptor = pool.FindMessageTypeByName(full_name)
-    return message_factory.GetMessageClass(message_descriptor)
-
-
-def _deserialize_protobuf(message, schema_info, uses_schema_registry):
-    """Deserialize a Protobuf message using google.protobuf with strict validation.
-
-    Args:
-        message: Raw protobuf bytes
-        schema_info: Tuple of (descriptor_pool, file_descriptor_set) from build_protobuf_schema
-        uses_schema_registry: Whether to extract Confluent message indices from the message
-    """
-    try:
-        if uses_schema_registry:
-            message_indices, message = _read_protobuf_message_indices(message)
-            # Empty indices array means use the first message type (index 0)
-            if not message_indices:
-                message_indices = [0]
-        else:
-            message_indices = [0]
-
-        message_class = _get_protobuf_message_class(schema_info, message_indices)
-        schema_instance = message_class()
-
-        bytes_consumed = schema_instance.ParseFromString(message)
-
-        # Check if all bytes were consumed (strict validation)
-        if bytes_consumed != len(message):
-            raise ValueError(
-                f"Not all bytes were consumed during Protobuf decoding! "
-                f"Read {bytes_consumed} bytes, but message has {len(message)} bytes. "
-            )
-
-        return MessageToJson(schema_instance)
-    except Exception as e:
-        raise ValueError(f"Failed to deserialize Protobuf message: {e}")
-
-
-def _deserialize_avro(message, schema):
-    """Deserialize an Avro message using fastavro with strict validation."""
-    try:
-        bio = BytesIO(message)
-        initial_position = bio.tell()
-        data = schemaless_reader(bio, schema)
-        final_position = bio.tell()
-
-        # Check if all bytes were consumed (strict validation)
-        bytes_read = final_position - initial_position
-        total_bytes = len(message)
-
-        if bytes_read != total_bytes:
-            raise ValueError(
-                f"Not all bytes were consumed during Avro decoding! "
-                f"Read {bytes_read} bytes, but message has {total_bytes} bytes. "
-            )
-
-        return json.dumps(data)
-    except Exception as e:
-        raise ValueError(f"Failed to deserialize Avro message: {e}")
-
-
-def build_schema(message_format, schema_str):
-    if message_format == 'protobuf':
-        return build_protobuf_schema(schema_str)
-    elif message_format == 'avro':
-        return build_avro_schema(schema_str)
-    return None
-
-
-def build_avro_schema(schema_str):
-    """Build an Avro schema from a JSON string."""
-    schema = json.loads(schema_str)
-
-    if schema is None:
-        raise ValueError("Avro schema cannot be None")
-
-    return schema
-
-
-def build_protobuf_schema(schema_str):
-    """Build a Protobuf schema from a base64-encoded FileDescriptorSet.
-
-    Returns a tuple of (descriptor_pool, file_descriptor_set) that can be used
-    to dynamically select and instantiate message types based on message indices.
-
-    Args:
-        schema_str: Base64-encoded FileDescriptorSet
-
-    Returns:
-        tuple: (DescriptorPool, FileDescriptorSet)
-    """
-    # schema is encoded in base64, decode it before passing it to ParseFromString
-    schema_str = base64.b64decode(schema_str)
-    descriptor_set = descriptor_pb2.FileDescriptorSet()
-    descriptor_set.ParseFromString(schema_str)
-
-    # Register all the file descriptors in a descriptor pool
-    pool = descriptor_pool.DescriptorPool()
-    for fd_proto in descriptor_set.file:
-        pool.Add(fd_proto)
-
-    return (pool, descriptor_set)
+def _interpolation_error(o, prev, nxt, timestamps):
+    before, after = prev[o], nxt[o]
+    predicted = timestamps[before] + (timestamps[after] - timestamps[before]) * (o - before) / (after - before)
+    return abs(timestamps[o] - predicted)

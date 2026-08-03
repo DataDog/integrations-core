@@ -1,0 +1,1 @@
+Catch `ProcessLookupError` when killing port-forward processes during E2E teardown to handle already-exited processes gracefully.

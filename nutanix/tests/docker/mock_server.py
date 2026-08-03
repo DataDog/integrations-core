@@ -181,7 +181,6 @@ def audits():
 
 
 @app.route('/api/monitoring/v4.0/serviceability/alerts')
-@app.route('/api/monitoring/v4.2/serviceability/alerts')
 def alerts():
     """Alerts endpoint (paginated with time filtering)."""
     page = int(request.args.get('$page', 0))

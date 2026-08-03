@@ -36,7 +36,15 @@ def instance_collect_counters_with_distributions():
     return False
 
 
+def instance_collect_genresources():
+    return False
+
+
 def instance_collect_histogram_buckets():
+    return True
+
+
+def instance_collect_openmetrics():
     return True
 
 
@@ -54,6 +62,42 @@ def instance_enable_health_service_check():
 
 def instance_enable_legacy_tags_normalization():
     return True
+
+
+def instance_genresources_application_full_scrape_interval_seconds():
+    return 600
+
+
+def instance_genresources_application_poll_interval_seconds():
+    return 120
+
+
+def instance_genresources_cluster_scrape_interval_seconds():
+    return 300
+
+
+def instance_genresources_max_resources_per_cycle():
+    return 10000
+
+
+def instance_genresources_repository_scrape_interval_seconds():
+    return 300
+
+
+def instance_genresources_stream_applications_enabled():
+    return True
+
+
+def instance_genresources_stream_backoff_max_seconds():
+    return 30
+
+
+def instance_genresources_stream_read_timeout_seconds():
+    return 300
+
+
+def instance_genresources_ttl_seconds():
+    return 1800
 
 
 def instance_histogram_buckets_as_distributions():

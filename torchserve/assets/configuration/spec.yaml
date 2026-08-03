@@ -82,6 +82,7 @@ files:
             value:
               type: integer
               example: 100
+            fleet_configurable: false
           - name: include
             description: |
               List of regular expressions for models that will be 'autodiscovered'.
@@ -113,6 +114,7 @@ files:
             value:
               type: boolean
               example: true
+            fleet_configurable: false
           - template: instances/http
           - template: instances/default
   - template: logs

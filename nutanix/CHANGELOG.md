@@ -2,7 +2,41 @@
 
 <!-- towncrier release notes start -->
 
-## 1.2.0 / 2026-04-15
+## 1.6.0 / 2026-07-08
+
+***Added***:
+
+* Add high availability (HA) support. ([#24161](https://github.com/DataDog/integrations-core/pull/24161))
+* Add the ``collect_resource_ids_as_tags`` option to tag infrastructure metrics with Nutanix resource extIds. ([#24303](https://github.com/DataDog/integrations-core/pull/24303))
+
+## 1.5.0 / 2026-06-10 / Agent 7.81.0
+
+***Added***:
+
+* Track each Nutanix alert through its lifecycle (open, acknowledged, resolved) with dedicated metrics, transition events, and a default monitor template. ([#23538](https://github.com/DataDog/integrations-core/pull/23538))
+
+## 1.4.0 / 2026-06-09
+
+***Added***:
+
+* Add `hostname_transform` config option to transform all Nutanix hostnames (hosts and VMs) to uppercase, lowercase, or leave them unchanged. ([#23769](https://github.com/DataDog/integrations-core/pull/23769))
+
+***Fixed***:
+
+* Skip hosts, VMs, and clusters missing an `extId` or name, and log a warning. ([#23612](https://github.com/DataDog/integrations-core/pull/23612))
+
+## 1.3.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add resource state tagging to filter dashboards on availability and health: `ntnx_maintenance_state` and `ntnx_connection_state` for hosts, `ntnx_power_state` for VMs, `ntnx_operation_mode` for clusters, and `ntnx_disk_status` for host storage metrics. ([#23578](https://github.com/DataDog/integrations-core/pull/23578))
+
+***Fixed***:
+
+* Fix `nutanix.vm.disk_capacity_bytes` to report allocated disk capacity per VM. ([#23583](https://github.com/DataDog/integrations-core/pull/23583))
+* Always emit `ntnx_host_type`, `ntnx_hypervisor_type`, and `ntnx_node_status` tags, with `$unknown` as the fallback when the source field is missing. ([#23609](https://github.com/DataDog/integrations-core/pull/23609))
+
+## 1.2.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 

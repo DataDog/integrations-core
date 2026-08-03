@@ -34,3 +34,7 @@ def instance_min_collection_interval():
 
 def instance_port():
     return 7222
+
+
+def instance_use_ssl():
+    return False

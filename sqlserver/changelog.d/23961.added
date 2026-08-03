@@ -1,0 +1,1 @@
+Add ``query_metrics.collect_plans`` option to disable SQL Server execution plan collection independently of query metrics.

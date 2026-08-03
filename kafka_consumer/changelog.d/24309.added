@@ -1,0 +1,1 @@
+Add connector failure trace and tracked topics to Kafka Connect configuration events.

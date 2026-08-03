@@ -1,0 +1,1 @@
+Compare license headers against the actual base branch instead of always against ``origin/master``, fixing false validation failures for files that exist on a release branch but were deleted from master.

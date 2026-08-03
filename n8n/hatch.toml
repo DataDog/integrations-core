@@ -3,9 +3,21 @@
 [[envs.default.matrix]]
 python = ["3.13"]
 
-version = ["1.118.1"]
+version = ["1", "2"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "N8N_VERSION", value = "1.118.1", if = ["1.118.1"] },
+  { key = "N8N_VERSION", value = "1.118.1", if = ["1"] },
+  { key = "N8N_VERSION", value = "2.19.5", if = ["2"] },
 ]
+
+[envs.lab]
+dependencies = ["click", "httpx", "pyyaml", "rich"]
+
+[envs.lab.scripts]
+start = "python -m tests.lab.traffic_generator start {args}"
+generate = "python -m tests.lab.traffic_generator generate {args}"
+stop = "python -m tests.lab.traffic_generator stop {args}"
+
+[envs.lab.env-vars]
+N8N_IS_LAB = "true"

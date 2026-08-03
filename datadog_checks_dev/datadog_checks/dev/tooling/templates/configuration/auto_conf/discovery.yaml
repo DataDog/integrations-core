@@ -1,0 +1,12 @@
+- name: discovery
+  description: Enables configuration discovery
+  enabled: true
+  example: {}
+- template: init_config
+  description: Unused init configuration
+  enabled: true
+  options: []
+- name: instances
+  description: Unused instance configuration
+  enabled: true
+  example: []

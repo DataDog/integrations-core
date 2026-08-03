@@ -81,6 +81,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: parse_unknown_metrics
       hidden: true
       legacy: true
@@ -89,6 +90,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: collect_server_info
       fleet_configurable: true
       hidden: true

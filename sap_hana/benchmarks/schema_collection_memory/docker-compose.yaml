@@ -1,0 +1,19 @@
+services:
+  saphanabenchmark:
+    container_name: saphanabenchmark
+    image: saplabs/hanaexpress:${SAP_HANA_VERSION:-latest}
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    sysctls:
+      kernel.shmmax: 1073741824
+      net.ipv4.ip_local_port_range: "40000 60999"
+    ports:
+      - "39019:39017"
+    environment:
+      - PASSWORD=${PASSWORD}
+    entrypoint:
+      - sh
+      - -c
+      - echo "{\"master_password\":\"$$PASSWORD\"}" > /tmp/hana_password.json;cat /tmp/hana_password.json;/run_hana --agree-to-sap-license --passwords-url file:///tmp/hana_password.json

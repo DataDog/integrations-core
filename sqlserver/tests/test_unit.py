@@ -11,6 +11,7 @@ from collections import namedtuple
 import mock
 import pytest
 
+from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -906,6 +907,71 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
 def test_split_sqlserver_host(instance_host, split_host, split_port):
     s_host, s_port = split_sqlserver_host_port(instance_host)
     assert (s_host, s_port) == (split_host, split_port)
+
+
+AGENT_HOSTNAME = 'sql-agent-host.example.com'
+
+
+@pytest.fixture
+def agent_hostname_for_resolve_db_host():
+    datadog_agent.set_hostname(AGENT_HOSTNAME)
+    yield
+    datadog_agent.reset_hostname()
+
+
+@pytest.mark.parametrize(
+    'instance_host,host_part',
+    [
+        (r'SQL-HOST01\INSTANCE01,1601', r'SQL-HOST01\INSTANCE01'),
+        (r'MY-SERVER\SQLEXPRESS,1433', r'MY-SERVER\SQLEXPRESS'),
+        (r'MY-SERVER\SQLEXPRESS', r'MY-SERVER\SQLEXPRESS'),
+    ],
+)
+def test_resolve_db_host_named_instance_returns_agent_hostname(
+    agent_hostname_for_resolve_db_host, instance_host, host_part
+):
+    instance = {
+        'host': instance_host,
+        'username': 'datadog',
+        'password': 'secret',
+    }
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    assert check.host == host_part
+
+    # Agent 7.79+ base resolver returns the literal host string for unresolvable names.
+    with mock.patch(
+        'datadog_checks.sqlserver.sqlserver.agent_host_resolver',
+        return_value=host_part,
+    ):
+        assert check.resolve_db_host() == AGENT_HOSTNAME
+    assert check.resolved_hostname == AGENT_HOSTNAME
+    assert check.database_hostname == AGENT_HOSTNAME
+
+
+@pytest.mark.parametrize(
+    'instance_host,host_part,base_resolver_return',
+    [
+        ('db.example.com,1433', 'db.example.com', 'resolved-db.example.com'),
+        ('192.0.2.10,1433', '192.0.2.10', '192.0.2.10'),
+    ],
+)
+def test_resolve_db_host_plain_host_delegates_to_base_resolver(
+    agent_hostname_for_resolve_db_host, instance_host, host_part, base_resolver_return
+):
+    instance = {
+        'host': instance_host,
+        'username': 'datadog',
+        'password': 'secret',
+    }
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    assert check.host == host_part
+
+    with mock.patch(
+        'datadog_checks.sqlserver.sqlserver.agent_host_resolver',
+        return_value=base_resolver_return,
+    ) as mock_resolver:
+        assert check.resolve_db_host() == base_resolver_return
+        mock_resolver.assert_called_once_with(host_part)
 
 
 @pytest.mark.parametrize(

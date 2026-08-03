@@ -22,6 +22,93 @@ def test_attributes(local_repo):
     assert isinstance(repo.config, RepositoryConfig)
 
 
+@pytest.mark.parametrize(
+    'remote_url, expected_full_name',
+    [
+        pytest.param('git@github.com:DataDog/integrations-core.git', 'integrations-core', id='ssh-with-suffix'),
+        pytest.param('git@github.com:DataDog/integrations-core', 'integrations-core', id='ssh-no-suffix'),
+        pytest.param('https://github.com/DataDog/integrations-core.git', 'integrations-core', id='https-with-suffix'),
+        pytest.param('https://github.com/DataDog/integrations-core', 'integrations-core', id='https-no-suffix'),
+        pytest.param('https://github.com/DataDog/integrations-core/', 'integrations-core', id='https-trailing-slash'),
+        pytest.param(
+            'https://user:token@github.com/DataDog/integrations-core.git',
+            'integrations-core',
+            id='https-with-credentials',
+        ),
+        pytest.param(
+            'ssh://git@github.com:22/DataDog/integrations-core.git',
+            'integrations-core',
+            id='ssh-scheme-with-port',
+        ),
+        pytest.param('git://github.com/DataDog/integrations-core.git', 'integrations-core', id='git-proto'),
+        pytest.param('git@github.com:fork-user/integrations-core.git', 'integrations-core', id='ssh-fork'),
+    ],
+)
+def test_repository_identity_uses_git_remote(mocker, tmp_path, remote_url, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=remote_url)
+    repo = Repository('weird-dir-name', str(tmp_path))
+
+    assert repo.name == 'weird-dir-name'
+    assert repo.full_name == expected_full_name
+
+
+def test_repository_identity_falls_back_when_no_remote(mocker, tmp_path):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
+    repo = Repository('core', str(tmp_path))
+
+    assert repo.name == 'core'
+    assert repo.full_name == 'integrations-core'
+
+
+@pytest.mark.parametrize(
+    'remote_url, name, expected_full_name',
+    [
+        pytest.param('', 'core', 'integrations-core', id='empty'),
+        pytest.param('not-a-url', 'extras', 'integrations-extras', id='garbage'),
+        pytest.param('https://github.com/only-one-segment', 'core', 'integrations-core', id='single-segment'),
+    ],
+)
+def test_repository_identity_falls_back_when_remote_unparseable(mocker, tmp_path, remote_url, name, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=remote_url)
+    repo = Repository(name, str(tmp_path))
+
+    assert repo.full_name == expected_full_name
+
+
+def test_repository_identity_unknown_name_falls_back_to_name(mocker, tmp_path):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
+    repo = Repository('custom-repo', str(tmp_path))
+
+    assert repo.full_name == 'custom-repo'
+
+
+def test_repository_identity_reads_real_dot_git_config(tmp_path):
+    git_dir = tmp_path / '.git'
+    git_dir.mkdir()
+    (git_dir / 'config').write_text('[remote "origin"]\n\turl = git@github.com:DataDog/integrations-core.git\n')
+    repo = Repository('weird-dir-name', str(tmp_path))
+
+    assert repo.full_name == 'integrations-core'
+
+
+def test_repository_identity_follows_worktree_gitdir_pointer(tmp_path):
+    primary_git = tmp_path / 'primary' / '.git'
+    primary_git.mkdir(parents=True)
+    (primary_git / 'config').write_text('[remote "origin"]\n\turl = https://github.com/DataDog/integrations-core.git\n')
+
+    worktrees_dir = primary_git / 'worktrees' / 'feature'
+    worktrees_dir.mkdir(parents=True)
+    (worktrees_dir / 'commondir').write_text('../..\n')
+
+    worktree_path = tmp_path / 'feature'
+    worktree_path.mkdir()
+    (worktree_path / '.git').write_text(f'gitdir: {worktrees_dir}\n')
+
+    repo = Repository('feature', str(worktree_path))
+
+    assert repo.full_name == 'integrations-core'
+
+
 class TestGetIntegration:
     def test_unknown(self, local_repo, helpers):
         repo = Repository(local_repo.name, str(local_repo))

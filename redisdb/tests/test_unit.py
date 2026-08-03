@@ -127,6 +127,7 @@ def test_check_all_available_config_options(check, aggregator, redis_instance, d
         'ssl_ca_certs': '/path',
         'ssl_cert_reqs': 0,
         'ssl_check_hostname': True,
+        'client_name': 'datadog-agent',
     }
     redis_instance.update(connection_args)
 

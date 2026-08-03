@@ -51,6 +51,37 @@ def test_databases_filters(dbm_instance, integration_check):
     assert 'nope' not in datbase_names
 
 
+def test_databases_include_filter(dbm_instance, integration_check):
+    dbm_instance['collect_schemas']['include_databases'] = ['^dogs_[0-9]$']
+    check = integration_check(dbm_instance)
+    collector = PostgresSchemaCollector(check)
+
+    databases = collector._get_databases()
+    database_names = [database['name'] for database in databases]
+    for n in range(10):
+        assert f'dogs_{n}' in database_names
+    assert 'dogs' not in database_names
+    assert 'postgres' not in database_names
+    assert 'datadog_test' not in database_names
+
+
+def test_databases_include_and_exclude_filter(dbm_instance, integration_check):
+    dbm_instance['collect_schemas']['exclude_databases'] = ['dogs_[345]']
+    dbm_instance['collect_schemas']['include_databases'] = ['^dogs_[0-9]$', '^postgres$']
+    check = integration_check(dbm_instance)
+    collector = PostgresSchemaCollector(check)
+
+    databases = collector._get_databases()
+    database_names = [database['name'] for database in databases]
+    assert 'postgres' in database_names
+    for n in (0, 1, 2, 6, 7, 8, 9):
+        assert f'dogs_{n}' in database_names
+    for n in (3, 4, 5):
+        assert f'dogs_{n}' not in database_names
+    assert 'dogs' not in database_names
+    assert 'datadog_test' not in database_names
+
+
 def test_get_cursor(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
@@ -78,6 +109,37 @@ def test_schemas_filters(dbm_instance, integration_check):
             schemas.append(row['schema_name'])
 
         assert set(schemas) == {'datadog', 'hstore'}
+
+
+def test_schemas_include_filter(dbm_instance, integration_check):
+    dbm_instance['collect_schemas']['include_schemas'] = ['^datadog$']
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    with collector._get_cursor('datadog_test') as cursor:
+        assert cursor is not None
+        schemas = []
+        for row in cursor:
+            schemas.append(row['schema_name'])
+
+        assert set(schemas) == {'datadog'}
+
+
+def test_schemas_include_and_exclude_filter(dbm_instance, integration_check):
+    dbm_instance['collect_schemas']['exclude_schemas'] = ['^hstore$']
+    dbm_instance['collect_schemas']['include_schemas'] = ['^datadog$', '^public2$']
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    with collector._get_cursor('datadog_test') as cursor:
+        assert cursor is not None
+        schemas = []
+        for row in cursor:
+            schemas.append(row['schema_name'])
+
+        assert set(schemas) == {'datadog', 'public2'}
 
 
 def test_tables(dbm_instance, integration_check):
@@ -117,6 +179,41 @@ def test_tables(dbm_instance, integration_check):
         expected_tables.update({'test_part', 'test_part_no_children', 'test_part_no_activity'})
 
     assert set(tables) == expected_tables
+
+
+def test_tables_include_filter(dbm_instance, integration_check):
+    dbm_instance['collect_schemas']['include_tables'] = ['^persons$']
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    with collector._get_cursor('datadog_test') as cursor:
+        assert cursor is not None
+        tables = [row['table_name'] for row in cursor if row['table_name']]
+
+    assert set(tables) == {'persons'}
+
+
+def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
+    dbm_instance['collect_schemas']['include_tables'] = ['^persons']
+    dbm_instance['collect_schemas']['exclude_tables'] = ['^personsdup[1-9]$']
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    with collector._get_cursor('datadog_test') as cursor:
+        assert cursor is not None
+        tables = [row['table_name'] for row in cursor if row['table_name']]
+
+    expected = {
+        'persons',
+        'persons_indexed',
+        'personsdup10',
+        'personsdup11',
+        'personsdup12',
+        'personsdup13',
+    }
+    assert set(tables) == expected
 
 
 # def test_columns(dbm_instance, integration_check):

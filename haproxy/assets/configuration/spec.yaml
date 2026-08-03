@@ -2,6 +2,14 @@ name: HAProxy
 fleet_configurable: true
 files:
 - name: haproxy.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 8404
+      candidates:
+      - use_openmetrics: "true"
+        openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:
@@ -153,6 +161,7 @@ files:
         unless it also matches an include rule.
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
     - name: services_exclude
       fleet_configurable: true
       legacy: true
@@ -188,6 +197,7 @@ files:
         "active" pool of connections normally used for servicing requests.
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
     - name: enable_service_check
       fleet_configurable: true
       legacy: true
@@ -210,6 +220,7 @@ files:
         tags: ['team:sre','env:prod','app:elk']
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
     - name: startup_grace_seconds
       legacy: true
       value:
@@ -227,9 +238,17 @@ files:
         haproxy reaches this many seconds.
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
   - template: logs
     example:
     - type: udp
       port: 514
       service: haproxy
       source: haproxy
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - haproxy
+  - template: auto_conf/discovery

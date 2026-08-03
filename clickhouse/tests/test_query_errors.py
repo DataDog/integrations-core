@@ -115,7 +115,7 @@ def test_normalize_query(check_with_dbm):
 
 
 def test_create_batched_payload_error_fields(check_with_dbm):
-    """Test that batched payload includes exception, exception_code, and stack_trace"""
+    """Test that batched payload includes exception, exception_code, stack_trace, and CPU time fields."""
     query_errors = check_with_dbm.query_errors
     query_errors._tags_no_db = ['test:clickhouse']
 
@@ -134,6 +134,8 @@ def test_create_batched_payload_error_fields(check_with_dbm):
             'result_rows': 0,
             'result_bytes': 0,
             'memory_usage': 0,
+            'cpu_us': 1872000,
+            'cpu_wait_us': 35000,
             'event_time_microseconds': 1746205423150500,
             'query_start_time_microseconds': 1746205423000000,
             'initial_query_id': 'err-query-id-456',
@@ -159,6 +161,59 @@ def test_create_batched_payload_error_fields(check_with_dbm):
     assert query_details['exception'] == 'Table default.nonexistent_table does not exist. (UNKNOWN_TABLE)'
     assert query_details['exception_code'] == 60
     assert query_details['stack_trace'] == 'DB::Exception::Exception at 0x1234...'
+    assert query_details['cpu_us'] == 1872000
+    assert query_details['cpu_wait_us'] == 35000
+
+
+def test_create_batched_payload_carries_clickhouse_node(check_with_dbm):
+    """The per-node identity (from hostName()) is surfaced as clickhouse_node in query_details."""
+    query_errors = check_with_dbm.query_errors
+    query_errors._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM nonexistent_table',
+            'query_signature': 'abc123',
+            'query_duration_ms': 0.0,
+            'databases': 'default',
+            'user': 'default',
+            'exception': 'Table does not exist.',
+            'exception_code': 60,
+            'clickhouse_node': 'ch-node-1',
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = query_errors._create_batched_payload(rows)
+
+    query_details = payload['clickhouse_query_errors'][0]['query_details']
+    assert query_details['clickhouse_node'] == 'ch-node-1'
+
+
+def test_create_batched_payload_clickhouse_node_defaults_empty(check_with_dbm):
+    """A row without a node identity emits an empty clickhouse_node rather than raising."""
+    query_errors = check_with_dbm.query_errors
+    query_errors._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM nonexistent_table',
+            'query_signature': 'abc123',
+            'query_duration_ms': 0.0,
+            'databases': 'default',
+            'user': 'default',
+            'exception': 'Table does not exist.',
+            'exception_code': 60,
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = query_errors._create_batched_payload(rows)
+
+    query_details = payload['clickhouse_query_errors'][0]['query_details']
+    assert query_details['clickhouse_node'] == ''
 
 
 def test_create_batched_payload_structure(check_with_dbm):
@@ -223,6 +278,10 @@ def test_query_errors_sql_query_format():
     assert 'query_id' in QUERY_ERRORS_QUERY
     assert 'memory_usage' in QUERY_ERRORS_QUERY
     assert 'event_time_microseconds' in QUERY_ERRORS_QUERY
+
+    # CPU time fields
+    assert "ProfileEvents['OSCPUVirtualTimeMicroseconds']" in QUERY_ERRORS_QUERY
+    assert "ProfileEvents['OSCPUWaitMicroseconds']" in QUERY_ERRORS_QUERY
 
 
 def test_rate_limiting(check_with_dbm):

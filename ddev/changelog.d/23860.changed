@@ -1,0 +1,1 @@
+`ddev release branch tag` now accepts `--release/-r`, `--ref`, `--rc N`, and `--yes/-y`, and prompts to confirm when run on a release branch without `--release`. Existing non-interactive callers that piped a single `y` need to pass `--yes` or one extra confirmation.

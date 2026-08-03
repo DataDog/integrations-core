@@ -124,4 +124,6 @@ RENAMED_METRICS_V1_75 = [
     'litellm.total.tokens.count',
     'litellm.input_tokens.metric.count',
     'litellm.output_tokens.metric.count',
+    'litellm.remaining_tokens.metric',
+    'litellm.remaining_requests.metric',
 ]

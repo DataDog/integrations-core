@@ -31,6 +31,6 @@ def dd_environment():
                 service="kafka",
             ),
         ],
-        waith_for_health=True,
+        wait_for_health=True,
     ):
         yield load_jmx_config(), {'use_jmx': True}

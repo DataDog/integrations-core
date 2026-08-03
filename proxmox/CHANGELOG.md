@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 2.5.1 / 2026-04-15
+## 2.6.0 / 2026-07-08
+
+***Added***:
+
+* Add infra_mode tag to proxmox metrics. ([#24008](https://github.com/DataDog/integrations-core/pull/24008))
+
+## 2.5.2 / 2026-05-14 / Agent 7.80.0
+
+***Fixed***:
+
+* Re-order configuration fields by usage frequency. ([#23320](https://github.com/DataDog/integrations-core/pull/23320))
+
+## 2.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

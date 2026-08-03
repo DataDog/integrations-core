@@ -15,30 +15,30 @@ tests:
         _HOSTNAME: "ssh-server"
         _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       ocsf:
+        activity_id: 2
+        activity_name: "Logoff"
+        actor:
+          user:
+            name: "marc.szalkiewicz"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Authentication"
         class_uid: 3002
-        activity_id: 2
-        activity_name: "Logoff"
-        time: 1768399940641849
         dst_endpoint:
           hostname: "ssh-server"
         metadata:
+          event_code: "session closed"
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-          event_code: "session closed"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
         status: "Success"
         status_id: 1
+        time: 1768399940641849
         user:
           name: "marc.szalkiewicz"
-        actor:
-          user:
-            name: "marc.szalkiewicz"
       system:
         action: "session closed"
         user: "marc.szalkiewicz"
@@ -64,20 +64,22 @@ tests:
           ip: "172.22.179.72"
           port: "58599"
       ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "topdog"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Authentication"
         class_uid: 3002
-        activity_id: 1
-        activity_name: "Logon"
-        time: 1768399940641849
         dst_endpoint:
           hostname: "ssh-server"
         metadata:
+          event_code: "Accepted"
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-          event_code: "Accepted"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -86,11 +88,9 @@ tests:
           port: 58599
         status: "Success"
         status_id: 1
+        time: 1768399940641849
         user:
           name: "topdog"
-        actor:
-          user:
-            name: "topdog"
       system:
         action: "Accepted"
         algorithm: "RSA"
@@ -142,33 +142,33 @@ tests:
           ip: "192.168.1.100"
           port: "22334"
       ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "admin"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Authentication"
         class_uid: 3002
-        activity_id: 1
-        activity_name: "Logon"
-        time: 1768399940641849
         dst_endpoint:
           hostname: "ssh-server"
-        status: "Failure"
-        status_id: 2
         metadata:
+          event_code: "Failed"
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-          event_code: "Failed"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
           port: 22334
+        status: "Failure"
+        status_id: 2
+        time: 1768399940641849
         user:
           name: "admin"
-        actor:
-          user:
-            name: "admin"
       system:
         action: "Failed"
         type: "password"
@@ -195,33 +195,33 @@ tests:
           ip: "192.168.1.100"
           port: "49630"
       ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "ubuntu"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Authentication"
         class_uid: 3002
-        activity_id: 1
-        activity_name: "Logon"
-        time: 1768399940641849
         dst_endpoint:
           hostname: "ssh-server"
-        status: "Success"
-        status_id: 1
         metadata:
+          event_code: "Starting session"
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-          event_code: "Starting session"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
           port: 49630
+        status: "Success"
+        status_id: 1
+        time: 1768399940641849
         user:
           name: "ubuntu"
-        actor:
-          user:
-            name: "ubuntu"
       system:
         action: "Starting session"
         session_id: 0
@@ -250,20 +250,22 @@ tests:
           ip: "192.168.1.100"
           port: "49630"
       ocsf:
+        activity_id: 2
+        activity_name: "Logoff"
+        actor:
+          user:
+            name: "ubuntu"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Authentication"
         class_uid: 3002
-        activity_id: 2
-        activity_name: "Logoff"
-        time: 1768399940641849
         dst_endpoint:
           hostname: "ssh-server"
         metadata:
+          event_code: "Close session"
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-          event_code: "Close session"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -272,11 +274,9 @@ tests:
           port: 49630
         status: "Success"
         status_id: 1
+        time: 1768399940641849
         user:
           name: "ubuntu"
-        actor:
-          user:
-            name: "ubuntu"
       system:
         action: "Close session"
         session_id: 0

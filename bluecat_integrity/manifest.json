@@ -46,6 +46,7 @@
     "classifier_tags": [
       "Category::Network",
       "Category::Security",
+      "Category::SIEM",
       "Category::Log Collection",
       "Submitted Data Type::Logs",
       "Offering::Integration"

@@ -14,7 +14,7 @@ def test_update_py_config(fake_repo, ddev):
     result = ddev('meta', 'scripts', 'update-python-config', NEW_PYTHON_VERSION)
 
     assert result.exit_code == 0, result.output
-    assert result.output.endswith('Python upgrades\n\nPassed: 10\n')
+    assert result.output.endswith('Python upgrades\n\nPassed: 9\n')
 
     contents = constant_file.read_text()
     assert f'PYTHON_VERSION = {OLD_PYTHON_VERSION!r}' not in contents
@@ -56,3 +56,17 @@ def test_update_py_config(fake_repo, ddev):
     contents = template_file.read_text()
     assert f'Programming Language :: Python :: {OLD_PYTHON_VERSION}' not in contents
     assert f'Programming Language :: Python :: {NEW_PYTHON_VERSION}' in contents
+
+    # Explicit content assertions on the rewritten ddev/pyproject.toml: this
+    # captures the actual contract `update_ddev_pyproject_file` upholds today
+    # (no `[tool.black]` block survives, and `[tool.ruff].target-version` is
+    # the only target-version key bumped). Counter-only assertions above can
+    # mask regressions where some unrelated tracker increment compensates for
+    # a missed rewrite.
+    ddev_pyproject = fake_repo.path / 'ddev' / 'pyproject.toml'
+    new_target_token = f"py{NEW_PYTHON_VERSION.replace('.', '')}"
+    old_target_token = f"py{OLD_PYTHON_VERSION.replace('.', '')}"
+    contents = ddev_pyproject.read_text()
+    assert '[tool.black]' not in contents
+    assert f'target-version = "{new_target_token}"' in contents
+    assert f'target-version = "{old_target_token}"' not in contents

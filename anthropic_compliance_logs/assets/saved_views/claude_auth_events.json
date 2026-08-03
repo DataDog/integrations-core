@@ -1,0 +1,34 @@
+{
+  "name": "Claude Auth Events",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:claude-compliance-logs @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_out OR user_signed_in_*)",
+  "timerange": {
+    "interval_ms": 86400000
+  },
+  "visible_facets": [
+    "core_service",
+    "tag_source",
+    "core_status",
+    "log_evt.name",
+    "log_usr.email",
+    "log_network.client.ip",
+    "log_network.client.geoip.country.iso_code"
+  ],
+  "options": {
+    "columns": [
+      "source",
+      "service",
+      "@evt.name",
+      "@usr.email",
+      "@network.client.ip",
+      "@network.client.geoip.country.iso_code",
+      "host"
+    ],
+    "sort": "desc",
+    "show_date_column": true,
+    "message_display": "inline",
+    "show_message_column": false,
+    "show_timeline": true
+  }
+}

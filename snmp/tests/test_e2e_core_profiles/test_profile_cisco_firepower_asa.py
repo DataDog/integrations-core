@@ -48,9 +48,13 @@ def test_e2e_profile_cisco_firepower_asa(dd_agent_check):
     aggregator.assert_metric('snmp.crasNumSessions', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.crasNumSetupFailInsufResources', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.crasNumUsers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    mem_tag_rows = [
+        ['mem:1', 'mem_pool_name:System memory'],
+    ]
+    for tag_row in mem_tag_rows:
+        aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
     tag_rows = [
         ['cpu:34646'],
         ['cpu:7885'],

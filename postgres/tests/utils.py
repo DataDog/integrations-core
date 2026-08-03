@@ -110,6 +110,52 @@ def _wait_for_value(db_instance, lower_threshold, query, attempts=10, applicatio
     conn.close()
 
 
+# WAL positions are exchanged as a numeric byte offset rather than a pg_lsn or its text form.
+# psycopg has no pg_lsn loader, and on SQL_ASCII databases it also hands back bytes for text,
+# so either representation round-trips as bytes and the server then refuses to cast it back.
+WAL_OFFSET_EXPR = "pg_wal_lsn_diff({}, '0/0'::pg_lsn)"
+
+
+def _force_wal_change(db_instance, application_name='test'):
+    """
+    Write a WAL record on the primary and return the WAL byte offset that follows it.
+
+    A logical message is emitted rather than calling txid_current(): the latter only assigns a
+    transaction id, and a transaction that changes nothing commits without writing a WAL record,
+    so it produces no traffic for a WAL receiver to report on.
+    """
+    with _get_superconn(db_instance, application_name) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT pg_logical_emit_message(true, 'datadog', 'wal_receiver_metrics')")
+            cur.fetchall()
+            # Read the position after the emitting transaction has committed, so that the offset
+            # covers its commit record too.
+            cur.execute(f'SELECT {WAL_OFFSET_EXPR.format("pg_current_wal_lsn()")}')
+            return cur.fetchone()[0]
+
+
+def _wait_for_wal_replay(db_instance, target_offset, timeout=30.0, application_name='test'):
+    """
+    Block until the replica has replayed WAL up to target_offset, failing the test if it has not
+    done so within timeout seconds.
+    """
+    query = f'SELECT {WAL_OFFSET_EXPR.format("pg_last_wal_replay_lsn()")} >= %s'
+    conn = _get_superconn(db_instance, application_name)
+    deadline = time.monotonic() + timeout
+    try:
+        while time.monotonic() < deadline:
+            with conn.cursor() as cur:
+                cur.execute(query, (target_offset,))
+                # pg_last_wal_replay_lsn() is NULL until the replica has started replaying
+                if cur.fetchone()[0]:
+                    return
+            time.sleep(0.1)
+    finally:
+        conn.close()
+
+    pytest.fail(f'Replica did not replay WAL up to offset {target_offset} within {timeout}s')
+
+
 def run_query_thread(pg_instance, query, application_name='test', init_statements=None):
     def run_query():
         conn = _get_superconn(pg_instance, application_name)
@@ -137,17 +183,11 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
 def run_one_check(check: AgentCheck, cancel=True):
     """
     Run check and immediately cancel.
-    Waits for all threads to close before continuing.
+    cancel() joins all threads and nulls futures, so no extra .result() calls needed.
     """
     check.run()
     if cancel:
         check.cancel()
-    if check.statement_samples._job_loop_future is not None:
-        check.statement_samples._job_loop_future.result()
-    if check.statement_metrics._job_loop_future is not None:
-        check.statement_metrics._job_loop_future.result()
-    if check.metadata_samples._job_loop_future is not None:
-        check.metadata_samples._job_loop_future.result()
 
 
 def normalize_object(obj):

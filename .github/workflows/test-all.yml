@@ -61,6 +61,12 @@ on:
         default: "standard"
         type: string
 
+permissions:
+  # needed for compute-matrix in test-target.yml
+  contents: read
+  # needed for dd-sts in test-target.yml
+  id-token: write
+
 jobs:
   jd316aba:
     uses: ./.github/workflows/test-target.yml
@@ -736,6 +742,7 @@ jobs:
         - py3.13-23.8
         - py3.13-24.8
         - py3.13-25.3
+        - py3.13-25.8
       fail-fast: false
   j4131274:
     uses: ./.github/workflows/test-target.yml
@@ -957,11 +964,11 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j58cf93c:
+  j69f9754:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: datadog_csi_driver
-      target: datadog_csi_driver
+      job-name: dcgm
+      target: dcgm
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -977,11 +984,11 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j69f9754:
+  jc346754:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: dcgm
-      target: dcgm
+      job-name: Dell Powerflex
+      target: dell_powerflex
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -1262,6 +1269,26 @@ jobs:
     with:
       job-name: Falco
       target: falco
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j7f02532:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: flink
+      target: flink
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -1622,6 +1649,26 @@ jobs:
     with:
       job-name: HiveMQ
       target: hivemq
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j0be27fe:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: HPE Aruba EdgeConnect
+      target: hpe_aruba_edgeconnect
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -2302,6 +2349,26 @@ jobs:
     with:
       job-name: KubeVirt Handler
       target: kubevirt_handler
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j3c620e6:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kueue
+      target: kueue
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

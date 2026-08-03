@@ -24,6 +24,10 @@ MAX_SERVICES = 50
 # Increase the number of threads to collect consul services checks
 THREADS_COUNT = 1
 
+# Defaults for the in-memory cache used to detect health check status transitions
+HEALTH_CHECKS_CACHE_SIZE = 5000
+HEALTH_CHECKS_CACHE_TTL = 3600
+
 STATUS_SC = {
     'up': AgentCheck.OK,
     'passing': AgentCheck.OK,

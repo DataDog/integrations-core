@@ -82,6 +82,7 @@ files:
                 - unit.kbyte
                 - kilobyte
                 - second
+            fleet_configurable: false
           - template: instances/default
       - template: logs
         example:

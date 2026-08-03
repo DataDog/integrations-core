@@ -44,8 +44,6 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /crio/manifest.json                             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /datadog_cluster_agent/                         @DataDog/container-integrations @DataDog/agent-integrations
 /datadog_cluster_agent/*.md                     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
-/datadog_csi_driver/                            @DataDog/container-platform @DataDog/agent-integrations
-/datadog_csi_driver/*.md                        @DataDog/container-platform @DataDog/agent-integrations @DataDog/documentation
 /datadog_operator/                              @DataDog/container-ecosystems @DataDog/agent-integrations
 /datadog_operator/*.md                          @DataDog/container-ecosystems @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                                 @DataDog/container-integrations @DataDog/agent-integrations
@@ -243,6 +241,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /adyen/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
 /adyen/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/anthropic_compliance_logs/                                          @DataDog/saas-integrations
+/anthropic_compliance_logs/*.md                                      @DataDog/saas-integrations @DataDog/documentation
+/anthropic_compliance_logs/manifest.json                             @DataDog/saas-integrations @DataDog/documentation
+/anthropic_compliance_logs/assets/logs/                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /authorize_net/                                                      @DataDog/saas-integrations
 /authorize_net/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /authorize_net/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
@@ -333,10 +336,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /have_i_been_pwned/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
 /have_i_been_pwned/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/incident_io/                                                        @DataDog/saas-integrations
-/incident_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
-/incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
-/incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/incident_io/                                                        @DataDog/saas-integrations @DataDog/collaboration-integrations
+/incident_io/*.md                                                    @DataDog/saas-integrations @DataDog/collaboration-integrations @DataDog/documentation
+/incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/collaboration-integrations @DataDog/documentation
+/incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/collaboration-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /kandji/                                                             @DataDog/saas-integrations
 /kandji/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
@@ -632,6 +635,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
 /gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
 
+/kueue/                                                                @DataDog/gpu-monitoring-agent
+/kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
+/kueue/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+
 /linux_audit_logs/                                                  @DataDog/agent-integrations
 /linux_audit_logs/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /linux_audit_logs/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
@@ -762,10 +769,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/cyberark_endpoint_privilege_manager/                                @DataDog/saas-integrations
-/cyberark_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
-/cyberark_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
-/cyberark_endpoint_privilege_manager/assets/logs/                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/idira_endpoint_privilege_manager/                                @DataDog/saas-integrations
+/idira_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
+/idira_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
+/idira_endpoint_privilege_manager/assets/logs/                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /beyondtrust_privileged_remote_access/                               @DataDog/agent-integrations
 /beyondtrust_privileged_remote_access/*.md                           @DataDog/agent-integrations @DataDog/documentation
@@ -796,6 +803,16 @@ plaid/assets/logs/                                                  @DataDog/saa
 /ide-shepherd/*.md                                                    @DataDog/agent-integrations @DataDog/documentation
 /ide-shepherd/manifest.json                                           @DataDog/agent-integrations @DataDog/documentation
 /ide-shepherd/assets/logs/                                            @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/anomali_threatstream/                                               @DataDog/saas-integrations
+/anomali_threatstream/*.md                                           @DataDog/saas-integrations @DataDog/documentation
+/anomali_threatstream/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
+/anomali_threatstream/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
+/palo_alto_networks_cortex_xsoar/*.md                                 @DataDog/saas-integrations @DataDog/documentation
+/palo_alto_networks_cortex_xsoar/manifest.json                        @DataDog/saas-integrations @DataDog/documentation
+/palo_alto_networks_cortex_xsoar/assets/logs/                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /bluecat_integrity/                                                  @DataDog/saas-integrations
 /bluecat_integrity/*.md                                              @DataDog/saas-integrations @DataDog/documentation

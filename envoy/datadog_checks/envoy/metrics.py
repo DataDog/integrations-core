@@ -387,6 +387,27 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_rbac_denied': 'http.rbac_denied',
     'envoy_http_rbac_shadow_allowed': 'http.rbac_shadow_allowed',
     'envoy_http_rbac_shadow_denied': 'http.rbac_shadow_denied',
+    'envoy_http_adaptive_concurrency_gradient_controller_rq_blocked': (
+        'http.adaptive_concurrency.gradient_controller.rq_blocked'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_min_rtt_calculation_active': (
+        'http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_concurrency_limit': (
+        'http.adaptive_concurrency.gradient_controller.concurrency_limit'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_gradient': (
+        'http.adaptive_concurrency.gradient_controller.gradient'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_burst_queue_size': (
+        'http.adaptive_concurrency.gradient_controller.burst_queue_size'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_min_rtt_msecs': (
+        'http.adaptive_concurrency.gradient_controller.min_rtt_msecs'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_sample_rtt_msecs': (
+        'http.adaptive_concurrency.gradient_controller.sample_rtt_msecs'
+    ),
     'envoy_http_local_rate_limit_enabled': 'http.local_rate_limit_enabled',
     'envoy_http_local_rate_limit_enforced': 'http.local_rate_limit_enforced',
     'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
@@ -886,7 +907,7 @@ METRICS = {
     'cluster.ratelimit.ok': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -894,7 +915,7 @@ METRICS = {
     'cluster.ratelimit.error': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -902,7 +923,7 @@ METRICS = {
     'cluster.ratelimit.over_limit': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -4091,6 +4112,69 @@ METRICS = {
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'http.adaptive_concurrency.gradient_controller.rq_blocked': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.concurrency_limit': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.gradient': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.burst_queue_size': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.min_rtt_msecs': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.sample_rtt_msecs': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
     },
 }
 # fmt: on

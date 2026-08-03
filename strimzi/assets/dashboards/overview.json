@@ -284,7 +284,7 @@
                             "grouping": "cluster",
                             "tags": [],
                             "time": {},
-                            "title": "Cluster Endpoint Endpoint",
+                            "title": "Cluster Endpoint",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "check_status"

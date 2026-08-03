@@ -4,10 +4,12 @@
 
 
 import logging
+from copy import deepcopy
 
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
+from tests.conftest import load_fixture_page
 from tests.constants import BASE_TAGS, CLUSTER_TAGS
 
 pytestmark = [pytest.mark.unit]
@@ -66,7 +68,9 @@ def test_entity_counts(dd_run_check, mock_instance, mock_http_get):
     assert activity.events_count == 0
     assert activity.tasks_count == 0
     assert activity.audits_count == 0
-    assert activity.alerts_count == 0
+    # First run fetches all unresolved alerts (no time filter), so the count
+    # reflects every isResolved=false alert in the fixture.
+    assert activity.alerts_count == 5
 
 
 def test_summary_log_message(dd_run_check, mock_instance, mock_http_get, caplog):
@@ -74,7 +78,7 @@ def test_summary_log_message(dd_run_check, mock_instance, mock_http_get, caplog)
     with caplog.at_level(logging.INFO):
         dd_run_check(check)
 
-    expected = "[PC:10.0.0.197] Check completed: 2 clusters, 2 hosts, 4 VMs, 0 events, 0 tasks, 0 audits, 0 alerts"
+    expected = "[PC:10.0.0.197] Check completed: 2 clusters, 2 hosts, 4 VMs, 0 events, 0 tasks, 0 audits, 5 alerts"
     summary_lines = [r.message for r in caplog.records if "Check completed" in r.message]
     assert len(summary_lines) == 1
     assert summary_lines[0] == expected
@@ -90,6 +94,24 @@ def test_prism_central_cluster_skipped(dd_run_check, aggregator, mock_instance, 
         m for m in aggregator.metrics("nutanix.cluster.count") if any("prism-central-deployment" in t for t in m.tags)
     ]
     assert len(pc_metrics) == 0
+
+
+def test_cluster_with_no_name_is_skipped(
+    dd_run_check, aggregator, mock_instance, mock_http_get, mocker, caplog
+) -> None:
+    clusters = deepcopy(load_fixture_page("clusters.json", 0)["data"])
+    clusters.append({"extId": "no-name-cluster-id", "config": {"clusterFunction": ["AOS"]}})
+    mocker.patch(
+        "datadog_checks.nutanix.infrastructure_monitor.InfrastructureMonitor._list_clusters",
+        return_value=clusters,
+    )
+
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    with caplog.at_level(logging.WARNING):
+        dd_run_check(check)
+
+    assert check.infrastructure_monitor.cluster_count == 2
+    assert any("no-name-cluster-id" in r.message and "has no name" in r.message for r in caplog.records)
 
 
 def test_missing_pc_ip_raises_error(dd_run_check):

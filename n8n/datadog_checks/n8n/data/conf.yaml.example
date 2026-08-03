@@ -18,7 +18,7 @@ instances:
     ## https://docs.n8n.io/hosting/logging-monitoring/monitoring/ 
     ## https://docs.n8n.io/hosting/configuration/environment-variables/endpoints/
     #
-  - openmetrics_endpoint: http://localhost:5678
+  - openmetrics_endpoint: http://localhost:5678/metrics
 
     ## @param raw_metric_prefix - string - optional - default: n8n_
     ## The prefix prepended to all metrics from n8n.

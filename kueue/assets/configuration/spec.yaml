@@ -1,0 +1,63 @@
+name: Kueue
+fleet_configurable: true
+files:
+- name: kueue.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:8080/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing Kueue's Prometheus metrics.
+    - name: cluster_check
+      description: |
+        Set to true when configuring this integration as a Cluster Agent cluster check.
+      value:
+        type: boolean
+        example: true
+    - name: collect_workload_events
+      description: |
+        Collect Kueue Workload lifecycle events by polling Workload custom resources from the Kubernetes API.
+
+        This requires `get` and `list` RBAC permissions on `workloads.kueue.x-k8s.io`.
+      value:
+        type: boolean
+        example: true
+        default: true
+    - name: kube_config_dict
+      description: |
+        Optional kubeconfig dictionary used to configure the Kubernetes API client.
+
+        If unset, the check uses in-cluster Kubernetes configuration.
+      value:
+        type: object
+        example:
+          apiVersion: v1
+          kind: Config
+          clusters: []
+          contexts: []
+          users: []
+    - name: workload_events_namespaces
+      description: |
+        Optional list of namespaces to collect Workload events from. If unset, Workloads are collected from all
+        namespaces.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - default
+    - name: resource_name_map
+      description: |
+        Mapping of Kueue resource label values to metric name suffixes for resource metrics.
+
+        By default, `cpu` is reported as `cpu`, `memory` is reported as `memory`, `nvidia.com/gpu` is reported as
+        `gpu`, and unmapped resources are reported as `other`. Built-in resource names cannot be overridden.
+      value:
+        type: object
+        example:
+          example.com/fpga: fpga

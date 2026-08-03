@@ -2,7 +2,31 @@
 
 <!-- towncrier release notes start -->
 
-## 10.10.0 / 2026-04-15
+## 10.11.0 / 2026-07-08
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Remove server-side sort from MongoDB query metrics collection to avoid `queryStats` sort memory failures. ([#24140](https://github.com/DataDog/integrations-core/pull/24140))
+
+## 10.10.2 / 2026-06-09 / Agent 7.81.0
+
+***Fixed***:
+
+* Raise exceptions from the hostname property, so permission and connectivity errors surface as check failures. ([#23661](https://github.com/DataDog/integrations-core/pull/23661))
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 10.10.1 / 2026-05-14 / Agent 7.80.0
+
+***Fixed***:
+
+* Fixed a datetime overflow when collecting slow operations from MongoDB 8.0 replica set logs containing out-of-range `$date` sentinel values in RSM topology change entries. ([#23472](https://github.com/DataDog/integrations-core/pull/23472))
+* Include `database_instance` tag in `mongodb.can_connect` service check. ([#23476](https://github.com/DataDog/integrations-core/pull/23476))
+
+## 10.10.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 
