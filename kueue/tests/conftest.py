@@ -64,8 +64,9 @@ def host_routed_networks() -> list[ipaddress.IPv4Network]:
             output = run_command(command, capture=True).stdout
         except Exception:
             continue
-        if output.strip():
-            return parse_route_networks(output)
+        networks = parse_route_networks(output)
+        if networks:
+            return networks
 
     raise RuntimeError(
         'Could not read the host routing table with `ip -4 route show` or `netstat -rn -f inet`. '
@@ -234,8 +235,8 @@ def preload_workload_images():
     """Pull the workload images once and side-load them, instead of once per Job pod from Docker Hub."""
     cluster_name = f'cluster-{CHECK_NAME}-{get_active_env()}'
     for image in sorted(workload_images()):
-        run_command(['docker', 'pull', image])
-        run_command(['kind', 'load', 'docker-image', image, '--name', cluster_name])
+        run_command(['docker', 'pull', image], check=True)
+        run_command(['kind', 'load', 'docker-image', image, '--name', cluster_name], check=True)
 
 
 def wait_for_queues_active():

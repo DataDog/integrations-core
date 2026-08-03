@@ -8,9 +8,8 @@ import time
 from collections.abc import Iterator
 
 import pytest
+import yaml
 
-from datadog_checks.dev.subprocess import run_command
-from datadog_checks.dev.utils import get_active_env
 from datadog_checks.kueue import KueueCheck
 
 from .common import (
@@ -100,10 +99,10 @@ def assert_workload_event(check, aggregator, transition, workload_name):
 
 
 @pytest.fixture
-def kubectl_env() -> Iterator[dict[str, str]]:
+def kubectl_env(dd_get_state) -> Iterator[dict[str, str]]:
     """Yield an env pointing kubectl at the kind cluster, cleaning up the event Jobs on both sides."""
     with tempfile.NamedTemporaryFile('w', suffix='.yaml') as kubeconfig:
-        kubeconfig.write(kind_kubeconfig())
+        yaml.safe_dump(live_instance(dd_get_state)['kube_config_dict'], kubeconfig)
         kubeconfig.flush()
         env = {**os.environ, 'KUBECONFIG': kubeconfig.name}
         delete_jobs(EVENT_JOBS, env=env)
@@ -111,8 +110,3 @@ def kubectl_env() -> Iterator[dict[str, str]]:
             yield env
         finally:
             delete_jobs(EVENT_JOBS, env=env)
-
-
-def kind_kubeconfig() -> str:
-    cluster_name = f'cluster-{CHECK_NAME}-{get_active_env()}'
-    return run_command(['kind', 'get', 'kubeconfig', '--name', cluster_name], capture='stdout', check=True).stdout

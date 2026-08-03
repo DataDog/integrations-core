@@ -1,2 +1,3 @@
+Correct metric metadata so counters, histograms, and gauges resolve in dashboards, and remove a metric that Kueue does not emit.
 Stop the ``kueue_preempted_by`` workload event tag from also capturing the preempting Job UID.
 Stop tagging ``kueue_preempted_by`` on workload evictions caused by resource flavor migration rather than preemption.
