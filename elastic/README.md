@@ -275,9 +275,10 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][17] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][18].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][18].
 
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: elastic`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -323,6 +324,33 @@ spec:
   containers:
     - name: elasticsearch
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <ELASTICSEARCH_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: elastic
+        containerName: elasticsearch
+        initConfig: {}
+        instances:
+          - url: "http://%%host%%:9200"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ##### Log collection
 

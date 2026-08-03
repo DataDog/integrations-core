@@ -77,7 +77,10 @@ For containerized environments, see [Configure integrations with Autodiscovery o
 
 **Example**
 
-Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
+Choose a Kubernetes Autodiscovery configuration, where `<CONTAINER_NAME>` is the Aerospike container name:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
@@ -88,8 +91,33 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
     }
   } 
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
 
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: aerospike`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <AEROSPIKE_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: aerospike
+        containerName: <CONTAINER_NAME>
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:9145/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 
 ##### Log collection

@@ -262,15 +262,16 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-To collect metrics, set the following parameters and values in an [Autodiscovery template][11]. You can do this with Kubernetes Annotations (shown below) on your NGINX pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][12].
-
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: nginx`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][24].
+To collect metrics, set the following parameters and values with one of the Kubernetes Autodiscovery options below. You can also use a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][12].
 
 | Parameter            | Value                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `["nginx"]`                                                                |
 | `<INIT_CONFIG>`      | `[{}]`                                                                     |
 | `<INSTANCE_CONFIG>`  | `[{"nginx_status_url": "http://%%host%%:18080/nginx_status"}]`             |
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -314,6 +315,33 @@ metadata:
   labels:
     name: nginx
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <NGINX_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: nginx
+        containerName: nginx
+        initConfig: {}
+        instances:
+          - nginx_status_url: "http://%%host%%:81/nginx_status/"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][24].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 

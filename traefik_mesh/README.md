@@ -35,9 +35,7 @@ In addition, a small subset of metrics can be collected by communicating with di
 #### Containerized
 ##### Metric collection
 
-Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh cluster. You can configure and customize this by following the instructions on the [Observability page in the official Traefik Mesh documentation][10]. In order for the Agent to start collecting metrics, the Traefik Mesh pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [`traefik_mesh.d/conf.yaml` sample][4].
-
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: traefik_mesh`, and set `containerName` to match each component's container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][13].
+Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh cluster. You can configure and customize this by following the instructions on the [Observability page in the official Traefik Mesh documentation][10]. Configure each component with one of the Kubernetes Autodiscovery options below. You can find additional configuration options by reviewing the [`traefik_mesh.d/conf.yaml` sample][4].
 
 **Note**: The following metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed.
 
@@ -47,6 +45,9 @@ When configuring the Traefik Mesh check, you can use the following parameters:
 - `traefik_controller_api_endpoint`: This parameter is optional. The default port is set to `9000`.
 
 #### Traefik Proxy
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
+
 ```yaml
 # (...)
 metadata:
@@ -70,8 +71,41 @@ spec:
     - name: <CONTAINER_NAME>
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the Traefik Mesh proxy DaemonSet:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: DaemonSet
+    name: traefik-mesh-proxy
+  config:
+    checks:
+      - integration: traefik_mesh
+        containerName: traefik-mesh-proxy
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8082/metrics"
+            traefik_proxy_api_endpoint: "http://%%host%%:8080"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][13].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### Traefik Controller
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
+
 ```yaml
 # (...)
 metadata:
@@ -94,6 +128,35 @@ spec:
     - name: <CONTAINER_NAME>
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the Traefik Mesh controller Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: traefik-mesh-controller
+  config:
+    checks:
+      - integration: traefik_mesh
+        containerName: traefik-mesh-controller
+        initConfig: {}
+        instances:
+          - traefik_controller_api_endpoint: "http://%%host%%:9000"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][13].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 See the [sample traefik_mesh.d/conf.yaml][4] for all available configuration options.
 

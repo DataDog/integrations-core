@@ -39,9 +39,7 @@ In addition, a small subset of metrics can be collected by communicating with di
 #### Containerized
 ##### Metric collection
 
-Make sure that the Prometheus-formatted metrics are exposed in your Weaviate cluster. You can configure and customize this by following the instructions on the [Monitoring][10] page in the Weaviate documentation. For the Agent to start collecting metrics, the Weaviate pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample weaviate.d/conf.yaml][4]
-
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: weaviate`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][17].
+Make sure that the Prometheus-formatted metrics are exposed in your Weaviate cluster. You can configure and customize this by following the instructions on the [Monitoring][10] page in the Weaviate documentation. Configure the check with one of the Kubernetes Autodiscovery options below. You can find additional configuration options by reviewing the [sample weaviate.d/conf.yaml][4].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the object deletion metric is exposed only when an object is deleted.
 
@@ -51,6 +49,9 @@ The two most important parameters for configuring the Weaviate check are as foll
 
 If authentication is required for the RESTful API endpoints, the check can be configured to provide an API key as part of the [request header][13].
 
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -78,6 +79,36 @@ spec:
     - name: 'weaviate'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <WEAVIATE_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: weaviate
+        containerName: weaviate
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:2112/metrics"
+            weaviate_api_endpoint: "http://%%host%%:8080"
+            headers:
+              Authorization: "Bearer if_needed_for_auth"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][17].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 **Note**: You can set these annotations directly in your [Weaviate Helm chart][14] using `annotations` key.
 

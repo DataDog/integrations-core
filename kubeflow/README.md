@@ -29,9 +29,7 @@ No additional installation is needed on your server.
 #### Metric collection
 
 Make sure that the Prometheus-formatted metrics are exposed for your `kubeflow` componenet. 
-For the Agent to start collecting metrics, the `kubeflow` pods need to be annotated.
-
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: kubeflow`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][10].
+Configure the `kubeflow` workload with one of the Kubernetes Autodiscovery options below.
 
 Kubeflow has metrics endpoints that can be accessed on port `9090`. 
 
@@ -85,6 +83,9 @@ Where `<kubeflow-component>` is to be replaced by `pipelines`, `kserve` or `kati
 
 The only parameter required for configuring the `kubeflow` check is `openmetrics_endpoint`. This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `9090`. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -109,6 +110,35 @@ spec:
     - name: 'controller'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the Deployment for the Kubeflow component that exposes the metrics endpoint:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: <KUBEFLOW_COMPONENT_NAME>
+  config:
+    checks:
+      - integration: kubeflow
+        containerName: controller
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:9090/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][10].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

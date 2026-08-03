@@ -69,7 +69,10 @@ instances:
 Customize this file with any additional configurations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 ##### Control plane configuration
-To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio v1.5 or later, apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:
+To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, configure the Agent to monitor the `istiod` deployment with one of the following Autodiscovery options:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 ad.datadoghq.com/discovery.checks: |
@@ -84,13 +87,41 @@ ad.datadoghq.com/discovery.checks: |
     }
   }
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the `istiod` Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istiod
+  config:
+    checks:
+      - integration: istio
+        containerName: discovery
+        initConfig: {}
+        instances:
+          - istiod_endpoint: "http://%%host%%:15014/metrics"
+            use_openmetrics: "true"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][33].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 **Note**: The Autodiscovery Annotations v2 syntax is supported for Agent v7.36+.
 
 This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
-The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
-
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: istio`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][33].
+When using annotations, the method for applying them varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 ##### Ambient mode configuration
 

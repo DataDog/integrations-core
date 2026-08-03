@@ -59,7 +59,10 @@ labels:
 
 ##### Metric collection
 
-This example demonstrates the configuration as Kubernetes annotations on your Ray pods. See the [sample configuration file][4] for all available configuration options.
+Choose one of the following Kubernetes Autodiscovery configurations. See the [sample configuration file][4] for all available configuration options.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -83,8 +86,33 @@ spec:
     - name: 'ray'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
 
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: ray`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <RAY_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: ray
+        containerName: ray
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8080"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

@@ -96,7 +96,10 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Kubernetes Deployment example
 
-Add pod annotations under `.spec.template.metadata` for a Deployment:
+Choose one of the following Kubernetes Autodiscovery configurations for the Deployment:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: apps/v1
@@ -121,8 +124,36 @@ spec:
       containers:
         - name: haproxy
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
 
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: haproxy`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+Target the HAProxy Deployment shown in the annotation example:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: haproxy
+  config:
+    checks:
+      - integration: haproxy
+        containerName: haproxy
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:<PORT>/metrics"
+            use_openmetrics: "true"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -256,7 +287,10 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][13].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][13].
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 **Annotations v1** (for Datadog Agent v7.36 or earlier)
 
@@ -302,6 +336,33 @@ spec:
   containers:
     - name: haproxy
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: haproxy
+  config:
+    checks:
+      - integration: haproxy
+        containerName: haproxy
+        initConfig: {}
+        instances:
+          - url: "https://%%host%%/admin?stats"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ##### Log collection
 

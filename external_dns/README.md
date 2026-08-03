@@ -20,7 +20,10 @@ Edit the `external_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of
 
 #### Using with service discovery
 
-If you are using one Datadog Agent pod per Kubernetes worker node, use these example annotations on your external-dns pod to retrieve the data automatically:
+If you are using one Datadog Agent pod per Kubernetes worker node, choose one of the following Autodiscovery configurations for external-dns:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -31,11 +34,40 @@ metadata:
     ad.datadoghq.com/external-dns.init_configs: '[{}]'
     ad.datadoghq.com/external-dns.instances: '[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["externaldns-pod:%%host%%"]}]'
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
 
-You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: external_dns`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][9].
+This example targets the ExternalDNS Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: external-dns
+  config:
+    checks:
+      - integration: external_dns
+        containerName: external-dns
+        initConfig: {}
+        instances:
+          - prometheus_url: "http://%%host%%:7979/metrics"
+            tags:
+              - "externaldns-pod:%%host%%"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][9].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 - The `externaldns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the autodiscovery.
-- The autodiscovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
+- When using pod annotations, add them to the metadata of the template's specification.
 
 ### Validation
 
