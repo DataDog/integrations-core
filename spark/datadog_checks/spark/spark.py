@@ -13,6 +13,7 @@ from datadog_checks.base.utils.http_exceptions import (
 )
 from datadog_checks.base.utils.http_exceptions import (
     HTTPInvalidURLError,
+    HTTPReadTimeoutError,
     HTTPStatusError,
     HTTPTimeoutError,
 )
@@ -675,6 +676,11 @@ class SparkCheck(AgentCheck):
                 response.raise_for_status()
 
         except HTTPTimeoutError as e:
+            # requests raised a body-phase read timeout as a ConnectionError, so it reached the
+            # suppression path below. Only read timeouts qualify: a connect timeout always alerted.
+            if isinstance(e, HTTPReadTimeoutError) and self._should_suppress_connection_error(e, tags):
+                return None
+
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,

@@ -13,7 +13,12 @@ import mock
 import pytest
 import urllib3
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPRequestError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+    HTTPRequestError,
+)
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
@@ -1745,6 +1750,37 @@ def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, mock_http):
 
     service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
     assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog, mock_http):
+    """requests raised a body-phase read timeout as a ConnectionError, so it was suppression-eligible."""
+    mock_http.get.side_effect = HTTPReadTimeoutError("Read timed out")
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
+    c = SparkCheck('spark', {}, [instance])
+
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(c)
+
+    assert "Pod phase is terminal, suppressing request error" in caplog.text
+    assert aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK) == []
+
+
+@pytest.mark.unit
+def test_connect_timeout_terminal_phase_still_alerts(aggregator, dd_run_check, mock_http):
+    """A connect timeout was never suppression-eligible, so the terminal phase must not silence it."""
+    mock_http.get.side_effect = HTTPConnectTimeoutError("Connection timed out")
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
+    c = SparkCheck('spark', {}, [instance])
+
+    with pytest.raises(Exception, match='Connection timed out'):
+        dd_run_check(c)
+
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 1
+    assert service_checks[0].status == SparkCheck.CRITICAL
 
 
 @pytest.mark.unit
