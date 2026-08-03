@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from json import JSONDecodeError as StdJSONDecodeError
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from simplejson import JSONDecodeError
@@ -424,7 +425,7 @@ class MapReduceCheck(AgentCheck):
             self._critical_service(service_name, service_check_tags, "Request failed: {}, {}".format(url, e))
             raise
 
-        except JSONDecodeError as e:
+        except (JSONDecodeError, StdJSONDecodeError) as e:
             self._critical_service(service_name, service_check_tags, "JSON Parse failed: {}, {}".format(url, e))
             raise
 

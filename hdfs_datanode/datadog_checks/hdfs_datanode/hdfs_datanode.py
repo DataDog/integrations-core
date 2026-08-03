@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from json import JSONDecodeError as StdJSONDecodeError
 from urllib.parse import urljoin
 
 from simplejson import JSONDecodeError
@@ -137,7 +138,7 @@ class HDFSDataNode(AgentCheck):
             )
             raise
 
-        except JSONDecodeError as e:
+        except (JSONDecodeError, StdJSONDecodeError) as e:
             self.service_check(
                 self.JMX_SERVICE_CHECK,
                 AgentCheck.CRITICAL,

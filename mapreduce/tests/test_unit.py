@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import pytest
+
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
@@ -90,6 +93,20 @@ def test_check(aggregator, dd_run_check, mocked_request):
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check, mock_http):
+    """The URL is the only per-endpoint discriminator, so a non-JSON body must still name it."""
+    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(content='<html>not json</html>')
+    instance = MR_CONFIG['instances'][0]
+    mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
+
+    # `dd_run_check` re-raises the check's traceback as a plain Exception.
+    with pytest.raises(Exception, match='JSONDecodeError'):
+        dd_run_check(mapreduce)
+
+    message = aggregator.service_checks(MapReduceCheck.YARN_SERVICE_CHECK)[0].message
+    assert message.startswith('JSON Parse failed: {}'.format(RM_URI))
 
 
 def test_auth():

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+from json import JSONDecodeError as StdJSONDecodeError
 from urllib.parse import urljoin
 
 from simplejson import JSONDecodeError
@@ -173,7 +174,7 @@ class HDFSNameNode(AgentCheck):
             )
             raise
 
-        except JSONDecodeError as e:
+        except (JSONDecodeError, StdJSONDecodeError) as e:
             self.service_check(
                 self.JMX_SERVICE_CHECK,
                 AgentCheck.CRITICAL,

@@ -4,10 +4,12 @@
 import mock
 import pytest
 
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
 from .common import (
     CUSTOM_TAGS,
+    DATANODE_URI,
     HDFS_DATANODE_AUTH_CONFIG,
     HDFS_DATANODE_CONFIG,
     HDFS_DATANODE_METRIC_TAGS,
@@ -73,6 +75,20 @@ def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_a
 
     datadog_agent.assert_metadata(CHECK_ID, version_metadata)
     datadog_agent.assert_metadata_count(6)
+
+
+def test_json_parse_failure_keeps_url_in_service_check(aggregator, mock_http):
+    """The URL is the only per-bean discriminator, so a non-JSON body must still name it."""
+    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(content='<html>not json</html>')
+    instance = HDFS_DATANODE_CONFIG['instances'][0]
+    hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
+
+    with pytest.raises(ValueError):
+        hdfs_datanode.check(instance)
+
+    aggregator.assert_service_check(HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.CRITICAL, count=1)
+    message = aggregator.service_checks(HDFSDataNode.JMX_SERVICE_CHECK)[0].message
+    assert message.startswith('JSON Parse failed: {}'.format(DATANODE_URI))
 
 
 def test_auth():
