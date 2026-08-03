@@ -324,7 +324,8 @@ def trigger_preemption():
 
 
 def get_service_account_token():
-    return kubectl_output(['create', 'token', 'kueue-metrics-reader', '-n', 'default', '--duration=24h'])
+    """Mint a token for the metrics reader, tolerating the tear-down pass that has no live cluster."""
+    return kubectl_output(['create', 'token', 'kueue-metrics-reader', '-n', 'default', '--duration=24h'], check=False)
 
 
 @pytest.fixture(scope='session')
