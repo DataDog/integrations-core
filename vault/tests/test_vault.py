@@ -785,7 +785,7 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
 
     # Return canned responses so the assertion targets the header, not the live metrics endpoint.
     def mock_get(url, *args, **kwargs):
-        assert c.http.get_header('X-Vault-Request') == 'true'
+        assert c.http.options['headers'].get('X-Vault-Request') == 'true'
         if url.endswith('/sys/leader'):
             return MockHTTPResponse(
                 json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}

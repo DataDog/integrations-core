@@ -95,4 +95,4 @@ def test_auth():
     instance = HDFS_DATANODE_AUTH_CONFIG['instances'][0]
     hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 
-    assert hdfs_datanode.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)
+    assert hdfs_datanode.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)

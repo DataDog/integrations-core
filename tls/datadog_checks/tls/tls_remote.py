@@ -179,12 +179,7 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                # tls_config is a model, not a mapping, so it has to be converted before being
-                # layered under the verification override: ChainMap would otherwise resolve every
-                # lookup to its default and silently drop the client certificate and ciphers.
-                context = create_ssl_context(
-                    ChainMap({'tls_verify': False}, self.agent_check.http.tls_config.model_dump())
-                )
+                context = create_ssl_context(ChainMap({'tls_verify': False}, self.agent_check.http.tls_config))
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)

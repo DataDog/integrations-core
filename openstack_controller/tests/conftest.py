@@ -998,7 +998,7 @@ def mock_http_get(request, mock_http_call, mock_http):
             return http_error[path]
         if data and path in data:
             return MockHTTPResponse(json_data=data[path], status_code=200)
-        headers = {**mock_http.get_headers(), **(options.get('headers') or {})}
+        headers = {**mock_http.options.get('headers', {}), **(options.get('headers') or {})}
         params = options.get('params')
         return MockHTTPResponse(
             json_data=mock_http_call('GET', path, headers=headers, params=params),
@@ -1030,7 +1030,7 @@ def mock_http_post(request, mock_http_call, mock_http):
                     file = 'system'
                 else:
                     file = file.get('project', {}).get('id')
-            json_data = mock_http_call(method, path, file, headers=mock_http.get_headers())
+            json_data = mock_http_call(method, path, file, headers=mock_http.options.get('headers'))
             headers = {'X-Subject-Token': f'token_{file}'}
         else:
             json_data = mock_http_call(method, path)

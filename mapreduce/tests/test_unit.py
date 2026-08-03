@@ -113,7 +113,7 @@ def test_auth():
     instance = MR_AUTH_CONFIG['instances'][0]
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
-    assert mapreduce.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)
+    assert mapreduce.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
 
 
 def test_disable_legacy_cluster_tag(aggregator, dd_run_check, mocked_request):

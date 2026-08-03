@@ -27,7 +27,7 @@ def test_config_default():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_headers() == DEFAULT_OPTIONS['headers']
+    assert http.options['headers'] == DEFAULT_OPTIONS['headers']
 
 
 def test_config_headers():
@@ -36,7 +36,7 @@ def test_config_headers():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert list(http.get_headers().items()) == list(headers.items())
+    assert list(http.options['headers'].items()) == list(headers.items())
 
 
 def test_config_headers_string_values():
@@ -44,7 +44,7 @@ def test_config_headers_string_values():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_headers() == {'answer': '42'}
+    assert http.options['headers'] == {'answer': '42'}
 
 
 def test_config_extra_headers():
@@ -55,7 +55,7 @@ def test_config_extra_headers():
 
     complete_headers = OrderedDict(DEFAULT_OPTIONS['headers'])
     complete_headers.update(headers)
-    assert list(http.get_headers().items()) == list(complete_headers.items())
+    assert list(http.options['headers'].items()) == list(complete_headers.items())
 
 
 def test_config_extra_headers_string_values():
@@ -65,7 +65,7 @@ def test_config_extra_headers_string_values():
 
     complete_headers = dict(DEFAULT_OPTIONS['headers'])
     complete_headers.update({'answer': '42'})
-    assert http.get_headers() == complete_headers
+    assert http.options['headers'] == complete_headers
 
 
 def test_config_extra_headers_non_canonical_case_takes_precedence_over_the_seeded_default():
@@ -103,7 +103,7 @@ def test_config_headers_keep_every_configured_spelling():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_headers() == {'host': 'first', 'Host': 'second'}
+    assert http.options['headers'] == {'host': 'first', 'Host': 'second'}
     assert http.tls_use_host_header is True
 
 
@@ -142,7 +142,7 @@ def test_extra_headers_on_http_method_call():
         )
 
     # make sure the original headers are not modified
-    assert http.get_headers() == complete_headers
+    assert http.options['headers'] == complete_headers
     assert extra_headers == {"foo": "bar"}
 
 
@@ -190,35 +190,16 @@ def test_set_header_case_insensitive():
     # Overwrites the existing 'Accept' key (preserving original casing)
     assert http.get_header('Accept') == 'application/json'
     # No duplicate key created
-    assert sum(1 for k in http.get_headers() if k.lower() == 'accept') == 1
+    assert sum(1 for k in http.options['headers'] if k.lower() == 'accept') == 1
 
 
 def test_set_header_collapses_case_insensitive_duplicates():
     http = RequestsWrapper({}, {})
-    http._options['headers'] = OrderedDict(
+    http.options['headers'] = OrderedDict(
         (('x-vault-token', 'configured-lower'), ('X-Vault-Token', 'configured-canonical'))
     )
 
     http.set_header('X-Vault-Token', 'runtime-token')
 
     assert http.get_header('X-Vault-Token') == 'runtime-token'
-    assert sum(1 for key in http.get_headers() if key.lower() == 'x-vault-token') == 1
-
-
-def test_update_headers_collapses_case_insensitive_duplicates():
-    http = RequestsWrapper({}, {})
-
-    http.update_headers(OrderedDict((('accept', 'first'), ('ACCEPT', 'last'))))
-
-    assert http.get_header('Accept') == 'last'
-    assert sum(1 for key in http.get_headers() if key.lower() == 'accept') == 1
-
-
-def test_remove_header_removes_case_insensitive_duplicates():
-    http = RequestsWrapper({}, {})
-    http._options['headers'] = OrderedDict((('x-token', 'first'), ('X-Token', 'last')))
-
-    http.remove_header('X-Token')
-
-    assert http.get_header('X-Token') is None
-    assert all(key.lower() != 'x-token' for key in http.get_headers())
+    assert sum(1 for key in http.options['headers'] if key.lower() == 'x-vault-token') == 1

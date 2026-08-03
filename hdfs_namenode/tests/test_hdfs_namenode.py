@@ -94,4 +94,4 @@ def test_auth():
     instance = HDFS_NAMENODE_AUTH_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
-    assert hdfs_namenode.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)
+    assert hdfs_namenode.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)

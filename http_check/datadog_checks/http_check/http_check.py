@@ -79,8 +79,9 @@ class HTTPCheck(AgentCheck):
             self.ca_certs = get_ca_certs_path()
 
         if not self.instance.get("include_default_headers", True) and "headers" not in self.instance:
-            self.http.clear_headers()
-            self.http.update_headers(self.instance.get("extra_headers", {}))
+            headers = self.http.options["headers"]
+            headers.clear()
+            headers.update(self.instance.get("extra_headers", {}))
 
         if is_affirmative(self.instance.get('use_cert_from_response', False)):
             self.HTTP_CONFIG_REMAPPER['disable_ssl_validation']['default'] = False
@@ -106,7 +107,7 @@ class HTTPCheck(AgentCheck):
             use_cert_from_response,
             enable_http_outcome_tag,
         ) = from_instance(instance, self.ca_certs)
-        timeout = self.http.default_timeout.connect
+        timeout = self.http.options["timeout"][0]
         start = time.time()
 
         def send_status_up(log_msg):
@@ -411,7 +412,8 @@ class HTTPCheck(AgentCheck):
         port = o.port or 443
 
         sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
-        if proxy_url := self.http.proxy_for_url(url):
+        proxies = self.http.options.get('proxies', {})
+        if proxies and (proxy_url := proxies.get("https")) and not self.http.should_bypass_proxy(url):
             proxy = parse_proxy_url(proxy_url)
             sock.set_proxy(**proxy)
 

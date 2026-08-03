@@ -61,7 +61,7 @@ class PowerFlexAPI:
             raise ValueError(f"Auth response missing access_token: {data}")
         expires_in = data.get('expires_in', 300)
         self._token_expiry = time() + expires_in
-        self._http.set_header('Authorization', f'Bearer {self._token}')
+        self._http.options['headers']['Authorization'] = f'Bearer {self._token}'
         self._log.debug('Refreshed PowerFlex auth token, expires in %ds', expires_in)
 
     def _get(self, path: str) -> Any:

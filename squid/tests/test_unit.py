@@ -101,4 +101,4 @@ def test_legacy_username_password(instance, auth_config):
     instance.update(auth_config)
     check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
 
-    assert check.http.get_basic_auth() == ('datadog_user', 'datadog_pass')
+    assert check.http.options['auth'] == ('datadog_user', 'datadog_pass')

@@ -136,17 +136,15 @@ def test_fetch_cert_honors_proxy_bypass(bypass, expect_proxy_set):
     # covered by the client's no_proxy rules (self.http.should_bypass_proxy).
     instance = {'name': 'cert', 'url': 'https://valid.mock:443'}
     check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+    check.http.options['proxies'] = {'https': 'http://proxy.example:3128'}
+
     mock_sock = mock.MagicMock()
     tls_context = mock.MagicMock()
     tls_context.wrap_socket.return_value.getpeercert.return_value = b'cert'
 
     with (
-        mock.patch.object(
-            type(check.http),
-            'proxy_for_url',
-            return_value=None if bypass else 'http://proxy.example:3128',
-        ),
         mock.patch('datadog_checks.http_check.http_check.socks.socksocket', return_value=mock_sock),
+        mock.patch.object(type(check.http), 'should_bypass_proxy', return_value=bypass),
         mock.patch.object(check, 'get_tls_context', return_value=tls_context),
     ):
         check._fetch_cert(instance, 1, 'ca')

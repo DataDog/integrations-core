@@ -12,7 +12,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
-from datadog_checks.dev.http_assertions import assert_http_client_config
 
 from . import common
 
@@ -123,7 +122,8 @@ def test_config(aggregator, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
 
-    assert_http_client_config(check.http, expected_http_kwargs)
+    actual_options = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
+    assert expected_http_kwargs == actual_options
 
 
 @pytest.mark.e2e

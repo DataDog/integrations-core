@@ -11,7 +11,6 @@ from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
-from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
 
 DEFAULT_MASTER_PORT = 5050
 
@@ -100,9 +99,8 @@ class MesosSlave(AgentCheck):
 
         url = self.instance.get('url', '')
         parsed_url = urlparse(url)
-        if self.http.tls_config.tls_verify and parsed_url.scheme == 'https':
+        if self.http.options['verify'] and parsed_url.scheme == 'https':
             self.log.warning('Skipping TLS cert validation for %s based on configuration.', url)
-        self._request_timeout = None
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
             timeout = (
@@ -112,7 +110,7 @@ class MesosSlave(AgentCheck):
                 or self.init_config.get('default_timeout')
                 or self.DEFAULT_TIMEOUT
             )
-            self._request_timeout = HTTPTimeoutConfig(timeout, timeout)
+            self.http.options['timeout'] = (timeout, timeout)
 
     def check(self, instance):
         if 'url' not in instance:
@@ -187,14 +185,10 @@ class MesosSlave(AgentCheck):
 
     def _get_json(self, url):
         try:
-            kwargs = {}
-            if self._request_timeout is not None:
-                kwargs['timeout'] = self._request_timeout
-            resp = self.http.get(url, **kwargs)
+            resp = self.http.get(url)
             resp.raise_for_status()
         except HTTPTimeoutError:
-            timeout = self._request_timeout or self.http.default_timeout
-            self.warning("Timeout for %s seconds when connecting to URL: %s", (timeout.connect, timeout.read), url)
+            self.warning("Timeout for %s seconds when connecting to URL: %s", self.http.options['timeout'], url)
             raise
         except Exception as e:
             self.warning("Couldn't connect to URL: %s with exception: %s", url, e)

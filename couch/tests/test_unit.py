@@ -9,7 +9,6 @@ import pytest
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.couch import CouchDb
 from datadog_checks.couch.couch import CouchDB1, CouchDB2
-from datadog_checks.dev.http_assertions import assert_http_client_config
 
 from . import common
 
@@ -31,7 +30,8 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
-    assert_http_client_config(check.http, expected_http_kwargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_new_version_system_metrics(load_test_data):

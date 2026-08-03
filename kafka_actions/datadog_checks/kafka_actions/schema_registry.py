@@ -18,6 +18,35 @@ class SchemaRegistryClient:
         self._oauth_token = None
         self._oauth_token_expiry = 0.0
 
+        self._configure_http()
+
+    def _configure_http(self):
+        """Set up auth/TLS on the HTTP client (same pattern as kafka_consumer cluster_metadata)."""
+        username = self._config.get('schema_registry_username')
+        password = self._config.get('schema_registry_password')
+        if username and password:
+            self._log.debug("Configuring Schema Registry with Basic Authentication")
+            self._http.options['auth'] = (username, password)
+
+        tls_verify = self._config.get('schema_registry_tls_verify')
+        tls_ca_cert = self._config.get('schema_registry_tls_ca_cert')
+        if tls_verify is False:
+            self._log.debug("Schema Registry TLS verification is disabled")
+            self._http.options['verify'] = False
+        elif tls_ca_cert:
+            self._log.debug("Using custom CA certificate for Schema Registry")
+            self._http.options['verify'] = tls_ca_cert
+        else:
+            self._http.options['verify'] = True
+
+        tls_cert = self._config.get('schema_registry_tls_cert')
+        tls_key = self._config.get('schema_registry_tls_key')
+        if tls_cert and tls_key:
+            self._log.debug("Configuring Schema Registry with client certificate authentication")
+            self._http.options['cert'] = (tls_cert, tls_key)
+        elif tls_cert:
+            self._http.options['cert'] = tls_cert
+
     def _refresh_oauth_token(self):
         """Fetch or refresh the OAuth token if configured and expired."""
         oauth_config = self._config.get('schema_registry_oauth_token_provider')
@@ -51,10 +80,11 @@ class SchemaRegistryClient:
         self._oauth_token = access_token
         self._oauth_token_expiry = time.time() + expires_in
 
-        self._http.set_header('Authorization', f'Bearer {access_token}')
+        headers = {**self._http.options.get('headers', {}), 'Authorization': f'Bearer {access_token}'}
         custom_headers = oauth_config.get('custom_headers')
         if custom_headers:
-            self._http.update_headers(custom_headers)
+            headers.update(custom_headers)
+        self._http.options['headers'] = headers
 
         self._log.debug("Schema Registry OAuth token refreshed, expires at %s", self._oauth_token_expiry)
 

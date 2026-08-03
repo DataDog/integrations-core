@@ -8,7 +8,6 @@ from copy import deepcopy
 import mock
 import pytest
 
-from datadog_checks.dev.http import assert_http_capability
 from datadog_checks.nginx import Nginx
 
 from .common import FIXTURES_PATH, HOST, PORT
@@ -70,7 +69,7 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     c = check(instance)
 
     for key, value in expected_http_kwargs.items():
-        assert_http_capability(c.http, key, value)
+        assert c.http.options[key] == value
 
 
 def test_no_version(check, instance, caplog, mock_http):

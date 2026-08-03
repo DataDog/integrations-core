@@ -21,7 +21,7 @@ class SonatypeNexusClient:
 
     def _set_auth_header(self):
         token = b64encode(f"{self.instance_check._username}:{self.instance_check._password}".encode()).decode("ascii")
-        self.http.update_headers(
+        self.http.options["headers"].update(
             {
                 "Authorization": f"Basic {token}",
                 "Accept": "application/json",

@@ -386,83 +386,57 @@ def mock_http_response(mocker, mock_response):
 @pytest.fixture
 def mock_http(mocker):
     from datadog_checks.base.checks.base import AgentCheck
-    from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPTimeoutConfig
-    from datadog_checks.base.utils.tls import TlsConfig
+    from datadog_checks.base.utils.http_protocol import HTTPClient
 
     client = create_autospec(HTTPClient)
-    header_state: dict[str, str] = {}
-    auth_state = {'value': None}
-    proxy_state = {'https': None, 'no_proxy': []}
     cookie_return_value_unset = object()
 
+    # create_autospec does not materialize attributes declared only as annotations on the protocol,
+    # and seal() below turns any later attribute access into an AttributeError, so options has to be
+    # a real dict assigned here. Its 'headers' value is the same object get_header and set_header
+    # read, so mutating options['headers'] directly stays visible through those methods.
+    header_state: dict[str, str] = {}
+    client.options = {
+        'auth': None,
+        'cert': None,
+        'headers': header_state,
+        'proxies': None,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
+    }
     client.trust_env = True
     client.ignore_tls_warning = False
     client.persist_connections = False
-    client.default_timeout = HTTPTimeoutConfig(10.0, 10.0)
-    client.tls_config = TlsConfig()
 
     def _get_header(name, default=None):
-        for key, value in header_state.items():
+        found = default
+        for key, value in client.options['headers'].items():
             if key.lower() == name.lower():
-                return value
-        return default
+                found = value
+        return found
 
     def _set_header(name, value):
-        for key in list(header_state):
+        headers = client.options['headers']
+        for key in list(headers):
             if key.lower() == name.lower():
-                header_state[key] = value
+                headers[key] = value
                 return
-        header_state[name] = value
-
-    def _remove_header(name):
-        for key in list(header_state):
-            if key.lower() == name.lower():
-                del header_state[key]
-                return
-
-    def _clear_headers():
-        header_state.clear()
-
-    def _update_headers(headers):
-        for key, value in headers.items():
-            _set_header(key, value)
-
-    def _get_headers():
-        return dict(header_state)
-
-    def _get_basic_auth():
-        return auth_state['value']
+        headers[name] = value
 
     def _get_cookie(name: str, default: str | None = None) -> str | None:
         return_value = client.get_cookie.return_value
         return default if return_value is cookie_return_value_unset else return_value
 
-    def _clear_default_auth():
-        auth_state['value'] = None
-
     def _disable_auth():
-        auth_state['value'] = 'suppressed'
-
-    def _proxy_for_url(url):
-        from urllib.parse import urlparse
-
-        from datadog_checks.base.utils.http import should_bypass_proxy
-
-        if should_bypass_proxy(url, proxy_state['no_proxy']):
-            return None
-        return proxy_state.get(urlparse(url).scheme)
+        client.options['auth'] = 'suppressed'
 
     client.get_header.side_effect = _get_header
     client.set_header.side_effect = _set_header
-    client.remove_header.side_effect = _remove_header
-    client.clear_headers.side_effect = _clear_headers
-    client.update_headers.side_effect = _update_headers
-    client.get_headers.side_effect = _get_headers
-    client.get_basic_auth.side_effect = _get_basic_auth
-    client.clear_default_auth.side_effect = _clear_default_auth
     client.disable_auth.side_effect = _disable_auth
-    client.proxy_for_url.side_effect = _proxy_for_url
-    client.should_bypass_proxy.side_effect = lambda url: _proxy_for_url(url) is None and bool(proxy_state['no_proxy'])
+    # No no_proxy rules are configured on the mock, matching a client built without them. A test that
+    # needs bypass behavior overrides this return_value.
+    client.should_bypass_proxy.return_value = False
     client.get_cookie.return_value = cookie_return_value_unset
     client.get_cookie.side_effect = _get_cookie
     client.close.return_value = None

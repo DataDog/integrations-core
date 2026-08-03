@@ -255,7 +255,7 @@ def test_auth():
     instance = YARN_AUTH_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
 
-    assert yarn.http.get_basic_auth() == (TEST_USERNAME, TEST_PASSWORD)
+    assert yarn.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
 
 
 @pytest.mark.parametrize(
@@ -269,7 +269,7 @@ def test_ssl_verification_configuration(config, expected_tls_verify):
     instance = config['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
 
-    assert yarn.http.tls_config.tls_verify is expected_tls_verify
+    assert yarn.http.options['verify'] is expected_tls_verify
 
 
 def test_ssl_verification_error(aggregator, mock_http):

@@ -78,11 +78,7 @@ def _get_server_info(server_info_url, log, http):
                 return
 
     except HTTPTimeoutError:
-        log.warning(
-            'Envoy endpoint `%s` timed out after %s seconds',
-            server_info_url,
-            (http.default_timeout.connect, http.default_timeout.read),
-        )
+        log.warning('Envoy endpoint `%s` timed out after %s seconds', server_info_url, http.options['timeout'])
         return None
     except Exception as e:
         log.warning('Error collecting Envoy version with url=`%s`. Error: %s', server_info_url, str(e))

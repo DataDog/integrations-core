@@ -264,7 +264,7 @@ class SimpleApi(AbstractApi):
         super(SimpleApi, self).__init__(logger)
         self.http = requests_wrapper
         self.keystone_endpoint = keystone_endpoint
-        self.timeout = self.http.default_timeout.connect
+        self.timeout = self.http.options['timeout'][0]
         self.paginated_limit = limit
         self.nova_endpoint = None
         self.neutron_endpoint = None
@@ -277,14 +277,14 @@ class SimpleApi(AbstractApi):
         self.logger.debug("Neutron Url: %s", credentials.neutron_endpoint)
         self.neutron_endpoint = credentials.neutron_endpoint
         self.auth_token = credentials.auth_token
-        self.http.set_header('X-Auth-Token', credentials.auth_token)
+        self.http.options['headers']['X-Auth-Token'] = credentials.auth_token
 
     def _make_request(self, url, params=None):
         """
         Generic request handler for OpenStack API requests
         Raises specialized Exceptions for commonly encountered error codes
         """
-        self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, self.http.get_headers(), params)
+        self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, self.http.options['headers'], params)
 
         try:
             resp = self.http.get(url, params=params)
@@ -435,7 +435,7 @@ class Authenticator(object):
         )
         keystone_auth_token = post_auth_token_resp.headers.get('X-Subject-Token')
         # List all projects using retrieved auth token
-        requests_wrapper.set_header('X-Auth-Token', keystone_auth_token)
+        requests_wrapper.options['headers']['X-Auth-Token'] = keystone_auth_token
         projects = cls._get_auth_projects(logger, keystone_endpoint, requests_wrapper)
 
         # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict

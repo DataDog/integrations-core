@@ -9,8 +9,6 @@ from typing import TYPE_CHECKING
 
 import click
 
-from ddev.cli.validate.http_options import validate_legacy_http_options_accesses
-
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
@@ -132,15 +130,9 @@ def http(app: Application, integrations: tuple[str, ...]):
     an 'all' `check` value will validate all checks.
     """
     validation_tracker = app.create_validation_tracker('HTTP wrapper validation')
-    selected_integrations = tuple(app.repo.integrations.iter(integrations))
-
-    for message in validate_legacy_http_options_accesses(
-        app.repo.path, (integration.path for integration in selected_integrations)
-    ):
-        validation_tracker.error(('Repository',), message=message)
 
     excluded = set(app.repo.config.get('/overrides/validate/http/exclude', []))
-    for integration in selected_integrations:
+    for integration in app.repo.integrations.iter(integrations):
         if integration.name in excluded or not integration.is_integration:
             continue
 

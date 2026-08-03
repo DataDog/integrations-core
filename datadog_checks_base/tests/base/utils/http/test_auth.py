@@ -18,7 +18,7 @@ def test_config_default():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_basic_auth() is None
+    assert http.options['auth'] is None
 
 
 def test_config_basic():
@@ -26,7 +26,7 @@ def test_config_basic():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_basic_auth() == ('user', 'pass')
+    assert http.options['auth'] == ('user', 'pass')
 
 
 def test_config_basic_authtype():
@@ -34,7 +34,7 @@ def test_config_basic_authtype():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_basic_auth() == ('user', 'pass')
+    assert http.options['auth'] == ('user', 'pass')
 
 
 def test_config_basic_no_legacy_encoding():
@@ -42,16 +42,14 @@ def test_config_basic_no_legacy_encoding():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_basic_auth() == (b'user', b'pass')
+    assert http.options['auth'] == (b'user', b'pass')
 
 
 def test_config_digest_authtype():
     instance = {'username': 'user', 'password': 'pass', 'auth_type': 'digest'}
     init_config = {}
     http = RequestsWrapper(instance, init_config)
-    with mock.patch('requests.Session.get') as get:
-        http.get('http://example.com')
-        assert isinstance(get.call_args.kwargs['auth'], requests_auth.HTTPDigestAuth)
+    assert isinstance(http.options['auth'], requests_auth.HTTPDigestAuth)
 
     with mock.patch('datadog_checks.base.utils.http.requests_auth.HTTPDigestAuth') as m:
         RequestsWrapper(instance, init_config)
@@ -64,7 +62,7 @@ def test_config_basic_only_username():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_basic_auth() is None
+    assert http.options['auth'] is None
 
 
 def test_config_basic_only_password():
@@ -72,7 +70,7 @@ def test_config_basic_only_password():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_basic_auth() is None
+    assert http.options['auth'] is None
 
 
 @pytest.mark.parametrize('username,password', [('user', ''), ('', 'pass'), ('', '')])
@@ -81,7 +79,7 @@ def test_config_basic_allows_empty_strings(username, password):
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert http.get_basic_auth() == (username, password)
+    assert http.options['auth'] == (username, password)
 
 
 def test_config_ntlm():
@@ -90,9 +88,7 @@ def test_config_ntlm():
 
     # Trigger lazy import
     http = RequestsWrapper(instance, init_config)
-    with mock.patch('requests.Session.get') as get:
-        http.get('http://example.com')
-        assert isinstance(get.call_args.kwargs['auth'], requests_ntlm.HttpNtlmAuth)
+    assert isinstance(http.options['auth'], requests_ntlm.HttpNtlmAuth)
 
     with mock.patch('datadog_checks.base.utils.http.requests_ntlm.HttpNtlmAuth') as m:
         RequestsWrapper(instance, init_config)
@@ -106,9 +102,7 @@ def test_config_ntlm_legacy(caplog):
 
     # Trigger lazy import
     http = RequestsWrapper(instance, init_config)
-    with mock.patch('requests.Session.get') as get:
-        http.get('http://example.com')
-        assert isinstance(get.call_args.kwargs['auth'], requests_ntlm.HttpNtlmAuth)
+    assert isinstance(http.options['auth'], requests_ntlm.HttpNtlmAuth)
 
     with mock.patch('datadog_checks.base.utils.http.requests_ntlm.HttpNtlmAuth') as m:
         RequestsWrapper(instance, init_config)
@@ -127,9 +121,7 @@ def test_config_aws():
 
     # Trigger lazy import
     http = RequestsWrapper(instance, init_config)
-    with mock.patch('requests.Session.get') as get:
-        http.get('http://example.com')
-        assert isinstance(get.call_args.kwargs['auth'], requests_aws.BotoAWSRequestsAuth)
+    assert isinstance(http.options['auth'], requests_aws.BotoAWSRequestsAuth)
 
     with mock.patch('datadog_checks.base.utils.http._http_utils.BotoAWSRequestsAuth') as m:
         RequestsWrapper(instance, init_config)

@@ -1229,6 +1229,7 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     mock_http = mock.MagicMock(wraps=collector.http)
     mock_http.post.return_value = mock_response
     mock_http.get.side_effect = original_get
+    mock_http.options = collector.http.options
     collector.http = mock_http
 
     dd_run_check(kafka_consumer_check)
@@ -1291,6 +1292,7 @@ def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggr
     mock_http = mock.MagicMock(wraps=collector.http)
     mock_http.post.return_value = mock_response
     mock_http.get.side_effect = original_get
+    mock_http.options = collector.http.options
     collector.http = mock_http
 
     dd_run_check(kafka_consumer_check)
@@ -1323,6 +1325,7 @@ def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
     collector._schema_registry_oauth_token_expiry = time.time() + 3600
 
     mock_http = mock.MagicMock(wraps=collector.http)
+    mock_http.options = collector.http.options
     collector.http = mock_http
 
     collector._refresh_schema_registry_oauth_token()

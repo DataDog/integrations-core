@@ -1,1 +1,0 @@
-Add a validation to ``ddev validate http`` that fails on legacy HTTP client ``.options`` accesses outside of ``RequestsWrapper`` internals.

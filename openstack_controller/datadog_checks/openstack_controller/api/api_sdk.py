@@ -55,20 +55,6 @@ class ApiSdk(Api):
             self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
             self.http.set_header('OpenStack-API-Version', self.config.cinder_microversion)
 
-    def _keystone_session_kwargs(self):
-        tls = self.http.tls_config
-        verify = tls.tls_ca_cert if tls.tls_ca_cert else tls.tls_verify
-        cert = None
-        if tls.tls_cert and tls.tls_private_key:
-            cert = (tls.tls_cert, tls.tls_private_key)
-        elif tls.tls_cert:
-            cert = tls.tls_cert
-        return {
-            'verify': verify,
-            'cert': cert,
-            'additional_headers': self.http.get_headers(),
-        }
-
     def auth_url(self):
         return self.cloud_config.get_auth_args().get('auth_url')
 
@@ -85,16 +71,22 @@ class ApiSdk(Api):
         environment proxies, so a shared transport cannot express per-host bypass, and anchoring the
         lookup on one endpoint would apply that endpoint's rules to every other one.
         """
-        http_proxy = self.http.proxy_for_url('http://example.com')
-        https_proxy = self.http.proxy_for_url('https://example.com')
+        proxies = self.http.options.get('proxies') or {}
+        http_proxy = None if self.http.should_bypass_proxy('http://example.com') else proxies.get('http')
+        https_proxy = None if self.http.should_bypass_proxy('https://example.com') else proxies.get('https')
         if http_proxy is None and https_proxy is None:
             return {}
         return {'http': http_proxy or '', 'https': https_proxy or ''}
 
     def _build_keystone_session(self, auth):
         # keystoneauth builds its own transport; mirror the TLS config and headers from our HTTP
-        # client via the backend-neutral protocol surface instead of handing it the requests session.
-        keystone_session = session.Session(auth=auth, **self._keystone_session_kwargs())
+        # client instead of handing it the requests session.
+        keystone_session = session.Session(
+            auth=auth,
+            verify=self.http.options['verify'],
+            cert=self.http.options['cert'],
+            additional_headers=self.http.options['headers'],
+        )
         # keystoneauth1 takes no proxy argument, so its transport is the only place proxies can go.
         # It takes no auth, ntlm_domain, kerberos_auth or tls_ciphers either; those options stay
         # unapplied on this path until the SDK is routed through ApiRest.

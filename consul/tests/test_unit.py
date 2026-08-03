@@ -9,7 +9,6 @@ import pytest
 from datadog_checks.base.utils.http_exceptions import HTTPInvalidURLError, HTTPStatusError
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
-from datadog_checks.dev.http_assertions import assert_http_client_config
 
 from . import common, consul_mocks
 
@@ -688,7 +687,12 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
 
-    assert_http_client_config(check.http, expected_http_kwargs)
+    for key, value in expected_http_kwargs.items():
+        if key == 'headers':
+            for h_key, h_value in value.items():
+                assert check.http.get_header(h_key) == h_value
+        else:
+            assert check.http.options[key] == value
 
 
 def test_health_checks_cache_defaults():

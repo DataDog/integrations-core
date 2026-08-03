@@ -14,7 +14,6 @@ from mock import ANY
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
-from datadog_checks.dev.http import assert_http_capability
 from datadog_checks.openstack_controller.legacy.api import AbstractApi, Authenticator, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import IncompleteConfig, KeystoneUnreachable
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
@@ -524,4 +523,6 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     check = OpenStackControllerLegacyCheck('openstack_controller', {}, instances=[instance])
 
     for key, value in expected_http_kwargs.items():
-        assert_http_capability(check.http, key, value)
+        assert check.http.options[key] == value, "Expected '{}' to be {} but was {}".format(
+            key, value, check.http.options[key]
+        )

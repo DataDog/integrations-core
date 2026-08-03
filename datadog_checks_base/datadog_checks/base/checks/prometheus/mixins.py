@@ -12,6 +12,7 @@ from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.headers import DEFAULT_ACCEPT, DEFAULT_ACCEPT_ENCODING
 from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
@@ -566,7 +567,11 @@ class PrometheusScraperMixin(object):
                 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
             )
         handler = self.get_http_handler(endpoint, instance)
-        if endpoint.startswith('https') and not handler.ignore_tls_warning and not handler.tls_config.tls_verify:
+        if (
+            endpoint.startswith('https')
+            and not handler.ignore_tls_warning
+            and not is_affirmative(handler.options.get('ssl_verify', True))
+        ):
             self.log.debug('An unverified HTTPS request is being made to %s', endpoint)
 
         try:

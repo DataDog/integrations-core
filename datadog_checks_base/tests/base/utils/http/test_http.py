@@ -16,10 +16,7 @@ import requests_unixsocket
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.base.utils.http_exceptions import HTTPSSLError, HTTPTimeoutError
-from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
 from datadog_checks.dev.utils import ON_WINDOWS
-
-from .common import expected_request_options
 
 
 @pytest.fixture(scope="module")
@@ -112,14 +109,14 @@ class TestAttribute:
     def test_factory_default_uses_instance_config(self):
         check = AgentCheck('test', {}, [{'timeout': 7}])
 
-        assert check.create_http_client().default_timeout == HTTPTimeoutConfig(7.0, 7.0)
+        assert check.create_http_client().options['timeout'] == (7.0, 7.0)
 
     def test_factory_instance_override(self):
         check = AgentCheck('test', {}, [{'timeout': 7}])
 
         client = check.create_http_client({'timeout': 42})
 
-        assert client.default_timeout == HTTPTimeoutConfig(42.0, 42.0)
+        assert client.options['timeout'] == (42.0, 42.0)
 
     def test_factory_empty_instance_override_is_honored(self):
         from datadog_checks.base.utils.http import create_http_client
@@ -127,22 +124,22 @@ class TestAttribute:
         check = AgentCheck('test', {}, [{'timeout': 7}])
 
         # {} is an explicit override, distinct from None, so self.instance's timeout must not leak in.
-        empty_default = create_http_client({}, {}).default_timeout
-        assert check.create_http_client({}).default_timeout == empty_default
+        empty_default = create_http_client({}, {}).options['timeout']
+        assert check.create_http_client({}).options['timeout'] == empty_default
 
     def test_module_factory_builds_from_given_config(self):
         from datadog_checks.base.utils.http import create_http_client
 
         client = create_http_client({'timeout': 24.5}, {})
 
-        assert client.default_timeout == HTTPTimeoutConfig(24.5, 24.5)
+        assert client.options['timeout'] == (24.5, 24.5)
 
     def test_module_factory_applies_remapper(self):
         from datadog_checks.base.utils.http import create_http_client
 
         client = create_http_client({'prometheus_timeout': 9}, {}, {'prometheus_timeout': {'name': 'timeout'}})
 
-        assert client.default_timeout == HTTPTimeoutConfig(9, 9)
+        assert client.options['timeout'] == (9, 9)
 
 
 class TestTLSCiphers:
@@ -312,8 +309,7 @@ class TestSession:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        expected = expected_request_options(http)
-        for key, value in expected.items():
+        for key, value in http.options.items():
             assert hasattr(http.session, key)
             assert getattr(http.session, key) == value
 

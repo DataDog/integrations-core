@@ -12,7 +12,6 @@ from urllib.parse import urlparse
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
-from datadog_checks.base.utils.http_protocol import HTTPTimeoutConfig
 
 
 class MesosMaster(AgentCheck):
@@ -143,9 +142,8 @@ class MesosMaster(AgentCheck):
             url = self.instance.get('url', '')
             parsed_url = urlparse(url)
 
-            if not self.http.tls_config.tls_verify and parsed_url.scheme == 'https':
+            if not self.http.options['verify'] and parsed_url.scheme == 'https':
                 self.log.warning('Skipping TLS cert validation for %s based on configuration.', url)
-            self._request_timeout = None
             if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
                 # `default_timeout` config option will be removed with Agent 5
                 timeout = (
@@ -156,15 +154,14 @@ class MesosMaster(AgentCheck):
                     or self.DEFAULT_TIMEOUT
                 )
 
-                self._request_timeout = HTTPTimeoutConfig(timeout, timeout)
+                self.http.options['timeout'] = (timeout, timeout)
 
     def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
 
         response, msg, status = self._make_request(url)
 
-        timeout = self._request_timeout or self.http.default_timeout
-        self.log.debug('Request to url : %s, timeout: %s, message: %s', url, (timeout.connect, timeout.read), msg)
+        self.log.debug('Request to url : %s, timeout: %s, message: %s', url, self.http.options['timeout'], msg)
         self._send_service_check(url, status, failure_expected=failure_expected, tags=tags, message=msg)
 
         if response.encoding is None:
@@ -178,10 +175,7 @@ class MesosMaster(AgentCheck):
         response = None
 
         try:
-            kwargs = {}
-            if self._request_timeout is not None:
-                kwargs['timeout'] = self._request_timeout
-            response = self.http.get(url, **kwargs)
+            response = self.http.get(url)
             if response.status_code != 200:
                 status = AgentCheck.CRITICAL
                 msg = "Got {} when hitting {}".format(response.status_code, url)
@@ -189,8 +183,7 @@ class MesosMaster(AgentCheck):
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at {} ".format(url)
         except HTTPTimeoutError:
-            timeout = self._request_timeout or self.http.default_timeout
-            msg = "{} seconds timeout when hitting {}".format((timeout.connect, timeout.read), url)
+            msg = "{} seconds timeout when hitting {}".format(self.http.options['timeout'], url)
             status = AgentCheck.CRITICAL
         except Exception as e:
             msg = str(e)

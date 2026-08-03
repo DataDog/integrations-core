@@ -8,7 +8,6 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPError
-from datadog_checks.dev.http_assertions import assert_http_client_config
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import (
@@ -135,7 +134,8 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
     config.update(extra_config)
     check = RabbitMQ('rabbitmq', {}, instances=[config])
 
-    assert_http_client_config(check.http, expected_http_kwargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_nodes(aggregator, check):
