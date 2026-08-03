@@ -6,8 +6,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.couch import CouchDb
-from datadog_checks.couch.couch import CouchDB2
+from datadog_checks.couch.couch import CouchDB1, CouchDB2
 from datadog_checks.dev.http_assertions import assert_http_client_config
 
 from . import common
@@ -52,3 +53,19 @@ def test_new_version_system_metrics(load_test_data):
 
     assert mock_agent_check.gauge.call_count >= 183
     mock_agent_check.log.debug.assert_any_call("Skipping distribution events")
+
+
+def test_v1_status_error_without_response_is_not_an_attribute_error():
+    """The auth-token seam raises without a response, so the exclusion guard must not dereference None."""
+    mock_agent_check = MagicMock()
+    mock_agent_check.instance = {}
+    mock_agent_check.MAX_DB = 50
+    mock_agent_check.get.side_effect = [{}, ['db1'], HTTPStatusError('403 Client Error')]
+
+    couchdb_check = CouchDB1(mock_agent_check)
+
+    data = couchdb_check.get_data('http://localhost:5984', [])
+
+    # Same outcome as any other unrecognized status on the merge base: the database is left unresolved.
+    assert data['databases'] == {'db1': None}
+    mock_agent_check.warning.assert_not_called()

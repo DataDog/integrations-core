@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPInvalidURLError, HTTPStatusError
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
 from datadog_checks.dev.http_assertions import assert_http_client_config
@@ -725,3 +727,28 @@ def test_health_checks_cache_eviction_re_emits_failure_event(aggregator):
 
     failure_events = [e for e in aggregator.events if e['event_type'] == 'consul.check_failed']
     assert len(failure_events) == 2
+
+
+def test_prometheus_endpoint_invalid_url_does_not_abort_check(aggregator, caplog):
+    """A malformed URL must be swallowed here, not abort check() at its first statement."""
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(side_effect=HTTPInvalidURLError('No scheme supplied'))
+    caplog.set_level(logging.WARNING)
+
+    consul_check.check(None)
+
+    assert 'does not support the prometheus endpoint' in caplog.text
+    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
+
+
+def test_prometheus_endpoint_status_error_without_response_is_surfaced(aggregator):
+    """The auth-token seam drops the raw response, so the guard must re-raise, not fail on None."""
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(side_effect=HTTPStatusError('403 Client Error'))
+
+    with pytest.raises(HTTPStatusError):
+        consul_check.check(None)

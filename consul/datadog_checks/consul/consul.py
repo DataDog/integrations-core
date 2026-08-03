@@ -14,7 +14,7 @@ from urllib.parse import urljoin
 from cachetools import TTLCache
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPStatusError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPInvalidURLError, HTTPStatusError, HTTPTimeoutError
 from datadog_checks.base.utils.serialization import json
 
 from .common import (
@@ -716,14 +716,15 @@ class ConsulCheck(OpenMetricsBaseCheck):
         try:
             self.process(self.scraper_config)
         # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
-        except ValueError as e:
+        except (ValueError, HTTPInvalidURLError) as e:
             self.log.warning(
                 "This Consul version probably does not support the prometheus endpoint. "
                 "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
                 str(e),
             )
         except HTTPStatusError as e:
-            if e.response.status_code == 404:
+            # The auth-token seam raises without a response, so the status is unknowable there.
+            if e.response is not None and e.response.status_code == 404:
                 self.log.warning(
                     "This Consul version (< 1.1.0) does not support the prometheus endpoint. "
                     "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",

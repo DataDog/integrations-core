@@ -176,7 +176,8 @@ class CouchDB1:
                     db_stats = self.agent_check.get(url, tags)
                 except HTTPStatusError as e:
                     couchdb['databases'][dbName] = None
-                    if (e.response.status_code == 403) or (e.response.status_code == 401):
+                    # The auth-token seam raises without a response, so the status is unknowable there.
+                    if e.response is not None and e.response.status_code in (401, 403):
                         self.db_exclude[server].append(dbName)
 
                         self.agent_check.warning(
