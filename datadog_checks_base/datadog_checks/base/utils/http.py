@@ -687,11 +687,20 @@ class RequestsWrapper(object):
         return proxies.get(urlparse(url).scheme)
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
-        """Look up a request header by name. Lookup is case-insensitive."""
+        """Look up a request header by name. Lookup is case-insensitive.
+
+        The header mapping is an ordinary dict, so it can hold the same header under several
+        spellings. Requests collapses those into a CaseInsensitiveDict per request, where the last
+        spelling wins, so the last match is the value that actually reaches the wire. Returning the
+        first match instead would report a value that is never sent, and a caller negotiating over a
+        seeded default would read the default, conclude the header is unset, and overwrite the value
+        the user configured under the other spelling.
+        """
+        found = default
         for key, value in self._options['headers'].items():
             if key.lower() == name.lower():
-                return value
-        return default
+                found = value
+        return found
 
     def set_header(self, name: str, value: str) -> None:
         set_header_value(self._options['headers'], name, value)

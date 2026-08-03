@@ -447,6 +447,16 @@ class TestUseLatestSpec:
         assert scraper.http.get_header('Accept') == 'application/json'
         assert _accept_header_sent(scraper) != LATEST_SPEC_ACCEPT
 
+    def test_non_canonically_cased_configured_accept_header_is_preserved(self, dd_run_check):
+        # Header names are case-insensitive, so a lowercase `accept` in `extra_headers` is just as
+        # explicit as the canonical spelling and must not be negotiated over.
+        check = get_check({'use_latest_spec': True, 'extra_headers': {'accept': 'application/json'}})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        assert scraper.http.get_header('Accept') == 'application/json'
+        assert _accept_header_sent(scraper) is None
+
     def test_lowercase_per_request_accept_header_is_preserved(self, dd_run_check):
         check = get_check({'use_latest_spec': True})
         check.configure_scrapers()

@@ -68,6 +68,53 @@ def test_config_extra_headers_string_values():
     assert http.get_headers() == complete_headers
 
 
+def test_config_extra_headers_non_canonical_case_takes_precedence_over_the_seeded_default():
+    instance = {'extra_headers': {'accept': 'application/openmetrics-text'}}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.get_header('Accept') == 'application/openmetrics-text'
+
+
+def test_config_extra_headers_override_config_headers_across_case():
+    instance = {'headers': {'x-token': 'from-headers'}, 'extra_headers': {'X-Token': 'from-extra-headers'}}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.get_header('X-Token') == 'from-extra-headers'
+
+
+def test_get_header_reports_the_value_that_reaches_the_wire():
+    """Callers negotiate a default only when a header is unset, so a lookup that disagreed with what
+    is sent would let them overwrite a value the user configured under a different spelling."""
+    http = RequestsWrapper({'extra_headers': {'accept': 'application/openmetrics-text'}}, {})
+
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com/hello')
+
+    assert get.call_args.kwargs['headers']['accept'] == http.get_header('Accept')
+
+
+def test_config_headers_keep_every_configured_spelling():
+    # The header mapping is not deduplicated: requests collapses spellings per request, and the
+    # `Host` detection below reads the exact key. Collapsing here would silently disable the
+    # HostHeaderSSLAdapter for a config that spells Host more than one way.
+    instance = {'headers': {'host': 'first'}, 'extra_headers': {'Host': 'second'}, 'tls_use_host_header': True}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.get_headers() == {'host': 'first', 'Host': 'second'}
+    assert http.tls_use_host_header is True
+
+
+def test_tls_use_host_header_sees_a_canonically_spelled_host_header():
+    instance = {'headers': {'Host': 'example.com'}, 'tls_use_host_header': True}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.tls_use_host_header is True
+
+
 def test_extra_headers_on_http_method_call():
     instance = {'extra_headers': {'answer': 42}}
     init_config = {}

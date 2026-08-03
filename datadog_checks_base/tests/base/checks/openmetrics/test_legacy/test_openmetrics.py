@@ -2779,6 +2779,24 @@ def test_http_handler_preserves_user_configured_headers(mocked_openmetrics_check
     assert http_handler.get_header('accept-encoding') == 'br'
 
 
+def test_http_handler_preserves_non_canonically_cased_extra_headers(mocked_openmetrics_check_factory):
+    """Header names are case-insensitive, so a user value configured under a non-canonical spelling
+    still counts as explicitly configured and must survive the exposition-format negotiation."""
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+        'extra_headers': {'accept': 'application/openmetrics-text', 'accept-encoding': 'br'},
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    http_handler = check.get_http_handler(scraper_config)
+
+    assert http_handler.get_header('accept') == 'application/openmetrics-text'
+    assert http_handler.get_header('accept-encoding') == 'br'
+
+
 def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_check_factory):
     instance = {
         'prometheus_url': 'https://www.example.com',
