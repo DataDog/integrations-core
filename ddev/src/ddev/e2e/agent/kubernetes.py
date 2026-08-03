@@ -7,6 +7,7 @@ import json
 import time
 from typing import TYPE_CHECKING, Any, cast
 
+from ddev.e2e.agent.constants import AgentEnvVars
 from ddev.e2e.agent.image import normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
 
@@ -344,6 +345,13 @@ class KubernetesAgent(AgentInterface):
         for command in commands:
             self._exec(self.platform.modules.shlex.split(command))
 
+    @staticmethod
+    def _validate_options(env_vars: dict[str, str]) -> None:
+        if AgentEnvVars.DOGSTATSD_PORT in env_vars:
+            raise NotImplementedError('Kubernetes Agent does not support DogStatsD')
+        if env_vars.get(AgentEnvVars.LOGS_ENABLED, '').lower() == 'true':
+            raise NotImplementedError('Kubernetes Agent does not support logs')
+
     def _require_prepared(self) -> None:
         process = self._exec(['test', '-f', PREPARED_MARKER], check=False)
         if process.returncode:
@@ -353,6 +361,7 @@ class KubernetesAgent(AgentInterface):
             )
 
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
+        self._validate_options(env_vars)
         agent_build = normalize_agent_image_name(
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
         )
