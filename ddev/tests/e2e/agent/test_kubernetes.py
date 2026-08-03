@@ -56,8 +56,8 @@ def agent(app, get_integration, metadata, config_file):
     return KubernetesAgent(app, get_integration('velero'), 'py3.12', metadata, config_file)
 
 
-def successful_process(command, *, stdout=b''):
-    return subprocess.CompletedProcess(command, 0, stdout=stdout)
+def successful_process(command, *, stdout=b'', stderr=None):
+    return subprocess.CompletedProcess(command, 0, stdout=stdout, stderr=stderr)
 
 
 @pytest.fixture
@@ -339,7 +339,7 @@ def test_rejects_non_kind_context_before_inspecting_cluster(agent, app, mocker):
     run_command.assert_called_once_with(
         ['kubectl', '--kubeconfig', TEST_KUBECONFIG, 'config', 'current-context'],
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.PIPE,
     )
 
 
@@ -363,7 +363,25 @@ def test_rejects_multi_node_clusters(agent, app, mocker):
     assert not any('create' in command for command in calls)
     for index in (context_index, topology_index):
         assert run_command.call_args_list[index].kwargs['stdout'] is subprocess.PIPE
-        assert run_command.call_args_list[index].kwargs['stderr'] is subprocess.STDOUT
+        assert run_command.call_args_list[index].kwargs['stderr'] is subprocess.PIPE
+
+
+def test_validation_ignores_kubectl_warnings(agent, app, mocker):
+    warning = b'Warning: deprecated API\n'
+    nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
+    run_command = mocker.patch.object(
+        app.platform,
+        'run_command',
+        side_effect=[
+            successful_process([], stdout=b'kind-test\n', stderr=warning),
+            successful_process([], stdout=json.dumps(nodes).encode(), stderr=warning),
+        ],
+    )
+
+    agent._validate_context()
+    agent._validate_topology()
+
+    assert all(call.kwargs['stderr'] is subprocess.PIPE for call in run_command.call_args_list)
 
 
 def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
