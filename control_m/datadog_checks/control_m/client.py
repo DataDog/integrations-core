@@ -7,6 +7,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -85,7 +86,10 @@ class ControlMClient:
 
         try:
             response = self._http.post(url, json=payload)
-        except OSError:
+        # The agnostic root covers the whole surface the wrapper can raise, including an HTTPStatusError
+        # from the pre-request auth-token poll. OSError still covers the ssl.SSLError that the TLS
+        # context builder raises outside the HTTP client.
+        except (OSError, HTTPError):
             self._log.error("Could not reach Control-M API at %s", url)
             raise
 
