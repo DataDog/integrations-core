@@ -232,11 +232,17 @@ def workload_images():
 
 
 def preload_workload_images():
-    """Pull the workload images once and side-load them, instead of once per Job pod from Docker Hub."""
+    """Pull the workload images once and side-load them, instead of once per Job pod from Docker Hub.
+
+    Side-loading is best effort: some kind and node image combinations reject it, and the Job pods
+    fall back to pulling the image themselves.
+    """
     cluster_name = f'cluster-{CHECK_NAME}-{get_active_env()}'
     for image in sorted(workload_images()):
         run_command(['docker', 'pull', image], check=True)
-        run_command(['kind', 'load', 'docker-image', image, '--name', cluster_name], check=True)
+        result = run_command(['kind', 'load', 'docker-image', image, '--name', cluster_name], capture=True)
+        if result.code != 0:
+            print(f'Could not side-load {image}; pods will pull it themselves: {result.stderr.strip()}')
 
 
 def wait_for_queues_active():
