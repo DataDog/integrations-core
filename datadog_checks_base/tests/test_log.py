@@ -52,6 +52,11 @@ def test_init_logging_suppresses_noisy_third_party_loggers():
 def test_init_logging_preserves_stricter_configured_log_level():
     from datadog_checks.base.stubs import datadog_agent
 
+    root_logger = logging.getLogger()
+    original_root_level = root_logger.level
+    original_msal_level = logging.getLogger("msal").level
+    original_urllib3_level = logging.getLogger("urllib3.connectionpool").level
+
     datadog_agent._config['log_level'] = 'error'
     try:
         init_logging()
@@ -60,6 +65,9 @@ def test_init_logging_preserves_stricter_configured_log_level():
         assert logging.getLogger("urllib3.connectionpool").level == logging.ERROR
     finally:
         datadog_agent._config.pop('log_level', None)
+        root_logger.setLevel(original_root_level)
+        logging.getLogger("msal").setLevel(original_msal_level)
+        logging.getLogger("urllib3.connectionpool").setLevel(original_urllib3_level)
 
 
 def test_get_check_logger(caplog):
