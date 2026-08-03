@@ -59,6 +59,7 @@
       "Category::Log Collection",
       "Category::Automation",
       "Category::Cloud",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
