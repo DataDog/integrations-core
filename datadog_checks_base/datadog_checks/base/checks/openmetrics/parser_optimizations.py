@@ -277,6 +277,11 @@ def _om_parse_sample(text):
     return Sample(name, labels, value, timestamp, exemplar)
 
 
+# Save original functions before any patching so they can be restored.
+_original_prom_parse_sample = _prom_parser._parse_sample
+_original_om_parse_sample = _om_parser._parse_sample if _om_parser is not None else None
+
+
 def apply():
     """Monkey-patch prometheus_client parsers with optimized hot-path functions."""
     if getattr(_prom_parser, '_dd_optimized', False):
@@ -289,6 +294,18 @@ def apply():
     # OpenMetrics format: replace _parse_sample with v0.21.1 implementation
     if _om_parser is not None:
         _om_parser._parse_sample = _om_parse_sample
+
+
+def unapply():
+    """Restore the original prometheus_client parser functions."""
+    if not getattr(_prom_parser, '_dd_optimized', False):
+        return
+
+    _prom_parser._parse_sample = _original_prom_parse_sample
+    del _prom_parser._dd_optimized
+
+    if _om_parser is not None and _original_om_parse_sample is not None:
+        _om_parser._parse_sample = _original_om_parse_sample
 
 
 apply()

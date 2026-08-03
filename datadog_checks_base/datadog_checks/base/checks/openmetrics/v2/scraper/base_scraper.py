@@ -26,9 +26,6 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
 
-# Monkey-patch prometheus_client parsers with optimized versions before any scraping occurs.
-parser_optimizations.apply()
-
 
 class OpenMetricsScraper:
     """
@@ -235,6 +232,11 @@ class OpenMetricsScraper:
             self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
+
+        if is_affirmative(config.get('patch_prometheus_client', True)):
+            parser_optimizations.apply()
+        else:
+            parser_optimizations.unapply()
 
         # Used for monotonic counts
         self.flush_first_value = None

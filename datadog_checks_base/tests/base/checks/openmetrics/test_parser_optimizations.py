@@ -4,16 +4,20 @@
 
 from unittest.mock import patch
 
+import prometheus_client.parser as prom_parser
 import pytest
 from prometheus_client.openmetrics import parser as om_parser
 from prometheus_client.openmetrics.parser import text_string_to_metric_families as om_text_string_to_metric_families
 from prometheus_client.parser import text_string_to_metric_families as prom_text_string_to_metric_families
 
+from datadog_checks.base.checks.openmetrics import parser_optimizations
 from datadog_checks.base.checks.openmetrics.parser_optimizations import (
     _om_parse_sample,
     _parse_labels,
     _parse_sample,
 )
+
+from .test_v2.utils import get_check
 
 
 @pytest.mark.parametrize(
@@ -233,3 +237,37 @@ def test_parse_full_comma_in_label_value():
     assert len(families) == 1
     assert families[0].samples[0].labels == {'func': 'apn,gw', 'proto': 'tcp'}
     assert families[0].samples[0].value == 8
+
+
+MOCK_PAYLOAD = '# HELP test_gauge A gauge.\n# TYPE test_gauge gauge\ntest_gauge 1\n'
+
+
+class TestPatchPrometheusClientFlag:
+    """Tests for the patch_prometheus_client config flag on the v2 scraper."""
+
+    def teardown_method(self):
+        parser_optimizations.apply()
+
+    def test_default_applies_patch(self, dd_run_check, mock_http_response):
+        mock_http_response(MOCK_PAYLOAD)
+        check = get_check({'metrics': ['.+']})
+        dd_run_check(check)
+
+        assert prom_parser._parse_sample is _parse_sample
+
+    def test_flag_true_applies_patch(self, dd_run_check, mock_http_response):
+        mock_http_response(MOCK_PAYLOAD)
+        check = get_check({'metrics': ['.+'], 'patch_prometheus_client': True})
+        dd_run_check(check)
+
+        assert prom_parser._parse_sample is _parse_sample
+
+    def test_flag_false_restores_original(self, dd_run_check, mock_http_response):
+        original = parser_optimizations._original_prom_parse_sample
+
+        mock_http_response(MOCK_PAYLOAD)
+        check = get_check({'metrics': ['.+'], 'patch_prometheus_client': False})
+        dd_run_check(check)
+
+        assert prom_parser._parse_sample is original
+        assert prom_parser._parse_sample is not _parse_sample
