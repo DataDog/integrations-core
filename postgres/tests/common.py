@@ -48,9 +48,9 @@ POSTGRES_IMAGE = "alpine"
 POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
 POSTGRES_IMAGE_TAG = os.environ.get('POSTGRES_IMAGE_TAG', None)
 
-REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
-REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
-REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
+REPLICA_CONTAINER_1_NAME = 'postgres-postgres_replica-1'
+REPLICA_CONTAINER_2_NAME = 'postgres-postgres_replica2-1'
+REPLICA_LOGICAL_1_NAME = 'postgres-postgres_logical_replica-1'
 USING_LATEST = False
 
 if POSTGRES_IMAGE_TAG is not None:
