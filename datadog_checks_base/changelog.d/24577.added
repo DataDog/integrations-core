@@ -1,0 +1,1 @@
+Emit `checks.max_returned_metrics_reached` and cumulative `checks.max_returned_metrics_dropped` Agent telemetry, tagged with `check_name`, when a check run reaches `max_returned_metrics` and starts dropping metrics.
