@@ -1,0 +1,2 @@
+Support string-array inputs for local generated configuration discovery strategies.
+Add Kubernetes discovery candidate-stability checks for E2E tests.
