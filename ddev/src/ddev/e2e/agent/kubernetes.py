@@ -348,9 +348,11 @@ class KubernetesAgent(AgentInterface):
     @staticmethod
     def _validate_options(env_vars: dict[str, str]) -> None:
         if AgentEnvVars.DOGSTATSD_PORT in env_vars:
-            raise NotImplementedError('Kubernetes Agent does not support DogStatsD')
+            raise NotImplementedError('The Kubernetes Agent backend does not currently support DogStatsD exposure')
         if env_vars.get(AgentEnvVars.LOGS_ENABLED, '').lower() == 'true':
-            raise NotImplementedError('Kubernetes Agent does not support logs')
+            raise NotImplementedError(
+                'The Kubernetes Agent backend does not currently support shared-file log collection'
+            )
 
     def _require_prepared(self) -> None:
         process = self._exec(['test', '-f', PREPARED_MARKER], check=False)
