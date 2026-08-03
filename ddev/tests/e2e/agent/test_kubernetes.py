@@ -297,8 +297,8 @@ def test_rejects_invalid_wait_timeout_before_creating_resources(agent, metadata,
 @pytest.mark.parametrize(
     ('env_vars', 'expected'),
     [
-        ({AgentEnvVars.DOGSTATSD_PORT: '8125'}, 'DogStatsD'),
-        ({AgentEnvVars.LOGS_ENABLED: 'true'}, 'logs'),
+        ({AgentEnvVars.DOGSTATSD_PORT: '8125'}, 'DogStatsD exposure'),
+        ({AgentEnvVars.LOGS_ENABLED: 'true'}, 'shared-file log collection'),
     ],
 )
 def test_rejects_unsupported_options_before_creating_resources(agent, run_command, env_vars, expected):
