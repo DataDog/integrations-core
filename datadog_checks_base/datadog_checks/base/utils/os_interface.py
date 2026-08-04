@@ -37,6 +37,11 @@ StrPath = str | os.PathLike[str]
 
 LOGGER = logging.getLogger(__name__)
 
+# Upper bound on distinct violations remembered for deduplication. The validator
+# lives as long as its check, so this set would otherwise grow with the number of
+# distinct disallowed paths a check touches.
+MAX_REPORTED_VIOLATIONS = 100
+
 
 def _resolve_program(program: str) -> str:
     """Resolve a bare command name the way the OS will, via PATH.
@@ -97,6 +102,7 @@ class TrustedProviderValidator:
         self._log = log or LOGGER
         self._reported_bad_modes: set = set()
         self._reported_violations: set = set()
+        self._violation_cap_reported = False
 
     def _mode(self) -> str:
         mode = self._security.path_enforcement_mode
@@ -135,6 +141,18 @@ class TrustedProviderValidator:
         # violation is reported once; a check repeats the same operations on every
         # scheduled run, and repeating the line adds no information.
         if (kind, target) in self._reported_violations:
+            return
+        if len(self._reported_violations) >= MAX_REPORTED_VIOLATIONS:
+            # The validator lives as long as its check, so this set cannot be
+            # allowed to grow with the number of distinct paths touched. Stop
+            # recording, but say so rather than going quiet.
+            if not self._violation_cap_reported:
+                self._violation_cap_reported = True
+                self._log.warning(
+                    "Reached %d distinct path enforcement violations; suppressing further reports. "
+                    "Review the allowlist configuration.",
+                    MAX_REPORTED_VIOLATIONS,
+                )
             return
         self._reported_violations.add((kind, target))
         self._log.warning("%s; would be denied if path_enforcement_mode were %r", message, ENFORCEMENT_ENFORCE)

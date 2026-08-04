@@ -110,6 +110,10 @@ An unrecognized mode is treated as `off` and logged, so a typo cannot enforce un
 Enforcement additionally requires field validation to be enabled, and it never applies to a trusted provider
 or to a check listed in the excluded-checks setting.
 
+In `log` mode each distinct violation is reported once per check rather than once per operation, since a check
+repeats the same work on every run. Reporting is capped at 100 distinct violations per check, and reaching the
+cap is itself logged.
+
 ## Testing
 
 The `mock_os_interface` fixture replaces the interface at both bindings at once, so a test does not need to

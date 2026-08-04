@@ -1082,3 +1082,33 @@ def test_log_mode_reports_distinct_violations_separately(tmp_path):
     osx.exists('/tmp/evil/a.txt')
     osx.exists('/tmp/evil/b.txt')
     assert log.warning.call_count == 2
+
+
+def test_violation_dedup_memory_is_bounded(tmp_path):
+    """The dedup set must not grow without bound.
+
+    A validator lives as long as its check, so a check that touches many
+    distinct disallowed paths would otherwise leak one entry per path for the
+    lifetime of the Agent.
+    """
+    from datadog_checks.base.utils.os_interface import MAX_REPORTED_VIOLATIONS
+
+    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
+    log = mock.MagicMock()
+    validator = TrustedProviderValidator(sec, log=log)
+    osx = OSInterface(validator)
+    for i in range(MAX_REPORTED_VIOLATIONS * 3):
+        osx.exists(f'/tmp/evil/{i}.txt')
+    assert len(validator._reported_violations) <= MAX_REPORTED_VIOLATIONS
+
+
+def test_violation_suppression_is_announced(tmp_path):
+    from datadog_checks.base.utils.os_interface import MAX_REPORTED_VIOLATIONS
+
+    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
+    log = mock.MagicMock()
+    osx = OSInterface(TrustedProviderValidator(sec, log=log))
+    for i in range(MAX_REPORTED_VIOLATIONS + 5):
+        osx.exists(f'/tmp/evil/{i}.txt')
+    messages = [str(c) for c in log.warning.call_args_list]
+    assert any('suppress' in m for m in messages), "hitting the cap must be visible in the log"
