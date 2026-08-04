@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import re
 from datetime import datetime
-from hashlib import md5
 
 from pyVmomi import vim
 
@@ -147,13 +146,6 @@ class VSphereEvent(object):
 
         TO_ALERT_TYPE = {'green': 'success', 'yellow': 'warning', 'red': 'error', 'gray': 'info'}
 
-        def get_agg_key(alarm_event):
-            return 'h:{0}|dc:{1}|a:{2}'.format(
-                md5(alarm_event.entity.name.encode('utf-8')).hexdigest()[:10],
-                md5(alarm_event.datacenter.name.encode('utf-8')).hexdigest()[:10],
-                md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
-            )
-
         host_name = self.hostname
         entity_name = self.raw_event.entity.name
 
@@ -182,7 +174,6 @@ class VSphereEvent(object):
             status=trans_after,
         )
         self.payload['alert_type'] = TO_ALERT_TYPE[trans_after]
-        self.payload['event_object'] = get_agg_key(self.raw_event)
         self.payload['msg_text'] = (
             "vCenter monitor status changed on this alarm, it was {before} and it's now {after}.".format(
                 before=trans_before, after=trans_after
