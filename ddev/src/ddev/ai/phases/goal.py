@@ -16,6 +16,8 @@ from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.registry import filter_read_only
 
+GOAL_REVIEWER_RESET_THRESHOLD_PCT = 75.0
+
 GOAL_REVIEWER_SYSTEM_PROMPT = """\
 You are a strict, independent reviewer. Your only job is to verify whether a
 goal was met by another agent. You do not fix anything; you only report.
@@ -31,11 +33,13 @@ How to work:
   worker summary blindly — verify it.
 - On the initial review, inspect the complete goal and report all findings you
   discover so the worker can repair them together.
-- On a repair review, retain your prior inspection. Verify the previous
-  findings against the worker's repair summary and inspect only the files and
-  directly affected invariants involved in that repair. Preserve your previous
-  conclusions about everything else. Perform a full review only if the repair
-  was broad enough to affect unrelated criteria.
+- On a repair review, verify the previous findings against the worker's repair
+  summary and inspect only the files and directly affected invariants involved
+  in that repair. When your prior conversation is available, preserve its
+  conclusions about everything else. When the message includes a previous
+  verdict, use it as the source of those conclusions because your context was
+  cleared. Perform a full review only if the repair was broad enough to affect
+  unrelated criteria.
 - If the worker summary explains that an apparent gap is intentional and the
   explanation is plausible and consistent with the task, accept that specific
   gap as valid.
@@ -118,6 +122,7 @@ class GoalCheckResult:
     input_tokens: int
     output_tokens: int
     verdict_json: str
+    context_pct: float | None
 
 
 @dataclass(frozen=True)
@@ -151,6 +156,27 @@ def build_reviewer_retry_message(
         "invariants identified by the worker's repair summary. Preserve your previous conclusions "
         "about everything else. Perform a full review only if the reported repair is broad enough "
         "to affect unrelated goal criteria.\n\n"
+        f"## Worker repair summary\n{worker_summary}\n"
+    )
+
+
+def build_reviewer_reset_retry_message(
+    *,
+    rendered_task_prompt: str,
+    goal_text: str,
+    previous_verdict: str,
+    worker_summary: str,
+) -> str:
+    return (
+        "## Re-review instructions\n"
+        "This work was already reviewed, but your previous conversation was cleared to free "
+        "context. Treat the previous verdict below as the established review state. Confirm every "
+        "finding is resolved, inspecting only the repaired files and directly affected invariants. "
+        "Perform a full review only if the repair was broad enough to affect unrelated goal "
+        "criteria.\n\n"
+        f"## Original task\n{rendered_task_prompt}\n\n"
+        f"## Goal to verify\n{goal_text}\n\n"
+        f"## Previous reviewer verdict\n{previous_verdict}\n\n"
         f"## Worker repair summary\n{worker_summary}\n"
     )
 
@@ -229,6 +255,7 @@ async def _run_reviewer_once(
     result = await reviewer_process.start(user_message)
     in_tokens = result.total_input_tokens
     out_tokens = result.total_output_tokens
+    context_usage = result.context_usage
 
     raw_output = result.final_response.text or ""
     parsed = parse_reviewer_verdict(raw_output)
@@ -236,6 +263,7 @@ async def _run_reviewer_once(
         retry_result = await reviewer_process.start(GOAL_PARSE_RETRY_PROMPT)
         in_tokens += retry_result.total_input_tokens
         out_tokens += retry_result.total_output_tokens
+        context_usage = retry_result.context_usage
         raw_output = retry_result.final_response.text or ""
         parsed = parse_reviewer_verdict(raw_output)
         if parsed is None:
@@ -252,6 +280,7 @@ async def _run_reviewer_once(
         input_tokens=in_tokens,
         output_tokens=out_tokens,
         verdict_json=json.dumps(parsed, sort_keys=True),
+        context_pct=context_usage.context_pct if context_usage is not None else None,
     )
 
 
@@ -270,6 +299,7 @@ async def _drive_goal_loop(
     total_in = total_out = 0
     attempts = 0
     worker_result = initial_result
+    previous_check: GoalCheckResult | None = None
 
     try:
         while True:
@@ -284,9 +314,22 @@ async def _drive_goal_loop(
                     worker_summary=worker_summary,
                 )
             else:
-                user_message = build_reviewer_retry_message(
-                    worker_summary=worker_summary,
-                )
+                if (
+                    previous_check is not None
+                    and previous_check.context_pct is not None
+                    and previous_check.context_pct >= GOAL_REVIEWER_RESET_THRESHOLD_PCT
+                ):
+                    await reviewer_process.reset()
+                    user_message = build_reviewer_reset_retry_message(
+                        rendered_task_prompt=rendered_task_prompt,
+                        goal_text=goal_text,
+                        previous_verdict=previous_check.verdict_json,
+                        worker_summary=worker_summary,
+                    )
+                else:
+                    user_message = build_reviewer_retry_message(
+                        worker_summary=worker_summary,
+                    )
 
             check = await _run_reviewer_once(reviewer_process, user_message)
             total_in += check.input_tokens
@@ -320,6 +363,7 @@ async def _drive_goal_loop(
             worker_result = await worker_process.start(retry_prompt)
             total_in += worker_result.total_input_tokens
             total_out += worker_result.total_output_tokens
+            previous_check = check
     except GoalValidationError as e:
         e.input_tokens += total_in
         e.output_tokens += total_out

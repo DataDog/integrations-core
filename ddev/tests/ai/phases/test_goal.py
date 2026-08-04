@@ -12,6 +12,7 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
+    GOAL_REVIEWER_RESET_THRESHOLD_PCT,
     GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,
     GoalParseError,
@@ -279,7 +280,9 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     )
     factory, _, reviewer_agent = _reviewer_factory(
         [
-            make_response(make_goal_verdict(False, "missing X"), 20, 10),
+            make_response(
+                make_goal_verdict(False, "missing X"), 20, 10, context_pct=GOAL_REVIEWER_RESET_THRESHOLD_PCT - 1
+            ),
             make_response(make_goal_verdict(True), 25, 12),
         ]
     )
@@ -307,8 +310,52 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     assert reviewer_agent.reset_call_count == 0
     assert "## Re-review instructions" not in reviewer_agent.send_calls[0]
     assert "## Re-review instructions" in reviewer_agent.send_calls[1]
+    assert "## Previous reviewer verdict" not in reviewer_agent.send_calls[1]
     assert outcome.total_input_tokens == 20 + 25 + 30
     assert outcome.total_output_tokens == 10 + 12 + 15
+
+
+async def test_run_goal_loop_resets_large_reviewer_context_before_retry(tmp_path):
+    worker_process, _ = _make_worker_process([make_response("fixed it", 30, 15)])
+    initial_result = ReActResult(
+        final_response=make_response("initial work"),
+        iterations=1,
+        total_input_tokens=100,
+        total_output_tokens=50,
+        context_usage=None,
+    )
+    previous_verdict = make_goal_verdict(False, "missing X")
+    factory, _, reviewer_agent = _reviewer_factory(
+        [
+            make_response(previous_verdict, 20, 10, context_pct=GOAL_REVIEWER_RESET_THRESHOLD_PCT),
+            make_response(make_goal_verdict(True), 25, 12),
+        ]
+    )
+
+    outcome = await run_goal_loop(
+        task=TaskConfig(name="t1", prompt="x", goal="g"),
+        goal_text="GOAL",
+        rendered_task_prompt="TASK",
+        worker_process=worker_process,
+        initial_result=initial_result,
+        parent_agent_config=make_agent_config(tools=[]),
+        process_factory=factory,
+        callbacks=Callbacks(),
+        phase_id="p1",
+        compact_if_needed=_noop_compact,
+    )
+
+    assert outcome.attempts == 2
+    assert reviewer_agent.reset_call_count == 1
+    assert reviewer_agent.compact_call_count == 0
+    assert len(reviewer_agent.send_calls) == 2
+    retry_message = reviewer_agent.send_calls[1]
+    assert "## Re-review instructions" in retry_message
+    assert "## Original task\nTASK" in retry_message
+    assert "## Goal to verify\nGOAL" in retry_message
+    assert "## Previous reviewer verdict" in retry_message
+    assert '"reason": "missing X"' in retry_message
+    assert "## Worker repair summary\nfixed it" in retry_message
 
 
 async def test_run_goal_loop_exhausts_attempts(tmp_path):
