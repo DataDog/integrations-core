@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum, auto
 from pathlib import Path
 
@@ -68,6 +68,18 @@ class RunSummaryStatus(StrEnum):
     UNAVAILABLE = auto()
 
 
+SUMMARY_ERROR_CHAR_LIMIT = 500
+TRUNCATION_MARKER = "\n\n[TRUNCATED: source exceeded the summary context budget]"
+
+
+def truncate_text(text: str, limit: int) -> str:
+    """Truncate ``text`` to ``limit`` characters, appending a marker when cut."""
+    if len(text) <= limit:
+        return text
+    available = max(0, limit - len(TRUNCATION_MARKER))
+    return f"{text[:available]}{TRUNCATION_MARKER}"
+
+
 class RunSummaryMetadata(BaseModel):
     """Metadata for the best-effort LLM narrative attached to a run outcome."""
 
@@ -81,6 +93,30 @@ class RunSummaryMetadata(BaseModel):
     input_tokens: int = 0
     output_tokens: int = 0
     error: str | None = None
+
+    @classmethod
+    def finished(
+        cls,
+        *,
+        status: RunSummaryStatus,
+        started_at: datetime,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
+        markdown_path: str | None = None,
+        error: str | None = None,
+    ) -> RunSummaryMetadata:
+        """Build metadata for a completed (successful or unavailable) summary attempt."""
+        finished_at = datetime.now(UTC)
+        return cls(
+            status=status,
+            markdown_path=markdown_path,
+            started_at=started_at.isoformat(),
+            finished_at=finished_at.isoformat(),
+            duration_seconds=max(0.0, (finished_at - started_at).total_seconds()),
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            error=truncate_text(error, SUMMARY_ERROR_CHAR_LIMIT) if error is not None else None,
+        )
 
 
 class PhaseReport(BaseModel):

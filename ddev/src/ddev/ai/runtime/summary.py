@@ -19,7 +19,15 @@ from ddev.ai.agent.types import StopReason
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointReadError, CheckpointStatus, PhaseCheckpoint
 from ddev.ai.runtime.helpers import atomic_write_text
-from ddev.ai.runtime.outcome import PhaseReportStatus, RunOutcome, RunSummaryMetadata, RunSummaryStatus
+from ddev.ai.runtime.outcome import (
+    SUMMARY_ERROR_CHAR_LIMIT,
+    TRUNCATION_MARKER,
+    PhaseReportStatus,
+    RunOutcome,
+    RunSummaryMetadata,
+    RunSummaryStatus,
+    truncate_text,
+)
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.registry import filter_read_only
 
@@ -28,8 +36,6 @@ RUN_SUMMARY_MODEL = "sonnet"
 RUN_SUMMARY_TIMEOUT_SECONDS = 600
 RUN_SUMMARY_MAX_TOKENS = 12_000
 RUN_SUMMARY_TOOLS = ["read_file", "list_files", "grep"]
-SUMMARY_ERROR_CHAR_LIMIT = 500
-TRUNCATION_MARKER = "\n\n[TRUNCATED: source exceeded the summary context budget]"
 
 
 class RunSummaryBudget(IntEnum):
@@ -144,7 +150,7 @@ class RunSummarizer:
             raise
         except Exception as error:
             return RunSummaryAttempt(
-                metadata=_finished_metadata(
+                metadata=RunSummaryMetadata.finished(
                     status=RunSummaryStatus.UNAVAILABLE,
                     started_at=started_at,
                     input_tokens=input_tokens,
@@ -154,7 +160,7 @@ class RunSummarizer:
             )
 
         return RunSummaryAttempt(
-            metadata=_finished_metadata(
+            metadata=RunSummaryMetadata.finished(
                 status=RunSummaryStatus.SUCCEEDED,
                 started_at=started_at,
                 input_tokens=input_tokens,
@@ -183,25 +189,25 @@ class RunSummarizer:
             self._artifact_context(outcome),
         ]
         prompt = "\n\n".join(sections)
-        return _truncate(prompt, RunSummaryBudget.PROMPT)
+        return truncate_text(prompt, RunSummaryBudget.PROMPT)
 
     def _flow_context(self) -> str:
         description = self._resolved_flow.description or "<not provided>"
         return (
             "## Flow\n\n"
             f"Name: {self._resolved_flow.name}\n"
-            f"Description: {_truncate(description, RunSummaryBudget.PHASE_SOURCE)}"
+            f"Description: {truncate_text(description, RunSummaryBudget.PHASE_SOURCE)}"
         )
 
     def _prd_context(self) -> str:
         prd = self._runtime_variables.get("prd")
         if not isinstance(prd, str) or not prd.strip():
             return "## Product requirements document\n\n<PRD NOT PROVIDED>"
-        return "## Product requirements document\n\n" + _truncate(prd.strip(), RunSummaryBudget.PRD)
+        return "## Product requirements document\n\n" + truncate_text(prd.strip(), RunSummaryBudget.PRD)
 
     def _outcome_context(self, outcome: RunOutcome) -> str:
         outcome_yaml = yaml.dump(outcome.model_dump(mode="json"), default_flow_style=False, sort_keys=False).strip()
-        return "## Authoritative deterministic RunOutcome\n\n" + _truncate(outcome_yaml, RunSummaryBudget.OUTCOME)
+        return "## Authoritative deterministic RunOutcome\n\n" + truncate_text(outcome_yaml, RunSummaryBudget.OUTCOME)
 
     def _phase_context(
         self,
@@ -252,7 +258,7 @@ class RunSummarizer:
         checkpoint_budget = min(RunSummaryBudget.PHASE_SOURCE, budget // 3)
         memory_budget = min(RunSummaryBudget.PHASE_SOURCE, budget - checkpoint_budget)
         if checkpoint is not None and checkpoint_is_current:
-            checkpoint_text = _truncate(
+            checkpoint_text = truncate_text(
                 yaml.dump(checkpoint.model_dump(mode="json"), default_flow_style=False, sort_keys=False).strip(),
                 checkpoint_budget,
             )
@@ -269,7 +275,7 @@ class RunSummarizer:
         details = (
             f"#### Validated checkpoint\n\n{checkpoint_text}\n\n#### Phase memory (supporting source only)\n\n{memory}"
         )
-        return _truncate(details, budget)
+        return truncate_text(details, budget)
 
     def _artifact_context(self, outcome: RunOutcome) -> str:
         run_dir = self._checkpoint_manager.run_dir
@@ -305,14 +311,7 @@ These are paths for selective read-only inspection; their contents are not autom
             sidecar_paths=_format_paths(sidecar_paths),
             log_paths=_format_paths(log_paths),
         )
-        return _truncate(context, RunSummaryBudget.ARTIFACTS)
-
-
-def _truncate(text: str, limit: int) -> str:
-    if len(text) <= limit:
-        return text
-    available = max(0, limit - len(TRUNCATION_MARKER))
-    return f"{text[:available]}{TRUNCATION_MARKER}"
+        return truncate_text(context, RunSummaryBudget.ARTIFACTS)
 
 
 def _checkpoint_matches_report(
@@ -336,38 +335,16 @@ def _format_paths(paths: Iterable[Path]) -> str:
 
 def _read_phase_memory(path: Path, limit: int) -> str:
     try:
-        return _truncate(path.read_text(encoding="utf-8"), limit)
+        return truncate_text(path.read_text(encoding="utf-8"), limit)
     except FileNotFoundError:
         return "<PHASE MEMORY UNAVAILABLE>"
     except (OSError, UnicodeError) as error:
         return f"<PHASE MEMORY UNREADABLE: {_compact_summary_error(error)}>"
 
 
-def _finished_metadata(
-    *,
-    status: RunSummaryStatus,
-    started_at: datetime,
-    input_tokens: int,
-    output_tokens: int,
-    markdown_path: str | None = None,
-    error: str | None = None,
-) -> RunSummaryMetadata:
-    finished_at = datetime.now(UTC)
-    return RunSummaryMetadata(
-        status=status,
-        markdown_path=markdown_path,
-        started_at=started_at.isoformat(),
-        finished_at=finished_at.isoformat(),
-        duration_seconds=max(0.0, (finished_at - started_at).total_seconds()),
-        input_tokens=input_tokens,
-        output_tokens=output_tokens,
-        error=error,
-    )
-
-
 def _compact_summary_error(error: BaseException) -> str:
     detail = str(error).strip() or "No details available"
-    return _truncate(f"{type(error).__name__}: {detail}", SUMMARY_ERROR_CHAR_LIMIT)
+    return truncate_text(f"{type(error).__name__}: {detail}", SUMMARY_ERROR_CHAR_LIMIT)
 
 
 def _summary_started_at(outcome: RunOutcome) -> datetime:

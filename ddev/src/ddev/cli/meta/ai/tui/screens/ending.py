@@ -119,13 +119,13 @@ class EndingScreen(TogoScreen):
         metadata = self.outcome.summary
         if metadata.status is not RunSummaryStatus.SUCCEEDED or metadata.markdown_path is None:
             detail = metadata.error or "No generated narrative is available for this run."
-            return Static(f"AI summary unavailable\n\n{detail}", id="ending-summary", classes="panel")
+            return Static(f"AI summary unavailable\n\n{detail}", id="ending-summary", classes="panel", markup=False)
         try:
-            manager = CheckpointManager(Path(self.outcome.run_dir) / "checkpoints.yaml")
+            manager = CheckpointManager.for_run_dir(Path(self.outcome.run_dir))
             path = manager.resolve_run_artifact(metadata.markdown_path)
             markdown = path.read_text(encoding="utf-8")
         except (OSError, UnicodeError, ValueError) as error:
-            return Static(f"AI summary unavailable\n\n{error}", id="ending-summary", classes="panel")
+            return Static(f"AI summary unavailable\n\n{error}", id="ending-summary", classes="panel", markup=False)
         return Markdown(markdown, id="ending-summary", classes="panel")
 
 

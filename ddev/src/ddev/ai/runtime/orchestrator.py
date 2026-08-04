@@ -4,6 +4,7 @@
 
 import asyncio
 import logging
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -47,6 +48,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         resume: bool = False,
         grace_period: float = DEFAULT_GRACE_PERIOD,
         logger: logging.Logger | None = None,
+        summarizer_factory: Callable[[], RunSummarizerLike] | None = None,
     ) -> None:
         """Initialize the orchestrator.
 
@@ -59,6 +61,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
         ``file_access_policy`` must have ``write_root`` set to the integration
         output directory so that agent writes are confined to that path.
+
+        ``summarizer_factory``, when provided, replaces the default ``RunSummarizer``
+        construction (intended for tests that need to inject a fake summarizer).
 
         """
         max_timeout = runtime_variables.get("max_timeout")
@@ -86,6 +91,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._resources: RunResources | None = None
         self._summary_task: asyncio.Task[RunSummaryAttempt] | None = None
         self._summary_cancellation_requested = False
+        self._summarizer_factory = summarizer_factory
 
     @property
     def failed_phase(self) -> str | None:
@@ -136,6 +142,17 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 self._agent_logger.close()
 
     async def _record_outcome(self, exception: BaseException | None) -> None:
+        outcome, summary_started_at = await self._persist_generating_state(exception)
+        try:
+            await self._callbacks.fire_run_finalizing(outcome)
+            attempt = await self._summarize_outcome(outcome, summary_started_at)
+        except asyncio.CancelledError:
+            self._persist_interrupted_summary(outcome, summary_started_at)
+            raise
+        await self._persist_final_state(outcome, attempt)
+
+    async def _persist_generating_state(self, exception: BaseException | None) -> tuple[RunOutcome, datetime]:
+        """Build the deterministic outcome, mark its summary as generating, and persist it."""
         try:
             finished_at = datetime.now(UTC)
             started_at = self._started_at or finished_at
@@ -171,25 +188,26 @@ class PhaseOrchestrator(EventBusOrchestrator):
             self._outcome = outcome.model_copy(update={"summary": unavailable})
             await self._callbacks.fire_run_finished(self._outcome)
             raise RunOutcomePersistenceError(f"Failed to persist the flow outcome: {e}") from e
+        return outcome, summary_started_at
 
+    def _persist_interrupted_summary(self, outcome: RunOutcome, summary_started_at: datetime) -> None:
+        """Record that final-summary generation was interrupted, best-effort."""
+        interrupted_outcome = outcome.model_copy(
+            update={
+                "summary": _unavailable_summary(
+                    summary_started_at,
+                    "Final summary generation was interrupted before completion",
+                )
+            }
+        )
+        self._outcome = interrupted_outcome
         try:
-            await self._callbacks.fire_run_finalizing(outcome)
-            attempt = await self._summarize_outcome(outcome, summary_started_at)
-        except asyncio.CancelledError:
-            interrupted_outcome = outcome.model_copy(
-                update={
-                    "summary": _unavailable_summary(
-                        summary_started_at,
-                        "Final summary generation was interrupted before completion",
-                    )
-                }
-            )
-            self._outcome = interrupted_outcome
-            try:
-                self._outcome_store.write(interrupted_outcome)
-            except Exception:
-                self._logger.exception("Failed to persist the interrupted final-summary state")
-            raise
+            self._outcome_store.write(interrupted_outcome)
+        except Exception:
+            self._logger.exception("Failed to persist the interrupted final-summary state")
+
+    async def _persist_final_state(self, outcome: RunOutcome, attempt: RunSummaryAttempt) -> None:
+        """Merge the summary attempt into the outcome, persist it, and notify listeners."""
         final_outcome = outcome.model_copy(update={"summary": attempt.metadata})
         self._outcome = final_outcome
         persistence_error: RunOutcomePersistenceError | None = None
@@ -230,6 +248,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
             self._summary_task = None
 
     def _build_run_summarizer(self) -> RunSummarizerLike:
+        if self._summarizer_factory is not None:
+            return self._summarizer_factory()
         if self._resources is None:
             raise RuntimeError("Run resources are not initialized")
         return RunSummarizer(
@@ -333,11 +353,4 @@ def _checkpoint_finished_at(checkpoint: PhaseCheckpoint) -> datetime:
 
 
 def _unavailable_summary(started_at: datetime, error: str) -> RunSummaryMetadata:
-    finished_at = datetime.now(UTC)
-    return RunSummaryMetadata(
-        status=RunSummaryStatus.UNAVAILABLE,
-        started_at=started_at.isoformat(),
-        finished_at=finished_at.isoformat(),
-        duration_seconds=max(0.0, (finished_at - started_at).total_seconds()),
-        error=error[:500],
-    )
+    return RunSummaryMetadata.finished(status=RunSummaryStatus.UNAVAILABLE, started_at=started_at, error=error)

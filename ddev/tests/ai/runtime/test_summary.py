@@ -112,15 +112,21 @@ class SuccessfulProcess:
         )
 
 
-def build_summarizer(tmp_path: Path, process: Any) -> tuple[RunSummarizer, CheckpointManager, FakeResources]:
+def build_summarizer(
+    tmp_path: Path,
+    process: Any,
+    *,
+    runtime_variables: dict[str, Any] | None = None,
+    resolved_flow: ResolvedFlow | None = None,
+) -> tuple[RunSummarizer, CheckpointManager, FakeResources]:
     manager = CheckpointManager(tmp_path / "checkpoints.yaml")
     manager.write_phase_checkpoint("inspect", make_success_checkpoint(memory_path=str(manager.memory_path("inspect"))))
     resources = FakeResources(process, tmp_path)
     summarizer = RunSummarizer(
-        resolved_flow=make_flow(),
+        resolved_flow=resolved_flow if resolved_flow is not None else make_flow(),
         checkpoint_manager=manager,
         resources=resources,  # type: ignore[arg-type]
-        runtime_variables={"prd": "Required product behavior."},
+        runtime_variables=runtime_variables if runtime_variables is not None else {"prd": "Required product behavior."},
     )
     return summarizer, manager, resources
 
@@ -140,8 +146,7 @@ def test_prompt_is_bounded_includes_prd_and_excludes_other_flow_variables(tmp_pa
 
 
 def test_missing_prd_is_labelled_not_provided(tmp_path: Path) -> None:
-    summarizer, _, _ = build_summarizer(tmp_path, SuccessfulProcess())
-    summarizer._runtime_variables = {}
+    summarizer, _, _ = build_summarizer(tmp_path, SuccessfulProcess(), runtime_variables={})
 
     prompt = summarizer.build_prompt(make_outcome(tmp_path))
 
@@ -205,15 +210,15 @@ def test_stale_checkpoint_and_memory_do_not_override_not_run_status(tmp_path: Pa
 
 
 def test_large_flow_keeps_every_phase_label_within_total_budget(tmp_path: Path) -> None:
-    summarizer, _, _ = build_summarizer(tmp_path, SuccessfulProcess())
     entries = [FlowEntry(phase=f"phase_{index}") for index in range(200)]
-    summarizer._resolved_flow = ResolvedFlow(
+    large_flow = ResolvedFlow(
         name="large",
         agents={},
         phases={},
         flow=entries,
         variables={},
     )
+    summarizer, _, _ = build_summarizer(tmp_path, SuccessfulProcess(), resolved_flow=large_flow)
     base_report = make_outcome(tmp_path).phases[0]
     reports = [
         base_report.model_copy(update={"phase_id": entry.phase, "status": PhaseReportStatus.NOT_RUN})

@@ -256,7 +256,7 @@ class ExecutionScreen(TogoScreen):
                         None,
                     )
                 )
-            elif self._orchestrator_builder is not None and self._outcome is None:
+            elif self._outcome is None:
                 self.post_message(RunFinished(orchestrator.outcome))
         except asyncio.CancelledError:
             if self.togo_app.bridge_target is self:
@@ -488,7 +488,7 @@ class ExecutionScreen(TogoScreen):
             widget = self.query_one("#execution-summary-status", Static)
             actions.display = True
             actions.query_one("#view-summary", Button).display = False
-            widget.update("Generating final summary...")
+            widget.update("Generating final summary... Esc to skip")
             widget.remove_class("outcome-warning")
             widget.display = True
         except NoMatches:

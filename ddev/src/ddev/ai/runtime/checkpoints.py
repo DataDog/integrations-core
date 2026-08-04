@@ -110,6 +110,15 @@ class CheckpointManager:
     def __init__(self, path: Path) -> None:
         self._path = path
 
+    @classmethod
+    def for_run_dir(cls, run_dir: Path) -> CheckpointManager:
+        """Build a manager scoped to ``run_dir``, for callers that only need path resolution.
+
+        Intended for read-only consumers (e.g. the TUI) that need ``resolve_run_artifact``
+        without otherwise reading or writing this run's checkpoints.
+        """
+        return cls(run_dir / "checkpoints.yaml")
+
     @property
     def run_dir(self) -> Path:
         """Directory containing all artifacts for this run."""

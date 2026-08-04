@@ -225,6 +225,32 @@ async def test_ending_screen_rejects_summary_path_escape(make_togo_app, tmp_path
         assert "AI summary unavailable" in summary.render().plain
 
 
+async def test_ending_screen_renders_bracketed_summary_error_without_crashing(make_togo_app, tmp_path):
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.screens.ending import EndingScreen
+
+    outcome = make_outcome(RunVerdict.SUCCEEDED).model_copy(
+        update={
+            "run_dir": str(tmp_path),
+            "summary": RunSummaryMetadata(
+                status=RunSummaryStatus.UNAVAILABLE,
+                error="ValueError: error at [/tmp/foo]",
+            ),
+        }
+    )
+    app = make_togo_app()
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = EndingScreen(outcome)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        summary = screen.query_one("#ending-summary", Static)
+        assert "error at [/tmp/foo]" in summary.render().plain
+
+
 async def test_execution_screen_offers_summary_without_opening_it_automatically(make_flow, make_togo_app):
     import asyncio
 
