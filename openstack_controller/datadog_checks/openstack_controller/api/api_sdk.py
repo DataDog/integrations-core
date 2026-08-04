@@ -87,9 +87,12 @@ class ApiSdk(Api):
             cert=self.http.options['cert'],
             additional_headers=self.http.options['headers'],
         )
+        # verify and cert cannot express the TLS options that live on the SSLContext, so hand the
+        # transport to the HTTP client and let it apply the full TLS configuration.
+        self.http.apply_tls_to_requests_session(keystone_session.session)
         # keystoneauth1 takes no proxy argument, so its transport is the only place proxies can go.
-        # It takes no auth, ntlm_domain, kerberos_auth or tls_ciphers either; those options stay
-        # unapplied on this path until the SDK is routed through ApiRest.
+        # It takes no auth, ntlm_domain or kerberos_auth either; those options stay unapplied on this
+        # path until the SDK is routed through ApiRest.
         keystone_session.session.proxies = self._keystone_proxies()
         return keystone_session
 

@@ -852,6 +852,16 @@ class RequestsWrapper(object):
             # before _session was ever defined (since __del__ executes even if __init__ fails).
             pass
 
+    def apply_tls_to_requests_session(self, session: requests.Session) -> None:
+        """Apply this wrapper's TLS configuration to a requests session it does not own.
+
+        For third-party libraries that build their own requests transport and accept only verify and
+        cert, which cannot express tls_validate_hostname, tls_ciphers, tls_private_key_password or
+        tls_intermediate_ca_certs. Those live on the SSLContext, so the adapter carrying it has to be
+        mounted on the foreign session for them to take effect.
+        """
+        self._mount_https_adapter(session, self.tls_config)
+
     def _mount_https_adapter(self, session, tls_config):
         # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)

@@ -7,12 +7,18 @@ from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from datetime import timedelta
 from types import MappingProxyType
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    import requests
 
 # Provisional backend-neutral HTTP surface (stabilizes once the httpx backend lands). RequestsWrapper
 # implements it on requests today; a future HTTPX2Wrapper implements the same surface on httpx. Do not
 # change existing methods, attributes, or their semantics without coordinating both backends.
-# Capabilities expose behavior, never a backend object (no requests or httpx type is returned).
+# Capabilities expose behavior, never a backend object, with one documented exception:
+# apply_tls_to_requests_session takes a requests.Session, for third-party libraries that cannot be
+# handed anything else. It is provisional and goes away once openstack_controller's SDK backend is
+# routed through ApiRest.
 
 
 class HTTPHeaders(Mapping[str, str]):
@@ -145,3 +151,13 @@ class HTTPClient(Protocol):
 
     # Whether url should bypass any configured proxy under the client's no_proxy rules, False if none match.
     def should_bypass_proxy(self, url: str) -> bool: ...
+
+    # Escape hatch, requests-only. Applies this client's TLS configuration to a requests.Session owned
+    # by a third-party library that is hard-bound to requests: today only keystoneauth1, reached through
+    # openstack_controller's SDK backend. Scoped to TLS deliberately. Proxies are not covered, because
+    # no_proxy is per-host and one shared transport cannot express per-host bypass, so callers set
+    # session.proxies themselves.
+    # A backend that is not requests-based MUST raise NotImplementedError rather than no-op. A silent
+    # no-op would drop the caller's TLS options exactly as happened before this member existed, and it
+    # would do so invisibly.
+    def apply_tls_to_requests_session(self, session: requests.Session) -> None: ...
