@@ -107,6 +107,12 @@ class OnRunFinishedCallback(Protocol):
     async def __call__(self, outcome: RunOutcome) -> None: ...
 
 
+class OnRunFinalizingCallback(Protocol):
+    """Called after the deterministic outcome is durable and before summary generation."""
+
+    async def __call__(self, outcome: RunOutcome) -> None: ...
+
+
 class OnBeforeGoalCheckCallback(Protocol):
     """Called immediately before each reviewer agent run for a task with a goal."""
 
@@ -155,6 +161,7 @@ class CallbackSet:
         self._on_phase_error: list[OnPhaseErrorCallback] = []
         self._on_run_error: list[OnRunErrorCallback] = []
         self._on_run_finished: list[OnRunFinishedCallback] = []
+        self._on_run_finalizing: list[OnRunFinalizingCallback] = []
         self._on_before_goal_check: list[OnBeforeGoalCheckCallback] = []
         self._on_after_goal_check: list[OnAfterGoalCheckCallback] = []
 
@@ -260,6 +267,13 @@ class CallbackSet:
         self._on_run_finished.append(func)
         return func
 
+    def on_run_finalizing(self, func: OnRunFinalizingCallback) -> OnRunFinalizingCallback:
+        self._on_run_finalizing.append(func)
+        return func
+
+    async def fire_run_finalizing(self, outcome: RunOutcome) -> None:
+        await self._fire(self._on_run_finalizing, outcome)
+
     async def fire_run_finished(self, outcome: RunOutcome) -> None:
         await self._fire(self._on_run_finished, outcome)
 
@@ -345,6 +359,10 @@ class Callbacks:
     async def fire_run_finished(self, outcome: RunOutcome) -> None:
         for s in self._sets:
             await s.fire_run_finished(outcome)
+
+    async def fire_run_finalizing(self, outcome: RunOutcome) -> None:
+        for s in self._sets:
+            await s.fire_run_finalizing(outcome)
 
     async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
         for s in self._sets:

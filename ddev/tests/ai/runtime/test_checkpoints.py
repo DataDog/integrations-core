@@ -9,6 +9,7 @@ import yaml
 
 from ddev.ai.config.models import FlowEntry, ResolvedFlow
 from ddev.ai.runtime.checkpoints import (
+    PHASE_MEMORY_PROMPT,
     CancelledCheckpoint,
     CheckpointManager,
     CheckpointReadError,
@@ -59,6 +60,20 @@ def test_read_unreadable_file_raises_checkpoint_read_error(manager: CheckpointMa
         manager.read()
 
 
+def test_read_invalid_utf8_raises_checkpoint_read_error(manager: CheckpointManager):
+    manager.checkpoints_path.write_bytes(b"\xff")
+
+    with pytest.raises(CheckpointReadError, match="checkpoints.yaml"):
+        manager.read()
+
+
+def test_read_non_mapping_yaml_raises_checkpoint_read_error(manager: CheckpointManager):
+    manager.checkpoints_path.write_text("- not\n- a\n- mapping\n", encoding="utf-8")
+
+    with pytest.raises(CheckpointReadError, match="must be a mapping"):
+        manager.read()
+
+
 def test_read_returns_validated_checkpoint(manager: CheckpointManager):
     manager.write_phase_checkpoint("phase1", make_success_checkpoint())
     data = manager.read()
@@ -91,6 +106,24 @@ def test_write_creates_parent_dirs(tmp_path: Path):
     manager = CheckpointManager(tmp_path / "nested" / "dir" / "checkpoints.yaml")
     manager.write_phase_checkpoint("p", make_success_checkpoint())
     assert isinstance(manager.read()["p"], SuccessCheckpoint)
+
+
+def test_checkpoint_and_memory_writes_use_atomic_persistence(
+    manager: CheckpointManager, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    writes: list[tuple[Path, str]] = []
+
+    def record_write(path: Path, text: str) -> None:
+        writes.append((path, text))
+
+    monkeypatch.setattr("ddev.ai.runtime.checkpoints.atomic_write_text", record_write)
+
+    manager.write_phase_checkpoint("phase1", make_success_checkpoint())
+    manager.write_memory("phase1", "Complete handoff")
+
+    assert writes[0][0] == manager.checkpoints_path
+    assert "phase1:" in writes[0][1]
+    assert writes[1] == (manager.memory_path("phase1"), "Complete handoff")
 
 
 def test_write_multiple_phases(manager: CheckpointManager):
@@ -141,13 +174,28 @@ def test_write_overwrites_existing_phase(manager: CheckpointManager):
 
 def test_build_memory_prompt_no_additions(manager: CheckpointManager):
     result = manager.build_memory_prompt(None)
-    assert result == "Write a brief summary of what you accomplished in this phase."
+    assert result == PHASE_MEMORY_PROMPT
+    assert result.startswith("Write a detailed Markdown handoff")
+    assert "## What the agent was asked for" in result
+    assert "## What information it had from before" in result
+    assert "## Decisions it took" in result
+    assert "## What it did" in result
+    assert "## Files it edited, created, or worked in" in result
 
 
 def test_build_memory_prompt_with_additions(manager: CheckpointManager):
     result = manager.build_memory_prompt("Also list the files you created.")
     assert result.startswith("Also list the files you created.")
-    assert "Write a brief summary" in result
+    assert "Write a detailed Markdown handoff" in result
+
+
+def test_resolve_run_artifact_rejects_escape(manager: CheckpointManager):
+    with pytest.raises(ValueError, match="escapes the run directory"):
+        manager.resolve_run_artifact("../summary.md")
+
+
+def test_summary_markdown_path_is_derived_from_run_dir(manager: CheckpointManager, tmp_path: Path):
+    assert manager.summary_markdown_path == tmp_path / "summary.md"
 
 
 # ---------------------------------------------------------------------------

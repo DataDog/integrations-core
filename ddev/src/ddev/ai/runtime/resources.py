@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from functools import cached_property
+from typing import Any
 
 from ddev.ai.agent.build import AgentRuntimeFactory, AgentRuntimeFactoryProtocol
 from ddev.ai.agent.registry import AgentProviderRegistry
@@ -40,6 +41,15 @@ class RunResources:
             return self._agents[name]
         except KeyError as e:
             raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
+
+    @property
+    def repository_root(self) -> str:
+        """Return the repository root visible through the run file policy."""
+        return str(self._file_access_policy.write_root)
+
+    def validate_agent_config(self, values: dict[str, Any]) -> AgentConfig:
+        """Validate a framework-owned agent with the active provider registry."""
+        return AgentConfig.model_validate(values, context={"provider_registry": self._provider_registry})
 
     @cached_property
     def agent_runtime_factory(self) -> AgentRuntimeFactoryProtocol:

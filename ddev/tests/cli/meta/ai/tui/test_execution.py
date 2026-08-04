@@ -1045,6 +1045,33 @@ async def test_agent_output_routes_to_phase_logs_by_scope_phase_id():
     assert screen._phase_logs["phase_1"] is not screen._phase_logs["phase_2"]
 
 
+def test_run_summary_agent_events_do_not_enter_live_phase_logs():
+    """Run-summary callbacks stay in JSONL logging and never render as phase activity."""
+    from ddev.ai.agent.scope import AgentRole, AgentScope
+    from ddev.cli.meta.ai.tui.messages import (
+        AgentBeforeSend,
+        AgentErrored,
+        AgentFinished,
+        AgentResponseReceived,
+        AgentStarted,
+    )
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    screen = ExecutionScreen(_make_flow())
+    scope = AgentScope(owner_id="Test Flow", role=AgentRole.RUN_SUMMARY, phase_id=None)
+    response = _make_agent_response("summary")
+    original_output_count = screen._output_write_count
+
+    screen.on_agent_started(AgentStarted(scope, "system", ["read_file"]))
+    screen.on_agent_before_send(AgentBeforeSend(scope, "summarize", 1))
+    screen.on_agent_response_received(AgentResponseReceived(scope, response, 1))
+    screen.on_agent_finished(AgentFinished(scope, _make_react_result(response)))
+    screen.on_agent_errored(AgentErrored(scope, RuntimeError("ignored by phase UI")))
+
+    assert screen._output_write_count == original_output_count
+    assert all(not active for active in screen._active_thinking.values())
+
+
 async def test_phase_log_shows_thinking_block_until_agent_response():
     """Open phase logs show a transient component while an agent response is pending."""
     from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -1561,18 +1588,66 @@ async def test_outcome_persistence_error_keeps_flow_verdict_and_summary() -> Non
         assert screen.query_one("#execution-actions", Horizontal).display is True
 
 
+async def test_unavailable_summary_shows_generic_status_and_preserves_detail() -> None:
+    from textual.containers import Horizontal
+    from textual.widgets import Button, Static
+
+    from ddev.ai.runtime.outcome import RunSummaryMetadata, RunSummaryStatus
+    from ddev.cli.meta.ai.tui.screens.ending import EndingScreen
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    summary_error = "Initial run outcome persistence failed: disk full"
+    outcome = _make_outcome(DEMO_PHASES).model_copy(
+        update={
+            "summary": RunSummaryMetadata(
+                status=RunSummaryStatus.UNAVAILABLE,
+                error=summary_error,
+            )
+        }
+    )
+
+    class FinishedWithUnavailableSummary(OrchestratorStub):
+        failed_phase = None
+
+        def __init__(self) -> None:
+            self.outcome = outcome
+
+    flow = _make_flow()
+    app = _app(flow)
+    screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: FinishedWithUnavailableSummary())
+
+    async with app.run_test(size=(80, 30)) as pilot:
+        await pilot.pause()
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        actions = screen.query_one("#execution-actions", Horizontal)
+        summary_status = screen.query_one("#execution-summary-status", Static)
+        view_summary = screen.query_one("#view-summary", Button)
+
+        assert summary_status.render().plain == "AI summary unavailable"
+        assert summary_status.region.right <= view_summary.region.x
+        assert view_summary.region.right <= actions.content_region.right
+
+        await pilot.click("#view-summary")
+        await pilot.pause()
+
+        assert isinstance(app.screen, EndingScreen)
+        assert summary_error in app.screen.query_one("#ending-summary", Static).render().plain
+
+
 # ---------------------------------------------------------------------------
 # ExecutionScreen: cancellation
 # ---------------------------------------------------------------------------
 
 
-async def test_cancel_stops_worker_without_crash():
-    """Ctrl+C cancels the run without reporting successful completion."""
+async def test_ctrl_c_requires_confirmation_then_stops_worker_without_crash():
+    """Ctrl+C confirms before cancelling without reporting successful completion."""
     import asyncio
 
+    from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
-    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
 
     cancelled = asyncio.Event()
 
@@ -1597,12 +1672,18 @@ async def test_cancel_stops_worker_without_crash():
         screen = ExecutionScreen(flow, orchestrator_builder=lambda cb: _InfiniteDemo(cb))
         await app.push_screen(screen)
         await pilot.pause(0.05)
-        await pilot.press("ctrl+c")
+        screen.action_copy_or_cancel_run()
+        await pilot.pause()
+
+        assert isinstance(app.screen, CancelRunModal)
+        assert not cancelled.is_set()
+
+        await pilot.click("#btn-cancel-flow")
         await pilot.pause()
 
         assert pilot.app.is_running
         assert cancelled.is_set()
-        assert str(screen.query_one(ExecutionStatusBadge).render()) == ""
+        assert isinstance(app.screen, MainScreen)
 
 
 async def test_execution_ctrl_c_copies_selection_before_cancelling(monkeypatch):
@@ -1712,6 +1793,81 @@ async def test_escape_requires_confirmation_before_cancelling_active_run():
         assert cancelled.is_set()
 
 
+async def test_escape_during_finalization_cancels_only_summary():
+    """Finalization uses a summary-specific confirmation and preserves the run verdict."""
+    import asyncio
+
+    from textual.containers import Horizontal
+    from textual.widgets import Button, Static
+
+    from ddev.ai.runtime.outcome import RunSummaryMetadata, RunSummaryStatus
+    from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.status import ExecutionStatus
+
+    summary_started = asyncio.Event()
+    cancellation_requested = asyncio.Event()
+
+    class _FinalizingDemo(OrchestratorStub):
+        failed_phase = None
+
+        def __init__(self, callbacks: Any) -> None:
+            self._callbacks = callbacks
+            self.outcome: RunOutcome | None = None
+
+        async def run_async(self) -> None:
+            baseline = _make_outcome(DEMO_PHASES).model_copy(
+                update={"summary": RunSummaryMetadata(status=RunSummaryStatus.GENERATING)}
+            )
+            await self._callbacks.fire_run_finalizing(baseline)
+            summary_started.set()
+            await cancellation_requested.wait()
+            self.outcome = baseline.model_copy(
+                update={
+                    "summary": RunSummaryMetadata(
+                        status=RunSummaryStatus.UNAVAILABLE,
+                        error="Final summary generation was stopped by the user",
+                    )
+                }
+            )
+            await self._callbacks.fire_run_finished(self.outcome)
+
+        def request_summary_cancellation(self) -> None:
+            cancellation_requested.set()
+
+    flow = _make_flow()
+    app = _app(flow)
+    app.animation_level = "none"
+    screen = ExecutionScreen(flow, orchestrator_builder=lambda callbacks: _FinalizingDemo(callbacks))
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        await app.push_screen(screen)
+        await summary_started.wait()
+        await pilot.pause()
+
+        assert app.execution_status is ExecutionStatus.FINISHING
+        assert "Generating final summary" in screen.query_one("#execution-summary-status", Static).render().plain
+        assert screen.query_one("#execution-actions", Horizontal).display is True
+        assert screen.query_one("#view-summary", Button).display is False
+        assert screen.check_action("show_outcome", ()) is False
+
+        await pilot.press("escape")
+        await pilot.pause()
+        assert isinstance(app.screen, CancelRunModal)
+        assert "Stop final summary" in app.screen.query_one("#dialog").border_title
+
+        await pilot.click("#btn-cancel-flow")
+        await pilot.pause()
+
+        assert app.screen is screen
+        assert cancellation_requested.is_set()
+        assert app.execution_status is ExecutionStatus.COMPLETED
+        assert screen._outcome is not None
+        assert screen._outcome.summary.status is RunSummaryStatus.UNAVAILABLE
+        assert screen.query_one("#view-summary", Button).display is True
+
+
 async def test_back_pops_immediately_after_run_finishes():
     """Back does not prompt once the worker has finished."""
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
@@ -1736,6 +1892,30 @@ async def test_back_pops_immediately_after_run_finishes():
 
         assert isinstance(app.screen, MainScreen)
         assert str(app.screen.query_one(ExecutionStatusBadge).render()) == ""
+
+
+async def test_ctrl_c_is_noop_after_run_finishes():
+    """Ctrl+C does nothing once the worker has finished — it neither cancels nor navigates away."""
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    class _FinishedDemo(OrchestratorStub):
+        failed_phase = None
+
+        async def run_async(self) -> None:
+            return
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _FinishedDemo())
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.action_copy_or_cancel_run()
+        await pilot.pause()
+
+        assert app.screen is screen
 
 
 # ---------------------------------------------------------------------------
