@@ -13,7 +13,7 @@
     "options": {
       "include_tags": false,
       "notify_audit": false,
-      "notify_no_data": false,
+      "on_missing_data": "show_no_data",
       "renotify_interval": 0,
       "require_full_window": false,
       "thresholds": {

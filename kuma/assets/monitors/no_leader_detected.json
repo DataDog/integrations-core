@@ -18,8 +18,7 @@
             "include_tags": true,
             "new_group_delay": 300,
             "silenced": {},
-            "notify_no_data": true,
-            "no_data_timeframe": 20,
+            "on_missing_data": "show_and_notify_no_data",
             "renotify_interval": 300,
             "require_full_window": true,
             "evaluation_delay": 60
