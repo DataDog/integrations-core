@@ -1,1 +1,0 @@
-Point the E2E Agent container's apt mirror at the generic Ubuntu archive so package installs in ``start_commands`` are not slowed by a region-pinned mirror.
