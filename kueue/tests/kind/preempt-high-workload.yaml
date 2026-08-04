@@ -1,10 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: event-workload
+  name: preempt-high-workload
   namespace: default
   labels:
-    kueue.x-k8s.io/queue-name: user-queue
+    kueue.x-k8s.io/queue-name: preempt-queue
+    kueue.x-k8s.io/priority-class: high-priority
 spec:
   suspend: true
   parallelism: 1
@@ -18,5 +19,5 @@ spec:
         command: ['sh', '-c', 'while true; do sleep 3600; done']
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: 200m
+            memory: 64Mi

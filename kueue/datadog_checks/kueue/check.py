@@ -15,7 +15,7 @@ from .metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
 RESOURCE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in RESOURCE_METRIC_MAP) + ')$'
 LOCAL_QUEUE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in LOCAL_QUEUE_METRIC_MAP) + ')$'
-PREEMPTING_WORKLOAD_UID_PATTERN = re.compile(r'\bworkload \(UID: ([^)]+)\)', re.IGNORECASE)
+PREEMPTING_WORKLOAD_UID_PATTERN = re.compile(r'\bworkload \(UID: ([^),\s]+)', re.IGNORECASE)
 
 RESOURCE_NAME_MAP = {
     'cpu': 'cpu',
@@ -366,11 +366,12 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if transition == 'evicted' and condition:
             if reason := condition.get('reason'):
                 tags.append(f'kueue_eviction_reason:{reason}')
-            preempted_condition = self.get_condition(workload, 'Preempted')
-            if reason == 'Preempted' and preempted_condition and preempted_condition.get('reason'):
-                tags.append(f'kueue_preemption_reason:{preempted_condition["reason"]}')
-            if preempted_by := self.preempting_workload_uid(condition, preempted_condition):
-                tags.append(f'kueue_preempted_by:{preempted_by}')
+            if reason == 'Preempted':
+                preempted_condition = self.get_condition(workload, 'Preempted')
+                if preempted_condition and preempted_condition.get('reason'):
+                    tags.append(f'kueue_preemption_reason:{preempted_condition["reason"]}')
+                if preempted_by := self.preempting_workload_uid(condition, preempted_condition):
+                    tags.append(f'kueue_preempted_by:{preempted_by}')
 
         return tags
 
