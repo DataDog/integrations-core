@@ -25,22 +25,25 @@ FDR is a paid add-on and is not enabled by default.
 
 1. In the Falcon console, go to **Support and resources** > **Resources** > **Falcon data replicator**.
 2. Create a new feed.
-3. CrowdStrike generates three values for the feed:
+3. CrowdStrike generates the feed credentials:
    - An AWS Access Key ID
    - An AWS Secret Key
    - An SQS Queue URL
 
    These credentials are scoped by CrowdStrike to grant read-only access to your FDR queue and S3 bucket only. No AWS console configuration, IAM policy authoring, or cross-account role setup is required.
 
+4. Note the S3 bucket name shown for the feed. Datadog checks that every file it downloads comes from this bucket.
+
 ### Connect your CrowdStrike FDR feed to Datadog
 
-1. Add your AWS Access Key ID, AWS Secret Key, and SQS Queue URL.
+1. Add your AWS Access Key ID, AWS Secret Key, SQS Queue URL, and S3 bucket.
 
    | Parameter          | Description                                                        |
    | ------------------ | ------------------------------------------------------------------ |
    | AWS Access Key ID  | The AWS Access Key ID generated for your FDR feed.                 |
    | AWS Secret Key     | The AWS Secret Key generated for your FDR feed.                    |
    | SQS Queue URL      | The SQS Queue URL generated for your FDR feed.                     |
+   | S3 Bucket          | The S3 bucket CrowdStrike delivers your FDR files to.              |
 
 2. Click **Save**.
 
