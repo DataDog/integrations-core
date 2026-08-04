@@ -43,6 +43,7 @@ MEDIATED_CALLS = frozenset(
         'subprocess.call',
         'subprocess.check_output',
         'subprocess.check_call',
+        'os.open',
         'os.listdir',
         'os.scandir',
         'os.walk',

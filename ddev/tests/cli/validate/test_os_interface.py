@@ -305,3 +305,25 @@ def test_unrelated_from_imports_are_not_flagged(repo_with, ddev):
     repo_with('ok', UNRELATED_FROM_IMPORT)
     result = ddev('validate', 'os-interface', 'ok')
     assert result.exit_code == 0, result.output
+
+
+RAW_OS_OPEN = """\
+import os
+
+from datadog_checks.base import AgentCheck
+
+
+class MyCheck(AgentCheck):
+    def check(self, _):
+        fd = os.open(self.instance['path'], os.O_RDONLY)
+        os.close(fd)
+"""
+
+
+def test_raw_os_open_is_flagged(repo_with, ddev):
+    # The interface exposes os_open; the dotted form must be caught too, not
+    # only the `from os import open` form.
+    repo_with('bad', RAW_OS_OPEN)
+    result = ddev('validate', 'os-interface', 'bad')
+    assert result.exit_code == 1, result.output
+    assert 'os.open' in result.output
