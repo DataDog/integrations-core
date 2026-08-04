@@ -193,8 +193,11 @@ class ExecutionScreen(TogoScreen):
             self.togo_app.execution_status = ExecutionStatus.IDLE
 
     def action_copy_or_cancel_run(self) -> None:
-        if not self.copy_selection():
-            self.action_back()
+        if self.copy_selection():
+            return
+        if not self.togo_app.execution_status.is_active:
+            return
+        self.action_back()
 
     def action_show_outcome(self) -> None:
         if self._outcome is not None:

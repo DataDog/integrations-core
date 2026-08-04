@@ -1894,6 +1894,30 @@ async def test_back_pops_immediately_after_run_finishes():
         assert str(app.screen.query_one(ExecutionStatusBadge).render()) == ""
 
 
+async def test_ctrl_c_is_noop_after_run_finishes():
+    """Ctrl+C does nothing once the worker has finished — it neither cancels nor navigates away."""
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    class _FinishedDemo(OrchestratorStub):
+        failed_phase = None
+
+        async def run_async(self) -> None:
+            return
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _FinishedDemo())
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.action_copy_or_cancel_run()
+        await pilot.pause()
+
+        assert app.screen is screen
+
+
 # ---------------------------------------------------------------------------
 # ExecutionScreen: failing orchestrator does not crash the app
 # ---------------------------------------------------------------------------
