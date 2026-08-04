@@ -356,7 +356,14 @@ class OpenMetricsScraper:
         if not raw_text:
             return
 
-        for family_data in json.loads(datadog_agent.parse_prometheus_metrics(raw_text, self._content_type)):
+        # When use_latest_spec is set, force OpenMetrics parsing regardless of
+        # the Content-Type header the server returned (mirrors the old
+        # parse_metric_families property behaviour).
+        content_type = self._content_type
+        if self._use_latest_spec:
+            content_type = 'application/openmetrics-text'
+
+        for family_data in json.loads(datadog_agent.parse_prometheus_metrics(raw_text, content_type)):
             metric = _GoMetric(family_data)
             self.submit_telemetry_number_of_total_metric_samples(metric)
 
