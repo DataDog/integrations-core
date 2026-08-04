@@ -4,13 +4,7 @@
 
 [CrowdStrike Falcon Data Replicator (FDR)][1] is a paid add-on that streams raw Falcon endpoint telemetry to a CrowdStrike-managed Amazon S3 bucket, with file-availability notifications delivered over a CrowdStrike-managed Amazon SQS queue.
 
-This integration collects the following `event_simpleName` types from your FDR feed:
-
-- **ProcessRollup2**: Process execution events.
-- **NetworkConnectIP4** and **NetworkConnectIP6**: Network connection events.
-- **DnsRequest**: DNS request events.
-- **UserLogon** and **UserIdentity**: Authentication and identity events.
-- **DetectionSummaryEvent**: Falcon detection summary events.
+Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity, and Network Activity events using pre-built dashboard visualizations. See CrowdStrike's Events Data Dictionary for the full list of event types included in your FDR feed.
 
 Send these logs to Datadog to search, monitor, and visualize this endpoint telemetry through out-of-the-box dashboards.
 
@@ -58,7 +52,7 @@ Datadog validates the credentials and periodically polls the queue for new file 
 
 | Format         | Event Types                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------------ |
-| Gzipped NDJSON | ProcessRollup2, NetworkConnectIP4, NetworkConnectIP6, DnsRequest, UserLogon, UserIdentity, DetectionSummaryEvent |
+| Gzipped NDJSON | Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity, and Network Activity events. See CrowdStrike's Events Data Dictionary for the full list of event types. |
 
 ### Metrics
 
