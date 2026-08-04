@@ -114,4 +114,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
 [11]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent
-[12]: https://docs.datadoghq.com/agent/kubernetes/log/
+[12]: https://docs.datadoghq.com/containers/kubernetes/log/
