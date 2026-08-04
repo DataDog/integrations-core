@@ -70,7 +70,7 @@ ad.datadoghq.com/manager.logs: |
   ]
 ```
 
-This annotation targets the container named `manager`, which is the container name used by both the Kueue release manifests and the Helm chart. Replace `manager` with the name (`.spec.containers[i].name`) of your Kueue container if yours differs.
+This annotation targets the container named `manager`, which is the container name used by both the Kueue release manifests and the Helm chart. Replace `manager` with the name (`.spec.containers[i].name`) of your Kueue container if you use a different name.
 
 ### Validation
 
