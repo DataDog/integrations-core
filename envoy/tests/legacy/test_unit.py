@@ -22,6 +22,7 @@ from .common import (
     EXT_AUTHZ_METRICS,
     EXT_PROC_METRICS,
     FLAVOR,
+    GLOBAL_RATE_LIMIT_METRICS,
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
@@ -253,6 +254,12 @@ def test_metadata_not_collected(datadog_agent, check):
             ['stat_prefix:bar'],
         ),
         (
+            './legacy/stat_prefix_ratelimit',
+            GLOBAL_RATE_LIMIT_METRICS,
+            ['cluster_name:foo', 'envoy_cluster:foo'],
+            ['stat_prefix:bar'],
+        ),
+        (
             './legacy/stat_prefix_ext_proc',
             EXT_PROC_METRICS,
             ['stat_prefix:bar'],
@@ -273,6 +280,7 @@ def test_metadata_not_collected(datadog_agent, check):
     ],
     ids=[
         "stats_prefix_ext_authz",
+        "stats_prefix_ratelimit",
         "stats_prefix_ext_proc",
         "rbac_enforce_metrics",
         "rbac_shadow_metrics",
