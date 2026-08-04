@@ -15,6 +15,7 @@ from ddev.utils.junit import TestStatus
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async.models import WorkflowJob
     from ddev.utils.junit import JUnitReport, JUnitTestCase
 
@@ -163,8 +164,14 @@ class WorkflowStatus:
 
 @dataclass
 class TestBatch(BaseMessage):
-    """Dispatched to trigger a matrix of test jobs."""
+    """Dispatched to trigger a matrix of test jobs.
 
+    ``batch_id`` is the logical batch identity (e.g. ``batch-01``). It is assigned during planning,
+    stays stable across workflow attempts, and is distinct from ``BaseMessage.id``, which identifies
+    one message instance.
+    """
+
+    batch_id: str
     job_list: list[BatchJob]
     jobs_count: int
     integrations: list[str]
@@ -172,8 +179,13 @@ class TestBatch(BaseMessage):
 
 @dataclass
 class BatchFinished(BaseMessage):
-    """Emitted when a GitHub Actions test workflow has completed."""
+    """Emitted when a GitHub Actions test workflow has completed.
 
+    ``batch_id`` carries the logical identity of the ``TestBatch`` this run came from, letting the
+    gatherer resolve the batch in its plan.
+    """
+
+    batch_id: str
     status: Status
     run_id: int
     workflow_url: str
@@ -186,14 +198,19 @@ class BatchFinished(BaseMessage):
 class UpdatePRComment(BaseMessage):
     """Emitted per finished batch to request a PR comment update.
 
-    ``revision`` is the gatherer's monotonic counter (one per consumed ``BatchFinished``); the
-    PR-updater renders the latest and rejects stale revisions. ``done`` is ``True`` only on the
-    revision that completes the final expected batch.
+    ``revision`` is the gatherer's monotonic counter (revision ``0`` is the initial plan, then one per
+    consumed ``BatchFinished``); the PR-updater renders the latest and rejects stale revisions.
+    ``done`` is ``True`` only on the revision that completes the final expected batch.
+
+    ``progress`` is the complete immutable snapshot of the aggregate at this revision and is the only
+    payload the PR updater needs; the ``workflows`` list and its derived counters are the earlier flat
+    view, kept until the updater is migrated.
     """
 
     revision: int
     done: bool
     workflows: list[WorkflowStatus]
+    progress: DispatcherProgress
 
     @property
     def passed(self) -> int:

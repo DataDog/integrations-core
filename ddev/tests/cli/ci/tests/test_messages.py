@@ -18,6 +18,7 @@ from ddev.cli.ci.tests.messages import (
     UpdatePRComment,
     WorkflowStatus,
 )
+from ddev.cli.ci.tests.progress import DispatcherProgress
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models import WorkflowJob
 
@@ -140,6 +141,19 @@ def test_update_pr_comment_aggregates() -> None:
     b1 = _workflow("b1", 1, 4, 0, 0, [_job("postgres", Status.SUCCESS)] * 4)
     b2 = _workflow("b2", 2, 3, 1, 0, [_job("mysql", Status.FAILURE)] + [_job("disk", Status.SUCCESS)] * 3)
     b3 = _workflow("b3", 3, 3, 0, 1, [_job("consul", Status.SKIPPED)] + [_job("nginx", Status.SUCCESS)] * 3)
-    update = UpdatePRComment(id="m1", revision=3, done=True, workflows=[b1, b2, b3])
+    update = UpdatePRComment(
+        id="m1",
+        revision=3,
+        done=True,
+        workflows=[b1, b2, b3],
+        progress=DispatcherProgress(batches=(), done=True),
+    )
 
     assert (update.passed, update.failed, update.skipped, update.complete) == (10, 1, 1, 12)
+
+
+def test_update_pr_comment_carries_the_progress_snapshot() -> None:
+    progress = DispatcherProgress(batches=(), done=False)
+    update = UpdatePRComment(id="m1", revision=0, done=False, workflows=[], progress=progress)
+
+    assert update.progress is progress
