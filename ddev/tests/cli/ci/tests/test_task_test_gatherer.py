@@ -561,8 +561,7 @@ def test_initial_update_is_revision_zero_over_the_whole_plan(tmp_path: Path) -> 
     assert [batch.batch_id for batch in progress.batches] == ["b1", "b2"]
     assert all(batch.state == ExecutionState.PLANNED for batch in progress.batches)
     assert all(
-        batch.status is None and batch.run_id is None and batch.current_attempt is None
-        for batch in progress.batches
+        batch.status is None and batch.run_id is None and batch.current_attempt is None for batch in progress.batches
     )
     assert [len(batch.jobs) for batch in progress.batches] == [2, 1]
     assert all(job.attempts == () and job.latest is None for batch in progress.batches for job in batch.jobs)
@@ -687,9 +686,7 @@ def test_missing_artifact_dir_is_recorded_as_an_attempt_error(tmp_path: Path) ->
 # ---------------------------------------------------------------------------
 
 
-def _scenario_batch_job(
-    target: str, platform: Platform = Platform.LINUX, runner: str = "ubuntu-latest"
-) -> BatchJob:
+def _scenario_batch_job(target: str, platform: Platform = Platform.LINUX, runner: str = "ubuntu-latest") -> BatchJob:
     return _batch_job(target, target=target, environment="py3.12", platform=platform, runner=runner)
 
 
