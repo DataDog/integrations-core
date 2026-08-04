@@ -132,6 +132,8 @@ def make_response(
     tool_calls: list[ToolCall] | None = None,
     input_tokens: int = 10,
     output_tokens: int = 5,
+    cache_read_input_tokens: int = 0,
+    cache_creation_input_tokens: int = 0,
     context_usage: ContextUsage | None = None,
 ) -> AgentResponse:
     return AgentResponse(
@@ -141,8 +143,8 @@ def make_response(
         usage=TokenUsage(
             input_tokens=input_tokens,
             output_tokens=output_tokens,
-            cache_read_input_tokens=0,
-            cache_creation_input_tokens=0,
+            cache_read_input_tokens=cache_read_input_tokens,
+            cache_creation_input_tokens=cache_creation_input_tokens,
             context_usage=context_usage,
         ),
     )
@@ -695,14 +697,27 @@ async def test_cancelled_error_notifies_and_reraises() -> None:
 
 async def test_total_tokens_summed_across_iterations() -> None:
     responses = [
-        make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call()], input_tokens=100, output_tokens=50),
-        make_response(StopReason.END_TURN, input_tokens=200, output_tokens=80),
+        make_response(
+            StopReason.TOOL_USE,
+            tool_calls=[make_tool_call()],
+            input_tokens=100,
+            output_tokens=50,
+            cache_read_input_tokens=1_000,
+            cache_creation_input_tokens=100,
+        ),
+        make_response(
+            StopReason.END_TURN,
+            input_tokens=200,
+            output_tokens=80,
+            cache_read_input_tokens=2_000,
+            cache_creation_input_tokens=200,
+        ),
     ]
     agent = MockAgent(responses)
 
     result = await make_process(agent).start("Task")
 
-    assert result.total_input_tokens == 300
+    assert result.total_input_tokens == 3_600
     assert result.total_output_tokens == 130
     assert result.iterations == 2
 
@@ -772,9 +787,15 @@ async def test_compact_delegates_to_agent_returns_zero_when_no_op() -> None:
 
 async def test_compact_returns_tokens_when_compaction_occurs() -> None:
     agent = MockAgent([])
-    agent.compact_response = make_response(StopReason.END_TURN, input_tokens=40, output_tokens=15)
+    agent.compact_response = make_response(
+        StopReason.END_TURN,
+        input_tokens=40,
+        output_tokens=15,
+        cache_read_input_tokens=400,
+        cache_creation_input_tokens=20,
+    )
     compact_in, compact_out = await make_process(agent).compact()
-    assert compact_in == 40
+    assert compact_in == 460
     assert compact_out == 15
 
 

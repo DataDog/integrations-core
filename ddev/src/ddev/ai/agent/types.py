@@ -93,13 +93,18 @@ class ContextUsage:
 class TokenUsage:
     """Token accounting from a single API call."""
 
-    input_tokens: int  # tokens sent to the model (system_prompt + history)
+    input_tokens: int  # uncached input tokens
     output_tokens: int  # tokens the model generated
     cache_read_input_tokens: int  # tokens read from prompt cache
     cache_creation_input_tokens: int  # tokens written to prompt cache
     context_usage: ContextUsage | None = None  # None only for agents that don't provide context tracking
     web_search_requests: int = 0  # number of web search requests (billed separately from tokens)
     web_fetch_requests: int = 0  # number of web fetch requests (billed separately from tokens)
+
+    @property
+    def total_input_tokens(self) -> int:
+        """Return all input tokens processed, including prompt-cache reads and writes."""
+        return self.input_tokens + self.cache_read_input_tokens + self.cache_creation_input_tokens
 
 
 @dataclass(frozen=True)

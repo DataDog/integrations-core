@@ -276,7 +276,7 @@ class AgenticPhase(Phase):
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         response = await process.run_once(memory_prompt)
-        return response.text, response.usage.input_tokens, response.usage.output_tokens
+        return response.text, response.usage.total_input_tokens, response.usage.output_tokens
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()
