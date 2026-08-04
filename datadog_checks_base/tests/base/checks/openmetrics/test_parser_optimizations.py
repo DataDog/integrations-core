@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 import prometheus_client.parser as prom_parser
 import pytest
-from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from prometheus_client.openmetrics import parser as om_parser
 from prometheus_client.openmetrics.parser import text_string_to_metric_families as om_text_string_to_metric_families
 from prometheus_client.parser import text_string_to_metric_families as prom_text_string_to_metric_families
@@ -17,6 +16,7 @@ from datadog_checks.base.checks.openmetrics.parser_optimizations import (
     _parse_labels,
     _parse_sample,
 )
+from datadog_checks.base.stubs.datadog_agent import datadog_agent
 
 from .test_v2.utils import get_check
 
