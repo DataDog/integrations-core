@@ -161,3 +161,28 @@ def test_direct_mock_configuration_still_works():
     fake.popen.side_effect = [mock_proc := object(), object()]
     assert fake.popen(["a"]) is mock_proc
     fake.popen.assert_called()
+
+
+def test_method_names_covers_the_full_interface_surface():
+    """Guard against drift between the real interface and the stub.
+
+    A method added to OSInterface but missing here is not redirected by the
+    `mock_os_interface` fixture, so a test using the fixture would silently
+    reach the real filesystem instead of the fake.
+    """
+    from datadog_checks.base.utils.os_interface import OSInterface
+
+    real = {name for name in dir(OSInterface) if not name.startswith("_") and callable(getattr(OSInterface, name))}
+    assert set(METHOD_NAMES) == real
+
+
+def test_glob_is_backed_by_the_in_memory_filesystem():
+    fake = MockOSInterface()
+    fake.add_files({"/etc/dd/a.conf": "", "/etc/dd/b.conf": "", "/etc/dd/c.txt": ""})
+    assert sorted(fake.glob("/etc/dd/*.conf")) == ["/etc/dd/a.conf", "/etc/dd/b.conf"]
+
+
+def test_glob_returns_empty_when_nothing_matches():
+    fake = MockOSInterface()
+    fake.add_file("/etc/dd/a.conf")
+    assert fake.glob("/etc/dd/*.nope") == []

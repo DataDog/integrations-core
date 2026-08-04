@@ -28,6 +28,7 @@ one of these at both seams for the duration of a test.
 from __future__ import annotations
 
 import errno
+import fnmatch
 import io
 import os
 import subprocess
@@ -49,6 +50,7 @@ METHOD_NAMES = (
     "listdir",
     "scandir",
     "walk",
+    "glob",
     "realpath",
     "resolve_path",
     "which",
@@ -62,6 +64,7 @@ METHOD_NAMES = (
 # declarative helper (add_file/add_dir/...) has populated it.
 _FS_METHODS = (
     "open",
+    "glob",
     "exists",
     "isfile",
     "isdir",
@@ -241,6 +244,7 @@ class MockOSInterface:
         self.listdir.side_effect = self._listdir_impl
         self.scandir.side_effect = self._scandir_impl
         self.walk.side_effect = self._walk_impl
+        self.glob.side_effect = self._glob_impl
 
     def _open_impl(self, path, mode="r", *args, **kwargs):
         p = self._norm(path)
@@ -277,6 +281,21 @@ class MockOSInterface:
         for entry in list(self._files) + list(self._dirs):
             if os.path.dirname(entry) == path and entry != path:
                 yield entry
+
+    def _glob_impl(self, pathname, **kwargs):
+        # Matches against registered paths rather than the real filesystem.
+        # Unlike listdir, a pattern that matches nothing returns [] rather than
+        # raising, mirroring glob.glob.
+        pattern = self._norm(pathname)
+        candidates = set(self._files) | self._dirs | set(self._links)
+        if kwargs.get("recursive"):
+            matches = [c for c in candidates if fnmatch.fnmatch(c, pattern)]
+        else:
+            # Without recursive=True, `*` does not cross directory separators.
+            matches = [
+                c for c in candidates if fnmatch.fnmatch(c, pattern) and c.count(os.sep) == pattern.count(os.sep)
+            ]
+        return sorted(matches)
 
     def _listdir_impl(self, path="."):
         p = self._norm(path)
