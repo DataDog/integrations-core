@@ -1,0 +1,1 @@
+Gracefully skip collection when a replica set node is not in a readable (primary/secondary) state instead of reporting the check as CRITICAL.
