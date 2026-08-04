@@ -34,12 +34,9 @@ Follow the instructions below to enable and configure this check for an Agent.
 
 #### Containerized
 
-For containerized environments, choose one of the following Autodiscovery configurations for each Operator workload:
+For containerized environments, refer to the [Autodiscovery Integration Templates][3] for guidance on applying these instructions. Here's an example of how to configure this on the different Operator manifests using pod annotations:
 
 ##### Cluster Operator:
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
-
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -75,42 +72,10 @@ spec:
         - name: strimzi-cluster-operator
 ...
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
-
-Target the Cluster Operator Deployment shown in the annotation example:
-
-```yaml
-apiVersion: datadoghq.com/v1alpha1
-kind: DatadogInstrumentation
-metadata:
-  name: <CR_NAME>
-  namespace: <WORKLOAD_NAMESPACE>
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: strimzi-cluster-operator
-  config:
-    checks:
-      - integration: strimzi
-        containerName: strimzi-cluster-operator
-        initConfig: {}
-        instances:
-          - cluster_operator_endpoint: "http://%%host%%:8080/metrics"
-```
-
-For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 **Note**: The template used for this example can be found [here][13].
 
 
 ##### Topic and User Operators:
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
-
 ```yaml
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
@@ -147,50 +112,13 @@ spec:
               } 
 ...
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
-
-The Topic and User Operators run in the same Entity Operator Deployment:
-
-```yaml
-apiVersion: datadoghq.com/v1alpha1
-kind: DatadogInstrumentation
-metadata:
-  name: <CR_NAME>
-  namespace: <WORKLOAD_NAMESPACE>
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: my-cluster-entity-operator
-  config:
-    checks:
-      - integration: strimzi
-        containerName: topic-operator
-        initConfig: {}
-        instances:
-          - topic_operator_endpoint: "http://%%host%%:8080/metrics"
-      - integration: strimzi
-        containerName: user-operator
-        initConfig: {}
-        instances:
-          - user_operator_endpoint: "http://%%host%%:8081/metrics"
-```
-
-For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 **Note**: The template used as for this example can be found [here][14].
 
 See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
 
 #### Kafka and Zookeeper
 
-The Kafka and Zookeeper components of Strimzi can be monitored using the [Kafka][11], [Kafka Consumer][17] and [Zookeeper][12] checks. Kafka metrics are collected through JMX. For more information on enabling JMX, see the [Strimzi documentation on JMX options][15]. Choose one of the following Autodiscovery configurations for each component:
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
-
+The Kafka and Zookeeper components of Strimzi can be monitored using the [Kafka][11], [Kafka Consumer][17] and [Zookeeper][12] checks. Kafka metrics are collected through JMX. For more information on enabling JMX, see the [Strimzi documentation on JMX options][15]. Here's an example of how to configure the Kafka, Kafka Consumer and Zookeeper checks using Pod annotations:
 ```yaml
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
@@ -261,64 +189,6 @@ spec:
                 }
               } 
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
-
-Create one resource per target workload. These resources mirror the annotation configurations:
-
-```yaml
-apiVersion: datadoghq.com/v1alpha1
-kind: DatadogInstrumentation
-metadata:
-  name: kafka-instrumentation
-  namespace: <WORKLOAD_NAMESPACE>
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: StatefulSet
-    name: my-cluster-kafka
-  config:
-    checks:
-      - integration: kafka
-        containerName: kafka
-        initConfig:
-          is_jmx: true
-          collect_default_metrics: true
-          new_gc_metrics: true
-        instances:
-          - host: "%%host%%"
-            port: "9999"
-      - integration: kafka_consumer
-        containerName: kafka
-        initConfig: {}
-        instances:
-          - kafka_connect_str: "%%host%%:9092"
-            monitor_unlisted_consumer_groups: "true"
----
-apiVersion: datadoghq.com/v1alpha1
-kind: DatadogInstrumentation
-metadata:
-  name: zookeeper-instrumentation
-  namespace: <WORKLOAD_NAMESPACE>
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: StatefulSet
-    name: my-cluster-zookeeper
-  config:
-    checks:
-      - integration: zk
-        containerName: zookeeper
-        initConfig: {}
-        instances:
-          - host: "%%host%%"
-            port: "2181"
-```
-
-For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 **Note**: The template used for this example can be found [here][14].
 
 #### Log collection
@@ -380,4 +250,3 @@ Additional helpful documentation, links, and articles:
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
 [18]: https://www.datadoghq.com/blog/container-native-integrations/#messaging-and-streaming-with-strimzi
-[19]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
