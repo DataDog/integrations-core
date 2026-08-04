@@ -244,3 +244,64 @@ def test_waiver_separated_by_blank_line_does_not_apply(repo_with, ddev):
     repo_with('bad', WAIVER_SEPARATED_BY_BLANK_LINE)
     result = ddev('validate', 'os-interface', 'bad')
     assert result.exit_code == 1, result.output
+
+
+FROM_IMPORT_EVASION = """\
+from os import scandir
+from os.path import exists
+
+from datadog_checks.base import AgentCheck
+
+
+class MyCheck(AgentCheck):
+    def check(self, _):
+        if exists(self.instance['path']):
+            for entry in scandir(self.instance['path']):
+                print(entry)
+"""
+
+ALIASED_IMPORT_EVASION = """\
+from subprocess import run as run_cmd
+
+from datadog_checks.base import AgentCheck
+
+
+class MyCheck(AgentCheck):
+    def check(self, _):
+        run_cmd([self.instance['binary']])
+"""
+
+UNRELATED_FROM_IMPORT = """\
+from os import environ
+from os.path import basename, join
+
+from datadog_checks.base import AgentCheck
+
+
+class MyCheck(AgentCheck):
+    def check(self, _):
+        return join(basename(environ['HOME']), 'x')
+"""
+
+
+def test_from_imported_functions_are_flagged(repo_with, ddev):
+    # `from os import scandir` evades dotted-name matching.
+    repo_with('bad', FROM_IMPORT_EVASION)
+    result = ddev('validate', 'os-interface', 'bad')
+    assert result.exit_code == 1, result.output
+    assert 'scandir' in result.output
+    assert 'exists' in result.output
+
+
+def test_aliased_imports_are_flagged(repo_with, ddev):
+    repo_with('bad', ALIASED_IMPORT_EVASION)
+    result = ddev('validate', 'os-interface', 'bad')
+    assert result.exit_code == 1, result.output
+    assert 'run' in result.output
+
+
+def test_unrelated_from_imports_are_not_flagged(repo_with, ddev):
+    # join/basename/environ do no I/O and must not be reported.
+    repo_with('ok', UNRELATED_FROM_IMPORT)
+    result = ddev('validate', 'os-interface', 'ok')
+    assert result.exit_code == 0, result.output

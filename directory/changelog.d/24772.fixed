@@ -1,0 +1,1 @@
+Route the configured directory scan through the OS interface so the traversal root is validated at the point of use. No change in behavior.

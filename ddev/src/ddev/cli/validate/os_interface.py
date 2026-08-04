@@ -64,6 +64,31 @@ MEDIATED_CALLS = frozenset(
 
 CHECK_BASE_NAMES = frozenset({'AgentCheck', 'OpenMetricsBaseCheck', 'OpenMetricsBaseCheckV2'})
 
+# Modules whose members are mediated, and the members that matter. A
+# `from os import scandir` binds a bare name that dotted matching cannot see, so
+# these imports are tracked and their local names (including aliases) resolved
+# back to the dotted form.
+MEDIATED_MEMBERS = {
+    'os': {'listdir', 'scandir', 'walk', 'remove', 'unlink', 'rename', 'system', 'open'},
+    'os.path': {'exists', 'isfile', 'isdir', 'islink', 'getsize', 'realpath'},
+    'subprocess': {'run', 'Popen', 'call', 'check_output', 'check_call'},
+    'shutil': {'copy', 'which'},
+    'glob': {'glob'},
+}
+
+
+def _imported_aliases(tree: ast.Module) -> dict[str, str]:
+    """Map locally bound names to the dotted mediated call they refer to."""
+    aliases = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom) or node.module not in MEDIATED_MEMBERS:
+            continue
+        members = MEDIATED_MEMBERS[node.module]
+        for imported in node.names:
+            if imported.name in members:
+                aliases[imported.asname or imported.name] = f'{node.module}.{imported.name}'
+    return aliases
+
 
 def _dotted_name(node: ast.AST) -> str | None:
     """Render an attribute/name chain such as `os.path.exists` as a string."""
@@ -127,18 +152,29 @@ def validate_file(path: str) -> list[str]:
 
     errors = []
     check_module = _defines_check_class(tree)
+    aliases = _imported_aliases(tree)
 
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
 
         target = node.func
-        if isinstance(target, ast.Name) and target.id == 'open':
+        if isinstance(target, ast.Name) and target.id == 'open' and 'open' not in aliases:
             if not waived(node.lineno):
                 errors.append(
                     f'{path}:{node.lineno}: uses `open(` directly; route it through '
                     f'`self.os_interface.open` so config-derived paths are validated. If the path '
                     f'cannot come from config, add an inline `# {WAIVER}` comment.'
+                )
+            continue
+
+        # A bare name bound by `from os import scandir` refers to the same call.
+        if isinstance(target, ast.Name) and target.id in aliases:
+            if not waived(node.lineno):
+                errors.append(
+                    f'{path}:{node.lineno}: uses `{aliases[target.id]}` directly (imported as '
+                    f'`{target.id}`); route it through `self.os_interface` so config-derived paths are '
+                    f'validated. If the path cannot come from config, add an inline `# {WAIVER}` comment.'
                 )
             continue
 

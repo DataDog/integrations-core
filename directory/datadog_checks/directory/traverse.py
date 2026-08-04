@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from os import scandir
-
-
-def walk(top, onerror=None, followlinks=False):
+def walk(osx, top, onerror=None, followlinks=False):
     """A simplified and modified version of stdlib's `os.walk` that yields the
     `os.DirEntry` objects that `scandir` produces during traversal instead of paths as
     strings.
+
+    `osx` is the check-bound OS interface. It is required rather than defaulting to the
+    module-level singleton because the root of the traversal is config-derived.
     """
     # This implementation is based on https://github.com/python/cpython/blob/3.8/Lib/os.py#L280.
 
@@ -30,7 +30,7 @@ def walk(top, onerror=None, followlinks=False):
     nondirs = []
 
     try:
-        scandir_iter = scandir(top)
+        scandir_iter = osx.scandir(top)
     except OSError as error:
         if onerror is not None:
             onerror(error)
@@ -62,5 +62,5 @@ def walk(top, onerror=None, followlinks=False):
     yield top, dirs, nondirs
 
     for dir_entry in dirs:
-        for entry in walk(dir_entry.path, onerror, followlinks):
+        for entry in walk(osx, dir_entry.path, onerror, followlinks):
             yield entry
