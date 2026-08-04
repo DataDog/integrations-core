@@ -111,7 +111,10 @@ def test_os_open_raw_fd_roundtrip(osx, tmp_path):
         os.write(fd, b"z")
     finally:
         os.close(fd)
-    assert stat.S_IMODE(os.stat(p).st_mode) == 0o600
+    if os.name != 'nt':
+        # Windows does not implement POSIX mode bits; only the read-only flag is
+        # honored, so the value would not round-trip.
+        assert stat.S_IMODE(os.stat(p).st_mode) == 0o600
     assert p.read_bytes() == b"z"
 
 
@@ -796,26 +799,31 @@ def test_excluded_check_bypasses_enforcement(tmp_path):
 # PATH) before the allowlist check. Otherwise `sudo`/`gunicorn`/`lsid` realpath
 # against the CWD and every check that uses a bare name breaks under enforcement.
 # --------------------------------------------------------------------------- #
+def _make_tool(bindir, name):
+    """Create an executable that `shutil.which` can find on this platform."""
+    # Windows resolves bare names through PATHEXT, so a suffix-less file is invisible.
+    tool = bindir / (f"{name}.bat" if os.name == 'nt' else name)
+    tool.write_text("#!/bin/sh\n")
+    tool.chmod(0o755)
+    return tool
+
+
 def test_bare_command_name_resolved_via_path_and_allowed(tmp_path, monkeypatch):
     bindir = tmp_path / "bin"
     bindir.mkdir()
-    tool = bindir / "mytool"
-    tool.write_text("#!/bin/sh\n")
-    tool.chmod(0o755)
+    _make_tool(bindir, "mytool")
     monkeypatch.setenv("PATH", str(bindir))
 
     sec = _sec(mode='enforce', allowlist=[str(bindir)])
     v = TrustedProviderValidator(sec)
-    # Bare name resolves to <bindir>/mytool, which is allowlisted.
+    # Bare name resolves under <bindir>, which is allowlisted.
     assert v.check_exec(["mytool", "--flag"]) is None
 
 
 def test_bare_command_name_resolved_via_path_and_denied(tmp_path, monkeypatch):
     bindir = tmp_path / "bin"
     bindir.mkdir()
-    tool = bindir / "mytool"
-    tool.write_text("#!/bin/sh\n")
-    tool.chmod(0o755)
+    _make_tool(bindir, "mytool")
     monkeypatch.setenv("PATH", str(bindir))
 
     other = tmp_path / "allowed_only"
@@ -842,13 +850,12 @@ def test_path_arguments_are_not_path_resolved(tmp_path):
         v.check_path("relative_file.txt", "r")
 
 
+@pytest.mark.skipif(os.name == 'nt', reason='sudo is a POSIX concept')
 def test_sudo_wrapped_bare_name_is_resolved(tmp_path, monkeypatch):
     bindir = tmp_path / "bin"
     bindir.mkdir()
     for name in ("sudo", "mytool"):
-        p = bindir / name
-        p.write_text("#!/bin/sh\n")
-        p.chmod(0o755)
+        _make_tool(bindir, name)
     monkeypatch.setenv("PATH", str(bindir))
     sec = _sec(mode='enforce', allowlist=[str(bindir)])
     v = TrustedProviderValidator(sec)
