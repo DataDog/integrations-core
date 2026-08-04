@@ -79,6 +79,14 @@ This rule concerns the single-leading-underscore convention. It does not apply t
 
 Extract duplicated logic when it represents the same concept and a shared helper improves clarity or consistency. Do not introduce an abstraction merely because two small code blocks look similar.
 
+### Filesystem and Subprocess Access
+
+Use `self.os_interface` instead of calling `open`, `os`, `shutil`, `glob`, or `subprocess` directly, so paths that come from configuration are validated at the point of use. A module-level helper that performs such access should take the interface as a required parameter and be called with `self.os_interface`.
+
+Do not use the module-level `os_interface` singleton in code that touches a config-derived path. It is bound to a no-op validator, so substituting it preserves behavior and passes every test while enforcing nothing, which is harder to notice than an obvious bypass. `ddev validate os-interface` enforces both rules; waive a genuinely non-config path with an inline `# SKIP_OS_INTERFACE_VALIDATION` comment stating why.
+
+See [OS Interface](docs/developer/base/os-interface.md) for the available operations, the enforcement modes, and the `mock_os_interface` test fixture.
+
 ## Configuration Models
 
 **Applicable to:** `**/config_models/*.py`, `*/assets/configuration/spec.yaml`.
