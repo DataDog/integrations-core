@@ -18,6 +18,7 @@ validations = [
     "metadata",
     "models",
     "openmetrics",
+    "os-interface",
     "package",
     "readmes",
     "saved-views",
