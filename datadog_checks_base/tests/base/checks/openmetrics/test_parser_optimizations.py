@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import prometheus_client.parser as prom_parser
 import pytest
+from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from prometheus_client.openmetrics import parser as om_parser
 from prometheus_client.openmetrics.parser import text_string_to_metric_families as om_text_string_to_metric_families
 from prometheus_client.parser import text_string_to_metric_families as prom_text_string_to_metric_families
@@ -246,6 +247,7 @@ class TestPatchPrometheusClientFlag:
     """Tests for the agent-level patch_prometheus_client config flag."""
 
     def teardown_method(self):
+        datadog_agent._config.pop('patch_prometheus_client', None)
         parser_optimizations.apply()
 
     def test_default_applies_patch(self, dd_run_check, mock_http_response):
@@ -257,17 +259,16 @@ class TestPatchPrometheusClientFlag:
 
     def test_agent_config_true_applies_patch(self, dd_run_check, mock_http_response):
         mock_http_response(MOCK_PAYLOAD)
-        with patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=True):
-            check = get_check({'metrics': ['.+']})
-            dd_run_check(check)
+        datadog_agent._config['patch_prometheus_client'] = True
+        check = get_check({'metrics': ['.+']})
+        dd_run_check(check)
 
         assert prom_parser._parse_sample is _parse_sample
 
     def test_agent_config_false_restores_original(self):
         original = parser_optimizations._original_prom_parse_sample
-
-        with patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=False):
-            parser_optimizations.init_from_agent_config()
+        datadog_agent._config['patch_prometheus_client'] = False
+        parser_optimizations.init_from_agent_config()
 
         assert prom_parser._parse_sample is original
         assert prom_parser._parse_sample is not _parse_sample
