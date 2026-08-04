@@ -61,6 +61,9 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
+    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.other', 'resource:example.com/fpga')
+    assert 'resource:nvidia.com/gpu' not in _get_metric_tags(aggregator, 'kueue.cluster_queue.resource_usage.gpu')
+
     for metric, tags in EXPECTED_METRIC_TAGS.items():
         for tag in tags:
             aggregator.assert_metric_has_tag(metric, tag)

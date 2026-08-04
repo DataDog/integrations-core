@@ -110,7 +110,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                     )
                     cached_transformers[metric_name] = native_transformer
 
-                resource_tags = [tag for tag in tags if tag != f'resource:{resource}']
+                resource_tags = tags
+                if resource_name != OTHER_RESOURCE_NAME:
+                    resource_tags = [tag for tag in tags if tag != f'resource:{resource}']
                 resource_tags = self.rename_local_queue_tag(resource_tags)
                 native_transformer(metric, [(sample, resource_tags, hostname)], runtime_data)
 
