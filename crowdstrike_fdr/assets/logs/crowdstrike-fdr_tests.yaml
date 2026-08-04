@@ -769,7 +769,7 @@ tests:
         "AssociatedFile" : "/webhook",
         "cid" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       }
-    status: "warning"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1680759530000
