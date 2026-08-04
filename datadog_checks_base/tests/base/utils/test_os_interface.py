@@ -1112,3 +1112,21 @@ def test_violation_suppression_is_announced(tmp_path):
         osx.exists(f'/tmp/evil/{i}.txt')
     messages = [str(c) for c in log.warning.call_args_list]
     assert any('suppress' in m for m in messages), "hitting the cap must be visible in the log"
+
+
+def test_agent_without_the_config_key_defaults_to_off_silently(datadog_agent):
+    """An older Agent returns '' for an unknown config key.
+
+    That must resolve to `off` without emitting an unknown-mode warning, since
+    the Agent-side key ships separately from this code.
+    """
+    from datadog_checks.base import AgentCheck
+
+    assert datadog_agent.get_config('integration_path_enforcement_mode') == ''
+    check = AgentCheck('c', {}, [{}])
+    assert check.security_config.path_enforcement_mode == 'off'
+
+    log = mock.MagicMock()
+    validator = TrustedProviderValidator(check.security_config, log=log)
+    validator.check_path('/anything', 'r')
+    assert not log.warning.called, "a missing Agent key must not look like a misconfiguration"

@@ -106,6 +106,10 @@ enforcing at every call site across every integration.
 | `log` | The policy is evaluated and violations are logged, but the operation proceeds. Use this to assess a fleet before anything starts failing. |
 | `enforce` | Violations raise `PermissionError`. |
 
+The Agent-side configuration key ships separately from this code. An Agent that does not define it yet
+reports an empty value, which resolves to `off` without any warning, so the layer is inert until the key
+exists and an operator sets it.
+
 An unrecognized mode is treated as `off` and logged, so a typo cannot enforce unexpectedly or break a check.
 Enforcement additionally requires field validation to be enabled, and it never applies to a trusted provider
 or to a check listed in the excluded-checks setting.
