@@ -95,16 +95,23 @@ class TrustedProviderValidator:
     def __init__(self, security: SecurityConfig, log: "logging.Logger | None" = None):
         self._security = security
         self._log = log or LOGGER
+        self._reported_bad_modes: set = set()
+        self._reported_violations: set = set()
 
     def _mode(self) -> str:
         mode = self._security.path_enforcement_mode
         if mode not in ENFORCEMENT_MODES:
-            self._log.warning(
-                "Unknown path enforcement mode %r; treating as %r. Valid modes: %s",
-                mode,
-                ENFORCEMENT_OFF,
-                ', '.join(ENFORCEMENT_MODES),
-            )
+            # Report each bad value once. Checks run on a schedule and perform
+            # many operations per run, so warning per operation would flood the
+            # Agent log over a single configuration mistake.
+            if mode not in self._reported_bad_modes:
+                self._reported_bad_modes.add(mode)
+                self._log.warning(
+                    "Unknown path enforcement mode %r; treating as %r. Valid modes: %s",
+                    mode,
+                    ENFORCEMENT_OFF,
+                    ', '.join(ENFORCEMENT_MODES),
+                )
             return ENFORCEMENT_OFF
         return mode
 
@@ -124,7 +131,12 @@ class TrustedProviderValidator:
         message = f"{kind} '{target}' is not allowed from untrusted provider '{self._security.provider}'"
         if mode == ENFORCEMENT_ENFORCE:
             raise PermissionError(message)
-        # log mode: surface what enforcement *would* do, then allow.
+        # log mode: surface what enforcement *would* do, then allow. Each distinct
+        # violation is reported once; a check repeats the same operations on every
+        # scheduled run, and repeating the line adds no information.
+        if (kind, target) in self._reported_violations:
+            return
+        self._reported_violations.add((kind, target))
         self._log.warning("%s; would be denied if path_enforcement_mode were %r", message, ENFORCEMENT_ENFORCE)
 
     def check_path(self, path: StrPath, mode: str) -> None:

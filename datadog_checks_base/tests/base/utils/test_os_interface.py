@@ -1045,3 +1045,40 @@ def test_resolve_path_still_resolves(osx, tmp_path):
     # does not. Callers that need the resolved form keep using resolve_path.
     p = tmp_path / 'x'
     assert osx.resolve_path(str(p)) == os.path.realpath(str(p))
+
+
+def test_unknown_mode_warns_once_not_per_operation(tmp_path):
+    """A misconfigured mode must not log once per file operation.
+
+    Checks run on a schedule and perform many operations per run, so warning
+    every time would flood the Agent log with a single configuration mistake.
+    """
+    sec = _sec(mode='enfroce', allowlist=[str(tmp_path)])
+    log = mock.MagicMock()
+    osx = OSInterface(TrustedProviderValidator(sec, log=log))
+    for _ in range(25):
+        osx.exists(str(tmp_path / 'x'))
+    assert log.warning.call_count == 1
+
+
+def test_log_mode_reports_each_violation_once(tmp_path):
+    """Dry-run reporting must not repeat per operation or per check run.
+
+    The diagnostic value is knowing which paths would be denied; repeating the
+    same line on every scheduled run would drown the log.
+    """
+    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
+    log = mock.MagicMock()
+    osx = OSInterface(TrustedProviderValidator(sec, log=log))
+    for _ in range(10):
+        osx.exists('/tmp/evil/a.txt')
+    assert log.warning.call_count == 1
+
+
+def test_log_mode_reports_distinct_violations_separately(tmp_path):
+    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
+    log = mock.MagicMock()
+    osx = OSInterface(TrustedProviderValidator(sec, log=log))
+    osx.exists('/tmp/evil/a.txt')
+    osx.exists('/tmp/evil/b.txt')
+    assert log.warning.call_count == 2
