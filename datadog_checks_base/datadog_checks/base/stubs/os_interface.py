@@ -31,6 +31,7 @@ import errno
 import fnmatch
 import io
 import os
+import re
 import subprocess
 from unittest import mock
 
@@ -283,20 +284,39 @@ class MockOSInterface:
             if os.path.dirname(entry) == path and entry != path:
                 yield entry
 
+    @staticmethod
+    def _glob_regex(pattern: str, recursive: bool):
+        """Translate a glob pattern to a regex over the in-memory key space.
+
+        Segments are translated individually so that `*` and `?` cannot cross a
+        separator, matching glob. With `recursive`, a `**` segment matches zero
+        or more segments, which is why `/a/**/*.conf` also matches `/a/x.conf`.
+        Separators are always `/` here: the store is keyed by the paths callers
+        registered, so platform separators must not enter the comparison.
+        """
+        parts = []
+        for segment in pattern.split("/"):
+            if recursive and segment == "**":
+                parts.append("(?:[^/]+/)*")
+            else:
+                # fnmatch.translate wraps in (?s:...)\Z; take the body only.
+                body = fnmatch.translate(segment)
+                body = body[len("(?s:") : -len(")\\Z")]
+                parts.append(body.replace(".*", "[^/]*").replace("(?s:", "(?:") + "/")
+        joined = "".join(parts)
+        if joined.endswith("/"):
+            joined = joined[:-1]
+        # A `**/` segment already carries its own trailing separator.
+        joined = joined.replace("(?:[^/]+/)*/", "(?:[^/]+/)*")
+        return re.compile(f"(?s:{joined})\\Z")
+
     def _glob_impl(self, pathname, **kwargs):
-        # Matches against registered paths rather than the real filesystem.
-        # Unlike listdir, a pattern that matches nothing returns [] rather than
-        # raising, mirroring glob.glob.
+        # Matches registered paths rather than the real filesystem. Unlike
+        # listdir, a pattern matching nothing returns [] rather than raising.
         pattern = self._norm(pathname)
+        matcher = self._glob_regex(pattern, bool(kwargs.get("recursive")))
         candidates = set(self._files) | self._dirs | set(self._links)
-        if kwargs.get("recursive"):
-            matches = [c for c in candidates if fnmatch.fnmatch(c, pattern)]
-        else:
-            # Without recursive=True, `*` does not cross directory separators.
-            matches = [
-                c for c in candidates if fnmatch.fnmatch(c, pattern) and c.count(os.sep) == pattern.count(os.sep)
-            ]
-        return sorted(matches)
+        return sorted(c for c in candidates if matcher.match(c))
 
     def _listdir_impl(self, path="."):
         p = self._norm(path)
@@ -319,13 +339,17 @@ class MockOSInterface:
 
         def visit(current):
             children = sorted(self._children(current))
-            dirnames = [os.path.basename(c) for c in children if c in self._dirs]
+            # Recurse on the registered child keys rather than re-joining names:
+            # os.path.join emits a backslash on Windows, which would no longer
+            # match the keys the caller registered with forward slashes.
+            child_dirs = [c for c in children if c in self._dirs]
+            dirnames = [os.path.basename(c) for c in child_dirs]
             filenames = [os.path.basename(c) for c in children if c in self._files]
             entry = (current, dirnames, filenames)
             if topdown:
                 results.append(entry)
-            for name in dirnames:
-                visit(os.path.join(current, name))
+            for child in child_dirs:
+                visit(child)
             if not topdown:
                 results.append(entry)
 

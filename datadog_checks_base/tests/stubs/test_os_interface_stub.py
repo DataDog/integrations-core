@@ -186,3 +186,28 @@ def test_glob_returns_empty_when_nothing_matches():
     fake = MockOSInterface()
     fake.add_file("/etc/dd/a.conf")
     assert fake.glob("/etc/dd/*.nope") == []
+
+
+def test_walk_yields_the_registered_paths_verbatim():
+    """Traversal must not re-join child paths.
+
+    Re-joining with os.path.join emits a backslash on Windows while the
+    registered keys use forward slashes, so the yielded dirpath stops matching
+    the key the test registered.
+    """
+    fake = MockOSInterface()
+    fake.add_file("/root/sub/deep/c.txt", "")
+    dirpaths = [dirpath for dirpath, _, _ in fake.walk("/root")]
+    assert dirpaths == ["/root", "/root/sub", "/root/sub/deep"]
+    assert all("\\" not in p for p in dirpaths)
+
+
+def test_glob_depth_is_separator_agnostic():
+    """`*` must not cross a separator regardless of the platform's os.sep."""
+    fake = MockOSInterface()
+    fake.add_files({"/etc/dd/a.conf": "", "/etc/dd/sub/b.conf": ""})
+    assert fake.glob("/etc/dd/*.conf") == ["/etc/dd/a.conf"]
+    assert sorted(fake.glob("/etc/dd/**/*.conf", recursive=True)) == [
+        "/etc/dd/a.conf",
+        "/etc/dd/sub/b.conf",
+    ]
