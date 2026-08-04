@@ -75,6 +75,7 @@ tests:
       TokenTypeValue: "PRIMARY"
       WindowFlags: "384"
       aid: "ffffffff3a5a424fa02450da53619745"
+      aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       event_platform: "Win"
       event_platform_value: "Windows"
@@ -92,43 +93,43 @@ tests:
         id: "S-1-5-18"
     message: |-
       {
-        "AuthenticationId" : "999",
-        "CommandLine" : "D:\\projects\\splunk-forwarder\\bin\\splunk-powershell.exe --ps2",
-        "ConfigBuild" : "1007.3.0011603.1",
-        "ConfigStateHash" : "3765958535",
-        "EffectiveTransmissionClass" : "3",
-        "Entitlements" : "15",
-        "ImageFileName" : "\\Device\\HarddiskVolume2\\projects\\splunk-forwarder\\bin\\splunk-powershell.exe",
-        "ImageSubsystem" : "3",
-        "IntegrityLevel" : "16384",
-        "MD5HashData" : "571391f723a439e985a2064337e2802a",
-        "ParentAuthenticationId" : "999",
-        "ParentBaseFileName" : "splunkd.exe",
-        "ParentProcessId" : "17346335177",
         "ProcessCreateFlags" : "67634688",
-        "ProcessEndTime" : "",
-        "ProcessParameterFlags" : "24577",
-        "ProcessStartTime" : "1604855099.406",
-        "ProcessSxsFlags" : "64",
-        "RawProcessId" : "6116",
-        "SHA1HashData" : "0000000000000000000000000000000000000000",
-        "SHA256HashData" : "7f326aad0ee45bfef93daede5597d70422d472084ae3295762654fb5021a8720",
-        "SessionId" : "0",
+        "IntegrityLevel" : "16384",
+        "ParentProcessId" : "17346335177",
         "SourceProcessId" : "17346335177",
-        "SourceThreadId" : "107650023406",
-        "Tags" : "27, 151, 12094627905582, 12094627906234",
-        "TargetProcessId" : "583707537390",
-        "TokenType" : "1",
-        "UserSid" : "S-1-5-18",
-        "WindowFlags" : "384",
-        "aid" : "ffffffff3a5a424fa02450da53619745",
         "aip" : "10.10.10.10",
-        "cid" : "ffffffff30a3407dae27d0503611022d",
+        "SHA1HashData" : "0000000000000000000000000000000000000000",
+        "UserSid" : "S-1-5-18",
+        "TokenType" : "1",
         "event_platform" : "Win",
-        "event_simpleName" : "ProcessRollup2",
+        "ProcessEndTime" : "",
+        "ParentBaseFileName" : "splunkd.exe",
+        "ImageSubsystem" : "3",
         "id" : "ffffffff-1111-11eb-a09e-06f79d630255",
+        "EffectiveTransmissionClass" : "3",
+        "SessionId" : "0",
+        "Tags" : "27, 151, 12094627905582, 12094627906234",
+        "timestamp" : "1604855100030",
+        "RawProcessId" : "6116",
+        "event_simpleName" : "ProcessRollup2",
+        "ConfigStateHash" : "3765958535",
+        "MD5HashData" : "571391f723a439e985a2064337e2802a",
+        "SHA256HashData" : "7f326aad0ee45bfef93daede5597d70422d472084ae3295762654fb5021a8720",
+        "ProcessSxsFlags" : "64",
+        "AuthenticationId" : "999",
+        "ConfigBuild" : "1007.3.0011603.1",
+        "WindowFlags" : "384",
+        "CommandLine" : "D:\\projects\\splunk-forwarder\\bin\\splunk-powershell.exe --ps2",
+        "ParentAuthenticationId" : "999",
+        "TargetProcessId" : "583707537390",
+        "ImageFileName" : "\\Device\\HarddiskVolume2\\projects\\splunk-forwarder\\bin\\splunk-powershell.exe",
+        "Entitlements" : "15",
+        "SourceThreadId" : "107650023406",
+        "ProcessStartTime" : "1604855099.406",
         "name" : "ProcessRollup2V17",
-        "timestamp" : "1604855100030"
+        "ProcessParameterFlags" : "24577",
+        "aid" : "ffffffff3a5a424fa02450da53619745",
+        "cid" : "ffffffff30a3407dae27d0503611022d"
       }
     tags:
      - "source:LOGS_SOURCE"
@@ -176,6 +177,7 @@ tests:
       Protocol: "6"
       ProtocolValue: "TCP"
       aid: "fffffffff000426eb99afaa2ccdcbc17"
+      aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       event_platform: "Win"
       event_platform_value: "Windows"
@@ -196,27 +198,27 @@ tests:
       timestamp: "1604855116942"
     message: |-
       {
-        "ConfigBuild" : "1007.3.0011603.1",
+        "LocalAddressIP4" : "192.168.1.10",
+        "event_simpleName" : "NetworkConnectIP4",
+        "ContextTimeStamp" : "1604855116.849",
         "ConfigStateHash" : "2602391615",
-        "ConnectionDirection" : "0",
         "ConnectionFlags" : "0",
         "ContextProcessId" : "223442259384",
-        "ContextTimeStamp" : "1604855116.849",
-        "EffectiveTransmissionClass" : "3",
-        "Entitlements" : "15",
-        "InContext" : "0",
-        "LocalAddressIP4" : "192.168.1.10",
+        "RemotePort" : "443",
+        "aip" : "10.10.10.10",
+        "ConfigBuild" : "1007.3.0011603.1",
+        "event_platform" : "Win",
         "LocalPort" : "53961",
+        "Entitlements" : "15",
+        "name" : "NetworkConnectIP4V5",
+        "id" : "ffffffff-1111-11eb-b0eb-06be7616c211",
+        "EffectiveTransmissionClass" : "3",
         "Protocol" : "6",
         "RemoteAddressIP4" : "10.20.30.40",
-        "RemotePort" : "443",
         "aid" : "fffffffff000426eb99afaa2ccdcbc17",
-        "aip" : "10.10.10.10",
+        "ConnectionDirection" : "0",
+        "InContext" : "0",
         "cid" : "ffffffff30a3407dae27d0503611022d",
-        "event_platform" : "Win",
-        "event_simpleName" : "NetworkConnectIP4",
-        "id" : "ffffffff-1111-11eb-b0eb-06be7616c211",
-        "name" : "NetworkConnectIP4V5",
         "timestamp" : "1604855116942"
       }
     tags:
@@ -266,6 +268,7 @@ tests:
       QueryStatus: "9003"
       RequestType: "28"
       aid: "31e92a267c044d57b1c1e14109079e89"
+      aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       dns:
         question:
@@ -371,6 +374,7 @@ tests:
       UserLogonFlags: "12"
       UserPrincipal: "user4@dom2"
       aid: "ffffffff8d2e4b4f9b21b40633a8d579"
+      aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       event_platform: "Win"
       event_platform_value: "Windows"
@@ -389,36 +393,36 @@ tests:
         name: "SYSTEM"
     message: |-
       {
-        "AuthenticationId" : "6580764513",
-        "AuthenticationPackage" : "Negotiate",
-        "ClientComputerName" : "-",
-        "ConfigBuild" : "1007.3.0011603.1",
-        "ConfigStateHash" : "3011122681",
-        "ContextProcessId" : "816054990879",
-        "ContextThreadId" : "52913017705957",
-        "ContextTimeStamp" : "1604855091.781",
-        "EffectiveTransmissionClass" : "2",
-        "Entitlements" : "15",
-        "LogonDomain" : "NT AUTHORITY",
-        "LogonServer" : "",
-        "LogonTime" : "1604855091.781",
-        "LogonType" : "9",
-        "PasswordLastSet" : "",
-        "RemoteAccount" : "1",
-        "UserFlags" : "0",
         "UserIsAdmin" : "0",
-        "UserLogonFlags" : "12",
-        "UserName" : "SYSTEM",
-        "UserPrincipal" : "user4@dom2",
-        "UserSid" : "S-1-5-18",
-        "aid" : "ffffffff8d2e4b4f9b21b40633a8d579",
+        "LogonTime" : "1604855091.781",
+        "ContextThreadId" : "52913017705957",
+        "LogonDomain" : "NT AUTHORITY",
         "aip" : "10.10.10.10",
-        "cid" : "ffffffff30a3407dae27d0503611022d",
+        "RemoteAccount" : "1",
+        "UserSid" : "S-1-5-18",
         "event_platform" : "Win",
-        "event_simpleName" : "UserLogon",
+        "ClientComputerName" : "-",
+        "UserFlags" : "0",
+        "LogonServer" : "",
         "id" : "ffffffff-1111-11eb-a8cf-0649c95cfa1d",
+        "EffectiveTransmissionClass" : "2",
+        "timestamp" : "1604855121077",
+        "event_simpleName" : "UserLogon",
+        "ContextTimeStamp" : "1604855091.781",
+        "ConfigStateHash" : "3011122681",
+        "UserName" : "SYSTEM",
+        "ContextProcessId" : "816054990879",
+        "LogonType" : "9",
+        "AuthenticationPackage" : "Negotiate",
+        "AuthenticationId" : "6580764513",
+        "UserPrincipal" : "user4@dom2",
+        "ConfigBuild" : "1007.3.0011603.1",
+        "PasswordLastSet" : "",
+        "Entitlements" : "15",
         "name" : "UserLogonV8",
-        "timestamp" : "1604855121077"
+        "UserLogonFlags" : "12",
+        "aid" : "ffffffff8d2e4b4f9b21b40633a8d579",
+        "cid" : "ffffffff30a3407dae27d0503611022d"
       }
     tags:
      - "source:LOGS_SOURCE"
@@ -485,6 +489,7 @@ tests:
       UserLogonFlagsValue: "NONE"
       UserPrincipal: "user7@dom4.cm"
       aid: "ffffffff73164cfa9656c4caff8a2a38"
+      aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       event_platform: "Win"
       event_platform_value: "Windows"
@@ -503,37 +508,37 @@ tests:
         name: "user7"
     message: |-
       {
-        "AuthenticationId" : "1656178821",
-        "AuthenticationPackage" : "Kerberos",
-        "ConfigBuild" : "1007.3.0011603.1",
-        "ConfigStateHash" : "3338885535",
-        "ContextProcessId" : "30254389526587",
-        "ContextThreadId" : "275230771323179",
-        "EffectiveTransmissionClass" : "2",
-        "Entitlements" : "15",
-        "LogonDomain" : "dom1",
-        "LogonId" : "1656178821",
-        "LogonServer" : "srv1",
-        "LogonTime" : "1604855211.249",
-        "LogonType" : "5",
-        "PasswordLastSet" : "1530626210.104",
-        "RemoteAccount" : "1",
-        "SessionId" : "0",
-        "UserCanonical" : "",
-        "UserFlags" : "32",
         "UserIsAdmin" : "0",
-        "UserLogonFlags" : "0",
-        "UserName" : "user7",
-        "UserPrincipal" : "user7@dom4.cm",
-        "UserSid" : "S-1-5-21-606747145-1364589140-725345543-183372",
-        "aid" : "ffffffff73164cfa9656c4caff8a2a38",
+        "LogonTime" : "1604855211.249",
+        "UserCanonical" : "",
+        "ContextThreadId" : "275230771323179",
+        "LogonDomain" : "dom1",
         "aip" : "10.10.10.10",
-        "cid" : "ffffffff30a3407dae27d0503611022d",
+        "RemoteAccount" : "1",
+        "UserSid" : "S-1-5-21-606747145-1364589140-725345543-183372",
         "event_platform" : "Win",
-        "event_simpleName" : "UserIdentity",
+        "UserFlags" : "32",
+        "LogonServer" : "srv1",
         "id" : "ffffffff-1111-11eb-86e3-02db1faa1327",
+        "EffectiveTransmissionClass" : "2",
+        "LogonId" : "1656178821",
+        "SessionId" : "0",
+        "timestamp" : "1604855212031",
+        "event_simpleName" : "UserIdentity",
+        "ConfigStateHash" : "3338885535",
+        "UserName" : "user7",
+        "ContextProcessId" : "30254389526587",
+        "LogonType" : "5",
+        "AuthenticationPackage" : "Kerberos",
+        "AuthenticationId" : "1656178821",
+        "UserPrincipal" : "user7@dom4.cm",
+        "ConfigBuild" : "1007.3.0011603.1",
+        "PasswordLastSet" : "1530626210.104",
+        "Entitlements" : "15",
         "name" : "UserIdentityV2",
-        "timestamp" : "1604855212031"
+        "UserLogonFlags" : "0",
+        "aid" : "ffffffff73164cfa9656c4caff8a2a38",
+        "cid" : "ffffffff30a3407dae27d0503611022d"
       }
     tags:
      - "source:LOGS_SOURCE"

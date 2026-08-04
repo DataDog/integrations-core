@@ -4,203 +4,13 @@ backend_only: false
 facets:
   - groups:
       - CrowdStrike FDR
-    name: Authentication Package
-    path: AuthenticationPackage
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Client Computer Name
-    path: ClientComputerName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Command Line
-    path: CommandLine
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Computer Name
-    path: ComputerName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Connection Direction
-    path: ConnectionDirectionValue
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Detect Description
-    path: DetectDescription
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Detect ID
-    path: DetectId
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Detect Name
-    path: DetectName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Falcon Host Link
-    path: FalconHostLink
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: File Name
-    path: FileName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: File Path
-    path: FilePath
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Grandparent Command Line
-    path: GrandparentCommandLine
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Grandparent Image File Name
-    path: GrandparentImageFileName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Image File Name
-    path: ImageFileName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Integrity Level
-    path: IntegrityLevelValue
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Local Address IP4
-    path: LocalAddressIP4
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Local Address IP6
-    path: LocalAddressIP6
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Logon Domain
-    path: LogonDomain
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Logon Server
-    path: LogonServer
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Logon Type
-    path: LogonTypeValue
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: MD5 Hash
-    path: MD5HashData
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: MITRE Tactic
-    path: Tactic
-    source: log
-  - groups:
-      - CrowdStrike FDR
     name: MITRE Tactic ID
     path: MitreAttack.TacticID
     source: log
   - groups:
       - CrowdStrike FDR
-    name: MITRE Technique
-    path: Technique
-    source: log
-  - groups:
-      - CrowdStrike FDR
     name: MITRE Technique ID
     path: MitreAttack.TechniqueID
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Objective
-    path: Objective
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Parent Base File Name
-    path: ParentBaseFileName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Parent Command Line
-    path: ParentCommandLine
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Parent Image File Name
-    path: ParentImageFileName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Parent Process ID
-    path: ParentProcessId
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Pattern Disposition Description
-    path: PatternDispositionDescription
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Protocol
-    path: ProtocolValue
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Responding DNS Server
-    path: RespondingDnsServer
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: SHA256 Hash
-    path: SHA256HashData
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Sensor ID
-    path: aid
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Sensor Platform
-    path: event_platform_value
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Severity Name
-    path: SeverityName
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: Target Process ID
-    path: TargetProcessId
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: User Is Admin
-    path: UserIsAdminValue
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: User Principal
-    path: UserPrincipal
     source: log
   - groups:
       - DNS
@@ -384,10 +194,10 @@ pipeline:
             query: "@evt.name:ProcessRollup2"
           name: process
         - filter:
-            query: "@evt.name:(NetworkConnectIP4 OR NetworkConnectIP6)"
+            query: "@evt.name:(NetworkConnectIP4 OR NetworkConnectIP6 OR NetworkConnectIP4Blocked OR NetworkConnectIP6Blocked OR NetworkConnectIP4DetectInfo OR NetworkConnectIP6DetectInfo)"
           name: network
         - filter:
-            query: "@evt.name:DnsRequest"
+            query: "@evt.name:(DnsRequest OR DnsRequestDetectInfo OR DNSRequestDetectInfo)"
           name: dns
         - filter:
             query: "@evt.name:(UserLogon OR UserIdentity)"
@@ -436,7 +246,7 @@ pipeline:
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: geo-ip-parser
       name: GeoIP Parser for `network.client.ip`
@@ -501,7 +311,7 @@ pipeline:
       name: Network Activity
       enabled: true
       filter:
-        query: "@evt.name:(NetworkConnectIP4 OR NetworkConnectIP6)"
+        query: "@evt.name:(NetworkConnectIP4 OR NetworkConnectIP6 OR NetworkConnectIP4Blocked OR NetworkConnectIP6Blocked OR NetworkConnectIP4DetectInfo OR NetworkConnectIP6DetectInfo)"
       processors:
         - type: attribute-remapper
           name: Map `LocalPort` to `network.client.port`
@@ -584,7 +394,7 @@ pipeline:
       name: DNS Activity
       enabled: true
       filter:
-        query: "@evt.name:DnsRequest"
+        query: "@evt.name:(DnsRequest OR DnsRequestDetectInfo OR DNSRequestDetectInfo)"
       processors:
         - type: attribute-remapper
           name: Map `DomainName` to `dns.question.name`
