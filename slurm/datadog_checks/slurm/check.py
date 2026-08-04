@@ -70,6 +70,7 @@ class ProcessPidMatch:
 class SlurmCheck(AgentCheck, ConfigMixin):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'slurm'
+    HA_SUPPORTED = True
 
     def get_slurm_command(self, cmd_name, params):
         cmd_path = self.instance.get(f'{cmd_name}_path', os.path.join(self.slurm_binaries_dir, cmd_name))
