@@ -1137,3 +1137,16 @@ def test_agent_without_the_config_key_defaults_to_off_silently(datadog_agent):
     validator = TrustedProviderValidator(check.security_config, log=log)
     validator.check_path('/anything', 'r')
     assert not log.warning.called, "a missing Agent key must not look like a misconfiguration"
+
+
+def test_exec_is_passthrough_when_enforcement_is_off(tmp_path):
+    """The default configuration must not gate executables.
+
+    This is the state every exec site ships in, so it is worth asserting
+    directly rather than inferring it from the path-side equivalent.
+    """
+    sec = _sec(allowlist=[str(tmp_path / 'nothing')])
+    assert sec.path_enforcement_mode == 'off'
+    v = TrustedProviderValidator(sec)
+    assert v.check_exec(['/usr/bin/evil', '--flag']) is None
+    assert v.check_exec(['sudo', '/usr/bin/evil']) is None
