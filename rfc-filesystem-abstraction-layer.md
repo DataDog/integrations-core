@@ -109,8 +109,10 @@ launch. The same applies to `shell=True`, where the shell is what launches and s
 strings are not parsed, so those sites count as unguarded rather than as coverage they lack.
 
 **Library handoffs are validated at the handoff.** Where a library opens a path itself, the read cannot be
-intercepted, so the path is validated at the last point the check controls. That is weaker than mediating the
-read, which is why the boundary below sits where it does.
+intercepted, so the path is validated at the last point the check controls and passed through unchanged.
+Normalizing it there would rewrite a relative path to an absolute one and change what the library receives,
+which parity forbids. Validating without mediating the read is weaker than mediation, which is why the
+boundary below sits where it does.
 
 ## Out of Scope
 

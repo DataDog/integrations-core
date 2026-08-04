@@ -53,6 +53,7 @@ METHOD_NAMES = (
     "glob",
     "realpath",
     "resolve_path",
+    "validate_path",
     "which",
     "copy",
     "run",

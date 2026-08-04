@@ -596,6 +596,7 @@ def _all_operations(osx, tmp_path):
         "walk": lambda: list(osx.walk(str(tmp_path))),
         "realpath": lambda: osx.realpath(str(src)),
         "resolve_path": lambda: osx.resolve_path(str(src)),
+        "validate_path": lambda: osx.validate_path(str(src)),
         "which": lambda: osx.which("python3"),
         "copy": lambda: osx.copy(str(src), str(tmp_path / "dst.txt")),
         "run": lambda: osx.run(noop_cmd, capture_output=True),
@@ -654,6 +655,7 @@ def test_every_path_method_can_be_denied(tmp_path):
         "walk": lambda: osx.walk(target),
         "realpath": lambda: osx.realpath(target),
         "resolve_path": lambda: osx.resolve_path(target),
+        "validate_path": lambda: osx.validate_path(target),
         "copy": lambda: osx.copy(target, str(tmp_path / "out.txt")),
     }
     for operation in path_ops.values():
@@ -931,3 +933,115 @@ def test_glob_can_be_denied(tmp_path):
     osx = OSInterface(v)
     with pytest.raises(PermissionError):
         osx.glob(pattern)
+
+
+# --------------------------------------------------------------------------- #
+# Shared TLS context builder: `tls_ca_cert`, `tls_cert` and `tls_private_key`
+# are config-derived paths handed to ssl, which opens them itself. This is the
+# path most integrations reach TLS through, so validating it covers many at once.
+# --------------------------------------------------------------------------- #
+def _tls_check(datadog_agent, tmp_path, mode, allowlist, instance):
+    from datadog_checks.base import AgentCheck
+
+    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
+    datadog_agent._config['integration_path_enforcement_mode'] = mode
+    datadog_agent._config['integration_file_paths_allowlist'] = [str(p) for p in allowlist]
+    datadog_agent._config['integration_trusted_providers'] = ['file']
+    check = AgentCheck('c', {}, [instance])
+    check.provider = 'untrusted'
+    check._AgentCheck__security_config = None
+    check._AgentCheck__os_interface = None
+    return check
+
+
+def test_tls_ca_cert_outside_allowlist_never_reaches_ssl(datadog_agent, tmp_path):
+    check = _tls_check(datadog_agent, tmp_path, 'enforce', [tmp_path / 'allowed'], {'tls_ca_cert': '/tmp/evil/ca.pem'})
+    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
+        with pytest.raises(PermissionError):
+            check.get_tls_context()
+    assert not load.called, "a disallowed CA cert must never reach ssl"
+
+
+def test_tls_client_cert_outside_allowlist_never_reaches_ssl(datadog_agent, tmp_path):
+    check = _tls_check(datadog_agent, tmp_path, 'enforce', [tmp_path / 'allowed'], {'tls_cert': '/tmp/evil/client.pem'})
+    with mock.patch('ssl.SSLContext.load_cert_chain') as load:
+        with pytest.raises(PermissionError):
+            check.get_tls_context()
+    assert not load.called, "a disallowed client cert must never reach ssl"
+
+
+def test_tls_ca_cert_inside_allowlist_is_used(datadog_agent, tmp_path):
+    allowed = tmp_path / 'allowed'
+    allowed.mkdir()
+    ca = allowed / 'ca.pem'
+    ca.write_text('')
+    check = _tls_check(datadog_agent, tmp_path, 'enforce', [allowed], {'tls_ca_cert': str(ca)})
+    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
+        check.get_tls_context()
+    assert load.called, "an allowlisted CA cert must still be used"
+
+
+def test_tls_enforcement_off_by_default(datadog_agent, tmp_path):
+    check = _tls_check(datadog_agent, tmp_path, 'off', [], {'tls_ca_cert': '/tmp/evil/ca.pem'})
+    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
+        check.get_tls_context()
+    assert load.called, "enforcement must default to off"
+
+
+def test_tls_context_refresh_still_enforces(tmp_path):
+    """refresh_tls_context rebuilds the context and must not drop the validator.
+
+    Exercised directly on the wrapper: going through AgentCheck.get_tls_context
+    would raise during construction and never reach the refresh path.
+    """
+    from datadog_checks.base.utils.tls import TlsContextWrapper
+
+    allowed = tmp_path / 'allowed'
+    allowed.mkdir()
+    ca = allowed / 'ca.pem'
+    ca.write_text('')
+    sec = _sec(mode='enforce', allowlist=[str(allowed)])
+    osx = OSInterface(TrustedProviderValidator(sec))
+
+    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
+        wrapper = TlsContextWrapper({'tls_ca_cert': str(ca)}, os_interface=osx)
+        assert load.called  # the allowlisted cert was accepted
+        load.reset_mock()
+
+        # Repoint at a disallowed path, then refresh: the rebuild must revalidate.
+        wrapper.config['tls_ca_cert'] = '/tmp/evil/ca.pem'
+        with pytest.raises(PermissionError):
+            wrapper.refresh_tls_context()
+        assert not load.called
+
+
+# --------------------------------------------------------------------------- #
+# validate_path: for library handoffs where the exact value the caller supplied
+# must be preserved. resolve_path also rewrites relative paths to absolute ones,
+# which changes what the library receives and so breaks parity.
+# --------------------------------------------------------------------------- #
+def test_validate_path_returns_the_input_unchanged(osx):
+    assert osx.validate_path('foo') == 'foo'
+    assert osx.validate_path('~/rel/../x') == '~/rel/../x'
+    assert osx.validate_path('/abs/path') == '/abs/path'
+
+
+def test_validate_path_consults_the_validator(tmp_path):
+    v = RecordingValidator()
+    osx = OSInterface(v)
+    osx.validate_path(str(tmp_path / 'x'))
+    assert v.path_calls
+
+
+def test_validate_path_can_be_denied(tmp_path):
+    target = str(tmp_path / 'x')
+    osx = OSInterface(RecordingValidator(deny_paths={target}))
+    with pytest.raises(PermissionError):
+        osx.validate_path(target)
+
+
+def test_resolve_path_still_resolves(osx, tmp_path):
+    # The two are deliberately different: resolve_path normalizes, validate_path
+    # does not. Callers that need the resolved form keep using resolve_path.
+    p = tmp_path / 'x'
+    assert osx.resolve_path(str(p)) == os.path.realpath(str(p))

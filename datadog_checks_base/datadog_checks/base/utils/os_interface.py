@@ -352,8 +352,20 @@ class OSInterface:
         return os.path.realpath(path, strict=strict)
 
     # Alias used at sites that hand a validated path to a third-party library
-    # that opens it itself (psutil, ssl, duckdb, fdb).
+    # that opens it itself (psutil, ssl, duckdb, fdb) and where the resolved
+    # form is wanted.
     resolve_path = realpath
+
+    def validate_path(self, path: StrPath, mode: str = "r") -> StrPath:
+        """Validate a path and return it unchanged, for third-party handoffs.
+
+        Use this instead of :meth:`resolve_path` when the library must receive
+        exactly what the caller supplied. ``resolve_path`` normalizes, which
+        rewrites a relative path to an absolute one and so changes the value the
+        library sees; that breaks parity with passing the raw path through.
+        """
+        self._validator.check_path(path, mode)
+        return path
 
     def which(self, cmd: str, mode: int = os.F_OK | os.X_OK, path: "str | None" = None) -> "str | None":
         self._validator.check_exec([cmd])

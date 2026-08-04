@@ -60,14 +60,14 @@ def test_disallowed_tls_key_never_reaches_fdb(enforcing_agent):
     assert not set_key.called, "a disallowed TLS key must never reach fdb"
 
 
-def test_allowlisted_cluster_file_is_resolved_and_used(enforcing_agent):
+def test_allowlisted_cluster_file_is_used_unchanged(enforcing_agent):
     cluster = enforcing_agent / "fdb.cluster"
     cluster.write_text("")
     check = _untrusted_check({'cluster_file': str(cluster)})
     with mock.patch('fdb.open') as fdb_open:
         check.construct_database()
     assert fdb_open.called
-    assert fdb_open.call_args.kwargs['cluster_file'] == str(cluster.resolve())
+    assert fdb_open.call_args.kwargs['cluster_file'] == str(cluster)
 
 
 def test_enforcement_off_by_default_allows_any_cluster_file(datadog_agent):

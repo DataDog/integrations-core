@@ -119,9 +119,9 @@ class DuckdbCheck(AgentCheck):
         # Only attempt connection if the Database file exists
         if self.os_interface.exists(self.db_name):
             try:
-                # duckdb opens the file itself, so validate and resolve the path
-                # at the handoff rather than relying on the exists() check above.
-                db_path = self.os_interface.resolve_path(self.db_name)
+                # duckdb opens the file itself, so validate the path at the handoff
+                # rather than relying on the exists() check above.
+                db_path = self.os_interface.validate_path(self.db_name)
                 # Try to establish the connection in read only mode
                 conn = duckdb.connect(db_path, read_only=True)
                 self.log.info('Connected to DuckDB database.')

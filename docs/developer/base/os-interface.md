@@ -58,7 +58,7 @@ several lines and applies to the call directly below it.
 | Reading | `open`, `os_open` |
 | Predicates | `exists`, `isfile`, `isdir`, `islink`, `getsize`, `access`, `stat` |
 | Listing | `listdir`, `scandir`, `walk`, `glob` |
-| Resolution | `realpath`, `resolve_path`, `which` |
+| Resolution | `realpath`, `resolve_path`, `validate_path`, `which` |
 | Copying | `copy` |
 | Subprocesses | `run`, `popen`, `get_subprocess_output` |
 
@@ -68,12 +68,17 @@ base helper and so preserves that helper's output decoding, empty-output handlin
 ### Paths handed to third-party libraries
 
 Some libraries open a path themselves, so the read cannot be intercepted: `ssl.SSLContext`, `psutil`,
-`duckdb.connect`, and the FoundationDB client all do this. For those, validate and resolve the path at the
-handoff, which is the last point the check controls:
+`duckdb.connect`, and the FoundationDB client all do this. For those, validate the path at the handoff, which
+is the last point the check controls:
 
 ```python
-context.load_verify_locations(cafile=self.os_interface.resolve_path(self.instance['ssl_cafile']))
+context.load_verify_locations(cafile=self.os_interface.validate_path(self.instance['ssl_cafile']))
 ```
+
+Use `validate_path` rather than `resolve_path` here. Both validate, but `resolve_path` also normalizes, which
+rewrites a relative path to an absolute one and therefore changes the value the library receives. That breaks
+parity with passing the raw path through. Reach for `resolve_path` only when you actually want the resolved
+form.
 
 ## Executables
 

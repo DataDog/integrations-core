@@ -74,16 +74,18 @@ def _load_certifi_fallback(context):
         LOGGER.error('Unexpected error loading certifi certificates: %s', e)
 
 
-def _load_ca_certs(context, config):
+def _load_ca_certs(context, config, osx):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
     ca_cert = config.get('tls_ca_cert')
 
     # Handle user-provided CA cert
     if ca_cert:
-        ca_cert = os.path.expanduser(ca_cert)
+        # ssl opens these paths itself, so the read cannot be intercepted.
+        # Validate and resolve at the handoff, the last point we control.
+        ca_cert = osx.validate_path(os.path.expanduser(ca_cert))
         try:
-            if os.path.isdir(ca_cert):
+            if osx.isdir(ca_cert):
                 context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
             else:
                 context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
@@ -117,9 +119,16 @@ def _load_ca_certs(context, config):
             )
 
 
-def create_ssl_context(config):
+def create_ssl_context(config, osx=None):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
+    # Default to an unenforcing interface so direct callers keep working; the
+    # check-bound one is threaded in from AgentCheck.get_tls_context.
+    if osx is None:
+        from datadog_checks.base.utils.os_interface import os_interface as _default_os_interface
+
+        osx = _default_os_interface
+
     context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 
     LOGGER.debug('Creating SSL context with config: %s', config)
@@ -142,16 +151,16 @@ def create_ssl_context(config):
     if context.verify_mode == ssl.CERT_NONE:
         LOGGER.debug('TLS verification is disabled; skipping CA certificate configuration.')
     else:
-        _load_ca_certs(context, config)
+        _load_ca_certs(context, config, osx)
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
     client_cert, client_key = config.get('tls_cert'), config.get('tls_private_key')
     client_key_pass = config.get('tls_private_key_password')
     try:
         if client_key:
-            client_key = os.path.expanduser(client_key)
+            client_key = osx.validate_path(os.path.expanduser(client_key))
         if client_cert:
-            client_cert = os.path.expanduser(client_cert)
+            client_cert = osx.validate_path(os.path.expanduser(client_cert))
             context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
     except FileNotFoundError:
         LOGGER.warning(
@@ -163,9 +172,9 @@ def create_ssl_context(config):
 
 
 class TlsContextWrapper(object):
-    __slots__ = ('logger', 'config', 'tls_context')
+    __slots__ = ('logger', 'config', 'tls_context', 'os_interface')
 
-    def __init__(self, instance, remapper=None, overrides=None):
+    def __init__(self, instance, remapper=None, overrides=None, os_interface=None):
         default_fields = dict(STANDARD_FIELDS)
 
         # Override existing config options if there exists any overrides
@@ -227,8 +236,11 @@ class TlsContextWrapper(object):
                 del config[unique_name]
 
         self.config = config
-        self.tls_context = create_ssl_context(self.config)
+        self.os_interface = os_interface
+        self.tls_context = create_ssl_context(self.config, self.os_interface)
 
     def refresh_tls_context(self):
         # type: () -> None
-        self.tls_context = create_ssl_context(self.config)
+        # Pass the interface through: a refresh that dropped it would rebuild the
+        # context without validating the configured certificate paths.
+        self.tls_context = create_ssl_context(self.config, self.os_interface)

@@ -77,8 +77,8 @@ def test_allowlisted_cafile_is_passed_to_ssl(enforcing_agent):
         with pytest.raises(Exception):
             check.initiate_api_connection()
     assert load.called, "an allowlisted CA file must still be used"
-    # The resolved (realpath) form is what ssl receives.
-    assert load.call_args.kwargs['cafile'] == str(cafile.resolve())
+    # The configured value is what ssl receives; validate_path does not rewrite it.
+    assert load.call_args.kwargs['cafile'] == str(cafile)
 
 
 def test_enforcement_off_by_default_allows_any_cafile(datadog_agent):

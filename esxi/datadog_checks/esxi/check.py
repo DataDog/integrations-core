@@ -85,13 +85,13 @@ class EsxiCheck(AgentCheck):
             context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
 
             # ssl opens these paths itself, so the read cannot be intercepted.
-            # Validate and resolve them here, at the handoff, which is the last
-            # point this code controls.
+            # Validate at the handoff instead, the last point this code controls.
+            # validate_path, not resolve_path: ssl must receive the configured value.
             if self.ssl_capath:
-                capath = self.os_interface.resolve_path(self.ssl_capath)
+                capath = self.os_interface.validate_path(self.ssl_capath)
                 context.load_verify_locations(cafile=None, capath=capath, cadata=None)
             elif self.ssl_cafile:
-                cafile = self.os_interface.resolve_path(self.ssl_cafile)
+                cafile = self.os_interface.validate_path(self.ssl_cafile)
                 context.load_verify_locations(cafile=cafile, capath=None, cadata=None)
             else:
                 context.load_default_certs(ssl.Purpose.SERVER_AUTH)
