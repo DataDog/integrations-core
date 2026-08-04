@@ -333,6 +333,13 @@ class TestUpdaterContract:
         assert not target_path.startswith('targets/')
         assert not target_path.startswith('wheels-signer-')
 
+    def test_updater_bootstraps_from_bundled_root(self, mock_urlopen, mock_updater_cls):
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        downloader.get_pointer(PROJECT, version=VERSION)
+
+        bootstrap = mock_updater_cls.call_args.kwargs['bootstrap']
+        assert json.loads(bootstrap)['signed']['_type'] == 'root'
+
 
 def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Make TUFPointerDownloader trust the synthetic repo's root.json instead of the bundled one."""

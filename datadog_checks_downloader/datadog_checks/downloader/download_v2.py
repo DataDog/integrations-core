@@ -64,6 +64,7 @@ class TUFPointerDownloader:
             target_base_url=f'{self._repository_url}/targets/',
             target_dir=str(target_dir),
             config=UpdaterConfig(prefix_targets_with_hash=True),
+            bootstrap=(metadata_dir / 'root.json').read_bytes(),
         )
 
     @staticmethod

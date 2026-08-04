@@ -4,10 +4,12 @@
 import urllib.error
 
 import pytest
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from tuf.api.exceptions import DownloadError
 
 from datadog_checks.downloader.cli import _v2_failure_category
-from datadog_checks.downloader.download import TUFDownloader
+from datadog_checks.downloader.download import TUFDownloader, _load_public_keys
 from datadog_checks.downloader.exceptions import TargetNotFoundError
 
 
@@ -23,6 +25,25 @@ from datadog_checks.downloader.exceptions import TargetNotFoundError
 )
 def test_v2_failure_category(exc, expected):
     assert _v2_failure_category(exc) == expected
+
+
+def test_load_public_keys_preserves_historical_key_id(tmp_path):
+    key_id = 'historical-key-id'
+    public_key = rsa.generate_private_key(public_exponent=65537, key_size=2048).public_key()
+    public_key_path = tmp_path / f'{key_id}.pub'
+    public_key_path.write_bytes(public_key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo))
+
+    public_keys = _load_public_keys([str(public_key_path)])
+
+    assert public_keys[key_id]['keyid'] == key_id
+
+
+def test_tuf_downloader_explicitly_uses_cached_root_as_bootstrap(mocker):
+    updater = mocker.patch('datadog_checks.downloader.download.Updater')
+
+    TUFDownloader()
+
+    assert updater.call_args.kwargs['bootstrap'] is None
 
 
 def test_non_official_wheel_filter(mocker):

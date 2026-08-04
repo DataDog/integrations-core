@@ -15,8 +15,7 @@ from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
 from socketserver import TCPServer
 
-from securesystemslib.keys import generate_ed25519_key
-from securesystemslib.signer import SSlibKey, SSlibSigner
+from securesystemslib.signer import CryptoSigner, Key, Signer
 from tuf.api.metadata import (
     DelegatedRole,
     Delegations,
@@ -35,13 +34,13 @@ EXPIRY = datetime(2099, 1, 1, tzinfo=timezone.utc)
 TOP_LEVEL_ROLES = ('root', 'targets', 'snapshot', 'timestamp')
 
 
-def _make_signers(role_names: tuple[str, ...]) -> tuple[dict[str, SSlibSigner], dict[str, SSlibKey]]:
-    signers: dict[str, SSlibSigner] = {}
-    public_keys: dict[str, SSlibKey] = {}
+def _make_signers(role_names: tuple[str, ...]) -> tuple[dict[str, Signer], dict[str, Key]]:
+    signers: dict[str, Signer] = {}
+    public_keys: dict[str, Key] = {}
     for role in role_names:
-        priv = generate_ed25519_key()
-        signers[role] = SSlibSigner(priv)
-        public_keys[role] = SSlibKey.from_securesystemslib_key(priv)
+        signer = CryptoSigner.generate_ed25519()
+        signers[role] = signer
+        public_keys[role] = signer.public_key
     return signers, public_keys
 
 
