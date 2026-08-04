@@ -58,7 +58,7 @@ instances:
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-### Kafka Console (Preview)
+### Kafka Console
 
 When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
 
