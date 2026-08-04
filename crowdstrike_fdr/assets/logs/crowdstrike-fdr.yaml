@@ -234,19 +234,19 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
-    # `aip` is the sensor's public egress address as observed by the CrowdStrike
-    # cloud, so it is the only routable address present on every event and the
-    # only one worth geolocating. `LocalAddressIP4`/`LocalAddressIP6` are the
-    # endpoint's private NIC addresses and are left unmapped.
     - type: attribute-remapper
-      name: Map `aip` to `network.client.ip`
+      name: Map `LocalAddressIP4`, `LocalAddressIP6`, `SourceEndpointAddressIP4`,
+        `SourceEndpointAddressIP6` to `network.client.ip`
       enabled: true
       sources:
-        - aip
+        - LocalAddressIP4
+        - LocalAddressIP6
+        - SourceEndpointAddressIP4
+        - SourceEndpointAddressIP6
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: geo-ip-parser
       name: GeoIP Parser for `network.client.ip`
@@ -444,7 +444,7 @@ pipeline:
           sourceType: attribute
           target: dns.answer.name
           targetType: attribute
-          preserveSource: true
+          preserveSource: false
           overrideOnConflict: false
     - type: pipeline
       name: Authentication Activity
