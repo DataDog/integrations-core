@@ -848,224 +848,117 @@ tests:
  -
   sample: |-
     {
-      "AgentId" : "cff45d56127743a593792fb968dac907",
-      "AggregateId" : "aggind:cff45d56127743a593792fb968dac907:42951223180",
-      "CommandLine" : "cmd  crowdstrike_test_critical",
-      "CompositeId" : "e880572ce33c42458b31e0dd368497fc:ind:cff45d56127743a593792fb968dac907:43444774922-10303-1888528",
-      "DataDomains" : "Endpoint",
-      "Description" : "A critical level detection was triggered on this process for testing purposes.",
-      "FalconHostLink" : "https://falcon.us-2.crowdstrike.com/activity-v2/detections/e880572ce33c42458b31e0dd368497fc:ind:cff45d56127743a593792fb968dac907:43444774922-10303-1888528?_cid=NTdmNWVjYzZmYzM0NDYyZTg4NGRiN2NmZjkzYzE5YWMK",
-      "FileName" : "cmd.exe",
-      "FilePath" : "\\Device\\HarddiskVolume4\\Windows\\System32\\cmd.exe",
-      "GrandParentCommandLine" : "C:\\Windows\\Explorer.EXE",
-      "GrandParentImageFileName" : "explorer.exe",
-      "GrandParentImageFilePath" : "\\Device\\HarddiskVolume4\\Windows\\explorer.exe",
-      "HostGroups" : "6b15afc3ea3a42ed810b5c163e490a9d",
-      "Hostname" : "dave-win10-3",
-      "LocalIP" : "10.0.0.13",
-      "LocalIPv6" : "",
-      "LogonDomain" : "dave-win10-3",
-      "MACAddress" : "ba-d0-00-ba-d0-00",
-      "MD5String" : "bd5bfe63bc48507039f7e3afa5b01a70",
-      "Name" : "Suspicious Activity",
-      "Objective" : "Falcon Detection Method",
-      "ParentCommandLine" : "\"C:\\Windows\\system32\\cmd.exe\" ",
-      "ParentImageFileName" : "cmd.exe",
-      "ParentImageFilePath" : "\\Device\\HarddiskVolume4\\Windows\\System32\\cmd.exe",
-      "ParentProcessId" : 43425257674,
-      "PatternDispositionDescription" : "Detection, standard detection.",
-      "PatternDispositionFlags" : {
-        "BlockingUnsupportedOrDisabled" : false,
-        "BootupSafeguardEnabled" : false,
-        "ContainmentFileSystem" : false,
-        "CriticalProcessDisabled" : false,
-        "Detect" : false,
-        "FsOperationBlocked" : false,
-        "HandleOperationDowngraded" : false,
-        "InddetMask" : false,
-        "Indicator" : false,
-        "KillActionFailed" : false,
-        "KillParent" : false,
-        "KillProcess" : false,
-        "KillSubProcess" : false,
-        "OperationBlocked" : false,
-        "PolicyDisabled" : false,
-        "ProcessBlocked" : false,
-        "QuarantineFile" : false,
-        "QuarantineMachine" : false,
-        "RegistryOperationBlocked" : false,
-        "Rooting" : false,
-        "SensorOnly" : false,
-        "SuspendParent" : false,
-        "SuspendProcess" : false
-      },
-      "PatternDispositionValue" : 0,
-      "PatternId" : 10303,
-      "PlatformId" : "0",
-      "PlatformName" : "Windows",
-      "ProcessEndTime" : 0,
-      "ProcessId" : 43444774922,
-      "ProcessStartTime" : 1752575334,
-      "SHA1String" : "0000000000000000000000000000000000000000",
-      "SHA256String" : "27c6ca0e877b6e7a9c7fb2c2e2919df8eaf7db84d82b2652e9a90c31a271db06",
-      "Severity" : 90,
-      "SeverityName" : "Critical",
-      "SourceProducts" : "Falcon Insight",
+      "Tactic" : "Custom Intelligence",
+      "CustomerIdString" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+      "EventType" : "Event_ExternalApiEvent",
+      "ParentProcessId" : "1234567890123456789",
       "SourceVendors" : "CrowdStrike",
-      "Tactic" : "Falcon Overwatch",
-      "Technique" : "Malicious Activity",
+      "AggregateId" : "aggind:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6:9876543210987654321",
+      "UTCTimestamp" : "1700000000",
+      "LogonDomain" : "",
+      "FalconHostLink" : "https://falcon.us-2.crowdstrike.com/activity-v2/detections/a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6:ind:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6:1234567890123456789-5306-9876543210987654321?_cid=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "CompositeId" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6:ind:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6:1234567890123456789-5306-9876543210987654321",
+      "Name" : "Intel Detection",
+      "SHA1String" : "0000000000000000000000000000000000000000",
+      "SourceProducts" : "Falcon Insight",
+      "ProcessEndTime" : "1700000001",
+      "IOCValue" : "example.com",
+      "PatternId" : "5306",
+      "MitreAttack" : [
+        {
+          "TacticID" : "CSTA0005",
+          "Tactic" : "Custom Intelligence",
+          "TechniqueID" : "CST0005",
+          "PatternID" : "5306",
+          "Technique" : "Indicator of Compromise"
+        }
+      ],
+      "AgentId" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+      "ParentCommandLine" : "-bash",
+      "ParentImageFilePath" : "/usr/bin/bash",
+      "DataDomains" : "Endpoint",
+      "LocalIPv6" : "",
+      "PatternDispositionFlags" : {
+        "BootupSafeguardEnabled" : "false",
+        "QuarantineFile" : "false",
+        "QuarantineMachine" : "false",
+        "HandleOperationDowngraded" : "false",
+        "Detect" : "false",
+        "RegistryOperationBlocked" : "false",
+        "KillParent" : "false",
+        "ContainmentFileSystem" : "false",
+        "Indicator" : "false",
+        "FsOperationBlocked" : "false",
+        "OperationBlocked" : "false",
+        "SuspendParent" : "false",
+        "SuspendProcess" : "false",
+        "KillProcess" : "false",
+        "ProcessBlocked" : "false",
+        "BlockingUnsupportedOrDisabled" : "false",
+        "PolicyDisabled" : "false",
+        "KillActionFailed" : "false",
+        "SensorOnly" : "false",
+        "CriticalProcessDisabled" : "false",
+        "KillSubProcess" : "false",
+        "Rooting" : "false",
+        "InddetMask" : "false"
+      },
+      "Hostname" : "test-host-01",
+      "GrandParentCommandLine" : "/usr/sbin/sshd -D -R",
+      "PatternDispositionDescription" : "Detection, standard detection.",
+      "PlatformName" : "Linux",
+      "Nonce" : "1234567890123456789",
+      "Objective" : "Falcon Detection Method",
+      "ProcessStartTime" : "1700000000",
+      "Technique" : "Indicator of Compromise",
+      "cid" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+      "eid" : "118",
+      "Description" : "A domain matched a Custom Intelligence Indicator (Custom IOC) with informational severity.",
+      "FileName" : "curl",
+      "ParentImageFileName" : "bash",
+      "HostGroups" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6,b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7",
+      "LocalIP" : "192.168.1.100",
+      "PlatformId" : "3",
+      "timestamp" : "2023-11-15T12:00:00Z",
+      "GrandParentImageFileName" : "sshd",
+      "FilePath" : "/usr/bin/curl",
+      "UserName" : "testuser",
+      "MD5String" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5",
+      "SeverityName" : "Informational",
+      "Severity" : "10",
+      "CloudIndicator" : "true",
+      "PatternDispositionValue" : "0",
+      "ExternalApiType" : "Event_EppDetectionSummaryEvent",
+      "SHA256String" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+      "NetworkAccesses" : [
+        {
+          "AccessTimestamp" : "1700000001",
+          "RemoteAddress" : "192.168.1.1",
+          "LocalAddress" : "192.168.1.100",
+          "LocalPort" : "5353",
+          "RemotePort" : "53",
+          "IsIPV6" : "false",
+          "Protocol" : "UDP",
+          "AccessType" : "0"
+        },
+        {
+          "AccessTimestamp" : "1700000001",
+          "RemoteAddress" : "192.168.1.2",
+          "LocalAddress" : "192.168.1.100",
+          "LocalPort" : "44300",
+          "RemotePort" : "443",
+          "IsIPV6" : "false",
+          "Protocol" : "TCP",
+          "AccessType" : "0"
+        }
+      ],
+      "CommandLine" : "curl https://example.com",
       "Type" : "ldt",
-      "UserName" : "win10_user3",
-      "ExternalApiType" : "Event_EppDetectionSummaryEvent"
+      "GrandParentImageFilePath" : "/usr/sbin/sshd",
+      "MACAddress" : "00-11-22-33-44-55",
+      "AgentIdString" : "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+      "IOCType" : "domain",
+      "ProcessId" : "1234567890123456789"
     }
   result:
-    custom:
-      AgentId: "cff45d56127743a593792fb968dac907"
-      AggregateId: "aggind:cff45d56127743a593792fb968dac907:42951223180"
-      CommandLine: "cmd  crowdstrike_test_critical"
-      CompositeId: "e880572ce33c42458b31e0dd368497fc:ind:cff45d56127743a593792fb968dac907:43444774922-10303-1888528"
-      DataDomains: "Endpoint"
-      Description: "A critical level detection was triggered on this process for testing purposes."
-      ExternalApiType: "Event_EppDetectionSummaryEvent"
-      FalconHostLink: "https://falcon.us-2.crowdstrike.com/activity-v2/detections/e880572ce33c42458b31e0dd368497fc:ind:cff45d56127743a593792fb968dac907:43444774922-10303-1888528?_cid=NTdmNWVjYzZmYzM0NDYyZTg4NGRiN2NmZjkzYzE5YWMK"
-      FileName: "cmd.exe"
-      FilePath: "\\Device\\HarddiskVolume4\\Windows\\System32\\cmd.exe"
-      GrandParentCommandLine: "C:\\Windows\\Explorer.EXE"
-      GrandParentImageFileName: "explorer.exe"
-      GrandParentImageFilePath: "\\Device\\HarddiskVolume4\\Windows\\explorer.exe"
-      HostGroups: "6b15afc3ea3a42ed810b5c163e490a9d"
-      Hostname: "dave-win10-3"
-      LocalIP: "10.0.0.13"
-      LocalIPv6: ""
-      LogonDomain: "dave-win10-3"
-      MACAddress: "ba-d0-00-ba-d0-00"
-      MD5HashData: "bd5bfe63bc48507039f7e3afa5b01a70"
-      Name: "Suspicious Activity"
-      Objective: "Falcon Detection Method"
-      ParentCommandLine: "\"C:\\Windows\\system32\\cmd.exe\" "
-      ParentImageFileName: "cmd.exe"
-      ParentImageFilePath: "\\Device\\HarddiskVolume4\\Windows\\System32\\cmd.exe"
-      ParentProcessId: 43425257674
-      PatternDispositionDescription: "Detection, standard detection."
-      PatternDispositionFlags:
-        BlockingUnsupportedOrDisabled: false
-        BootupSafeguardEnabled: false
-        ContainmentFileSystem: false
-        CriticalProcessDisabled: false
-        Detect: false
-        FsOperationBlocked: false
-        HandleOperationDowngraded: false
-        InddetMask: false
-        Indicator: false
-        KillActionFailed: false
-        KillParent: false
-        KillProcess: false
-        KillSubProcess: false
-        OperationBlocked: false
-        PolicyDisabled: false
-        ProcessBlocked: false
-        QuarantineFile: false
-        QuarantineMachine: false
-        RegistryOperationBlocked: false
-        Rooting: false
-        SensorOnly: false
-        SuspendParent: false
-        SuspendProcess: false
-      PatternDispositionValue: 0
-      PatternId: 10303
-      PlatformId: "0"
-      PlatformName: "Windows"
-      ProcessEndTime: 0
-      ProcessId: 43444774922
-      ProcessStartTime: 1752575334
-      SHA1String: "0000000000000000000000000000000000000000"
-      SHA256HashData: "27c6ca0e877b6e7a9c7fb2c2e2919df8eaf7db84d82b2652e9a90c31a271db06"
-      Severity: 90
-      SeverityName: "Critical"
-      SourceProducts: "Falcon Insight"
-      SourceVendors: "CrowdStrike"
-      Tactic: "Falcon Overwatch"
-      Technique: "Malicious Activity"
-      Type: "ldt"
-      evt:
-        category: "detection"
-        name: "DetectionSummaryEvent"
-      status: "Critical"
-      usr:
-        name: "win10_user3"
-    message: |-
-      {
-        "Description" : "A critical level detection was triggered on this process for testing purposes.",
-        "Tactic" : "Falcon Overwatch",
-        "FileName" : "cmd.exe",
-        "ParentProcessId" : 43425257674,
-        "AggregateId" : "aggind:cff45d56127743a593792fb968dac907:42951223180",
-        "SourceVendors" : "CrowdStrike",
-        "LogonDomain" : "dave-win10-3",
-        "CompositeId" : "e880572ce33c42458b31e0dd368497fc:ind:cff45d56127743a593792fb968dac907:43444774922-10303-1888528",
-        "FalconHostLink" : "https://falcon.us-2.crowdstrike.com/activity-v2/detections/e880572ce33c42458b31e0dd368497fc:ind:cff45d56127743a593792fb968dac907:43444774922-10303-1888528?_cid=NTdmNWVjYzZmYzM0NDYyZTg4NGRiN2NmZjkzYzE5YWMK",
-        "ParentImageFileName" : "cmd.exe",
-        "HostGroups" : "6b15afc3ea3a42ed810b5c163e490a9d",
-        "Name" : "Suspicious Activity",
-        "SHA1String" : "0000000000000000000000000000000000000000",
-        "SourceProducts" : "Falcon Insight",
-        "ProcessEndTime" : 0,
-        "PatternId" : 10303,
-        "LocalIP" : "10.0.0.13",
-        "PlatformId" : "0",
-        "AgentId" : "cff45d56127743a593792fb968dac907",
-        "ParentCommandLine" : "\"C:\\Windows\\system32\\cmd.exe\" ",
-        "GrandParentImageFileName" : "explorer.exe",
-        "FilePath" : "\\Device\\HarddiskVolume4\\Windows\\System32\\cmd.exe",
-        "ParentImageFilePath" : "\\Device\\HarddiskVolume4\\Windows\\System32\\cmd.exe",
-        "DataDomains" : "Endpoint",
-        "UserName" : "win10_user3",
-        "LocalIPv6" : "",
-        "PatternDispositionFlags" : {
-          "BootupSafeguardEnabled" : false,
-          "QuarantineFile" : false,
-          "QuarantineMachine" : false,
-          "HandleOperationDowngraded" : false,
-          "Detect" : false,
-          "RegistryOperationBlocked" : false,
-          "ContainmentFileSystem" : false,
-          "KillParent" : false,
-          "FsOperationBlocked" : false,
-          "Indicator" : false,
-          "OperationBlocked" : false,
-          "SuspendParent" : false,
-          "SuspendProcess" : false,
-          "BlockingUnsupportedOrDisabled" : false,
-          "KillProcess" : false,
-          "ProcessBlocked" : false,
-          "KillActionFailed" : false,
-          "PolicyDisabled" : false,
-          "SensorOnly" : false,
-          "CriticalProcessDisabled" : false,
-          "KillSubProcess" : false,
-          "Rooting" : false,
-          "InddetMask" : false
-        },
-        "MD5String" : "bd5bfe63bc48507039f7e3afa5b01a70",
-        "GrandParentCommandLine" : "C:\\Windows\\Explorer.EXE",
-        "Hostname" : "dave-win10-3",
-        "PatternDispositionDescription" : "Detection, standard detection.",
-        "SeverityName" : "Critical",
-        "Severity" : 90,
-        "PatternDispositionValue" : 0,
-        "SHA256String" : "27c6ca0e877b6e7a9c7fb2c2e2919df8eaf7db84d82b2652e9a90c31a271db06",
-        "ExternalApiType" : "Event_EppDetectionSummaryEvent",
-        "PlatformName" : "Windows",
-        "Objective" : "Falcon Detection Method",
-        "CommandLine" : "cmd  crowdstrike_test_critical",
-        "GrandParentImageFilePath" : "\\Device\\HarddiskVolume4\\Windows\\explorer.exe",
-        "Type" : "ldt",
-        "MACAddress" : "ba-d0-00-ba-d0-00",
-        "ProcessStartTime" : 1752575334,
-        "ProcessId" : 43444774922,
-        "Technique" : "Malicious Activity"
-      }
-    status: "critical"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1
+    custom: {}
