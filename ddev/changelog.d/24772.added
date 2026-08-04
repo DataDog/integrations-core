@@ -1,0 +1,1 @@
+Add `ddev validate os-interface`, which flags raw filesystem and subprocess calls in check code and use of the non-enforcing OS interface singleton.

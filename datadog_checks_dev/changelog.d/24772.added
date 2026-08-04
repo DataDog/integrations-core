@@ -1,0 +1,1 @@
+Add a `mock_os_interface` fixture that redirects the OS interface at both bindings, so tests do not need to know which one a check uses.

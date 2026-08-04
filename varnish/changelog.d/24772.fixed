@@ -1,0 +1,1 @@
+Route filesystem and subprocess access through the OS interface so config-derived paths are validated at the point of use. No change in behavior.

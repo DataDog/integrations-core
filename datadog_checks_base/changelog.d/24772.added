@@ -1,0 +1,1 @@
+Add an OS interface that mediates filesystem and subprocess access so config-derived paths and executables are validated at the point of use. Enforcement is off by default and controlled by the `integration_path_enforcement_mode` Agent setting.
