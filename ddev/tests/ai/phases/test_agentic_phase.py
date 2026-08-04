@@ -29,7 +29,7 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
 
-from .conftest import MockAgent, make_agent_phase, make_response
+from .helpers import MockAgent, make_agent_phase, make_goal_verdict, make_response
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -426,7 +426,7 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
             make_response("phase summary", 10, 5),
         ]
     )
-    reviewer_responses = [make_response('{"valid": true, "reason": ""}', 7, 3)]
+    reviewer_responses = [make_response(make_goal_verdict(True), 7, 3)]
 
     captured_builder_calls: list = []
 
@@ -471,8 +471,8 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
     def goal_builder(owner_id: str) -> AgentRuntime:
         agent = MockAgent(
             [
-                make_response('{"valid": false, "reason": "first miss"}', 0, 0),
-                make_response('{"valid": false, "reason": "second miss"}', 0, 0),
+                make_response(make_goal_verdict(False, "first miss"), 0, 0),
+                make_response(make_goal_verdict(False, "second miss"), 0, 0),
             ]
         )
         return AgentRuntime(agent=agent, tool_registry=ToolRegistry([]))
@@ -517,12 +517,12 @@ async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, mon
         nonlocal call_count
         call_count += 1
         if call_count == 1:
-            agent = MockAgent([make_response('{"valid": true, "reason": ""}', 0, 0)])
+            agent = MockAgent([make_response(make_goal_verdict(True), 0, 0)])
         else:
             agent = MockAgent(
                 [
-                    make_response('{"valid": false, "reason": "miss 1"}', 0, 0),
-                    make_response('{"valid": false, "reason": "miss 2"}', 0, 0),
+                    make_response(make_goal_verdict(False, "miss 1"), 0, 0),
+                    make_response(make_goal_verdict(False, "miss 2"), 0, 0),
                 ]
             )
         return AgentRuntime(agent=agent, tool_registry=ToolRegistry([]))
@@ -563,8 +563,8 @@ async def test_goal_exhaustion_tokens_captured_on_phase(flow_dir, monkeypatch, m
         return AgentRuntime(
             agent=MockAgent(
                 [
-                    make_response('{"valid": false, "reason": "miss 1"}', 8, 4),
-                    make_response('{"valid": false, "reason": "miss 2"}', 8, 4),
+                    make_response(make_goal_verdict(False, "miss 1"), 8, 4),
+                    make_response(make_goal_verdict(False, "miss 2"), 8, 4),
                 ]
             ),
             tool_registry=ToolRegistry([]),

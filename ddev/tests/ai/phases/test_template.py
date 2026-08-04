@@ -6,7 +6,7 @@ import pytest
 
 from ddev.ai.phases.template import _SafeMapping, render_inline
 
-from .conftest import resolve_key
+from .helpers import resolve_key
 
 # ---------------------------------------------------------------------------
 # _SafeMapping
