@@ -1,1 +1,1 @@
-Use SHA-256 instead of MD5 for vSphere alarm events for FIPS compatibility.
+Use SHA-256 instead of MD5 for vSphere alarm events.
