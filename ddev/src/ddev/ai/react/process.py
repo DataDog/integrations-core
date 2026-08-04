@@ -72,7 +72,7 @@ class ReActProcess:
         Args:
             response: The last agent response. If None, compaction is unconditional.
 
-        Returns (input_tokens, output_tokens) from the compaction API call.
+        Returns (total_input_tokens, output_tokens) from the compaction API call.
         Returns (0, 0) if history was already compact and no API call was made.
         """
         await self._callbacks.fire_before_compact(self._scope)
