@@ -119,10 +119,14 @@ class Marathon(AgentCheck):
             r.raise_for_status()
         except HTTPTimeoutError:
             # If there's a timeout
+            # options['timeout'] is a bare number unless read_timeout or connect_timeout is configured.
+            configured_timeout = self.http.options['timeout']
+            if isinstance(configured_timeout, tuple):
+                configured_timeout = configured_timeout[0]
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} timed out after {} seconds.".format(url, self.http.options['timeout'][0]),
+                message="{} timed out after {} seconds.".format(url, configured_timeout),
                 tags=["url:{}".format(url)] + tags,
             )
             raise Exception("Timeout when hitting {}".format(url))

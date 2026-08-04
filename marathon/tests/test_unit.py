@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPReadTimeoutError
 from datadog_checks.marathon import Marathon
 
 from .common import INSTANCE_INTEGRATION
@@ -109,3 +110,24 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
 
     for key, value in expected_http_kwargs.items():
         assert check.http.options[key] == value
+
+
+def test_get_json_timeout_emits_critical_service_check(aggregator, mock_http):
+    """
+    A timeout must still submit marathon.can_connect. With neither read_timeout nor
+    connect_timeout configured, __init__ stores a bare number in options['timeout'],
+    so the timeout arm must not assume a (connect, read) tuple.
+    """
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    # Precondition: without the guard below the test would exercise the tuple path only.
+    assert not isinstance(check.http.options['timeout'], tuple)
+
+    mock_http.get.side_effect = HTTPReadTimeoutError('read timed out')
+
+    url = 'http://localhost:8080/v2/apps'
+    with pytest.raises(Exception, match='Timeout when hitting'):
+        check.get_json(url, None, [])
+
+    aggregator.assert_service_check(
+        'marathon.can_connect', status=Marathon.CRITICAL, tags=['url:{}'.format(url)], count=1
+    )
