@@ -44,6 +44,7 @@ def dd_environment():
             metadata = {
                 'agent_type': 'kubernetes',
                 'kubernetes': {
+                    'auto_conf': os.path.join(HERE, '..', 'datadog_checks', 'linkerd', 'data', 'auto_conf.yaml'),
                     'kubeconfig': kubeconfig,
                 },
             }
