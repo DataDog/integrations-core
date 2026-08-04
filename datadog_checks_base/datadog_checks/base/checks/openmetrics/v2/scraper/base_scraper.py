@@ -233,10 +233,7 @@ class OpenMetricsScraper:
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
-        if is_affirmative(config.get('patch_prometheus_client', True)):
-            parser_optimizations.apply()
-        else:
-            parser_optimizations.unapply()
+        parser_optimizations.init_from_agent_config()
 
         # Used for monotonic counts
         self.flush_first_value = None

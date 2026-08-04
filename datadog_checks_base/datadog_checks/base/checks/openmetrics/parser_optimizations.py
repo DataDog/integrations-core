@@ -308,4 +308,19 @@ def unapply():
         _om_parser._parse_sample = _original_om_parse_sample
 
 
-apply()
+def init_from_agent_config():
+    from datadog_checks.base.agent import datadog_agent
+    from datadog_checks.base.config import is_affirmative
+
+    try:
+        val = datadog_agent.get_config('patch_prometheus_client')
+    except Exception:
+        val = ''
+
+    if val is None or val == '':
+        # Not set — default to patched (fast path).
+        apply()
+    elif is_affirmative(val):
+        apply()
+    else:
+        unapply()

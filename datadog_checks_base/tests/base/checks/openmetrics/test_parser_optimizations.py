@@ -243,7 +243,7 @@ MOCK_PAYLOAD = '# HELP test_gauge A gauge.\n# TYPE test_gauge gauge\ntest_gauge 
 
 
 class TestPatchPrometheusClientFlag:
-    """Tests for the patch_prometheus_client config flag on the v2 scraper."""
+    """Tests for the agent-level patch_prometheus_client config flag."""
 
     def teardown_method(self):
         parser_optimizations.apply()
@@ -255,19 +255,19 @@ class TestPatchPrometheusClientFlag:
 
         assert prom_parser._parse_sample is _parse_sample
 
-    def test_flag_true_applies_patch(self, dd_run_check, mock_http_response):
+    def test_agent_config_true_applies_patch(self, dd_run_check, mock_http_response):
         mock_http_response(MOCK_PAYLOAD)
-        check = get_check({'metrics': ['.+'], 'patch_prometheus_client': True})
-        dd_run_check(check)
+        with patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=True):
+            check = get_check({'metrics': ['.+']})
+            dd_run_check(check)
 
         assert prom_parser._parse_sample is _parse_sample
 
-    def test_flag_false_restores_original(self, dd_run_check, mock_http_response):
+    def test_agent_config_false_restores_original(self):
         original = parser_optimizations._original_prom_parse_sample
 
-        mock_http_response(MOCK_PAYLOAD)
-        check = get_check({'metrics': ['.+'], 'patch_prometheus_client': False})
-        dd_run_check(check)
+        with patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=False):
+            parser_optimizations.init_from_agent_config()
 
         assert prom_parser._parse_sample is original
         assert prom_parser._parse_sample is not _parse_sample
