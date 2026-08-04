@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import subprocess
 from unittest import mock
 
@@ -211,3 +212,50 @@ def test_glob_depth_is_separator_agnostic():
         "/etc/dd/a.conf",
         "/etc/dd/sub/b.conf",
     ]
+
+
+@pytest.fixture
+def windows_path_semantics(monkeypatch):
+    """Make os.path behave as it does on Windows, on any host.
+
+    The double is keyed by the paths callers register, which use forward
+    slashes. Two Windows-only defects came from letting the platform separator
+    into that key space, and neither was reproducible on POSIX. Simulating
+    ntpath keeps that regression covered without a Windows runner.
+    """
+    import ntpath
+
+    monkeypatch.setattr(os, 'path', ntpath)
+    monkeypatch.setattr(os, 'sep', '\\')
+    monkeypatch.setattr(os, 'altsep', '/')
+
+
+def test_walk_under_windows_path_semantics(windows_path_semantics):
+    fake = MockOSInterface()
+    fake.add_file("/root/a.txt", "")
+    fake.add_file("/root/sub/b.txt", "")
+    fake.add_file("/root/sub/deep/c.txt", "")
+
+    walked = {d: (sorted(dirs), sorted(files)) for d, dirs, files in fake.walk("/root")}
+    assert sorted(walked) == ["/root", "/root/sub", "/root/sub/deep"]
+    assert walked["/root"] == (["sub"], ["a.txt"])
+    assert walked["/root/sub"] == (["deep"], ["b.txt"])
+
+
+def test_glob_under_windows_path_semantics(windows_path_semantics):
+    fake = MockOSInterface()
+    fake.add_files({"/etc/dd/a.conf": "", "/etc/dd/sub/b.conf": "", "/etc/dd/c.txt": ""})
+    assert fake.glob("/etc/dd/*.conf") == ["/etc/dd/a.conf"]
+    assert sorted(fake.glob("/etc/dd/**/*.conf", recursive=True)) == [
+        "/etc/dd/a.conf",
+        "/etc/dd/sub/b.conf",
+    ]
+
+
+def test_listing_under_windows_path_semantics(windows_path_semantics):
+    fake = MockOSInterface()
+    fake.add_file("/root/a.txt", "")
+    fake.add_file("/root/sub/b.txt", "")
+    assert fake.listdir("/root") == ["a.txt", "sub"]
+    with fake.scandir("/root") as entries:
+        assert sorted(e.name for e in entries) == ["a.txt", "sub"]
