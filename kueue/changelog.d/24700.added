@@ -1,0 +1,2 @@
+Add support for Kueue log collection.
+Collect the cumulative ``kueue.finished_workloads.count`` counter.

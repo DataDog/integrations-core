@@ -96,6 +96,14 @@ def instance_parts_and_merges():
     )
 
 
+def instance_collect_pending_async_inserts():
+    return instance.CollectPendingAsyncInserts(
+        enabled=False,
+        collection_interval=10,
+        max_samples_per_collection=1000,
+    )
+
+
 def instance_collect_async_inserts():
     return instance.CollectAsyncInserts(
         enabled=False,
