@@ -76,7 +76,8 @@ def test_check(check, aggregator, mocker):
 
 
 def test__get_tls_object(check, mocker):
-    os_mock = mocker.patch("datadog_checks.openldap.openldap.os")
+    isfile_mock = mocker.patch.object(check.os_interface, "isfile")
+    isdir_mock = mocker.patch.object(check.os_interface, "isdir")
     ldap3_tls_mock = mocker.patch("datadog_checks.openldap.openldap.ldap3.core.tls.Tls")
     ssl_mock = mocker.patch("datadog_checks.openldap.openldap.ssl")
 
@@ -85,8 +86,8 @@ def test__get_tls_object(check, mocker):
 
     # Check emission of warning, ssl validation none, and ca_certs_file
     ssl_params = {"key": None, "cert": None, "ca_certs": "foo", "verify": False}
-    os_mock.path.isdir.return_value = False
-    os_mock.path.isfile.return_value = True
+    isdir_mock.return_value = False
+    isfile_mock.return_value = True
     log_mock = mocker.MagicMock()
     check.log = log_mock
     check._get_tls_object(ssl_params)
@@ -115,8 +116,8 @@ def test__get_tls_object(check, mocker):
     )
 
     # Check ca_certs_path
-    os_mock.path.isdir.return_value = True
-    os_mock.path.isfile.return_value = False
+    isdir_mock.return_value = True
+    isfile_mock.return_value = False
     ldap3_tls_mock.reset_mock()
     ssl_params = {"key": "foo", "cert": "bar", "ca_certs": "foo", "verify": True}
     check._get_tls_object(ssl_params)
@@ -130,8 +131,8 @@ def test__get_tls_object(check, mocker):
 
     # Check exception when invalid ca_certs_path
     with pytest.raises(CheckException):
-        os_mock.path.isdir.return_value = False
-        os_mock.path.isfile.return_value = False
+        isdir_mock.return_value = False
+        isfile_mock.return_value = False
         ssl_params = {"key": "foo", "cert": "bar", "ca_certs": "foo", "verify": True}
         check._get_tls_object(ssl_params)
 

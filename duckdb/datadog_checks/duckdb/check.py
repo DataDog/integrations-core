@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-import os
 import re
 import time
 from contextlib import closing, contextmanager
@@ -118,10 +117,13 @@ class DuckdbCheck(AgentCheck):
     def connect(self):
         conn = None
         # Only attempt connection if the Database file exists
-        if os.path.exists(self.db_name):
+        if self.os_interface.exists(self.db_name):
             try:
+                # duckdb opens the file itself, so validate and resolve the path
+                # at the handoff rather than relying on the exists() check above.
+                db_path = self.os_interface.resolve_path(self.db_name)
                 # Try to establish the connection in read only mode
-                conn = duckdb.connect(self.db_name, read_only=True)
+                conn = duckdb.connect(db_path, read_only=True)
                 self.log.info('Connected to DuckDB database.')
                 yield conn
             except Exception as e:

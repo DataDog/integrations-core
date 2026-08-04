@@ -8,6 +8,8 @@ from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequen
 
 import yaml
 
+from datadog_checks.base.utils.os_interface import os_interface
+
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_types import (
@@ -75,11 +77,11 @@ def _resolve_definition_file(definition_file):
         return definition_file
 
     definition_conf_file = os.path.join(_get_profiles_confd_user_root(), definition_file)
-    if os.path.isfile(definition_conf_file):
+    if os_interface.isfile(definition_conf_file):
         return definition_conf_file
 
     definition_conf_file = os.path.join(_get_profiles_confd_default_root(), definition_file)
-    if os.path.isfile(definition_conf_file):
+    if os_interface.isfile(definition_conf_file):
         return definition_conf_file
 
     return os.path.join(_get_profiles_site_root(), definition_file)
@@ -89,7 +91,7 @@ def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
     definition_file = _resolve_definition_file(definition_file)
 
-    with open(definition_file) as f:
+    with os_interface.open(definition_file) as f:
         return yaml.safe_load(f)
 
 
@@ -124,10 +126,10 @@ def _iter_default_profile_file_paths():
     paths = [_get_profiles_confd_user_root(), _get_profiles_confd_default_root(), _get_profiles_site_root()]
 
     for path in paths:
-        if not os.path.isdir(path):
+        if not os_interface.isdir(path):
             continue
 
-        for filename in os.listdir(path):
+        for filename in os_interface.listdir(path):
             base, ext = os.path.splitext(filename)
             if ext != '.yaml':
                 continue

@@ -321,8 +321,9 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics, 
 def test_get_devices_label():
     c = Disk('disk', {}, [{}])
 
-    with mock.patch(
-        "datadog_checks.disk.disk.get_subprocess_output",
+    with mock.patch.object(
+        c.os_interface,
+        "get_subprocess_output",
         return_value=mock_blkid_output(),
         __name__='get_subprocess_output',
     ):
@@ -366,8 +367,9 @@ def test_get_devices_label_from_lsblk():
     """
     c = Disk('disk', {}, [{}])
 
-    with mock.patch(
-        "datadog_checks.disk.disk.get_subprocess_output",
+    with mock.patch.object(
+        c.os_interface,
+        "get_subprocess_output",
         return_value=mock_lsblk_output(),
         __name__='get_subprocess_output',
     ):

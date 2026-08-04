@@ -9,7 +9,6 @@ http://gunicorn.org/
 """
 
 import re
-import subprocess
 import time
 
 import psutil
@@ -17,14 +16,18 @@ import psutil
 from datadog_checks.base import AgentCheck
 
 
-def get_gunicorn_version(cmd):
+def get_gunicorn_version(osx, cmd):
     """
     Adapter around a subprocess call to gunicorn.
+
+    `osx` is required rather than defaulted to the module-level singleton: the
+    binary comes from the `gunicorn` config option, so it must go through the
+    check-bound, validator-enforcing interface.
     """
     # Splitting cmd by whitespace is "Good Enough"(tm):
     # - shex.split is not available on Windows
     # - passing shell=True exposes us to shell injection vulnerabilities since we get cmd from user config
-    res = subprocess.run(cmd.split(), capture_output=True, text=True)
+    res = osx.run(cmd.split(), capture_output=True, text=True)
     return res.stdout, res.stderr, res.returncode
 
 
@@ -179,7 +182,7 @@ class GUnicornCheck(AgentCheck):
         """Get version from `gunicorn --version`"""
         cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
-            pc_out, pc_err, _ = get_gunicorn_version(cmd)
+            pc_out, pc_err, _ = get_gunicorn_version(self.os_interface, cmd)
         except OSError:
             self.log.debug("Error collecting gunicorn version.")
             return None

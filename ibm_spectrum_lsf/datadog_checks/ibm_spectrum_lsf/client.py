@@ -1,9 +1,8 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import subprocess
-
 from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.utils.os_interface import os_interface
 
 
 class LSFClient:
@@ -13,7 +12,7 @@ class LSFClient:
     def _run_command(self, *command: str) -> tuple[str, str, int]:
         self.log.debug("Running command: %s", command)
         try:
-            result = subprocess.run(command, timeout=5, capture_output=True, text=True)
+            result = os_interface.run(command, timeout=5, capture_output=True, text=True)
             self.log.trace("Command output: %s", result.stdout)
             return result.stdout, result.stderr, result.returncode
         except Exception as e:

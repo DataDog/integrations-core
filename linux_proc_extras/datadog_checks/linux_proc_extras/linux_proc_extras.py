@@ -6,7 +6,6 @@
 from collections import defaultdict
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 try:
     import datadog_agent
@@ -55,13 +54,13 @@ class MoreUnixCheck(AgentCheck):
             self.proc_path_map[key] = "{procfs}/{path}".format(procfs=proc_location, path=path)
 
     def get_inode_info(self):
-        with open(self.proc_path_map['inode_info'], 'r') as inode_info:
+        with self.os_interface.open(self.proc_path_map['inode_info'], 'r') as inode_info:
             inode_stats = inode_info.readline().split()
             self.gauge('system.inodes.total', float(inode_stats[0]), tags=self.tags)
             self.gauge('system.inodes.used', float(inode_stats[1]), tags=self.tags)
 
     def get_stat_info(self):
-        with open(self.proc_path_map['stat_info'], 'r') as stat_info:
+        with self.os_interface.open(self.proc_path_map['stat_info'], 'r') as stat_info:
             lines = [line.strip() for line in stat_info.readlines()]
             for line in lines:
                 if line.startswith('ctxt'):
@@ -75,14 +74,14 @@ class MoreUnixCheck(AgentCheck):
                     self.monotonic_count('system.linux.interrupts', interrupts, tags=self.tags)
 
     def get_entropy_info(self):
-        with open(self.proc_path_map['entropy_info'], 'r') as entropy_info:
+        with self.os_interface.open(self.proc_path_map['entropy_info'], 'r') as entropy_info:
             entropy = entropy_info.readline()
             self.gauge('system.entropy.available', float(entropy), tags=self.tags)
 
     def get_process_states(self):
         state_counts = defaultdict(int)
         prio_counts = defaultdict(int)
-        ps = get_subprocess_output(['ps', '--no-header', '-eo', 'stat'], self.log)
+        ps = self.os_interface.get_subprocess_output(['ps', '--no-header', '-eo', 'stat'], self.log)
         for state in ps[0]:
             # Each process state is a flag in a list of characters. See ps(1) for details.
             for _ in list(state):
@@ -102,7 +101,7 @@ class MoreUnixCheck(AgentCheck):
             self.gauge('system.processes.priorities', float(prio_counts[prio]), prio_tags)
 
     def get_interrupts_info(self):
-        with open(self.proc_path_map['interrupts_info'], 'r') as interrupts_info:
+        with self.os_interface.open(self.proc_path_map['interrupts_info'], 'r') as interrupts_info:
             lines = [line.strip() for line in interrupts_info.readlines()]
             cpu_count = len(lines[0].split())
             for line in lines[1:]:

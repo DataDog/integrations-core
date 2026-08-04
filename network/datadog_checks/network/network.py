@@ -7,7 +7,6 @@ Collects network metrics.
 """
 
 import re
-import shutil
 import socket
 
 import psutil
@@ -23,8 +22,10 @@ except ImportError:
     fcntl = None
 
 
-def find_executable(name):
-    return shutil.which(name)
+def find_executable(osx, name):
+    # `osx` is required rather than defaulting to the module-level singleton so
+    # that enforcement applies to the resolved executable.
+    return osx.which(name)
 
 
 class Network(AgentCheck):
@@ -295,7 +296,7 @@ class Network(AgentCheck):
 
         if proc_location != "/proc":
             # If we have `ss`, we're fine with a non-standard `/proc` location
-            if find_executable("ss") is None:
+            if find_executable(self.os_interface, "ss") is None:
                 self.warning(
                     "Cannot collect connection state: `ss` cannot be found and currently with a custom /proc path: %s",
                     proc_location,

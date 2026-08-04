@@ -11,7 +11,6 @@ import simplejson as json
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class Ceph(AgentCheck):
@@ -47,6 +46,9 @@ class Ceph(AgentCheck):
     def _collect_raw(self, ceph_cmd, ceph_cluster, instance):
         use_sudo = _is_affirmative(instance.get('use_sudo', False))
         if use_sudo:
+            # SKIP_OS_INTERFACE_VALIDATION: fixed literal probe with no config input,
+            # and it needs a shell for the redirect. The config-derived ceph_cmd below
+            # does go through the interface.
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
                 raise CheckException('The dd-agent user does not have sudo access')
@@ -61,7 +63,7 @@ class Ceph(AgentCheck):
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
-                output, _, _ = get_subprocess_output(args.split(), self.log)
+                output, _, _ = self.os_interface.get_subprocess_output(args.split(), self.log)
                 res = json.loads(output)
             except Exception as e:
                 self.log.warning('Unable to parse data from cmd=%s: %s', cmd, e)

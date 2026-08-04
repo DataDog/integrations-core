@@ -63,7 +63,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         return self._subprocess
 
     def _create_connection_subprocess(self):
-        self._subprocess = subprocess.Popen(
+        self._subprocess = self.os_interface.popen(
             [
                 sys.executable,
                 "-c",

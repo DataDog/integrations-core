@@ -590,7 +590,7 @@ class PostgreSql(DatabaseCheck):
 
     def _get_local_wal_file_age(self):
         wal_log_dir = os.path.join(self._config.data_directory, "pg_xlog")
-        if not os.path.isdir(wal_log_dir):
+        if not self.os_interface.isdir(wal_log_dir):
             self.log.warning(
                 "Cannot access WAL log directory: %s. Ensure that you are "
                 "running the agent on your local postgres database.",
@@ -598,8 +598,8 @@ class PostgreSql(DatabaseCheck):
             )
             return None
 
-        all_dir_contents = os.listdir(wal_log_dir)
-        all_files = [f for f in all_dir_contents if os.path.isfile(os.path.join(wal_log_dir, f))]
+        all_dir_contents = self.os_interface.listdir(wal_log_dir)
+        all_files = [f for f in all_dir_contents if self.os_interface.isfile(os.path.join(wal_log_dir, f))]
 
         # files extensions that are not valid WAL files
         exluded_file_exts = [".backup", ".history"]

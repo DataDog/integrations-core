@@ -1,10 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
-
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
@@ -19,10 +16,10 @@ class NfsStatCheck(AgentCheck):
             self.nfs_cmd = init_config['nfsiostat_path'].split() + ['1', '2']
         else:
             # if not, check if it's installed in the opt dir, if so use that
-            if os.path.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):
+            if self.os_interface.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):
                 self.nfs_cmd = ['/opt/datadog-agent/embedded/sbin/nfsiostat', '1', '2']
             # if not, then check if it is in the default place
-            elif os.path.exists('/usr/local/sbin/nfsiostat'):
+            elif self.os_interface.exists('/usr/local/sbin/nfsiostat'):
                 self.nfs_cmd = ['/usr/local/sbin/nfsiostat', '1', '2']
             else:
                 raise Exception(
@@ -35,7 +32,7 @@ class NfsStatCheck(AgentCheck):
         )
 
     def check(self, instance):
-        stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
+        stat_out, err, _ = self.os_interface.get_subprocess_output(self.nfs_cmd, self.log)
         all_devices = []
         this_device = []
         custom_tags = instance.get("tags", [])
