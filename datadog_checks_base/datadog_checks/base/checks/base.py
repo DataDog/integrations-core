@@ -391,6 +391,7 @@ class AgentCheck(object):
         self.__formatted_tags = None
         self.__logs_enabled = None
         self.__security_config = None
+        self.__os_interface = None
         self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
@@ -511,9 +512,31 @@ class AgentCheck(object):
                 if trusted_providers is not None
                 else list(validation.security.DEFAULT_TRUSTED_PROVIDERS),
                 excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
+                # Separate switch from ignore_untrusted_file_params so that enabling
+                # config-field validation does not also switch on point-of-use
+                # enforcement everywhere at once. See utils/os_interface.py.
+                path_enforcement_mode=(
+                    datadog_agent.get_config('integration_path_enforcement_mode') or validation.security.ENFORCEMENT_OFF
+                ),
             )
 
         return self.__security_config
+
+    @property
+    def os_interface(self):
+        """Validated filesystem/subprocess interface bound to this check's security config.
+
+        Config-derived paths and executables passed through this interface are
+        checked against the trusted-provider policy at the point of use. When
+        enforcement is disabled (the default), behavior is byte-identical to the
+        stdlib calls it replaces.
+        """
+        if self.__os_interface is None:
+            from datadog_checks.base.utils.os_interface import OSInterface, TrustedProviderValidator
+
+            self.__os_interface = OSInterface(TrustedProviderValidator(self.security_config, log=self.log))
+
+        return self.__os_interface
 
     @property
     def formatted_tags(self):

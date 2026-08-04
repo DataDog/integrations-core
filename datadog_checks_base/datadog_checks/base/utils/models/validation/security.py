@@ -8,6 +8,15 @@ from dataclasses import dataclass, field
 
 DEFAULT_TRUSTED_PROVIDERS: tuple[str, ...] = ('file', 'remote-config')
 
+# Point-of-use path/exec enforcement modes, independent of config-field validation.
+#   off     - evaluate nothing; byte-identical passthrough (default)
+#   log     - evaluate and report violations, but allow the operation (dry run)
+#   enforce - evaluate and raise PermissionError on violation
+ENFORCEMENT_OFF = 'off'
+ENFORCEMENT_LOG = 'log'
+ENFORCEMENT_ENFORCE = 'enforce'
+ENFORCEMENT_MODES: tuple[str, ...] = (ENFORCEMENT_OFF, ENFORCEMENT_LOG, ENFORCEMENT_ENFORCE)
+
 
 @dataclass
 class SecurityConfig:
@@ -19,6 +28,12 @@ class SecurityConfig:
     file_paths_allowlist: list[str] = field(default_factory=list)
     trusted_providers: list[str] = field(default_factory=lambda: list(DEFAULT_TRUSTED_PROVIDERS))
     excluded_checks: list[str] = field(default_factory=list)
+
+    # Governs point-of-use enforcement only (see OSInterface). Deliberately
+    # separate from ignore_untrusted_file_params so that enabling config-field
+    # validation does not simultaneously switch on enforcement at every migrated
+    # call site across every integration.
+    path_enforcement_mode: str = ENFORCEMENT_OFF
 
     def is_enabled(self) -> bool:
         """Return whether file path security enforcement is enabled."""
