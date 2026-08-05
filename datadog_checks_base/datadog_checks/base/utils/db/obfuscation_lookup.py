@@ -5,8 +5,9 @@ from __future__ import annotations
 
 import logging
 from collections import OrderedDict
-from collections.abc import Hashable
+from collections.abc import Callable, Hashable
 from dataclasses import dataclass
+from enum import Enum, auto
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
@@ -249,3 +250,128 @@ class ObfuscationLookup[K: Hashable]:
     def _trim_ignored(self):
         while len(self._ignored_keys) > self._maxsize:
             self._ignored_keys.popitem(last=False)
+
+
+class TextDisposition(Enum):
+    """What :func:`resolve_obfuscations` should do with a statement text the caller inspected."""
+
+    CACHE = auto()
+    """Obfuscate the text and keep the result. The normal outcome."""
+
+    IGNORE = auto()
+    """Negative-cache the key so its text is never fetched again while the key exists.
+
+    For statements that are an artifact of monitoring rather than application traffic, such as
+    queries the Agent tags with ``/* DDIGNORE */`` or the ``EXPLAIN`` statements MySQL's plan
+    collection leaves in the digest table.
+    """
+
+    SKIP = auto()
+    """Leave the key a miss so the next collection fetches it again.
+
+    For text that says nothing about the statement itself, such as the
+    ``<insufficient privilege>`` placeholder Postgres returns to a role that may later be granted
+    access.
+    """
+
+
+@dataclass(frozen=True, slots=True)
+class ResolveStats:
+    hits: int
+    """Keys served from the cache, needing neither a fetch nor obfuscation."""
+    misses: int
+    """Keys whose text had to be fetched."""
+    fetched: int
+    """Texts the fetch returned. Lower than ``misses`` when a key vanished between snapshot and
+    fetch."""
+    ignored: int
+    """Keys added to the negative cache, whether rejected by the caller or by the obfuscator."""
+    failed: int
+    """Keys whose text could not be obfuscated."""
+
+
+@dataclass(frozen=True, slots=True)
+class ResolveResult[K: Hashable]:
+    results: dict[K, ObfuscationResult]
+    stats: ResolveStats
+
+
+def resolve_obfuscations[K: Hashable](
+    lookup: ObfuscationLookup[K],
+    changed_keys: set[K],
+    vanished_keys: set[K],
+    fetch_texts: Callable[[set[K]], dict[K, str]],
+    classify: Callable[[str], TextDisposition],
+) -> ResolveResult[K]:
+    """Resolve *changed_keys* to obfuscated results, fetching text only for cache misses.
+
+    The steps have to happen in this order, and getting any of them wrong is quiet rather than
+    loud, which is why they live here rather than in each integration:
+
+    - Vanished keys are evicted before the lookup, so a key that left the source table and came
+      back cannot be served a result cached against its previous incarnation.
+    - Empty text is left a miss without consulting *classify*, so callers do not each repeat that
+      guard.
+    - Keys the obfuscator rejects are negative-cached alongside the ones *classify* rejected.
+      Obfuscation depends only on the text, so retrying is guaranteed to fail again; without this
+      an unobfuscatable statement is re-fetched on every collection in which it changes. Both
+      kinds of negative entry are forgotten by :meth:`ObfuscationLookup.evict` once the key leaves
+      the source table, so neither outlives the statement it describes.
+
+    This emits no telemetry and knows nothing about the check. Counts come back in
+    :attr:`ResolveResult.stats` for the caller to report under its own metric names.
+
+    :param fetch_texts: Reads statement text for a set of keys. May return fewer keys than asked
+        for; the rest stay misses and are retried next collection.
+    :param classify: Decides what to do with one non-empty text. See :class:`TextDisposition`.
+    """
+    lookup.evict(vanished_keys)
+
+    if not changed_keys:
+        return ResolveResult(results={}, stats=ResolveStats(hits=0, misses=0, fetched=0, ignored=0, failed=0))
+
+    hits, misses = lookup.lookup(changed_keys)
+    cache_hits = len(hits)
+    fetched = 0
+    ignorable: set[K] = set()
+    failures: set[K] = set()
+
+    if misses:
+        raw_texts = fetch_texts(misses)
+        fetched = len(raw_texts)
+
+        cacheable: dict[K, str] = {}
+        for key, text in raw_texts.items():
+            if not text:
+                continue
+            disposition = classify(text)
+            if disposition is TextDisposition.IGNORE:
+                ignorable.add(key)
+            elif disposition is TextDisposition.CACHE:
+                cacheable[key] = text
+
+        populated, failures = lookup.populate(cacheable)
+        lookup.mark_ignored(ignorable | failures)
+        hits.update(populated)
+
+    logger.debug(
+        "resolve: changed=%d hits=%d misses=%d fetched=%d ignored=%d failed=%d resolved=%d",
+        len(changed_keys),
+        cache_hits,
+        len(misses),
+        fetched,
+        len(ignorable),
+        len(failures),
+        len(hits),
+    )
+
+    return ResolveResult(
+        results=hits,
+        stats=ResolveStats(
+            hits=cache_hits,
+            misses=len(misses),
+            fetched=fetched,
+            ignored=len(ignorable) + len(failures),
+            failed=len(failures),
+        ),
+    )
