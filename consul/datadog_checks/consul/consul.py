@@ -722,10 +722,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
             self.process(self.scraper_config)
         # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
         except (ValueError, HTTPRequestError) as e:
-            # HTTPRequestError is the translator's fallthrough type and subsumes HTTPInvalidURLError.
-            # Merge base swallowed requests' InvalidHeader and InvalidURL here because both
-            # subclassed ValueError, but it propagated transport failures, which say nothing about
-            # the Consul version.
+            # HTTPRequestError is the translator's fallthrough type and subsumes HTTPInvalidURLError,
+            # so a malformed header or an unusable URL lands here and does suggest an older Consul.
+            # A timeout or a connection failure says nothing about the version, so let those out.
             if isinstance(e, (HTTPTimeoutError, HTTPConnectionError)):
                 raise
             self.log.warning(

@@ -430,8 +430,8 @@ class MapReduceCheck(AgentCheck):
             self._critical_service(service_name, service_check_tags, "JSON Parse failed: {}, {}".format(url, e))
             raise
 
-        # HTTPRequestError is the translator's fallthrough type. It carries requests'
-        # InvalidHeader, which subclassed ValueError and so reached this arm before the migration.
+        # HTTPRequestError is the translator's fallthrough type, so it carries the malformed-header
+        # and malformed-body failures that have no more specific agnostic equivalent.
         except (ValueError, HTTPRequestError) as e:
             self._critical_service(service_name, service_check_tags, str(e))
             raise

@@ -1636,9 +1636,9 @@ def test_connection_failure_non_k8s(aggregator, dd_run_check, mock_http):
 def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
     """A server-sent malformed header must still emit spark.driver.can_connect.
 
-    urllib3 raises InvalidHeader for a multi-valued Content-Length and requests re-raises it as
-    its own InvalidHeader, which subclasses ValueError. The agnostic translator has no equivalent
-    subtype and collapses it into a bare HTTPRequestError, so the last arm has to name that type.
+    A multi-valued Content-Length makes the backend reject the response header. The translator has
+    no more specific agnostic subtype for that, so it arrives as a bare HTTPRequestError and the
+    last arm has to name that type.
     """
     message = 'Content-Length contained multiple unmatching values'
     mock_http.get.side_effect = HTTPRequestError(message)
@@ -1652,8 +1652,8 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
     service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
     assert len(service_checks) == 1
     assert service_checks[0].status == SparkCheck.CRITICAL
-    # Merge base reported the bare error text here, not the "Request failed" prefix that the
-    # status/connection arm uses. Pin it so the fix stays on the last arm.
+    # The last arm reports the bare error text, unlike the status/connection arm above it, which
+    # prefixes "Request failed". Pin the exact message so the arm cannot drift.
     assert service_checks[0].message == message
 
 

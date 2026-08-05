@@ -496,8 +496,8 @@ class YarnCheck(AgentCheck):
             )
             raise
 
-        # HTTPRequestError is the translator's fallthrough type. It carries requests'
-        # InvalidHeader, which subclassed ValueError and so reached this arm before the migration.
+        # HTTPRequestError is the translator's fallthrough type, so it carries the malformed-header
+        # and malformed-body failures that have no more specific agnostic equivalent.
         except (ValueError, HTTPRequestError) as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise

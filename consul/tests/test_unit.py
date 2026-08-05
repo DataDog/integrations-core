@@ -782,9 +782,10 @@ def test_prometheus_endpoint_malformed_header_does_not_abort_check(aggregator, c
     ],
 )
 def test_prometheus_endpoint_transport_failures_still_abort_check(exception):
-    """Transport failures say nothing about the Consul version, and merge base propagated them.
+    """Transport failures say nothing about the Consul version, so they must not be swallowed.
 
-    They are HTTPRequestError subclasses, so the widened arm above has to let them back out.
+    They are HTTPRequestError subclasses, so the arm that catches malformed responses has to let
+    them back out rather than reporting an unsupported prometheus endpoint.
     """
     config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])

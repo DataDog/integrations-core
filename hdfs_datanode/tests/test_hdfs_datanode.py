@@ -102,9 +102,9 @@ def test_auth():
 def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
     """A server-sent malformed header must still emit hdfs.datanode.jmx.can_connect.
 
-    urllib3 raises InvalidHeader for a multi-valued Content-Length and requests re-raises it as
-    its own InvalidHeader, which subclasses ValueError. The agnostic translator has no equivalent
-    subtype and collapses it into a bare HTTPRequestError, so the last arm has to name that type.
+    A multi-valued Content-Length makes the backend reject the response header. The translator has
+    no more specific agnostic subtype for that, so it arrives as a bare HTTPRequestError and the
+    last arm has to name that type.
     """
     message = 'Content-Length contained multiple unmatching values'
     mock_http.get.side_effect = HTTPRequestError(message)
@@ -115,6 +115,6 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
         dd_run_check(hdfs_datanode)
 
     aggregator.assert_service_check(HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.CRITICAL, count=1)
-    # Merge base reported the bare error text here, not the "Request failed" prefix that the
-    # status/connection arm uses. Pin it so the fix stays on the last arm.
+    # The last arm reports the bare error text, unlike the status/connection arm above it, which
+    # prefixes "Request failed". Pin the exact message so the arm cannot drift.
     assert aggregator.service_checks(HDFSDataNode.JMX_SERVICE_CHECK)[0].message == message
