@@ -135,7 +135,7 @@ def _drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
 
 
 def _test_batch(batch_id: str, jobs: list[BatchJob]) -> TestBatch:
-    """One planned batch. Its message id is deliberately not its batch id — they are different layers."""
+    """One planned batch. Its message id is deliberately not its batch id: different layers."""
     return TestBatch(
         id=f"msg-{batch_id}",
         batch_id=batch_id,
@@ -473,8 +473,7 @@ def test_missing_workflow_job_raises(tmp_path: Path) -> None:
 
 
 def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
-    # Nothing was gathered, so the registry stays empty — the batch's fate lives in the aggregate,
-    # which can say "finished with no results" where a counts-only record cannot.
+    # Nothing gathered, so the registry stays empty; only the aggregate can say "finished empty".
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished("", batch_jobs=[]))
 
@@ -483,8 +482,7 @@ def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
 
 
 def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path) -> None:
-    # The batch must not keep rendering as planned: it is terminal, unsuccessful, and carries the
-    # reason — and it still emits a revision, so the comment reflects that it stopped.
+    # Terminal, unsuccessful, and carrying the reason — and still emitting a revision.
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished("", run_id=100, batch_jobs=[]))
 
@@ -523,8 +521,7 @@ def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:
 
 
 def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
-    # A BatchFinished whose batch_id is not in the plan is a contract violation: it must not be
-    # counted, must not inflate the revision, and must not appear in the snapshot.
+    # An unplanned batch_id must not be counted, inflate the revision, or reach the snapshot.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
 
@@ -563,8 +560,7 @@ def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
 
 
 def test_duplicate_is_detected_by_batch_id_not_message_id(tmp_path: Path) -> None:
-    # Two messages can carry the same batch with different message ids (a re-delivery). Identity is
-    # the batch's, so the second must not count as a second batch.
+    # A re-delivery carries the same batch under a new message id: still one batch.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
     job = _batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)
@@ -645,8 +641,7 @@ def test_finished_batch_leaves_other_batches_planned(tmp_path: Path) -> None:
 
 
 def test_progress_and_registry_agree(tmp_path: Path) -> None:
-    # The published snapshot and the local registry are built from the same gathered jobs in one pass;
-    # they must never disagree on counts, or the registry stops being a usable cross-check.
+    # Both are built from the same gathered jobs in one pass, so they must agree on counts.
     artifacts = tmp_path / "artifacts" / "100"
     j1_dir = _make_job_tree(artifacts, "j1", environment="py3.12")
     j2_dir = _make_job_tree(artifacts, "j2", environment="py3.13", junit=JUNIT_FAILING)
@@ -696,8 +691,7 @@ def test_timed_out_batch_is_recorded_on_the_batch(tmp_path: Path) -> None:
 
 
 def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
-    # Batches run concurrently, so BatchFinished messages can be processed on different threads. Each
-    # must yield exactly one revision and land in the snapshot: no lost batch, no repeated revision.
+    # Concurrent batches land on different threads: one revision each, no loss, no repeat.
     plan = {f"b{index}": [_scenario_batch_job(f"int{index}")] for index in range(1, 6)}
     gatherer = _make_gatherer(tmp_path, plan)
 
@@ -739,9 +733,8 @@ def test_missing_artifact_dir_is_recorded_as_an_attempt_error(tmp_path: Path) ->
 
 
 def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) -> None:
-    # What a failed-job rerun looks like: the batch reports only the job it re-ran. The rerun job
-    # gains a second attempt; the job it did not re-run keeps the one it had, and the batch keeps
-    # both. (The duplicate guard is bypassed directly — replaying a batch is the retry work's job.)
+    # A failed-job rerun reports only the job it re-ran: that job gains a second attempt, the other
+    # keeps its own, and the batch keeps both. (Bypasses the duplicate guard, which retries will own.)
     artifacts = tmp_path / "artifacts" / "100"
     passing = _make_job_tree(artifacts, "j1")
     failing = _make_job_tree(artifacts, "j2", junit=JUNIT_FAILING, e2e=False)

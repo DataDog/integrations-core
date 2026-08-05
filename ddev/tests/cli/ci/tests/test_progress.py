@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for the aggregate progress objects the gatherer publishes to the PR updater.
 
-These types are pure data: no GitHub calls, no filesystem. What is worth testing is the derived
-reporting rules the design doc pins down — a logical job's history can be sparse, only its latest
-execution counts, and a planned job with no execution yet is not complete.
+These types are pure data, so what is worth testing is the derived reporting rules: a job's history
+can be sparse, only its latest execution counts, and a planned job with no execution is not complete.
 """
 
 from __future__ import annotations
@@ -119,8 +118,7 @@ def test_latest_is_the_last_attempt() -> None:
 
 
 def test_retry_count_is_execution_count_minus_one_over_a_sparse_history() -> None:
-    # A logical job may execute in attempts 1 and 3 without executing in attempt 2: retry count is
-    # execution count minus one, never ``run_attempt - 1``.
+    # A job can execute in attempts 1 and 3 but not 2, so the count is executions minus one.
     job = _job(_attempt(1, Status.FAILURE), _attempt(3, Status.SUCCESS))
     assert job.retry_count == 1
     assert job.latest is not None
@@ -206,8 +204,7 @@ def test_planned_jobs_count_toward_total_but_not_complete() -> None:
 
 
 def test_an_execution_missing_its_artifacts_still_counts() -> None:
-    # The job ran and GitHub reported an outcome; only its artifacts are missing. It is complete and
-    # counted under that outcome — the error qualifies the execution, it does not erase it.
+    # Only the artifacts are missing: the error qualifies the execution, it does not erase it.
     attempt = _attempt(status=Status.SUCCESS, error=ProgressError.NO_ARTIFACTS)
     progress = DispatcherProgress(batches=(_batch(_job(attempt)),), done=True)
     assert (progress.passed, progress.complete, progress.total) == (1, 1, 1)

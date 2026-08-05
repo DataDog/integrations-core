@@ -52,21 +52,16 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     Reads ``BatchFinished`` messages, analyzes the downloaded artifacts on disk, builds per-job
     ``JobResult`` records, and organizes coverage/JUnit files for later publishing.
 
-    It is constructed with the complete batch plan, keeps an in-memory registry of every job's full
-    result across all batches and, on each finished batch, emits an ``UpdatePRComment`` carrying a
-    monotonically increasing ``revision`` and a ``DispatcherProgress`` snapshot covering every planned
-    batch, including those still to run. That snapshot is the message's whole payload; ``done`` is
-    derived from it, set once no planned batch is left unfinished. It does not post to GitHub —
-    rendering the comment (and rejecting stale revisions) is a separate consumer's job.
+    It is constructed with the complete batch plan and, on each finished batch, emits an
+    ``UpdatePRComment`` carrying a monotonic ``revision`` and a ``DispatcherProgress`` snapshot of
+    every planned batch, including those still to run. ``done`` is derived from that snapshot, set
+    once no batch is left unfinished. Rendering the comment is a separate consumer's job.
 
-    ``WorkflowStatus``/``JobResult`` are kept as the local registry of what each batch reported. They
-    are not published: the snapshot is what consumers read.
+    ``WorkflowStatus``/``JobResult`` are the local registry of what each batch reported; they are not
+    published. Every registry is keyed by ``batch_id``, which stays stable across workflow attempts
+    while ``run_id`` and the message id do not.
 
-    Every registry is keyed by ``batch_id``, the batch's logical identity, which stays stable across
-    workflow attempts while ``run_id`` and the message id do not.
-
-    This task makes no GitHub API calls — it works exclusively from the artifacts the runner
-    already downloaded to ``BatchFinished.artifacts_path``.
+    Makes no GitHub API calls: it works only from the artifacts the runner already downloaded.
     """
 
     def __init__(self, name: str, output_base_path: Path, batches: list[TestBatch]) -> None:
@@ -75,8 +70,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         self._revision = 0
         self._status_by_batch: dict[str, WorkflowStatus] = {}
         self._results_by_batch: dict[str, list[JobResult]] = {}
-        # The whole plan, in planning order: every batch is present from the start so each snapshot
-        # covers batches that have not run yet, not only the ones already gathered.
+        # The whole plan, in planning order, so each snapshot covers batches that have not run yet.
         self._progress_by_batch: dict[str, BatchProgress] = {
             batch.batch_id: self._planned_batch(batch) for batch in batches
         }
@@ -86,31 +80,29 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     def process_message(self, message: BatchFinished) -> None:
         log_extra = {"batch_id": message.batch_id, "run_id": message.run_id}
         if not message.batch_jobs:
-            # Still terminal, and still worth a revision: the batch has stopped and the comment must
-            # say so, otherwise it renders as planned forever and ``done`` is never reached.
+            # Still terminal and still worth a revision, or it renders as planned forever.
             self._logger.warning("BatchFinished carried no jobs; nothing to gather", extra=log_extra)
 
-        # Parse and organize artifacts outside the lock — these touch only this batch's own files.
+        # Outside the lock: these touch only this batch's own files.
         gathered = [self._gather_job(batch_job_result, message) for batch_job_result in message.batch_jobs]
         results = [result for result, _ in gathered]
         status = self._build_workflow_status(message, results)
 
-        # Register the batch, bump the revision, and emit the update all under the lock so two batches
-        # finishing at once cannot build a comment from half-updated shared state.
+        # Register, bump the revision, and emit under one lock, so two batches finishing at once
+        # cannot build a comment from half-updated state.
         with self._lock:
             planned = self._progress_by_batch.get(message.batch_id)
             if planned is None:
                 self._logger.warning("BatchFinished for an unplanned batch ignored", extra=log_extra)
                 return
-            # The aggregate is the single record of what has been gathered, so a batch already in a
-            # terminal state is a duplicate. Ignoring it keeps it from inflating the revision — the
-            # check is authoritative only inside the lock. (Retry semantics come with the retry work.)
+            # The aggregate is the record of what was gathered, so an already-terminal batch is a
+            # duplicate; ignoring it keeps it from inflating the revision.
             if planned.state is ExecutionState.FINISHED:
                 self._logger.warning("Duplicate BatchFinished ignored", extra=log_extra)
                 return
             if results:
-                # The registry records job outcomes, so a run that reported none has no entry there;
-                # the aggregate is where a batch that finished empty is recorded as failed.
+                # The registry records job outcomes; a run that reported none belongs only in the
+                # aggregate, which can say it finished empty.
                 self._results_by_batch[message.batch_id] = results
                 self._status_by_batch[message.batch_id] = status
             self._progress_by_batch[message.batch_id] = self._finished_batch_progress(planned, message, gathered)
@@ -129,18 +121,14 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     def build_initial_update(self, message_id: str) -> UpdatePRComment:
         """Revision ``0``: the complete plan, before any batch has been dispatched.
 
-        Returned rather than submitted, because a processor can only submit once the event bus has
-        attached its queue. The dispatcher entry point publishes it when it starts the bus, so the
-        PR updater receives the plan on the same channel as every later revision.
+        Returned rather than submitted: a processor can only submit once the bus has attached its
+        queue, so the dispatcher entry point publishes this when it starts the bus.
         """
         with self._lock:
             return self.build_update_message(message_id, revision=0, done=False)
 
     def build_update_message(self, message_id: str, revision: int, done: bool) -> UpdatePRComment:
-        """Build an ``UpdatePRComment`` for *revision* from all accumulated results.
-
-        Must be called while holding ``self._lock`` when reading live shared state.
-        """
+        """Build an ``UpdatePRComment`` for *revision*. Hold ``self._lock`` when state is live."""
         return UpdatePRComment(
             id=message_id,
             revision=revision,
@@ -149,7 +137,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
 
     @staticmethod
     def _planned_batch(batch: TestBatch) -> BatchProgress:
-        """A batch as planned: known jobs, no execution yet, and no retry budget until retries land."""
+        """A batch as planned: known jobs, no execution, no retry budget until retries land."""
         return BatchProgress(
             batch_id=batch.batch_id,
             run_id=None,
@@ -168,8 +156,8 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     ) -> tuple[JobResult, JobAttemptProgress]:
         """Build a job's records from its correlated workflow job and its artifacts on disk.
 
-        Both the flat ``JobResult`` and the aggregate's ``JobAttemptProgress`` come from this single
-        pass, so reports are parsed and artifacts organized exactly once per job.
+        ``JobResult`` and ``JobAttemptProgress`` come from one pass, so reports are parsed and
+        artifacts organized exactly once per job.
         """
         batch_job = batch_job_result.job
         status, failed_steps = self._job_status(batch_job_result, message)
@@ -196,8 +184,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         )
         workflow_job = batch_job_result.workflow_job
         attempt = JobAttemptProgress(
-            # Provisional: the job's real position in its history is only known once the attempt is
-            # appended to the registered plan, under the lock.
+            # Provisional: the real position is known only when appended to the plan, under the lock.
             attempt=1,
             job_id=None if workflow_job is None else workflow_job.id,
             status=status,
@@ -211,13 +198,12 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
 
     @staticmethod
     def _job_status(batch_job_result: BatchJobResult, message: BatchFinished) -> tuple[Status, list[str]]:
-        """Per-job (status, failed_steps). Deterministic: timed-out batches fail every job; otherwise the
-        job's own workflow-job conclusion decides. A missing workflow job is unexpected and raises — the
-        runner correlates every job before emitting, so a miss is a bug, not a state to paper over.
+        """Per-job (status, failed_steps). A timed-out batch fails every job; otherwise the job's own
+        conclusion decides. A missing workflow job raises: the runner correlates every job before
+        emitting, so a miss is a bug.
 
-        ``failed_steps`` holds real step names only. A timed-out batch has none — the timeout is not a
-        step, and is recorded as the batch's ``error`` instead. All steps concluding in failure are
-        collected: a workflow can run on-failure steps, so more than one step may fail for a job.
+        ``failed_steps`` holds real step names only, so a timeout (recorded as the batch's ``error``)
+        contributes none. All failing steps are collected: on-failure steps mean there can be several.
         """
         if message.timed_out:
             return (Status.FAILURE, [])
@@ -230,10 +216,8 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         return (conclusion_to_status(workflow_job.conclusion), failed_steps)
 
     def _organize_artifacts(self, job_artifacts_path: Path, batch_job: BatchJob) -> None:
-        """Copy coverage and JUnit files into the organized output tree with unique names.
-
-        The prefix is the job's target/environment/platform — the same fields as
-        ``BatchJob.artifact_name`` and the uniqueness key for a job within a batch.
+        """Copy coverage and JUnit files into the output tree, prefixed by the job's
+        target/environment/platform — the same fields that make ``BatchJob.artifact_name`` unique.
         """
         prefix = f"{batch_job.target}-{batch_job.environment}-{batch_job.platform}"
 
@@ -259,11 +243,10 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     ) -> BatchProgress:
         """The batch's terminal aggregate: the registered plan with this run's executions appended.
 
-        Built from *planned* rather than from the message alone, so the batch keeps every job it was
-        planned with. A run that reports only a subset — which is what a failed-job rerun does — adds
-        attempts to the jobs it covers and leaves the rest as they were, instead of dropping them.
+        Built from *planned*, not from the message alone, so a run reporting only a subset — what a
+        failed-job rerun does — adds attempts to the jobs it covers and leaves the rest untouched.
 
-        Must be called while holding ``self._lock``: it reads a registered ``BatchProgress``.
+        Must be called while holding ``self._lock``.
         """
         reported_jobs = {batch_job_result.job.name: batch_job_result.job for batch_job_result in message.batch_jobs}
         attempts = {
@@ -277,11 +260,11 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             if attempt is None:
                 jobs.append(job)
                 continue
-            # The attempt number is the execution's position in this job's own history.
+            # The attempt number is the execution's position in this job's history.
             numbered = dataclasses.replace(attempt, attempt=len(job.attempts) + 1)
             jobs.append(dataclasses.replace(job, attempts=(*job.attempts, numbered)))
         for name, attempt in attempts.items():
-            # A job the plan never mentioned is a runner bug, but dropping its result would hide it.
+            # An unplanned job is a runner bug, but dropping its result would hide it.
             self._logger.warning(
                 "Gathered a job that is not in the batch plan", extra={"batch_id": message.batch_id, "job": name}
             )
@@ -295,9 +278,9 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             run_id=message.run_id,
             workflow_url=message.workflow_url,
             state=ExecutionState.FINISHED,
-            # A batch that ran but reported nothing has no job status to collapse, and failed.
+            # Nothing reported means nothing to collapse, and a failed batch.
             status=batch_status(statuses) if statuses else Status.FAILURE,
-            # The batch ran, so it is on at least its first attempt even if no job reported one.
+            # The batch ran, so it is on at least its first attempt.
             current_attempt=max(attempts_run, 1),
             max_attempts=1,
             retries_remaining=0,

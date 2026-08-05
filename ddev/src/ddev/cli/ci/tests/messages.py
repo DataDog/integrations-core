@@ -162,9 +162,8 @@ class WorkflowStatus:
 class TestBatch(BaseMessage):
     """Dispatched to trigger a matrix of test jobs.
 
-    ``batch_id`` is the logical batch identity (e.g. ``batch-01``). It is assigned during planning,
-    stays stable across workflow attempts, and is distinct from ``BaseMessage.id``, which identifies
-    one message instance.
+    ``batch_id`` is the logical batch identity (e.g. ``batch-01``): assigned during planning, stable
+    across workflow attempts, and distinct from ``BaseMessage.id``, which identifies one message.
     """
 
     batch_id: str
@@ -177,8 +176,8 @@ class TestBatch(BaseMessage):
 class BatchFinished(BaseMessage):
     """Emitted when a GitHub Actions test workflow has completed.
 
-    ``batch_id`` carries the logical identity of the ``TestBatch`` this run came from, letting the
-    gatherer resolve the batch in its plan.
+    ``batch_id`` is the identity of the ``TestBatch`` this run came from, so the gatherer can resolve
+    it in the plan.
     """
 
     batch_id: str
@@ -194,12 +193,9 @@ class BatchFinished(BaseMessage):
 class UpdatePRComment(BaseMessage):
     """Emitted per finished batch to request a PR comment update.
 
-    ``revision`` is ordering metadata: the gatherer's monotonic counter, revision ``0`` being the
-    initial plan and then one per consumed ``BatchFinished``. The PR updater renders the latest and
-    rejects stale revisions.
-
-    ``progress`` is the whole payload — the complete immutable snapshot of the aggregate at this
-    revision, including whether the run is done and every count the comment needs.
+    ``revision`` is ordering metadata: revision ``0`` is the initial plan, then one per consumed
+    ``BatchFinished``. The updater renders the latest and rejects stale revisions. ``progress`` is
+    the whole payload, including whether the run is done and every count the comment needs.
     """
 
     revision: int

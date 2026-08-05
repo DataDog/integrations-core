@@ -29,10 +29,9 @@ class Status(StrEnum):
 
 
 def batch_status(statuses: Iterable[Status]) -> Status:
-    """Collapse the statuses of a batch's jobs into the batch's own label.
+    """Collapse a batch's job statuses into its own label: failure wins, then success, else skipped.
 
-    Failure wins, then success, else skipped. Callers that can distinguish "every job was skipped"
-    from "no job reported anything" must handle the empty case themselves.
+    Callers that must tell "all skipped" from "nothing reported" handle the empty case themselves.
     """
     known = set(statuses)
     if Status.FAILURE in known:

@@ -146,8 +146,7 @@ def test_workflow_status_label() -> None:
 
 
 def test_update_pr_comment_carries_only_the_revision_and_the_snapshot() -> None:
-    # The message is ordering metadata plus the aggregate: every count and the done flag live on the
-    # snapshot, so there is no second copy for a consumer to disagree with.
+    # Ordering metadata plus the aggregate: no second copy of the counts or the done flag.
     progress = DispatcherProgress(batches=(), done=False)
     update = UpdatePRComment(id="m1", revision=0, progress=progress)
 
