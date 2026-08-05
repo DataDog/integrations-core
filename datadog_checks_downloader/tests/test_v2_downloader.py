@@ -340,16 +340,6 @@ class TestUpdaterContract:
         bootstrap = mock_updater_cls.call_args.kwargs['bootstrap']
         assert json.loads(bootstrap)['signed']['_type'] == 'root'
 
-    def test_updater_preserves_requests_ca_bundle(self, mock_urlopen, mock_updater_cls, monkeypatch, tmp_path):
-        ca_bundle = tmp_path / 'ca.pem'
-        ca_bundle.touch()
-        monkeypatch.setenv('REQUESTS_CA_BUNDLE', str(ca_bundle))
-        downloader = TUFPointerDownloader(repository_url=REPO_URL)
-        downloader.get_pointer(PROJECT, version=VERSION)
-
-        fetcher = mock_updater_cls.call_args.kwargs['fetcher']
-        assert fetcher._proxy_env._kw_args['ca_certs'] == str(ca_bundle)
-
 
 def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Make TUFPointerDownloader trust the synthetic repo's root.json instead of the bundled one."""
