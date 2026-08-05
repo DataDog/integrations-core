@@ -233,8 +233,8 @@ class IntegrationRegistry:
         Iterate over all integrations that have changes that could affect built distributions.
         """
         for integration in self.__iter_filtered(selection):
-            for relative_path in self.repo.git.changed_files():
-                if integration.requires_changelog_entry(self.repo.path / relative_path):
+            for changed_file in self.repo.git.changed_files():
+                if integration.requires_changelog_entry(self.repo.path / changed_file.path):
                     yield integration
                     break
 
@@ -276,4 +276,4 @@ class IntegrationRegistry:
         return set() if 'all' in selection else set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
-        return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files()}
+        return {changed_file.path.split('/', 1)[0] for changed_file in self.repo.git.changed_files()}

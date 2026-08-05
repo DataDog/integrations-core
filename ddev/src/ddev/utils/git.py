@@ -3,7 +3,78 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import enum
+from dataclasses import dataclass
+
 from ddev.utils.fs import Path
+
+
+class ChangeType(enum.Enum):
+    """The kind of change reported by `git diff --name-status`.
+
+    Values are the literal git status letters, so a status code maps straight onto a member.
+    """
+
+    ADDED = 'A'
+    MODIFIED = 'M'
+    DELETED = 'D'
+    RENAMED = 'R'
+    COPIED = 'C'
+
+
+# A type change (`T`) is a modification of an existing path. Any other single-path status is also
+# treated as a modification, so no changed path is lost.
+SINGLE_PATH_CHANGE_TYPES = {
+    'A': ChangeType.ADDED,
+    'M': ChangeType.MODIFIED,
+    'D': ChangeType.DELETED,
+    'T': ChangeType.MODIFIED,
+}
+
+
+@dataclass(frozen=True)
+class ChangedFile:
+    """A single change to one file.
+
+    For renames and copies, `path` is the destination and `previous_path` is the source.
+    """
+
+    change_type: ChangeType
+    path: str
+    previous_path: str | None = None
+
+
+def is_git_warning_line(line: str) -> bool:
+    """Return whether a line of git output is an ignorable warning rather than a record."""
+    return line.startswith('warning: ') or 'original line endings' in line
+
+
+def parse_name_status(output: str) -> list[ChangedFile]:
+    """Parse `git diff --name-status` output into change records.
+
+    Lines are tab separated: `<status>\\t<path>`, or `<status>\\t<source>\\t<destination>` for
+    renames and copies, whose status also carries a similarity score (`R100`). A line with the
+    wrong field count raises rather than being dropped, so a changed path is never lost silently.
+    """
+    changed: list[ChangedFile] = []
+    for line in output.splitlines():
+        if not line or is_git_warning_line(line):
+            continue
+
+        fields = line.split('\t')
+        status = fields[0][:1].upper()
+        if status in ('R', 'C'):
+            if len(fields) < 3:
+                raise ValueError(f'Malformed rename/copy diff line: {line!r}')
+            change_type = ChangeType.RENAMED if status == 'R' else ChangeType.COPIED
+            changed.append(ChangedFile(change_type=change_type, path=fields[2], previous_path=fields[1]))
+        else:
+            if len(fields) < 2:
+                raise ValueError(f'Malformed diff line: {line!r}')
+            change_type = SINGLE_PATH_CHANGE_TYPES.get(status, ChangeType.MODIFIED)
+            changed.append(ChangedFile(change_type=change_type, path=fields[1]))
+
+    return changed
 
 
 class GitCommit:
@@ -164,30 +235,35 @@ class GitRepository:
         # We force because, in very rare cases, we move tags
         self.capture('fetch', '--all', '--tags', '--force')
 
-    def changed_files(self) -> list[str]:
-        changed_files = set()
+    def changed_files(self, base: str = 'origin/master', head: str | None = None) -> list[ChangedFile]:
+        """Return the files that changed between two points, deepest path first.
 
-        # Committed e.g.:
-        # A   relative/path/to/file.added
-        # M   relative/path/to/file.modified
-        for line in self.capture('diff', '--name-status', 'origin/master...').splitlines():
-            if not self.__is_warning_line(line):
-                changed_files.add(line.split(maxsplit=1)[1])
+        The comparison always starts at the merge base of `base` and `head`, so passing `C^1` as
+        the base gives exactly the changes `C` introduced.
 
-        # Tracked
-        for line in self.capture('diff', '--name-only', 'HEAD').splitlines():
-            if not self.__is_warning_line(line):
-                changed_files.add(line)
+        Leaving `head` unset compares against the working tree, which additionally picks up
+        uncommitted and untracked changes. Passing a ref compares committed state only.
 
-        # Untracked
-        # Remove worktrees within the repo root as they can be untracked and should not be taken into account
-        changed_files.update(
-            untracked_file
-            for untracked_file in self.capture('ls-files', '--others', '--exclude-standard').splitlines()
-            if not self.is_worktree(self.repo_root / untracked_file)
-        )
+        A path reported by more than one of those sources keeps the change type furthest from
+        `base`, so a file committed as added and then edited locally is still reported as added.
+        """
+        changed: dict[str, ChangedFile] = {}
+        comparison = f'{base}...' if head is None else f'{base}...{head}'
+        for record in parse_name_status(self.capture('diff', '--name-status', comparison)):
+            changed.setdefault(record.path, record)
 
-        return sorted(changed_files, key=lambda relative_path: (-relative_path.count('/'), relative_path))
+        if head is not None:
+            return self.__sort_changed_files(changed.values())
+
+        for record in parse_name_status(self.capture('diff', '--name-status', 'HEAD')):
+            changed.setdefault(record.path, record)
+
+        # Worktrees inside the repo root show up as untracked and are not changes to this checkout
+        for path in self.capture('ls-files', '--others', '--exclude-standard').splitlines():
+            if not self.is_worktree(self.repo_root / path):
+                changed.setdefault(path, ChangedFile(change_type=ChangeType.ADDED, path=path))
+
+        return self.__sort_changed_files(changed.values())
 
     def filter_tags(self, pattern: str) -> list[str]:
         import re
@@ -234,5 +310,5 @@ class GitRepository:
         return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
 
     @staticmethod
-    def __is_warning_line(line):
-        return line.startswith('warning: ') or 'original line endings' in line
+    def __sort_changed_files(changed_files):
+        return sorted(changed_files, key=lambda changed_file: (-changed_file.path.count('/'), changed_file.path))
