@@ -782,10 +782,15 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
     c = Vault(Vault.CHECK_NAME, {}, [instance])
+    requested = []
 
     # Return canned responses so the assertion targets the header, not the live metrics endpoint.
-    def mock_get(url, *args, **kwargs):
-        assert c.http.options['headers'].get('X-Vault-Request') == 'true'
+    def mock_get(http, url, *args, **kwargs):
+        # Read the header off the client that made this call. The API calls and the metrics scrape run
+        # on separate clients, each with its own header mapping, so an assertion pinned to one of them
+        # leaves the other free to omit the header. get_header reads the value that reaches the wire.
+        assert http.get_header('X-Vault-Request') == 'true'
+        requested.append(url)
         if url.endswith('/sys/leader'):
             return MockHTTPResponse(
                 json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -806,7 +811,9 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
             )
         return MockHTTPResponse(content='', status_code=200)
 
-    with mock.patch.object(type(c.http), 'get', side_effect=mock_get) as mock_get_call:
+    with mock.patch.object(type(c.http), 'get', autospec=True, side_effect=mock_get) as mock_get_call:
         dd_run_check(c)
 
     assert mock_get_call.call_count > 0
+    # Without the scrape among the calls the header would only ever be read off the API client.
+    assert any(url.endswith('/sys/metrics?format=prometheus') for url in requested)

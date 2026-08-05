@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import RequestsWrapper
 
-from .common import DEFAULT_OPTIONS
+from .common import DEFAULT_OPTIONS, get_wire_headers
 
 pytestmark = [pytest.mark.unit]
 
@@ -144,20 +144,6 @@ def test_extra_headers_on_http_method_call():
     # make sure the original headers are not modified
     assert http.options['headers'] == complete_headers
     assert extra_headers == {"foo": "bar"}
-
-
-def get_wire_headers(http, url='http://example.com/hello', **options):
-    """Send a request and return the headers of the request that actually left the client.
-
-    The mapping handed to the client call is not the one that goes out: a per-request mapping replaces
-    the configured one there, and the client's own mapping is merged back underneath it afterwards. Only
-    the outgoing request shows the result of that merge.
-    """
-    with mock.patch('requests.adapters.HTTPAdapter.send') as send:
-        send.return_value = mock.MagicMock(status_code=200, headers={}, is_redirect=False, history=[])
-        http.get(url, **options)
-
-    return send.call_args.args[0].headers
 
 
 def test_request_headers_override_defaults_before_extra_headers():

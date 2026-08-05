@@ -59,10 +59,14 @@ def test_check(aggregator, mocked_request):
     # Run the check once
     yarn.check(instance)
 
+    # One per endpoint the collection visits: cluster metrics, apps, nodes and the scheduler. The
+    # sibling test that turns app metrics off asserts three, so without a count here an emission
+    # missing or duplicated on the apps endpoint alone would satisfy both.
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
         tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=4,
     )
 
     aggregator.assert_service_check(

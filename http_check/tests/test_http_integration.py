@@ -504,7 +504,9 @@ def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check, mock_ht
         check.get_tls_context()
         dd_run_check(check)
         mock_warning.assert_called()
-        assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)
+        # Search every warning rather than the last one: the check run below the context build emits
+        # its own, and the one naming the CA path would then be out of reach.
+        assert any(instance['tls_ca_cert'] in call.args for call in mock_warning.call_args_list)
 
 
 def test_instance_auth_token(dd_run_check):

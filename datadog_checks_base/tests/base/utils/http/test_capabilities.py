@@ -10,6 +10,8 @@ from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 from datadog_checks.base.utils.http_protocol import HTTPResponse
 from datadog_checks.dev.http import MockHTTPResponse
 
+from .common import get_wire_headers
+
 pytestmark = [pytest.mark.unit]
 
 
@@ -134,6 +136,17 @@ class TestCookies:
         http.session.cookies.set('dup', 'a', domain='a.example.com')
         http.session.cookies.set('dup', 'b', domain='b.example.com')
         assert http.get_cookie('dup', 'fallback') == 'fallback'
+
+    def test_per_request_cookies_reach_the_request(self):
+        # The tests above cover cookies the session holds. spark instead keeps the YARN proxy's cookie
+        # on the check and hands it to the next hop as a per-request mapping, so nothing on the session
+        # carries it. Dropping the kwarg would send that hop uncredentialed, and YARN's web proxy would
+        # answer with its HTML warning page instead of the JSON payload.
+        http = RequestsWrapper({}, {})
+
+        wire_headers = get_wire_headers(http, cookies={'proxy': 'approved'})
+
+        assert wire_headers['Cookie'] == 'proxy=approved'
 
 
 class TestTrustEnv:

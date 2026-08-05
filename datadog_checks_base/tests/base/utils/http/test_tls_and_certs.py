@@ -69,6 +69,20 @@ class TestCert:
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
 
+    def test_missing_ca_cert_file_is_reported(self, tmp_path, caplog):
+        # http_check holds the only other assertion on this warning, and it reads it off that check's
+        # own get_tls_context(), which builds a context beside the client rather than the one the request
+        # uses. Only the client's tls_config decides what the request's context loads, so a tls_ca_cert
+        # that stopped reaching the client would leave that assertion intact while every request ran
+        # against the system trust store instead of the operator's CA.
+        missing_ca_cert = str(tmp_path / 'unexisting.crt')
+        http = RequestsWrapper({'tls_ca_cert': missing_ca_cert}, {})
+
+        with mock.patch('requests.Session.get'), caplog.at_level(logging.WARNING):
+            http.get('https://example.com')
+
+        assert 'TLS CA certificate file not found: {}'.format(missing_ca_cert) in caplog.text
+
     @pytest.mark.skipif(ON_WINDOWS, reason="Windows uses the default store locations.")
     def test_bad_default_verify_paths_and_fallback_to_certifi(self, monkeypatch, caplog):
         '''The SSL default verify paths can be set incorrectly.'''
