@@ -8,14 +8,29 @@ import psycopg
 import pytest
 
 from datadog_checks.postgres.relationsmanager import (
-    QUERY_PG_CLASS,
     QUERY_PG_CLASS_SIZE,
     STATIO_METRICS,
     RelationsManager,
+    get_pg_class_query,
 )
+from datadog_checks.postgres.version_utils import VersionUtils
 
-from .common import DB_NAME, HOST, POSTGRES_LOCALE, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
+from .common import (
+    DB_NAME,
+    HOST,
+    POSTGRES_LOCALE,
+    POSTGRES_VERSION,
+    _get_expected_tags,
+    _iterate_metric_name,
+    assert_metric_at_least,
+)
 from .utils import _get_superconn, _wait_for_value, requires_over_11
+
+# Built for the version under test so the asserted metric set matches what the check collects.
+# Guarded so the module still imports when POSTGRES_VERSION is unset (these tests are integration-only).
+QUERY_PG_CLASS = (
+    get_pg_class_query(VersionUtils.parse_version(POSTGRES_VERSION)) if POSTGRES_VERSION is not None else None
+)
 
 RELATION_INDEX_METRICS = [
     "postgresql.index_scans",

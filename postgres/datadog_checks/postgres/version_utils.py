@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
+from dataclasses import dataclass
 
 from semver import VersionInfo
 
@@ -26,6 +27,52 @@ V15 = VersionInfo.parse("15.0.0")
 V16 = VersionInfo.parse("16.0.0")
 V17 = VersionInfo.parse("17.0.0")
 V18 = VersionInfo.parse("18.0.0")
+
+
+@dataclass(frozen=True)
+class VersionRange:
+    """Server-version window ``[min_version, max_version)`` for a single query column.
+
+    Either bound may be ``None`` to leave that side open. Use it to gate a column that a given
+    PostgreSQL major added (``min_version``) or removed (``max_version``).
+    """
+
+    min_version: VersionInfo | None = None
+    max_version: VersionInfo | None = None
+
+    def __contains__(self, version: VersionInfo) -> bool:
+        if self.min_version is not None and version < self.min_version:
+            return False
+        if self.max_version is not None and version >= self.max_version:
+            return False
+        return True
+
+
+def build_versioned_query(name: str, columns: list, from_clause: str, version: VersionInfo) -> dict:
+    """Assemble a ``{name, query, columns}`` query dict holding only the columns ``version`` exposes.
+
+    ``columns`` is a list of ``(sql_expression, column_descriptor)`` pairs in SELECT order; a pair may
+    carry an optional third element, a ``VersionRange``, restricting it to the servers that expose that
+    column. The SELECT projection and the QueryExecutor descriptors are filtered together from the one
+    list, so they cannot drift or reference a column the server lacks — calling a missing ``pg_stat_get_*``
+    function aborts the whole query, so a too-new column must never be projected.
+    """
+    if version is None:
+        raise ValueError("build_versioned_query requires a resolved server version, got None")
+
+    expressions = []
+    descriptors = []
+    for expression, descriptor, *gate in columns:
+        version_range = gate[0] if gate else None
+        if version_range is None or version in version_range:
+            expressions.append(expression)
+            descriptors.append(descriptor)
+
+    return {
+        'name': name,
+        'query': '\nSELECT\n  ' + ',\n  '.join(expressions) + from_clause,
+        'columns': descriptors,
+    }
 
 
 class VersionUtils(object):

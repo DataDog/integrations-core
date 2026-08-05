@@ -18,9 +18,12 @@
 
 from typing import Any, Dict, List, Union  # noqa: F401
 
+from semver import VersionInfo
+
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.postgres.config_models.instance import Relations
+from datadog_checks.postgres.version_utils import build_versioned_query
 
 ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
@@ -191,42 +194,12 @@ FROM
 # However, using this view is inefficient as it groups by aggregation on oid and schema
 # behind the hood, leading to possible temporary bytes being written to handle the sort.
 # To avoid this, we need to directly call the pg_stat_* functions
-QUERY_PG_CLASS = {
-    'name': 'pg_class',
-    'query': """
-SELECT
-  current_database(),
-  N.nspname,
-  C.relname,
-  pg_stat_get_numscans(C.oid),
-  pg_stat_get_tuples_returned(C.oid),
-  I.idx_scan,
-  I.idx_tup_fetch,
-  pg_stat_get_tuples_inserted(C.oid),
-  pg_stat_get_tuples_updated(C.oid),
-  pg_stat_get_tuples_deleted(C.oid),
-  pg_stat_get_tuples_hot_updated(C.oid),
-  pg_stat_get_live_tuples(C.oid),
-  pg_stat_get_dead_tuples(C.oid),
-  pg_stat_get_vacuum_count(C.oid),
-  pg_stat_get_autovacuum_count(C.oid),
-  pg_stat_get_analyze_count(C.oid),
-  pg_stat_get_autoanalyze_count(C.oid),
-  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_vacuum_time(C.oid))),
-  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.oid))),
-  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_analyze_time(C.oid))),
-  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autoanalyze_time(C.oid))),
-  pg_stat_get_numscans(idx_toast.indexrelid),
-  pg_stat_get_tuples_fetched(idx_toast.indexrelid),
-  pg_stat_get_tuples_inserted(C.reltoastrelid),
-  pg_stat_get_tuples_deleted(C.reltoastrelid),
-  pg_stat_get_live_tuples(C.reltoastrelid),
-  pg_stat_get_dead_tuples(C.reltoastrelid),
-  pg_stat_get_vacuum_count(C.reltoastrelid),
-  pg_stat_get_autovacuum_count(C.reltoastrelid),
-  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_vacuum_time(C.reltoastrelid))),
-  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.reltoastrelid))),
-  C.xmin
+#
+# Several per-table maintenance/access columns of pg_stat_user_tables/pg_stat_all_tables are only
+# exposed by recent PostgreSQL majors (and so are their backing pg_stat_get_* functions). Calling a
+# function that does not exist on the server aborts the whole query, so those columns are gated on
+# the server version and added by get_pg_class_query() only when the server is new enough.
+PG_CLASS_FROM_CLAUSE = """
 FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 LEFT JOIN pg_index idx_toast ON (idx_toast.indrelid = C.reltoastrelid)
@@ -246,42 +219,73 @@ WHERE C.relkind = 'r'
         AND relation = C.oid
     )
     AND {relations} {limits}
-""",
-    'columns': [
-        {'name': 'db', 'type': 'tag'},
-        {'name': 'schema', 'type': 'tag'},
-        {'name': 'table', 'type': 'tag'},
-        {'name': 'seq_scans', 'type': 'rate'},
-        {'name': 'seq_rows_read', 'type': 'rate'},
-        {'name': 'index_rel_scans', 'type': 'rate'},
-        {'name': 'index_rel_rows_fetched', 'type': 'rate'},
-        {'name': 'rows_inserted', 'type': 'rate'},
-        {'name': 'rows_updated', 'type': 'rate'},
-        {'name': 'rows_deleted', 'type': 'rate'},
-        {'name': 'rows_hot_updated', 'type': 'rate'},
-        {'name': 'live_rows', 'type': 'gauge'},
-        {'name': 'dead_rows', 'type': 'gauge'},
-        {'name': 'vacuumed', 'type': 'monotonic_count'},
-        {'name': 'autovacuumed', 'type': 'monotonic_count'},
-        {'name': 'analyzed', 'type': 'monotonic_count'},
-        {'name': 'autoanalyzed', 'type': 'monotonic_count'},
-        {'name': 'last_vacuum_age', 'type': 'gauge'},
-        {'name': 'last_autovacuum_age', 'type': 'gauge'},
-        {'name': 'last_analyze_age', 'type': 'gauge'},
-        {'name': 'last_autoanalyze_age', 'type': 'gauge'},
-        {'name': 'toast.index_scans', 'type': 'monotonic_count'},
-        {'name': 'toast.rows_fetched', 'type': 'monotonic_count'},
-        {'name': 'toast.rows_inserted', 'type': 'monotonic_count'},
-        {'name': 'toast.rows_deleted', 'type': 'monotonic_count'},
-        {'name': 'toast.live_rows', 'type': 'gauge'},
-        {'name': 'toast.dead_rows', 'type': 'gauge'},
-        {'name': 'toast.vacuumed', 'type': 'monotonic_count'},
-        {'name': 'toast.autovacuumed', 'type': 'monotonic_count'},
-        {'name': 'toast.last_vacuum_age', 'type': 'gauge'},
-        {'name': 'toast.last_autovacuum_age', 'type': 'gauge'},
-        {'name': 'relation.xmin', 'type': 'gauge'},
-    ],
-}
+"""
+
+
+def get_pg_class_query(version: VersionInfo) -> dict:
+    """Build the pg_class relation-metrics query for `version`.
+
+    Reference pattern for version-gated structured queries: the (SQL expression, column descriptor)
+    pairs are handed to build_versioned_query, which keeps the SELECT projection and the column
+    descriptors in lockstep. To collect a column only newer majors expose, add a third element to its
+    pair — a VersionRange (see the note on PG_CLASS_FROM_CLAUSE above for why this gating is required).
+    No column is version-gated yet, so this preserves the exact metric set of the former QUERY_PG_CLASS.
+    """
+    # (SQL expression, column descriptor[, VersionRange]) pairs, in SELECT order.
+    relation_columns = [
+        ('current_database()', {'name': 'db', 'type': 'tag'}),
+        ('N.nspname', {'name': 'schema', 'type': 'tag'}),
+        ('C.relname', {'name': 'table', 'type': 'tag'}),
+        ('pg_stat_get_numscans(C.oid)', {'name': 'seq_scans', 'type': 'rate'}),
+        ('pg_stat_get_tuples_returned(C.oid)', {'name': 'seq_rows_read', 'type': 'rate'}),
+        ('I.idx_scan', {'name': 'index_rel_scans', 'type': 'rate'}),
+        ('I.idx_tup_fetch', {'name': 'index_rel_rows_fetched', 'type': 'rate'}),
+        ('pg_stat_get_tuples_inserted(C.oid)', {'name': 'rows_inserted', 'type': 'rate'}),
+        ('pg_stat_get_tuples_updated(C.oid)', {'name': 'rows_updated', 'type': 'rate'}),
+        ('pg_stat_get_tuples_deleted(C.oid)', {'name': 'rows_deleted', 'type': 'rate'}),
+        ('pg_stat_get_tuples_hot_updated(C.oid)', {'name': 'rows_hot_updated', 'type': 'rate'}),
+        ('pg_stat_get_live_tuples(C.oid)', {'name': 'live_rows', 'type': 'gauge'}),
+        ('pg_stat_get_dead_tuples(C.oid)', {'name': 'dead_rows', 'type': 'gauge'}),
+        ('pg_stat_get_vacuum_count(C.oid)', {'name': 'vacuumed', 'type': 'monotonic_count'}),
+        ('pg_stat_get_autovacuum_count(C.oid)', {'name': 'autovacuumed', 'type': 'monotonic_count'}),
+        ('pg_stat_get_analyze_count(C.oid)', {'name': 'analyzed', 'type': 'monotonic_count'}),
+        ('pg_stat_get_autoanalyze_count(C.oid)', {'name': 'autoanalyzed', 'type': 'monotonic_count'}),
+        (
+            'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_vacuum_time(C.oid)))',
+            {'name': 'last_vacuum_age', 'type': 'gauge'},
+        ),
+        (
+            'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.oid)))',
+            {'name': 'last_autovacuum_age', 'type': 'gauge'},
+        ),
+        (
+            'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_analyze_time(C.oid)))',
+            {'name': 'last_analyze_age', 'type': 'gauge'},
+        ),
+        (
+            'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autoanalyze_time(C.oid)))',
+            {'name': 'last_autoanalyze_age', 'type': 'gauge'},
+        ),
+        ('pg_stat_get_numscans(idx_toast.indexrelid)', {'name': 'toast.index_scans', 'type': 'monotonic_count'}),
+        ('pg_stat_get_tuples_fetched(idx_toast.indexrelid)', {'name': 'toast.rows_fetched', 'type': 'monotonic_count'}),
+        ('pg_stat_get_tuples_inserted(C.reltoastrelid)', {'name': 'toast.rows_inserted', 'type': 'monotonic_count'}),
+        ('pg_stat_get_tuples_deleted(C.reltoastrelid)', {'name': 'toast.rows_deleted', 'type': 'monotonic_count'}),
+        ('pg_stat_get_live_tuples(C.reltoastrelid)', {'name': 'toast.live_rows', 'type': 'gauge'}),
+        ('pg_stat_get_dead_tuples(C.reltoastrelid)', {'name': 'toast.dead_rows', 'type': 'gauge'}),
+        ('pg_stat_get_vacuum_count(C.reltoastrelid)', {'name': 'toast.vacuumed', 'type': 'monotonic_count'}),
+        ('pg_stat_get_autovacuum_count(C.reltoastrelid)', {'name': 'toast.autovacuumed', 'type': 'monotonic_count'}),
+        (
+            'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_vacuum_time(C.reltoastrelid)))',
+            {'name': 'toast.last_vacuum_age', 'type': 'gauge'},
+        ),
+        (
+            'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.reltoastrelid)))',
+            {'name': 'toast.last_autovacuum_age', 'type': 'gauge'},
+        ),
+        ('C.xmin', {'name': 'relation.xmin', 'type': 'gauge'}),
+    ]
+
+    return build_versioned_query('pg_class', relation_columns, PG_CLASS_FROM_CLAUSE, version)
 
 
 # The pg_statio_all_tables view will contain one row for each table in the current database,
@@ -419,7 +423,8 @@ INDEX_BLOAT = {
 }
 
 RELATION_METRICS = [STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
+# QUERY_PG_CLASS is version-dependent and built per-run via get_pg_class_query(version).
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
 
 
 class RelationsManager(object):
