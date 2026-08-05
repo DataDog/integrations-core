@@ -18,6 +18,13 @@ stages:
   - release
   - notify
 
+.master-or-manual-rules: &master-or-manual-rules
+  - if: $CI_PIPELINE_SOURCE == 'schedule'
+    when: never
+  - if: $CI_COMMIT_BRANCH == 'master'
+  - when: manual
+    allow_failure: true
+
 cache: &slack-cache
   key: integrations-core-slack-cache
   paths:
@@ -131,4 +138,5 @@ evalya:run-tests:
 evalya:publish-metadata:
   extends: .evalya:publish-metadata
   stage: release
+  rules: *master-or-manual-rules
 # --- END evalya ---
