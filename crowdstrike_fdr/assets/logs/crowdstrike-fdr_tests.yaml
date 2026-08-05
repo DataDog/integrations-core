@@ -845,3 +845,120 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1604855136669
+ -
+  sample: |-
+    {
+      "ConfigBuild" : "1007.3.0011603.1",
+      "ConfigStateHash" : "2602391615",
+      "ConnectionDirection" : "1",
+      "ConnectionFlags" : "0",
+      "ContextProcessId" : "223442259385",
+      "ContextTimeStamp" : "1604855120.221",
+      "EffectiveTransmissionClass" : "3",
+      "Entitlements" : "15",
+      "InContext" : "0",
+      "LocalAddressIP4" : "192.168.1.10",
+      "LocalPort" : "53962",
+      "Protocol" : "6",
+      "RemoteAddressIP4" : "10.20.30.41",
+      "RemotePort" : "445",
+      "aid" : "fffffffff000426eb99afaa2ccdcbc17",
+      "aip" : "10.10.10.10",
+      "cid" : "ffffffff30a3407dae27d0503611022d",
+      "event_platform" : "Win",
+      "event_simpleName" : "NetworkConnectIP4Blocked",
+      "id" : "ffffffff-1111-11eb-b0eb-06be7616c212",
+      "name" : "NetworkConnectIP4BlockedV1",
+      "timestamp" : "1604855120310"
+    }
+ -
+  sample: |-
+    {
+      "ConfigBuild" : "1007.3.0011603.1",
+      "ConfigStateHash" : "2602391615",
+      "ConnectionDirection" : "0",
+      "ConnectionFlags" : "1",
+      "ContextProcessId" : "223442259386",
+      "ContextTimeStamp" : "1604855124.550",
+      "EffectiveTransmissionClass" : "3",
+      "Entitlements" : "15",
+      "InContext" : "0",
+      "LocalAddressIP4" : "192.168.1.10",
+      "LocalPort" : "53963",
+      "Protocol" : "17",
+      "RemoteAddressIP4" : "10.20.30.42",
+      "RemotePort" : "8080",
+      "aid" : "fffffffff000426eb99afaa2ccdcbc17",
+      "aip" : "10.10.10.10",
+      "cid" : "ffffffff30a3407dae27d0503611022d",
+      "event_platform" : "Win",
+      "event_simpleName" : "NetworkConnectIP4DetectInfo",
+      "id" : "ffffffff-1111-11eb-b0eb-06be7616c213",
+      "name" : "NetworkConnectIP4DetectInfoV1",
+      "timestamp" : "1604855124638"
+    }
+ -
+  sample: |-
+    {
+      "ContextBaseFileName" : "SenseImdsCollector.exe",
+      "event_simpleName" : "DnsRequestDetectInfo",
+      "ContextTimeStamp" : "1738009381.112",
+      "ConfigStateHash" : "138674525",
+      "ContextProcessId" : "683613242246",
+      "DomainName" : "malware-c2.example.com",
+      "ContextThreadId" : "31712204862363",
+      "aip" : "10.10.10.10",
+      "QueryStatus" : "0",
+      "InterfaceIndex" : "0",
+      "ConfigBuild" : "1007.3.0019011.15",
+      "event_platform" : "Win",
+      "DnsRequestCount" : "1",
+      "DualRequest" : "0",
+      "Entitlements" : "15",
+      "name" : "DnsRequestDetectInfoV1",
+      "EventOrigin" : "1",
+      "FirstIP4Record" : "10.20.30.43",
+      "id" : "3d0ef474-fcc3-4f18-9ad6-7130d8ddb408",
+      "EffectiveTransmissionClass" : "3",
+      "aid" : "31e92a267c044d57b1c1e14109079e89",
+      "timestamp" : "1738009381200",
+      "cid" : "ffffffff30a3407dae27d0503611022d",
+      "RequestType" : "1"
+    }
+ -
+  sample: |-
+    {
+      "eid" : 119,
+      "SensorId" : "55555555555555555555555555555555",
+      "Tactic" : "Malware",
+      "CustomerIdString" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "EventType" : "Event_ExternalApiEvent",
+      "FileName" : "suspicious.exe",
+      "UTCTimestamp" : 1680759540000,
+      "FalconHostLink" : "https://falcon.us-2.crowdstrike.com/activity/detections/detail/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/111111112?_cid=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "MachineDomain" : "",
+      "SHA1String" : "0000000000000000000000000000000000000000",
+      "LocalIP" : "172.17.0.1",
+      "DetectDescription" : "A file matching a known malware signature was quarantined on this host.",
+      "timestamp" : "2023-04-06T05:39:00Z",
+      "FilePath" : "/",
+      "UserName" : "cherry",
+      "EventUUID" : "14688888888888888888888888888889",
+      "MD5String" : "cf288888888888888888888888888889",
+      "SeverityName" : "High",
+      "PatternDispositionDescription" : "Prevention, process was killed.",
+      "Severity" : 50,
+      "DetectId" : "ldt:45bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:111111112",
+      "PatternDispositionValue" : 272,
+      "ExternalApiType" : "Event_EppDetectionSummaryEvent",
+      "SHA256String" : "31a0333333333333333333333333333333333333333333333333333333333334",
+      "Objective" : "Falcon Detection Method",
+      "MACAddress" : "02-02-02-02-02-02",
+      "ComputerName" : "ip-172-18-63-231.ec2.internal",
+      "DetectName" : "NGAV",
+      "AgentIdString" : "45444444444444444444444444444444",
+      "IOCType" : "hash_sha256",
+      "Technique" : "Known malware signature",
+      "AssociatedFile" : "/suspicious.exe",
+      "cid" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }

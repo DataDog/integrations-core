@@ -3,16 +3,6 @@ metric_id: crowdstrike-fdr
 backend_only: false
 facets:
   - groups:
-      - CrowdStrike FDR
-    name: MITRE Tactic ID
-    path: MitreAttack.TacticID
-    source: log
-  - groups:
-      - CrowdStrike FDR
-    name: MITRE Technique ID
-    path: MitreAttack.TechniqueID
-    source: log
-  - groups:
       - DNS
     name: Answer Name
     path: dns.answer.name
@@ -245,6 +235,22 @@ pipeline:
         - SourceEndpointAddressIP6
       sourceType: attribute
       target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    # Kept at the top level rather than inside the network sub-pipeline: which
+    # event shapes carry `TargetServerAddress*` is unverified until the sandbox
+    # payloads land, and scoping it to a filter would silently drop the mapping
+    # for every shape outside that guess.
+    - type: attribute-remapper
+      name: Map `TargetServerAddressIP4`, `TargetServerAddressIP6` to
+        `network.destination.ip`
+      enabled: true
+      sources:
+        - TargetServerAddressIP4
+        - TargetServerAddressIP6
+      sourceType: attribute
+      target: network.destination.ip
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
