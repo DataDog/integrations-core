@@ -5,7 +5,7 @@ base-package-features = ["deps", "db"]
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["18", "19", "20", "21.8", "22.7", "23.2", "23.8", "24.8", "25.3", "25.8"]
+version = ["18", "19", "20", "21.8", "22.7", "23.2", "23.8", "24.8", "25.3", "25.8", "26.3"]
 
 [envs.default.env-vars]
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
@@ -22,12 +22,18 @@ CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
 
 [envs.metrics]
 dependencies = [
-    "requests==2.32.5"
+    "requests==2.34.2"
 ]
 
 [envs.metrics.env-vars]
 # keep in sync with default version matrix
-VERSIONS = "24.8,25.3,25.8"
+VERSIONS = "24.8,25.3,25.8,26.3"
 
 [envs.metrics.scripts]
 generate = "python scripts/generate_metrics.py"
+# Diff generated metrics against a live server, e.g. `DIFF_VERSION=25.8 hatch run metrics:diff`.
+diff = [
+    "- ddev env start --dev clickhouse py3.13-{env:DIFF_VERSION:}",
+    "python scripts/diff_metrics.py --version {env:DIFF_VERSION:}",
+    "ddev env stop clickhouse py3.13-{env:DIFF_VERSION:}",
+]
