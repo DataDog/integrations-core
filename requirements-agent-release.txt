@@ -174,7 +174,7 @@ datadog-nutanix==1.7.0
 datadog-nvidia-nim==2.4.1
 datadog-nvidia-triton==3.4.1
 datadog-octopus-deploy==2.4.0
-datadog-openldap==3.3.0
+datadog-openldap==3.4.0
 datadog-openmetrics==7.4.1
 datadog-openstack-controller==9.6.1
 datadog-openstack==4.3.0
