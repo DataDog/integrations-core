@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 23.4.0 / 2026-08-05
+
+***Added***:
+
+* Add ``query_metrics.collect_plans`` option to disable SQL Server execution plan collection independently of query metrics. ([#23961](https://github.com/DataDog/integrations-core/pull/23961))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+***Fixed***:
+
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
 ## 23.3.0 / 2026-07-08
 
 ***Added***:
