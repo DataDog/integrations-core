@@ -1,12 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""The injectable batching-strategy extension contract.
-
-A batching strategy maps an ordered list of concrete jobs to an ordered list of job groups (one
-per batch). Keeping the protocol separate lets new strategies depend on the contract without
-importing the default implementation or strategy-independent validation.
-"""
+"""The batching-strategy contract, kept separate so a strategy need not import the default one."""
 
 from __future__ import annotations
 

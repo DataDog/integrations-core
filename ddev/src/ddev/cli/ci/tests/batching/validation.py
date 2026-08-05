@@ -1,14 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Strategy-independent validation of a batch partition.
-
-:func:`validate_batches` enforces the execution contract regardless of which strategy produced the
-partition, so a custom injected callable cannot silently drop, duplicate, overfill, illegally
-split, or emit identity-colliding batches. It is a ``batching``-level concern (invoked by
-:mod:`~ddev.cli.ci.tests.batching.build`), not part of any single strategy, so every strategy is
-held to the same contract.
-"""
+"""Validation of a batch partition, applied to every strategy's output."""
 
 from __future__ import annotations
 
@@ -30,16 +23,14 @@ def validate_batches(
     *,
     config: BatchingConfig,
 ):
-    """Enforce the batch-execution contract independently of the strategy that produced it.
+    """Enforce the batch-execution contract, so no strategy can emit an unrunnable plan.
 
     Rejects empty or over-capacity batches, duplicate job names or artifact identities within a
-    batch, any deviation from exact once-per-job coverage of ``jobs``, and integration splitting
-    that is not justified by the configured oversized-integration condition.
+    batch, any deviation from exact once-per-job coverage of `jobs`, and unjustified integration
+    splitting.
 
-    Artifact identity (``BatchJob.artifact_name``) is checked in addition to the display name
-    because sanitization or ambiguous environment labels can collapse two distinct-named jobs onto
-    the same artifact, which would let their uploaded/organized files overwrite one another even
-    though their names differ.
+    Artifact identity is checked as well as the display name because sanitization can collapse two
+    differently named jobs onto one artifact, whose files would then overwrite each other.
     """
     capacity = config.max_jobs_per_batch
     for index, group in enumerate(job_groups):
@@ -61,8 +52,8 @@ def validate_batches(
 def _validate_coverage(job_groups: Sequence[Sequence[BatchJob]], jobs: Sequence[BatchJob]):
     """Require the partition to contain every input job exactly once, compared by value.
 
-    Comparing by value rather than object identity lets a strategy rebuild equal jobs (by sorting,
-    copying, or round-tripping them) instead of being forced to pass the original instances through.
+    By value, not identity, so a strategy may rebuild equal jobs instead of passing the original
+    instances through.
     """
     planned = Counter(job for group in job_groups for job in group)
     expected = Counter(jobs)

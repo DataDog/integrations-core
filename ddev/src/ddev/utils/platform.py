@@ -12,15 +12,13 @@ from importlib import import_module
 
 
 class PlatformName(StrEnum):
-    """A platform ddev knows how to target, named the way ddev spells it everywhere.
+    """A platform ddev knows how to target.
 
     Values match `normalize_platform_name` output, `.ddev/config.toml` `platforms` entries, and
     Hatch's `platforms` constraints, so a raw configuration string compares equal to its member.
 
-    This is the declarative identity of a platform. It is unrelated to `Platform`, which is the
-    service object ddev uses to interact with the host it happens to be running on, and it is
-    deliberately not what `normalize_platform_name` returns: that function stays lenient because
-    `platform.system()` can report systems ddev does not target.
+    `normalize_platform_name` still returns a plain string, since `platform.system()` can report
+    systems ddev does not target. This is unrelated to `Platform`, the host ddev runs on.
     """
 
     LINUX = auto()

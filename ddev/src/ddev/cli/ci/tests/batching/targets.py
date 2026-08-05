@@ -1,16 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Composable affected-target discovery.
-
-Discovery is an ordered composition of independent rules. Each rule receives the normalized
-changed files and a narrow read-only view of the repository; a deterministic ordered union
-combines their results and applies the testability/exclusion policy.
-
-Testability is sourced from ddev's integration registry (``Integration.is_testable`` and
-``IntegrationRegistry`` iteration) through :class:`RegistryRepositoryFacts`. Rules depend only
-on the narrow :class:`RepositoryFacts` protocol, so tests inject synthetic facts.
-"""
+"""Discovery of the targets a change set affects, as a composition of independent rules."""
 
 from __future__ import annotations
 
@@ -48,26 +39,19 @@ TESTABLE_PATH_PATTERN = re.compile(
 
 # Repository-wide paths that, when changed, trigger the full eligible target set.
 #
-# This set is deliberately narrower than the `paths` filter of `.github/workflows/pr-all.yml`,
-# which also triggers on `ddev/src/**`, the three tooling `pyproject.toml` files, and the test
-# workflow/action definitions. Whether Dispatcher should match those is an open decision; until it
-# is made, this list only covers paths that demonstrably change how every target's tests run.
+# Deliberately narrower than the `paths` filter of `.github/workflows/pr-all.yml`, which also
+# triggers on `ddev/src/**`, the tooling `pyproject.toml` files, and the workflow definitions.
+# Whether Dispatcher should match those too is still an open decision.
 #
-# TODO(manifest): these repository-wide triggers are hard-coded here as path patterns. Once ddev's
-# dependency on `manifest.json` is removed and replaced by per-integration tooling configuration,
-# the intent is to move this policy there: each integration would declare, as structured config,
-# what changes trigger *its own* tests and what (if anything) triggers the full repository test
-# set — rather than expressing it as a shared regex string in this module.
+# TODO(manifest): once ddev no longer depends on `manifest.json`, each integration should declare
+# its own triggers as structured configuration instead of this shared regex.
 REPOSITORY_WIDE_PATTERNS = re.compile(
     r"""
-    # Shared testing framework: a change here can affect every integration's tests.
+    # Shared testing framework.
     datadog_checks_base/datadog_checks/.+
   | datadog_checks_dev/datadog_checks/dev/[^/]+\.py
-    # ddev test-planning/execution code: target discovery, Hatch environment resolution, unit/E2E
-    # invocation, and Dispatcher batching. A change here can alter how *every* target's tests are
-    # selected, planned, or run, so it retests the full eligible set. Unrelated ddev tooling (for
-    # example `ddev/src/ddev/cli/port_commit.py`) is intentionally not listed and only selects the
-    # `ddev` target through the direct rule.
+    # ddev's test planning and execution code. Other ddev tooling is intentionally absent and only
+    # selects the `ddev` target through the direct rule.
   | ddev/src/ddev/cli/test/.+
   | ddev/src/ddev/cli/env/test\.py
   | ddev/src/ddev/testing/.+
@@ -90,12 +74,7 @@ class RepositoryFacts(Protocol):
 
 @dataclass(frozen=True, eq=False)
 class RegistryRepositoryFacts:
-    """A :class:`RepositoryFacts` implementation backed by ddev's integration registry.
-
-    Testability is delegated to ddev (``Integration.is_testable`` and
-    ``IntegrationRegistry.iter_testable``) so it never diverges from the rest of ddev; the
-    only extra policy applied is :data:`UNTESTABLE_TARGETS`.
-    """
+    """`RepositoryFacts` backed by ddev's integration registry, plus the `UNTESTABLE_TARGETS` policy."""
 
     registry: IntegrationRegistry
 
@@ -143,8 +122,6 @@ class DirectTargetRule:
     @staticmethod
     def _affected_paths(changed_file: ChangedFile) -> list[str]:
         paths = [changed_file.path]
-        # A rename removes the file from its source location, so the source target is affected
-        # too. A copy leaves the source untouched, so only the destination path matters.
         if changed_file.change_type is ChangeType.RENAMED and changed_file.previous_path is not None:
             paths.append(changed_file.previous_path)
         return paths
@@ -166,9 +143,8 @@ class DirectTargetRule:
 class RepositoryWideRule:
     """Trigger the full eligible target set when a repository-wide path changes.
 
-    The repository-wide paths only exist in the core repository, so ``is_core`` gates the
-    rule: elsewhere it yields nothing. ``is_core`` is required so a rule can never be built
-    without stating which repository it applies to.
+    Those paths only exist in the core repository, so the rule yields nothing elsewhere. `is_core`
+    is required rather than defaulted so a rule can never be built without stating where it applies.
     """
 
     is_core: bool
@@ -193,7 +169,12 @@ def find_affected_targets(
     *,
     rules: Sequence[TargetRule],
 ) -> list[str]:
-    """Combine rule results by deterministic ordered union under the testability policy."""
+    """Combine every rule's results into the unique set of testable targets.
+
+    Deduplication is what matters: a target selected by two rules would otherwise plan two
+    identically named jobs. The dict keeps insertion order on top of that, which costs nothing
+    over a set and makes runs comparable when debugging, but nothing downstream depends on it.
+    """
     union: dict[str, None] = {}
     for rule in rules:
         for target in rule(changed_files, facts):
