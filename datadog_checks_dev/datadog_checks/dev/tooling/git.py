@@ -39,20 +39,22 @@ def get_current_branch():
 
 def content_changed(file_glob="*"):
     """
-    Return the content changed in the current branch compared to `master`
+    Return the content changed in the current branch compared to the base branch
     """
     with chdir(get_root()):
-        output = run_command(f'git diff master -U0 -- "{file_glob}"', capture='out')
+        output = run_command(f'git diff {get_base_ref()} -U0 -- "{file_glob}"', capture='out')
     return output.stdout
 
 
 def files_changed(include_uncommitted=True):
     """
-    Return the list of file changed in the current branch compared to `master`
+    Return the list of file changed in the current branch compared to the base branch
     """
+    base_ref = get_base_ref()
+
     with chdir(get_root()):
         # Use `--name-status` to include moved files
-        name_status_result = run_command('git diff --name-status origin/master...', capture='out')
+        name_status_result = run_command(f'git diff --name-status {base_ref}...', capture='out')
 
     name_status_lines = name_status_result.stdout.splitlines()
 
@@ -64,7 +66,7 @@ def files_changed(include_uncommitted=True):
     if include_uncommitted:
         with chdir(get_root()):
             # Use `--name-only` to include uncommitted files
-            name_only_result = run_command('git diff --name-only master', capture='out')
+            name_only_result = run_command(f'git diff --name-only {base_ref}', capture='out')
         name_only_lines = name_only_result.stdout.splitlines()
         changed_files.extend(name_only_lines)
 
