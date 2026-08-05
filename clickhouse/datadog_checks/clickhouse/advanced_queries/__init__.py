@@ -59,7 +59,7 @@ import json
 import os
 from typing import Any
 
-from datadog_checks.base.utils.os_interface import os_interface
+from datadog_checks.base.utils.safe_os import safe_os
 
 __all__ = ['SystemAsynchronousMetrics', 'SystemErrors', 'SystemEvents', 'SystemMetrics']
 
@@ -88,7 +88,7 @@ SystemErrors: dict[str, Any] = {
 def load_match_query(name: str) -> dict[str, Any]:
     """Read ``data/<name>.json`` and reconstitute the QueryManager-shaped dict."""
     try:
-        with os_interface.open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
+        with safe_os.open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
             spec = json.load(f)
         items = _expand_match_items(spec['items'], spec['prefix'])
         return {

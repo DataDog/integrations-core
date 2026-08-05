@@ -23,14 +23,14 @@ def mock_output_old_format(*args, **kwargs):
     return _read_fixture('nodetool_output_1.2')
 
 
-def test_check(aggregator, mock_os_interface):
-    mock_os_interface.get_subprocess_output.side_effect = mock_output
-    _check(mock_os_interface.get_subprocess_output, aggregator)
+def test_check(aggregator, mock_safe_os):
+    mock_safe_os.get_subprocess_output.side_effect = mock_output
+    _check(mock_safe_os.get_subprocess_output, aggregator)
 
 
-def test_check_old_format(aggregator, mock_os_interface):
-    mock_os_interface.get_subprocess_output.side_effect = mock_output_old_format
-    _check(mock_os_interface.get_subprocess_output, aggregator)
+def test_check_old_format(aggregator, mock_safe_os):
+    mock_safe_os.get_subprocess_output.side_effect = mock_output_old_format
+    _check(mock_safe_os.get_subprocess_output, aggregator)
 
 
 def _check(mock_output, aggregator):

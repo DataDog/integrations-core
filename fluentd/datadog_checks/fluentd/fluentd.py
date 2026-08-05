@@ -131,7 +131,7 @@ class Fluentd(AgentCheck):
         version_command = '{} --version'.format(self._fluentd_command)
 
         try:
-            out, _, _ = self.os_interface.get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
+            out, _, _ = self.safe_os.get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
         except OSError as exc:
             self.log.debug("Error collecting fluentd version: %s", exc)
             return None

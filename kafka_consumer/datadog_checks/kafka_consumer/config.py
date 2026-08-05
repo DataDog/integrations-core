@@ -5,7 +5,7 @@ import os
 import re
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.base.utils.os_interface import os_interface
+from datadog_checks.base.utils.safe_os import safe_os
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 
 # https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
@@ -77,7 +77,7 @@ class KafkaConfig:
         if (
             not self._tls_ca_cert
             and os.name != 'nt'
-            and os_interface.exists('/opt/datadog-agent/embedded/ssl/certs/cacert.pem')
+            and safe_os.exists('/opt/datadog-agent/embedded/ssl/certs/cacert.pem')
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 

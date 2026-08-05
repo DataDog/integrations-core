@@ -445,7 +445,7 @@ class Disk(AgentCheck):
             # Use raw output mode (space-separated fields encoded in UTF-8).
             # We want to be compatible with lsblk version 2.19 since
             # it is the last version supported by CentOS 6 and SUSE 11.
-            lsblk_out, _, _ = self.os_interface.get_subprocess_output(
+            lsblk_out, _, _ = self.safe_os.get_subprocess_output(
                 ["lsblk", "--noheadings", "--raw", "--output=NAME,LABEL"], self.log
             )
 
@@ -464,7 +464,7 @@ class Disk(AgentCheck):
     def _get_devices_label_from_blkid(self):
         devices_label = {}
         try:
-            blkid_out, _, _ = self.os_interface.get_subprocess_output(['blkid'], self.log)
+            blkid_out, _, _ = self.safe_os.get_subprocess_output(['blkid'], self.log)
             all_devices = [l.split(':', 1) for l in blkid_out.splitlines()]
 
             for d in all_devices:
@@ -482,7 +482,7 @@ class Disk(AgentCheck):
     def _get_devices_label_from_blkid_cache(self):
         devices_label = {}
         try:
-            with self.os_interface.open(self._blkid_cache_file, 'r') as blkid_cache_file_handler:
+            with self.safe_os.open(self._blkid_cache_file, 'r') as blkid_cache_file_handler:
                 blkid_cache_data = blkid_cache_file_handler.readlines()
         except IOError as e:
             self.log.warning("Couldn't read the blkid cache file %s: %s", self._blkid_cache_file, e)

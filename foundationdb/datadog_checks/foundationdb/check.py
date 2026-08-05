@@ -28,16 +28,16 @@ class FoundationdbCheck(AgentCheck):
             fdb.options.set_tls_ca_path(self.instance.get('tls_ca_file'))
         if 'tls_certificate_file' in self.instance:
             # fdb opens these paths itself; validate at the handoff.
-            fdb.options.set_tls_cert_path(self.os_interface.validate_path(self.instance.get('tls_certificate_file')))
+            fdb.options.set_tls_cert_path(self.safe_os.validate_path(self.instance.get('tls_certificate_file')))
         if 'tls_password' in self.instance:
             fdb.options.set_tls_password(self.instance.get('tls_password'))
         if 'tls_key_file' in self.instance:
-            fdb.options.set_tls_key_path(self.os_interface.validate_path(self.instance.get('tls_key_file')))
+            fdb.options.set_tls_key_path(self.safe_os.validate_path(self.instance.get('tls_key_file')))
         if 'tls_verify_peers' in self.instance:
             fdb.options.set_tls_verify_peers(self.instance.get('tls_verify_peers').encode('latin-1'))
 
         if 'cluster_file' in self.instance:
-            self._db = fdb.open(cluster_file=self.os_interface.validate_path(self.instance.get('cluster_file')))
+            self._db = fdb.open(cluster_file=self.safe_os.validate_path(self.instance.get('cluster_file')))
         else:
             self._db = fdb.open()
 

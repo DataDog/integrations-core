@@ -34,7 +34,7 @@ def _untrusted_check(gunicorn_path):
     check = GUnicornCheck('gunicorn', {}, [{'proc_name': 'web', 'gunicorn': gunicorn_path}])
     check.provider = 'untrusted'
     check._AgentCheck__security_config = None
-    check._AgentCheck__os_interface = None
+    check._AgentCheck__safe_os = None
     return check
 
 

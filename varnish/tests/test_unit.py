@@ -36,7 +36,7 @@ pyestmark = [pytest.mark.unit]
     ],
 )
 def test_command_line_manually_unhealthy(
-    mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd, mock_os_interface
+    mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd, mock_safe_os
 ):
     """
     Test the varnishadm output with manually set health
@@ -47,10 +47,10 @@ def test_command_line_manually_unhealthy(
 
     mock_version.return_value = version
     mock_geteuid.return_value = uuid
-    mock_os_interface.get_subprocess_output.side_effect = mocks.backend_manual_unhealthy_mock
+    mock_safe_os.get_subprocess_output.side_effect = mocks.backend_manual_unhealthy_mock
     check.check(instance)
 
-    args, _ = mock_os_interface.get_subprocess_output.call_args
+    args, _ = mock_safe_os.get_subprocess_output.call_args
     assert args[0] == expected_cmd
     aggregator.assert_service_check(
         "varnish.backend_healthy", status=check.CRITICAL, tags=['backend:default', 'varnish_cluster:webs'], count=1
@@ -150,7 +150,7 @@ def test_command_line_manually_unhealthy(
     ],
 )
 def test_command_line_healthy(
-    mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd, output_mock, mock_os_interface
+    mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd, output_mock, mock_safe_os
 ):
     """
     Test the Varnishadm output for version >= 4.x
@@ -162,9 +162,9 @@ def test_command_line_healthy(
     mock_version.return_value = version
     mock_geteuid.return_value = uuid
 
-    mock_os_interface.get_subprocess_output.side_effect = output_mock
+    mock_safe_os.get_subprocess_output.side_effect = output_mock
     check.check(instance)
-    args, _ = mock_os_interface.get_subprocess_output.call_args
+    args, _ = mock_safe_os.get_subprocess_output.call_args
     assert args[0] == expected_cmd
     aggregator.assert_service_check(
         "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'varnish_cluster:webs'], count=1

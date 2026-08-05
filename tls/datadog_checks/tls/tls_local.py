@@ -18,7 +18,7 @@ class TLSLocalCheck(object):
 
     def _get_local_cert(self):
         try:
-            with self.agent_check.os_interface.open(self.agent_check._local_cert_path, 'rb') as f:
+            with self.agent_check.safe_os.open(self.agent_check._local_cert_path, 'rb') as f:
                 self.log.debug('Reading from local cert path')
                 cert = f.read()
         except Exception as e:

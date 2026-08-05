@@ -5,7 +5,7 @@ import os
 from typing import Any
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.base.utils.os_interface import os_interface
+from datadog_checks.base.utils.safe_os import safe_os
 
 
 class KafkaActionsConfig:
@@ -52,7 +52,7 @@ class KafkaActionsConfig:
         if (
             not self._tls_ca_cert
             and os.name != 'nt'
-            and os_interface.exists('/opt/datadog-agent/embedded/ssl/certs/cacert.pem')
+            and safe_os.exists('/opt/datadog-agent/embedded/ssl/certs/cacert.pem')
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 

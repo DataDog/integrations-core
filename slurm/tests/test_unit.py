@@ -72,7 +72,7 @@ def test_acct_command_params(instance):
         assert check.sacct_cmd == expected_cmd
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_sinfo_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sinfo_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -94,7 +94,7 @@ def test_sinfo_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_sinfo_level_2_processing(mock_get_subprocess_output, instance, aggregator, caplog):
     instance['collect_sinfo_stats'] = True
     instance['sinfo_collection_level'] = 2
@@ -122,7 +122,7 @@ def test_sinfo_level_2_processing(mock_get_subprocess_output, instance, aggregat
         aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_sinfo_error_logs(mock_get_subprocess_output, instance, caplog):
     instance['collect_sinfo_stats'] = True
     instance['sinfo_collection_level'] = 3
@@ -147,7 +147,7 @@ def test_sinfo_error_logs(mock_get_subprocess_output, instance, caplog):
         assert "out of range for metric" in caplog.text
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_squeue_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_squeue_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -159,7 +159,7 @@ def test_squeue_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_sacct_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sacct_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -173,7 +173,7 @@ def test_sacct_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_sshare_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sshare_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -185,7 +185,7 @@ def test_sshare_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_sdiag_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sdiag_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -203,7 +203,7 @@ def test_sdiag_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_scontrol_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_scontrol_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -228,7 +228,7 @@ def test_scontrol_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_scontrol_processing_resolves_host_pid(mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path):
     instance['collect_scontrol_stats'] = True
     instance['resolve_scontrol_host_pids'] = True
@@ -300,7 +300,7 @@ def test_scontrol_processing_resolves_host_pid(mock_get_subprocess_output, insta
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_scontrol_processing_does_not_resolve_host_pid_by_default(
     mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path
 ):
@@ -341,7 +341,7 @@ def test_resolve_scontrol_host_pid_returns_match_without_nspids_when_missing(ins
     assert check._resolve_scontrol_host_pid("3771", {}) == ProcessPidMatch(host_pid="3771", namespace_pids=[])
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 @patch('datadog_checks.slurm.check.SlurmCheck._get_process_tags')
 def test_scontrol_processing_gets_process_tags_for_host_pid_only(
     mock_get_process_tags, mock_get_subprocess_output, instance, monkeypatch, tmp_path
@@ -370,7 +370,7 @@ def test_scontrol_processing_gets_process_tags_for_host_pid_only(
     assert mock_get_process_tags.call_count == 3
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check):
     instance['collect_sinfo_stats'] = True
     instance['sinfo_collection_level'] = 1
@@ -401,7 +401,7 @@ def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance, caplog):
     # Test enrich_scontrol_tags error
     instance['collect_scontrol_stats'] = True
@@ -420,7 +420,7 @@ def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance, caplog
     assert "Error fetching squeue details for job 123: Test exception" in caplog.text
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, instance, caplog):
     instance['collect_scontrol_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -436,7 +436,7 @@ def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, insta
     assert result == []
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_process_seff_metric_submission(mock_get_subprocess_output, instance, aggregator):
     # Load the seff fixture
     with open('tests/fixtures/seff.txt') as f:
@@ -499,7 +499,7 @@ def test_sinfo_gpu_gres_multi_type(instance, aggregator):
     aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=kepler)
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.get_subprocess_output')
 def test_process_seff_normalizes_kilobytes(mock_get_subprocess_output, instance, aggregator):
     # Slurm 25.05 seff reports small jobs in KB (and large ones in GB); memory must still
     # normalize to MB rather than being dropped (regression for the hardcoded 'MB').

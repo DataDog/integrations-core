@@ -18,7 +18,7 @@ class SolarisNetwork(Network):
         # Default to kstat -p link:0:
         custom_tags = instance.get('tags', [])
         try:
-            netstat, _, _ = self.os_interface.get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
+            netstat, _, _ = self.safe_os.get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
             metrics_by_interface = self._parse_solaris_netstat(netstat)
             for interface, metrics in metrics_by_interface.items():
                 self.submit_devicemetrics(interface, metrics, custom_tags)
@@ -26,7 +26,7 @@ class SolarisNetwork(Network):
             self.log.exception("Error collecting kstat stats.")
 
         try:
-            netstat, _, _ = self.os_interface.get_subprocess_output(["netstat", "-s", "-P", "tcp"], self.log)
+            netstat, _, _ = self.safe_os.get_subprocess_output(["netstat", "-s", "-P", "tcp"], self.log)
             # TCP: tcpRtoAlgorithm=     4 tcpRtoMin           =   200
             # tcpRtoMax           = 60000 tcpMaxConn          =    -1
             # tcpActiveOpens      =    57 tcpPassiveOpens     =    50

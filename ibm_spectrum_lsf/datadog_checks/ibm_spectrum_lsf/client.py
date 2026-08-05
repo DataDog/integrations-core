@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.base.utils.os_interface import os_interface
+from datadog_checks.base.utils.safe_os import safe_os
 
 
 class LSFClient:
@@ -12,7 +12,7 @@ class LSFClient:
     def _run_command(self, *command: str) -> tuple[str, str, int]:
         self.log.debug("Running command: %s", command)
         try:
-            result = os_interface.run(command, timeout=5, capture_output=True, text=True)
+            result = safe_os.run(command, timeout=5, capture_output=True, text=True)
             self.log.trace("Command output: %s", result.stdout)
             return result.stdout, result.stderr, result.returncode
         except Exception as e:

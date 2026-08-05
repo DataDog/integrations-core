@@ -1073,7 +1073,7 @@ class MySql(DatabaseCheck):
         if pid_file is not None:
             self.log.debug("pid file: %s", str(pid_file))
             try:
-                with self.os_interface.open(pid_file, 'rb') as f:
+                with self.safe_os.open(pid_file, 'rb') as f:
                     pid = int(f.readline())
             except IOError:
                 self.log.debug("Cannot read mysql pid file %s", pid_file)

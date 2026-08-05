@@ -345,7 +345,7 @@ def test_get_previous_iteration_log_cursor_when_cusror_is_not_none(utc_timestamp
 
 
 @pytest.mark.unit
-def test_fetch_audit_logs(instance, mock_os_interface):
+def test_fetch_audit_logs(instance, mock_safe_os):
     """Multiple file paths are joined into a single auditreduce command."""
     logs = (
         "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>\n<record time=\"Thu Jun  5 "
@@ -357,7 +357,7 @@ def test_fetch_audit_logs(instance, mock_os_interface):
     mock_auditreduce_process = MagicMock(stdout=mock_auditreduce_stdout)
     mock_praudit_process = MagicMock(communicate=MagicMock(return_value=(logs, "")))
 
-    mock_popen = mock_os_interface.popen
+    mock_popen = mock_safe_os.popen
     mock_popen.side_effect = [mock_auditreduce_process, mock_praudit_process]
 
     file_paths = [
@@ -389,7 +389,7 @@ def test_fetch_audit_logs(instance, mock_os_interface):
 
 
 @pytest.mark.unit
-def test_fetch_audit_logs_single_file(instance, mock_os_interface):
+def test_fetch_audit_logs_single_file(instance, mock_safe_os):
     """A single-element list produces the correct auditreduce command."""
     logs = "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>"
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
@@ -397,7 +397,7 @@ def test_fetch_audit_logs_single_file(instance, mock_os_interface):
     mock_auditreduce_process = MagicMock(stdout=mock_auditreduce_stdout)
     mock_praudit_process = MagicMock(communicate=MagicMock(return_value=(logs, "")))
 
-    mock_popen = mock_os_interface.popen
+    mock_popen = mock_safe_os.popen
     mock_popen.side_effect = [mock_auditreduce_process, mock_praudit_process]
 
     file_path = "/var/audit/20250605082138.20250605082142"

@@ -7,7 +7,7 @@ The rest of the suite proves parity: the check behaves as it always did. These
 tests prove the other half, that a config-derived binary outside the allowlist is
 never launched. They exercise the real check, its real config parsing and its
 real interface binding, so they would fail if the check reached the OS through
-the unenforcing module-level singleton instead of `self.os_interface`.
+the unenforcing module-level singleton instead of `self.safe_os`.
 """
 
 from unittest import mock
@@ -39,7 +39,7 @@ def _untrusted_check(instance):
     check.provider = 'untrusted'
     # Drop caches so the new provider/agent config is picked up.
     check._AgentCheck__security_config = None
-    check._AgentCheck__os_interface = None
+    check._AgentCheck__safe_os = None
     return check
 
 
@@ -72,7 +72,7 @@ def test_trusted_provider_is_not_blocked(enforcing_agent, instance):
     check = SlurmCheck('slurm', {}, [instance])
     check.provider = 'file'  # trusted
     check._AgentCheck__security_config = None
-    check._AgentCheck__os_interface = None
+    check._AgentCheck__safe_os = None
 
     with mock.patch('subprocess.run') as real_run:
         real_run.return_value = mock.MagicMock(stdout='', stderr='', returncode=0)

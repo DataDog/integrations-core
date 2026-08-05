@@ -22,10 +22,6 @@ except ImportError:
     fcntl = None
 
 
-def find_executable(osx, name):
-    return osx.which(name)
-
-
 class Network(AgentCheck):
     SOURCE_TYPE_NAME = 'system'
     PSUTIL_TYPE_MAPPING = {socket.SOCK_STREAM: 'tcp', socket.SOCK_DGRAM: 'udp'}
@@ -72,6 +68,9 @@ class Network(AgentCheck):
         # along with a few other things
         self._setup_metrics(self.instance)
         self.check_initializations.append(self._validate)
+
+    def find_executable(self, name):
+        return self.safe_os.which(name)
 
     def _validate(self):
         if not isinstance(self._excluded_ifaces, list):
@@ -294,7 +293,7 @@ class Network(AgentCheck):
 
         if proc_location != "/proc":
             # If we have `ss`, we're fine with a non-standard `/proc` location
-            if find_executable(self.os_interface, "ss") is None:
+            if self.find_executable("ss") is None:
                 self.warning(
                     "Cannot collect connection state: `ss` cannot be found and currently with a custom /proc path: %s",
                     proc_location,

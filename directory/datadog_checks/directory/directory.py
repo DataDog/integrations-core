@@ -11,8 +11,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.directory.config import DirectoryConfig
 
-from .traverse import walk
-
 SERVICE_DIRECTORY_EXISTS = 'system.disk.directory.exists'
 
 
@@ -47,7 +45,7 @@ class DirectoryCheck(AgentCheck):
     def check(self, _):
         service_check_tags = ['dir_name:{}'.format(self._config.name)]
         service_check_tags.extend(self._config.tags)
-        if not self.os_interface.exists(self._config.abs_directory):
+        if not self.safe_os.exists(self._config.abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
                 "have permissions to access it, skipping.".format(self._config.abs_directory)
@@ -119,7 +117,7 @@ class DirectoryCheck(AgentCheck):
                 try:
                     self.log.debug('File entries in matched files: %s', str(file_entry))
                     file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
-                    real_path = self.os_interface.realpath(file_entry.path)
+                    real_path = self.safe_os.realpath(file_entry.path)
                 except OSError as ose:
                     self.log.debug(
                         'DirectoryCheck: could not stat file %s, skipping it - %s', join(root, file_entry.name), ose
@@ -191,6 +189,67 @@ class DirectoryCheck(AgentCheck):
             # seen_files = {'/path/to/real/file': [list of symlinks]}
             self.log.trace("Processed files: %s", seen_files)
 
+    def walk(self, top, onerror=None, followlinks=False):
+        """A simplified and modified version of stdlib's `os.walk` that yields the
+        `os.DirEntry` objects that `scandir` produces during traversal instead of paths as
+        strings.
+        """
+        # This implementation is based on https://github.com/python/cpython/blob/3.8/Lib/os.py#L280.
+
+        # This is a significant optimization for our use case (particularly on Windows) that
+        # justifies maintaining our own version of the function instead of using the
+        # stdlib's one directly. We need to stat every file to collect useful data, and the
+        # following quote from the docs
+        # (https://docs.python.org/3.8/library/os.html#os.scandir) explains very well why we
+        # want to keep those `os.DirEntry` objects:
+
+        # Using `scandir()` instead of `listdir()` can significantly increase the performance of
+        # code that also needs file type or file attribute information, because os.DirEntry
+        # objects expose this information if the operating system provides it when scanning a
+        # directory. All `os.DirEntry` methods may perform a system call, but is_dir() and
+        # is_file() usually only require a system call for symbolic links; os.DirEntry.stat()
+        # always requires a system call on Unix but only requires one for symbolic links on
+        # Windows.
+
+        dirs = []
+        nondirs = []
+
+        try:
+            scandir_iter = self.safe_os.scandir(top)
+        except OSError as error:
+            if onerror is not None:
+                onerror(error)
+            return
+
+        # Avoid repeated global lookups.
+        get_next = next
+
+        while True:
+            try:
+                entry = get_next(scandir_iter)
+            except StopIteration:
+                break
+            except OSError as error:
+                if onerror is not None:
+                    onerror(error)
+                continue
+
+            try:
+                is_dir = entry.is_dir(follow_symlinks=followlinks)
+            except OSError:
+                is_dir = False
+
+            if is_dir:
+                dirs.append(entry)
+            else:
+                nondirs.append(entry)
+
+        yield top, dirs, nondirs
+
+        for dir_entry in dirs:
+            for entry in self.walk(dir_entry.path, onerror, followlinks):
+                yield entry
+
     def _walk(self):
         """
         Wraps walker iteration to handle errors and recursive option.
@@ -199,9 +258,7 @@ class DirectoryCheck(AgentCheck):
         def log_error(e):
             self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
 
-        walker = walk(
-            self.os_interface, self._config.abs_directory, onerror=log_error, followlinks=self._config.follow_symlinks
-        )
+        walker = self.walk(self._config.abs_directory, onerror=log_error, followlinks=self._config.follow_symlinks)
 
         while True:
             try:

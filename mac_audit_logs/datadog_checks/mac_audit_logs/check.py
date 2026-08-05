@@ -49,7 +49,7 @@ class MacAuditLogsCheck(AgentCheck):
     def collect_relevant_files(
         self, last_record_time: str
     ) -> tuple[list[tuple[datetime, datetime, str]], list[tuple[datetime, str]]]:
-        if not self.os_interface.isdir(self.audit_logs_dir_path):
+        if not self.safe_os.isdir(self.audit_logs_dir_path):
             err_message = (
                 f"`{self.audit_logs_dir_path}` directory does not exist. Please ensure BSM auditing is enabled."
             )
@@ -61,12 +61,12 @@ class MacAuditLogsCheck(AgentCheck):
         lookback_cutoff = utils.time_string_to_datetime_utc(utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET))
         last_record_datetime = utils.time_string_to_datetime_utc(last_record_time)
 
-        for file_name in self.os_interface.listdir(self.audit_logs_dir_path):
+        for file_name in self.safe_os.listdir(self.audit_logs_dir_path):
             if file_name == "current":
                 continue
 
             file_path = os.path.join(self.audit_logs_dir_path, file_name)
-            if not self.os_interface.isfile(file_path):
+            if not self.safe_os.isfile(file_path):
                 self.log.debug(constants.LOG_TEMPLATE.format(message=f"Skipping non-file entry: {file_name}"))
                 continue
 
@@ -128,13 +128,13 @@ class MacAuditLogsCheck(AgentCheck):
 
         try:
             # use TZ=UTC because auditreduce does not translate daylight savings to UTC and always uses standard time
-            auditreduce_process = self.os_interface.popen(
+            auditreduce_process = self.safe_os.popen(
                 ["sudo", "auditreduce", "-a", time_filter_arg, *file_paths],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env={**os.environ, "TZ": "UTC"},
             )
-            praudit_process = self.os_interface.popen(
+            praudit_process = self.safe_os.popen(
                 ["sudo", "praudit", "-xsl"],
                 stdin=auditreduce_process.stdout,
                 stdout=subprocess.PIPE,
@@ -218,7 +218,7 @@ class MacAuditLogsCheck(AgentCheck):
         valid_closed: list[tuple[datetime, datetime, str]] = []
         for start_time, end_time, file_name in closed:
             file_path = os.path.join(self.audit_logs_dir_path, file_name)
-            if not self.os_interface.exists(file_path):
+            if not self.safe_os.exists(file_path):
                 self.log.info(
                     constants.LOG_TEMPLATE.format(
                         message=f"{file_path} is not available. Skipping collection for this file."
@@ -236,7 +236,7 @@ class MacAuditLogsCheck(AgentCheck):
         valid_open: list[tuple[datetime, str]] = []
         for start_time, file_name in still_open:
             file_path = os.path.join(self.audit_logs_dir_path, file_name)
-            if not self.os_interface.exists(file_path):
+            if not self.safe_os.exists(file_path):
                 self.log.info(
                     constants.LOG_TEMPLATE.format(
                         message=f"{file_path} is not available. Skipping collection for this file."
@@ -305,7 +305,7 @@ class MacAuditLogsCheck(AgentCheck):
                 last_completed_open,
             ) = self.get_previous_iteration_log_cursor(previous_cursor)
 
-            timezone_offset = self.os_interface.run(["date", "+%z"], capture_output=True, text=True).stdout.strip()
+            timezone_offset = self.safe_os.run(["date", "+%z"], capture_output=True, text=True).stdout.strip()
 
             closed, still_open = self.collect_relevant_files(last_record_time)
 
