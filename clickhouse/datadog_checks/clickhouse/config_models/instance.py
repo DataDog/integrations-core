@@ -33,6 +33,16 @@ class CollectAsyncInserts(BaseModel):
     max_samples_per_collection: Optional[int] = None
 
 
+class CollectPendingAsyncInserts(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_samples_per_collection: Optional[int] = None
+
+
 class CollectSchemas(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -165,6 +175,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     collect_async_inserts: Optional[CollectAsyncInserts] = None
+    collect_pending_async_inserts: Optional[CollectPendingAsyncInserts] = None
     collect_schemas: Optional[CollectSchemas] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
