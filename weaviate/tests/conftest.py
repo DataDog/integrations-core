@@ -4,14 +4,13 @@
 import json
 import os
 import time
-from contextlib import ExitStack
 
 import pytest
 import requests
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.dev.kube_port_forward import PortForwardConfig, multiple_port_forward
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.weaviate.check import DEFAULT_LIVENESS_ENDPOINT
 
@@ -36,23 +35,23 @@ def setup_weaviate():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_weaviate]) as kubeconfig, ExitStack() as stack:
-        weaviate_host, weaviate_port = stack.enter_context(
-            port_forward(kubeconfig, 'weaviate', 2112, 'statefulset', 'weaviate')
-        )
-        weaviate_host, weaviate_api_port = stack.enter_context(
-            port_forward(kubeconfig, 'weaviate', 8080, 'statefulset', 'weaviate')
-        )
+    with kind_run(conditions=[setup_weaviate]) as kubeconfig:
+        configs = [
+            PortForwardConfig('weaviate', 2112, 'statefulset', 'weaviate'),
+            PortForwardConfig('weaviate', 8080, 'statefulset', 'weaviate'),
+        ]
+        with multiple_port_forward(kubeconfig, configs) as forwards:
+            (weaviate_host, weaviate_port), (_, weaviate_api_port) = forwards
 
-        instance = {
-            'openmetrics_endpoint': f'http://{weaviate_host}:{weaviate_port}/metrics',
-            'weaviate_api_endpoint': f'http://{weaviate_host}:{weaviate_api_port}',
-        }
-        if USE_AUTH:
-            instance['headers'] = {'Authorization': 'Bearer test123'}
+            instance = {
+                'openmetrics_endpoint': f'http://{weaviate_host}:{weaviate_port}/metrics',
+                'weaviate_api_endpoint': f'http://{weaviate_host}:{weaviate_api_port}',
+            }
+            if USE_AUTH:
+                instance['headers'] = {'Authorization': 'Bearer test123'}
 
-        make_weaviate_request(instance)
-        yield instance
+            make_weaviate_request(instance)
+            yield instance
 
 
 def make_weaviate_request(instance):
