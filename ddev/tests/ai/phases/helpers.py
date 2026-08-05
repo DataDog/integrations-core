@@ -144,6 +144,7 @@ def make_agent_phase(
     agent_config: AgentConfig | None = None,
     resume_frontier: frozenset[str] = frozenset(),
     phase_cls: type[AgenticPhase] = AgenticPhase,
+    phase_kwargs: dict[str, Any] | None = None,
 ) -> tuple[AgenticPhase, CheckpointManager]:
     """Build an AgenticPhase ready for process_message-driven tests."""
     effective_agent_config = agent_config or make_agent_config(tools=[])
@@ -178,6 +179,7 @@ def make_agent_phase(
         context=context,
         agent_config=effective_agent_config,
         process_factory=process_factory,
+        **(phase_kwargs or {}),
     )
     phase.queue = message_queue
     return phase, checkpoint_manager

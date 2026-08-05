@@ -114,6 +114,7 @@ def test_register_from_discovers_subpackage_phases():
     names = registry.known_names()
     assert "AgenticPhase" in names
     assert "InspectEndpointPhase" in names
+    assert "OpenMetricsBuildPhase" in names
     assert registry.import_errors == {}
 
 
