@@ -391,7 +391,7 @@ class AgentCheck(object):
         self.__formatted_tags = None
         self.__logs_enabled = None
         self.__security_config = None
-        self.__os_interface = None
+        self.__safe_os = None
         self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
@@ -517,7 +517,7 @@ class AgentCheck(object):
         return self.__security_config
 
     @property
-    def os_interface(self):
+    def safe_os(self):
         """Validated filesystem/subprocess interface bound to this check's security config.
 
         Config-derived paths and executables passed through this interface are
@@ -525,12 +525,12 @@ class AgentCheck(object):
         enforcement is disabled (the default), behavior is byte-identical to the
         stdlib calls it replaces.
         """
-        if self.__os_interface is None:
-            from datadog_checks.base.utils.os_interface import OSInterface, TrustedProviderValidator
+        if self.__safe_os is None:
+            from datadog_checks.base.utils.safe_os import SafeOS, TrustedProviderValidator
 
-            self.__os_interface = OSInterface(TrustedProviderValidator(self.security_config))
+            self.__safe_os = SafeOS(TrustedProviderValidator(self.security_config))
 
-        return self.__os_interface
+        return self.__safe_os
 
     @property
     def formatted_tags(self):
@@ -580,7 +580,7 @@ class AgentCheck(object):
                 self.instance or {},
                 self.TLS_CONFIG_REMAPPER,
                 overrides=overrides,
-                os_interface=self.os_interface,
+                safe_os=self.safe_os,
             )
 
         if refresh:

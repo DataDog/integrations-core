@@ -218,7 +218,7 @@ def _exec_argv(command: "str | Sequence[str]") -> list[str]:
 _WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND | os.O_TRUNC
 
 
-class OSInterface:
+class SafeOS:
     """Validated passthrough over direct filesystem and subprocess operations."""
 
     def __init__(self, validator: OSValidator | None = None):
@@ -336,5 +336,5 @@ class OSInterface:
 # Module-level default: NO ENFORCEMENT. Permanently bound to NoOpValidator with
 # no injection point, for sites with no check instance that touch only paths a
 # config cannot influence. Anything touching a config-derived path or executable
-# must use AgentCheck.os_interface, or enforcement silently does nothing there.
-os_interface = OSInterface()
+# must use AgentCheck.safe_os, or enforcement silently does nothing there.
+safe_os = SafeOS()

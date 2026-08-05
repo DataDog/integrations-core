@@ -53,7 +53,7 @@ nav:
     - Basics: base/basics.md
     - HTTP: base/http.md
     - TLS/SSL: base/tls.md
-    - OS Interface: base/os-interface.md
+    - safe_os: base/safe-os.md
     - Databases: base/databases.md
     - OpenMetrics: base/openmetrics.md
     - Log Crawlers: base/logs-crawlers.md

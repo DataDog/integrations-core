@@ -7,13 +7,13 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.base.stubs.os_interface import METHOD_NAMES, MockOSInterface
+from datadog_checks.base.stubs.safe_os import METHOD_NAMES, MockSafeOS
 
 pytestmark = pytest.mark.unit
 
 
 def test_methods_are_mocks():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     for name in METHOD_NAMES:
         assert isinstance(getattr(fake, name), mock.MagicMock)
 
@@ -23,7 +23,7 @@ def test_methods_are_mocks():
 
 
 def test_add_file_predicates_and_read():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/etc/app/conf.yaml", "key: value")
 
     assert fake.exists("/etc/app/conf.yaml") is True
@@ -36,7 +36,7 @@ def test_add_file_predicates_and_read():
 
 
 def test_add_file_registers_parent_dirs():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/a/b/c.txt", "x")
 
     assert fake.isdir("/a") is True
@@ -46,34 +46,34 @@ def test_add_file_registers_parent_dirs():
 
 
 def test_trailing_slash_normalized():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_dir("/data/")
     assert fake.isdir("/data") is True
     assert fake.isdir("/data/") is True
 
 
 def test_open_read_missing_file_raises():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     with pytest.raises(FileNotFoundError):
         fake.open("/nope")
 
 
 def test_open_binary_read():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/blob", b"\x00\x01\x02")
     with fake.open("/blob", "rb") as f:
         assert f.read() == b"\x00\x01\x02"
 
 
 def test_open_write_captures_content():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     with fake.open("/out.txt", "w") as f:
         f.write("hello")
     assert fake.get_file("/out.txt") == "hello"
 
 
 def test_open_append_preserves_existing():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/log", "line1\n")
     with fake.open("/log", "a") as f:
         f.write("line2\n")
@@ -81,7 +81,7 @@ def test_open_append_preserves_existing():
 
 
 def test_open_is_line_iterable():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/status", "NSpid:\t42 7\nName:\tx\n")
     with fake.open("/status") as f:
         lines = list(f)
@@ -89,20 +89,20 @@ def test_open_is_line_iterable():
 
 
 def test_listdir_lists_files_and_dirs():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/base/f1", "")
     fake.add_dir("/base/sub")
     assert fake.listdir("/base") == ["f1", "sub"]
 
 
 def test_listdir_missing_dir_raises():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     with pytest.raises(FileNotFoundError):
         fake.listdir("/missing")
 
 
 def test_scandir_is_context_manager_with_entries():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/proc/42/status", "")
     fake.add_dir("/proc/42")
 
@@ -112,7 +112,7 @@ def test_scandir_is_context_manager_with_entries():
 
 
 def test_walk_traverses_tree():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/root/a.txt", "")
     fake.add_file("/root/sub/b.txt", "")
 
@@ -122,7 +122,7 @@ def test_walk_traverses_tree():
 
 
 def test_set_command_output_get_subprocess_output():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.set_command_output("netstat -i", stdout="iface data", returncode=0)
 
     out, err, code = fake.get_subprocess_output("netstat -i", None)
@@ -130,14 +130,14 @@ def test_set_command_output_get_subprocess_output():
 
 
 def test_set_command_output_matches_list_command():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.set_command_output(["ps", "aux"], stdout="procs")
     out, _, _ = fake.get_subprocess_output(["ps", "aux"], None)
     assert out == "procs"
 
 
 def test_set_command_output_run_returns_completed_process():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.set_command_output("lparstat -m", stdout="mem", returncode=0)
 
     proc = fake.run(["lparstat", "-m"], text=True)
@@ -147,7 +147,7 @@ def test_set_command_output_run_returns_completed_process():
 
 
 def test_run_bytes_when_not_text():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.set_command_output("lparstat -m", stdout="mem")
     proc = fake.run(["lparstat", "-m"])
     assert proc.stdout == b"mem"
@@ -155,7 +155,7 @@ def test_run_bytes_when_not_text():
 
 def test_direct_mock_configuration_still_works():
     # The layer must not get in the way of raw mock usage.
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.get_subprocess_output.return_value = ("x", "", 0)
     assert fake.get_subprocess_output("anything", None) == ("x", "", 0)
 
@@ -167,24 +167,24 @@ def test_direct_mock_configuration_still_works():
 def test_method_names_covers_the_full_interface_surface():
     """Guard against drift between the real interface and the stub.
 
-    A method added to OSInterface but missing here is not redirected by the
-    `mock_os_interface` fixture, so a test using the fixture would silently
+    A method added to SafeOS but missing here is not redirected by the
+    `mock_safe_os` fixture, so a test using the fixture would silently
     reach the real filesystem instead of the fake.
     """
-    from datadog_checks.base.utils.os_interface import OSInterface
+    from datadog_checks.base.utils.safe_os import SafeOS
 
-    real = {name for name in dir(OSInterface) if not name.startswith("_") and callable(getattr(OSInterface, name))}
+    real = {name for name in dir(SafeOS) if not name.startswith("_") and callable(getattr(SafeOS, name))}
     assert set(METHOD_NAMES) == real
 
 
 def test_glob_is_backed_by_the_in_memory_filesystem():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_files({"/etc/dd/a.conf": "", "/etc/dd/b.conf": "", "/etc/dd/c.txt": ""})
     assert sorted(fake.glob("/etc/dd/*.conf")) == ["/etc/dd/a.conf", "/etc/dd/b.conf"]
 
 
 def test_glob_returns_empty_when_nothing_matches():
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/etc/dd/a.conf")
     assert fake.glob("/etc/dd/*.nope") == []
 
@@ -196,7 +196,7 @@ def test_walk_yields_the_registered_paths_verbatim():
     registered keys use forward slashes, so the yielded dirpath stops matching
     the key the test registered.
     """
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/root/sub/deep/c.txt", "")
     dirpaths = [dirpath for dirpath, _, _ in fake.walk("/root")]
     assert dirpaths == ["/root", "/root/sub", "/root/sub/deep"]
@@ -205,7 +205,7 @@ def test_walk_yields_the_registered_paths_verbatim():
 
 def test_glob_depth_is_separator_agnostic():
     """`*` must not cross a separator regardless of the platform's os.sep."""
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_files({"/etc/dd/a.conf": "", "/etc/dd/sub/b.conf": ""})
     assert fake.glob("/etc/dd/*.conf") == ["/etc/dd/a.conf"]
     assert sorted(fake.glob("/etc/dd/**/*.conf", recursive=True)) == [
@@ -231,7 +231,7 @@ def windows_path_semantics(monkeypatch):
 
 
 def test_walk_under_windows_path_semantics(windows_path_semantics):
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/root/a.txt", "")
     fake.add_file("/root/sub/b.txt", "")
     fake.add_file("/root/sub/deep/c.txt", "")
@@ -243,7 +243,7 @@ def test_walk_under_windows_path_semantics(windows_path_semantics):
 
 
 def test_glob_under_windows_path_semantics(windows_path_semantics):
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_files({"/etc/dd/a.conf": "", "/etc/dd/sub/b.conf": "", "/etc/dd/c.txt": ""})
     assert fake.glob("/etc/dd/*.conf") == ["/etc/dd/a.conf"]
     assert sorted(fake.glob("/etc/dd/**/*.conf", recursive=True)) == [
@@ -253,7 +253,7 @@ def test_glob_under_windows_path_semantics(windows_path_semantics):
 
 
 def test_listing_under_windows_path_semantics(windows_path_semantics):
-    fake = MockOSInterface()
+    fake = MockSafeOS()
     fake.add_file("/root/a.txt", "")
     fake.add_file("/root/sub/b.txt", "")
     assert fake.listdir("/root") == ["a.txt", "sub"]

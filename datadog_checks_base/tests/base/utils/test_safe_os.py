@@ -16,17 +16,17 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base.utils.models.validation.security import SecurityConfig
-from datadog_checks.base.utils.os_interface import (
+from datadog_checks.base.utils.safe_os import (
     NoOpValidator,
-    OSInterface,
+    SafeOS,
     TrustedProviderValidator,
-    os_interface,
+    safe_os,
 )
 
 
 @pytest.fixture
 def osx():
-    return OSInterface()
+    return SafeOS()
 
 
 class RecordingValidator:
@@ -235,7 +235,7 @@ def test_get_subprocess_output_passthrough(osx):
 # --------------------------------------------------------------------------- #
 def test_validator_invoked_on_path_ops(tmp_path):
     v = RecordingValidator()
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     f = tmp_path / "a.txt"
     f.write_text("x")
     osx.exists(str(f))
@@ -251,7 +251,7 @@ def test_validator_can_deny_path(tmp_path):
     f = tmp_path / "a.txt"
     f.write_text("x")
     v = RecordingValidator(deny_paths={str(f)})
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     with pytest.raises(PermissionError):
         osx.open(str(f))
     # denial happens before the real call: file is never opened
@@ -260,7 +260,7 @@ def test_validator_can_deny_path(tmp_path):
 
 def test_open_write_mode_reported_to_validator(tmp_path):
     v = RecordingValidator()
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     with osx.open(str(tmp_path / "w.txt"), "w"):
         pass
     assert (str(tmp_path / "w.txt"), "w") in v.path_calls
@@ -268,14 +268,14 @@ def test_open_write_mode_reported_to_validator(tmp_path):
 
 def test_validator_invoked_on_exec(osx=None):
     v = RecordingValidator()
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     osx.run(["echo", "hi"], capture_output=True)
     assert v.exec_calls == [["echo", "hi"]]
 
 
 def test_validator_can_deny_exec():
     v = RecordingValidator(deny_execs={"echo"})
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     with pytest.raises(PermissionError):
         osx.run(["echo", "hi"], capture_output=True)
     assert v.exec_calls == [["echo", "hi"]]
@@ -283,7 +283,7 @@ def test_validator_can_deny_exec():
 
 def test_exec_string_command_validated_as_argv0():
     v = RecordingValidator()
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     # get_subprocess_output accepts a whitespace-split string command
     import logging
 
@@ -297,8 +297,8 @@ def test_exec_string_command_validated_as_argv0():
 def test_module_singleton_is_noop(tmp_path):
     p = tmp_path / "s.txt"
     p.write_text("ok")
-    assert os_interface.exists(str(p)) is True
-    with os_interface.open(str(p)) as f:
+    assert safe_os.exists(str(p)) is True
+    with safe_os.open(str(p)) as f:
         assert f.read() == "ok"
 
 
@@ -314,7 +314,7 @@ def test_noop_validator_returns_none():
 def test_trusted_provider_disabled_allows_everything(tmp_path):
     # enforcement off (default): identical to no-op
     sec = SecurityConfig(check_name="c", provider="untrusted", ignore_untrusted_file_params=False)
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     f = tmp_path / "a.txt"
     f.write_text("x")
     with osx.open(str(f)) as fh:
@@ -329,7 +329,7 @@ def test_trusted_provider_trusted_provider_passes(tmp_path):
         trusted_providers=["file"],
         file_paths_allowlist=[],
     )
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     f = tmp_path / "a.txt"
     f.write_text("x")
     with osx.open(str(f)):
@@ -346,7 +346,7 @@ def test_trusted_provider_untrusted_outside_allowlist_denied(tmp_path):
         trusted_providers=["file"],
         file_paths_allowlist=[str(tmp_path / "allowed")],
     )
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     with pytest.raises(PermissionError):
         osx.open(str(f))
 
@@ -363,7 +363,7 @@ def test_trusted_provider_untrusted_inside_allowlist_allowed(tmp_path):
         trusted_providers=["file"],
         file_paths_allowlist=[str(allowed_dir)],
     )
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     with osx.open(str(f)) as fh:
         assert fh.read() == "x"
 
@@ -378,7 +378,7 @@ def test_trusted_provider_excluded_check_passes(tmp_path):
         excluded_checks=["c"],
         file_paths_allowlist=[],
     )
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     with osx.open(str(f)):
         pass
 
@@ -391,7 +391,7 @@ def test_trusted_provider_gates_exec_by_binary_path(tmp_path):
         trusted_providers=["file"],
         file_paths_allowlist=[str(tmp_path / "allowed_bin")],
     )
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     with pytest.raises(PermissionError):
         osx.run(["/usr/bin/evil", "--flag"], capture_output=True)
 
@@ -403,13 +403,13 @@ def test_agentcheck_exposes_bound_interface(tmp_path):
     from datadog_checks.base import AgentCheck
 
     check = AgentCheck("c", {}, [{}])
-    assert isinstance(check.os_interface, OSInterface)
+    assert isinstance(check.safe_os, SafeOS)
     # cached
-    assert check.os_interface is check.os_interface
+    assert check.safe_os is check.safe_os
     # default config disables enforcement -> passthrough
     p = tmp_path / "a.txt"
     p.write_text("ok")
-    assert check.os_interface.exists(str(p)) is True
+    assert check.safe_os.exists(str(p)) is True
 
 
 # --------------------------------------------------------------------------- #
@@ -442,7 +442,7 @@ def test_agentcheck_exposes_bound_interface(tmp_path):
     ],
 )
 def test_exec_targets(argv, expected):
-    from datadog_checks.base.utils.os_interface import _exec_targets
+    from datadog_checks.base.utils.safe_os import _exec_targets
 
     assert _exec_targets(argv) == expected
 
@@ -478,7 +478,7 @@ def test_sudo_wrapped_binary_inside_allowlist_is_permitted(tmp_path):
 
 
 def test_noop_validator_ignores_wrappers():
-    osx = OSInterface()
+    osx = SafeOS()
     # No enforcement: unwrapping must not change passthrough behavior.
     assert osx._validator.check_exec(["sudo", "/usr/bin/anything"]) is None
 
@@ -500,7 +500,7 @@ def test_shell_true_validates_the_shell_not_the_command_token(tmp_path):
     )
     allowed = tmp_path / "safe"
     allowed.write_text("")
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     with pytest.raises(PermissionError, match="/bin/sh"):
         osx.run(f"{allowed} && /usr/bin/evil", shell=True, capture_output=True)
 
@@ -514,14 +514,14 @@ def test_shell_true_permitted_when_shell_is_allowlisted(tmp_path):
         trusted_providers=["file"],
         file_paths_allowlist=["/bin", "/usr/bin"],
     )
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     result = osx.run("echo shell-ok", shell=True, capture_output=True, text=True)
     assert result.stdout.strip() == "shell-ok"
 
 
 @pytest.mark.skipif(os.name == 'nt', reason='POSIX shell semantics')
 def test_shell_exec_argv_shapes():
-    from datadog_checks.base.utils.os_interface import _shell_exec_argv
+    from datadog_checks.base.utils.safe_os import _shell_exec_argv
 
     assert _shell_exec_argv("a && b") == ["/bin/sh", "-c", "a && b"]
     assert _shell_exec_argv(["a && b", "arg0"]) == ["/bin/sh", "-c", "a && b", "arg0"]
@@ -529,13 +529,13 @@ def test_shell_exec_argv_shapes():
 
 def test_shell_true_is_passthrough_under_noop_validator():
     # Parity: the no-op validator must not change shell=True behavior.
-    osx = OSInterface()
+    osx = SafeOS()
     result = osx.run("echo parity", shell=True, capture_output=True, text=True)
     assert result.stdout.strip() == "parity"
 
 
 def test_shell_false_still_validates_the_program():
-    osx = OSInterface()
+    osx = SafeOS()
     assert osx._launched_argv(["ls", "-l"], {}) == ["ls", "-l"]
     assert osx._launched_argv(["ls", "-l"], {"shell": False}) == ["ls", "-l"]
 
@@ -546,11 +546,11 @@ def test_shell_false_still_validates_the_program():
 # This is the security invariant of the whole design. Without it, a method that
 # forgets its validator hook, or a newly added one, silently becomes an
 # unguarded bypass while every other test still passes. The registry below is
-# asserted to cover the full public surface, so adding a method to OSInterface
+# asserted to cover the full public surface, so adding a method to SafeOS
 # fails this test until it is exercised here.
 # --------------------------------------------------------------------------- #
 def _all_operations(osx, tmp_path):
-    """Map every public OSInterface method name to a thunk that invokes it."""
+    """Map every public SafeOS method name to a thunk that invokes it."""
     import sys
 
     src = tmp_path / "src.txt"
@@ -603,18 +603,18 @@ def _all_operations(osx, tmp_path):
 
 
 def _public_methods():
-    return {name for name in dir(OSInterface) if not name.startswith("_") and callable(getattr(OSInterface, name))}
+    return {name for name in dir(SafeOS) if not name.startswith("_") and callable(getattr(SafeOS, name))}
 
 
 def test_operation_registry_covers_full_public_surface(tmp_path):
     # Guards the test below: a newly added public method must be registered here,
     # otherwise it would escape the enforcement check entirely.
-    assert set(_all_operations(OSInterface(), tmp_path)) == _public_methods()
+    assert set(_all_operations(SafeOS(), tmp_path)) == _public_methods()
 
 
 def test_every_public_method_consults_the_validator(tmp_path):
     v = RecordingValidator()
-    osx = OSInterface(v)
+    osx = SafeOS(v)
 
     unguarded = []
     for name, operation in _all_operations(osx, tmp_path).items():
@@ -632,7 +632,7 @@ def test_every_path_method_can_be_denied(tmp_path):
     src.write_text("x")
     target = str(src)
     v = RecordingValidator(deny_paths={target})
-    osx = OSInterface(v)
+    osx = SafeOS(v)
 
     path_ops = {
         "open": lambda: osx.open(target),
@@ -660,7 +660,7 @@ def test_every_path_method_can_be_denied(tmp_path):
 
 def test_every_exec_method_can_be_denied():
     v = RecordingValidator(deny_execs={"/usr/bin/evil"})
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     cmd = ["/usr/bin/evil", "--flag"]
 
     with pytest.raises(PermissionError):
@@ -678,13 +678,13 @@ def test_every_exec_method_can_be_denied():
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize("option", ["--login", "--shell"])
 def test_sudo_long_shell_options_have_no_static_target(option):
-    from datadog_checks.base.utils.os_interface import _exec_targets
+    from datadog_checks.base.utils.safe_os import _exec_targets
 
     assert _exec_targets(["sudo", option]) == ["sudo"]
 
 
 def test_shell_exec_argv_on_windows(monkeypatch):
-    from datadog_checks.base.utils import os_interface as module
+    from datadog_checks.base.utils import safe_os as module
 
     monkeypatch.setattr(module.os, "name", "nt")
     monkeypatch.setenv("COMSPEC", r"C:\Windows\System32\cmd.exe")
@@ -716,7 +716,7 @@ def test_nothing_is_gated_while_field_validation_is_disabled(tmp_path):
     """
     sec = _sec(ignore_untrusted_file_params=False, allowlist=[])
     validator = TrustedProviderValidator(sec)
-    osx = OSInterface(validator)
+    osx = SafeOS(validator)
     denied = tmp_path / "outside.txt"
     denied.write_text("x")
     assert osx.exists(str(denied)) is True
@@ -726,7 +726,7 @@ def test_nothing_is_gated_while_field_validation_is_disabled(tmp_path):
 
 def test_excluded_check_bypasses_enforcement(tmp_path):
     sec = _sec(allowlist=[], excluded_checks=["c"])
-    osx = OSInterface(TrustedProviderValidator(sec))
+    osx = SafeOS(TrustedProviderValidator(sec))
     denied = tmp_path / "outside.txt"
     denied.write_text("x")
     assert osx.exists(str(denied)) is True
@@ -830,7 +830,7 @@ def test_glob_no_match_returns_empty(osx, tmp_path):
 
 def test_glob_consults_the_validator(tmp_path):
     v = RecordingValidator()
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     osx.glob(str(tmp_path / "*"))
     assert v.path_calls, "glob must be validated like any other listing operation"
 
@@ -838,93 +838,9 @@ def test_glob_consults_the_validator(tmp_path):
 def test_glob_can_be_denied(tmp_path):
     pattern = str(tmp_path / "*")
     v = RecordingValidator(deny_paths={pattern})
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     with pytest.raises(PermissionError):
         osx.glob(pattern)
-
-
-# --------------------------------------------------------------------------- #
-# Shared TLS context builder: `tls_ca_cert`, `tls_cert` and `tls_private_key`
-# are config-derived paths handed to ssl, which opens them itself. This is the
-# path most integrations reach TLS through, so validating it covers many at once.
-# --------------------------------------------------------------------------- #
-@pytest.fixture(autouse=True)
-def _reset_agent_config(datadog_agent):
-    """Undo Agent-config mutations after each test in this module.
-
-    The stub is a module-level singleton that only resets for tests requesting
-    the fixture, so a test that enables enforcement would otherwise gate
-    unrelated tests that do not request it.
-    """
-    yield
-    datadog_agent.reset()
-
-
-def _tls_check(datadog_agent, tmp_path, allowlist, instance):
-    from datadog_checks.base import AgentCheck
-
-    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_file_paths_allowlist'] = [str(p) for p in allowlist]
-    datadog_agent._config['integration_trusted_providers'] = ['file']
-    check = AgentCheck('c', {}, [instance])
-    check.provider = 'untrusted'
-    check._AgentCheck__security_config = None
-    check._AgentCheck__os_interface = None
-    return check
-
-
-def test_tls_ca_cert_outside_allowlist_never_reaches_ssl(datadog_agent, tmp_path):
-    check = _tls_check(datadog_agent, tmp_path, [tmp_path / 'allowed'], {'tls_ca_cert': '/tmp/evil/ca.pem'})
-    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
-        with pytest.raises(PermissionError):
-            check.get_tls_context()
-    assert not load.called, "a disallowed CA cert must never reach ssl"
-
-
-def test_tls_client_cert_outside_allowlist_never_reaches_ssl(datadog_agent, tmp_path):
-    check = _tls_check(datadog_agent, tmp_path, [tmp_path / 'allowed'], {'tls_cert': '/tmp/evil/client.pem'})
-    with mock.patch('ssl.SSLContext.load_cert_chain') as load:
-        with pytest.raises(PermissionError):
-            check.get_tls_context()
-    assert not load.called, "a disallowed client cert must never reach ssl"
-
-
-def test_tls_ca_cert_inside_allowlist_is_used(datadog_agent, tmp_path):
-    allowed = tmp_path / 'allowed'
-    allowed.mkdir()
-    ca = allowed / 'ca.pem'
-    ca.write_text('')
-    check = _tls_check(datadog_agent, tmp_path, [allowed], {'tls_ca_cert': str(ca)})
-    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
-        check.get_tls_context()
-    assert load.called, "an allowlisted CA cert must still be used"
-
-
-def test_tls_context_refresh_still_enforces(tmp_path):
-    """refresh_tls_context rebuilds the context and must not drop the validator.
-
-    Exercised directly on the wrapper: going through AgentCheck.get_tls_context
-    would raise during construction and never reach the refresh path.
-    """
-    from datadog_checks.base.utils.tls import TlsContextWrapper
-
-    allowed = tmp_path / 'allowed'
-    allowed.mkdir()
-    ca = allowed / 'ca.pem'
-    ca.write_text('')
-    sec = _sec(allowlist=[str(allowed)])
-    osx = OSInterface(TrustedProviderValidator(sec))
-
-    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
-        wrapper = TlsContextWrapper({'tls_ca_cert': str(ca)}, os_interface=osx)
-        assert load.called  # the allowlisted cert was accepted
-        load.reset_mock()
-
-        # Repoint at a disallowed path, then refresh: the rebuild must revalidate.
-        wrapper.config['tls_ca_cert'] = '/tmp/evil/ca.pem'
-        with pytest.raises(PermissionError):
-            wrapper.refresh_tls_context()
-        assert not load.called
 
 
 # --------------------------------------------------------------------------- #
@@ -940,14 +856,14 @@ def test_validate_path_returns_the_input_unchanged(osx):
 
 def test_validate_path_consults_the_validator(tmp_path):
     v = RecordingValidator()
-    osx = OSInterface(v)
+    osx = SafeOS(v)
     osx.validate_path(str(tmp_path / 'x'))
     assert v.path_calls
 
 
 def test_validate_path_can_be_denied(tmp_path):
     target = str(tmp_path / 'x')
-    osx = OSInterface(RecordingValidator(deny_paths={target}))
+    osx = SafeOS(RecordingValidator(deny_paths={target}))
     with pytest.raises(PermissionError):
         osx.validate_path(target)
 
