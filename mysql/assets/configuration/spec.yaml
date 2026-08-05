@@ -868,6 +868,19 @@ files:
                   type: string
                   example: mysql-database.database.windows.net
                 fleet_configurable: false
+              - name: resource_id
+                description: |
+                  The full Azure Resource Manager (ARM) resource ID of this MySQL server, for example
+                  /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.DBforMySQL/flexibleServers/<server>.
+
+                  Set this when the automatic mapping from the fully qualified domain name to the Azure
+                  resource cannot be made (for example, proxy connections, a custom `reported_hostname`, or
+                  when the Azure resource is not crawled), so that DBM can correlate Azure resource logs to
+                  this database instance.
+                value:
+                  type: string
+                  example: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.DBforMySQL/flexibleServers/my-server
+                fleet_configurable: false
 
           - name: obfuscator_options
             display_priority: 0

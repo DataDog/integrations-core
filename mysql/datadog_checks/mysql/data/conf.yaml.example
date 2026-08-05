@@ -626,6 +626,17 @@ instances:
         #
         # fully_qualified_domain_name: mysql-database.database.windows.net
 
+        ## @param resource_id - string - optional - default: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.DBforMySQL/flexibleServers/my-server
+        ## The full Azure Resource Manager (ARM) resource ID of this MySQL server, for example
+        ## /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.DBforMySQL/flexibleServers/<server>.
+        ##
+        ## Set this when the automatic mapping from the fully qualified domain name to the Azure
+        ## resource cannot be made (for example, proxy connections, a custom `reported_hostname`, or
+        ## when the Azure resource is not crawled), so that DBM can correlate Azure resource logs to
+        ## this database instance.
+        #
+        # resource_id: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.DBforMySQL/flexibleServers/my-server
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #

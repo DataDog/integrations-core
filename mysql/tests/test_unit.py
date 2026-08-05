@@ -335,6 +335,46 @@ def test_service_check(disable_generic_tags, expected_tags, hostname):
     assert set(check._service_check_tags(hostname)) == expected_tags
 
 
+AZURE_TEST_RESOURCE_ID = (
+    '/subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/example-resource-group'
+    '/providers/Microsoft.DBforMySQL/flexibleServers/example-mysql-server'
+)
+
+
+@pytest.mark.parametrize(
+    'azure, expected_resource_id',
+    [
+        pytest.param({'resource_id': AZURE_TEST_RESOURCE_ID}, AZURE_TEST_RESOURCE_ID, id='resource_id_only'),
+        pytest.param(
+            {
+                'deployment_type': 'flexible_server',
+                'fully_qualified_domain_name': 'example-mysql-server.mysql.database.azure.com',
+                'resource_id': AZURE_TEST_RESOURCE_ID,
+            },
+            AZURE_TEST_RESOURCE_ID,
+            id='resource_id_with_deployment_type',
+        ),
+        pytest.param(
+            {
+                'deployment_type': 'flexible_server',
+                'fully_qualified_domain_name': 'example-mysql-server.mysql.database.azure.com',
+            },
+            None,
+            id='no_resource_id',
+        ),
+    ],
+)
+def test_azure_resource_id_emitted_as_tag(azure, expected_resource_id):
+    config = {'server': 'localhost', 'user': 'datadog', 'azure': azure}
+    check = MySql(common.CHECK_NAME, {}, instances=[config])
+    tags = check.tag_manager.get_tags()
+
+    if expected_resource_id is not None:
+        assert 'azure_resource_id:{}'.format(expected_resource_id) in tags
+    else:
+        assert not any(tag.startswith('azure_resource_id:') for tag in tags)
+
+
 class DummyLogger:
     def debug(*args):
         pass

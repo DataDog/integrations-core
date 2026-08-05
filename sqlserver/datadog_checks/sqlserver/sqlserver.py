@@ -294,23 +294,33 @@ class SQLServer(DatabaseCheck):
                 "instance_endpoint": self.resolved_hostname,
             }
         if self.cloud_metadata.get("azure") is not None:
-            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
-            name = self.cloud_metadata.get("azure")["name"]
-            db_instance = None
-            if "sql_database" in deployment_type and self._config.dbm_enabled:
-                # azure_sql_server_database resource should be set to {fully_qualified_server_name}/{database_name}
-                # for correct resource aliasing
-                dbname = self.instance.get("database", "master")
-                db_instance = f"{name}/{dbname}"
-            # some `deployment_type`s map to multiple `resource_type`s
-            resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
-            for r_type in resource_types:
-                if "azure_sql_server_database" in r_type and db_instance:
-                    self.tag_manager.set_tag(
-                        "dd.internal.resource:{}".format(r_type), "{}".format(db_instance), replace=True
-                    )
-                else:
-                    self.tag_manager.set_tag("dd.internal.resource:{}".format(r_type), "{}".format(name), replace=True)
+            azure = self.cloud_metadata.get("azure")
+            deployment_type = azure.get("deployment_type")
+            name = azure.get("name")
+            if deployment_type and name:
+                db_instance = None
+                if "sql_database" in deployment_type and self._config.dbm_enabled:
+                    # azure_sql_server_database resource should be set to {fully_qualified_server_name}/{database_name}
+                    # for correct resource aliasing
+                    dbname = self.instance.get("database", "master")
+                    db_instance = f"{name}/{dbname}"
+                # some `deployment_type`s map to multiple `resource_type`s
+                resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type)
+                for r_type in resource_types.split(",") if resource_types else []:
+                    if "azure_sql_server_database" in r_type and db_instance:
+                        self.tag_manager.set_tag(
+                            "dd.internal.resource:{}".format(r_type), "{}".format(db_instance), replace=True
+                        )
+                    else:
+                        self.tag_manager.set_tag(
+                            "dd.internal.resource:{}".format(r_type), "{}".format(name), replace=True
+                        )
+            resource_id = azure.get("resource_id")
+            if resource_id:
+                # Emitted as a regular tag (not a dd.internal.resource) so it survives to the
+                # database_instance metadata and lets DBM correlate Azure resource logs when the
+                # automatic FQDN-to-resource mapping is unavailable.
+                self.tag_manager.set_tag("azure_resource_id", resource_id, replace=True)
         # finally, emit a `database_instance` resource for this instance
         self.tag_manager.set_tag(
             "dd.internal.resource:database_instance",

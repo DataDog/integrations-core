@@ -49,6 +49,7 @@ class Azure(BaseModel):
     )
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+    resource_id: Optional[str] = None
 
 
 class CollectSchemas(BaseModel):

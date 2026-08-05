@@ -829,6 +829,19 @@ files:
             type: string
             example: my-sqlserver-database.database.windows.net
           fleet_configurable: false
+        - name: resource_id
+          description: |
+            The full Azure Resource Manager (ARM) resource ID of this SQL resource, for example
+            /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.Sql/servers/<server>/databases/<db>.
+
+            Set this when the automatic mapping from the fully qualified domain name to the Azure
+            resource cannot be made (for example, proxy connections, a custom `reported_hostname`, or
+            when the Azure resource is not crawled), so that DBM can correlate Azure resource logs to
+            this database instance.
+          value:
+            type: string
+            example: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.Sql/servers/my-server/databases/my-database
+          fleet_configurable: false
         - name: aggregate_sql_databases
           description: |
             Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
