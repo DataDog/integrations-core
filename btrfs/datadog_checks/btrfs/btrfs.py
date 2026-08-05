@@ -83,8 +83,8 @@ def sized_array(count):
 
 
 class FileDescriptor(object):
-    def __init__(self, mountpoint):
-        self.fd = os.open(mountpoint, os.O_DIRECTORY)
+    def __init__(self, osx, mountpoint):
+        self.fd = osx.os_open(mountpoint, os.O_DIRECTORY)
 
     def __enter__(self):
         return self
@@ -108,7 +108,7 @@ class BTRFS(AgentCheck):
     def get_usage(self, mountpoint):
         results = []
 
-        with FileDescriptor(mountpoint) as fd:
+        with FileDescriptor(self.os_interface, mountpoint) as fd:
             # Get the struct size needed
             # https://github.com/spotify/linux/blob/master/fs/btrfs/ioctl.h#L46-L50
             ret = sized_array(TWO_LONGS_STRUCT.size)
@@ -133,7 +133,7 @@ class BTRFS(AgentCheck):
     def get_unallocated_space(self, mountpoint):
         unallocated_bytes = 0
 
-        with FileDescriptor(mountpoint) as fd:
+        with FileDescriptor(self.os_interface, mountpoint) as fd:
             # Retrieve the fs info to get the number of devices and max device id
             fs_info = sized_array(BTRFS_FS_INFO_STRUCT.size)
             fcntl.ioctl(fd, BTRFS_IOC_FS_INFO, fs_info)

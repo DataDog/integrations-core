@@ -11,12 +11,12 @@ import subprocess
 from datadog_checks.base import AgentCheck
 
 
-def _run_cmd(cmd: list[str], sudo: bool = False, timeout: float | None = None) -> tuple[str, str, int]:
+def _run_cmd(osx, cmd: list[str], sudo: bool = False, timeout: float | None = None) -> tuple[str, str, int]:
     """Run a command, optionally via sudo. Returns (stdout, stderr, returncode)."""
     if sudo:
         cmd = ['sudo'] + list(cmd)
     try:
-        result = subprocess.run(
+        result = osx.run(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -34,10 +34,10 @@ def _run_cmd(cmd: list[str], sudo: bool = False, timeout: float | None = None) -
 
 
 def _lparstat_rows(
-    cmd: list[str], start_idx: int, sudo: bool = False, timeout: float | None = None
+    osx, cmd: list[str], start_idx: int, sudo: bool = False, timeout: float | None = None
 ) -> tuple[list[str], str, int]:
     """Run lparstat, filter blank lines, and return rows starting at start_idx."""
-    output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+    output, stderr, rc = _run_cmd(osx, cmd, sudo=sudo, timeout=timeout)
     rows = [line for line in output.splitlines() if line][start_idx:]
     return rows, stderr, rc
 
@@ -89,7 +89,9 @@ class LPARStats(AgentCheck):
             cmd.append('-pw')
         cmd.extend(['1', '1'])
 
-        stats, stderr, rc = _lparstat_rows(cmd, self.MEMORY_METRICS_START_IDX, sudo=sudo, timeout=timeout)
+        stats, stderr, rc = _lparstat_rows(
+            self.os_interface, cmd, self.MEMORY_METRICS_START_IDX, sudo=sudo, timeout=timeout
+        )
         if rc != 0:
             self.log.warning('lparstat -m failed (rc=%d): %s', rc, stderr.strip())
             return False
@@ -112,7 +114,9 @@ class LPARStats(AgentCheck):
 
     def collect_hypervisor(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-H', '1', '1']
-        stats, stderr, rc = _lparstat_rows(cmd, self.HYPERVISOR_METRICS_START_IDX, sudo=sudo, timeout=timeout)
+        stats, stderr, rc = _lparstat_rows(
+            self.os_interface, cmd, self.HYPERVISOR_METRICS_START_IDX, sudo=sudo, timeout=timeout
+        )
         if rc != 0:
             self.log.warning('lparstat -H failed (rc=%d): %s', rc, stderr.strip())
             return False
@@ -141,7 +145,9 @@ class LPARStats(AgentCheck):
 
     def collect_memory_entitlements(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-m', '-eR', '1', '1']
-        stats, stderr, rc = _lparstat_rows(cmd, self.MEMORY_ENTITLEMENTS_START_IDX, sudo=sudo, timeout=timeout)
+        stats, stderr, rc = _lparstat_rows(
+            self.os_interface, cmd, self.MEMORY_ENTITLEMENTS_START_IDX, sudo=sudo, timeout=timeout
+        )
         if rc != 0:
             self.log.warning('lparstat -m -eR failed (rc=%d): %s', rc, stderr.strip())
             return False
@@ -168,7 +174,9 @@ class LPARStats(AgentCheck):
 
     def collect_spurr(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-E', '1', '1']
-        table, stderr, rc = _lparstat_rows(cmd, self.SPURR_PROCESSOR_UTILIZATION_START_IDX, sudo=sudo, timeout=timeout)
+        table, stderr, rc = _lparstat_rows(
+            self.os_interface, cmd, self.SPURR_PROCESSOR_UTILIZATION_START_IDX, sudo=sudo, timeout=timeout
+        )
         if rc != 0:
             self.log.warning('lparstat -E failed (rc=%d): %s', rc, stderr.strip())
             return False

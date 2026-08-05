@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-import shutil
 import sys
 from typing import Dict
 
+from datadog_checks.base.utils.os_interface import os_interface
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
@@ -39,10 +39,10 @@ def get_unixodbc_sysconfig(python_executable):
 
 
 def is_non_empty_file(path):
-    if not os.path.exists(path):
+    if not os_interface.exists(path):
         return False
     try:
-        if os.path.getsize(path) > 0:
+        if os_interface.getsize(path) > 0:
             return True
     # exists and getsize aren't atomic
     except FileNotFoundError:
@@ -78,7 +78,7 @@ def set_default_driver_conf():
             os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
             odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
             if not is_non_empty_file(odbc_inst_ini_sysconfig):
-                shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
+                os_interface.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
                 # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
                 # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
                 return

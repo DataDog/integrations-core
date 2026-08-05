@@ -4,43 +4,37 @@
 import os
 
 import pytest
-from mock import mock_open, patch
 
 from . import common
 
 pytestmark = pytest.mark.unit
 
 
+def _read_fixture(name):
+    with open(os.path.join(common.FIXTURE_DIR, name)) as f:
+        return f.read()
+
+
 # Really a basic check to see if all metrics are there
-def test_check(aggregator, check):
+def test_check(aggregator, check, mock_os_interface):
     check.tags = []
     check.set_paths()
 
-    with open(os.path.join(common.FIXTURE_DIR, "entropy_avail")) as f:
-        m = mock_open(read_data=f.read())
-        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
-            check.get_entropy_info()
+    mock_os_interface.add_files(
+        {
+            check.proc_path_map['entropy_info']: _read_fixture("entropy_avail"),
+            check.proc_path_map['inode_info']: _read_fixture("inode-nr"),
+            check.proc_path_map['stat_info']: _read_fixture("proc-stat"),
+            check.proc_path_map['interrupts_info']: _read_fixture("interrupts"),
+        }
+    )
+    mock_os_interface.set_command_output(['ps', '--no-header', '-eo', 'stat'], stdout=_read_fixture("process_stats"))
 
-    with open(os.path.join(common.FIXTURE_DIR, "inode-nr")) as f:
-        m = mock_open(read_data=f.read())
-        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
-            check.get_inode_info()
-
-    with open(os.path.join(common.FIXTURE_DIR, "proc-stat")) as f:
-        m = mock_open(read_data=f.read())
-        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
-            check.get_stat_info()
-
-    with open(os.path.join(common.FIXTURE_DIR, "process_stats")) as f:
-        with patch(
-            'datadog_checks.linux_proc_extras.linux_proc_extras.get_subprocess_output', return_value=(f.read(), "", 0)
-        ):
-            check.get_process_states()
-
-    with open(os.path.join(common.FIXTURE_DIR, "interrupts")) as f:
-        m = mock_open(read_data=f.read())
-        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
-            check.get_interrupts_info()
+    check.get_entropy_info()
+    check.get_inode_info()
+    check.get_stat_info()
+    check.get_process_states()
+    check.get_interrupts_info()
 
     # Assert metrics
     for metric in common.EXPECTED_METRICS:

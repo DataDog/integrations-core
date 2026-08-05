@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 from fnmatch import fnmatch
-from os.path import exists, join, realpath, relpath
+from os.path import join, relpath
 from time import time
 from typing import Any  # noqa: F401
 
@@ -47,7 +47,7 @@ class DirectoryCheck(AgentCheck):
     def check(self, _):
         service_check_tags = ['dir_name:{}'.format(self._config.name)]
         service_check_tags.extend(self._config.tags)
-        if not exists(self._config.abs_directory):
+        if not self.os_interface.exists(self._config.abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
                 "have permissions to access it, skipping.".format(self._config.abs_directory)
@@ -119,7 +119,7 @@ class DirectoryCheck(AgentCheck):
                 try:
                     self.log.debug('File entries in matched files: %s', str(file_entry))
                     file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
-                    real_path = realpath(file_entry.path)
+                    real_path = self.os_interface.realpath(file_entry.path)
                 except OSError as ose:
                     self.log.debug(
                         'DirectoryCheck: could not stat file %s, skipping it - %s', join(root, file_entry.name), ose
@@ -199,7 +199,9 @@ class DirectoryCheck(AgentCheck):
         def log_error(e):
             self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
 
-        walker = walk(self._config.abs_directory, onerror=log_error, followlinks=self._config.follow_symlinks)
+        walker = walk(
+            self.os_interface, self._config.abs_directory, onerror=log_error, followlinks=self._config.follow_symlinks
+        )
 
         while True:
             try:

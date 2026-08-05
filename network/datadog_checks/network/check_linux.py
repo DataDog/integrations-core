@@ -6,7 +6,7 @@ import socket
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
-from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError
 from datadog_checks.network import ethtool
 from datadog_checks.network.const import ENA_METRIC_NAMES, ENA_METRIC_PREFIX
 
@@ -61,7 +61,7 @@ class LinuxNetwork(Network):
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                    output, _, _ = self.os_interface.get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -73,13 +73,13 @@ class LinuxNetwork(Network):
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                    output, _, _ = self.os_interface.get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
                     if self._collect_cx_queues:
                         cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
-                        output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                        output, _, _ = self.os_interface.get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
                         for state, recvq, sendq in self._parse_queues("ss", output):
                             self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                             self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
@@ -89,7 +89,7 @@ class LinuxNetwork(Network):
 
             except OSError as e:
                 self.log.info("`ss` invocation failed: %s. Using `netstat` as a fallback", str(e))
-                output, _, _ = get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"], self.log)
+                output, _, _ = self.os_interface.get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"], self.log)
                 lines = output.splitlines()
                 # Active Internet connections (w/o servers)
                 # Proto Recv-Q Send-Q Local Address           Foreign Address         State
@@ -115,7 +115,7 @@ class LinuxNetwork(Network):
 
         proc_dev_path = "{}/net/dev".format(net_proc_base_location)
         try:
-            with open(proc_dev_path, 'r') as proc:
+            with self.os_interface.open(proc_dev_path, 'r') as proc:
                 lines = proc.readlines()
         except IOError:
             # On Openshift, /proc/net/snmp is only readable by root
@@ -161,7 +161,7 @@ class LinuxNetwork(Network):
         for f in ['netstat', 'snmp']:
             proc_data_path = "{}/net/{}".format(net_proc_base_location, f)
             try:
-                with open(proc_data_path, 'r') as netstat:
+                with self.os_interface.open(proc_data_path, 'r') as netstat:
                     while True:
                         n_header = netstat.readline()
                         if not n_header:
@@ -286,9 +286,9 @@ class LinuxNetwork(Network):
 
         # Get the metrics to read
         try:
-            for metric_file in os.listdir(conntrack_files_location):
+            for metric_file in self.os_interface.listdir(conntrack_files_location):
                 if (
-                    os.path.isfile(os.path.join(conntrack_files_location, metric_file))
+                    self.os_interface.isfile(os.path.join(conntrack_files_location, metric_file))
                     and 'nf_conntrack_' in metric_file
                 ):
                     available_files.append(metric_file[len('nf_conntrack_') :])
@@ -317,7 +317,7 @@ class LinuxNetwork(Network):
 
     def _read_int_file(self, file_location):
         try:
-            with open(file_location, 'r') as f:
+            with self.os_interface.open(file_location, 'r') as f:
                 try:
                     value = int(f.read().rstrip())
                     return value
@@ -331,7 +331,7 @@ class LinuxNetwork(Network):
         sys_net_location = '/sys/class/net'
         sys_net_metrics = ['mtu', 'tx_queue_len', 'up']
         try:
-            ifaces = os.listdir(sys_net_location)
+            ifaces = self.os_interface.listdir(sys_net_location)
         except OSError as e:
             self.log.debug("Unable to list %s, skipping system iface metrics: %s.", sys_net_location, e)
             return None
@@ -349,7 +349,7 @@ class LinuxNetwork(Network):
 
     def _collect_iface_queue_metrics(self, iface, iface_queues_location, custom_tags):
         try:
-            iface_queues = os.listdir(iface_queues_location)
+            iface_queues = self.os_interface.listdir(iface_queues_location)
         except OSError as e:
             self.log.debug("Unable to list %s, skipping %s.", iface_queues_location, e)
             return
@@ -367,7 +367,7 @@ class LinuxNetwork(Network):
             cmd = [conntrack_path, "-S"]
             if use_sudo_conntrack:
                 cmd.insert(0, "sudo")
-            output, _, _ = get_subprocess_output(cmd, self.log)
+            output, _, _ = self.os_interface.get_subprocess_output(cmd, self.log)
             # conntrack -S sample:
             # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
             #       drop=1 early_drop=0 error=0 search_restart=39936711

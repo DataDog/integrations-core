@@ -8,7 +8,6 @@ import re
 from collections import defaultdict
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'cassandra_nodetool'
 DEFAULT_HOST = 'localhost'
@@ -77,7 +76,7 @@ class CassandraNodetoolCheck(AgentCheck):
             cmd = self.nodetool_cmd + ['status', '--', keyspace]
 
             # Execute the command
-            out, err, code = get_subprocess_output(cmd, self.log, False, log_debug=False)
+            out, err, code = self.os_interface.get_subprocess_output(cmd, self.log, False, log_debug=False)
             if err or 'Error:' in out or code != 0:
                 self.log.error('Error executing nodetool status: %s', err or out)
                 continue

@@ -1,10 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from os import scandir
-
-
-def walk(top, onerror=None, followlinks=False):
+def walk(osx, top, onerror=None, followlinks=False):
     """A simplified and modified version of stdlib's `os.walk` that yields the
     `os.DirEntry` objects that `scandir` produces during traversal instead of paths as
     strings.
@@ -30,7 +27,7 @@ def walk(top, onerror=None, followlinks=False):
     nondirs = []
 
     try:
-        scandir_iter = scandir(top)
+        scandir_iter = osx.scandir(top)
     except OSError as error:
         if onerror is not None:
             onerror(error)
@@ -62,5 +59,5 @@ def walk(top, onerror=None, followlinks=False):
     yield top, dirs, nondirs
 
     for dir_entry in dirs:
-        for entry in walk(dir_entry.path, onerror, followlinks):
+        for entry in walk(osx, dir_entry.path, onerror, followlinks):
             yield entry

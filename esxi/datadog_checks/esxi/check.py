@@ -84,10 +84,13 @@ class EsxiCheck(AgentCheck):
             context.check_hostname = True if self.ssl_verify else False
             context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
 
+            # ssl opens these paths itself; validate at the handoff.
             if self.ssl_capath:
-                context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
+                capath = self.os_interface.validate_path(self.ssl_capath)
+                context.load_verify_locations(cafile=None, capath=capath, cadata=None)
             elif self.ssl_cafile:
-                context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
+                cafile = self.os_interface.validate_path(self.ssl_cafile)
+                context.load_verify_locations(cafile=cafile, capath=None, cadata=None)
             else:
                 context.load_default_certs(ssl.Purpose.SERVER_AUTH)
 
