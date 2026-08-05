@@ -106,6 +106,7 @@ ProcedureMetrics = {
         {'name': 'procedure.aborts', 'type': 'monotonic_count'},
         {'name': 'procedure.failures', 'type': 'monotonic_count'},
         None,  # TRANSACTIONAL
+        None, # COMPOUND PROC
     ],
     'extras': [
         {
@@ -191,10 +192,8 @@ TableMetrics = {
         {'name': 'table.string_data_memory', 'type': 'gauge'},
         {'name': 'table.tuple_limit', 'type': 'gauge'},  # May be null.
         {'name': 'table.percent_full', 'type': 'gauge'},
-        # The following two columns were added in V10 only. Leave them out for now, as we target v8.4.
-        # See: https://docs.voltdb.com/ReleaseNotes/index.php
-        # {'name': 'distributed_replication', 'type': 'tag', 'boolean': True},
-        # None,  # EXPORT
+        {'name': 'distributed_replication', 'type': 'tag', 'boolean': True},
+        None,  # EXPORT
     ],
 }
 
