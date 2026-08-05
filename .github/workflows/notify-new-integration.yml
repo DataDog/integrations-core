@@ -1,0 +1,68 @@
+name: Notify New Integration
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**/datadog_checks/**/__init__.py"
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  notify:
+    name: Notify Slack on new integration check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: Detect new integration checks
+        id: detect
+        run: |
+          new_checks=""
+          for init_file in $(git diff --diff-filter=A --name-only HEAD~1 HEAD -- '*/datadog_checks/*/__init__.py'); do
+            check_dir=$(echo "$init_file" | cut -d'/' -f1)
+            pyproject="${check_dir}/pyproject.toml"
+
+            # Only consider directories that are actual integrations (have a pyproject.toml)
+            if [ ! -f "$pyproject" ]; then
+              continue
+            fi
+
+            # Check that the __init__.py has more than one import (actual check code, not just version re-export)
+            if [ $(grep -c 'import ' "$init_file") -gt 1 ]; then
+              check_name=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
+              if [ -z "$new_checks" ]; then
+                new_checks="$check_name"
+              else
+                new_checks="$new_checks, $check_name"
+              fi
+            fi
+          done
+
+          if [ -z "$new_checks" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "names=$new_checks" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send Slack notification
+        if: steps.detect.outputs.found == 'true'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NEW_INTEGRATION_SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -n \
+              --arg text "New integration check(s) merged to master: ${{ steps.detect.outputs.names }} (${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" \
+              '{text: $text}')"
