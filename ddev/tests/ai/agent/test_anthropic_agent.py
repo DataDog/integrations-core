@@ -336,6 +336,7 @@ async def test_context_usage_fields() -> None:
 
     result = await agent.send("Hi")
 
+    assert result.usage.total_input_tokens == 1700
     ctx = result.usage.context_usage
     assert ctx.window_size == FAKE_CONTEXT_WINDOW
     assert ctx.used_tokens == 1700  # 1000 + 500 + 200

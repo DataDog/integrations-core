@@ -269,14 +269,14 @@ class AgenticPhase(Phase):
         process: ReActProcess,
         context: dict[str, Any],
     ) -> tuple[str, int, int]:
-        """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
+        """Run the final summary turn. Returns (memory_text, total_input_tokens, output_tokens)."""
         user_additions = None
         if self._config.checkpoint is not None:
             user_additions = render_inline(cast(str, self._config.checkpoint.memory_prompt), context)
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         response = await process.run_once(memory_prompt)
-        return response.text, response.usage.input_tokens, response.usage.output_tokens
+        return response.text, response.usage.total_input_tokens, response.usage.output_tokens
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()

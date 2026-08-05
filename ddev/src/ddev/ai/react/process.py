@@ -72,7 +72,7 @@ class ReActProcess:
         Args:
             response: The last agent response. If None, compaction is unconditional.
 
-        Returns (input_tokens, output_tokens) from the compaction API call.
+        Returns (total_input_tokens, output_tokens) from the compaction API call.
         Returns (0, 0) if history was already compact and no API call was made.
         """
         await self._callbacks.fire_before_compact(self._scope)
@@ -86,7 +86,7 @@ class ReActProcess:
         await self._callbacks.fire_after_compact(self._scope)
         if compact_response is None:
             return 0, 0
-        return compact_response.usage.input_tokens, compact_response.usage.output_tokens
+        return compact_response.usage.total_input_tokens, compact_response.usage.output_tokens
 
     def _is_compact_needed(self, response: AgentResponse) -> bool:
         if self._compact_threshold_pct is None:
@@ -142,7 +142,7 @@ class ReActProcess:
 
             response = await self._agent.send(prompt, allowed_tools)
             iterations = 1
-            total_input = response.usage.input_tokens
+            total_input = response.usage.total_input_tokens
             total_output = response.usage.output_tokens
 
             await self._callbacks.fire_agent_response(self._scope, response, iterations)
@@ -180,7 +180,7 @@ class ReActProcess:
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1
-                total_input += response.usage.input_tokens
+                total_input += response.usage.total_input_tokens
                 total_output += response.usage.output_tokens
 
                 await self._callbacks.fire_agent_response(self._scope, response, iterations)
