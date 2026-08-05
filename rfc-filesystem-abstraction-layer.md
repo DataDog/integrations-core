@@ -70,12 +70,16 @@ mock-target updates where a test patched a module-level import the migration rel
 migrated integrations need one, and a shared test fixture keeps those edits mechanical. Parity is all this
 proves; enforcement needs its own tests, and has them where binaries come from config.
 
-Enforcement must be independently controllable, through its own Agent setting with three modes: off, which
-evaluates nothing; log, which evaluates the policy and reports what would be denied without blocking; and
-enforce, which denies. Off is the default. This matters because reusing the existing field-validation flag
-would mean any operator who has already enabled it begins enforcing at every migrated call site the moment
-this ships, with no gradual path and no way to observe the impact first. An unrecognized mode must be treated
-as off and reported, so a typo can neither enforce unexpectedly nor break a check.
+Enforcement reuses the existing field-validation setting rather than introducing one of its own. No new
+configuration is added: the switch that already governs whether untrusted config fields are checked now also
+governs whether the corresponding operations are checked. This keeps the operator-facing surface unchanged and
+keeps a single answer to "is this policy on?".
+
+The cost is that the two cannot be staged separately. An operator already relying on field validation begins
+enforcing at every migrated call site the moment this ships, and there is no dry-run mode in which violations
+are reported without being blocked. Rollout therefore depends on the existing excluded-checks setting and on
+migrating integrations in batches, rather than on observing impact first. That tradeoff is accepted
+deliberately; reviewers should weigh it, because it is the main operational risk in this proposal.
 
 The validator must invent no allowlist policy; it reuses `SecurityConfig` exactly as load-time validation
 does. One behavior is necessarily new: a bare command name is not a path, so it is resolved through `PATH`
@@ -133,5 +137,6 @@ surface spans roughly forty check packages, about seventy-five counting library 
   enforcement this requires allowlisting the shell, which grants everything the shell can reach. No
   integration does this today, and the alternative is to forbid it outright.
 - What is the supported Python version floor?
-- Should the log-only mode emit a metric or event, rather than only a log line, so a fleet's violations can
-  be assessed centrally before enforcement is enabled?
+- Reusing the existing setting means enforcement cannot be staged separately from field validation. Is the
+  excluded-checks setting plus batched migration sufficient for rollout, or does the first enablement need a
+  way to assess impact that this proposal does not provide?

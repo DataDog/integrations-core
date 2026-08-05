@@ -94,29 +94,19 @@ just the first element of the argv. Two cases matter:
 A bare command name such as `gunicorn` is resolved through `PATH` before being checked, because that is how
 the OS resolves it.
 
-## Enforcement modes
+## When validation applies
 
-Validation is controlled by the Agent-level `integration_path_enforcement_mode` setting, which is separate
-from the config-field validation flag so that turning on field validation does not simultaneously begin
-enforcing at every call site across every integration.
+Validation is governed by the existing `integration_ignore_untrusted_file_params` Agent setting, the same
+switch that controls config-field validation at load time. There is no separate switch for point-of-use
+validation: enabling that setting turns on both.
 
-| Mode | Behavior |
-| --- | --- |
-| `off` (default) | Nothing is evaluated; identical to calling the stdlib directly. |
-| `log` | The policy is evaluated and violations are logged, but the operation proceeds. Use this to assess a fleet before anything starts failing. |
-| `enforce` | Violations raise `PermissionError`. |
+That has a consequence worth planning for. An operator who already relies on field validation will begin
+enforcing at every migrated call site as soon as this ships, and a path that was previously only checked when
+it arrived as a config field is now also checked when it is used. There is no dry-run mode, so the way to
+assess impact is the excluded-checks setting and a staged rollout rather than an observation period.
 
-The Agent-side configuration key ships separately from this code. An Agent that does not define it yet
-reports an empty value, which resolves to `off` without any warning, so the layer is inert until the key
-exists and an operator sets it.
-
-An unrecognized mode is treated as `off` and logged, so a typo cannot enforce unexpectedly or break a check.
-Enforcement additionally requires field validation to be enabled, and it never applies to a trusted provider
-or to a check listed in the excluded-checks setting.
-
-In `log` mode each distinct violation is reported once per check rather than once per operation, since a check
-repeats the same work on every run. Reporting is capped at 100 distinct violations per check, and reaching the
-cap is itself logged.
+Validation never applies to a trusted provider, or to a check listed in the excluded-checks setting, matching
+load-time behavior exactly.
 
 ## Testing
 

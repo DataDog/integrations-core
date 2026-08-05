@@ -326,7 +326,6 @@ def test_trusted_provider_trusted_provider_passes(tmp_path):
         check_name="c",
         provider="file",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         trusted_providers=["file"],
         file_paths_allowlist=[],
     )
@@ -344,7 +343,6 @@ def test_trusted_provider_untrusted_outside_allowlist_denied(tmp_path):
         check_name="c",
         provider="untrusted",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         trusted_providers=["file"],
         file_paths_allowlist=[str(tmp_path / "allowed")],
     )
@@ -362,7 +360,6 @@ def test_trusted_provider_untrusted_inside_allowlist_allowed(tmp_path):
         check_name="c",
         provider="untrusted",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         trusted_providers=["file"],
         file_paths_allowlist=[str(allowed_dir)],
     )
@@ -378,7 +375,6 @@ def test_trusted_provider_excluded_check_passes(tmp_path):
         check_name="c",
         provider="untrusted",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         excluded_checks=["c"],
         file_paths_allowlist=[],
     )
@@ -392,7 +388,6 @@ def test_trusted_provider_gates_exec_by_binary_path(tmp_path):
         check_name="c",
         provider="untrusted",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         trusted_providers=["file"],
         file_paths_allowlist=[str(tmp_path / "allowed_bin")],
     )
@@ -457,7 +452,6 @@ def _sudo_validator(tmp_path):
         check_name="c",
         provider="untrusted",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         trusted_providers=["file"],
         file_paths_allowlist=[str(tmp_path)],
     )
@@ -500,7 +494,6 @@ def test_shell_true_validates_the_shell_not_the_command_token(tmp_path):
         check_name="c",
         provider="untrusted",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         trusted_providers=["file"],
         # The command token is allowlisted; the shell is not.
         file_paths_allowlist=[str(tmp_path)],
@@ -518,7 +511,6 @@ def test_shell_true_permitted_when_shell_is_allowlisted(tmp_path):
         check_name="c",
         provider="untrusted",
         ignore_untrusted_file_params=True,
-        path_enforcement_mode='enforce',
         trusted_providers=["file"],
         file_paths_allowlist=["/bin", "/usr/bin"],
     )
@@ -704,7 +696,7 @@ def test_shell_exec_argv_on_windows(monkeypatch):
 # field-validation flag, plus a log-only dry run. Enabling field validation must
 # NOT silently switch on enforcement at every migrated call site.
 # --------------------------------------------------------------------------- #
-def _sec(mode=None, allowlist=(), **kw):
+def _sec(allowlist=(), **kw):
     kwargs = {
         "check_name": "c",
         "provider": "untrusted",
@@ -713,81 +705,27 @@ def _sec(mode=None, allowlist=(), **kw):
         "file_paths_allowlist": list(allowlist),
     }
     kwargs.update(kw)
-    if mode is not None:
-        kwargs["path_enforcement_mode"] = mode
     return SecurityConfig(**kwargs)
 
 
-def test_enforcement_defaults_to_off_even_when_field_validation_is_on(tmp_path):
-    # The kill switch: field validation enabled, point-of-use enforcement absent.
-    sec = _sec(allowlist=[str(tmp_path / "nothing")])
-    assert sec.path_enforcement_mode == 'off'
-    osx = OSInterface(TrustedProviderValidator(sec))
-    denied = tmp_path / "outside.txt"
-    denied.write_text("x")
-    assert osx.exists(str(denied)) is True  # allowed: enforcement off
+def test_nothing_is_gated_while_field_validation_is_disabled(tmp_path):
+    """The shipped default: `ignore_untrusted_file_params` off means no gating.
 
-
-def test_enforce_mode_denies(tmp_path):
-    sec = _sec(mode='enforce', allowlist=[str(tmp_path / "nothing")])
-    osx = OSInterface(TrustedProviderValidator(sec))
-    denied = tmp_path / "outside.txt"
-    denied.write_text("x")
-    with pytest.raises(PermissionError):
-        osx.exists(str(denied))
-
-
-def test_log_mode_allows_but_reports(tmp_path):
-    sec = _sec(mode='log', allowlist=[str(tmp_path / "nothing")])
-    log = mock.MagicMock()
-    osx = OSInterface(TrustedProviderValidator(sec, log=log))
-    denied = tmp_path / "outside.txt"
-    denied.write_text("x")
-    assert osx.exists(str(denied)) is True  # dry run: not blocked
-    assert log.warning.called
-    assert "would be denied" in log.warning.call_args[0][0]
-
-
-def test_log_mode_reports_exec_violations(tmp_path):
-    sec = _sec(mode='log', allowlist=[str(tmp_path)])
-    log = mock.MagicMock()
-    v = TrustedProviderValidator(sec, log=log)
-    assert v.check_exec(["/usr/bin/evil"]) is None
-    assert log.warning.called
-
-
-def test_log_mode_is_silent_when_allowed(tmp_path):
-    sec = _sec(mode='log', allowlist=[str(tmp_path)])
-    log = mock.MagicMock()
-    allowed = tmp_path / "ok.txt"
-    allowed.write_text("x")
-    osx = OSInterface(TrustedProviderValidator(sec, log=log))
-    osx.exists(str(allowed))
-    assert not log.warning.called
-
-
-def test_unknown_enforcement_mode_fails_closed_to_off(tmp_path):
-    # A typo in the Agent config must not silently enforce, nor crash the check.
-    sec = _sec(mode='enfroce', allowlist=[str(tmp_path / "nothing")])
-    log = mock.MagicMock()
-    denied = tmp_path / "outside.txt"
-    denied.write_text("x")
-    osx = OSInterface(TrustedProviderValidator(sec, log=log))
-    assert osx.exists(str(denied)) is True
-    assert log.warning.called  # misconfiguration is surfaced
-
-
-def test_enforcement_mode_requires_field_validation_enabled(tmp_path):
-    # is_enabled() is still the master switch; mode alone must not enforce.
-    sec = _sec(mode='enforce', ignore_untrusted_file_params=False, allowlist=[])
-    osx = OSInterface(TrustedProviderValidator(sec))
+    Covers exec as well as paths, since a single flag now governs both and this
+    is the state every migrated call site runs in until an operator opts in.
+    """
+    sec = _sec(ignore_untrusted_file_params=False, allowlist=[])
+    validator = TrustedProviderValidator(sec)
+    osx = OSInterface(validator)
     denied = tmp_path / "outside.txt"
     denied.write_text("x")
     assert osx.exists(str(denied)) is True
+    assert validator.check_exec(['/usr/bin/evil', '--flag']) is None
+    assert validator.check_exec(['sudo', '/usr/bin/evil']) is None
 
 
 def test_excluded_check_bypasses_enforcement(tmp_path):
-    sec = _sec(mode='enforce', allowlist=[], excluded_checks=["c"])
+    sec = _sec(allowlist=[], excluded_checks=["c"])
     osx = OSInterface(TrustedProviderValidator(sec))
     denied = tmp_path / "outside.txt"
     denied.write_text("x")
@@ -814,7 +752,7 @@ def test_bare_command_name_resolved_via_path_and_allowed(tmp_path, monkeypatch):
     _make_tool(bindir, "mytool")
     monkeypatch.setenv("PATH", str(bindir))
 
-    sec = _sec(mode='enforce', allowlist=[str(bindir)])
+    sec = _sec(allowlist=[str(bindir)])
     v = TrustedProviderValidator(sec)
     # Bare name resolves under <bindir>, which is allowlisted.
     assert v.check_exec(["mytool", "--flag"]) is None
@@ -828,7 +766,7 @@ def test_bare_command_name_resolved_via_path_and_denied(tmp_path, monkeypatch):
 
     other = tmp_path / "allowed_only"
     other.mkdir()
-    sec = _sec(mode='enforce', allowlist=[str(other)])
+    sec = _sec(allowlist=[str(other)])
     v = TrustedProviderValidator(sec)
     with pytest.raises(PermissionError):
         v.check_exec(["mytool"])
@@ -836,7 +774,7 @@ def test_bare_command_name_resolved_via_path_and_denied(tmp_path, monkeypatch):
 
 def test_unresolvable_bare_command_is_denied_not_crashed(tmp_path, monkeypatch):
     monkeypatch.setenv("PATH", str(tmp_path / "empty"))
-    sec = _sec(mode='enforce', allowlist=[str(tmp_path)])
+    sec = _sec(allowlist=[str(tmp_path)])
     v = TrustedProviderValidator(sec)
     with pytest.raises(PermissionError):
         v.check_exec(["definitely-not-on-path"])
@@ -844,7 +782,7 @@ def test_unresolvable_bare_command_is_denied_not_crashed(tmp_path, monkeypatch):
 
 def test_path_arguments_are_not_path_resolved(tmp_path):
     # Only exec targets get PATH resolution; file paths must not.
-    sec = _sec(mode='enforce', allowlist=[str(tmp_path)])
+    sec = _sec(allowlist=[str(tmp_path)])
     v = TrustedProviderValidator(sec)
     with pytest.raises(PermissionError):
         v.check_path("relative_file.txt", "r")
@@ -857,46 +795,9 @@ def test_sudo_wrapped_bare_name_is_resolved(tmp_path, monkeypatch):
     for name in ("sudo", "mytool"):
         _make_tool(bindir, name)
     monkeypatch.setenv("PATH", str(bindir))
-    sec = _sec(mode='enforce', allowlist=[str(bindir)])
+    sec = _sec(allowlist=[str(bindir)])
     v = TrustedProviderValidator(sec)
     assert v.check_exec(["sudo", "mytool"]) is None
-
-
-# --------------------------------------------------------------------------- #
-# AgentCheck wiring: the enforcement mode comes from its own Agent config key,
-# and the validator logs through the check's logger.
-# --------------------------------------------------------------------------- #
-def test_agentcheck_reads_enforcement_mode_from_agent_config(datadog_agent):
-    from datadog_checks.base import AgentCheck
-
-    datadog_agent._config['integration_path_enforcement_mode'] = 'log'
-    check = AgentCheck("c", {}, [{}])
-    assert check.security_config.path_enforcement_mode == 'log'
-
-
-def test_agentcheck_enforcement_mode_defaults_to_off(datadog_agent):
-    from datadog_checks.base import AgentCheck
-
-    check = AgentCheck("c", {}, [{}])
-    assert check.security_config.path_enforcement_mode == 'off'
-
-
-def test_agentcheck_validator_logs_through_check_logger(datadog_agent, tmp_path):
-    from datadog_checks.base import AgentCheck
-
-    datadog_agent._config['integration_path_enforcement_mode'] = 'log'
-    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_file_paths_allowlist'] = [str(tmp_path / "nothing")]
-    check = AgentCheck("c", {}, [{}])
-    check.provider = 'untrusted'
-    denied = tmp_path / "outside.txt"
-    denied.write_text("x")
-    with mock.patch.object(check, 'log') as log:
-        # Rebuild the interface so it picks up the patched logger.
-        check._AgentCheck__os_interface = None
-        check._AgentCheck__security_config = None
-        assert check.os_interface.exists(str(denied)) is True
-        assert log.warning.called
 
 
 # --------------------------------------------------------------------------- #
@@ -947,11 +848,22 @@ def test_glob_can_be_denied(tmp_path):
 # are config-derived paths handed to ssl, which opens them itself. This is the
 # path most integrations reach TLS through, so validating it covers many at once.
 # --------------------------------------------------------------------------- #
-def _tls_check(datadog_agent, tmp_path, mode, allowlist, instance):
+@pytest.fixture(autouse=True)
+def _reset_agent_config(datadog_agent):
+    """Undo Agent-config mutations after each test in this module.
+
+    The stub is a module-level singleton that only resets for tests requesting
+    the fixture, so a test that enables enforcement would otherwise gate
+    unrelated tests that do not request it.
+    """
+    yield
+    datadog_agent.reset()
+
+
+def _tls_check(datadog_agent, tmp_path, allowlist, instance):
     from datadog_checks.base import AgentCheck
 
     datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_path_enforcement_mode'] = mode
     datadog_agent._config['integration_file_paths_allowlist'] = [str(p) for p in allowlist]
     datadog_agent._config['integration_trusted_providers'] = ['file']
     check = AgentCheck('c', {}, [instance])
@@ -962,7 +874,7 @@ def _tls_check(datadog_agent, tmp_path, mode, allowlist, instance):
 
 
 def test_tls_ca_cert_outside_allowlist_never_reaches_ssl(datadog_agent, tmp_path):
-    check = _tls_check(datadog_agent, tmp_path, 'enforce', [tmp_path / 'allowed'], {'tls_ca_cert': '/tmp/evil/ca.pem'})
+    check = _tls_check(datadog_agent, tmp_path, [tmp_path / 'allowed'], {'tls_ca_cert': '/tmp/evil/ca.pem'})
     with mock.patch('ssl.SSLContext.load_verify_locations') as load:
         with pytest.raises(PermissionError):
             check.get_tls_context()
@@ -970,7 +882,7 @@ def test_tls_ca_cert_outside_allowlist_never_reaches_ssl(datadog_agent, tmp_path
 
 
 def test_tls_client_cert_outside_allowlist_never_reaches_ssl(datadog_agent, tmp_path):
-    check = _tls_check(datadog_agent, tmp_path, 'enforce', [tmp_path / 'allowed'], {'tls_cert': '/tmp/evil/client.pem'})
+    check = _tls_check(datadog_agent, tmp_path, [tmp_path / 'allowed'], {'tls_cert': '/tmp/evil/client.pem'})
     with mock.patch('ssl.SSLContext.load_cert_chain') as load:
         with pytest.raises(PermissionError):
             check.get_tls_context()
@@ -982,17 +894,10 @@ def test_tls_ca_cert_inside_allowlist_is_used(datadog_agent, tmp_path):
     allowed.mkdir()
     ca = allowed / 'ca.pem'
     ca.write_text('')
-    check = _tls_check(datadog_agent, tmp_path, 'enforce', [allowed], {'tls_ca_cert': str(ca)})
+    check = _tls_check(datadog_agent, tmp_path, [allowed], {'tls_ca_cert': str(ca)})
     with mock.patch('ssl.SSLContext.load_verify_locations') as load:
         check.get_tls_context()
     assert load.called, "an allowlisted CA cert must still be used"
-
-
-def test_tls_enforcement_off_by_default(datadog_agent, tmp_path):
-    check = _tls_check(datadog_agent, tmp_path, 'off', [], {'tls_ca_cert': '/tmp/evil/ca.pem'})
-    with mock.patch('ssl.SSLContext.load_verify_locations') as load:
-        check.get_tls_context()
-    assert load.called, "enforcement must default to off"
 
 
 def test_tls_context_refresh_still_enforces(tmp_path):
@@ -1007,7 +912,7 @@ def test_tls_context_refresh_still_enforces(tmp_path):
     allowed.mkdir()
     ca = allowed / 'ca.pem'
     ca.write_text('')
-    sec = _sec(mode='enforce', allowlist=[str(allowed)])
+    sec = _sec(allowlist=[str(allowed)])
     osx = OSInterface(TrustedProviderValidator(sec))
 
     with mock.patch('ssl.SSLContext.load_verify_locations') as load:
@@ -1052,101 +957,3 @@ def test_resolve_path_still_resolves(osx, tmp_path):
     # does not. Callers that need the resolved form keep using resolve_path.
     p = tmp_path / 'x'
     assert osx.resolve_path(str(p)) == os.path.realpath(str(p))
-
-
-def test_unknown_mode_warns_once_not_per_operation(tmp_path):
-    """A misconfigured mode must not log once per file operation.
-
-    Checks run on a schedule and perform many operations per run, so warning
-    every time would flood the Agent log with a single configuration mistake.
-    """
-    sec = _sec(mode='enfroce', allowlist=[str(tmp_path)])
-    log = mock.MagicMock()
-    osx = OSInterface(TrustedProviderValidator(sec, log=log))
-    for _ in range(25):
-        osx.exists(str(tmp_path / 'x'))
-    assert log.warning.call_count == 1
-
-
-def test_log_mode_reports_each_violation_once(tmp_path):
-    """Dry-run reporting must not repeat per operation or per check run.
-
-    The diagnostic value is knowing which paths would be denied; repeating the
-    same line on every scheduled run would drown the log.
-    """
-    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
-    log = mock.MagicMock()
-    osx = OSInterface(TrustedProviderValidator(sec, log=log))
-    for _ in range(10):
-        osx.exists('/tmp/evil/a.txt')
-    assert log.warning.call_count == 1
-
-
-def test_log_mode_reports_distinct_violations_separately(tmp_path):
-    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
-    log = mock.MagicMock()
-    osx = OSInterface(TrustedProviderValidator(sec, log=log))
-    osx.exists('/tmp/evil/a.txt')
-    osx.exists('/tmp/evil/b.txt')
-    assert log.warning.call_count == 2
-
-
-def test_violation_dedup_memory_is_bounded(tmp_path):
-    """The dedup set must not grow without bound.
-
-    A validator lives as long as its check, so a check that touches many
-    distinct disallowed paths would otherwise leak one entry per path for the
-    lifetime of the Agent.
-    """
-    from datadog_checks.base.utils.os_interface import MAX_REPORTED_VIOLATIONS
-
-    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
-    log = mock.MagicMock()
-    validator = TrustedProviderValidator(sec, log=log)
-    osx = OSInterface(validator)
-    for i in range(MAX_REPORTED_VIOLATIONS * 3):
-        osx.exists(f'/tmp/evil/{i}.txt')
-    assert len(validator._reported_violations) <= MAX_REPORTED_VIOLATIONS
-
-
-def test_violation_suppression_is_announced(tmp_path):
-    from datadog_checks.base.utils.os_interface import MAX_REPORTED_VIOLATIONS
-
-    sec = _sec(mode='log', allowlist=[str(tmp_path / 'allowed')])
-    log = mock.MagicMock()
-    osx = OSInterface(TrustedProviderValidator(sec, log=log))
-    for i in range(MAX_REPORTED_VIOLATIONS + 5):
-        osx.exists(f'/tmp/evil/{i}.txt')
-    messages = [str(c) for c in log.warning.call_args_list]
-    assert any('suppress' in m for m in messages), "hitting the cap must be visible in the log"
-
-
-def test_agent_without_the_config_key_defaults_to_off_silently(datadog_agent):
-    """An older Agent returns '' for an unknown config key.
-
-    That must resolve to `off` without emitting an unknown-mode warning, since
-    the Agent-side key ships separately from this code.
-    """
-    from datadog_checks.base import AgentCheck
-
-    assert datadog_agent.get_config('integration_path_enforcement_mode') == ''
-    check = AgentCheck('c', {}, [{}])
-    assert check.security_config.path_enforcement_mode == 'off'
-
-    log = mock.MagicMock()
-    validator = TrustedProviderValidator(check.security_config, log=log)
-    validator.check_path('/anything', 'r')
-    assert not log.warning.called, "a missing Agent key must not look like a misconfiguration"
-
-
-def test_exec_is_passthrough_when_enforcement_is_off(tmp_path):
-    """The default configuration must not gate executables.
-
-    This is the state every exec site ships in, so it is worth asserting
-    directly rather than inferring it from the path-side equivalent.
-    """
-    sec = _sec(allowlist=[str(tmp_path / 'nothing')])
-    assert sec.path_enforcement_mode == 'off'
-    v = TrustedProviderValidator(sec)
-    assert v.check_exec(['/usr/bin/evil', '--flag']) is None
-    assert v.check_exec(['sudo', '/usr/bin/evil']) is None

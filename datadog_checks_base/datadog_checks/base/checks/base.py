@@ -512,12 +512,6 @@ class AgentCheck(object):
                 if trusted_providers is not None
                 else list(validation.security.DEFAULT_TRUSTED_PROVIDERS),
                 excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
-                # Separate switch from ignore_untrusted_file_params so that enabling
-                # config-field validation does not also switch on point-of-use
-                # enforcement everywhere at once. See utils/os_interface.py.
-                path_enforcement_mode=(
-                    datadog_agent.get_config('integration_path_enforcement_mode') or validation.security.ENFORCEMENT_OFF
-                ),
             )
 
         return self.__security_config
@@ -534,7 +528,7 @@ class AgentCheck(object):
         if self.__os_interface is None:
             from datadog_checks.base.utils.os_interface import OSInterface, TrustedProviderValidator
 
-            self.__os_interface = OSInterface(TrustedProviderValidator(self.security_config, log=self.log))
+            self.__os_interface = OSInterface(TrustedProviderValidator(self.security_config))
 
         return self.__os_interface
 

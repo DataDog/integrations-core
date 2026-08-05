@@ -24,10 +24,13 @@ def enforcing_agent(datadog_agent, tmp_path):
     allowed.mkdir()
     (allowed / "a.txt").write_text("x")
     datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_path_enforcement_mode'] = 'enforce'
     datadog_agent._config['integration_file_paths_allowlist'] = [str(allowed)]
     datadog_agent._config['integration_trusted_providers'] = ['file']
     yield allowed
+    # The stub is a module-level singleton and only resets for tests that request
+    # the fixture, so leaving enforcement enabled would silently gate unrelated
+    # tests that do not.
+    datadog_agent.reset()
 
 
 def _untrusted_check(directory):
@@ -53,18 +56,5 @@ def test_directory_outside_allowlist_is_never_read(enforcing_agent, tmp_path, ag
 
 def test_allowlisted_directory_is_scanned(enforcing_agent, aggregator):
     check = _untrusted_check(enforcing_agent)
-    check.check(None)
-    aggregator.assert_metric('system.disk.directory.files', count=1)
-
-
-def test_enforcement_off_by_default_scans_any_directory(datadog_agent, tmp_path, aggregator):
-    outside = tmp_path / "outside"
-    outside.mkdir()
-    (outside / "secret.txt").write_text("x")
-    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_file_paths_allowlist'] = []
-    datadog_agent._config['integration_trusted_providers'] = ['file']
-
-    check = _untrusted_check(outside)
     check.check(None)
     aggregator.assert_metric('system.disk.directory.files', count=1)

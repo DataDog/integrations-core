@@ -22,10 +22,13 @@ def enforcing_agent(datadog_agent, tmp_path):
     allowed = tmp_path / "allowed"
     allowed.mkdir()
     datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_path_enforcement_mode'] = 'enforce'
     datadog_agent._config['integration_file_paths_allowlist'] = [str(allowed)]
     datadog_agent._config['integration_trusted_providers'] = ['file']
     yield allowed
+    # The stub is a module-level singleton and only resets for tests that request
+    # the fixture, so leaving enforcement enabled would silently gate unrelated
+    # tests that do not.
+    datadog_agent.reset()
 
 
 def _untrusted_check(instance):
@@ -68,13 +71,3 @@ def test_allowlisted_cluster_file_is_used_unchanged(enforcing_agent):
         check.construct_database()
     assert fdb_open.called
     assert fdb_open.call_args.kwargs['cluster_file'] == str(cluster)
-
-
-def test_enforcement_off_by_default_allows_any_cluster_file(datadog_agent):
-    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_file_paths_allowlist'] = []
-    datadog_agent._config['integration_trusted_providers'] = ['file']
-    check = _untrusted_check({'cluster_file': '/tmp/evil/fdb.cluster'})
-    with mock.patch('fdb.open') as fdb_open:
-        check.construct_database()
-    assert fdb_open.called, "enforcement must default to off"

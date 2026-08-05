@@ -19,28 +19,15 @@ operation being replaced.
 from __future__ import annotations
 
 import glob
-import logging
 import os
 import shutil
 import subprocess
 from typing import IO, Any, Protocol, Sequence, runtime_checkable
 
-from datadog_checks.base.utils.models.validation.security import (
-    ENFORCEMENT_ENFORCE,
-    ENFORCEMENT_MODES,
-    ENFORCEMENT_OFF,
-    SecurityConfig,
-)
+from datadog_checks.base.utils.models.validation.security import SecurityConfig
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output as _base_get_subprocess_output
 
 StrPath = str | os.PathLike[str]
-
-LOGGER = logging.getLogger(__name__)
-
-# Upper bound on distinct violations remembered for deduplication. The validator
-# lives as long as its check, so this set would otherwise grow with the number of
-# distinct disallowed paths a check touches.
-MAX_REPORTED_VIOLATIONS = 100
 
 
 def _resolve_program(program: str) -> str:
@@ -88,38 +75,14 @@ class TrustedProviderValidator:
     *when* it runs: at the actual file/exec operation, so runtime-derived paths
     are covered too.
 
-    Point-of-use enforcement is gated by its own
-    ``SecurityConfig.path_enforcement_mode`` (``off``/``log``/``enforce``), which
-    is independent of the field-validation flag. ``off`` is the default and makes
-    this validator a passthrough; ``log`` evaluates the policy and reports what
-    *would* be denied without blocking, so a fleet can be assessed before any
-    check starts failing. Unknown modes are treated as ``off`` and reported, so a
-    typo in the Agent config can neither enforce unexpectedly nor crash a check.
+    Enforcement is gated by the existing ``ignore_untrusted_file_params`` setting,
+    the same switch that governs config-field validation. Turning that on
+    therefore begins enforcing at every migrated call site as well as at load
+    time; there is no separate switch and no dry-run mode.
     """
 
-    def __init__(self, security: SecurityConfig, log: "logging.Logger | None" = None):
+    def __init__(self, security: SecurityConfig):
         self._security = security
-        self._log = log or LOGGER
-        self._reported_bad_modes: set = set()
-        self._reported_violations: set = set()
-        self._violation_cap_reported = False
-
-    def _mode(self) -> str:
-        mode = self._security.path_enforcement_mode
-        if mode not in ENFORCEMENT_MODES:
-            # Report each bad value once. Checks run on a schedule and perform
-            # many operations per run, so warning per operation would flood the
-            # Agent log over a single configuration mistake.
-            if mode not in self._reported_bad_modes:
-                self._reported_bad_modes.add(mode)
-                self._log.warning(
-                    "Unknown path enforcement mode %r; treating as %r. Valid modes: %s",
-                    mode,
-                    ENFORCEMENT_OFF,
-                    ', '.join(ENFORCEMENT_MODES),
-                )
-            return ENFORCEMENT_OFF
-        return mode
 
     def _allowed(self, path: StrPath) -> bool:
         if not self._security.is_enabled():
@@ -130,45 +93,18 @@ class TrustedProviderValidator:
             return True
         return self._security.is_file_path_allowed(os.fspath(path))
 
-    def _enforce(self, target: str, kind: str, mode: str) -> None:
-        """Deny, report, or ignore a policy violation according to `mode`."""
-        if self._allowed(target):
-            return
-        message = f"{kind} '{target}' is not allowed from untrusted provider '{self._security.provider}'"
-        if mode == ENFORCEMENT_ENFORCE:
-            raise PermissionError(message)
-        # log mode: surface what enforcement *would* do, then allow. Each distinct
-        # violation is reported once; a check repeats the same operations on every
-        # scheduled run, and repeating the line adds no information.
-        if (kind, target) in self._reported_violations:
-            return
-        if len(self._reported_violations) >= MAX_REPORTED_VIOLATIONS:
-            # The validator lives as long as its check, so this set cannot be
-            # allowed to grow with the number of distinct paths touched. Stop
-            # recording, but say so rather than going quiet.
-            if not self._violation_cap_reported:
-                self._violation_cap_reported = True
-                self._log.warning(
-                    "Reached %d distinct path enforcement violations; suppressing further reports. "
-                    "Review the allowlist configuration.",
-                    MAX_REPORTED_VIOLATIONS,
-                )
-            return
-        self._reported_violations.add((kind, target))
-        self._log.warning("%s; would be denied if path_enforcement_mode were %r", message, ENFORCEMENT_ENFORCE)
-
     def check_path(self, path: StrPath, mode: str) -> None:
-        enforcement = self._mode()
-        if enforcement == ENFORCEMENT_OFF:
-            return
-        self._enforce(os.fspath(path), 'Path', enforcement)
+        target = os.fspath(path)
+        if not self._allowed(target):
+            raise PermissionError(f"Path '{target}' is not allowed from untrusted provider '{self._security.provider}'")
 
     def check_exec(self, argv: Sequence[str]) -> None:
-        enforcement = self._mode()
-        if enforcement == ENFORCEMENT_OFF:
-            return
         for target in _exec_targets(argv):
-            self._enforce(_resolve_program(target), 'Executable', enforcement)
+            program = _resolve_program(target)
+            if not self._allowed(program):
+                raise PermissionError(
+                    f"Executable '{program}' is not allowed from untrusted provider '{self._security.provider}'"
+                )
 
 
 # Programs that launch another program named later in the same argv. Validating

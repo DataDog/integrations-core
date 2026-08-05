@@ -23,10 +23,13 @@ def enforcing_agent(datadog_agent, tmp_path):
     allowed = tmp_path / "allowed_certs"
     allowed.mkdir()
     datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_path_enforcement_mode'] = 'enforce'
     datadog_agent._config['integration_file_paths_allowlist'] = [str(allowed)]
     datadog_agent._config['integration_trusted_providers'] = ['file']
     yield allowed
+    # The stub is a module-level singleton and only resets for tests that request
+    # the fixture, so leaving enforcement enabled would silently gate unrelated
+    # tests that do not.
+    datadog_agent.reset()
 
 
 def _untrusted_check(instance):
@@ -79,17 +82,3 @@ def test_allowlisted_cafile_is_passed_to_ssl(enforcing_agent):
     assert load.called, "an allowlisted CA file must still be used"
     # The configured value is what ssl receives; validate_path does not rewrite it.
     assert load.call_args.kwargs['cafile'] == str(cafile)
-
-
-def test_enforcement_off_by_default_allows_any_cafile(datadog_agent):
-    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_file_paths_allowlist'] = []
-    datadog_agent._config['integration_trusted_providers'] = ['file']
-    check = _untrusted_check(_base_instance(ssl_cafile='/tmp/evil/ca.pem'))
-    with (
-        mock.patch('ssl.SSLContext.load_verify_locations') as load,
-        mock.patch('datadog_checks.esxi.check.connect.SmartConnect', side_effect=RuntimeError('stop here')),
-    ):
-        with pytest.raises(Exception):
-            check.initiate_api_connection()
-    assert load.called, "enforcement must default to off"

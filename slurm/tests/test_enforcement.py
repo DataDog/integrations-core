@@ -25,10 +25,13 @@ def enforcing_agent(datadog_agent, tmp_path):
     allowed = tmp_path / "allowed_bin"
     allowed.mkdir()
     datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_path_enforcement_mode'] = 'enforce'
     datadog_agent._config['integration_file_paths_allowlist'] = [str(allowed)]
     datadog_agent._config['integration_trusted_providers'] = ['file']
     yield allowed
+    # The stub is a module-level singleton and only resets for tests that request
+    # the fixture, so leaving enforcement enabled would silently gate unrelated
+    # tests that do not.
+    datadog_agent.reset()
 
 
 def _untrusted_check(instance):
@@ -76,37 +79,3 @@ def test_trusted_provider_is_not_blocked(enforcing_agent, instance):
         check.check(None)
 
     assert real_run.called, "a trusted provider must not be subject to the allowlist"
-
-
-def test_log_mode_reports_but_still_launches(datadog_agent, instance, tmp_path):
-    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_path_enforcement_mode'] = 'log'
-    datadog_agent._config['integration_file_paths_allowlist'] = [str(tmp_path / "nothing")]
-    datadog_agent._config['integration_trusted_providers'] = ['file']
-
-    instance = dict(instance, collect_sinfo_stats=True, sinfo_path='/tmp/evil/sinfo')
-    check = _untrusted_check(instance)
-
-    with mock.patch.object(check, 'log') as log, mock.patch('subprocess.run') as real_run:
-        check._AgentCheck__os_interface = None
-        real_run.return_value = mock.MagicMock(stdout='', stderr='', returncode=0)
-        check.check(None)
-
-    assert real_run.called, "log mode is a dry run; it must not block"
-    assert log.warning.called, "log mode must report what would be denied"
-
-
-def test_enforcement_off_by_default_does_not_block(datadog_agent, instance):
-    # The kill switch: field validation on, point-of-use enforcement unset.
-    datadog_agent._config['integration_ignore_untrusted_file_params'] = True
-    datadog_agent._config['integration_file_paths_allowlist'] = []
-    datadog_agent._config['integration_trusted_providers'] = ['file']
-
-    instance = dict(instance, collect_sinfo_stats=True, sinfo_path='/tmp/evil/sinfo')
-    check = _untrusted_check(instance)
-
-    with mock.patch('subprocess.run') as real_run:
-        real_run.return_value = mock.MagicMock(stdout='', stderr='', returncode=0)
-        check.check(None)
-
-    assert real_run.called, "enforcement must default to off"
