@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from ddev.cli.ci.tests.batching.git import ChangedFile, ChangeType
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
+from ddev.utils.git import ChangedFile, ChangeType
 from ddev.utils.platform import PlatformName
 
 DEFAULT_PYTHON_VERSION = "3.13"

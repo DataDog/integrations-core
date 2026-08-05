@@ -10,7 +10,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from ddev.cli.ci.tests.batching.git import ChangedFile, ChangeType
+from ddev.utils.git import ChangedFile, ChangeType
 
 if TYPE_CHECKING:
     from ddev.repo.core import IntegrationRegistry

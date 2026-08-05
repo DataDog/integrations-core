@@ -9,15 +9,17 @@ conventions.
 
 ```
 changed files -> affected targets -> test units -> batch jobs -> job groups -> TestBatch messages
-      git.py         targets.py       units.py      jobs.py      strategy/      assembly.py
+  (see below)      targets.py       units.py      jobs.py      strategy/      assembly.py
 ```
 
 Everything is composed by `build.py`, the package's public entry point. Callers use
 `build_test_units` or `build_test_batches` and never assemble the stages themselves.
 
+Changed files arrive as `ChangedFile` records and are not produced here. `ddev.utils.git` reads
+them from git, and `../changes.py` decides which two commits a CI run compares.
+
 | Module | Role |
 | --- | --- |
-| `git.py` | Picks the comparison base and parses `git diff --name-status` into `ChangedFile` records. |
 | `targets.py` | Maps changed files to affected target names through ordered, independent rules. |
 | `units.py` | Expands targets into `TestUnit` values: one target, one platform, one environment. |
 | `jobs.py` | Turns each unit into the concrete `BatchJob` the workflow runs. |
@@ -35,10 +37,10 @@ plan, byte for byte. Never introduce ordering that depends on a set, a dict buil
 source, wall-clock time, or randomness, and never make a network call while planning. Registry
 lookups belong in an explicit preflight such as `find_unpublished_images`, not in the plan itself.
 
-**External systems come in through injected protocols.** `GitProvider`, `RepositoryFacts`,
-`EnvironmentProvider`, `BatchStrategy`, and `AgentImageResolver` exist so tests never need git, a
-real repository, or Hatch and allow composition in the future if needed. Add a protocol rather than importing a concrete dependency into a
-planning module.
+**External systems come in through injected protocols.** `RepositoryFacts`,
+`EnvironmentProvider`, `BatchStrategy`, and `AgentImageResolver` exist so tests never need a real
+repository or Hatch, and so the pieces can be recomposed later. Add a protocol rather than
+importing a concrete dependency into a planning module.
 
 **Validation is independent of the strategy.** A strategy is untrusted input: `validate_batches`
 must catch a partition that drops, duplicates, overfills, or illegally splits, no matter which

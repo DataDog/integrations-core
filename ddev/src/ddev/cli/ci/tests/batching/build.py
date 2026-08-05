@@ -29,13 +29,13 @@ from ddev.cli.ci.tests.batching.validation import validate_batches
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ddev.cli.ci.tests.batching.git import ChangedFile
     from ddev.cli.ci.tests.batching.targets import TargetRule
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
     from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.integration.core import Integration
     from ddev.repo.core import Repository
+    from ddev.utils.git import ChangedFile
     from ddev.utils.hatch import Environment
     from ddev.utils.platform import Platform, PlatformName
 
