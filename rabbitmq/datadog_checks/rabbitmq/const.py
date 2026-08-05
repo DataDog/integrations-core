@@ -57,6 +57,8 @@ QUEUE_ATTRIBUTES = [
     ('message_stats/publish_details/rate', 'messages.publish.rate', float),
     ('message_stats/redeliver', 'messages.redeliver.count', float),
     ('message_stats/redeliver_details/rate', 'messages.redeliver.rate', float),
+    ('slave_nodes', 'slave_nodes', len),
+    ('synchronised_slave_nodes', 'synchronised_slave_nodes', len),
 ]
 
 NODE_ATTRIBUTES = [
