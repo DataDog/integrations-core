@@ -24,8 +24,9 @@ from ddev.cli.ci.tests.progress import (
     ExecutionState,
     JobAttemptProgress,
     JobProgress,
+    ProgressError,
 )
-from ddev.cli.ci.tests.status import Status, conclusion_to_status
+from ddev.cli.ci.tests.status import Status, batch_status, conclusion_to_status
 from ddev.event_bus.orchestrator import SyncProcessor
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import parse_junit_dir
@@ -54,9 +55,12 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     It is constructed with the complete batch plan, keeps an in-memory registry of every job's full
     result across all batches and, on each finished batch, emits an ``UpdatePRComment`` carrying a
     monotonically increasing ``revision`` and the whole accumulated state — as a ``DispatcherProgress``
-    snapshot covering every planned batch, including those still to run. ``done`` is set once the final
-    expected batch has been received. It does not post to GitHub — rendering the comment (and rejecting
-    stale revisions) is a separate consumer's job.
+    snapshot covering every planned batch, including those still to run. ``done`` is derived from that
+    snapshot: it is set once no planned batch is left unfinished. It does not post to GitHub —
+    rendering the comment (and rejecting stale revisions) is a separate consumer's job.
+
+    Every registry is keyed by ``batch_id``, the batch's logical identity, which stays stable across
+    workflow attempts while ``run_id`` and the message id do not.
 
     This task makes no GitHub API calls — it works exclusively from the artifacts the runner
     already downloaded to ``BatchFinished.artifacts_path``.
@@ -65,8 +69,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     def __init__(self, name: str, output_base_path: Path, batches: list[TestBatch]) -> None:
         super().__init__(name)
         self._output_base_path = output_base_path
-        self._expected_batches = len(batches)
-        self._received_batches = 0
+        self._revision = 0
         self._status_by_batch: dict[str, WorkflowStatus] = {}
         self._results_by_batch: dict[str, list[JobResult]] = {}
         # The whole plan, in planning order: every batch is present from the start so each snapshot
@@ -80,36 +83,37 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
     def process_message(self, message: BatchFinished) -> None:
         log_extra = {"batch_id": message.batch_id, "run_id": message.run_id}
         if not message.batch_jobs:
+            # Still terminal, and still worth a revision: the batch has stopped and the comment must
+            # say so, otherwise it renders as planned forever and ``done`` is never reached.
             self._logger.warning("BatchFinished carried no jobs; nothing to gather", extra=log_extra)
-            # No revision is emitted, but the batch is terminal: it must not keep rendering as planned.
-            with self._lock:
-                self._finish_without_jobs(message)
-            return
 
         # Parse and organize artifacts outside the lock — these touch only this batch's own files.
         gathered = [self._gather_job(batch_job_result, message) for batch_job_result in message.batch_jobs]
         results = [result for result, _ in gathered]
         status = self._build_workflow_status(message, results)
-        progress = self._finished_batch_progress(message, gathered)
 
         # Register the batch, bump the revision, and emit the update all under the lock so two batches
         # finishing at once cannot build a comment from half-updated shared state.
         with self._lock:
-            if message.batch_id not in self._progress_by_batch:
+            planned = self._progress_by_batch.get(message.batch_id)
+            if planned is None:
                 self._logger.warning("BatchFinished for an unplanned batch ignored", extra=log_extra)
                 return
-            # Keyed by batch id (stable across retries; run_id changes on a re-run). A duplicate is
-            # ignored so it can't re-count the batch and inflate the revision — this check is
-            # authoritative only inside the lock. (Retry-replace semantics come with the retry work.)
-            if message.id in self._results_by_batch:
+            # The aggregate is the single record of what has been gathered, so a batch already in a
+            # terminal state is a duplicate. Ignoring it keeps it from inflating the revision — the
+            # check is authoritative only inside the lock. (Retry semantics come with the retry work.)
+            if planned.state is ExecutionState.FINISHED:
                 self._logger.warning("Duplicate BatchFinished ignored", extra=log_extra)
                 return
-            self._results_by_batch[message.id] = results
-            self._status_by_batch[message.id] = status
-            self._progress_by_batch[message.batch_id] = progress
-            self._received_batches += 1
-            revision = self._received_batches
-            done = revision >= self._expected_batches
+            if results:
+                # The flat view counts job outcomes, so a run that reported none has no entry there;
+                # the aggregate is where a batch that finished empty is recorded as failed.
+                self._results_by_batch[message.batch_id] = results
+                self._status_by_batch[message.batch_id] = status
+            self._progress_by_batch[message.batch_id] = self._finished_batch_progress(planned, message, gathered)
+            self._revision += 1
+            revision = self._revision
+            done = all(batch.state is ExecutionState.FINISHED for batch in self._progress_by_batch.values())
             self.submit_message(self.build_update_message(message.id, revision, done))
 
         self._logger.info(
@@ -119,14 +123,15 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             extra=log_extra,
         )
 
-    def build_initial_update(self) -> UpdatePRComment:
+    def build_initial_update(self, message_id: str) -> UpdatePRComment:
         """Revision ``0``: the complete plan, before any batch has been dispatched.
 
-        Follows the same event-bus path as every later revision, so the PR updater needs no separate
-        startup call.
+        Returned rather than submitted, because a processor can only submit once the event bus has
+        attached its queue. The dispatcher entry point publishes it when it starts the bus, so the
+        PR updater receives the plan on the same channel as every later revision.
         """
         with self._lock:
-            return self.build_update_message("initial", revision=0, done=False)
+            return self.build_update_message(message_id, revision=0, done=False)
 
     def build_update_message(self, message_id: str, revision: int, done: bool) -> UpdatePRComment:
         """Build an ``UpdatePRComment`` for *revision* from all accumulated results.
@@ -168,14 +173,14 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         batch_job = batch_job_result.job
         status, failed_steps = self._job_status(batch_job_result, message)
 
-        error: str | None = None
+        error: ProgressError | None = None
         reports: tuple[JUnitReport, ...] = ()
         job_artifacts_path = Path(batch_job_result.artifact_name_path) if batch_job_result.artifact_name_path else None
         if job_artifacts_path is not None:
             reports = tuple(parse_junit_dir(job_artifacts_path))
             self._organize_artifacts(job_artifacts_path, batch_job)
         else:
-            error = f"No artifact directory found for job {batch_job.name!r}"
+            error = ProgressError.NO_ARTIFACTS
             self._logger.warning(
                 "No artifact directory found for job %s", batch_job.name, extra={"run_id": message.run_id}
             )
@@ -190,7 +195,8 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         )
         workflow_job = batch_job_result.workflow_job
         attempt = JobAttemptProgress(
-            # One attempt per job until the retry work lands; the runner reports no attempt number yet.
+            # Provisional: the job's real position in its history is only known once the attempt is
+            # appended to the registered plan, under the lock.
             attempt=1,
             job_id=None if workflow_job is None else workflow_job.id,
             status=status,
@@ -208,11 +214,12 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         job's own workflow-job conclusion decides. A missing workflow job is unexpected and raises — the
         runner correlates every job before emitting, so a miss is a bug, not a state to paper over.
 
-        All steps concluding in failure are collected: a workflow can run on-failure steps, so more than
-        one step may fail for a single job.
+        ``failed_steps`` holds real step names only. A timed-out batch has none — the timeout is not a
+        step, and is recorded as the batch's ``error`` instead. All steps concluding in failure are
+        collected: a workflow can run on-failure steps, so more than one step may fail for a job.
         """
         if message.timed_out:
-            return (Status.FAILURE, ["timed out"])
+            return (Status.FAILURE, [])
 
         workflow_job = batch_job_result.workflow_job
         if workflow_job is None:
@@ -243,57 +250,68 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         shutil.copy2(source, destination)
         self._logger.debug("Organized artifact %s -> %s", source, destination)
 
-    def _finish_without_jobs(self, message: BatchFinished) -> None:
-        """Mark a batch that reported no job results terminal, with the reason recorded.
-
-        Must be called while holding ``self._lock``. No revision is emitted: nothing was gathered.
-        """
-        planned = self._progress_by_batch.get(message.batch_id)
-        if planned is None:
-            return
-        self._progress_by_batch[message.batch_id] = dataclasses.replace(
-            planned,
-            run_id=message.run_id,
-            workflow_url=message.workflow_url,
-            state=ExecutionState.FINISHED,
-            status=Status.FAILURE,
-            current_attempt=1,
-            error="Batch reported no job results",
-        )
-
     def _finished_batch_progress(
-        self, message: BatchFinished, gathered: list[tuple[JobResult, JobAttemptProgress]]
+        self,
+        planned: BatchProgress,
+        message: BatchFinished,
+        gathered: list[tuple[JobResult, JobAttemptProgress]],
     ) -> BatchProgress:
-        """The batch's terminal aggregate, built from the executions reported on the message.
+        """The batch's terminal aggregate: the registered plan with this run's executions appended.
 
-        The batch label follows the same precedence as ``WorkflowStatus.status``: failed if any job
-        failed, else passed if any job passed, else skipped.
+        Built from *planned* rather than from the message alone, so the batch keeps every job it was
+        planned with. A run that reports only a subset — which is what a failed-job rerun does — adds
+        attempts to the jobs it covers and leaves the rest as they were, instead of dropping them.
+
+        Must be called while holding ``self._lock``: it reads a registered ``BatchProgress``.
         """
-        jobs = tuple(
-            JobProgress(job=batch_job_result.job, attempts=(attempt,))
+        reported_jobs = {batch_job_result.job.name: batch_job_result.job for batch_job_result in message.batch_jobs}
+        attempts = {
+            batch_job_result.job.name: attempt
             for batch_job_result, (_, attempt) in zip(message.batch_jobs, gathered, strict=True)
-        )
-        statuses = {job.latest.status for job in jobs if job.latest is not None}
-        if Status.FAILURE in statuses:
-            status = Status.FAILURE
-        elif Status.SUCCESS in statuses:
-            status = Status.SUCCESS
-        else:
-            status = Status.SKIPPED
+        }
+
+        jobs = []
+        for job in planned.jobs:
+            attempt = attempts.pop(job.job.name, None)
+            if attempt is None:
+                jobs.append(job)
+                continue
+            # The attempt number is the execution's position in this job's own history.
+            numbered = dataclasses.replace(attempt, attempt=len(job.attempts) + 1)
+            jobs.append(dataclasses.replace(job, attempts=(*job.attempts, numbered)))
+        for name, attempt in attempts.items():
+            # A job the plan never mentioned is a runner bug, but dropping its result would hide it.
+            self._logger.warning(
+                "Gathered a job that is not in the batch plan", extra={"batch_id": message.batch_id, "job": name}
+            )
+            jobs.append(JobProgress(job=reported_jobs[name], attempts=(attempt,)))
+
+        statuses = [job.latest.status for job in jobs if job.latest is not None]
+        attempts_run = max((len(job.attempts) for job in jobs), default=0)
 
         return BatchProgress(
             batch_id=message.batch_id,
             run_id=message.run_id,
             workflow_url=message.workflow_url,
             state=ExecutionState.FINISHED,
-            status=status,
-            current_attempt=1,
+            # A batch that ran but reported nothing has no job status to collapse, and failed.
+            status=batch_status(statuses) if statuses else Status.FAILURE,
+            # The batch ran, so it is on at least its first attempt even if no job reported one.
+            current_attempt=max(attempts_run, 1),
             max_attempts=1,
             retries_remaining=0,
             retrying_jobs=(),
-            jobs=jobs,
-            error="Batch timed out" if message.timed_out else None,
+            jobs=tuple(jobs),
+            error=self._batch_error(message, statuses),
         )
+
+    @staticmethod
+    def _batch_error(message: BatchFinished, statuses: list[Status]) -> ProgressError | None:
+        if message.timed_out:
+            return ProgressError.TIMED_OUT
+        if not statuses:
+            return ProgressError.NO_JOB_RESULTS
+        return None
 
     @staticmethod
     def _build_workflow_status(message: BatchFinished, results: list[JobResult]) -> WorkflowStatus:

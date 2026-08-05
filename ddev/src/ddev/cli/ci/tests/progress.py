@@ -10,7 +10,8 @@ jobs, and each job contains its executions in attempt order.
 These objects are the only domain language the PR updater consumes. They deliberately contain no
 GitHub API models: the runner turns API responses into execution facts, the gatherer normalizes them
 into the objects below, and the renderer works from a complete immutable snapshot. ``conclusion`` is
-the one raw GitHub value retained, kept as a plain string for diagnosis and rendering.
+the one GitHub value retained — as its ``WorkflowJobConclusion`` enum, never a bare string — because
+it distinguishes outcomes (cancelled, timed out, action required) that ``Status`` collapses.
 
 ``BatchJob`` (in ``messages``) is the authoritative planned-job representation, so there is no
 separate planned-job type here. Although it is not frozen, every component treats each instance as
@@ -20,7 +21,7 @@ immutable after planning.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum, auto
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.status import Status
@@ -30,7 +31,21 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from ddev.cli.ci.tests.messages import BatchJob
+    from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
     from ddev.utils.junit import JUnitReport, JUnitTestCase
+
+
+class ProgressError(StrEnum):
+    """Why a batch or execution is unavailable, as a closed set the renderer can branch on.
+
+    A free-form message would force the PR updater to match on prose. The subject is already on the
+    object carrying the error, so the member alone says everything: ``NO_ARTIFACTS`` on a job
+    attempt means that job's artifacts, ``TIMED_OUT`` on a batch means that batch.
+    """
+
+    TIMED_OUT = auto()
+    NO_JOB_RESULTS = auto()
+    NO_ARTIFACTS = auto()
 
 
 class ExecutionState(Enum):
@@ -52,20 +67,24 @@ class ExecutionState(Enum):
 class JobAttemptProgress:
     """One observed execution of one planned job.
 
-    ``attempt`` is the workflow attempt that produced this execution; ``status`` is ``None`` while no
-    outcome is available; ``failed_steps`` holds every failing step name, since a job can fail more
-    than one step; ``reports`` holds the complete parsed JUnit reports for the execution; ``error``
-    records an unavailable or processing error, such as a job or artifact that never showed up.
+    An attempt exists only because the job ran, so ``status`` is always known — a job whose outcome
+    is undetermined has no attempt, not an attempt with an empty status. ``attempt`` is its 1-based
+    position in the job's history; ``failed_steps`` holds every failing step name, since a job can
+    fail more than one step; ``reports`` holds the complete parsed JUnit reports; ``error`` records
+    what was unavailable, such as artifacts that never showed up.
+
+    ``job_id``, ``conclusion`` and ``job_url`` come from the correlated workflow job and are ``None``
+    only when GitHub never reported one, which today means the batch timed out.
     """
 
     attempt: int
     job_id: int | None
-    status: Status | None
-    conclusion: str | None
+    status: Status
+    conclusion: WorkflowJobConclusion | None
     failed_steps: tuple[str, ...]
     job_url: str | None
     reports: tuple[JUnitReport, ...]
-    error: str | None = None
+    error: ProgressError | None = None
 
     @property
     def failed_tests(self) -> list[JUnitTestCase]:
@@ -121,7 +140,7 @@ class BatchProgress:
     retries_remaining: int
     retrying_jobs: tuple[BatchJob, ...]
     jobs: tuple[JobProgress, ...]
-    error: str | None = None
+    error: ProgressError | None = None
 
 
 @dataclass(frozen=True)
@@ -153,8 +172,8 @@ class DispatcherProgress:
 
     @property
     def complete(self) -> int:
-        """Planned jobs whose latest execution has an outcome."""
-        return sum(1 for job in self._jobs if job.latest is not None and job.latest.status is not None)
+        """Planned jobs that have run: an attempt carries an outcome by construction."""
+        return sum(1 for job in self._jobs if job.latest is not None)
 
     @property
     def total(self) -> int:

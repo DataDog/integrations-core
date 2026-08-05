@@ -12,8 +12,12 @@ collapses a GitHub conclusion into it.
 from __future__ import annotations
 
 from enum import StrEnum, auto
+from typing import TYPE_CHECKING
 
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class Status(StrEnum):
@@ -22,6 +26,20 @@ class Status(StrEnum):
     SUCCESS = auto()
     FAILURE = auto()
     SKIPPED = auto()
+
+
+def batch_status(statuses: Iterable[Status]) -> Status:
+    """Collapse the statuses of a batch's jobs into the batch's own label.
+
+    Failure wins, then success, else skipped. Callers that can distinguish "every job was skipped"
+    from "no job reported anything" must handle the empty case themselves.
+    """
+    known = set(statuses)
+    if Status.FAILURE in known:
+        return Status.FAILURE
+    if Status.SUCCESS in known:
+        return Status.SUCCESS
+    return Status.SKIPPED
 
 
 def conclusion_to_status(conclusion: str | None) -> Status:

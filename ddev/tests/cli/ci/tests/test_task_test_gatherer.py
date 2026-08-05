@@ -27,7 +27,7 @@ from ddev.cli.ci.tests.messages import (
     TestBatch,
     UpdatePRComment,
 )
-from ddev.cli.ci.tests.progress import ExecutionState
+from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage
@@ -268,16 +268,15 @@ def test_full_report_keeps_passing_tests(tmp_path: Path) -> None:
 
 
 def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
-    gatherer = _make_gatherer(tmp_path)
-    batch_jobs = [
-        _batch_job_result(_batch_job("j1", environment="py3.12")),
-        _batch_job_result(_batch_job("j2", target="kafka", environment="py3.13")),
-    ]
+    jobs = [_batch_job("j1", environment="py3.12"), _batch_job("j2", target="kafka", environment="py3.13")]
+    gatherer = _make_gatherer(tmp_path, {"batch-1": jobs})
+    batch_jobs = [_batch_job_result(job) for job in jobs]
     gatherer.process_message(_batch_finished("", status="failure", run_id=300, batch_jobs=batch_jobs, timed_out=True))
 
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.failed_count == 2
-    assert {tuple(result.failed_steps) for result in status.results} == {("timed out",)}
+    # The timeout is the batch's, not a step of any job: no step name is invented for it.
+    assert {tuple(result.failed_steps) for result in status.results} == {()}
 
 
 def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) -> None:
@@ -285,12 +284,12 @@ def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) -> Non
     j1_dir = _make_job_tree(artifacts, "j1", environment="py3.12", junit=JUNIT_PASSING)
     j2_dir = _make_job_tree(artifacts, "j2", environment="py3.13", junit=JUNIT_FAILING)
 
-    gatherer = _make_gatherer(tmp_path)
+    j1 = _batch_job("j1", environment="py3.12")
+    j2 = _batch_job("j2", target="kafka", environment="py3.13")
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]})
     batch_jobs = [
-        _batch_job_result(_batch_job("j1", environment="py3.12"), _workflow_job("j1", "success"), j1_dir),
-        _batch_job_result(
-            _batch_job("j2", target="kafka", environment="py3.13"), _workflow_job("j2", "failure"), j2_dir
-        ),
+        _batch_job_result(j1, _workflow_job("j1", "success"), j1_dir),
+        _batch_job_result(j2, _workflow_job("j2", "failure"), j2_dir),
     ]
     gatherer.process_message(_batch_finished(artifacts, status="failure", batch_jobs=batch_jobs))
 
@@ -306,14 +305,12 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path) -
     j1_dir = _make_job_tree(artifacts, "j1", e2e=False)
     j2_dir = _make_job_tree(artifacts, "j2", e2e=False)
 
-    gatherer = _make_gatherer(tmp_path)
+    j1 = _batch_job("j1", platform=Platform.LINUX, runner="ubuntu-latest")
+    j2 = _batch_job("j2", platform=Platform.WINDOWS, runner="windows-latest")
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]})
     batch_jobs = [
-        _batch_job_result(
-            _batch_job("j1", platform=Platform.LINUX, runner="ubuntu-latest"), _workflow_job("j1", "success"), j1_dir
-        ),
-        _batch_job_result(
-            _batch_job("j2", platform=Platform.WINDOWS, runner="windows-latest"), _workflow_job("j2", "success"), j2_dir
-        ),
+        _batch_job_result(j1, _workflow_job("j1", "success"), j1_dir),
+        _batch_job_result(j2, _workflow_job("j2", "success"), j2_dir),
     ]
     gatherer.process_message(_batch_finished(artifacts, batch_jobs=batch_jobs))
 
@@ -462,26 +459,55 @@ def test_missing_workflow_job_raises(tmp_path: Path) -> None:
         )
 
 
-def test_empty_batch_jobs_is_skipped(tmp_path: Path) -> None:
+def test_empty_batch_jobs_has_no_entry_in_the_flat_view(tmp_path: Path) -> None:
+    # Nothing was gathered, so the per-job registry stays empty — the batch's fate lives in the
+    # aggregate, which can say "finished with no results" where a counts-only view cannot.
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished("", batch_jobs=[]))
 
-    assert _drain_queue(gatherer.queue) == []
     assert gatherer._results_by_batch == {}
-    assert gatherer._received_batches == 0
+    assert _drain_queue(gatherer.queue)[0].workflows == []
 
 
 def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path) -> None:
-    # No revision is emitted (nothing was gathered), but the batch must not keep rendering as planned:
-    # it is terminal, unsuccessful, and carries the reason.
+    # The batch must not keep rendering as planned: it is terminal, unsuccessful, and carries the
+    # reason — and it still emits a revision, so the comment reflects that it stopped.
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished("", run_id=100, batch_jobs=[]))
 
-    batch = gatherer.build_initial_update().progress.batches[0]
+    update = _drain_queue(gatherer.queue)[0]
+    assert update.revision == 1
+    batch = update.progress.batches[0]
     assert batch.state == ExecutionState.FINISHED
     assert batch.status == Status.FAILURE
     assert batch.run_id == 100
-    assert batch.error == "Batch reported no job results"
+    assert batch.error == ProgressError.NO_JOB_RESULTS
+    # Its planned jobs are still listed, with no execution: 1 planned, 0 complete.
+    assert (update.progress.total, update.progress.complete) == (1, 0)
+
+
+def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:
+    # A batch that reports nothing is finished, so the run as a whole can still reach done.
+    artifacts = tmp_path / "artifacts" / "200"
+    job_dir = _make_job_tree(artifacts, "j1")
+    gatherer = _make_gatherer(tmp_path, _one_job_plan("b1", "b2"))
+
+    gatherer.process_message(_batch_finished("", id="b1", run_id=100, batch_jobs=[]))
+    assert _drain_queue(gatherer.queue)[0].done is False
+
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            id="b2",
+            run_id=200,
+            batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success", run_id=200), job_dir)],
+        )
+    )
+
+    final = _drain_queue(gatherer.queue)[0]
+    assert final.done is True
+    assert final.progress.done is True
+    assert _batch_progress(final, "b1").error == ProgressError.NO_JOB_RESULTS
 
 
 def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
@@ -500,12 +526,12 @@ def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
     )
 
     assert _drain_queue(gatherer.queue) == []
-    assert gatherer._received_batches == 0
-    assert [batch.batch_id for batch in gatherer.build_initial_update().progress.batches] == ["batch-1"]
+    assert gatherer._revision == 0
+    assert [batch.batch_id for batch in gatherer.build_initial_update("initial").progress.batches] == ["batch-1"]
 
 
 def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
-    # A duplicate BatchFinished for a run_id already gathered must not re-count the batch or inflate
+    # A duplicate BatchFinished for a batch already gathered must not re-count the batch or inflate
     # the revision (invariant 2: one revision per consumed batch).
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
@@ -521,7 +547,24 @@ def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
 
     gatherer.process_message(batch)
     assert _drain_queue(gatherer.queue) == []
-    assert gatherer._received_batches == 1
+    assert gatherer._revision == 1
+
+
+def test_duplicate_is_detected_by_batch_id_not_message_id(tmp_path: Path) -> None:
+    # Two messages can carry the same batch with different message ids (a re-delivery). Identity is
+    # the batch's, so the second must not count as a second batch.
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1")
+    job = _batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)
+
+    gatherer = _make_gatherer(tmp_path)
+    gatherer.process_message(_batch_finished(artifacts, id="msg-a", batch_id="batch-1", batch_jobs=[job]))
+    gatherer.process_message(_batch_finished(artifacts, id="msg-b", batch_id="batch-1", batch_jobs=[job]))
+
+    updates = _drain_queue(gatherer.queue)
+    assert [update.revision for update in updates] == [1]
+    assert gatherer._revision == 1
+    assert len(updates[0].workflows) == 1
 
 
 def test_no_emission_without_batch_finished(tmp_path: Path) -> None:
@@ -529,7 +572,7 @@ def test_no_emission_without_batch_finished(tmp_path: Path) -> None:
     gatherer = _make_gatherer(tmp_path)
     assert _drain_queue(gatherer.queue) == []
     assert gatherer._results_by_batch == {}
-    assert gatherer._received_batches == 0
+    assert gatherer._revision == 0
 
 
 def test_build_update_message(tmp_path: Path) -> None:
@@ -552,8 +595,8 @@ def test_initial_update_is_revision_zero_over_the_whole_plan(tmp_path: Path) -> 
     plan = {"b1": [_batch_job("j1"), _batch_job("j2", target="kafka")], "b2": [_batch_job("j3", target="redis")]}
     gatherer = _make_gatherer(tmp_path, plan)
 
-    update = gatherer.build_initial_update()
-    assert (update.revision, update.done) == (0, False)
+    update = gatherer.build_initial_update("initial")
+    assert (update.id, update.revision, update.done) == ("initial", 0, False)
     assert update.workflows == []
 
     progress = update.progress
@@ -633,9 +676,11 @@ def test_timed_out_batch_is_recorded_on_the_batch(tmp_path: Path) -> None:
 
     batch = _batch_progress(_drain_queue(gatherer.queue)[0], "batch-1")
     assert batch.status == Status.FAILURE
-    assert batch.error == "Batch timed out"
+    assert batch.error == ProgressError.TIMED_OUT
     assert batch.jobs[0].latest is not None
-    assert batch.jobs[0].latest.failed_steps == ("timed out",)
+    # The job never reported a step, and GitHub never reported the job at all.
+    assert batch.jobs[0].latest.failed_steps == ()
+    assert batch.jobs[0].latest.conclusion is None
 
 
 def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
@@ -677,8 +722,55 @@ def test_missing_artifact_dir_is_recorded_as_an_attempt_error(tmp_path: Path) ->
 
     attempt = _batch_progress(_drain_queue(gatherer.queue)[0], "batch-1").jobs[0].latest
     assert attempt is not None
-    assert attempt.error == "No artifact directory found for job 'j1'"
+    assert attempt.error == ProgressError.NO_ARTIFACTS
     assert attempt.reports == ()
+
+
+def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) -> None:
+    # What a failed-job rerun looks like: the batch reports only the job it re-ran. The rerun job
+    # gains a second attempt; the job it did not re-run keeps the one it had, and the batch keeps
+    # both. (The duplicate guard is bypassed directly — replaying a batch is the retry work's job.)
+    artifacts = tmp_path / "artifacts" / "100"
+    passing = _make_job_tree(artifacts, "j1")
+    failing = _make_job_tree(artifacts, "j2", junit=JUNIT_FAILING, e2e=False)
+    j1, j2 = _batch_job("j1"), _batch_job("j2", target="kafka")
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]})
+
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            status="failure",
+            batch_jobs=[
+                _batch_job_result(j1, _workflow_job("j1", "success"), passing),
+                _batch_job_result(j2, _workflow_job("j2", "failure"), failing),
+            ],
+        )
+    )
+    _drain_queue(gatherer.queue)
+
+    rerun_dir = _make_job_tree(tmp_path / "artifacts" / "101", "j2")
+    rerun = _batch_finished(
+        artifacts,
+        id="msg-2",
+        batch_id="batch-1",
+        run_id=101,
+        batch_jobs=[_batch_job_result(j2, _workflow_job("j2", "success"), rerun_dir)],
+    )
+    gatherer._progress_by_batch["batch-1"] = gatherer._finished_batch_progress(
+        gatherer._progress_by_batch["batch-1"], rerun, [gatherer._gather_job(rerun.batch_jobs[0], rerun)]
+    )
+
+    batch = gatherer._progress_by_batch["batch-1"]
+    assert batch.batch_id == "batch-1"
+    by_name = {job.job.name: job for job in batch.jobs}
+    assert sorted(by_name) == ["j1", "j2"]
+    assert by_name["j1"].retry_count == 0
+    assert by_name["j2"].retry_count == 1
+    assert [attempt.attempt for attempt in by_name["j2"].attempts] == [1, 2]
+    assert [attempt.status for attempt in by_name["j2"].attempts] == [Status.FAILURE, Status.SUCCESS]
+    # Only the latest attempt counts, so the batch reads as passed and the totals do not double.
+    assert batch.status == Status.SUCCESS
+    assert batch.current_attempt == 2
 
 
 # ---------------------------------------------------------------------------

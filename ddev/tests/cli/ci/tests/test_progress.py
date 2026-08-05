@@ -21,9 +21,17 @@ from ddev.cli.ci.tests.progress import (
     ExecutionState,
     JobAttemptProgress,
     JobProgress,
+    ProgressError,
 )
 from ddev.cli.ci.tests.status import Status
+from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
+
+CONCLUSIONS = {
+    Status.SUCCESS: WorkflowJobConclusion.SUCCESS,
+    Status.FAILURE: WorkflowJobConclusion.FAILURE,
+    Status.SKIPPED: WorkflowJobConclusion.SKIPPED,
+}
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -42,12 +50,12 @@ def _batch_job(name: str = "j1", target: str = "ntp") -> BatchJob:
     )
 
 
-def _attempt(attempt: int = 1, status: Status | None = Status.SUCCESS, **overrides) -> JobAttemptProgress:
+def _attempt(attempt: int = 1, status: Status = Status.SUCCESS, **overrides) -> JobAttemptProgress:
     defaults = {
         "attempt": attempt,
         "job_id": 8100 + attempt,
         "status": status,
-        "conclusion": None if status is None else str(status),
+        "conclusion": CONCLUSIONS[status],
         "failed_steps": (),
         "job_url": f"https://github.com/o/r/actions/runs/1/job/{8100 + attempt}",
         "reports": (),
@@ -197,11 +205,12 @@ def test_planned_jobs_count_toward_total_but_not_complete() -> None:
     assert progress.total == 3
 
 
-def test_an_attempt_without_an_outcome_is_not_complete() -> None:
-    # An in-flight execution has no normalized status yet, so it cannot be counted anywhere.
-    progress = DispatcherProgress(batches=(_batch(_job(_attempt(status=None)), status=None),), done=False)
-    assert (progress.passed, progress.failed, progress.skipped, progress.complete) == (0, 0, 0, 0)
-    assert progress.total == 1
+def test_an_execution_missing_its_artifacts_still_counts() -> None:
+    # The job ran and GitHub reported an outcome; only its artifacts are missing. It is complete and
+    # counted under that outcome — the error qualifies the execution, it does not erase it.
+    attempt = _attempt(status=Status.SUCCESS, error=ProgressError.NO_ARTIFACTS)
+    progress = DispatcherProgress(batches=(_batch(_job(attempt)),), done=True)
+    assert (progress.passed, progress.complete, progress.total) == (1, 1, 1)
 
 
 def test_empty_progress_counts_zero() -> None:
