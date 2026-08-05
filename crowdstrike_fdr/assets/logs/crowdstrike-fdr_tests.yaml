@@ -771,7 +771,7 @@ tests:
       "LocalAddressIP6" : "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6",
       "LocalPort" : "49689",
       "Protocol" : "6",
-      "RemoteAddressIP6" : "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6",
+      "RemoteAddressIP6" : "2606:4700:4700::1111",
       "RemotePort" : "443",
       "aid" : "ffffffff6854438eb4181691ec47e43d",
       "aip" : "67.43.156.14",
@@ -814,7 +814,7 @@ tests:
           port: "49689"
         destination:
           geoip: {}
-          ip: "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6"
+          ip: "2606:4700:4700::1111"
           port: "443"
       timestamp: "1604855199798"
     message: |-
@@ -823,7 +823,7 @@ tests:
         "ContextTimeStamp" : "1604855136.669",
         "LocalAddressIP6" : "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6",
         "ConfigStateHash" : "1858880895",
-        "RemoteAddressIP6" : "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6",
+        "RemoteAddressIP6" : "2606:4700:4700::1111",
         "ConnectionFlags" : "0",
         "ContextProcessId" : "56042872298",
         "RemotePort" : "443",
@@ -866,7 +866,7 @@ tests:
       "Protocol" : "6",
       "RemoteAddressIP4" : "10.20.30.41",
       "aid" : "fffffffff000426eb99afaa2ccdcbc17",
-      "ConnectionDirection" : "1",
+      "ConnectionDirection" : "0",
       "InContext" : "0",
       "cid" : "ffffffff30a3407dae27d0503611022d",
       "timestamp" : "1604855120310"
@@ -875,8 +875,8 @@ tests:
     custom:
       ConfigBuild: "1007.3.0011603.1"
       ConfigStateHash: "2602391615"
-      ConnectionDirection: "1"
-      ConnectionDirectionValue: "DIRECTION_INBOUND"
+      ConnectionDirection: "0"
+      ConnectionDirectionValue: "DIRECTION_OUTBOUND"
       ConnectionFlags: "0"
       ConnectionFlagsValue: "NONE"
       ContextProcessId: "223442259385"
@@ -926,7 +926,7 @@ tests:
         "Protocol" : "6",
         "RemoteAddressIP4" : "10.20.30.41",
         "aid" : "fffffffff000426eb99afaa2ccdcbc17",
-        "ConnectionDirection" : "1",
+        "ConnectionDirection" : "0",
         "InContext" : "0",
         "cid" : "ffffffff30a3407dae27d0503611022d",
         "timestamp" : "1604855120310"
