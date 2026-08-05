@@ -848,55 +848,181 @@ tests:
  -
   sample: |-
     {
-      "ConfigBuild" : "1007.3.0011603.1",
+      "LocalAddressIP4" : "192.168.1.10",
+      "event_simpleName" : "NetworkConnectIP4Blocked",
+      "ContextTimeStamp" : "1604855120.221",
       "ConfigStateHash" : "2602391615",
-      "ConnectionDirection" : "1",
       "ConnectionFlags" : "0",
       "ContextProcessId" : "223442259385",
-      "ContextTimeStamp" : "1604855120.221",
-      "EffectiveTransmissionClass" : "3",
-      "Entitlements" : "15",
-      "InContext" : "0",
-      "LocalAddressIP4" : "192.168.1.10",
+      "RemotePort" : "445",
+      "aip" : "10.10.10.10",
+      "ConfigBuild" : "1007.3.0011603.1",
+      "event_platform" : "Win",
       "LocalPort" : "53962",
+      "Entitlements" : "15",
+      "name" : "NetworkConnectIP4BlockedV1",
+      "id" : "ffffffff-1111-11eb-b0eb-06be7616c212",
+      "EffectiveTransmissionClass" : "3",
       "Protocol" : "6",
       "RemoteAddressIP4" : "10.20.30.41",
-      "RemotePort" : "445",
       "aid" : "fffffffff000426eb99afaa2ccdcbc17",
-      "aip" : "10.10.10.10",
+      "ConnectionDirection" : "1",
+      "InContext" : "0",
       "cid" : "ffffffff30a3407dae27d0503611022d",
-      "event_platform" : "Win",
-      "event_simpleName" : "NetworkConnectIP4Blocked",
-      "id" : "ffffffff-1111-11eb-b0eb-06be7616c212",
-      "name" : "NetworkConnectIP4BlockedV1",
       "timestamp" : "1604855120310"
     }
+  result:
+    custom:
+      ConfigBuild: "1007.3.0011603.1"
+      ConfigStateHash: "2602391615"
+      ConnectionDirection: "1"
+      ConnectionDirectionValue: "DIRECTION_INBOUND"
+      ConnectionFlags: "0"
+      ConnectionFlagsValue: "NONE"
+      ContextProcessId: "223442259385"
+      ContextTimeStamp: 1.604855120221E12
+      EffectiveTransmissionClass: "3"
+      Entitlements: "15"
+      InContext: "0"
+      Protocol: "6"
+      ProtocolValue: "TCP"
+      aid: "fffffffff000426eb99afaa2ccdcbc17"
+      aip: "10.10.10.10"
+      cid: "ffffffff30a3407dae27d0503611022d"
+      event_platform: "Win"
+      event_platform_value: "Windows"
+      evt:
+        category: "network"
+        name: "NetworkConnectIP4Blocked"
+      id: "ffffffff-1111-11eb-b0eb-06be7616c212"
+      name: "NetworkConnectIP4BlockedV1"
+      network:
+        client:
+          geoip: {}
+          ip: "192.168.1.10"
+          port: "53962"
+        destination:
+          geoip: {}
+          ip: "10.20.30.41"
+          port: "445"
+      timestamp: "1604855120310"
+    message: |-
+      {
+        "LocalAddressIP4" : "192.168.1.10",
+        "event_simpleName" : "NetworkConnectIP4Blocked",
+        "ContextTimeStamp" : "1604855120.221",
+        "ConfigStateHash" : "2602391615",
+        "ConnectionFlags" : "0",
+        "ContextProcessId" : "223442259385",
+        "RemotePort" : "445",
+        "aip" : "10.10.10.10",
+        "ConfigBuild" : "1007.3.0011603.1",
+        "event_platform" : "Win",
+        "LocalPort" : "53962",
+        "Entitlements" : "15",
+        "name" : "NetworkConnectIP4BlockedV1",
+        "id" : "ffffffff-1111-11eb-b0eb-06be7616c212",
+        "EffectiveTransmissionClass" : "3",
+        "Protocol" : "6",
+        "RemoteAddressIP4" : "10.20.30.41",
+        "aid" : "fffffffff000426eb99afaa2ccdcbc17",
+        "ConnectionDirection" : "1",
+        "InContext" : "0",
+        "cid" : "ffffffff30a3407dae27d0503611022d",
+        "timestamp" : "1604855120310"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1604855120221
  -
   sample: |-
     {
-      "ConfigBuild" : "1007.3.0011603.1",
+      "LocalAddressIP4" : "192.168.1.10",
+      "event_simpleName" : "NetworkConnectIP4DetectInfo",
+      "ContextTimeStamp" : "1604855124.550",
       "ConfigStateHash" : "2602391615",
-      "ConnectionDirection" : "0",
       "ConnectionFlags" : "1",
       "ContextProcessId" : "223442259386",
-      "ContextTimeStamp" : "1604855124.550",
-      "EffectiveTransmissionClass" : "3",
-      "Entitlements" : "15",
-      "InContext" : "0",
-      "LocalAddressIP4" : "192.168.1.10",
+      "RemotePort" : "8080",
+      "aip" : "10.10.10.10",
+      "ConfigBuild" : "1007.3.0011603.1",
+      "event_platform" : "Win",
       "LocalPort" : "53963",
+      "Entitlements" : "15",
+      "name" : "NetworkConnectIP4DetectInfoV1",
+      "id" : "ffffffff-1111-11eb-b0eb-06be7616c213",
+      "EffectiveTransmissionClass" : "3",
       "Protocol" : "17",
       "RemoteAddressIP4" : "10.20.30.42",
-      "RemotePort" : "8080",
       "aid" : "fffffffff000426eb99afaa2ccdcbc17",
-      "aip" : "10.10.10.10",
+      "ConnectionDirection" : "0",
+      "InContext" : "0",
       "cid" : "ffffffff30a3407dae27d0503611022d",
-      "event_platform" : "Win",
-      "event_simpleName" : "NetworkConnectIP4DetectInfo",
-      "id" : "ffffffff-1111-11eb-b0eb-06be7616c213",
-      "name" : "NetworkConnectIP4DetectInfoV1",
       "timestamp" : "1604855124638"
     }
+  result:
+    custom:
+      ConfigBuild: "1007.3.0011603.1"
+      ConfigStateHash: "2602391615"
+      ConnectionDirection: "0"
+      ConnectionDirectionValue: "DIRECTION_OUTBOUND"
+      ConnectionFlags: "1"
+      ConnectionFlagsValue: "RAW_SOCKET"
+      ContextProcessId: "223442259386"
+      ContextTimeStamp: 1.60485512455E12
+      EffectiveTransmissionClass: "3"
+      Entitlements: "15"
+      InContext: "0"
+      Protocol: "17"
+      ProtocolValue: "UDP"
+      aid: "fffffffff000426eb99afaa2ccdcbc17"
+      aip: "10.10.10.10"
+      cid: "ffffffff30a3407dae27d0503611022d"
+      event_platform: "Win"
+      event_platform_value: "Windows"
+      evt:
+        category: "network"
+        name: "NetworkConnectIP4DetectInfo"
+      id: "ffffffff-1111-11eb-b0eb-06be7616c213"
+      name: "NetworkConnectIP4DetectInfoV1"
+      network:
+        client:
+          geoip: {}
+          ip: "192.168.1.10"
+          port: "53963"
+        destination:
+          geoip: {}
+          ip: "10.20.30.42"
+          port: "8080"
+      timestamp: "1604855124638"
+    message: |-
+      {
+        "LocalAddressIP4" : "192.168.1.10",
+        "event_simpleName" : "NetworkConnectIP4DetectInfo",
+        "ContextTimeStamp" : "1604855124.550",
+        "ConfigStateHash" : "2602391615",
+        "ConnectionFlags" : "1",
+        "ContextProcessId" : "223442259386",
+        "RemotePort" : "8080",
+        "aip" : "10.10.10.10",
+        "ConfigBuild" : "1007.3.0011603.1",
+        "event_platform" : "Win",
+        "LocalPort" : "53963",
+        "Entitlements" : "15",
+        "name" : "NetworkConnectIP4DetectInfoV1",
+        "id" : "ffffffff-1111-11eb-b0eb-06be7616c213",
+        "EffectiveTransmissionClass" : "3",
+        "Protocol" : "17",
+        "RemoteAddressIP4" : "10.20.30.42",
+        "aid" : "fffffffff000426eb99afaa2ccdcbc17",
+        "ConnectionDirection" : "0",
+        "InContext" : "0",
+        "cid" : "ffffffff30a3407dae27d0503611022d",
+        "timestamp" : "1604855124638"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1604855124550
  -
   sample: |-
     {
@@ -917,14 +1043,77 @@ tests:
       "Entitlements" : "15",
       "name" : "DnsRequestDetectInfoV1",
       "EventOrigin" : "1",
-      "FirstIP4Record" : "10.20.30.43",
       "id" : "3d0ef474-fcc3-4f18-9ad6-7130d8ddb408",
       "EffectiveTransmissionClass" : "3",
+      "FirstIP4Record" : "10.20.30.43",
       "aid" : "31e92a267c044d57b1c1e14109079e89",
       "timestamp" : "1738009381200",
       "cid" : "ffffffff30a3407dae27d0503611022d",
       "RequestType" : "1"
     }
+  result:
+    custom:
+      ConfigBuild: "1007.3.0019011.15"
+      ConfigStateHash: "138674525"
+      ContextBaseFileName: "SenseImdsCollector.exe"
+      ContextProcessId: "683613242246"
+      ContextThreadId: "31712204862363"
+      ContextTimeStamp: 1.738009381112E12
+      DnsRequestCount: "1"
+      DualRequest: "0"
+      EffectiveTransmissionClass: "3"
+      Entitlements: "15"
+      EventOrigin: "1"
+      InterfaceIndex: "0"
+      QueryStatus: "0"
+      RequestType: "1"
+      aid: "31e92a267c044d57b1c1e14109079e89"
+      aip: "10.10.10.10"
+      cid: "ffffffff30a3407dae27d0503611022d"
+      dns:
+        answer:
+          name: "10.20.30.43"
+        question:
+          name: "malware-c2.example.com"
+          type: "A"
+      event_platform: "Win"
+      event_platform_value: "Windows"
+      evt:
+        category: "dns"
+        name: "DnsRequestDetectInfo"
+      id: "3d0ef474-fcc3-4f18-9ad6-7130d8ddb408"
+      name: "DnsRequestDetectInfoV1"
+      timestamp: "1738009381200"
+    message: |-
+      {
+        "ContextBaseFileName" : "SenseImdsCollector.exe",
+        "event_simpleName" : "DnsRequestDetectInfo",
+        "ContextTimeStamp" : "1738009381.112",
+        "ConfigStateHash" : "138674525",
+        "ContextProcessId" : "683613242246",
+        "DomainName" : "malware-c2.example.com",
+        "ContextThreadId" : "31712204862363",
+        "aip" : "10.10.10.10",
+        "QueryStatus" : "0",
+        "InterfaceIndex" : "0",
+        "ConfigBuild" : "1007.3.0019011.15",
+        "event_platform" : "Win",
+        "DnsRequestCount" : "1",
+        "DualRequest" : "0",
+        "Entitlements" : "15",
+        "name" : "DnsRequestDetectInfoV1",
+        "EventOrigin" : "1",
+        "id" : "3d0ef474-fcc3-4f18-9ad6-7130d8ddb408",
+        "EffectiveTransmissionClass" : "3",
+        "FirstIP4Record" : "10.20.30.43",
+        "aid" : "31e92a267c044d57b1c1e14109079e89",
+        "timestamp" : "1738009381200",
+        "cid" : "ffffffff30a3407dae27d0503611022d",
+        "RequestType" : "1"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1738009381112
  -
   sample: |-
     {
@@ -962,3 +1151,83 @@ tests:
       "AssociatedFile" : "/suspicious.exe",
       "cid" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     }
+  result:
+    custom:
+      AgentIdString: "45444444444444444444444444444444"
+      AssociatedFile: "/suspicious.exe"
+      ComputerName: "ip-172-18-63-231.ec2.internal"
+      CustomerIdString: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      DetectDescription: "A file matching a known malware signature was quarantined on this host."
+      DetectId: "ldt:45bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:111111112"
+      DetectName: "NGAV"
+      EventType: "Event_ExternalApiEvent"
+      EventUUID: "14688888888888888888888888888889"
+      ExternalApiType: "Event_EppDetectionSummaryEvent"
+      FalconHostLink: "https://falcon.us-2.crowdstrike.com/activity/detections/detail/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/111111112?_cid=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      FileName: "suspicious.exe"
+      FilePath: "/"
+      IOCType: "hash_sha256"
+      LocalIP: "172.17.0.1"
+      MACAddress: "02-02-02-02-02-02"
+      MD5HashData: "cf288888888888888888888888888889"
+      MachineDomain: ""
+      Objective: "Falcon Detection Method"
+      PatternDispositionDescription: "Prevention, process was killed."
+      PatternDispositionValue: 272
+      SHA1String: "0000000000000000000000000000000000000000"
+      SHA256HashData: "31a0333333333333333333333333333333333333333333333333333333333334"
+      SensorId: "55555555555555555555555555555555"
+      Severity: 50
+      SeverityName: "High"
+      Tactic: "Malware"
+      Technique: "Known malware signature"
+      UTCTimestamp: 1680759540000
+      cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      eid: 119
+      evt:
+        category: "detection"
+        name: "DetectionSummaryEvent"
+      status: "Warning"
+      timestamp: "2023-04-06T05:39:00Z"
+      usr:
+        name: "cherry"
+    message: |-
+      {
+        "eid" : 119,
+        "SensorId" : "55555555555555555555555555555555",
+        "Tactic" : "Malware",
+        "CustomerIdString" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "EventType" : "Event_ExternalApiEvent",
+        "FileName" : "suspicious.exe",
+        "UTCTimestamp" : 1680759540000,
+        "FalconHostLink" : "https://falcon.us-2.crowdstrike.com/activity/detections/detail/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/111111112?_cid=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "MachineDomain" : "",
+        "SHA1String" : "0000000000000000000000000000000000000000",
+        "LocalIP" : "172.17.0.1",
+        "DetectDescription" : "A file matching a known malware signature was quarantined on this host.",
+        "timestamp" : "2023-04-06T05:39:00Z",
+        "FilePath" : "/",
+        "UserName" : "cherry",
+        "EventUUID" : "14688888888888888888888888888889",
+        "MD5String" : "cf288888888888888888888888888889",
+        "SeverityName" : "High",
+        "PatternDispositionDescription" : "Prevention, process was killed.",
+        "Severity" : 50,
+        "DetectId" : "ldt:45bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:111111112",
+        "PatternDispositionValue" : 272,
+        "ExternalApiType" : "Event_EppDetectionSummaryEvent",
+        "SHA256String" : "31a0333333333333333333333333333333333333333333333333333333333334",
+        "Objective" : "Falcon Detection Method",
+        "MACAddress" : "02-02-02-02-02-02",
+        "ComputerName" : "ip-172-18-63-231.ec2.internal",
+        "DetectName" : "NGAV",
+        "AgentIdString" : "45444444444444444444444444444444",
+        "IOCType" : "hash_sha256",
+        "Technique" : "Known malware signature",
+        "AssociatedFile" : "/suspicious.exe",
+        "cid" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1680759540000
