@@ -109,6 +109,26 @@ def test_sdk_transport_uses_configured_proxy(openstack_controller_check, instanc
 
 
 @pytest.mark.parametrize(
+    ('instance_overrides', 'expected_auth'),
+    [
+        pytest.param({}, None, id='no auth configured'),
+        pytest.param({'username': 'user', 'password': 'pass'}, ('user', 'pass'), id='basic auth configured'),
+    ],
+)
+@pytest.mark.usefixtures('openstack_v3_password')
+def test_sdk_transport_uses_configured_auth(openstack_controller_check, instance_overrides, expected_auth):
+    """Configured HTTP auth must reach openstacksdk traffic.
+
+    keystoneauth1 takes no auth argument, so the transport it builds is the only place it can go.
+    Leaving the transport without it also hands the requests .netrc lookup an opening, because that
+    lookup only runs when the session carries no auth of its own.
+    """
+    transport = build_sdk_transport(openstack_controller_check({**configs.SDK, **instance_overrides}))
+
+    assert transport.auth == expected_auth
+
+
+@pytest.mark.parametrize(
     ('instance_overrides', 'expected_check_hostname', 'expected_verify_mode'),
     [
         pytest.param({}, True, ssl.CERT_REQUIRED, id='defaults verify and validate hostname'),
