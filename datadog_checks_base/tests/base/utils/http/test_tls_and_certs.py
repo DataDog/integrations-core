@@ -6,6 +6,7 @@ import ssl
 
 import mock
 import pytest
+import requests
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -412,3 +413,25 @@ class TestSSLContextAdapter:
                 http.get('https://example.com', verify=True)
 
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+
+    def test_foreign_session_does_not_share_this_client_adapter(self):
+        """A session this client does not own gets its own adapter, carrying the same TLS configuration.
+
+        requests.Session.close() closes every adapter mounted on it, and a library that builds its own
+        transport closes it when the transport is collected. Sharing the adapter would take down the
+        connection pool this client's own requests run on.
+        """
+        http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
+        own_adapter = http.session.get_adapter('https://example.com')
+        foreign_session = requests.Session()
+
+        http.apply_tls_to_requests_session(foreign_session)
+
+        foreign_adapter = foreign_session.get_adapter('https://example.com')
+        assert foreign_adapter.ssl_context.verify_mode == ssl.CERT_REQUIRED
+        assert foreign_adapter.ssl_context.check_hostname is True
+
+        own_adapter.poolmanager.connection_from_url('https://example.com')
+        foreign_session.close()
+
+        assert len(own_adapter.poolmanager.pools) == 1

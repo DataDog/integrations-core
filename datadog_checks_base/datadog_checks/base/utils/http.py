@@ -860,15 +860,20 @@ class RequestsWrapper(object):
         tls_intermediate_ca_certs. Those live on the SSLContext, so the adapter carrying it has to be
         mounted on the foreign session for them to take effect.
         """
-        self._mount_https_adapter(session, self.tls_config)
+        # A dedicated adapter, never one from the cache. Closing a requests session closes every
+        # adapter mounted on it, and the owner of a foreign session decides when that happens, so a
+        # shared adapter would let it drop the connection pool this client's own requests run on.
+        session.mount('https://', self._create_https_adapter(self.tls_config))
 
     def _mount_https_adapter(self, session, tls_config):
         # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)
-        if tls_config_key in self._https_adapters:
-            session.mount('https://', self._https_adapters[tls_config_key])
-            return
+        if tls_config_key not in self._https_adapters:
+            self._https_adapters[tls_config_key] = self._create_https_adapter(tls_config)
 
+        session.mount('https://', self._https_adapters[tls_config_key])
+
+    def _create_https_adapter(self, tls_config):
         context = create_ssl_context(tls_config)
         # Enables HostHeaderSSLAdapter if needed
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
@@ -886,13 +891,9 @@ class RequestsWrapper(object):
                         self, connections, maxsize, block=block, **pool_kwargs
                     )
 
-            https_adapter = SSLContextHostHeaderAdapter(context)
-        else:
-            https_adapter = _SSLContextAdapter(context)
+            return SSLContextHostHeaderAdapter(context)
 
-        # Cache the adapter for reuse
-        self._https_adapters[tls_config_key] = https_adapter
-        session.mount('https://', https_adapter)
+        return _SSLContextAdapter(context)
 
 
 def create_http_client(
