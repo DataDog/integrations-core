@@ -1,21 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""The single public entry point that turns changed files into deterministic test units.
-
-:func:`build_test_units` composes the whole pipeline: it runs the affected-target rules against
-ddev's integration registry, reads CI overrides from ``repo.config``, resolves each target's
-display name and platforms from ddev, obtains resolved environments through an injected
-:class:`~ddev.cli.ci.tests.batching.units.EnvironmentProvider`, and expands everything into
-ordered :class:`~ddev.cli.ci.tests.batching.units.TestUnit` values.
-
-The environment provider is the seam that keeps callers decoupled from Hatch: production uses
-:class:`HatchEnvironmentProvider` (ddev's ``list_environments``), while tests inject a plain
-callable.
-"""
+"""Public entry points that turn changed files into test units and batches."""
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -49,6 +39,8 @@ if TYPE_CHECKING:
     from ddev.utils.hatch import Environment
     from ddev.utils.platform import Platform, PlatformName
 
+logger = logging.getLogger(__name__)
+
 
 def build_test_units(
     repo: Repository,
@@ -58,11 +50,10 @@ def build_test_units(
     default_python_version: str,
     rules: Sequence[TargetRule] | None = None,
 ) -> list[TestUnit]:
-    """Turn a set of changed files into the complete, deterministic list of test units.
+    """Turn changed files into the complete, deterministic list of test units.
 
-    When ``rules`` is ``None`` the default rule set is built from the repository, gating the
-    repository-wide rule on whether ``repo`` is the core repository.
-    ``default_python_version`` is used for targets that define no environments.
+    Without explicit `rules`, the default set is used, with the repository-wide rule enabled only
+    for the core repository.
     """
     if rules is None:
         rules = default_target_rules(is_core=repo.name == "core")
@@ -78,13 +69,20 @@ def build_test_units(
 
         integration = repo.integrations.get(name)
         platforms = resolve_platforms(ci_override.get("platforms", []), _supported_os(integration), target=name)
+        environments = tuple(environment_provider(integration, platforms))
+        if not environments:
+            # The target is still planned, one job per platform, the way `ci_matrix` does. Hatch
+            # reporting nothing testable usually means a `hatch.toml` that never enables a test or
+            # E2E environment, which is worth surfacing even though it does not block the plan.
+            logger.warning("%s has a hatch.toml but no testable environment", name)
+
         definitions.append(
             TargetDefinition(
                 name=name,
                 display_name=integration.display_name,
                 platforms=tuple(platforms),
                 runners=ci_override.get("runners", {}),
-                environments=tuple(environment_provider(integration, platforms)),
+                environments=environments,
             )
         )
 
@@ -101,14 +99,10 @@ def build_test_batches(
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
 ) -> list[TestBatch]:
-    """Turn changed files into the complete, ordered list of ``TestBatch`` messages.
+    """Turn changed files into the complete, ordered list of `TestBatch` messages.
 
-    The pipeline obtains test units through the public :func:`build_test_units` boundary (never by
-    composing affected-target and unit-expansion internals here) and expands each resolved
-    environment into one concrete ``target + environment + platform`` job, so the final plan always
-    has one job per actual environment. It then applies the (injected or default) batching
-    ``strategy``, validates the resulting partition independently of that strategy, and constructs
-    deterministically numbered messages. Empty input yields no batches.
+    The partition is validated independently of the strategy that produced it. Empty input yields
+    no batches.
     """
     units = build_test_units(
         repo,
@@ -136,11 +130,7 @@ def _supported_os(integration: Integration) -> list[str]:
 
 @dataclass(frozen=True, eq=False)
 class HatchEnvironmentProvider:
-    """An :class:`EnvironmentProvider` backed by ddev's Hatch integration.
-
-    Environment names, Python versions, and facet flags come from ddev's ``list_environments``;
-    facet filtering and platform routing are delegated to :func:`resolve_hatch_environments`.
-    """
+    """An `EnvironmentProvider` backed by ddev's Hatch integration."""
 
     platform: Platform
     default_python_version: str
@@ -161,19 +151,13 @@ def resolve_hatch_environments(
     *,
     default_python_version: str,
 ) -> list[ResolvedEnvironment]:
-    """Map ddev ``Environment`` values onto target platforms, keeping both facet flags.
+    """Map ddev `Environment` values onto target platforms, keeping environments that test anything.
 
-    An environment is included when enabled for either the unit facet (``test_env``) or the E2E
-    facet (``e2e_env``); both flags are preserved on each resolved environment. An environment
-    with an explicit ``platforms`` constraint (which ddev populates from a ``hatch.toml``
-    ``overrides.matrix.os.platforms`` mapping) is routed only to the intersection of that
-    constraint with the target's platforms, so a Windows-only environment never lands on Linux.
-    An unconstrained environment is routed to a single default platform (the target's first) and
-    is never cross-produced across the target's platforms.
+    An environment constrained to specific platforms is routed only to those the target also runs
+    on; an unconstrained one goes to the target's first platform rather than to all of them.
 
-    The Python version is read from Hatch's own ``python`` value rather than parsed out of the
-    environment name, which only encodes it by convention. An environment that declares no Python
-    falls back to ``default_python_version``.
+    The Python version comes from Hatch's own `python` value, never from the environment name,
+    which only encodes it by convention.
     """
     if not platforms:
         return []
@@ -185,8 +169,8 @@ def resolve_hatch_environments(
             continue
 
         if environment.platforms:
-            # Hatch's constraint is raw configuration, so a platform ddev does not target simply
-            # fails to intersect the target's platforms rather than failing the plan.
+            # Raw configuration, so a platform ddev does not target drops out of the intersection
+            # instead of failing the plan.
             candidate_platforms = [by_name[name] for name in environment.platforms if name in by_name]
         else:
             candidate_platforms = [platforms[0]]

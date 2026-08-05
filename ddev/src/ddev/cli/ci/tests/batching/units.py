@@ -1,18 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Deterministic expansion of affected targets into typed test-planning units.
-
-A test unit is a planning unit: one target, on one platform, running one resolved environment (or
-none, for a target that defines no environments). It maps one-to-one onto the concrete job that
-:mod:`~ddev.cli.ci.tests.batching.jobs` builds from it, so a unit's name is already the final job
-display name.
-
-Environments are supplied pre-resolved through an :class:`EnvironmentProvider`, so this module
-does not compute the Hatch matrix. Each resolved environment carries the Python version it runs
-under and both facet flags (``test_env`` and ``e2e_env``), which become attributes of the single
-job the unit produces.
-"""
+"""Expansion of affected targets into test units."""
 
 from __future__ import annotations
 
@@ -53,48 +42,31 @@ DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
     )
 }
 
-# Characters that are reserved (illegal) in Windows file names. Job names are later used to
-# construct unique file paths (e.g. per-job artifact/report directories), so any of these
-# characters must be replaced to keep those paths valid across platforms.
-# See https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
+# Job names end up in file paths, so characters Windows reserves must be replaced.
+# https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
 JOB_NAME_RESERVED_PATTERN = re.compile(r'[<>:"/\\|?*]')
 
 
 @dataclass(frozen=True)
 class ResolvedEnvironment:
-    """A concrete environment resolved for a target: exactly what expansion consumes.
-
-    ``python_version`` is the ``major.minor`` interpreter the environment runs under, used both to
-    set up Python on the runner and to select the E2E Agent image. ``test_available`` is the
-    unit-test facet (ddev's ``test_env``) and ``e2e_available`` is the E2E facet (``e2e_env``);
-    both are kept so a job can declare exactly which facets it must produce.
-    """
+    """One environment a target runs, already routed onto a platform."""
 
     name: str
     platform: PlatformName
-    python_version: str
-    test_available: bool = True
-    e2e_available: bool = False
+    python_version: str  # `major.minor`, picks both the runner Python and the E2E Agent image
+    test_available: bool = True  # ddev's `test_env`
+    e2e_available: bool = False  # ddev's `e2e_env`
 
 
 class EnvironmentProvider(Protocol):
-    """Resolves the environments an integration runs, routed onto the given platforms.
-
-    The caller already holds the ddev :class:`Integration`, so it is passed directly. Production
-    implementations source environments from ddev's Hatch model; tests inject synthetic ones.
-    """
+    """Resolves the environments an integration runs, routed onto the given platforms."""
 
     def __call__(self, integration: Integration, platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]: ...
 
 
 @dataclass(frozen=True)
 class TargetDefinition:
-    """Fully digested facts for a single target used during expansion.
-
-    Everything here is already resolved upstream (in production from ddev): ``display_name``
-    from ``Integration.display_name``, ``platforms`` from CI overrides/manifest, ``runners``
-    from CI overrides, and ``environments`` from the environment provider.
-    """
+    """A single target to expand, with everything expansion needs already resolved."""
 
     name: str
     display_name: str | None = None
@@ -105,12 +77,9 @@ class TargetDefinition:
 
 @dataclass(frozen=True)
 class TestUnit:
-    """A single deterministic test-planning unit produced from an affected target.
+    """One target, on one platform, in one environment. Becomes exactly one job.
 
-    ``environment`` is the one resolved environment this unit covers. A target that defines no
-    environments on a platform gets an environment with an empty ``name``, meaning its tests run
-    without an environment selection, the way ``ci_matrix`` emits a job with no ``target-env``.
-    ``name`` is already unique across the plan, so downstream job construction reuses it verbatim.
+    `name` is already unique across the plan and is reused verbatim as the job's display name.
     """
 
     # Prevent pytest from collecting this domain class as a test case.
@@ -143,18 +112,13 @@ def resolve_platforms(
     *,
     target: str,
 ) -> list[PlatformName]:
-    """Resolve the platforms a target runs on from CI overrides then its supported OS list.
-
-    Raw configuration strings are parsed here so everything downstream holds a `PlatformName`.
-    """
+    """Resolve the platforms a target runs on, from CI overrides then its supported OS list."""
     if platform_override:
         return [parse_platform_name(value, target=target) for value in platform_override]
 
     platform_ids = [parse_platform_name(value, target=target) for value in supported_os]
-    # A target that supports multiple operating systems runs on Linux only by default; a
-    # Windows-exclusive target runs on Windows. Testing a multi-OS target on additional
-    # platforms (e.g. Windows for path-handling coverage) is opt-in via the CI ``platforms``
-    # override, which takes precedence above.
+    # Only a Windows-exclusive target runs on Windows by default. Anything else runs on Linux
+    # alone, and extra platforms are opt-in through the CI `platforms` override handled above.
     if platform_ids != [PlatformName.WINDOWS]:
         platform_ids = [PlatformName.LINUX]
 
@@ -176,11 +140,10 @@ def _display_order_key(target: str) -> tuple[int, str]:
 
 
 def expand_test_units(targets: Sequence[TargetDefinition], *, default_python_version: str) -> list[TestUnit]:
-    """Expand digested targets into deterministically ordered typed test units.
+    """Expand targets into deterministically ordered test units, one per resolved environment.
 
-    Each resolved environment becomes its own unit. A target with no environments on a platform
-    produces a single unit for that platform whose environment has an empty name and runs under
-    ``default_python_version``, since there is no environment to read a Python version from.
+    A target with no environments on a platform still gets one unit there, under an unnamed
+    environment running `default_python_version`.
     """
     ordered_targets = sorted(targets, key=lambda target: _display_order_key(target.name))
 

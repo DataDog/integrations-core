@@ -16,20 +16,13 @@ if TYPE_CHECKING:
 
 
 class BatchingConfig(BaseModel):
-    """Policy for turning discovered test units into batched ``TestBatch`` plans.
-
-    Read from the ``[dispatcher.batching]`` table. ``max_jobs_per_batch`` caps every batch (256
-    GitHub job cap minus a 16-job setup buffer, the safe max). ``allow_integration_splitting``
-    permits a single integration whose job count exceeds ``max_jobs_per_batch`` to span multiple
-    capacity-bounded batches.
-
-    Splitting a job's unit and E2E facets into separate jobs is not implemented yet; the plan
-    currently emits one job per resolved environment that produces both facets.
-    """
+    """Policy for turning discovered test units into batched plans, read from `[dispatcher.batching]`."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    # 240 is GitHub's 256-job matrix cap minus a 16-job setup buffer.
     max_jobs_per_batch: int = Field(default=240, gt=0, le=240)
+    # Lets an integration with more jobs than one batch holds span several batches.
     allow_integration_splitting: bool = False
 
 
@@ -39,8 +32,7 @@ class DispatcherConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     global_timeout_seconds: float = Field(default=10800.0, gt=0)  # 3 hours
-    # Used only where a Hatch environment declares no Python of its own, and for targets that
-    # define no environments at all.
+    # Used when Hatch does not declare a Python version.
     default_python_version: str = Field(default="3.13", pattern=r"^\d+\.\d+$")
     batching: BatchingConfig = BatchingConfig()
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()

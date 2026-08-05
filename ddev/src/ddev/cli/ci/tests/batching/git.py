@@ -1,11 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Comparison-base selection and changed-file acquisition for Dispatcher planning.
-
-Git execution is injected through a :class:`GitProvider` so production can issue real
-commands while tests provide representative ``git diff --name-status`` output.
-"""
+"""Comparison-base selection and changed-file acquisition."""
 
 from __future__ import annotations
 
@@ -23,10 +19,9 @@ class CIContext(enum.Enum):
 
 
 class ChangeType(enum.Enum):
-    """The kind of change reported by ``git diff --name-status``.
+    """The kind of change reported by `git diff --name-status`.
 
-    Values are the literal git status letters so a status code maps directly onto a member;
-    they carry meaning and therefore are not ``enum.auto()``.
+    Values are the literal git status letters, so a status code maps straight onto a member.
     """
 
     ADDED = "A"
@@ -36,8 +31,8 @@ class ChangeType(enum.Enum):
     COPIED = "C"
 
 
-# Single-path statuses map directly; a type change (``T``) is a modification of an existing
-# path, and any other single-path status is treated as a modification so no changed path is lost.
+# A type change (`T`) is a modification of an existing path. Any other single-path status is also
+# treated as a modification, so no changed path is lost.
 SINGLE_PATH_CHANGE_TYPES = {
     "A": ChangeType.ADDED,
     "M": ChangeType.MODIFIED,
@@ -50,7 +45,7 @@ SINGLE_PATH_CHANGE_TYPES = {
 class ChangedFile:
     """A single normalized change record.
 
-    For renames and copies, ``path`` is the destination and ``previous_path`` is the source.
+    For renames and copies, `path` is the destination and `previous_path` is the source.
     """
 
     change_type: ChangeType
@@ -59,13 +54,13 @@ class ChangedFile:
 
 
 class GitProvider(Protocol):
-    """A callable boundary that runs ``git`` with the given arguments and returns stdout."""
+    """A callable boundary that runs `git` with the given arguments and returns stdout."""
 
     def __call__(self, *args: str) -> str: ...
 
 
 class SubprocessGitProvider:
-    """Production :class:`GitProvider` that shells out to the real ``git`` executable."""
+    """A `GitProvider` that shells out to the real `git` executable."""
 
     def __call__(self, *args: str) -> str:
         # Diagnostics are kept off stdout so they can never reach the strict diff parser.
@@ -89,13 +84,11 @@ def is_git_warning_line(line: str) -> bool:
 
 
 def parse_name_status(output: str) -> list[ChangedFile]:
-    """Normalize ``git diff --name-status`` output into deterministic change records.
+    """Normalize `git diff --name-status` output into deterministic change records.
 
-    Each record line is tab separated: ``<status>\\t<path>`` for additions/modifications/
-    deletions/type-changes and ``<status>\\t<source>\\t<destination>`` for renames and copies
-    (whose status carries a similarity score, e.g. ``R100``). A non-warning line that does not
-    have the field count its status requires is malformed and raises rather than being dropped,
-    so an unparseable diff never silently hides a changed path.
+    Lines are tab separated: `<status>\\t<path>`, or `<status>\\t<source>\\t<destination>` for
+    renames and copies, whose status also carries a similarity score (`R100`). A line with the
+    wrong field count raises rather than being dropped, so a changed path is never lost silently.
     """
     changed: list[ChangedFile] = []
     seen: set[str] = set()

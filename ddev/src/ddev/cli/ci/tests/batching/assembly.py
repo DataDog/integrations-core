@@ -1,12 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Strategy-independent construction of ``TestBatch`` messages from a validated partition.
-
-Message construction is a ``batching``-level concern (invoked by
-:mod:`~ddev.cli.ci.tests.batching.build`), not part of any single strategy, so it applies uniformly
-to every strategy's output.
-"""
+"""Construction of `TestBatch` messages from a validated partition."""
 
 from __future__ import annotations
 
@@ -21,11 +16,10 @@ if TYPE_CHECKING:
 
 
 def create_test_batches(job_groups: Sequence[Sequence[BatchJob]]) -> list[TestBatch]:
-    """Build ordered ``TestBatch`` messages with function-local deterministic numbering.
+    """Build ordered `TestBatch` messages, numbering from `batch-01` on every call.
 
-    Numbering restarts at ``batch-01`` on every call, so identical inputs always yield the same
-    ordered ids. The logical ``batch_id`` is also used as the message ``id`` here; downstream
-    processors correlate on ``batch_id``, keeping the message identity free to diverge later.
+    The message `id` is set to the same value as `batch_id` for now; processors correlate on
+    `batch_id`, so the two are free to diverge later.
     """
     batches: list[TestBatch] = []
     for index, group in enumerate(job_groups, start=1):

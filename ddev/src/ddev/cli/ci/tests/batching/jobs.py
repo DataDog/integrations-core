@@ -1,20 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Expansion of test-planning units into concrete jobs.
-
-A :class:`~ddev.cli.ci.tests.batching.units.TestUnit` is a planning unit; a
-:class:`~ddev.cli.ci.tests.messages.BatchJob` is a concrete job the workflow runs. Per the
-Dispatcher design, a job's logical identity is ``target + environment + platform``: every concrete
-job carries exactly one resolved Hatch environment (empty for an environmentless target) and is
-never duplicated into separate unit and E2E rows. Its ``unit_tests``/``e2e_tests`` flags describe
-which facets that single execution must produce, taken from the environment's ddev-derived
-availability.
-
-Each job also carries the Python version the runner must set up and, when it runs E2E tests, the
-Agent image to run them against. Resolving the image here rather than in the workflow keeps the
-plan self-describing: the recorded plan states exactly what every job ran against.
-"""
+"""Expansion of test units into the concrete jobs a workflow runs."""
 
 from __future__ import annotations
 
@@ -41,10 +28,11 @@ def expand_batch_jobs(
     *,
     agent_image_resolver: AgentImageResolver = get_agent_image,
 ) -> list[BatchJob]:
-    """Expand ordered test units into ordered concrete jobs, one per unit, preserving order.
+    """Expand test units into concrete jobs, one per unit, preserving order.
 
-    A job that runs no E2E facet gets no Agent image, so an unresolvable image can only ever fail
-    a plan that would actually have used it.
+    The Agent image is resolved here rather than in the workflow so the recorded plan states what
+    every job ran against. A job with no E2E tests gets no image, so an unresolvable one can only
+    fail a plan that would actually have used it.
     """
     jobs: list[BatchJob] = []
     for unit in units:

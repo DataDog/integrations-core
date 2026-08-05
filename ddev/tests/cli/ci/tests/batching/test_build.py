@@ -9,6 +9,8 @@ environment provider, so neither Git nor Hatch is ever invoked.
 
 from __future__ import annotations
 
+import logging
+
 import pytest
 
 from ddev.cli.ci.tests.batching.build import build_test_batches, build_test_units, resolve_hatch_environments
@@ -157,6 +159,39 @@ def test_build_environmentless_target():
         "",
     )
     assert unit.environment.python_version == DEFAULT_PYTHON_VERSION
+
+
+def test_build_warns_about_a_target_with_no_testable_environment(caplog):
+    repo = FakeRepo([FakeIntegration("ddev")])
+    provider = FakeEnvironmentProvider({})
+    changed = [modified("ddev/src/ddev/foo.py")]
+
+    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.build"):
+        units = build_test_units(
+            repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+        )
+
+    assert len(units) == 1
+    assert "ddev has a hatch.toml but no testable environment" in caplog.text
+
+
+def test_build_does_not_warn_when_a_platform_alone_has_no_environments(caplog):
+    # `disk` and friends run on Linux and Windows but declare only unconstrained environments, so
+    # Windows legitimately falls back to an unnamed environment. That is not worth a warning.
+    repo = FakeRepo([FakeIntegration("disk")], ci={"disk": {"platforms": ["linux", "windows"]}})
+    provider = FakeEnvironmentProvider({"disk": [env("py3.13", platform=PlatformName.LINUX)]})
+    changed = [modified("disk/tests/test_a.py")]
+
+    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.build"):
+        units = build_test_units(
+            repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+        )
+
+    assert [(u.platform, u.environment.name) for u in units] == [
+        (PlatformName.LINUX, "py3.13"),
+        (PlatformName.WINDOWS, ""),
+    ]
+    assert caplog.text == ""
 
 
 def test_build_excludes_target_via_ci_override():

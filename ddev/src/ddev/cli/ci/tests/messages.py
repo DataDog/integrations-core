@@ -29,44 +29,30 @@ ARTIFACT_NAME_SEPARATOR = "_"
 
 @dataclass(frozen=True)
 class BatchJob:
-    """A single job entry in a TestBatch: one ``target + environment + platform`` execution.
+    """One execution of a target, in one environment, on one platform.
 
-    A ``BatchJob`` is never duplicated into separate unit and E2E rows. Its logical identity is
-    ``target + environment + platform``; ``runner_labels`` (one runner selection: the labels a
-    single GitHub runner is chosen by) and the ``unit_tests``/``e2e_tests`` facet flags are
-    attributes of that identity, describing which test facets the one execution must produce.
-    ``environment`` is exactly one resolved Hatch environment, or the empty string for an
-    environmentless target.
-
-    ``python_version`` is the ``major.minor`` interpreter the runner sets up for this job.
-    ``agent_image`` is the Agent Docker image its E2E tests run against, and is ``None`` when the
-    job runs no E2E facet.
-
-    The whole pipeline treats a planned job as immutable, so this is frozen: it makes every job
-    hashable and lets a batch partition be validated by value rather than by object identity.
+    A job is never duplicated into separate unit and E2E rows; the facet flags say which kinds of
+    tests the single execution produces. Frozen so jobs are hashable and a batch partition can be
+    validated by value.
     """
 
     name: str
     target: str
     runner_labels: tuple[str, ...]
-    environment: str
+    environment: str  # empty for a target that defines no environments
     platform: PlatformName
-    python_version: str
+    python_version: str  # `major.minor`, set up on the runner
     unit_tests: bool
     e2e_tests: bool
-    agent_image: str | None = None
+    agent_image: str | None = None  # `None` when the job runs no E2E tests
 
     def artifact_name(self) -> str:
-        """Deterministic artifact name built from the job's target, environment, and platform.
+        """Sanitized, deterministic name built from the job's target, environment, and platform.
 
-        Pure and deterministic. Each field is sanitized to GitHub's artifact-name constraints and
-        joined by the separator. Because a job's identity is ``target + environment + platform``,
-        those fields are unique per job within a batch and give each job a unique artifact
-        identity. An environmentless job contributes no environment segment (so it reads
-        ``target_platform`` rather than leaving an empty ``target__platform`` gap); it stays unique
-        because such a target produces a single job per platform.
+        Those three fields are the job's identity, so the name is unique within a batch. An
+        environmentless job contributes no segment rather than an empty one.
         """
-        fields = (self.target, self.environment, str(self.platform))
+        fields = (self.target, self.environment, self.platform)
         return ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields if field)
 
 
@@ -101,8 +87,8 @@ class JobResult:
 class BatchJobResult:
     """Everything known about a single job in a finished batch, correlated by the producer.
 
-    ``artifact_name_path`` is the single downloaded folder for the job (named after the job's
-    ``artifact_name``); the three ``*_artifact_name`` fields are the expected per-facet file names
+    `artifact_name_path` is the single downloaded folder for the job (named after the job's
+    `artifact_name`); the three `*_artifact_name` fields are the expected per-facet file names
     inside that folder.
     """
 
@@ -122,9 +108,9 @@ class BatchJobResult:
         """Correlate each job's spec, its workflow-run result, and its artifact directory.
 
         The workflow-job join is by name (tolerant of misses). Each job's artifact folder is matched
-        by reconstructing its name from the job's fields (``artifact_name``) and looking it up among
+        by reconstructing its name from the job's fields (`artifact_name`) and looking it up among
         the downloaded folders; the path is recorded only when it exists on disk. That single folder
-        holds the three per-facet files, whose names (``unit-``/``e2e-``/``coverage-`` prefixed on
+        holds the three per-facet files, whose names (`unit-`/`e2e-`/`coverage-` prefixed on
         the base name) are recorded for the gatherer. A job missing from the API or from disk still
         yields a well-formed result.
         """
@@ -152,8 +138,8 @@ class BatchJobResult:
 class WorkflowStatus:
     """Status of a single GitHub Actions workflow run (one batch), with every job's result.
 
-    ``batch_id`` is the human batch identifier (e.g. ``batch-01``) the comment renders; ``id`` is the
-    numeric workflow run id and ``url`` links to the run.
+    `batch_id` is the human batch identifier (e.g. `batch-01`) the comment renders; `id` is the
+    numeric workflow run id and `url` links to the run.
     """
 
     batch_id: str
@@ -182,6 +168,8 @@ class TestBatch(BaseMessage):
     across workflow attempts, and distinct from ``BaseMessage.id``, which identifies one message.
     """
 
+    # Logical batch identity (`batch-01`) that downstream processors correlate on. Distinct from
+    # the inherited message `id`, which identifies the message instance.
     batch_id: str
     job_list: list[BatchJob]
     jobs_count: int
@@ -198,7 +186,7 @@ class BatchFinished(BaseMessage):
 
     batch_id: str
     status: Status
-    run_id: int
+    run_id: int  # GitHub Actions workflow run
     workflow_url: str
     artifacts_path: str
     timed_out: bool = False
