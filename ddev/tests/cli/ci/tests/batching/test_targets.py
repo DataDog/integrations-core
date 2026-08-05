@@ -7,7 +7,6 @@ from dataclasses import dataclass
 
 import pytest
 
-from ddev.cli.ci.tests.batching.git import ChangedFile, ChangeType
 from ddev.cli.ci.tests.batching.targets import (
     UNTESTABLE_TARGETS,
     DirectTargetRule,
@@ -16,6 +15,7 @@ from ddev.cli.ci.tests.batching.targets import (
     default_target_rules,
     find_affected_targets,
 )
+from ddev.utils.git import ChangedFile, ChangeType
 
 CORE_RULES = default_target_rules(is_core=True)
 
