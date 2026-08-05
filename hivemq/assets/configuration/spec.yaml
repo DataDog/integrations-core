@@ -6,11 +6,68 @@ files:
   - template: init_config
     options:
     - template: init_config/jmx
-  - template: instances
-    options:
-    - template: instances/jmx
       overrides:
-        port.value.example: 9010
+        is_jmx.required: false
+        is_jmx.value.example: false
+  - template: instances
+    multiple_instances_defined: true
+    options:
+    - name: jmx
+      description: JMX instance example
+      options:
+      - template: instances/jmx
+        overrides:
+          host.required: false
+          port.required: false
+          port.value.example: 9010
+          is_jmx.hidden: false
+          is_jmx.enabled: true
+          is_jmx.value.default: true
+          is_jmx.value.example: true
+          is_jmx.description: |
+            Whether or not this instance is a configuration for a JMX integration.
+            If `is_jmx` is set to true at the init_config level, this flag is ignored.
+
+            Note: Set to `false` and set `use_openmetrics: true` to collect via the
+            HiveMQ Prometheus extension instead. See the `openmetrics` instance
+            example below.
+    - name: openmetrics
+      description: |
+        OpenMetrics instance example. Requires the free HiveMQ Prometheus extension
+        (https://github.com/hivemq/hivemq-prometheus-extension) to be installed and
+        enabled on the HiveMQ broker.
+
+        Note: `Max`, `Mean`, `Min`, `StdDev`, and `SnapshotSize` sub-metrics of
+        histogram-based metrics (for example `hivemq.messages.incoming.publish.bytes.*`)
+        are not available through this collection method -- only the percentile and
+        count sub-metrics are. This is a limitation of the HiveMQ Prometheus
+        extension itself, which does not expose them.
+      options:
+      - name: is_jmx
+        description: |
+          Whether or not this instance is a configuration for a JMX integration.
+          Must be `false` for this OpenMetrics instance example.
+        hidden: true
+        enabled: true
+        value:
+          type: boolean
+          default: false
+          example: false
+      - name: use_openmetrics
+        description: |
+          Whether or not this instance collects HiveMQ metrics from the HiveMQ
+          Prometheus extension instead of JMX. Must be set to `true`, alongside
+          `is_jmx: false`, to use this instance type.
+        enabled: true
+        value:
+          type: boolean
+          default: true
+          example: true
+        fleet_configurable: true
+      - template: instances/openmetrics
+        overrides:
+          openmetrics_endpoint.required: false
+          openmetrics_endpoint.value.example: http://%%host%%:9399/metrics
   - template: logs
     example:
     - type: file
