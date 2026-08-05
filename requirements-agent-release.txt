@@ -239,7 +239,7 @@ datadog-tls==5.7.0
 datadog-tomcat==4.3.0
 datadog-torchserve==4.4.1
 datadog-traefik-mesh==3.5.1
-datadog-traffic-server==3.6.0
+datadog-traffic-server==3.7.0
 datadog-twemproxy==3.3.0
 datadog-twistlock==6.4.0
 datadog-varnish==4.4.1
