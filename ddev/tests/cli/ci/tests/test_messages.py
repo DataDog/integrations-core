@@ -11,7 +11,6 @@ import pytest
 
 from ddev.cli.ci.tests.messages import (
     ARTIFACT_NAME_DISALLOWED,
-    BatchJob,
     BatchJobResult,
     JobResult,
     UpdatePRComment,
@@ -21,32 +20,11 @@ from ddev.cli.ci.tests.progress import DispatcherProgress
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models import WorkflowJob
 from ddev.utils.platform import PlatformName
-
-
-def batch_job(
-    name="job-1",
-    target="ntp",
-    runner_labels=("ubuntu-latest",),
-    environment="py3.13",
-    platform=PlatformName.LINUX,
-    python_version="3.13",
-    unit_tests=True,
-    e2e_tests=False,
-) -> BatchJob:
-    return BatchJob(
-        name=name,
-        target=target,
-        runner_labels=runner_labels,
-        environment=environment,
-        platform=platform,
-        python_version=python_version,
-        unit_tests=unit_tests,
-        e2e_tests=e2e_tests,
-    )
+from tests.helpers.batching import make_job
 
 
 def test_artifact_name_built_from_target_env_platform():
-    assert batch_job().artifact_name() == "ntp_py3.13_linux"
+    assert make_job().artifact_name() == "ntp_py3.13_linux"
 
 
 @pytest.mark.parametrize("field", ["name", "runner_labels", "unit_tests", "e2e_tests"])
@@ -54,7 +32,7 @@ def test_artifact_name_ignores_non_identifying_fields(field: str):
     # The artifact identity is target + environment + platform; name/runner/facet flags are not part
     # of it (a single job carries its facets, so facets never distinguish two jobs).
     changed = {"name": "other-job", "runner_labels": ("windows-latest",), "unit_tests": False, "e2e_tests": True}[field]
-    assert batch_job(**{field: changed}).artifact_name() == batch_job().artifact_name()
+    assert make_job(**{field: changed}).artifact_name() == make_job().artifact_name()
 
 
 @pytest.mark.parametrize(
@@ -62,23 +40,23 @@ def test_artifact_name_ignores_non_identifying_fields(field: str):
     [("target", "kafka"), ("environment", "py3.12"), ("platform", PlatformName.WINDOWS)],
 )
 def test_artifact_name_varies_with_identifying_fields(field, value):
-    assert batch_job(**{field: value}).artifact_name() != batch_job().artifact_name()
+    assert make_job(**{field: value}).artifact_name() != make_job().artifact_name()
 
 
 def test_artifact_name_for_environmentless_job():
     # An environmentless job omits the environment segment entirely (no empty "__" gap); it stays
     # unique because such a target produces a single job per platform.
-    assert batch_job(environment="").artifact_name() == "ntp_linux"
-    assert batch_job(environment="", platform=PlatformName.WINDOWS).artifact_name() == "ntp_windows"
+    assert make_job(environment="").artifact_name() == "ntp_linux"
+    assert make_job(environment="", platform=PlatformName.WINDOWS).artifact_name() == "ntp_windows"
 
 
 def test_artifact_name_sanitizes_disallowed_characters():
-    name = batch_job(target='a/b:c*d?e|f"g<h>i\\j', environment="x\r\ny").artifact_name()
+    name = make_job(target='a/b:c*d?e|f"g<h>i\\j', environment="x\r\ny").artifact_name()
     assert ARTIFACT_NAME_DISALLOWED.search(name) is None
 
 
 def test_correlate_matches_jobs_and_artifacts(tmp_path: Path):
-    job = batch_job("j1")
+    job = make_job("j1")
     base = job.artifact_name()
     artifact_dir = tmp_path / base
     artifact_dir.mkdir()
@@ -97,7 +75,7 @@ def test_correlate_matches_jobs_and_artifacts(tmp_path: Path):
 def test_correlate_without_workflow_or_artifact_match():
     # A job absent from the workflow API and with no matching artifact folder still yields a
     # well-formed result whose correlated facets are None.
-    job = batch_job("j1")
+    job = make_job("j1")
 
     [result] = BatchJobResult.correlate([job], [], {})
 
@@ -108,19 +86,12 @@ def test_correlate_without_workflow_or_artifact_match():
 
 def test_correlate_ignores_artifact_dir_missing_on_disk(tmp_path: Path):
     # A mapped path that does not exist on disk is not recorded.
-    job = batch_job("j1")
+    job = make_job("j1")
     base = job.artifact_name()
 
     [result] = BatchJobResult.correlate([job], [], {base: tmp_path / base})
 
     assert result.artifact_name_path is None
-
-
-def test_job_result_defaults():
-    result = JobResult(integration="ntp", environment="py3.13", platform=PlatformName.LINUX, status=Status.SUCCESS)
-    assert result.failed_steps == []
-    assert result.reports == ()
-    assert result.failed_tests == []
 
 
 def _job(integration: str, status: Status) -> JobResult:

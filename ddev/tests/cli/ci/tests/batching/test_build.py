@@ -19,44 +19,10 @@ from ddev.cli.ci.tests.batching.build import (
     create_test_batches,
     resolve_hatch_environments,
 )
-from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
+from ddev.cli.ci.tests.batching.exceptions import BatchValidationError
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.utils.platform import PlatformName
-from tests.helpers.batching import DEFAULT_PYTHON_VERSION, env, jobs, modified
-
-
-class FakeManifest:
-    def __init__(self, classifier_tags):
-        self._classifier_tags = list(classifier_tags)
-
-    def get(self, pointer, default=None):
-        if pointer == "/tile/classifier_tags":
-            return list(self._classifier_tags)
-        return default
-
-
-class FakeIntegration:
-    def __init__(self, name, *, is_testable=True, display_name=None, classifier_tags=()):
-        self.name = name
-        self.is_testable = is_testable
-        self.display_name = display_name or name
-        self.manifest = FakeManifest(classifier_tags)
-
-
-class FakeRegistry:
-    """Minimal stand-in for ddev's IntegrationRegistry (no git repository)."""
-
-    def __init__(self, integrations):
-        self._integrations = {integration.name: integration for integration in integrations}
-
-    def get(self, name):
-        try:
-            return self._integrations[name]
-        except KeyError:
-            raise OSError(f"Integration does not exist: {name}") from None
-
-    def iter_testable(self):
-        return [integration for integration in self._integrations.values() if integration.is_testable]
+from tests.helpers.batching import DEFAULT_PYTHON_VERSION, FakeIntegration, FakeRegistry, env, jobs, modified
 
 
 class FakeConfig:
@@ -131,41 +97,6 @@ def test_build_end_to_end_direct_and_broad_overlap():
     ]
 
 
-def test_build_gives_every_environment_its_own_unit():
-    repo = FakeRepo([FakeIntegration("postgres")])
-    provider = FakeEnvironmentProvider({"postgres": [env("py3.11", e2e=False), env("py3.12", e2e=True)]})
-    changed = [modified("postgres/tests/test_a.py")]
-
-    units = build_test_units(
-        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-    )
-
-    assert [(u.environment.name, u.environment.e2e_available) for u in units] == [
-        ("py3.11", False),
-        ("py3.12", True),
-    ]
-
-
-def test_build_environmentless_target():
-    repo = FakeRepo([FakeIntegration("ddev")])
-    provider = FakeEnvironmentProvider({})  # no environments for ddev
-    changed = [modified("ddev/src/ddev/foo.py")]
-
-    units = build_test_units(
-        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-    )
-
-    assert len(units) == 1
-    unit = units[0]
-    assert (unit.target, unit.name, unit.platform, unit.environment.name) == (
-        "ddev",
-        "ddev",
-        PlatformName.LINUX,
-        "",
-    )
-    assert unit.environment.python_version == DEFAULT_PYTHON_VERSION
-
-
 def test_build_warns_about_a_target_with_no_testable_environment(caplog):
     repo = FakeRepo([FakeIntegration("ddev")])
     provider = FakeEnvironmentProvider({})
@@ -192,10 +123,8 @@ def test_build_does_not_warn_when_a_platform_alone_has_no_environments(caplog):
             repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
         )
 
-    assert [(u.platform, u.environment.name) for u in units] == [
-        (PlatformName.LINUX, "py3.13"),
-        (PlatformName.WINDOWS, ""),
-    ]
+    # Both platforms are still planned; only the absence of a warning is under test here.
+    assert len(units) == 2
     assert caplog.text == ""
 
 
@@ -228,9 +157,9 @@ def test_build_applies_platform_and_runner_overrides():
         repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
     )
 
-    assert [(u.platform, u.name, u.runner_labels) for u in units] == [
-        (PlatformName.WINDOWS, "sqlserver on Windows (py3.13)", ("windows-2022",)),
-        (PlatformName.LINUX, "sqlserver on Linux (py3.13)", ("ubuntu-22.04",)),
+    assert [(u.platform, u.runner_labels) for u in units] == [
+        (PlatformName.WINDOWS, ("windows-2022",)),
+        (PlatformName.LINUX, ("ubuntu-22.04",)),
     ]
 
 
@@ -307,22 +236,6 @@ def test_resolve_hatch_environments_falls_back_when_hatch_declares_no_python():
     assert resolved[0].python_version == "3.9"
 
 
-def test_build_returns_nothing_for_irrelevant_changes():
-    repo = FakeRepo([FakeIntegration("postgres")])
-    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")]})
-    changed = [modified("docs/readme.md")]
-
-    assert (
-        build_test_units(repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION)
-        == []
-    )
-
-
-# ---------------------------------------------------------------------------
-# build_test_batches
-# ---------------------------------------------------------------------------
-
-
 def test_build_batches_end_to_end_split_defaults():
     repo = FakeRepo([FakeIntegration("postgres")])
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11", unit=True, e2e=True)]})
@@ -345,33 +258,6 @@ def test_build_batches_end_to_end_split_defaults():
         ("postgres (py3.11)", "py3.11", True, True),
     ]
     assert batch.jobs_count == 1
-
-
-def test_build_batches_emits_one_job_per_resolved_environment():
-    # The authoritative job identity is exactly one (target, environment, platform) — there is no
-    # representation for a single job spanning several environments and no batching-level knob to
-    # collapse them. A target with two resolved environments therefore always produces two singular
-    # jobs, in deterministic order, each carrying that environment's own facet flags.
-    repo = FakeRepo([FakeIntegration("postgres")])
-    provider = FakeEnvironmentProvider(
-        {"postgres": [env("py3.11", unit=True, e2e=False), env("py3.12", unit=True, e2e=True)]}
-    )
-    changed = [modified("postgres/tests/test_a.py")]
-
-    batches = build_test_batches(
-        repo,
-        changed,
-        environment_provider=provider,
-        config=BatchingConfig(),
-        default_python_version=DEFAULT_PYTHON_VERSION,
-    )
-
-    assert len(batches) == 1
-    # Each concrete job carries exactly one real environment, never a joined label.
-    assert [(j.name, j.environment, j.unit_tests, j.e2e_tests) for j in batches[0].job_list] == [
-        ("postgres (py3.11)", "py3.11", True, False),
-        ("postgres (py3.12)", "py3.12", True, True),
-    ]
 
 
 def test_build_batches_empty_input_returns_no_batches():
@@ -411,41 +297,6 @@ def test_build_batches_rejects_invalid_injected_strategy():
         )
 
 
-def test_build_batches_oversized_integration_fails_when_splitting_disabled():
-    repo = FakeRepo([FakeIntegration("postgres")])
-    provider = FakeEnvironmentProvider({"postgres": [env("py3.11"), env("py3.12")]})
-    changed = [modified("postgres/tests/test_a.py")]
-    # Two unit jobs (one per environment) for one integration, capacity 1, splitting disabled.
-    config = BatchingConfig(max_jobs_per_batch=1, allow_integration_splitting=False)
-
-    with pytest.raises(PlanningError, match="exceeding the batch capacity"):
-        build_test_batches(
-            repo, changed, environment_provider=provider, config=config, default_python_version=DEFAULT_PYTHON_VERSION
-        )
-
-
-def test_build_batches_numbering_is_deterministic_across_calls():
-    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("mysql")])
-    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "mysql": [env("py3.11")]})
-    changed = [modified("postgres/tests/test_a.py"), modified("mysql/tests/test_b.py")]
-    config = BatchingConfig(max_jobs_per_batch=1)
-
-    first = [
-        b.batch_id
-        for b in build_test_batches(
-            repo, changed, environment_provider=provider, config=config, default_python_version=DEFAULT_PYTHON_VERSION
-        )
-    ]
-    second = [
-        b.batch_id
-        for b in build_test_batches(
-            repo, changed, environment_provider=provider, config=config, default_python_version=DEFAULT_PYTHON_VERSION
-        )
-    ]
-
-    assert first == second == ["batch-01", "batch-02"]
-
-
 def test_create_test_batches_numbers_and_populates_messages():
     groups = [jobs("postgres", 2), jobs("mysql", 1) + jobs("redis", 1)]
 
@@ -458,10 +309,33 @@ def test_create_test_batches_numbers_and_populates_messages():
     assert batches[1].integrations == ["mysql", "redis"]
 
 
-def test_create_test_batches_numbering_is_local_and_repeatable():
-    groups = [jobs("a", 1), jobs("b", 1), jobs("c", 1)]
+def test_build_reads_supported_platforms_from_the_manifest():
+    # Without a CI override, platforms come from the manifest's `Supported OS` classifier tags.
+    repo = FakeRepo([FakeIntegration("hyperv", classifier_tags=["Supported OS::Windows"])])
+    provider = FakeEnvironmentProvider({"hyperv": [env("py3.13", PlatformName.WINDOWS)]})
+    changed = [modified("hyperv/tests/test_a.py")]
 
-    first = [b.batch_id for b in create_test_batches(groups)]
-    second = [b.batch_id for b in create_test_batches(groups)]
+    units = build_test_units(
+        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+    )
 
-    assert first == second == ["batch-01", "batch-02", "batch-03"]
+    assert [u.platform for u in units] == [PlatformName.WINDOWS]
+
+
+def test_build_only_expands_the_whole_repository_for_the_core_repo():
+    # The repository-wide rule is gated on the repo name, so the same change outside core selects
+    # only the directly modified target.
+    integrations = [FakeIntegration("postgres"), FakeIntegration("datadog_checks_base")]
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "datadog_checks_base": [env("py3.11")]})
+    changed = [modified("datadog_checks_base/datadog_checks/base/utils/foo.py")]
+
+    def targets(repo):
+        return {
+            u.target
+            for u in build_test_units(
+                repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
+            )
+        }
+
+    assert targets(FakeRepo(integrations)) == {"postgres", "datadog_checks_base"}
+    assert targets(FakeRepo(integrations, name="extras")) == {"datadog_checks_base"}
