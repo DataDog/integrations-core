@@ -60,6 +60,15 @@ class ObfuscationLookup[K: Hashable]:
         self._misses = 0
 
     @property
+    def maxsize(self) -> int:
+        return self._maxsize
+
+    @maxsize.setter
+    def maxsize(self, value: int):
+        self._maxsize = value
+        self._trim()
+
+    @property
     def key_map_size(self) -> int:
         return len(self._key_to_sig)
 
@@ -201,6 +210,11 @@ class ObfuscationLookup[K: Hashable]:
             commands=metadata.get('commands', None),
             comments=metadata.get('comments', None),
         )
+
+    def _trim(self):
+        self._trim_keys()
+        self._trim_sig()
+        self._trim_ignored()
 
     def _trim_keys(self):
         while len(self._key_to_sig) > self._maxsize:

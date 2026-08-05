@@ -83,6 +83,30 @@ class TestObfuscationLookup:
         _, misses = lk.lookup({(2, 2, 2)})
         assert (2, 2, 2) in misses
 
+    def test_maxsize_setter_trims_immediately(self):
+        lk = self._make_lookup(maxsize=3)
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2', (3, 3, 3): 'SELECT 3'})
+        assert lk.key_map_size == 3
+
+        lk.maxsize = 1
+        assert lk.maxsize == 1
+        assert lk.key_map_size == 1
+        assert lk.signature_map_size == 1
+
+    def test_maxsize_setter_growing_does_not_evict(self):
+        lk = self._make_lookup(maxsize=2)
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2'})
+        lk.maxsize = 10
+        hits, _ = lk.lookup({(1, 1, 1), (2, 2, 2)})
+        assert len(hits) == 2
+
+    def test_maxsize_setter_trims_the_negative_cache(self):
+        lk = self._make_lookup(maxsize=3)
+        lk.mark_ignored({(1, 1, 1), (2, 2, 2), (3, 3, 3)})
+        assert lk.ignored_map_size == 3
+        lk.maxsize = 1
+        assert lk.ignored_map_size == 1
+
     def test_keys_are_opaque_to_the_cache(self):
         """Any hashable works as a key; MySQL uses a digest string rather than a tuple."""
         lk = self._make_lookup()
