@@ -3,7 +3,7 @@ name: Notify New Integration
 on:
   push:
     branches:
-      - master
+      - sarah/test-notify-pypi
     paths:
       - "**/datadog_checks/**/__init__.py"
 
