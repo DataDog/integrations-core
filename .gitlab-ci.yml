@@ -138,11 +138,5 @@ evalya:run-tests:
 evalya:publish-metadata:
   extends: .evalya:publish-metadata
   stage: release
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'schedule'
-      when: never
-    - if: $CI_COMMIT_BRANCH == 'master'
-    - when: manual
-      allow_failure: true
   rules: *master-or-manual-rules
 # --- END evalya ---
