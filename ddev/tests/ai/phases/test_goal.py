@@ -552,6 +552,29 @@ def test_run_deterministic_checks_rejects_duplicate_names_before_running_checks(
     assert calls == []
 
 
+@pytest.mark.parametrize(
+    "checks,match",
+    [
+        pytest.param(
+            (DeterministicCheck(name="  ", run=lambda: None),),
+            "must not be blank",
+            id="blank_name",
+        ),
+        pytest.param(
+            (DeterministicCheck(name="incomplete", run=lambda: ""),),
+            "blank failure reason",
+            id="blank_failure_reason",
+        ),
+    ],
+)
+def test_run_deterministic_checks_rejects_invalid_checks(
+    checks: tuple[DeterministicCheck, ...],
+    match: str,
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        run_deterministic_checks(checks)
+
+
 def test_run_deterministic_checks_propagates_checker_exceptions() -> None:
     def broken_check() -> None:
         raise RuntimeError("catalog is unreadable")

@@ -14,6 +14,7 @@ from ddev.ai.phases.goal import (
     GOAL_TASK_SUFFIX,
     TaskValidationError,
     run_validation_loop,
+    validate_check_names,
 )
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
@@ -159,6 +160,7 @@ class AgenticPhase(Phase):
 
         has_goal = self._task_has_goal(task)
         deterministic_checks = self.deterministic_checks(task, context)
+        validate_check_names(deterministic_checks)
         prompt = self._render_task_prompt(task, context, has_goal)
         result = await self._start_task(process, prompt)
 

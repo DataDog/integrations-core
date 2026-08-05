@@ -125,6 +125,10 @@ class ValidationAttemptsExhausted(TaskValidationError):
     """Validation rejected every candidate up to max_validation_attempts."""
 
 
+class ReviewerProcessError(TaskValidationError):
+    """The lazy goal-reviewer process could not be created."""
+
+
 @dataclass(frozen=True)
 class ReviewerCheckResult:
     valid: bool
@@ -177,8 +181,11 @@ class DeterministicCheckReport:
         return "Deterministic checks failed:\n\n" + "\n\n".join(sections)
 
 
-def run_deterministic_checks(checks: Sequence[DeterministicCheck]) -> DeterministicCheckReport:
-    """Run every named deterministic check and compose all repairable failures."""
+def validate_check_names(checks: Sequence[DeterministicCheck]) -> None:
+    """Validate that check names are non-blank and unique.
+
+    Raises ValueError if any check name is blank or duplicated.
+    """
     names = [check.name.strip() for check in checks]
     if invalid_names := [check.name for check, name in zip(checks, names, strict=True) if not name]:
         raise ValueError(f"Deterministic check names must not be blank: {invalid_names!r}")
@@ -186,8 +193,14 @@ def run_deterministic_checks(checks: Sequence[DeterministicCheck]) -> Determinis
     if duplicates:
         raise ValueError(f"Deterministic check names must be unique: {duplicates}")
 
+
+def run_deterministic_checks(checks: Sequence[DeterministicCheck]) -> DeterministicCheckReport:
+    """Run every named deterministic check and compose all repairable failures."""
+    validate_check_names(checks)
+
     failures: list[DeterministicCheckFailure] = []
-    for check, name in zip(checks, names, strict=True):
+    for check in checks:
+        name = check.name.strip()
         reason = check.run()
         if reason is None:
             continue
@@ -393,6 +406,30 @@ async def _run_reviewer_once(
     )
 
 
+def build_reviewer_process(
+    *,
+    task: TaskConfig,
+    parent_agent_config: AgentConfig,
+    process_factory: ReActProcessFactory,
+    phase_id: str,
+) -> ReActProcess:
+    """Create the lazy goal-reviewer process for one task."""
+    reviewer_scope = AgentScope(
+        owner_id=f"{phase_id}.goal.{task.name}",
+        role=AgentRole.GOAL_REVIEWER,
+        phase_id=phase_id,
+    )
+    reviewer_config = parent_agent_config.model_copy(update={"tools": filter_read_only(parent_agent_config.tools)})
+    try:
+        return process_factory.create(
+            scope=reviewer_scope,
+            agent_config=reviewer_config,
+            system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
+        )
+    except Exception as e:
+        raise ReviewerProcessError(f"Failed to create reviewer process for task {task.name}: {e}") from e
+
+
 async def run_validation_loop(
     *,
     task: TaskConfig,
@@ -418,7 +455,7 @@ async def run_validation_loop(
         while True:
             attempts += 1
             failure_reason = run_deterministic_checks(deterministic_checks).failure_reason()
-            reviewer_verdict: str | None = None
+            reviewer_feedback: tuple[str, str] | None = None
 
             if failure_reason is None:
                 if goal_text is None:
@@ -429,22 +466,12 @@ async def run_validation_loop(
                         total_output_tokens=total_out,
                     )
                 if reviewer_process is None:
-                    reviewer_scope = AgentScope(
-                        owner_id=f"{phase_id}.goal.{task.name}",
-                        role=AgentRole.GOAL_REVIEWER,
+                    reviewer_process = build_reviewer_process(
+                        task=task,
+                        parent_agent_config=parent_agent_config,
+                        process_factory=process_factory,
                         phase_id=phase_id,
                     )
-                    reviewer_config = parent_agent_config.model_copy(
-                        update={"tools": filter_read_only(parent_agent_config.tools)}
-                    )
-                    try:
-                        reviewer_process = process_factory.create(
-                            scope=reviewer_scope,
-                            agent_config=reviewer_config,
-                            system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
-                        )
-                    except Exception as e:
-                        raise RuntimeError(f"Failed to create reviewer process for task {task.name}: {e}") from e
 
                 worker_summary = worker_result.final_response.text or "(no summary provided)"
                 user_message, needs_reset = _select_reviewer_message(
@@ -476,7 +503,7 @@ async def run_validation_loop(
                         total_output_tokens=total_out,
                     )
                 failure_reason = reviewer_result.reason
-                reviewer_verdict = reviewer_result.verdict_json
+                reviewer_feedback = (goal_text, reviewer_result.verdict_json)
 
             if attempts >= task.max_validation_attempts:
                 raise ValidationAttemptsExhausted(
@@ -488,11 +515,11 @@ async def run_validation_loop(
             total_in += compact_in
             total_out += compact_out
 
-            if reviewer_verdict is not None:
-                assert goal_text is not None
-                retry_prompt = build_reviewer_retry_prompt(goal_text, reviewer_verdict)
-            else:
-                retry_prompt = build_validation_retry_prompt(goal_text, failure_reason)
+            retry_prompt = (
+                build_reviewer_retry_prompt(*reviewer_feedback)
+                if reviewer_feedback is not None
+                else build_validation_retry_prompt(goal_text, failure_reason)
+            )
             worker_result = await worker_process.start(retry_prompt)
             total_in += worker_result.total_input_tokens
             total_out += worker_result.total_output_tokens
