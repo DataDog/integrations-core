@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 23.11.0 / 2026-08-05
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Include logical_database with pg_extension payload_row ([#24709](https://github.com/DataDog/integrations-core/pull/24709))
+
+***Fixed***:
+
+* Cache parameterized-query explain failures caused by ambiguous function calls so they aren't re-attempted on every collection. ([#24505](https://github.com/DataDog/integrations-core/pull/24505))
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
 ## 23.10.0 / 2026-07-08
 
 ***Added***:
