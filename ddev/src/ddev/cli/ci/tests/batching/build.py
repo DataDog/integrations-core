@@ -9,7 +9,6 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ddev.cli.ci.tests.batching.assembly import create_test_batches
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
 from ddev.cli.ci.tests.batching.strategy import BatchStrategy, default_strategy
 from ddev.cli.ci.tests.batching.targets import (
@@ -25,6 +24,7 @@ from ddev.cli.ci.tests.batching.units import (
     resolve_platforms,
 )
 from ddev.cli.ci.tests.batching.validation import validate_batches
+from ddev.cli.ci.tests.messages import TestBatch
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.batching.targets import TargetRule
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
     from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
-    from ddev.cli.ci.tests.messages import TestBatch
+    from ddev.cli.ci.tests.messages import BatchJob
     from ddev.integration.core import Integration
     from ddev.repo.core import Repository
     from ddev.utils.git import ChangedFile
@@ -115,6 +115,28 @@ def build_test_batches(
     job_groups = strategy(jobs, config=config)
     validate_batches(job_groups, jobs, config=config)
     return create_test_batches(job_groups)
+
+
+def create_test_batches(job_groups: Sequence[Sequence[BatchJob]]) -> list[TestBatch]:
+    """Build ordered `TestBatch` messages, numbering from `batch-01` on every call.
+
+    The message `id` is set to the same value as `batch_id` for now; processors correlate on
+    `batch_id`, so the two are free to diverge later.
+    """
+    batches: list[TestBatch] = []
+    for index, group in enumerate(job_groups, start=1):
+        batch_id = f"batch-{index:02d}"
+        integrations = list(dict.fromkeys(job.target for job in group))
+        batches.append(
+            TestBatch(
+                id=batch_id,
+                batch_id=batch_id,
+                job_list=list(group),
+                jobs_count=len(group),
+                integrations=integrations,
+            )
+        )
+    return batches
 
 
 def _supported_os(integration: Integration) -> list[str]:
