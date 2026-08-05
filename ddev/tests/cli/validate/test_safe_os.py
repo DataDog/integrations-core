@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the OS interface erosion guard.
+"""Tests for the safe_os erosion guard.
 
 Without this validation, a new PR can reintroduce a raw `open()`/`subprocess`
 call, or reach for the unenforcing module-level singleton inside a check class,
@@ -20,9 +20,9 @@ from datadog_checks.base import AgentCheck
 
 class MyCheck(AgentCheck):
     def check(self, _):
-        with self.os_interface.open(self.instance['path']) as f:
+        with self.safe_os.open(self.instance['path']) as f:
             f.read()
-        self.os_interface.run(['ls'], capture_output=True)
+        self.safe_os.run(['ls'], capture_output=True)
 """
 
 RAW_OPEN = """\
@@ -48,20 +48,20 @@ class MyCheck(AgentCheck):
 
 SINGLETON_IN_CHECK_CLASS = """\
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.os_interface import os_interface
+from datadog_checks.base.utils.safe_os import safe_os
 
 
 class MyCheck(AgentCheck):
     def check(self, _):
-        os_interface.run([self.instance['binary']], capture_output=True)
+        safe_os.run([self.instance['binary']], capture_output=True)
 """
 
 SINGLETON_WITH_WAIVER = """\
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.os_interface import os_interface
+from datadog_checks.base.utils.safe_os import safe_os
 
-# SKIP_OS_INTERFACE_VALIDATION: bundled asset, no config-derived path
-DATA = os_interface.open('bundled.json')
+# SKIP_SAFE_OS_VALIDATION: bundled asset, no config-derived path
+DATA = safe_os.open('bundled.json')
 
 
 class MyCheck(AgentCheck):
@@ -74,7 +74,7 @@ from datadog_checks.base import AgentCheck
 
 class MyCheck(AgentCheck):
     def check(self, _):
-        # SKIP_OS_INTERFACE_VALIDATION: reads a fixed, non-config path
+        # SKIP_SAFE_OS_VALIDATION: reads a fixed, non-config path
         with open('/proc/uptime') as f:
             f.read()
 """
@@ -97,41 +97,41 @@ def repo_with(fake_repo):
 
 def test_compliant_check_passes(repo_with, ddev):
     repo_with('good', COMPLIANT)
-    result = ddev('validate', 'os-interface', 'good')
+    result = ddev('validate', 'safe-os', 'good')
     assert result.exit_code == 0, result.output
 
 
 def test_raw_open_is_flagged(repo_with, ddev):
     repo_with('bad', RAW_OPEN)
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 1, result.output
     assert 'open(' in result.output
 
 
 def test_raw_subprocess_is_flagged(repo_with, ddev):
     repo_with('bad', RAW_SUBPROCESS)
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 1, result.output
     assert 'subprocess' in result.output
 
 
 def test_singleton_inside_check_class_is_flagged(repo_with, ddev):
     repo_with('bad', SINGLETON_IN_CHECK_CLASS)
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 1, result.output
-    assert 'os_interface' in result.output
-    assert 'self.os_interface' in result.output
+    assert 'safe_os' in result.output
+    assert 'self.safe_os' in result.output
 
 
 def test_singleton_outside_check_class_is_allowed_with_waiver(repo_with, ddev):
     repo_with('ok', SINGLETON_WITH_WAIVER)
-    result = ddev('validate', 'os-interface', 'ok')
+    result = ddev('validate', 'safe-os', 'ok')
     assert result.exit_code == 0, result.output
 
 
 def test_raw_open_with_waiver_is_allowed(repo_with, ddev):
     repo_with('ok', RAW_OPEN_WITH_WAIVER)
-    result = ddev('validate', 'os-interface', 'ok')
+    result = ddev('validate', 'safe-os', 'ok')
     assert result.exit_code == 0, result.output
 
 
@@ -143,7 +143,7 @@ def test_config_models_are_ignored(fake_repo, ddev):
         'instance.py',
         "with open('x') as f:\n    pass\n",
     )
-    result = ddev('validate', 'os-interface', 'gen')
+    result = ddev('validate', 'safe-os', 'gen')
     assert result.exit_code == 0, result.output
 
 
@@ -152,9 +152,9 @@ def test_excluded_integration_is_skipped(repo_with, fake_repo, ddev):
     write_file(
         fake_repo.path / '.ddev',
         'config.toml',
-        '[overrides.validate.os-interface]\nexclude = ["bad"]\n',
+        '[overrides.validate.safe-os]\nexclude = ["bad"]\n',
     )
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 0, result.output
 
 
@@ -172,7 +172,7 @@ class FileDescriptor:
 
 class MyCheck(AgentCheck):
     def check(self, _):
-        with self.os_interface.open('x') as f:
+        with self.safe_os.open('x') as f:
             f.read()
 """
 
@@ -186,20 +186,20 @@ class MyCheck(AgentCheck):
     MESSAGE = "call open( to read"
 
     def check(self, _):
-        self.os_interface.run(['ls'])
+        self.safe_os.run(['ls'])
 '''
 
 
 def test_method_definition_named_open_is_not_flagged(repo_with, ddev):
     # `def open(...)` is a definition, not a call into the stdlib.
     repo_with('ok', METHOD_NAMED_OPEN)
-    result = ddev('validate', 'os-interface', 'ok')
+    result = ddev('validate', 'safe-os', 'ok')
     assert result.exit_code == 0, result.output
 
 
 def test_docstrings_and_string_literals_are_not_flagged(repo_with, ddev):
     repo_with('ok', STRING_AND_DOCSTRING_MENTIONS)
-    result = ddev('validate', 'os-interface', 'ok')
+    result = ddev('validate', 'safe-os', 'ok')
     assert result.exit_code == 0, result.output
 
 
@@ -211,7 +211,7 @@ from datadog_checks.base import AgentCheck
 
 class MyCheck(AgentCheck):
     def check(self, _):
-        # SKIP_OS_INTERFACE_VALIDATION: fixed literal probe with no config input,
+        # SKIP_SAFE_OS_VALIDATION: fixed literal probe with no config input,
         # and it needs a shell for the redirect. The config-derived path below
         # does go through the interface.
         os.system('setsid sudo -l < /dev/null')
@@ -225,7 +225,7 @@ from datadog_checks.base import AgentCheck
 
 class MyCheck(AgentCheck):
     def check(self, _):
-        # SKIP_OS_INTERFACE_VALIDATION: too far away to apply
+        # SKIP_SAFE_OS_VALIDATION: too far away to apply
 
         os.system('rm -rf /')
 """
@@ -235,14 +235,14 @@ def test_multiline_waiver_block_applies_to_following_call(repo_with, ddev):
     # A justification often needs more than one line; the whole contiguous
     # comment block above the call counts.
     repo_with('ok', MULTILINE_WAIVER)
-    result = ddev('validate', 'os-interface', 'ok')
+    result = ddev('validate', 'safe-os', 'ok')
     assert result.exit_code == 0, result.output
 
 
 def test_waiver_separated_by_blank_line_does_not_apply(repo_with, ddev):
     # The waiver must be attached to the call, not merely nearby.
     repo_with('bad', WAIVER_SEPARATED_BY_BLANK_LINE)
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 1, result.output
 
 
@@ -287,7 +287,7 @@ class MyCheck(AgentCheck):
 def test_from_imported_functions_are_flagged(repo_with, ddev):
     # `from os import scandir` evades dotted-name matching.
     repo_with('bad', FROM_IMPORT_EVASION)
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 1, result.output
     assert 'scandir' in result.output
     assert 'exists' in result.output
@@ -295,7 +295,7 @@ def test_from_imported_functions_are_flagged(repo_with, ddev):
 
 def test_aliased_imports_are_flagged(repo_with, ddev):
     repo_with('bad', ALIASED_IMPORT_EVASION)
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 1, result.output
     assert 'run' in result.output
 
@@ -303,7 +303,7 @@ def test_aliased_imports_are_flagged(repo_with, ddev):
 def test_unrelated_from_imports_are_not_flagged(repo_with, ddev):
     # join/basename/environ do no I/O and must not be reported.
     repo_with('ok', UNRELATED_FROM_IMPORT)
-    result = ddev('validate', 'os-interface', 'ok')
+    result = ddev('validate', 'safe-os', 'ok')
     assert result.exit_code == 0, result.output
 
 
@@ -324,6 +324,6 @@ def test_raw_os_open_is_flagged(repo_with, ddev):
     # The interface exposes os_open; the dotted form must be caught too, not
     # only the `from os import open` form.
     repo_with('bad', RAW_OS_OPEN)
-    result = ddev('validate', 'os-interface', 'bad')
+    result = ddev('validate', 'safe-os', 'bad')
     assert result.exit_code == 1, result.output
     assert 'os.open' in result.output

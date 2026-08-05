@@ -68,40 +68,40 @@ def datadog_agent():
 
 
 @pytest.fixture
-def mock_os_interface():
-    """Install a ``MockOSInterface`` at every seam a check reaches the OS layer through.
+def mock_safe_os():
+    """Install a ``MockSafeOS`` at every seam a check reaches the OS layer through.
 
     A check performs filesystem and subprocess operations either through the
-    per-instance ``self.os_interface`` property or through the module-level
-    ``os_interface`` singleton (used by module-level helper functions). This
+    per-instance ``self.safe_os`` property or through the module-level
+    ``safe_os`` singleton (used by module-level helper functions). This
     fixture patches both to the same double for the duration of the test, so a
     test configures one object without having to know which seam the code under
     test uses. Configure it declaratively::
 
-        def test_check(mock_os_interface, dd_run_check):
-            mock_os_interface.add_file('/proc/stat', 'cpu 1 2 3')
-            mock_os_interface.set_command_output('netstat -i', stdout='...')
+        def test_check(mock_safe_os, dd_run_check):
+            mock_safe_os.add_file('/proc/stat', 'cpu 1 2 3')
+            mock_safe_os.set_command_output('netstat -i', stdout='...')
             ...
 
-    or drive the underlying MagicMocks directly (``mock_os_interface.popen.side_effect = [...]``).
+    or drive the underlying MagicMocks directly (``mock_safe_os.popen.side_effect = [...]``).
     """
     try:
         from unittest import mock
 
         from datadog_checks.base import AgentCheck
-        from datadog_checks.base.stubs.os_interface import METHOD_NAMES, MockOSInterface
-        from datadog_checks.base.utils import os_interface as os_interface_module
+        from datadog_checks.base.stubs.safe_os import METHOD_NAMES, MockSafeOS
+        from datadog_checks.base.utils import safe_os as safe_os_module
     except ImportError:
         raise ImportError('datadog-checks-base is not installed!')
 
-    fake = MockOSInterface()
+    fake = MockSafeOS()
 
     # Patching the singleton's methods, rather than rebinding the name, reaches
-    # every module that did `from ... import os_interface`.
+    # every module that did `from ... import safe_os`.
     singleton_patches = {name: getattr(fake, name) for name in METHOD_NAMES}
     with (
-        mock.patch.object(AgentCheck, 'os_interface', new_callable=mock.PropertyMock, return_value=fake),
-        mock.patch.multiple(os_interface_module.os_interface, **singleton_patches),
+        mock.patch.object(AgentCheck, 'safe_os', new_callable=mock.PropertyMock, return_value=fake),
+        mock.patch.multiple(safe_os_module.safe_os, **singleton_patches),
     ):
         yield fake
 

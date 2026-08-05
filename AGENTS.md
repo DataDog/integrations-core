@@ -81,11 +81,11 @@ Extract duplicated logic when it represents the same concept and a shared helper
 
 ### Filesystem and Subprocess Access
 
-Use `self.os_interface` instead of calling `open`, `os`, `shutil`, `glob`, or `subprocess` directly, so paths that come from configuration are validated at the point of use. A module-level helper that performs such access should take the interface as a required parameter and be called with `self.os_interface`.
+Use `self.safe_os` instead of calling `open`, `os`, `shutil`, `glob`, or `subprocess` directly, so paths that come from configuration are validated at the point of use. A module-level helper that performs such access should take the interface as a required parameter and be called with `self.safe_os`.
 
-Do not use the module-level `os_interface` singleton in code that touches a config-derived path. It is bound to a no-op validator, so substituting it preserves behavior and passes every test while enforcing nothing, which is harder to notice than an obvious bypass. `ddev validate os-interface` enforces both rules; waive a genuinely non-config path with an inline `# SKIP_OS_INTERFACE_VALIDATION` comment stating why.
+Do not use the module-level `safe_os` singleton in code that touches a config-derived path. It is bound to a no-op validator, so substituting it preserves behavior and passes every test while enforcing nothing, which is harder to notice than an obvious bypass. `ddev validate safe-os` enforces both rules; waive a genuinely non-config path with an inline `# SKIP_SAFE_OS_VALIDATION` comment stating why.
 
-See [OS Interface](docs/developer/base/os-interface.md) for the available operations, the enforcement modes, and the `mock_os_interface` test fixture.
+See [safe_os](docs/developer/base/safe-os.md) for the available operations, the enforcement modes, and the `mock_safe_os` test fixture.
 
 ## Configuration Models
 
