@@ -146,21 +146,46 @@ def test_extra_headers_on_http_method_call():
     assert extra_headers == {"foo": "bar"}
 
 
+def get_wire_headers(http, url='http://example.com/hello', **options):
+    """Send a request and return the headers of the request that actually left the client.
+
+    The mapping handed to the client call is not the one that goes out: a per-request mapping replaces
+    the configured one there, and the client's own mapping is merged back underneath it afterwards. Only
+    the outgoing request shows the result of that merge.
+    """
+    with mock.patch('requests.adapters.HTTPAdapter.send') as send:
+        send.return_value = mock.MagicMock(status_code=200, headers={}, is_redirect=False, history=[])
+        http.get(url, **options)
+
+    return send.call_args.args[0].headers
+
+
 def test_request_headers_override_defaults_before_extra_headers():
     http = RequestsWrapper({'headers': {'X-Default': 'default', 'X-Precedence': 'default'}}, {})
 
-    with mock.patch('requests.Session.get') as get:
-        http.get(
-            'http://example.com/hello',
-            headers={'X-Request': 'request', 'X-Precedence': 'request'},
-            extra_headers={'X-Extra': 'extra', 'X-Precedence': 'extra'},
-        )
+    wire_headers = get_wire_headers(
+        http,
+        headers={'X-Request': 'request', 'X-Precedence': 'request'},
+        extra_headers={'X-Extra': 'extra', 'X-Precedence': 'extra'},
+    )
 
-    assert get.call_args.kwargs['headers'] == {
-        'X-Request': 'request',
-        'X-Extra': 'extra',
-        'X-Precedence': 'extra',
-    }
+    assert wire_headers['X-Request'] == 'request'
+    assert wire_headers['X-Extra'] == 'extra'
+    assert wire_headers['X-Precedence'] == 'extra'
+    # A per-request mapping does not discard the configured one.
+    assert wire_headers['X-Default'] == 'default'
+
+
+def test_a_per_request_mapping_keeps_the_configured_headers():
+    # cisco_aci and cloud_foundry_api pass a per-request mapping holding only their session cookie, so
+    # the Agent's User-Agent and everything the user configured reach the wire through the merge alone.
+    http = RequestsWrapper({'extra_headers': {'X-Configured': 'configured'}}, {})
+
+    wire_headers = get_wire_headers(http, headers={'Cookie': 'APIC-cookie=token'})
+
+    assert wire_headers['Cookie'] == 'APIC-cookie=token'
+    assert wire_headers['User-Agent'] == 'Datadog Agent/0.0.0'
+    assert wire_headers['X-Configured'] == 'configured'
 
 
 def test_get_header_default_for_missing():

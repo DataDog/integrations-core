@@ -247,6 +247,17 @@ def test_mock_response_reason():
     assert MockHTTPResponse(status_code=599).reason == ''
 
 
+@pytest.mark.parametrize(
+    ('status_code', 'expected'),
+    [(200, True), (301, True), (399, True), (400, False), (404, False), (500, False)],
+)
+def test_mock_response_truthiness_follows_the_status_code(status_code, expected):
+    # A response reached through an error handler is sometimes tested for truth rather than for None,
+    # and an always-truthy double sends that branch the other way. nutanix's activity monitor picks
+    # its log message that way, so a test written on a truthy double pins the wrong message.
+    assert bool(MockHTTPResponse(status_code=status_code)) is expected
+
+
 def test_mock_response_iter_content_whole_content():
     # chunk_size=None yields the entire body as a single chunk.
     assert list(MockHTTPResponse(content='hello world').iter_content()) == [b'hello world']
@@ -258,7 +269,10 @@ def test_mock_response_iter_content_empty():
 
 
 def test_mock_response_iter_content_decode_unicode():
-    assert list(MockHTTPResponse(content='ab').iter_content(chunk_size=1, decode_unicode=True)) == ['a', 'b']
+    # The character set comes from the header, the same place the production backend reads it.
+    response = MockHTTPResponse(content='ab', headers={'Content-Type': 'text/plain; charset=utf-8'})
+
+    assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == ['a', 'b']
 
 
 def test_mock_response_iter_content_decode_unicode_uses_explicit_encoding():
@@ -270,6 +284,7 @@ def test_mock_response_iter_content_decode_unicode_uses_explicit_encoding():
 
 def test_mock_response_iter_content_decode_unicode_handles_split_code_points():
     response = MockHTTPResponse(content='café')
+    response.encoding = 'utf-8'
 
     assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == ['c', 'a', 'f', 'é']
 
@@ -285,7 +300,7 @@ def test_mock_response_iter_lines_custom_delimiter():
 
 
 def test_mock_response_iter_lines_decode_unicode():
-    response = MockHTTPResponse(content='line1\nline2')
+    response = MockHTTPResponse(content='line1\nline2', headers={'Content-Type': 'text/plain; charset=utf-8'})
     assert list(response.iter_lines(decode_unicode=True)) == ['line1', 'line2']
 
 

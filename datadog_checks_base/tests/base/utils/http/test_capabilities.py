@@ -4,6 +4,7 @@
 import mock
 import pytest
 import requests
+from requests.adapters import HTTPAdapter
 
 from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 from datadog_checks.base.utils.http_protocol import HTTPResponse
@@ -242,6 +243,64 @@ class TestResponseProtocolSurface:
             assert entered is wrapper
 
         response.close.assert_called_once_with()
+
+
+def build_requests_response(content: bytes, headers: dict[str, str] | None = None) -> ResponseWrapper:
+    """Build a response through the requests adapter, which is where the character set is derived.
+
+    A hand-constructed requests.Response leaves encoding at None no matter what headers it carries, so
+    a test that built one directly would compare the double against a backend that never derived
+    anything. Pre-consuming the body keeps the raw stream out of the picture.
+    """
+    raw = mock.Mock(spec=['status', 'headers', 'reason', 'version'])
+    raw.status, raw.headers, raw.reason, raw.version = 200, headers or {}, 'OK', 11
+    response = HTTPAdapter().build_response(requests.Request('GET', 'http://example.com').prepare(), raw)
+    response._content = content
+    response._content_consumed = True
+    return ResponseWrapper(response, 1024)
+
+
+@pytest.mark.parametrize('backend', ['requests', 'mock'])
+@pytest.mark.parametrize(
+    ('headers', 'expected'),
+    [
+        (None, None),
+        ({'Content-Type': 'application/octet-stream'}, None),
+        ({'Content-Type': 'text/plain'}, 'ISO-8859-1'),
+        ({'Content-Type': 'text/plain; charset=latin-1'}, 'latin-1'),
+        ({'Content-Type': 'application/json'}, 'utf-8'),
+        # "text" is matched anywhere in the media type, so an OpenMetrics body with no charset is
+        # latin-1 too. The charset value is passed through verbatim rather than normalized.
+        ({'Content-Type': 'application/openmetrics-text; version=1.0.0'}, 'ISO-8859-1'),
+        ({'Content-Type': 'TEXT/PLAIN; CHARSET=UTF-8'}, 'UTF-8'),
+    ],
+)
+def test_encoding_derived_from_content_type(backend, headers, expected):
+    # A double that ignored the header would decode every body as utf-8, so a test could not tell a
+    # correctly parsed latin-1 payload from a mangled one, and no test could reach the branch where
+    # the character set stays undetermined.
+    if backend == 'requests':
+        response = build_requests_response(b'abc', headers)
+    else:
+        response = MockHTTPResponse(content=b'abc', headers=headers)
+
+    assert response.encoding == expected
+
+
+@pytest.mark.parametrize('backend', ['requests', 'mock'])
+def test_decode_unicode_yields_bytes_when_the_encoding_is_undetermined(backend):
+    # An endpoint that omits Content-Type leaves nothing to decode with, and callers that split or
+    # search the yielded records raise TypeError against bytes. A double that always handed back text
+    # would make that crash unreachable from a test.
+    content = 'a: café\nb: 2'.encode('utf-8')
+    if backend == 'requests':
+        response = build_requests_response(content)
+    else:
+        response = MockHTTPResponse(content=content)
+
+    assert response.encoding is None
+    assert list(response.iter_lines(decode_unicode=True)) == [b'a: caf\xc3\xa9', b'b: 2']
+    assert list(response.iter_content(chunk_size=4, decode_unicode=True)) == [b'a: c', b'af\xc3\xa9', b'\nb: ', b'2']
 
 
 @pytest.mark.parametrize('backend', ['requests', 'mock'])

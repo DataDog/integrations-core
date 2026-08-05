@@ -101,8 +101,6 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     check = PHPFPMCheck('php_fpm', {}, instances=[instance])
 
     for key, value in expected_http_kwargs.items():
-        if key == 'headers':
-            for h_key, h_value in value.items():
-                assert check.http.get_header(h_key) == h_value
-        else:
-            assert check.http.options[key] == value
+        # The header mapping is compared whole, so a header the case should not carry at all, an
+        # Authorization alongside http_host for instance, fails here.
+        assert check.http.options[key] == value

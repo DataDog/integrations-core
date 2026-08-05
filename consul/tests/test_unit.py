@@ -694,11 +694,11 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
 
     for key, value in expected_http_kwargs.items():
-        if key == 'headers':
-            for h_key, h_value in value.items():
-                assert check.http.get_header(h_key) == h_value
-        else:
-            assert check.http.options[key] == value
+        # The header mapping is compared whole, because the "new config" case pins that an
+        # instance-level headers mapping replaces the seeded defaults instead of adding to them. That
+        # shows up as the absence of User-Agent, Accept and Accept-Encoding, which only an exact
+        # comparison can see.
+        assert check.http.options[key] == value
 
 
 def test_health_checks_cache_defaults():

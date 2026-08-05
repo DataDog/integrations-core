@@ -60,6 +60,30 @@ class CaseInsensitiveDict(dict):
         return NotImplemented
 
 
+def encoding_from_content_type(content_type: str | None) -> str | None:
+    """Derive the character set a response body is decoded with, or None when the headers do not say.
+
+    Reproduces the rule the production backend applies when it builds a response, quirks included: an
+    explicit charset wins, then any media type containing "text" falls back to latin-1 rather than to
+    utf-8, then JSON is assumed utf-8 per RFC 4627. Everything else stays undetermined, which is what
+    makes decode_unicode yield raw bytes.
+    """
+    if not content_type:
+        return None
+
+    media_type, _, parameter_text = content_type.partition(';')
+    for parameter in parameter_text.split(';'):
+        name, sep, value = parameter.partition('=')
+        if sep and name.strip().lower() == 'charset':
+            return value.strip('"\' ')
+
+    if 'text' in media_type.lower():
+        return 'ISO-8859-1'
+    if 'application/json' in media_type.lower():
+        return 'utf-8'
+    return None
+
+
 class MockHTTPResponseImpl:
     """Rich agnostic mock response; wrapped by the protocol-enforcing MockHTTPResponse."""
 
@@ -99,7 +123,7 @@ class MockHTTPResponseImpl:
         self.status_code = status_code
         self.headers = CaseInsensitiveDict(headers or {})
         self.cookies = cookies or {}
-        self.encoding: str | None = None
+        self.encoding: str | None = encoding_from_content_type(self.headers.get('content-type'))
         self.elapsed = timedelta(seconds=elapsed_seconds)
         self.history: list[Any] = history if history is not None else []
         self._stream = BytesIO(self._content)
@@ -117,6 +141,9 @@ class MockHTTPResponseImpl:
         return self._decode(self._content)
 
     def _decode(self, content: bytes) -> str:
+        # The utf-8 fallback applies to text and json only. The production backend guesses the character
+        # set there instead, but text never yields bytes on either side, and guessing would make the
+        # decoded value of every mock that carries no content type depend on its payload.
         return content.decode(self.encoding or 'utf-8', errors='replace')
 
     @property
@@ -124,6 +151,11 @@ class MockHTTPResponseImpl:
         # Transitional: mirrors requests.Response.ok for current production code. A backend that
         # reports success through narrower predicates has to derive this one itself.
         return self.status_code < 400
+
+    def __bool__(self) -> bool:
+        # A response reaching an error handler is sometimes tested for truth rather than for None, and
+        # the production response is falsy for an error status, so this one has to be as well.
+        return self.ok
 
     @property
     def reason(self) -> str:
@@ -173,7 +205,12 @@ class MockHTTPResponseImpl:
         # chunk_size=None means return the entire content as a single chunk (matches requests behavior)
         chunk_size = chunk_size if chunk_size is not None else len(self._content) or 1
         self._stream.seek(0)
-        decoder = codecs.getincrementaldecoder(self.encoding or 'utf-8')(errors='replace') if decode_unicode else None
+        # An undetermined character set leaves nothing to decode with, so records stay bytes even when
+        # decode_unicode is set. Callers that split or search them raise TypeError, which is the whole
+        # reason this branch has to be reachable from a test.
+        decoder = (
+            codecs.getincrementaldecoder(self.encoding)(errors='replace') if decode_unicode and self.encoding else None
+        )
         while chunk := self._stream.read(chunk_size):
             if decoder is None:
                 yield chunk
@@ -195,7 +232,7 @@ class MockHTTPResponseImpl:
         if not content:
             return
 
-        if decode_unicode:
+        if decode_unicode and self.encoding:
             decoded_content = self._decode(content)
             decoded_delimiter = self._decode(delimiter) if isinstance(delimiter, bytes) else delimiter
             lines = (
@@ -273,3 +310,7 @@ class MockHTTPResponse:
 
     def __iter__(self) -> Iterator[bytes | str]:
         return iter(self.__wrapped__)
+
+    def __bool__(self) -> bool:
+        # Dunder lookups skip __getattr__, so truthiness has to be forwarded by hand.
+        return bool(self.__wrapped__)

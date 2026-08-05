@@ -386,6 +386,7 @@ def mock_http_response(mocker, mock_response):
 @pytest.fixture
 def mock_http(mocker):
     from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.headers import set_header
     from datadog_checks.base.utils.http_protocol import HTTPClient
 
     client = create_autospec(HTTPClient)
@@ -419,12 +420,8 @@ def mock_http(mocker):
         return found
 
     def _set_header(name, value):
-        headers = client.options['headers']
-        for key in list(headers):
-            if key.lower() == name.lower():
-                headers[key] = value
-                return
-        headers[name] = value
+        # The client's own helper, so the double cannot drift from the surface it stands in for.
+        set_header(client.options['headers'], name, value)
 
     def _get_cookie(name: str, default: str | None = None) -> str | None:
         return_value = client.get_cookie.return_value

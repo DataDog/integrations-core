@@ -125,3 +125,15 @@ class TestMockHttpLegacyOptions:
 
         mock_http.set_header('X-Other', 'def')
         assert mock_http.options['headers']['X-Other'] == 'def'
+
+    def test_mock_set_header_collapses_duplicate_spellings(self, mock_http):
+        # A config that spells one header under two casings reaches the client as two keys. The real
+        # client keeps one of them, so a double that overwrote the first and left the second behind
+        # would report the stale value back through get_header, and a check that negotiates a header
+        # against its current value would then take the branch production never takes.
+        mock_http.options['headers'].update({'x-vault-token': 'stale', 'X-Vault-Token': 'canon'})
+
+        mock_http.set_header('X-Vault-Token', 'fresh')
+
+        assert mock_http.get_header('X-Vault-Token') == 'fresh'
+        assert sum(1 for key in mock_http.options['headers'] if key.lower() == 'x-vault-token') == 1
