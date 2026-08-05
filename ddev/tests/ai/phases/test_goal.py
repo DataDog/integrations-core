@@ -15,7 +15,9 @@ from ddev.ai.phases.goal import (
     GOAL_REVIEWER_RESET_THRESHOLD_PCT,
     GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,
+    GoalCheckResult,
     GoalParseError,
+    _select_reviewer_message,
     build_reviewer_user_message,
     parse_reviewer_verdict,
     run_goal_loop,
@@ -132,6 +134,48 @@ def test_build_reviewer_user_message_sections():
     assert "## Original task\nTASK" in msg
     assert "## Goal to verify\nGOAL" in msg
     assert "## Worker summary\nSUMMARY" in msg
+
+
+@pytest.mark.parametrize(
+    "has_previous_check,context_pct,expected_reset,expected_section",
+    [
+        (False, None, False, "## Worker summary\nSUMMARY"),
+        (True, None, False, "## Worker repair summary\nSUMMARY"),
+        (True, GOAL_REVIEWER_RESET_THRESHOLD_PCT - 1, False, "## Worker repair summary\nSUMMARY"),
+        (True, GOAL_REVIEWER_RESET_THRESHOLD_PCT, True, "## Previous reviewer verdict"),
+        (True, GOAL_REVIEWER_RESET_THRESHOLD_PCT + 1, True, "## Previous reviewer verdict"),
+    ],
+    ids=["initial", "unknown", "below_threshold", "at_threshold", "above_threshold"],
+)
+def test_select_reviewer_message(
+    has_previous_check: bool,
+    context_pct: float | None,
+    expected_reset: bool,
+    expected_section: str,
+) -> None:
+    previous_check = None
+    if has_previous_check:
+        previous_check = GoalCheckResult(
+            valid=False,
+            reason="missing X",
+            input_tokens=20,
+            output_tokens=10,
+            verdict_json=make_goal_verdict(False, "missing X"),
+            context_pct=context_pct,
+        )
+
+    message, needs_reset = _select_reviewer_message(
+        previous_check=previous_check,
+        rendered_task_prompt="TASK",
+        goal_text="GOAL",
+        worker_summary="SUMMARY",
+    )
+
+    assert needs_reset is expected_reset
+    assert expected_section in message
+    if expected_reset:
+        assert "## Original task\nTASK" in message
+        assert "## Goal to verify\nGOAL" in message
 
 
 # ---------------------------------------------------------------------------
@@ -303,9 +347,11 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     assert outcome.attempts == 2
     assert outcome.final_result.final_response.text == "fixed it"
     assert len(worker_agent.send_calls) == 1
-    assert "missing X" in worker_agent.send_calls[0]
-    assert '"valid": false' in worker_agent.send_calls[0]
-    assert "g" in worker_agent.send_calls[0]
+    worker_retry_message = worker_agent.send_calls[0]
+    assert "missing X" in worker_retry_message
+    assert '"valid": false' in worker_retry_message
+    assert "g" in worker_retry_message
+    assert "Reviewer verdict:" in worker_retry_message
     assert len(reviewer_agent.send_calls) == 2
     assert reviewer_agent.reset_call_count == 0
     assert "## Re-review instructions" not in reviewer_agent.send_calls[0]

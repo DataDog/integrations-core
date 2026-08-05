@@ -53,9 +53,10 @@ Output contract:
 - Schema: {"valid": <bool>, "reason": <string>, "findings": <array>}.
 - "reason" must be specific and actionable when "valid" is false.
 - "reason" may be an empty string when "valid" is true.
-- "findings" should contain every discovered problem. Each entry should have a
-  stable "id", the affected "criterion", and an actionable "reason". Return an
-  empty array when the goal is valid.
+- "findings" must contain every discovered problem. Each entry must be an
+  object with a stable string "id", a string "criterion", and a string "reason".
+  Return at least one finding when the goal is invalid and an empty array when
+  the goal is valid.
 - You may write your reasoning as prose before that final line; only the last
   line is read as the verdict.
 """
@@ -76,9 +77,7 @@ A reviewer checked your work against this goal and reported it failed:
 
 Goal: {goal}
 
-Reviewer reason: {reason}
-
-Complete reviewer verdict: {reviewer_verdict}
+Reviewer verdict: {reviewer_verdict}
 
 Address all findings above and avoid unrelated changes. If you believe the
 reviewer is wrong, explain why clearly in your final summary (do not silently
@@ -92,8 +91,9 @@ ignore it). Finish with a precise repair summary that lists:
 GOAL_PARSE_RETRY_PROMPT = (
     "Your previous reply did not end with a valid JSON verdict. End your reply with a "
     'single-line JSON object as the LAST line: {"valid": <bool>, "reason": <string>, '
-    '"findings": <array>}, '
-    "with no markdown code fences and nothing after it."
+    '"findings": <array>}, with no markdown code fences and nothing after it. Each finding '
+    'must be an object with a stable string "id", a string "criterion", and a string "reason". '
+    'Return at least one finding when "valid" is false and an empty array when "valid" is true.'
 )
 
 
@@ -179,6 +179,40 @@ def build_reviewer_reset_retry_message(
         f"## Previous reviewer verdict\n{previous_verdict}\n\n"
         f"## Worker repair summary\n{worker_summary}\n"
     )
+
+
+def _select_reviewer_message(
+    *,
+    previous_check: GoalCheckResult | None,
+    rendered_task_prompt: str,
+    goal_text: str,
+    worker_summary: str,
+) -> tuple[str, bool]:
+    if previous_check is None:
+        return (
+            build_reviewer_user_message(
+                rendered_task_prompt=rendered_task_prompt,
+                goal_text=goal_text,
+                worker_summary=worker_summary,
+            ),
+            False,
+        )
+
+    needs_reset = (
+        previous_check.context_pct is not None and previous_check.context_pct >= GOAL_REVIEWER_RESET_THRESHOLD_PCT
+    )
+    if needs_reset:
+        return (
+            build_reviewer_reset_retry_message(
+                rendered_task_prompt=rendered_task_prompt,
+                goal_text=goal_text,
+                previous_verdict=previous_check.verdict_json,
+                worker_summary=worker_summary,
+            ),
+            True,
+        )
+
+    return build_reviewer_retry_message(worker_summary=worker_summary), False
 
 
 def _parse_verdict_object(candidate: str) -> dict[str, object] | None:
@@ -307,31 +341,17 @@ async def _drive_goal_loop(
             await callbacks.fire_before_goal_check(phase_id, task.name, attempts)
 
             worker_summary = worker_result.final_response.text or "(no summary provided)"
-            if attempts == 1:
-                user_message = build_reviewer_user_message(
-                    rendered_task_prompt=rendered_task_prompt,
-                    goal_text=goal_text,
-                    worker_summary=worker_summary,
-                )
-            else:
-                if (
-                    previous_check is not None
-                    and previous_check.context_pct is not None
-                    and previous_check.context_pct >= GOAL_REVIEWER_RESET_THRESHOLD_PCT
-                ):
-                    await reviewer_process.reset()
-                    user_message = build_reviewer_reset_retry_message(
-                        rendered_task_prompt=rendered_task_prompt,
-                        goal_text=goal_text,
-                        previous_verdict=previous_check.verdict_json,
-                        worker_summary=worker_summary,
-                    )
-                else:
-                    user_message = build_reviewer_retry_message(
-                        worker_summary=worker_summary,
-                    )
+            user_message, needs_reset = _select_reviewer_message(
+                previous_check=previous_check,
+                rendered_task_prompt=rendered_task_prompt,
+                goal_text=goal_text,
+                worker_summary=worker_summary,
+            )
+            if needs_reset:
+                await reviewer_process.reset()
 
             check = await _run_reviewer_once(reviewer_process, user_message)
+            previous_check = check
             total_in += check.input_tokens
             total_out += check.output_tokens
 
@@ -357,13 +377,11 @@ async def _drive_goal_loop(
 
             retry_prompt = GOAL_RETRY_PROMPT_TEMPLATE.format(
                 goal=goal_text,
-                reason=check.reason,
                 reviewer_verdict=check.verdict_json,
             )
             worker_result = await worker_process.start(retry_prompt)
             total_in += worker_result.total_input_tokens
             total_out += worker_result.total_output_tokens
-            previous_check = check
     except GoalValidationError as e:
         e.input_tokens += total_in
         e.output_tokens += total_out
