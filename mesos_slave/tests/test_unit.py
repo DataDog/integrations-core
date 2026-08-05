@@ -1,15 +1,20 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from copy import deepcopy
 
 import mock
 import pytest
+from requests.exceptions import Timeout
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mesos_slave import MesosSlave
+from datadog_checks.mesos_slave.mesos_slave import DEFAULT_MASTER_PORT
 
 from .common import MESOS_SLAVE_VERSION, PARAMETERS
+
+pytestmark = pytest.mark.unit
 
 
 def test_fixtures(check, instance, aggregator):
@@ -229,3 +234,230 @@ def test_can_connect_service_check_stats(
                 raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+
+
+def urls_called(mock_get):
+    return [call.args[0] for call in mock_get.call_args_list]
+
+
+def test_default_master_port_is_5050():
+    # Kills the core/NumberReplacer mutants at mesos_slave.py:16 (DEFAULT_MASTER_PORT 5050 -> 5051/5049).
+    assert DEFAULT_MASTER_PORT == 5050
+
+
+def test_tls_warning_logged_for_https_url_when_verify_enabled(caplog):
+    # Kills core/ReplaceComparisonOperator_Eq_{Gt,GtE,Is} and AddNot mutants at mesos_slave.py:103.
+    with caplog.at_level(logging.WARNING):
+        MesosSlave('mesos_slave', {}, [{'url': 'https://hello.com', 'tasks': []}])
+    assert any('Skipping TLS cert validation' in m for m in caplog.messages)
+
+
+def test_tls_warning_not_logged_for_http_url(caplog):
+    # Kills core/ReplaceComparisonOperator_Eq_{NotEq,Lt,LtE,IsNot} and ReplaceAndWithOr at mesos_slave.py:103.
+    with caplog.at_level(logging.WARNING):
+        MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    assert not any('Skipping TLS cert validation' in m for m in caplog.messages)
+
+
+def test_tls_warning_not_logged_for_scheme_greater_than_https(caplog):
+    # Kills the core/ReplaceComparisonOperator_Eq_GtE mutant at mesos_slave.py:103 ('httpz' >= 'https' is True).
+    with caplog.at_level(logging.WARNING):
+        MesosSlave('mesos_slave', {}, [{'url': 'httpz://hello.com', 'tasks': []}])
+    assert not any('Skipping TLS cert validation' in m for m in caplog.messages)
+
+
+def test_tls_warning_not_logged_when_ssl_validation_disabled_for_https_url(caplog):
+    # Kills the core/AddNot and core/ReplaceAndWithOr mutants at mesos_slave.py:103 (verify=False case).
+    with caplog.at_level(logging.WARNING):
+        MesosSlave('mesos_slave', {}, [{'url': 'https://hello.com', 'tasks': [], 'disable_ssl_validation': True}])
+    assert not any('Skipping TLS cert validation' in m for m in caplog.messages)
+
+
+def test_read_timeout_only_does_not_override_http_timeout():
+    # Kills the core/ReplaceOrWithAnd mutant at mesos_slave.py:105 (read_timeout alone must skip the override).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': [], 'read_timeout': 3}])
+    assert check.http.options['timeout'] == (10.0, 3.0)
+
+
+def test_get_state_metrics_uses_state_endpoint():
+    # Kills the core/ReplaceBinaryOperator_Add_* mutants at mesos_slave.py:170,172,173 (url/endpoint/suffix concat).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200, **{'json.return_value': {}})
+        tags = []
+        state_metrics = check._get_state_metrics('http://hello.com', tags)
+    assert urls_called(r.get) == ['http://hello.com/state']
+    assert tags == ['url:http://hello.com/state']
+    assert state_metrics == {}
+
+
+def test_get_state_metrics_with_suffix_appends_suffix_to_endpoint():
+    # Kills the core/ReplaceBinaryOperator_Add_* mutants at mesos_slave.py:172,173 for the suffix concatenation.
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200, **{'json.return_value': {}})
+        tags = []
+        check._get_state_metrics('http://hello.com', tags, suffix='-summary')
+    assert urls_called(r.get) == ['http://hello.com/state-summary']
+    assert tags == ['url:http://hello.com/state-summary']
+
+
+def test_get_state_metrics_falls_back_to_json_endpoint_on_failure():
+    # Kills the core/ExceptionReplacer mutant at mesos_slave.py:174 and the Add mutants at line 176.
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.side_effect = [Exception('boom'), mock.MagicMock(status_code=200, **{'json.return_value': {}})]
+        tags = []
+        state_metrics = check._get_state_metrics('http://hello.com', tags)
+    assert urls_called(r.get) == ['http://hello.com/state', 'http://hello.com/state.json']
+    assert tags == ['url:http://hello.com/state.json']
+    assert state_metrics == {}
+
+
+def test_get_stats_metrics_uses_snapshot_endpoint_at_version_boundary():
+    # Kills the core/NumberReplacer and ReplaceComparisonOperator_GtE_* mutants at mesos_slave.py:183 (exact boundary).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    check.version = [0, 22, 0]
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200, **{'json.return_value': {}})
+        tags = []
+        check._get_stats_metrics('http://hello.com', tags)
+    assert urls_called(r.get) == ['http://hello.com/metrics/snapshot']
+    assert tags == ['url:http://hello.com/metrics/snapshot']
+
+
+def test_get_stats_metrics_uses_legacy_endpoint_below_version_boundary():
+    # Kills the core/NumberReplacer and ReplaceComparisonOperator_GtE_* mutants at mesos_slave.py:183 (minor < 22).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    check.version = [0, 21, 99]
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200, **{'json.return_value': {}})
+        tags = []
+        check._get_stats_metrics('http://hello.com', tags)
+    assert urls_called(r.get) == ['http://hello.com/stats.json']
+    assert tags == ['url:http://hello.com/stats.json']
+
+
+def test_get_stats_metrics_uses_legacy_endpoint_with_negative_patch():
+    # Kills the core/NumberReplacer mutant at mesos_slave.py:183 (last 0 -> -1 in [0,22,0]).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    check.version = [0, 22, -1]
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200, **{'json.return_value': {}})
+        tags = []
+        check._get_stats_metrics('http://hello.com', tags)
+    assert urls_called(r.get) == ['http://hello.com/stats.json']
+
+
+def test_get_stats_metrics_uses_snapshot_endpoint_strictly_above_boundary():
+    # Kills the core/ReplaceComparisonOperator_GtE_Eq mutant at mesos_slave.py:183 (version strictly above target).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    check.version = [0, 23, 0]
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200, **{'json.return_value': {}})
+        tags = []
+        check._get_stats_metrics('http://hello.com', tags)
+    assert urls_called(r.get) == ['http://hello.com/metrics/snapshot']
+
+
+def test_get_json_timeout_logs_timeout_specific_warning_and_reraises():
+    # Kills the core/ExceptionReplacer mutant at mesos_slave.py:191 (except Timeout).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.side_effect = Timeout()
+        with pytest.raises(Timeout):
+            check._get_json('http://hello.com/state')
+    assert any('Timeout for' in w for w in check.warnings)
+
+
+def test_get_json_generic_exception_logs_connection_warning_and_reraises():
+    # Kills the core/ExceptionReplacer mutant at mesos_slave.py:194 (except Exception as e).
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.side_effect = ValueError('boom')
+        with pytest.raises(ValueError):
+            check._get_json('http://hello.com/state')
+    assert any("Couldn't connect to URL" in w for w in check.warnings)
+
+
+def test_process_state_info_reports_critical_and_reraises_when_state_fetch_fails(aggregator):
+    # Kills the core/ExceptionReplacer mutant at mesos_slave.py:143 (except Exception): the
+    # CRITICAL service check must be submitted by the handler before the exception is re-raised.
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.side_effect = [Exception, Exception]
+        with pytest.raises(Exception):
+            check._process_state_info('http://hello.com', [], 5050, ['instance:mytag1'])
+    aggregator.assert_service_check(check.SERVICE_CHECK_NAME, count=1, status=AgentCheck.CRITICAL)
+
+
+def test_process_stats_info_reports_critical_and_reraises_when_stats_fetch_fails(aggregator):
+    # Kills the core/ExceptionReplacer mutant at mesos_slave.py:164 (except Exception): the
+    # CRITICAL service check must be submitted by the handler before the exception is re-raised.
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.side_effect = [Exception]
+        with pytest.raises(Exception):
+            check._process_stats_info('http://hello.com', ['instance:mytag1'])
+    aggregator.assert_service_check(check.SERVICE_CHECK_NAME, count=1, status=AgentCheck.CRITICAL)
+
+
+def test_set_cluster_name_skips_master_lookup_when_cluster_name_already_set():
+    # Kills the core/ReplaceAndWithOr mutant at mesos_slave.py:208.
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    check.cluster_name = 'existing'
+    r = mock.MagicMock()
+    tags = []
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        check._set_cluster_name('http://hello.com', 5050, {'master_hostname': 'host'}, tags)
+    assert r.get.call_count == 0
+    assert tags == ['mesos_cluster:existing']
+
+
+def make_state_metrics_with_task(state_id, slave_id):
+    return {
+        'id': state_id,
+        'frameworks': [
+            {
+                'executors': [
+                    {
+                        'tasks': [
+                            {
+                                'name': 'hello',
+                                'slave_id': slave_id,
+                                'state': 'TASK_RUNNING',
+                                'resources': {'cpus': 1, 'mem': 1, 'disk': 1},
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+    }
+
+
+def test_process_tasks_skips_task_with_lexicographically_smaller_slave_id(aggregator):
+    # Kills the core/ReplaceComparisonOperator_Eq_LtE and Eq_IsNot mutants at mesos_slave.py:221.
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    state_metrics = make_state_metrics_with_task(state_id='ZZZ', slave_id='AAA')
+    check._process_tasks(['hello'], state_metrics, [])
+    aggregator.assert_service_check('hello.ok', count=0)
+
+
+def test_process_tasks_skips_task_with_lexicographically_larger_slave_id(aggregator):
+    # Kills the core/ReplaceComparisonOperator_Eq_GtE mutant at mesos_slave.py:221.
+    check = MesosSlave('mesos_slave', {}, [{'url': 'http://hello.com', 'tasks': []}])
+    state_metrics = make_state_metrics_with_task(state_id='AAA', slave_id='ZZZ')
+    check._process_tasks(['hello'], state_metrics, [])
+    aggregator.assert_service_check('hello.ok', count=0)
