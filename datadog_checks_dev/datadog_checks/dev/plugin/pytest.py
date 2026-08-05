@@ -405,6 +405,8 @@ def mock_http(mocker):
         'verify': True,
         'allow_redirects': True,
     }
+    # Empty, matching a client built with no tls_ configuration. A test that needs it populates it.
+    client.tls_config = {}
     client.trust_env = True
     client.ignore_tls_warning = False
     client.persist_connections = False

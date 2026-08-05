@@ -9,6 +9,7 @@ real call shape found in integrations-extras or marketplace, so removing or priv
 again fails here instead of at a customer's next Agent upgrade.
 """
 
+import mock
 import pytest
 
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -72,6 +73,44 @@ class TestLegacyOptionsSurface:
         http = RequestsWrapper({'tls_ca_cert': '/tmp/ca.pem'}, {})
         assert isinstance(http.tls_config, dict)
         assert http.tls_config['tls_ca_cert'] == '/tmp/ca.pem'
+
+
+class TestOptionsReachTheWire:
+    """A write to options after construction has to change the next request, not just the dict.
+
+    Every assertion in the class above reads options back out of options, so a client that snapshotted
+    the dict at construction would satisfy all of them while ignoring every later write.
+    """
+
+    def test_replaced_timeout_reaches_the_request(self):
+        # fluentd, marathon, mesos_master and mesos_slave all overwrite the timeout after construction.
+        http = RequestsWrapper({'connect_timeout': 4, 'read_timeout': 9}, {})
+        http.options['timeout'] = (1, 2)
+
+        with mock.patch('requests.Session.get') as get:
+            http.get('https://www.example.com')
+
+        assert get.call_args.kwargs['timeout'] == (1, 2)
+
+    def test_nested_header_write_reaches_the_request(self):
+        # openstack_controller writes the Keystone token into the nested dict between requests.
+        http = RequestsWrapper({}, {})
+        http.options['headers']['X-Auth-Token'] = 'token'
+
+        with mock.patch('requests.Session.get') as get:
+            http.get('https://www.example.com')
+
+        assert get.call_args.kwargs['headers']['X-Auth-Token'] == 'token'
+
+    def test_updated_verify_reaches_the_request(self):
+        # netwrix_auditor, zoho_desk and miro turn verification off through options.update().
+        http = RequestsWrapper({}, {})
+        http.options.update({'verify': False})
+
+        with mock.patch('requests.Session.get') as get:
+            http.get('https://www.example.com')
+
+        assert get.call_args.kwargs['verify'] is False
 
 
 class TestMockHttpLegacyOptions:

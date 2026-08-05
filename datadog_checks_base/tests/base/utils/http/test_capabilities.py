@@ -195,9 +195,23 @@ class TestClientProtocolSurface:
     def test_client_capabilities_declared(self):
         from datadog_checks.base.utils.http_protocol import HTTPClient
 
-        for name in ('ignore_tls_warning', 'persist_connections'):
+        for name in ('ignore_tls_warning', 'persist_connections', 'tls_config'):
             assert name in HTTPClient.__annotations__, f'{name} missing from HTTPClient'
         assert callable(HTTPClient.should_bypass_proxy)
+
+    def test_tls_escape_hatch_refuses_to_no_op(self):
+        """A backend inheriting the protocol without implementing this member must fail loudly.
+
+        An inherited empty body returns None to a caller that cannot tell the TLS configuration was
+        never applied, which is the silent drop the member exists to prevent.
+        """
+        from datadog_checks.base.utils.http_protocol import HTTPClient
+
+        class BackendWithoutTheEscapeHatch(HTTPClient):
+            pass
+
+        with pytest.raises(NotImplementedError):
+            BackendWithoutTheEscapeHatch().apply_tls_to_requests_session(requests.Session())
 
     def test_wrapper_satisfies_client_surface(self):
         from datadog_checks.base.utils.http_protocol import HTTPClient

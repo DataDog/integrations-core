@@ -52,6 +52,13 @@ class CaseInsensitiveDict(dict):
     def setdefault(self, key, default=None):
         return super().setdefault(key.lower() if isinstance(key, str) else key, default)
 
+    def __eq__(self, other):
+        # Both real backends compare headers case-insensitively. Plain dict equality would test the
+        # caller's wire casing against the lowercased keys stored here and report a false difference.
+        if isinstance(other, Mapping):
+            return dict(self) == {(k.lower() if isinstance(k, str) else k): v for k, v in other.items()}
+        return NotImplemented
+
 
 class MockHTTPResponseImpl:
     """Rich agnostic mock response; wrapped by the protocol-enforcing MockHTTPResponse."""

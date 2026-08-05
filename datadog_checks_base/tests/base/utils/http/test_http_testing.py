@@ -136,6 +136,20 @@ def test_mock_response_headers_case_insensitive():
     assert response.headers.get('cOnTeNt-tYpE') == 'text/plain'
 
 
+def test_mock_response_headers_compare_case_insensitively():
+    """Both real backends compare case-insensitively, so a literal that matches live must match here."""
+    response = MockHTTPResponse(headers={'Content-Type': 'text/plain'})
+
+    assert response.headers == {'Content-Type': 'text/plain'}
+    assert response.headers == {'content-type': 'text/plain'}
+    assert response.headers != {'Content-Type': 'text/html'}
+
+
+def test_mock_http_exposes_tls_config(mock_http):
+    """The tls integration reads check.http.tls_config, and the double is sealed against anything else."""
+    assert mock_http.tls_config == {}
+
+
 def test_mock_response_headers_update_and_setdefault():
     response = MockHTTPResponse(headers={'Content-Type': 'text/plain'})
 

@@ -67,9 +67,9 @@ class HTTPResponse(Protocol):
     status_code: int
     content: bytes
     text: str
-    # Response headers. Backends MUST expose these case-insensitively (a lookup by any casing
-    # succeeds), per HTTP semantics. Callers rely on it, e.g. 'content-length' in headers and
-    # headers.get('Content-Type'), so a backend returning a case-sensitive plain dict would regress them.
+    # Response headers. Lookup, containment and equality against another mapping MUST all be
+    # case-insensitive. The casing reported by iteration, keys(), items() and dict() is
+    # backend-defined and MUST NOT be relied on: requests reports wire casing, httpx lowercases.
     headers: Mapping[str, str]
     # Character encoding used to decode text. None until determined. Writable to force a default.
     encoding: str | None
@@ -112,7 +112,18 @@ class HTTPResponse(Protocol):
 
 
 class HTTPClient(Protocol):
+    # Request defaults, a plain mutable dict and public surface: integrations outside this repository
+    # read and mutate it directly. A backend MUST populate exactly these keys, which callers index
+    # unguarded: auth, cert, headers (mutable, case-insensitive), proxies, timeout as a (connect, read)
+    # pair, verify as True/False/CA-bundle-path, allow_redirects.
+    # Read per request, not snapshotted: a write after construction MUST affect the next request, and
+    # copying it onto a backend client is not enough because httpx has no cert, proxies, verify or
+    # allow_redirects attribute.
     options: dict[str, Any]
+
+    # TLS settings keyed by their tls_ prefixed configuration names, for callers that build their own
+    # SSL context outside the client. Today the tls integration, for intermediate-certificate discovery.
+    tls_config: dict[str, Any]
 
     # Whether the client trusts environment config (proxies, auth, CA bundles).
     trust_env: bool
@@ -123,7 +134,17 @@ class HTTPClient(Protocol):
     # Reuse a single persistent connection across requests by default. Writable after construction.
     persist_connections: bool
 
-    # The verb methods also accept persist, overriding persist_connections for that single call.
+    # Every verb also takes per-request keywords, all of which a backend MUST accept:
+    #   params, headers, data, json, auth, cookies, timeout
+    #                   override the same key in options for this request. headers REPLACES the
+    #                   configured headers rather than adding to them.
+    #   verify, cert    per-request TLS. httpx binds TLS to the transport at construction, so a
+    #                   backend needs a per-configuration transport cache, not a pass-through.
+    #   extra_headers   merged over whichever header set applies, adding without discarding.
+    #   stream          defer reading the body so the caller can iterate it, relied on by the
+    #                   OpenMetrics scrapers, the kubelet pod-list query and argocd's endless watch.
+    #   persist         override persist_connections for this call.
+    # Only the first group maps onto an httpx per-request keyword. A backend implements the rest.
     def get(self, url: str, **options: Any) -> HTTPResponse: ...
     def post(self, url: str, **options: Any) -> HTTPResponse: ...
     def head(self, url: str, **options: Any) -> HTTPResponse: ...
@@ -157,7 +178,8 @@ class HTTPClient(Protocol):
     # openstack_controller's SDK backend. Scoped to TLS deliberately. Proxies are not covered, because
     # no_proxy is per-host and one shared transport cannot express per-host bypass, so callers set
     # session.proxies themselves.
-    # A backend that is not requests-based MUST raise NotImplementedError rather than no-op. A silent
-    # no-op would drop the caller's TLS options exactly as happened before this member existed, and it
-    # would do so invisibly.
-    def apply_tls_to_requests_session(self, session: requests.Session) -> None: ...
+    # A backend that is not requests-based MUST raise NotImplementedError rather than no-op, which the
+    # body below enforces for any backend inheriting from this protocol. Nothing downstream of this
+    # call can detect a no-op, so an unimplemented member would drop the caller's TLS options silently.
+    def apply_tls_to_requests_session(self, session: requests.Session) -> None:
+        raise NotImplementedError('a non-requests backend must not silently skip applying TLS configuration')
