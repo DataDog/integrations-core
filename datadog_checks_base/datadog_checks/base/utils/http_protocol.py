@@ -12,9 +12,9 @@ from typing import TYPE_CHECKING, Any, Protocol
 if TYPE_CHECKING:
     import requests
 
-# Provisional backend-neutral HTTP surface (stabilizes once the httpx backend lands). RequestsWrapper
-# implements it on requests today; a future HTTPX2Wrapper implements the same surface on httpx. Do not
-# change existing methods, attributes, or their semantics without coordinating both backends.
+# Provisional backend-neutral HTTP surface, stabilizing once a second backend implements it.
+# RequestsWrapper implements it on requests today. Do not change existing methods, attributes, or
+# their semantics without coordinating every implementation.
 # Capabilities expose behavior, never a backend object, with one documented exception:
 # apply_tls_to_requests_session takes a requests.Session, for third-party libraries that cannot be
 # handed anything else. It is provisional and goes away once openstack_controller's SDK backend is
@@ -69,7 +69,7 @@ class HTTPResponse(Protocol):
     text: str
     # Response headers. Lookup, containment and equality against another mapping MUST all be
     # case-insensitive. The casing reported by iteration, keys(), items() and dict() is
-    # backend-defined and MUST NOT be relied on: requests reports wire casing, httpx lowercases.
+    # backend-defined and MUST NOT be relied on, since a backend may lowercase or preserve wire casing.
     headers: Mapping[str, str]
     # Character encoding used to decode text. None until determined. Writable to force a default.
     encoding: str | None
@@ -117,8 +117,8 @@ class HTTPClient(Protocol):
     # unguarded: auth, cert, headers (mutable, case-insensitive), proxies, timeout as a (connect, read)
     # pair, verify as True/False/CA-bundle-path, allow_redirects.
     # Read per request, not snapshotted: a write after construction MUST affect the next request, and
-    # copying it onto a backend client is not enough because httpx has no cert, proxies, verify or
-    # allow_redirects attribute.
+    # copying it onto a backend client is not enough, since a backend need not expose these as
+    # settable attributes at all.
     options: dict[str, Any]
 
     # TLS settings keyed by their tls_ prefixed configuration names, for callers that build their own
@@ -138,13 +138,14 @@ class HTTPClient(Protocol):
     #   params, headers, data, json, auth, cookies, timeout
     #                   override the same key in options for this request. headers REPLACES the
     #                   configured headers rather than adding to them.
-    #   verify, cert    per-request TLS. httpx binds TLS to the transport at construction, so a
-    #                   backend needs a per-configuration transport cache, not a pass-through.
+    #   verify, cert    per-request TLS. A backend that binds TLS at construction needs a
+    #                   per-configuration transport cache rather than a pass-through.
     #   extra_headers   merged over whichever header set applies, adding without discarding.
     #   stream          defer reading the body so the caller can iterate it, relied on by the
     #                   OpenMetrics scrapers, the kubelet pod-list query and argocd's endless watch.
     #   persist         override persist_connections for this call.
-    # Only the first group maps onto an httpx per-request keyword. A backend implements the rest.
+    # Only the first group is a plain per-request forward. extra_headers and persist exist on this
+    # surface alone, and stream and the TLS pair may need machinery rather than a pass-through.
     def get(self, url: str, **options: Any) -> HTTPResponse: ...
     def post(self, url: str, **options: Any) -> HTTPResponse: ...
     def head(self, url: str, **options: Any) -> HTTPResponse: ...

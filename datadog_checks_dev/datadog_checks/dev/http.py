@@ -15,7 +15,7 @@ from unittest.mock import MagicMock
 
 
 class CaseInsensitiveDict(dict):
-    """Case-insensitive header dict storing keys lowercased, mirroring httpx's decoded-key semantics."""
+    """Case-insensitive header dict storing keys lowercased, one of the two casings a backend may report."""
 
     def __init__(self, data=None):
         super().__init__()
@@ -121,8 +121,8 @@ class MockHTTPResponseImpl:
 
     @property
     def ok(self) -> bool:
-        # Transitional: mirrors requests.Response.ok for current production code.
-        # httpx uses is_success/is_client_error/is_server_error instead.
+        # Transitional: mirrors requests.Response.ok for current production code. A backend that
+        # reports success through narrower predicates has to derive this one itself.
         return self.status_code < 400
 
     @property

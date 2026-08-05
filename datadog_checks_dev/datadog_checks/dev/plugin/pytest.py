@@ -36,7 +36,7 @@ __aggregator = None
 __datadog_agent = None
 MockHTTPResponse = None
 
-_DEFAULT_MOCK_METHOD = 'requests.Session.get'  # TODO(httpx-migration): update when backend changes
+_DEFAULT_MOCK_METHOD = 'requests.Session.get'  # Backend-specific, update alongside the backend.
 
 
 @pytest.fixture
