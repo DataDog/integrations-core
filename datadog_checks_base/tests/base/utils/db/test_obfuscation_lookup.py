@@ -34,7 +34,7 @@ class TestObfuscationLookup:
         assert lk.hits == 1
         assert lk.misses == 1
 
-    def test_evict_removes_pgss_key(self):
+    def test_evict_removes_key(self):
         lk = self._make_lookup()
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
         lk.evict({(1, 1, 1)})
@@ -42,19 +42,19 @@ class TestObfuscationLookup:
         assert (1, 1, 1) in misses
         assert (2, 1, 1) in hits
 
-    def test_multiple_pgss_keys_share_signature(self):
-        """Different pgss keys with the same normalized SQL share one ObfuscationResult."""
+    def test_multiple_keys_share_signature(self):
+        """Different keys with the same normalized SQL share one ObfuscationResult."""
         lk = self._make_lookup()
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
         hits, _ = lk.lookup({(1, 1, 1), (2, 1, 1)})
         assert hits[(1, 1, 1)].query_signature == hits[(2, 1, 1)].query_signature
-        assert lk.queryid_map_size == 2
+        assert lk.key_map_size == 2
         assert lk.signature_map_size == 1
 
     def test_lru_eviction_on_max_size(self):
         lk = self._make_lookup(maxsize=2)
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2', (3, 3, 3): 'SELECT 3'})
-        assert lk.queryid_map_size == 2
+        assert lk.key_map_size == 2
         _, misses = lk.lookup({(1, 1, 1)})
         assert (1, 1, 1) in misses
 
@@ -66,7 +66,7 @@ class TestObfuscationLookup:
         assert results[(1, 1, 1)].obfuscated_query is not None
 
     def test_evict_does_not_remove_shared_signature(self):
-        """Evicting one pgss key removes tier-1 mapping but keeps tier-2 if other keys share it."""
+        """Evicting one key removes tier-1 mapping but keeps tier-2 if other keys share it."""
         lk = self._make_lookup()
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
         lk.evict({(1, 1, 1)})
@@ -82,6 +82,17 @@ class TestObfuscationLookup:
         assert (1, 1, 1) in hits
         _, misses = lk.lookup({(2, 2, 2)})
         assert (2, 2, 2) in misses
+
+    def test_keys_are_opaque_to_the_cache(self):
+        """Any hashable works as a key; MySQL uses a digest string rather than a tuple."""
+        lk = self._make_lookup()
+        lk.populate({'digest_a': 'SELECT 1', 'digest_b': 'SELECT 2'})
+        hits, misses = lk.lookup({'digest_a', 'digest_c'})
+        assert 'digest_a' in hits
+        assert misses == {'digest_c'}
+        lk.evict({'digest_a'})
+        _, misses = lk.lookup({'digest_a'})
+        assert misses == {'digest_a'}
 
     # --- negative cache (ignored keys) ---
 
@@ -128,7 +139,7 @@ class TestObfuscationLookup:
         lk = self._make_lookup()
         # Two keys share the same normalized SQL (one signature).
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
-        assert lk.queryid_map_size == 2
+        assert lk.key_map_size == 2
 
         # Key (1, 1, 1) turns out to be ignorable; its tier-1 mapping must be dropped.
         lk.mark_ignored({(1, 1, 1)})
