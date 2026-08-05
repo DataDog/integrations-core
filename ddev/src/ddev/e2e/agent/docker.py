@@ -47,6 +47,8 @@ def disable_integration_before_install(config_file):
 
 def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
     agent_build = 'registry.datadoghq.com/agent-dev:sarah-go-parser-labels-782-py3'
+    if use_jmx:
+        agent_build += '-jmx'
 
     if match := re.match(AGENT_IMAGE_REGEX, agent_build):
         org, image, tag = match.groups()
