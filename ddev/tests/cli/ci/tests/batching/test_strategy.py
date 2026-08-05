@@ -1,20 +1,16 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the default batching strategy, central validation, and message construction."""
+"""Tests for the default batching strategy."""
 
 from __future__ import annotations
 
-import dataclasses
-
 import pytest
 
-from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.strategy import default_strategy
-from ddev.cli.ci.tests.batching.validation import validate_batches
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.cli.ci.tests.messages import BatchJob
-from ddev.utils.platform import PlatformName
 from tests.helpers.batching import jobs
 
 
@@ -35,38 +31,39 @@ def test_empty_input_returns_no_groups():
     assert default_strategy([], config=config()) == []
 
 
-def test_single_integration_fits_in_one_batch():
-    groups = default_strategy(jobs("postgres", 100), config=config())
-    assert sizes(groups) == [100]
+@pytest.mark.parametrize(
+    ("groups", "capacity", "expected_sizes", "expected_targets"),
+    [
+        pytest.param(
+            [("postgres", 200), ("mysql", 200)],
+            210,
+            [200, 200],
+            [{"postgres"}, {"mysql"}],
+            id="fitting-integrations-never-share-a-batch",
+        ),
+        pytest.param(
+            [("postgres", 100), ("mysql", 150)],
+            210,
+            [100, 150],
+            [{"postgres"}, {"mysql"}],
+            id="a-remainder-too-small-is-left-unfilled",
+        ),
+        pytest.param(
+            [("a", 80), ("b", 80), ("c", 80), ("d", 80)],
+            240,
+            [240, 80],
+            [{"a", "b", "c"}, {"d"}],
+            id="small-integrations-pack-together",
+        ),
+    ],
+)
+def test_default_strategy_packing(groups, capacity, expected_sizes, expected_targets):
+    all_jobs = [job for target, count in groups for job in jobs(target, count)]
 
+    result = default_strategy(all_jobs, config=config(capacity=capacity))
 
-def test_two_fitting_integrations_at_capacity_210_do_not_split():
-    # 200 + 200 at capacity 210: two non-overflowing batches, neither integration split.
-    all_jobs = jobs("postgres", 200) + jobs("mysql", 200)
-    groups = default_strategy(all_jobs, config=config(capacity=210))
-
-    assert sizes(groups) == [200, 200]
-    assert {job.target for job in groups[0]} == {"postgres"}
-    assert {job.target for job in groups[1]} == {"mysql"}
-
-
-def test_fitting_integration_starts_new_batch_rather_than_filling_remainder():
-    # postgres (100) fills the first batch; mysql (150) does not fit the 110-job remainder, so it
-    # starts a new batch instead of being split to fill it.
-    all_jobs = jobs("postgres", 100) + jobs("mysql", 150)
-    groups = default_strategy(all_jobs, config=config(capacity=210))
-
-    assert sizes(groups) == [100, 150]
-
-
-def test_small_integrations_pack_together():
-    all_jobs = jobs("a", 80) + jobs("b", 80) + jobs("c", 80) + jobs("d", 80)
-    groups = default_strategy(all_jobs, config=config())
-
-    # a+b+c fill the first batch (240); d starts the next.
-    assert sizes(groups) == [240, 80]
-    assert {job.target for job in groups[0]} == {"a", "b", "c"}
-    assert {job.target for job in groups[1]} == {"d"}
+    assert sizes(result) == expected_sizes
+    assert [{job.target for job in group} for group in result] == expected_targets
 
 
 def test_oversized_integration_fails_when_splitting_disabled():
@@ -93,109 +90,13 @@ def test_oversized_remainder_is_reusable_by_following_integrations():
     assert sum(1 for job in groups[1] if job.target == "small") == 80
 
 
-# ---------------------------------------------------------------------------
-# validate_batches
-# ---------------------------------------------------------------------------
+def test_oversized_integration_spills_starting_from_an_open_batch():
+    # The open batch is filled before the oversized integration starts a new one, so no slot is
+    # wasted: 80 + 400 at capacity 240 packs as 240 then 240 rather than 80 then 240 then 160.
+    all_jobs = jobs("small", 80) + jobs("huge", 400)
 
-
-def test_validate_accepts_default_strategy_output():
-    all_jobs = jobs("postgres", 200) + jobs("mysql", 100)
-    groups = default_strategy(all_jobs, config=config())
-    validate_batches(groups, all_jobs, config=config())  # does not raise
-
-
-def test_validate_rejects_empty_batch():
-    all_jobs = jobs("postgres", 2)
-    with pytest.raises(BatchValidationError, match="empty"):
-        validate_batches([all_jobs, []], all_jobs, config=config())
-
-
-def test_validate_rejects_overfilled_batch():
-    all_jobs = jobs("postgres", 5)
-    with pytest.raises(BatchValidationError, match="capacity"):
-        validate_batches([all_jobs], all_jobs, config=config(capacity=4))
-
-
-def test_validate_rejects_lost_job():
-    all_jobs = jobs("postgres", 3)
-    with pytest.raises(BatchValidationError, match="exactly once"):
-        validate_batches([all_jobs[:2]], all_jobs, config=config())
-
-
-def test_validate_rejects_a_job_duplicated_within_a_batch():
-    all_jobs = jobs("postgres", 2)
-    with pytest.raises(BatchValidationError, match="duplicate job names"):
-        validate_batches([[all_jobs[0], all_jobs[0], all_jobs[1]]], all_jobs, config=config())
-
-
-def test_validate_rejects_a_job_duplicated_across_batches():
-    all_jobs = jobs("postgres", 2)
-    with pytest.raises(BatchValidationError, match="exactly once"):
-        validate_batches([[all_jobs[0]], [all_jobs[0], all_jobs[1]]], all_jobs, config=config())
-
-
-def test_validate_compares_jobs_by_value_not_identity():
-    # A strategy is free to rebuild equal jobs rather than pass the original instances through.
-    all_jobs = jobs("postgres", 3)
-    rebuilt = [dataclasses.replace(job) for job in all_jobs]
-
-    validate_batches([rebuilt], all_jobs, config=config())  # does not raise
-
-
-def test_validate_rejects_duplicate_names_within_batch():
-    clash = jobs("postgres", 1)[0]
-    twin = BatchJob(
-        name=clash.name,
-        target="mysql",
-        runner_labels=("ubuntu-22.04",),
-        environment="py3.11",
-        platform=PlatformName.LINUX,
-        python_version="3.11",
-        unit_tests=True,
-        e2e_tests=False,
-    )
-    all_jobs = [clash, twin]
-    with pytest.raises(BatchValidationError, match="duplicate job name"):
-        validate_batches([[clash, twin]], all_jobs, config=config())
-
-
-def test_validate_rejects_duplicate_artifact_identity_within_batch():
-    # Two jobs with distinct display names but the same target/facet/environment/platform collapse
-    # to the same artifact identity; central validation must reject them even though names differ.
-    def artifact_twin(name: str) -> BatchJob:
-        return BatchJob(
-            name=name,
-            target="postgres",
-            runner_labels=("ubuntu-22.04",),
-            environment="py3.11",
-            platform=PlatformName.LINUX,
-            python_version="3.11",
-            unit_tests=True,
-            e2e_tests=False,
-        )
-
-    a, b = artifact_twin("postgres (py3.11)"), artifact_twin("postgres duplicate")
-    assert a.name != b.name
-    assert a.artifact_name() == b.artifact_name()
-
-    with pytest.raises(BatchValidationError, match="duplicate artifact identities"):
-        validate_batches([[a, b]], [a, b], config=config())
-
-
-def test_validate_rejects_illegal_split_when_disabled():
-    all_jobs = jobs("postgres", 4)
-    with pytest.raises(BatchValidationError, match="split"):
-        validate_batches([all_jobs[:2], all_jobs[2:]], all_jobs, config=config())
-
-
-def test_validate_rejects_split_of_fitting_integration_even_when_enabled():
-    # Splitting is enabled, but this integration fits capacity, so splitting it is still invalid.
-    all_jobs = jobs("postgres", 4)
-    with pytest.raises(BatchValidationError, match="fits in one batch"):
-        validate_batches([all_jobs[:2], all_jobs[2:]], all_jobs, config=config(allow_integration_splitting=True))
-
-
-def test_validate_allows_oversized_split_when_enabled():
-    all_jobs = jobs("huge", 400)
     groups = default_strategy(all_jobs, config=config(allow_integration_splitting=True))
-    validate_batches(groups, all_jobs, config=config(allow_integration_splitting=True))  # no raise
+
+    assert sizes(groups) == [240, 240]
+    assert {job.target for job in groups[0]} == {"small", "huge"}
+    assert {job.target for job in groups[1]} == {"huge"}

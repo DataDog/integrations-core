@@ -15,7 +15,6 @@ import pytest
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.status import Status, conclusion_to_status
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
-from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
@@ -24,7 +23,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
-from ddev.utils.platform import PlatformName
+from tests.helpers.batching import drain_queue, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------
@@ -34,19 +33,6 @@ from tests.helpers.github_async import FakeAsyncGitHubClient
 
 def wrap(data: Any) -> GitHubResponse[Any]:
     return GitHubResponse(data=data, headers={})
-
-
-def make_job(name: str = "job-1", environment: str = "py3.13") -> BatchJob:
-    return BatchJob(
-        name=name,
-        target="ntp",
-        runner_labels=("ubuntu-latest",),
-        environment=environment,
-        platform=PlatformName.LINUX,
-        python_version="3.13",
-        unit_tests=True,
-        e2e_tests=False,
-    )
 
 
 DEFAULT_URL = object()
@@ -114,13 +100,6 @@ def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner
     )
     runner.queue = asyncio.Queue()
     return runner
-
-
-def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
-    out: list[BaseMessage] = []
-    while not queue.empty():
-        out.append(queue.get_nowait())
-    return out
 
 
 def make_batch(batch_id: str = "batch-err") -> TestBatch:
@@ -208,7 +187,7 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                     {
                         "name": "j1",
                         "target": "ntp",
-                        "runner_labels": ["ubuntu-latest"],
+                        "runner_labels": ["ubuntu-22.04"],
                         "environment": "py3.13",
                         "platform": "linux",
                         "python_version": "3.13",
@@ -220,7 +199,7 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                     {
                         "name": "j2",
                         "target": "ntp",
-                        "runner_labels": ["ubuntu-latest"],
+                        "runner_labels": ["ubuntu-22.04"],
                         "environment": "py3.13",
                         "platform": "linux",
                         "python_version": "3.13",

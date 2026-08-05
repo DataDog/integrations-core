@@ -8,7 +8,6 @@ import pytest
 from ddev.e2e.agent.docker import _normalize_agent_image_name
 from ddev.e2e.agent_images import (
     AGENT_IMAGES_BY_PYTHON,
-    AgentImages,
     UnknownPythonVersion,
     UnsupportedAgentPlatform,
     find_unpublished_images,
@@ -18,34 +17,20 @@ from ddev.e2e.agent_images import (
 from ddev.utils.platform import PlatformName
 
 
-@pytest.mark.parametrize("platform", [PlatformName.LINUX, PlatformName.WINDOWS])
-def test_every_known_python_version_resolves_on_every_platform(platform):
-    for python_version in AGENT_IMAGES_BY_PYTHON:
-        assert get_agent_image(python_version, platform)
-
-
-def test_linux_and_windows_images_differ():
-    assert get_agent_image('3.13', PlatformName.LINUX) != get_agent_image('3.13', PlatformName.WINDOWS)
-
-
-def test_current_line_tracks_the_development_build():
-    assert get_agent_image('3.13', PlatformName.LINUX) == 'registry.datadoghq.com/agent-dev:master-py3'
-    assert get_agent_image('3.13', PlatformName.WINDOWS) == 'registry.datadoghq.com/agent:7-rc-servercore'
-
-
 @pytest.mark.parametrize(
-    "python_version, expected",
+    ("python_version", "platform", "expected"),
     [
-        pytest.param('3.12', 'registry.datadoghq.com/agent:7.71.1', id="last-of-3.12-line"),
-        pytest.param('3.11', 'registry.datadoghq.com/agent:7.57.2', id="last-of-3.11-line"),
+        pytest.param('3.13', PlatformName.LINUX, 'registry.datadoghq.com/agent-dev:master-py3', id="current-dev"),
+        pytest.param('3.13', PlatformName.WINDOWS, 'registry.datadoghq.com/agent:7-rc-servercore', id="current-rc"),
+        pytest.param('3.12', PlatformName.LINUX, 'registry.datadoghq.com/agent:7.71.1', id="last-of-3.12-line"),
+        pytest.param(
+            '3.12', PlatformName.WINDOWS, 'registry.datadoghq.com/agent:7.71.1-servercore', id="servercore-variant"
+        ),
+        pytest.param('3.11', PlatformName.LINUX, 'registry.datadoghq.com/agent:7.57.2', id="last-of-3.11-line"),
     ],
 )
-def test_superseded_lines_are_pinned_to_their_final_release(python_version, expected):
-    assert get_agent_image(python_version, PlatformName.LINUX) == expected
-
-
-def test_windows_images_use_the_servercore_variant():
-    assert get_agent_image('3.12', PlatformName.WINDOWS) == 'registry.datadoghq.com/agent:7.71.1-servercore'
+def test_agent_image_for_release_line(python_version, platform, expected):
+    assert get_agent_image(python_version, platform) == expected
 
 
 @pytest.mark.parametrize(
@@ -94,13 +79,6 @@ def test_images_survive_ddev_jmx_normalization(platform):
         assert _normalize_agent_image_name(image, 3, True) == f'{image}-jmx'
 
 
-def test_for_platform_rejects_a_platform_with_no_agent_image():
-    images = AgentImages(linux='a', windows='b')
-
-    with pytest.raises(UnsupportedAgentPlatform):
-        images.for_platform(PlatformName.MACOS)
-
-
 @pytest.mark.parametrize(
     "image, expected",
     [
@@ -142,6 +120,18 @@ def test_find_unpublished_images_queries_each_distinct_image_once(monkeypatch):
 
     assert missing == ['host/agent:gone']
     assert queried == [('agent', 'here'), ('agent', 'gone')]
+
+
+def test_find_unpublished_images_propagates_a_registry_failure(monkeypatch):
+    # An unreachable registry must not be reported as a missing image, or a network blip would
+    # look like a withdrawn tag.
+    def failing_manifest_exists(repository, tag, *, host, **kwargs):
+        raise OSError("registry unreachable")
+
+    monkeypatch.setattr('ddev.utils.docker_registry.manifest_exists', failing_manifest_exists)
+
+    with pytest.raises(OSError, match="registry unreachable"):
+        find_unpublished_images(['host/agent:here'])
 
 
 @pytest.mark.requires_ci

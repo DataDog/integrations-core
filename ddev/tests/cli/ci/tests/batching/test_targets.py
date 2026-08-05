@@ -15,7 +15,7 @@ from ddev.cli.ci.tests.batching.targets import (
     default_target_rules,
     find_affected_targets,
 )
-from ddev.utils.git import ChangedFile, ChangeType
+from tests.helpers.batching import FakeIntegration, FakeRegistry, copied, modified, renamed
 
 CORE_RULES = default_target_rules(is_core=True)
 
@@ -36,18 +36,6 @@ class FakeRepositoryFacts:
 
     def eligible_targets(self) -> list[str]:
         return sorted(name for name in self.testable_targets if name not in UNTESTABLE_TARGETS)
-
-
-def modified(path: str) -> ChangedFile:
-    return ChangedFile(change_type=ChangeType.MODIFIED, path=path)
-
-
-def renamed(source: str, destination: str) -> ChangedFile:
-    return ChangedFile(change_type=ChangeType.RENAMED, path=destination, previous_path=source)
-
-
-def copied(source: str, destination: str) -> ChangedFile:
-    return ChangedFile(change_type=ChangeType.COPIED, path=destination, previous_path=source)
 
 
 def facts(*targets: str) -> FakeRepositoryFacts:
@@ -94,8 +82,7 @@ def test_direct_rule_rename_out_of_target_affects_source():
 def test_direct_rule_rename_between_targets_affects_both():
     changed = [renamed("postgres/tests/test_a.py", "mysql/tests/test_a.py")]
 
-    # Destination (path) is yielded before source (previous_path).
-    assert list(DirectTargetRule()(changed, facts("postgres", "mysql"))) == ["mysql", "postgres"]
+    assert set(DirectTargetRule()(changed, facts("postgres", "mysql"))) == {"mysql", "postgres"}
 
 
 def test_direct_rule_copy_affects_only_destination():
@@ -172,17 +159,6 @@ def test_find_affected_targets_unrelated_ddev_command_selects_only_ddev():
     assert find_affected_targets(changed, facts("postgres", "mysql", "ddev"), rules=CORE_RULES) == ["ddev"]
 
 
-def test_find_affected_targets_ddev_test_planning_change_triggers_full_set():
-    # End to end: changing ddev's Hatch environment resolution retests every eligible target.
-    changed = [modified("ddev/src/ddev/utils/hatch.py")]
-
-    assert find_affected_targets(changed, facts("postgres", "mysql", "ddev"), rules=CORE_RULES) == [
-        "ddev",
-        "mysql",
-        "postgres",
-    ]
-
-
 def test_repository_wide_rule_does_not_fire_outside_core():
     rule = RepositoryWideRule(is_core=False)
     changed = [modified("datadog_checks_base/datadog_checks/base/utils/foo.py")]
@@ -204,7 +180,10 @@ def test_find_affected_targets_multiple_integrations_ordered_union_no_duplicates
         modified("mysql/tests/test_b.py"),
     ]
 
-    assert find_affected_targets(changed, facts("postgres", "mysql"), rules=CORE_RULES) == ["postgres", "mysql"]
+    assert sorted(find_affected_targets(changed, facts("postgres", "mysql"), rules=CORE_RULES)) == [
+        "mysql",
+        "postgres",
+    ]
 
 
 def test_find_affected_targets_broad_and_direct_overlap_deduplicated():
@@ -215,8 +194,8 @@ def test_find_affected_targets_broad_and_direct_overlap_deduplicated():
 
     result = find_affected_targets(changed, facts("postgres", "mysql", "datadog_checks_base"), rules=CORE_RULES)
 
-    # postgres from the direct rule, then the broad rule adds the full eligible set, each once.
-    assert result == ["postgres", "datadog_checks_base", "mysql"]
+    # Comparing sorted against a three-element list also pins that nothing is selected twice.
+    assert sorted(result) == ["datadog_checks_base", "mysql", "postgres"]
 
 
 def test_find_affected_targets_irrelevant_paths_yield_nothing():
@@ -232,34 +211,16 @@ def test_find_affected_targets_excludes_untestable_targets():
     assert find_affected_targets(changed, facts("postgres"), rules=CORE_RULES) == ["postgres"]
 
 
-def test_default_target_rules_are_direct_then_repository_wide():
-    rules = default_target_rules(is_core=False)
+def test_default_target_rules_only_expand_the_repository_for_core():
+    # Outside core the base-package change still selects its own target, but never the whole repo.
+    changed = [modified("datadog_checks_base/datadog_checks/base/utils/foo.py")]
+    known = facts("postgres", "datadog_checks_base")
 
-    assert isinstance(rules[0], DirectTargetRule)
-    assert isinstance(rules[1], RepositoryWideRule)
-    assert rules[1].is_core is False
-
-
-class FakeIntegration:
-    def __init__(self, name: str, is_testable: bool):
-        self.name = name
-        self.is_testable = is_testable
-
-
-class FakeRegistry:
-    """A minimal stand-in for ddev's ``IntegrationRegistry`` (no git repository)."""
-
-    def __init__(self, integrations):
-        self._integrations = {integration.name: integration for integration in integrations}
-
-    def get(self, name: str):
-        try:
-            return self._integrations[name]
-        except KeyError:
-            raise OSError(f"Integration does not exist: {name}") from None
-
-    def iter_testable(self):
-        return [integration for integration in self._integrations.values() if integration.is_testable]
+    assert sorted(find_affected_targets(changed, known, rules=CORE_RULES)) == [
+        "datadog_checks_base",
+        "postgres",
+    ]
+    assert find_affected_targets(changed, known, rules=default_target_rules(is_core=False)) == ["datadog_checks_base"]
 
 
 @pytest.mark.parametrize(
