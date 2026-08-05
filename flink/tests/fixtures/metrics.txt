@@ -58,3 +58,18 @@ flink_taskmanager_job_task_operator_numRecordsIn{host="taskmanager-0",tm_id="tm-
 # HELP flink_taskmanager_job_task_operator_currentInputWatermark currentInputWatermark (scope: taskmanager_job_task_operator)
 # TYPE flink_taskmanager_job_task_operator_currentInputWatermark gauge
 flink_taskmanager_job_task_operator_currentInputWatermark{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 1735689600000.0
+# A job-defined custom/user metric, not present in METRIC_MAP -- exercises the
+# `extra_metrics` opt-in path (see tests/test_unit.py). TYPE is `gauge`: Flink's
+# Prometheus reporter maps every metric (Counter, Gauge, Meter alike) to a
+# Prometheus gauge collector, so the raw scrape never actually says `counter`
+# even when the underlying Flink metric is one.
+# HELP flink_taskmanager_job_task_operator_messageLatency messageLatency (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_messageLatency gauge
+flink_taskmanager_job_task_operator_messageLatency{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 7.0
+# A job-defined custom/user metric whose exposed TYPE is wrong (declared gauge,
+# semantically a counter) -- same failure mode as Bug 1, but on a metric this
+# integration has no way to know about ahead of time. Exercises the
+# `extra_metrics` `type:` override (see tests/test_unit.py).
+# HELP flink_taskmanager_job_task_operator_customEventsTotal customEventsTotal (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_customEventsTotal gauge
+flink_taskmanager_job_task_operator_customEventsTotal{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 9.0
