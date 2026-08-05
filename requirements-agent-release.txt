@@ -191,7 +191,7 @@ datadog-postgres==23.11.0
 datadog-powerdns-recursor==5.4.0
 datadog-prefect==1.1.0
 datadog-presto==3.4.0
-datadog-process==5.5.1
+datadog-process==5.5.2
 datadog-prometheus==6.3.0
 datadog-proxmox==2.6.0
 datadog-proxysql==7.7.0
