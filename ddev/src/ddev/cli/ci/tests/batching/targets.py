@@ -10,7 +10,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from ddev.utils.git import ChangedFile, ChangeType
+from ddev.utils.git import ChangedFile
 
 if TYPE_CHECKING:
     from ddev.repo.core import IntegrationRegistry
@@ -104,9 +104,8 @@ class TargetRule(Protocol):
 class DirectTargetRule:
     """Recognize every directly modified testable target in the change set.
 
-    A rename affects both the source and destination targets (a file leaving a target still
-    changes that target), while a copy only affects the destination since the source is left
-    untouched.
+    Each change is matched against every path it affects, so a rename selects both the target it
+    left and the one it landed in.
     """
 
     testable_pattern: re.Pattern[str] = TESTABLE_PATH_PATTERN
@@ -114,17 +113,10 @@ class DirectTargetRule:
 
     def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterator[str]:
         for changed_file in changed_files:
-            for path in self._affected_paths(changed_file):
+            for path in changed_file.affected_paths:
                 target = self._target_for_path(path, facts)
                 if target is not None:
                     yield target
-
-    @staticmethod
-    def _affected_paths(changed_file: ChangedFile) -> list[str]:
-        paths = [changed_file.path]
-        if changed_file.change_type is ChangeType.RENAMED and changed_file.previous_path is not None:
-            paths.append(changed_file.previous_path)
-        return paths
 
     def _target_for_path(self, path: str, facts: RepositoryFacts) -> str | None:
         directory, separator, remaining = path.partition("/")
