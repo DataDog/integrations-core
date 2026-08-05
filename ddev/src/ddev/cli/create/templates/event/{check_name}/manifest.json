@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "{app_uuid}",
   "app_id": "{integration_id}",
+  "owner": "<FILL IN>",
   "display_on_public_website": false,
   "tile": {{
     "overview": "README.md#Overview",
@@ -29,7 +30,7 @@
         "source_type_name": "{integration_name}",
         "events": {{
           "creates_events": true
-        }},
+        }}
     }},
     "monitors": {{}},
     "saved_views": {{}}
