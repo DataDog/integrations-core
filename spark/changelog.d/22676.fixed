@@ -1,1 +1,2 @@
 Decouple the integration from the requests library by using the Agent's backend-agnostic HTTP interface.
+Suppression of request errors on terminating Kubernetes pods now also covers read timeouts that occur while waiting for response headers, not only those that occur midway through the response body. A driver that stops responding on a pod already in a terminal phase no longer emits ``spark.driver.can_connect`` CRITICAL.

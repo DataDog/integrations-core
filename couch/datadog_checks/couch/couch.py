@@ -171,11 +171,9 @@ class CouchDB1:
 
             for dbName in databases:
                 url = urljoin(server, quote(dbName, safe=''))
-                db_stats = None
                 try:
                     db_stats = self.agent_check.get(url, tags)
                 except HTTPStatusError as e:
-                    couchdb['databases'][dbName] = None
                     # The auth-token seam raises without a response, so the status is unknowable there.
                     if e.response is not None and e.response.status_code in (401, 403):
                         self.db_exclude[server].append(dbName)
@@ -185,8 +183,9 @@ class CouchDB1:
                             'It will be added to the exclusion list. Please restart the agent to clear.',
                             dbName,
                         )
-                        del couchdb['databases'][dbName]
-                        continue
+                    # _create_metric dereferences every value in this dict, so an unresolved database
+                    # has to be left out entirely rather than stored as a None placeholder.
+                    continue
                 if db_stats is not None:
                     couchdb['databases'][dbName] = db_stats
         return couchdb

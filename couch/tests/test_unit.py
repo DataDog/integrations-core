@@ -66,6 +66,30 @@ def test_v1_status_error_without_response_is_not_an_attribute_error():
 
     data = couchdb_check.get_data('http://localhost:5984', [])
 
-    # Same outcome as any other unrecognized status on the merge base: the database is left unresolved.
-    assert data['databases'] == {'db1': None}
+    # The database is unresolved, so it is absent rather than present with a None placeholder
+    # that _create_metric would dereference.
+    assert data['databases'] == {}
     mock_agent_check.warning.assert_not_called()
+
+
+def test_v1_unresolved_database_still_emits_overall_stats():
+    """A per-database status the exclusion guard cannot act on must not cost the whole run.
+
+    The auth-token seam raises with no response at all, so the guard has no status to read and the
+    database stays unresolved. The overall stats still have to reach the aggregator.
+    """
+    mock_agent_check = MagicMock()
+    mock_agent_check.instance = {}
+    mock_agent_check.MAX_DB = 50
+    mock_agent_check.get_server.return_value = 'http://localhost:5984'
+    mock_agent_check.get_config_tags.return_value = []
+    overall_stats = {'httpd': {'requests': {'current': 12}}}
+    mock_agent_check.get.side_effect = [overall_stats, ['db1'], HTTPStatusError('404 Client Error')]
+
+    couchdb_check = CouchDB1(mock_agent_check)
+
+    couchdb_check.check()
+
+    mock_agent_check.gauge.assert_called_once_with(
+        'couchdb.httpd.requests', 12, tags=['instance:http://localhost:5984']
+    )

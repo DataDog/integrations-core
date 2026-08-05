@@ -1,0 +1,1 @@
+Fix HTTP wrapper validation so it detects ``requests.Session``, ``requests.request`` and ``requests.options``, stops flagging identifiers that merely start with ``requests``, recognizes clients named ``self._http``, keeps ``SKIP_HTTP_VALIDATION`` from disabling an integration's spec.yaml template check, and covers shippable packages such as ``datadog_checks_base``.
