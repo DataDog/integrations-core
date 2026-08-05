@@ -53,15 +53,7 @@ class DeltaDetector[K: Hashable]:
 
     def compute(self, rows: list[dict]) -> DeltaResult[K]:
         """Diff *rows* against the previous snapshot and remember them for the next call."""
-        current: dict[K, dict] = {}
-        for row in rows:
-            key = self._key(row)
-            if key in current:
-                for col in self._metric_columns:
-                    if col in row:
-                        current[key][col] = current[key].get(col, 0) + row[col]
-            else:
-                current[key] = row
+        current = self._collapse(rows)
 
         derivative_rows: list[dict] = []
         changed_keys: set[K] = set()
@@ -124,6 +116,24 @@ class DeltaDetector[K: Hashable]:
             changed_keys=changed_keys,
             vanished_keys=vanished_keys,
         )
+
+    def _collapse(self, rows: list[dict]) -> dict[K, dict]:
+        """Group rows by key, summing metric columns across rows that share one.
+
+        Rows are copied rather than accumulated into, so a caller that holds on to the snapshot it
+        passed in does not see its counters silently rewritten.
+        """
+        collapsed: dict[K, dict] = {}
+        for row in rows:
+            key = self._key(row)
+            existing = collapsed.get(key)
+            if existing is None:
+                collapsed[key] = dict(row)
+                continue
+            for col in self._metric_columns:
+                if col in row:
+                    existing[col] = existing.get(col, 0) + row[col]
+        return collapsed
 
     def _update_cache(self, current: dict[K, dict]):
         stale = self._previous.keys() - current.keys()

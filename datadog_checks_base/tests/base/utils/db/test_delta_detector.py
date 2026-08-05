@@ -110,6 +110,16 @@ class TestDeltaDetector:
         result = dd.compute([self._make_row(101, calls=15)])
         assert result.derivative_rows == []
 
+    def test_collapse_does_not_mutate_input_rows(self):
+        dd = self._make_detector()
+        rows = [
+            self._make_row(101, calls=8, rows=60),
+            self._make_row(101, calls=7, rows=55),
+        ]
+        before = [dict(row) for row in rows]
+        dd.compute(rows)
+        assert rows == before
+
     def test_key_callable_determines_the_counter_series(self):
         """Rows are grouped by whatever the key callable returns, not by any fixed column set."""
         dd = DeltaDetector(metric_columns=METRIC_COLS, key=lambda row: row['queryid'])
