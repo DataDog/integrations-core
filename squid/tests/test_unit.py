@@ -6,6 +6,7 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.squid import SquidCheck
 
@@ -70,6 +71,19 @@ def test_get_counters(check, mock_http):
         # we assert `parse_counter` was called only once despite the raw text
         # containing multiple `\n` chars
         check.parse_counter.assert_called_once()
+
+
+def test_service_check_critical_when_the_cachemgr_rejects_the_request(aggregator, check, mock_http):
+    # The cachemgr_username and cachemgr_password options exist because this endpoint answers 403 without
+    # them, so an error status has to reach the same handler as a transport failure. A status error is a
+    # sibling of the transport family rather than a member of it, so a handler covering only the transport
+    # root would leave squid.can_connect silent on the one failure the credentials are there to fix.
+    mock_http.get.return_value = MockHTTPResponse(status_code=403)
+
+    with pytest.raises(HTTPStatusError):
+        check.get_counters('host', 'port', ['name:ok_instance'])
+
+    aggregator.assert_service_check(common.SERVICE_CHECK, status=check.CRITICAL, tags=['name:ok_instance'])
 
 
 def test_host_without_protocol(check, instance, mock_http):

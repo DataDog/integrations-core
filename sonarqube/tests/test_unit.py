@@ -24,6 +24,28 @@ def test_service_check_critical(aggregator, dd_run_check, sonarqube_check, web_i
         aggregator.assert_service_check('sonarqube.api_access', status=check.CRITICAL, tags=global_tags)
 
 
+def test_service_check_critical_when_the_api_answers_with_a_non_json_body(
+    aggregator, dd_run_check, sonarqube_check, web_instance
+):
+    # An SSO or reverse proxy in front of SonarQube answers a metrics search with 200 and an HTML login
+    # page, so the failure surfaces while parsing the body rather than on the wire. The check reports
+    # that as CRITICAL alongside the transport failures above.
+    with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
+        mock_http.get.side_effect = [
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(content='<html><body>Sign in</body></html>', headers={'Content-Type': 'text/html'}),
+        ]
+        check = sonarqube_check(web_instance)
+        global_tags = ['endpoint:{}'.format(web_instance['web_endpoint'])]
+        global_tags.extend(web_instance['tags'])
+
+        dd_run_check(check)
+
+        for metric_name in WEB_METRICS:
+            assert len(aggregator.metrics(metric_name)) == 0
+        aggregator.assert_service_check('sonarqube.api_access', status=check.CRITICAL, tags=global_tags)
+
+
 def test_service_check_ok_version_empty(aggregator, dd_run_check, sonarqube_check, web_instance):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [

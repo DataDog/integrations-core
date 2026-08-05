@@ -85,6 +85,7 @@ def test_raise_for_status_maps_to_status_error():
         pytest.param(requests.exceptions.ConnectionError('refused'), HTTPConnectionError, id='connection-error'),
         pytest.param(requests.exceptions.ProxyError('proxy'), HTTPConnectionError, id='proxy-error'),
         pytest.param(requests.exceptions.ContentDecodingError('decode'), HTTPRequestError, id='content-decoding'),
+        pytest.param(requests.exceptions.InvalidHeader('multiple values'), HTTPRequestError, id='invalid-header'),
         pytest.param(requests.exceptions.HTTPError('500'), HTTPStatusError, id='http-error'),
         pytest.param(requests.exceptions.RequestException('generic'), HTTPRequestError, id='request-exception'),
         pytest.param(RuntimeError('not-requests'), HTTPError, id='non-requests-fallback'),
@@ -93,6 +94,58 @@ def test_raise_for_status_maps_to_status_error():
 def test_translate_maps_requests_to_agnostic(raised, expected):
     result = _translate_requests_exception(raised)
     assert type(result) is expected, f"{type(raised).__name__} -> {type(result).__name__}, expected {expected.__name__}"
+
+
+def test_invalid_header_leaves_the_value_error_family():
+    # Requests raises InvalidHeader when a server answers with a multi-valued Content-Length, and its
+    # own InvalidHeader is a ValueError. The agnostic equivalent is not, which is why the yarn, spark,
+    # mapreduce, hdfs_datanode, hdfs_namenode and consul handlers name it next to ValueError.
+    assert isinstance(requests.exceptions.InvalidHeader('multiple values'), ValueError)
+
+    translated = _translate_requests_exception(requests.exceptions.InvalidHeader('multiple values'))
+
+    assert not isinstance(translated, ValueError)
+
+
+def requests_exception_types():
+    """Every requests exception type reachable from RequestException, discovered rather than listed.
+
+    Restricted to requests' own module so an installed library that subclasses one of these, as the
+    OpenStack SDK does, cannot change what this suite measures.
+    """
+    found: dict[str, type] = {}
+    pending = [requests.exceptions.RequestException]
+    while pending:
+        exc_type = pending.pop()
+        if exc_type.__module__.split('.')[0] != 'requests':
+            continue
+        found[exc_type.__name__] = exc_type
+        pending.extend(exc_type.__subclasses__())
+
+    return sorted(found.values(), key=lambda exc_type: exc_type.__name__)
+
+
+@pytest.mark.parametrize('exc_type', requests_exception_types(), ids=lambda exc_type: exc_type.__name__)
+def test_every_requests_exception_lands_under_a_handled_agnostic_type(exc_type):
+    # Four shared OpenMetrics handler tuples (openmetrics/base_check.py, openmetrics/mixins.py,
+    # openmetrics/v2/base.py, prometheus/mixins.py) catch HTTPRequestError and HTTPStatusError but not
+    # their common root, so a type that translated to the root alone would escape all four at once and
+    # break every OpenMetrics integration together. Constructed without __init__ because the
+    # signatures differ across the family and the translator reads only args, str() and request.
+    translated = _translate_requests_exception(exc_type.__new__(exc_type))
+
+    assert isinstance(translated, (HTTPRequestError, HTTPStatusError))
+
+
+def test_a_non_requests_failure_reaches_the_caller_untranslated():
+    # This is what keeps the bare-root fallback above unreachable through the client, and the four
+    # OpenMetrics handler tuples depend on that. Widening the translation guard to cover more than
+    # requests exceptions would let the root escape all four.
+    http = RequestsWrapper({}, {})
+
+    with mock.patch('requests.Session.get', side_effect=RuntimeError('not a requests failure')):
+        with pytest.raises(RuntimeError, match='not a requests failure'):
+            http.get('http://example.test/')
 
 
 def test_translate_does_not_leak_raw_response():

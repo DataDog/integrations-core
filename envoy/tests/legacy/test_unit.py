@@ -1,12 +1,18 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from copy import deepcopy
 
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPRequestError,
+    HTTPTimeoutError,
+)
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
@@ -115,6 +121,44 @@ def test_service_check(aggregator, fixture_path, mock_http, check, dd_run_check)
     dd_run_check(c)
 
     assert aggregator.service_checks(Envoy.SERVICE_CHECK_NAME)[0].status == Envoy.OK
+
+
+@pytest.mark.parametrize(
+    'exception, expected_message',
+    [
+        pytest.param(
+            HTTPConnectTimeoutError('too slow'),
+            'Envoy endpoint `http://localhost:8001/stats` timed out after (10.0, 10.0) seconds',
+            id="timeout",
+        ),
+        pytest.param(
+            HTTPConnectionError('refused'),
+            'Error accessing Envoy endpoint `http://localhost:8001/stats`',
+            id="connection error",
+        ),
+        pytest.param(
+            HTTPRequestError('malformed header'),
+            'Error accessing Envoy endpoint `http://localhost:8001/stats`',
+            id="request error",
+        ),
+    ],
+)
+def test_service_check_critical_when_the_stats_request_fails(
+    aggregator, mock_http, check, dd_run_check, exception, expected_message
+):
+    # The two handlers around the stats request pick different messages, and the timeout one also reads
+    # the configured timeout back out of the client. A phase-specific timeout and a plain connection
+    # failure are used rather than the two handler types themselves, because those are what a real
+    # endpoint produces and they are the shapes a narrowed handler would stop matching.
+    c = check(INSTANCES['main'])
+    mock_http.get.side_effect = exception
+
+    dd_run_check(c)
+
+    # assert_service_check treats message as a pattern, and the timeout one carries parentheses.
+    aggregator.assert_service_check(
+        Envoy.SERVICE_CHECK_NAME, status=Envoy.CRITICAL, message=re.escape(expected_message)
+    )
 
 
 def test_unknown(fixture_path, mock_http, dd_run_check, check):
