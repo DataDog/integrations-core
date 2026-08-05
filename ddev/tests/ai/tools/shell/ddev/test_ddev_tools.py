@@ -4,6 +4,7 @@
 import pytest
 
 from ddev.ai.tools.shell.ddev.create import DdevCreateInput, DdevCreateTool
+from ddev.ai.tools.shell.ddev.ddev_lint import DdevLintInput, DdevLintTool
 from ddev.ai.tools.shell.ddev.ddev_test import DdevTestInput, DdevTestTool
 from ddev.ai.tools.shell.ddev.env_show import DdevEnvShowTool, EnvShowInput
 from ddev.ai.tools.shell.ddev.env_start import DdevEnvStartTool, EnvStartInput
@@ -49,32 +50,7 @@ def test_create_cmd_platforms_joined():
 
 def test_ddev_test_cmd_no_flags():
     cmd = DdevTestTool().cmd(DdevTestInput(integration="mycheck"))
-    assert "--no-interactive" in cmd
-    assert "-s" not in cmd
-    assert "-fs" not in cmd
-
-
-def test_ddev_test_cmd_lint_only():
-    cmd = DdevTestTool().cmd(DdevTestInput(integration="mycheck", lint=True))
-    assert "-s" in cmd
-    assert "-fs" not in cmd
-
-
-def test_ddev_test_cmd_fmt_only():
-    cmd = DdevTestTool().cmd(DdevTestInput(integration="mycheck", fmt=True))
-    assert "-fs" in cmd
-    assert "-s" not in cmd
-
-
-def test_ddev_test_cmd_fmt_and_lint():
-    cmd = DdevTestTool().cmd(DdevTestInput(integration="mycheck", fmt=True, lint=True))
-    assert "-fs" in cmd
-    assert "-s" in cmd
-
-
-def test_ddev_test_cmd_integration_last():
-    cmd = DdevTestTool().cmd(DdevTestInput(integration="mycheck", fmt=True, lint=True))
-    assert cmd[-1] == "mycheck"
+    assert cmd == ["ddev", "--no-interactive", "test", "mycheck"]
 
 
 def test_ddev_test_cmd_pytest_args():
@@ -87,6 +63,19 @@ def test_ddev_test_cmd_pytest_args():
 def test_ddev_test_cmd_no_pytest_args_omits_separator():
     cmd = DdevTestTool().cmd(DdevTestInput(integration="mycheck"))
     assert "--" not in cmd
+
+
+# --- ddev lint ---
+
+
+def test_ddev_lint_cmd_default_checks_only():
+    cmd = DdevLintTool().cmd(DdevLintInput(integration="mycheck"))
+    assert cmd == ["ddev", "--no-interactive", "test", "-s", "mycheck"]
+
+
+def test_ddev_lint_cmd_fmt_fixes():
+    cmd = DdevLintTool().cmd(DdevLintInput(integration="mycheck", fmt=True))
+    assert cmd == ["ddev", "--no-interactive", "test", "-fs", "mycheck"]
 
 
 # --- ddev env show ---

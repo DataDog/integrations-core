@@ -12,7 +12,7 @@ tools:
   - grep
   - mkdir
   - ddev_validate
-  - ddev_test
+  - ddev_lint
   - web_search
   - web_fetch
 ---
