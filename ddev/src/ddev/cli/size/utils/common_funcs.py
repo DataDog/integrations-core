@@ -299,11 +299,50 @@ def extract_version_from_about_py(path: str) -> str:
 
 
 WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
+WHEELS_STORAGE_TIERS = ("dev", "stable")
 
 
 def resolve_wheel_url(url: str, wheels_storage: str) -> str:
     """Substitute the wheels storage tier into a lockfile URL."""
     return url.replace(WHEELS_STORAGE_PLACEHOLDER, wheels_storage)
+
+
+def wheel_url_candidates(url: str, wheels_storage: str) -> list[str]:
+    """
+    Returns the URL resolved against the preferred tier first, then the remaining tiers.
+
+    A wheel is the same object whichever tier serves it, but the tiers have different retention:
+    older builds are pruned from dev while stable keeps them. Falling back therefore lets commits
+    old enough to have aged out of dev still be measured.
+    """
+    if WHEELS_STORAGE_PLACEHOLDER not in url:
+        return [url]
+
+    tiers = [wheels_storage, *(tier for tier in WHEELS_STORAGE_TIERS if tier != wheels_storage)]
+    return [resolve_wheel_url(url, tier) for tier in tiers]
+
+
+def request_wheel(url: str, wheels_storage: str, head: bool = False) -> requests.Response:
+    """
+    Requests a wheel, trying each storage tier in turn and returning the first that serves it.
+
+    Raises the final HTTPError if no tier has the wheel; anything other than a missing wheel is
+    raised immediately rather than masked by trying the next tier.
+    """
+    candidates = wheel_url_candidates(url, wheels_storage)
+    for index, candidate in enumerate(candidates):
+        response = requests.head(candidate) if head else requests.get(candidate, stream=True)
+        try:
+            response.raise_for_status()
+        except requests.HTTPError:
+            response.close()
+            is_last = index == len(candidates) - 1
+            if is_last or response.status_code not in (403, 404):
+                raise
+            continue
+        return response
+
+    raise RuntimeError(f"No wheels storage tier served {url}")
 
 
 def get_dependencies(
@@ -319,14 +358,17 @@ def get_dependencies(
         file_path = os.path.join(resolved_path, filename)
 
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls, versions = get_dependencies_list(file_path, wheels_storage)
-            return get_dependencies_sizes(deps, download_urls, versions, compressed)
+            deps, download_urls, versions = get_dependencies_list(file_path)
+            return get_dependencies_sizes(deps, download_urls, versions, compressed, wheels_storage)
     return []
 
 
-def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str], list[str], list[str]]:
+def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
+
+    URLs keep their storage tier placeholder; it is resolved when the wheel is requested so a
+    missing wheel can fall back to another tier.
     """
     download_urls = []
     deps = []
@@ -339,7 +381,7 @@ def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
-            url = resolve_wheel_url(match.group(2), wheels_storage)
+            url = match.group(2)
 
             deps.append(name)
             download_urls.append(url)
@@ -353,7 +395,7 @@ def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str
 
 
 def get_dependencies_sizes(
-    deps: list[str], download_urls: list[str], versions: list[str], compressed: bool
+    deps: list[str], download_urls: list[str], versions: list[str], compressed: bool, wheels_storage: str
 ) -> list[FileDataEntry]:
     """
     Calculates the sizes of dependencies, either compressed or uncompressed.
@@ -367,8 +409,7 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        with requests.get(url, stream=True) as response:
-            response.raise_for_status()
+        with request_wheel(url, wheels_storage) as response:
             wheel_data = response.content
 
         with tempfile.TemporaryDirectory() as tmpdir:

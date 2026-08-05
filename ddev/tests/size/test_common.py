@@ -21,9 +21,11 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
+    request_wheel,
     save_csv,
     save_json,
     save_markdown,
+    wheel_url_candidates,
 )
 from ddev.utils.fs import Path
 
@@ -146,7 +148,7 @@ def test_get_dependencies_list():
     file_content = "dependency1 @ https://example.com/dependency1/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2/dependency2-1.1.1-.whl"
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
-        deps, urls, versions = get_dependencies_list("fake_path", "stable")
+        deps, urls, versions = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
     assert urls == [
         "https://example.com/dependency1/dependency1-1.1.1-.whl",
@@ -170,7 +172,7 @@ def test_get_dependencies_sizes():
     mock_response.__exit__.return_value = None
     with patch("requests.get", return_value=mock_response):
         file_data = get_dependencies_sizes(
-            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True
+            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True, "dev"
         )
 
     assert file_data == [
@@ -389,3 +391,75 @@ def test_extract_version_from_about_py(file_content, expected_version):
     with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=file_content)):
         version = extract_version_from_about_py(str(fake_path))
     assert version == expected_version
+
+
+PLACEHOLDER_URL = "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/built/dep1/dep1-1.1.1-.whl"
+
+
+def make_wheel_response(status_code):
+    import requests
+
+    response = MagicMock()
+    response.status_code = status_code
+    if status_code >= 400:
+        error = requests.HTTPError(response=response)
+        response.raise_for_status.side_effect = error
+    else:
+        response.raise_for_status.return_value = None
+    return response
+
+
+def test_wheel_url_candidates_prefers_configured_tier():
+    assert wheel_url_candidates(PLACEHOLDER_URL, "dev") == [
+        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+    ]
+    assert wheel_url_candidates(PLACEHOLDER_URL, "stable") == [
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+    ]
+
+
+def test_wheel_url_candidates_without_placeholder_is_not_duplicated():
+    url = "https://example.com/built/dep1/dep1-1.1.1-.whl"
+    assert wheel_url_candidates(url, "dev") == [url]
+
+
+def test_request_wheel_falls_back_to_the_other_tier():
+    missing = make_wheel_response(404)
+    found = make_wheel_response(200)
+
+    with patch("requests.get", side_effect=[missing, found]) as mock_get:
+        assert request_wheel(PLACEHOLDER_URL, "dev") is found
+
+    assert [call.args[0] for call in mock_get.call_args_list] == [
+        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+    ]
+
+
+def test_request_wheel_raises_when_no_tier_has_the_wheel():
+    import requests
+
+    with patch("requests.get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
+        with pytest.raises(requests.HTTPError):
+            request_wheel(PLACEHOLDER_URL, "dev")
+
+
+def test_request_wheel_does_not_retry_on_a_non_missing_error():
+    import requests
+
+    with patch("requests.get", side_effect=[make_wheel_response(500), make_wheel_response(200)]) as mock_get:
+        with pytest.raises(requests.HTTPError):
+            request_wheel(PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == 1
+
+
+def test_request_wheel_uses_head_when_requested():
+    found = make_wheel_response(200)
+
+    with patch("requests.head", return_value=found) as mock_head:
+        assert request_wheel(PLACEHOLDER_URL, "stable", head=True) is found
+
+    mock_head.assert_called_once_with("https://example.com/stable/built/dep1/dep1-1.1.1-.whl")
