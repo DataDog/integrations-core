@@ -13,7 +13,7 @@ import pytest
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.date import parse_rfc3339
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
@@ -565,19 +565,25 @@ def test_kubelet_credentials_update(monkeypatch, aggregator, mock_openmetrics_ht
     )
     mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
 
-    with mock.patch(
-        'datadog_checks.kubelet.kubelet.get_connection_info',
-        return_value={'url': 'http://127.0.0.1:10255', 'ca_cert': True},
-    ):
-        check.check(instance)
-    assert check.kubelet_credentials.verify() is True
+    # Credentials are resolved per run, so each run has to discard the cached per-endpoint clients or
+    # the scrapers keep using the ones built from the previous run's credentials. The rebuild itself
+    # is asserted in the base suite, which is where the handler cache is not patched away.
+    with mock.patch.object(check, 'reset_http_config', wraps=check.reset_http_config) as reset:
+        with mock.patch(
+            'datadog_checks.kubelet.kubelet.get_connection_info',
+            return_value={'url': 'http://127.0.0.1:10255', 'ca_cert': True},
+        ):
+            check.check(instance)
+        assert check.kubelet_credentials.verify() is True
 
-    with mock.patch(
-        'datadog_checks.kubelet.kubelet.get_connection_info',
-        return_value={'url': 'http://127.0.0.1:10255', 'ca_cert': False},
-    ):
-        check.check(instance)
-    assert check.kubelet_credentials.verify() is False
+        with mock.patch(
+            'datadog_checks.kubelet.kubelet.get_connection_info',
+            return_value={'url': 'http://127.0.0.1:10255', 'ca_cert': False},
+        ):
+            check.check(instance)
+        assert check.kubelet_credentials.verify() is False
+
+        assert reset.call_count == 2
 
 
 def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger):
@@ -1048,13 +1054,19 @@ def test_perform_kubelet_check(monkeypatch, mock_openmetrics_http):
     check.service_check.assert_has_calls(calls)
 
 
-def test_report_node_metrics(monkeypatch):
+def test_report_node_metrics(monkeypatch, mock_openmetrics_http):
     check = KubeletCheck('kubelet', {}, [{}])
-    mock_resp = mock.Mock(status_code=200, raise_for_status=mock.Mock())
-    mock_resp.json = mock.Mock(return_value={'num_cores': 4, 'memory_capacity': 512})
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
+    check.kubelet_credentials = KubeletCredentials({})
+    check.node_spec_url = "http://localhost:10255/spec"
+    check.pod_list_url = "http://localhost:10255/pods"
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(json_data={'num_cores': 4, 'memory_capacity': 512})
     monkeypatch.setattr(check, 'gauge', mock.Mock())
+
     check._report_node_metrics(['foo:bar'])
+
+    # The endpoint is the assertion, not incidental setup: reading the node spec from any other
+    # kubelet URL yields no num_cores or memory_capacity and reports both capacities as zero.
+    assert mock_openmetrics_http.get.call_args.args[0] == check.node_spec_url
     calls = [
         mock.call('kubernetes.cpu.capacity', 4.0, ['foo:bar']),
         mock.call('kubernetes.memory.capacity', 512.0, ['foo:bar']),
@@ -1062,29 +1074,19 @@ def test_report_node_metrics(monkeypatch):
     check.gauge.assert_has_calls(calls, any_order=False)
 
 
-def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
+def test_report_node_metrics_kubernetes1_18(aggregator, mock_openmetrics_http):
+    # A 404 on /spec is the degraded mode for k8s >= 1.18, where the endpoint can be absent. The
+    # response double raises the agnostic HTTPStatusError from raise_for_status, so the whole path
+    # from the client through _retrieve_node_spec to the suppression runs.
     check = KubeletCheck('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
     check.node_spec_url = "http://localhost:10255/spec"
+    check.pod_list_url = "http://localhost:10255/pods"
 
-    mock_resp = MockHTTPResponse(status_code=404, content='Error Code')
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=404, content='Error Code')
     check._report_node_metrics(['foo:bar'])
-    aggregator.assert_all_metrics_covered()
 
-
-def test_report_node_metrics_kubernetes1_18_httpstatuserror(monkeypatch, aggregator):
-    # In production, the check HTTP client returns a response whose raise_for_status()
-    # raises the agnostic HTTPStatusError.
-    check = KubeletCheck('kubelet', {}, [{}])
-    check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
-    check.node_spec_url = "http://localhost:10255/spec"
-
-    mock_resp = mock.Mock()
-    mock_resp.status_code = 404
-    mock_resp.raise_for_status.side_effect = HTTPStatusError('404 Not Found')
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
-    check._report_node_metrics(['foo:bar'])
+    assert mock_openmetrics_http.get.call_args.args[0] == check.node_spec_url
     aggregator.assert_all_metrics_covered()
 
 

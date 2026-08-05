@@ -2770,6 +2770,34 @@ def test_http_handler(mock_http, mocked_openmetrics_check_factory, mocker):
     assert mock_http.get_header('accept') == 'text/plain'
 
 
+def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_openmetrics_check_factory):
+    # Checks that resolve credentials dynamically on every run, the kubelet among them, call
+    # reset_http_config so the cached per-endpoint clients are rebuilt. Without the reset a node that
+    # stops presenting a CA keeps being scraped by the first run's client, so every scrape fails on
+    # TLS verification and the metrics disappear until the Agent restarts.
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    first = check.get_http_handler(scraper_config)
+    assert first.options['verify'] is True
+    assert check.get_http_handler(scraper_config) is first
+
+    # A credential change landing between runs, the way KubeletCredentials.configure_scraper applies it.
+    scraper_config['ssl_ca_cert'] = False
+    assert check.get_http_handler(scraper_config) is first
+
+    check.reset_http_config()
+    rebuilt = check.get_http_handler(scraper_config)
+
+    assert rebuilt is not first
+    assert rebuilt.options['verify'] is False
+
+
 def test_http_handler_negotiates_over_seeded_default_headers(mocked_openmetrics_check_factory):
     """A real client seeds Accept/Accept-Encoding with values that express no preference, and the
     scraper must still negotiate the exposition format over them."""

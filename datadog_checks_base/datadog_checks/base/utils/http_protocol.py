@@ -138,6 +138,10 @@ class HTTPClient(Protocol):
     #   params, headers, data, json, auth, cookies, timeout
     #                   override the same key in options for this request. headers REPLACES the
     #                   configured headers rather than adding to them.
+    #   allow_redirects overrides the same key in options for this request. A backend whose own
+    #                   redirect option carries a different name MUST accept this name and map it.
+    #                   The legacy cAdvisor probe passes False and depends on a 3xx being returned
+    #                   rather than chased.
     #   verify, cert    per-request TLS. A backend that binds TLS at construction needs a
     #                   per-configuration transport cache rather than a pass-through.
     #   extra_headers   merged over whichever header set applies, adding without discarding.
@@ -145,7 +149,8 @@ class HTTPClient(Protocol):
     #                   OpenMetrics scrapers, the kubelet pod-list query and argocd's endless watch.
     #   persist         override persist_connections for this call.
     # Only the first group is a plain per-request forward. extra_headers and persist exist on this
-    # surface alone, and stream and the TLS pair may need machinery rather than a pass-through.
+    # surface alone, and allow_redirects, stream and the TLS pair may need machinery or a rename
+    # rather than a pass-through.
     def get(self, url: str, **options: Any) -> HTTPResponse: ...
     def post(self, url: str, **options: Any) -> HTTPResponse: ...
     def head(self, url: str, **options: Any) -> HTTPResponse: ...
