@@ -1,9 +1,5 @@
 name: Measure Disk Usage
 
-# Dependency sizes come from the .deps/resolved lockfiles in the measured commit, so this
-# workflow no longer has to wait for wheels to be built. It therefore triggers directly on
-# the commit instead of subscribing to resolve-build-deps via workflow_run, which also lets
-# the master-only companion workflow go away.
 on:
   push:
     branches:
@@ -22,8 +18,7 @@ jobs:
       # needed for dd-sts
       id-token: write
     steps:
-      # For pull_request, check out the branch head rather than the synthetic merge commit so
-      # the measured tree and the reported SHA are the ones that were actually pushed.
+      # Measure the pushed branch head, not the synthetic pull_request merge commit.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -49,9 +44,7 @@ jobs:
       - name: Configure ddev
         run: ddev config override
 
-      # Sending is restricted to master because the metrics carry no branch tag yet: PR
-      # measurements would land in the same series as master and skew it. PR runs still
-      # measure and upload the JSON so the numbers can be inspected on the run.
+      # Only master is sent: without a branch tag, PR measurements would skew the same series.
       - name: Resolve measurement context
         id: ctx
         env:
