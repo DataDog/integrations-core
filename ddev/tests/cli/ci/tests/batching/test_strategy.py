@@ -9,31 +9,13 @@ import dataclasses
 
 import pytest
 
-from ddev.cli.ci.tests.batching.assembly import create_test_batches
 from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
 from ddev.cli.ci.tests.batching.strategy import default_strategy
 from ddev.cli.ci.tests.batching.validation import validate_batches
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.cli.ci.tests.messages import BatchJob
 from ddev.utils.platform import PlatformName
-
-
-def jobs(target: str, count: int) -> list[BatchJob]:
-    # Each job carries a distinct environment, as production jobs within an integration do, so
-    # names and artifact identities are unique within the target.
-    return [
-        BatchJob(
-            name=f"{target}-{index}",
-            target=target,
-            runner_labels=("ubuntu-22.04",),
-            environment=f"env-{index}",
-            platform=PlatformName.LINUX,
-            python_version="3.13",
-            unit_tests=True,
-            e2e_tests=False,
-        )
-        for index in range(count)
-    ]
+from tests.helpers.batching import jobs
 
 
 def config(*, capacity: int = 240, allow_integration_splitting: bool = False) -> BatchingConfig:
@@ -217,29 +199,3 @@ def test_validate_allows_oversized_split_when_enabled():
     all_jobs = jobs("huge", 400)
     groups = default_strategy(all_jobs, config=config(allow_integration_splitting=True))
     validate_batches(groups, all_jobs, config=config(allow_integration_splitting=True))  # no raise
-
-
-# ---------------------------------------------------------------------------
-# create_test_batches
-# ---------------------------------------------------------------------------
-
-
-def test_create_test_batches_numbers_and_populates_messages():
-    groups = [jobs("postgres", 2), jobs("mysql", 1) + jobs("redis", 1)]
-
-    batches = create_test_batches(groups)
-
-    assert [b.batch_id for b in batches] == ["batch-01", "batch-02"]
-    assert [b.id for b in batches] == ["batch-01", "batch-02"]
-    assert [b.jobs_count for b in batches] == [2, 2]
-    assert batches[0].integrations == ["postgres"]
-    assert batches[1].integrations == ["mysql", "redis"]
-
-
-def test_create_test_batches_numbering_is_local_and_repeatable():
-    groups = [jobs("a", 1), jobs("b", 1), jobs("c", 1)]
-
-    first = [b.batch_id for b in create_test_batches(groups)]
-    second = [b.batch_id for b in create_test_batches(groups)]
-
-    assert first == second == ["batch-01", "batch-02", "batch-03"]

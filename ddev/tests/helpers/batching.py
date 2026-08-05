@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
+from ddev.cli.ci.tests.messages import BatchJob
 from ddev.utils.git import ChangedFile, ChangeType
 from ddev.utils.platform import PlatformName
 
@@ -45,6 +46,24 @@ def make_unit(
         runner_labels=runner_labels,
         environment=environment if environment is not None else env(target, platform),
     )
+
+
+def jobs(target: str, count: int) -> list[BatchJob]:
+    # Each job carries a distinct environment, as production jobs within an integration do, so
+    # names and artifact identities are unique within the target.
+    return [
+        BatchJob(
+            name=f"{target}-{index}",
+            target=target,
+            runner_labels=DEFAULT_RUNNER_LABELS,
+            environment=f"env-{index}",
+            platform=PlatformName.LINUX,
+            python_version=DEFAULT_PYTHON_VERSION,
+            unit_tests=True,
+            e2e_tests=False,
+        )
+        for index in range(count)
+    ]
 
 
 def modified(path: str) -> ChangedFile:

@@ -13,11 +13,16 @@ import logging
 
 import pytest
 
-from ddev.cli.ci.tests.batching.build import build_test_batches, build_test_units, resolve_hatch_environments
+from ddev.cli.ci.tests.batching.build import (
+    build_test_batches,
+    build_test_units,
+    create_test_batches,
+    resolve_hatch_environments,
+)
 from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.utils.platform import PlatformName
-from tests.helpers.batching import DEFAULT_PYTHON_VERSION, env, modified
+from tests.helpers.batching import DEFAULT_PYTHON_VERSION, env, jobs, modified
 
 
 class FakeManifest:
@@ -439,3 +444,24 @@ def test_build_batches_numbering_is_deterministic_across_calls():
     ]
 
     assert first == second == ["batch-01", "batch-02"]
+
+
+def test_create_test_batches_numbers_and_populates_messages():
+    groups = [jobs("postgres", 2), jobs("mysql", 1) + jobs("redis", 1)]
+
+    batches = create_test_batches(groups)
+
+    assert [b.batch_id for b in batches] == ["batch-01", "batch-02"]
+    assert [b.id for b in batches] == ["batch-01", "batch-02"]
+    assert [b.jobs_count for b in batches] == [2, 2]
+    assert batches[0].integrations == ["postgres"]
+    assert batches[1].integrations == ["mysql", "redis"]
+
+
+def test_create_test_batches_numbering_is_local_and_repeatable():
+    groups = [jobs("a", 1), jobs("b", 1), jobs("c", 1)]
+
+    first = [b.batch_id for b in create_test_batches(groups)]
+    second = [b.batch_id for b in create_test_batches(groups)]
+
+    assert first == second == ["batch-01", "batch-02", "batch-03"]

@@ -9,11 +9,12 @@ conventions.
 
 ```
 changed files -> affected targets -> test units -> batch jobs -> job groups -> TestBatch messages
-  (see below)      targets.py       units.py      jobs.py      strategy/      assembly.py
+  (see below)      targets.py       units.py      jobs.py      strategy/      build.py
 ```
 
-Everything is composed by `build.py`, the package's public entry point. Callers use
-`build_test_units` or `build_test_batches` and never assemble the stages themselves.
+Everything is composed by `build.py`, the package's public entry point, which also turns the
+final groups into messages. Callers use `build_test_units` or `build_test_batches` and never
+assemble the stages themselves.
 
 Changed files arrive as `ChangedFile` records and are not produced here. `ddev.utils.git` reads
 them from git, and `../changes.py` decides which two commits a CI run compares.
@@ -25,7 +26,6 @@ them from git, and `../changes.py` decides which two commits a CI run compares.
 | `jobs.py` | Turns each unit into the concrete `BatchJob` the workflow runs. |
 | `strategy/` | Packs jobs into capacity-bounded groups. `types.py` is the contract, `default.py` the implementation. |
 | `validation.py` | Checks any strategy's partition against the execution contract. |
-| `assembly.py` | Builds the numbered `TestBatch` messages. |
 | `exceptions.py` | `PlanningError` and `BatchValidationError`. |
 
 `BatchJob` itself lives in `../messages.py`, alongside the other Dispatcher messages.
