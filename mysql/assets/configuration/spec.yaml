@@ -569,6 +569,17 @@ files:
                   type: boolean
                   example: true
                   display_default: true
+              - name: incremental_query_metrics
+                hidden: true
+                description: |
+                  When enabled query metrics collection uses a lightweight multi-pass pipeline.
+                  The check determines which statements had a change in execution counts since the last collection,
+                  then fetches query text from `events_statements_summary_by_digest` and runs obfuscation for those
+                  statements only.
+                value:
+                  type: boolean
+                  display_default: false
+                  example: false
 
           - name: query_samples
             display_priority: 0

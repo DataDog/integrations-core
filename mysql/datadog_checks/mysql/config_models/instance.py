@@ -175,6 +175,7 @@ class QueryMetrics(BaseModel):
     collect_prepared_statements: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    incremental_query_metrics: Optional[bool] = None
     only_query_recent_statements: Optional[bool] = None
 
 
