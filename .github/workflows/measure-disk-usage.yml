@@ -1,89 +1,103 @@
 name: Measure Disk Usage
-run-name: "Measure Disk Usage [${{ github.event.workflow_run.head_sha }}]"
 
+# Dependency sizes come from the .deps/resolved lockfiles in the measured commit, so this
+# workflow no longer has to wait for wheels to be built. It therefore triggers directly on
+# the commit instead of subscribing to resolve-build-deps via workflow_run, which also lets
+# the master-only companion workflow go away.
 on:
-  workflow_run:
-    workflows: ['Resolve Dependencies and Build Wheels']
-    types:
-      - completed
+  push:
+    branches:
+      - master
+  pull_request:
+
 env:
   PYTHON_VERSION: "3.13"
   INTEGRATIONS_WHEELS_STORAGE: "stable"
 
 jobs:
-
   measure-disk-usage:
     runs-on: ubuntu-22.04
     permissions:
-        contents: read
-        actions: read
-        # needed for dd-sts
-        id-token: write
+      contents: read
+      # needed for dd-sts
+      id-token: write
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        fetch-depth: 0
+      # For pull_request, check out the branch head rather than the synthetic merge commit so
+      # the measured tree and the reported SHA are the ones that were actually pushed.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Get Datadog credentials
-      id: dd-sts
-      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
-      with:
-        policy: integrations-core-api-key
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-core-api-key
 
-    - name: Install ddev
-      uses: ./.github/actions/setup-ddev
-      with:
-        install-mode: local
-        cache-profile: local-ddev-base
+      - name: Install ddev
+        uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
 
-    - name: Configure ddev
-      run: |
-            ddev config override
+      - name: Configure ddev
+        run: ddev config override
 
-    - name: Define command
-      id: cmd
-      env:
-        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        EVENT_NAME: ${{ github.event.workflow_run.event }}
-        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-      run: |
-        cmd="ddev -v size status --commit \"$HEAD_SHA\" --format json"
+      # Sending is restricted to master because the metrics carry no branch tag yet: PR
+      # measurements would land in the same series as master and skew it. PR runs still
+      # measure and upload the JSON so the numbers can be inspected on the run.
+      - name: Resolve measurement context
+        id: ctx
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          echo "sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "send=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "send=false" >> "$GITHUB_OUTPUT"
+          fi
 
-        if [ "$EVENT_NAME" = "push" ] && [ "$HEAD_BRANCH" = "master" ]; then 
-          cmd="$cmd --to-dd-key ${{ steps.dd-sts.outputs.api_key }}"
-        fi
-        echo "cmd=$cmd" >> $GITHUB_OUTPUT
-    
+      - name: Measure disk usage (Uncompressed)
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          SHA: ${{ steps.ctx.outputs.sha }}
+          SEND: ${{ steps.ctx.outputs.send }}
+        run: |
+          args=(-v size status --commit "$SHA" --format json)
+          if [ "$SEND" = "true" ]; then
+            args+=(--to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
 
-    - name: Measure disk usage (Uncompressed)
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "Running for uncompressed sizes"
-        ${{ steps.cmd.outputs.cmd }}
-        
-    - name: Measure disk usage (Compressed)
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "Running for compressed sizes"
-        ${{ steps.cmd.outputs.cmd }} --compressed
+      - name: Measure disk usage (Compressed)
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          SHA: ${{ steps.ctx.outputs.sha }}
+          SEND: ${{ steps.ctx.outputs.send }}
+        run: |
+          args=(-v size status --commit "$SHA" --format json --compressed)
+          if [ "$SEND" = "true" ]; then
+            args+=(--to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
 
-    - name: Upload JSON uncompressed sizes artifact
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: status_uncompressed.json
-        path: status_uncompressed.json
-        if-no-files-found: error
-  
-    - name: Upload JSON compressed sizes artifact
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: status_compressed.json
-        path: status_compressed.json
-        if-no-files-found: error
+      - name: Upload JSON uncompressed sizes artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: status_uncompressed.json
+          path: status_uncompressed.json
+          if-no-files-found: error
+
+      - name: Upload JSON compressed sizes artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: status_compressed.json
+          path: status_compressed.json
+          if-no-files-found: error
