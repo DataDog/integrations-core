@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Awaitable, Callable
+from collections import Counter
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -72,7 +73,16 @@ Your work will be checked by an independent reviewer using only this summary
 and the files you produced.
 """
 
-GOAL_RETRY_PROMPT_TEMPLATE = """\
+VALIDATION_RETRY_PROMPT_TEMPLATE = """\
+A validation check found that your work is incomplete.{goal_section}
+
+Validation reason: {reason}
+
+Address only the issue above. If you believe the validation is wrong, explain
+why clearly in your final summary (do not silently ignore it).
+"""
+
+REVIEWER_RETRY_PROMPT_TEMPLATE = """\
 A reviewer checked your work against this goal and reported it failed:
 
 Goal: {goal}
@@ -97,8 +107,8 @@ GOAL_PARSE_RETRY_PROMPT = (
 )
 
 
-class GoalValidationError(Exception):
-    """Base class for goal-validation failures. Carries the token cost and attempt count."""
+class TaskValidationError(Exception):
+    """Base class for task-validation failures. Carries the token cost and attempt count."""
 
     def __init__(self, message: str, input_tokens: int = 0, output_tokens: int = 0) -> None:
         super().__init__(message)
@@ -107,16 +117,16 @@ class GoalValidationError(Exception):
         self.attempts: int = 0
 
 
-class GoalParseError(GoalValidationError):
+class ReviewerParseError(TaskValidationError):
     """Reviewer failed to return valid JSON after the parse-retry."""
 
 
-class GoalAttemptsExhausted(GoalValidationError):
-    """Reviewer rejected the work on every attempt up to max_goal_attempts."""
+class ValidationAttemptsExhausted(TaskValidationError):
+    """Validation rejected every candidate up to max_validation_attempts."""
 
 
 @dataclass(frozen=True)
-class GoalCheckResult:
+class ReviewerCheckResult:
     valid: bool
     reason: str
     input_tokens: int
@@ -126,11 +136,76 @@ class GoalCheckResult:
 
 
 @dataclass(frozen=True)
-class GoalLoopOutcome:
+class ValidationLoopOutcome:
     final_result: ReActResult
     attempts: int
     total_input_tokens: int
     total_output_tokens: int
+
+
+@dataclass(frozen=True)
+class DeterministicCheck:
+    """A named, repeatable artifact check that does not require a model reviewer."""
+
+    name: str
+    run: Callable[[], str | None]
+
+
+@dataclass(frozen=True)
+class DeterministicCheckFailure:
+    """A repairable failure returned by one deterministic check."""
+
+    name: str
+    reason: str
+
+
+@dataclass(frozen=True)
+class DeterministicCheckReport:
+    """The ordered composition of every failure from one deterministic pass."""
+
+    failures: tuple[DeterministicCheckFailure, ...]
+
+    @property
+    def valid(self) -> bool:
+        return not self.failures
+
+    def failure_reason(self) -> str | None:
+        """Render every failure in declaration order, or ``None`` when all checks passed."""
+        if self.valid:
+            return None
+        sections = [f"## {failure.name}\n{failure.reason}" for failure in self.failures]
+        return "Deterministic checks failed:\n\n" + "\n\n".join(sections)
+
+
+def run_deterministic_checks(checks: Sequence[DeterministicCheck]) -> DeterministicCheckReport:
+    """Run every named deterministic check and compose all repairable failures."""
+    names = [check.name.strip() for check in checks]
+    if invalid_names := [check.name for check, name in zip(checks, names, strict=True) if not name]:
+        raise ValueError(f"Deterministic check names must not be blank: {invalid_names!r}")
+    duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
+    if duplicates:
+        raise ValueError(f"Deterministic check names must be unique: {duplicates}")
+
+    failures: list[DeterministicCheckFailure] = []
+    for check, name in zip(checks, names, strict=True):
+        reason = check.run()
+        if reason is None:
+            continue
+        if not reason.strip():
+            raise ValueError(f"Deterministic check {name!r} returned a blank failure reason")
+        failures.append(DeterministicCheckFailure(name=name, reason=reason))
+    return DeterministicCheckReport(failures=tuple(failures))
+
+
+def build_validation_retry_prompt(goal_text: str | None, reason: str) -> str:
+    """Build worker feedback for a deterministic-check failure."""
+    goal_section = f"\n\nGoal: {goal_text}" if goal_text is not None else ""
+    return VALIDATION_RETRY_PROMPT_TEMPLATE.format(goal_section=goal_section, reason=reason)
+
+
+def build_reviewer_retry_prompt(goal_text: str, reviewer_verdict: str) -> str:
+    """Build worker feedback for a reviewer-rejected goal, including its findings."""
+    return REVIEWER_RETRY_PROMPT_TEMPLATE.format(goal=goal_text, reviewer_verdict=reviewer_verdict)
 
 
 def build_reviewer_user_message(
@@ -183,7 +258,7 @@ def build_reviewer_reset_retry_message(
 
 def _select_reviewer_message(
     *,
-    previous_check: GoalCheckResult | None,
+    previous_check: ReviewerCheckResult | None,
     rendered_task_prompt: str,
     goal_text: str,
     worker_summary: str,
@@ -280,11 +355,11 @@ def parse_reviewer_verdict(text: str) -> dict[str, object] | None:
 async def _run_reviewer_once(
     reviewer_process: ReActProcess,
     user_message: str,
-) -> GoalCheckResult:
+) -> ReviewerCheckResult:
     """Send ``user_message`` to the reviewer and parse its JSON output.
 
     On parse failure, ask the reviewer once more for valid JSON. If that
-    second response still does not parse, raise GoalParseError.
+    second response still does not parse, raise ReviewerParseError.
     """
     result = await reviewer_process.start(user_message)
     in_tokens = result.total_input_tokens
@@ -301,14 +376,14 @@ async def _run_reviewer_once(
         raw_output = retry_result.final_response.text or ""
         parsed = parse_reviewer_verdict(raw_output)
         if parsed is None:
-            raise GoalParseError(
+            raise ReviewerParseError(
                 "Reviewer did not return valid JSON after one parse-retry. "
                 f"Last raw output: {retry_result.final_response.text!r}",
                 input_tokens=in_tokens,
                 output_tokens=out_tokens,
             )
 
-    return GoalCheckResult(
+    return ReviewerCheckResult(
         valid=bool(parsed["valid"]),
         reason=str(parsed.get("reason", "")),
         input_tokens=in_tokens,
@@ -318,81 +393,10 @@ async def _run_reviewer_once(
     )
 
 
-async def _drive_goal_loop(
-    *,
-    phase_id: str,
-    task: TaskConfig,
-    goal_text: str,
-    rendered_task_prompt: str,
-    worker_process: ReActProcess,
-    initial_result: ReActResult,
-    reviewer_process: ReActProcess,
-    callbacks: Callbacks,
-    compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
-) -> GoalLoopOutcome:
-    total_in = total_out = 0
-    attempts = 0
-    worker_result = initial_result
-    previous_check: GoalCheckResult | None = None
-
-    try:
-        while True:
-            attempts += 1
-            await callbacks.fire_before_goal_check(phase_id, task.name, attempts)
-
-            worker_summary = worker_result.final_response.text or "(no summary provided)"
-            user_message, needs_reset = _select_reviewer_message(
-                previous_check=previous_check,
-                rendered_task_prompt=rendered_task_prompt,
-                goal_text=goal_text,
-                worker_summary=worker_summary,
-            )
-            if needs_reset:
-                await reviewer_process.reset()
-
-            check = await _run_reviewer_once(reviewer_process, user_message)
-            previous_check = check
-            total_in += check.input_tokens
-            total_out += check.output_tokens
-
-            await callbacks.fire_after_goal_check(phase_id, task.name, attempts, check.valid, check.reason)
-
-            if check.valid:
-                return GoalLoopOutcome(
-                    final_result=worker_result,
-                    attempts=attempts,
-                    total_input_tokens=total_in,
-                    total_output_tokens=total_out,
-                )
-
-            if attempts >= task.max_goal_attempts:
-                raise GoalAttemptsExhausted(
-                    f"Task {task.name!r} failed goal validation after "
-                    f"{attempts} attempts. Last reviewer reason: {check.reason}"
-                )
-
-            compact_in, compact_out = await compact_if_needed(worker_result)
-            total_in += compact_in
-            total_out += compact_out
-
-            retry_prompt = GOAL_RETRY_PROMPT_TEMPLATE.format(
-                goal=goal_text,
-                reviewer_verdict=check.verdict_json,
-            )
-            worker_result = await worker_process.start(retry_prompt)
-            total_in += worker_result.total_input_tokens
-            total_out += worker_result.total_output_tokens
-    except GoalValidationError as e:
-        e.input_tokens += total_in
-        e.output_tokens += total_out
-        e.attempts = attempts
-        raise
-
-
-async def run_goal_loop(
+async def run_validation_loop(
     *,
     task: TaskConfig,
-    goal_text: str,
+    goal_text: str | None,
     rendered_task_prompt: str,
     worker_process: ReActProcess,
     initial_result: ReActResult,
@@ -401,36 +405,99 @@ async def run_goal_loop(
     callbacks: Callbacks,
     phase_id: str,
     compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
-) -> GoalLoopOutcome:
-    """Drive the reviewer + worker-retry loop for a single task with a goal.
+    deterministic_checks: Sequence[DeterministicCheck] = (),
+) -> ValidationLoopOutcome:
+    """Validate and repair a task with deterministic checks, an optional reviewer, or both."""
+    total_in = total_out = 0
+    attempts = 0
+    worker_result = initial_result
+    reviewer_process: ReActProcess | None = None
+    previous_check: ReviewerCheckResult | None = None
 
-    The reviewer runs as a scoped ``GOAL_REVIEWER`` process; its per-run activity
-    is captured by the run-wide logging callbacks bound to ``process_factory``.
-    The phase callbacks see only the bracketing before/after_goal_check events.
-    """
-    reviewer_scope = AgentScope(
-        owner_id=f"{phase_id}.goal.{task.name}",
-        role=AgentRole.GOAL_REVIEWER,
-        phase_id=phase_id,
-    )
-    reviewer_config = parent_agent_config.model_copy(update={"tools": filter_read_only(parent_agent_config.tools)})
     try:
-        reviewer_process = process_factory.create(
-            scope=reviewer_scope,
-            agent_config=reviewer_config,
-            system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
-        )
-    except Exception as e:
-        raise RuntimeError(f"Failed to create reviewer process for task {task.name}: {e}") from e
+        while True:
+            attempts += 1
+            failure_reason = run_deterministic_checks(deterministic_checks).failure_reason()
+            reviewer_verdict: str | None = None
 
-    return await _drive_goal_loop(
-        phase_id=phase_id,
-        task=task,
-        goal_text=goal_text,
-        rendered_task_prompt=rendered_task_prompt,
-        worker_process=worker_process,
-        initial_result=initial_result,
-        reviewer_process=reviewer_process,
-        callbacks=callbacks,
-        compact_if_needed=compact_if_needed,
-    )
+            if failure_reason is None:
+                if goal_text is None:
+                    return ValidationLoopOutcome(
+                        final_result=worker_result,
+                        attempts=attempts,
+                        total_input_tokens=total_in,
+                        total_output_tokens=total_out,
+                    )
+                if reviewer_process is None:
+                    reviewer_scope = AgentScope(
+                        owner_id=f"{phase_id}.goal.{task.name}",
+                        role=AgentRole.GOAL_REVIEWER,
+                        phase_id=phase_id,
+                    )
+                    reviewer_config = parent_agent_config.model_copy(
+                        update={"tools": filter_read_only(parent_agent_config.tools)}
+                    )
+                    try:
+                        reviewer_process = process_factory.create(
+                            scope=reviewer_scope,
+                            agent_config=reviewer_config,
+                            system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
+                        )
+                    except Exception as e:
+                        raise RuntimeError(f"Failed to create reviewer process for task {task.name}: {e}") from e
+
+                worker_summary = worker_result.final_response.text or "(no summary provided)"
+                user_message, needs_reset = _select_reviewer_message(
+                    previous_check=previous_check,
+                    rendered_task_prompt=rendered_task_prompt,
+                    goal_text=goal_text,
+                    worker_summary=worker_summary,
+                )
+                if needs_reset:
+                    await reviewer_process.reset()
+
+                await callbacks.fire_before_goal_check(phase_id, task.name, attempts)
+                reviewer_result = await _run_reviewer_once(reviewer_process, user_message)
+                previous_check = reviewer_result
+                total_in += reviewer_result.input_tokens
+                total_out += reviewer_result.output_tokens
+                await callbacks.fire_after_goal_check(
+                    phase_id,
+                    task.name,
+                    attempts,
+                    reviewer_result.valid,
+                    reviewer_result.reason,
+                )
+                if reviewer_result.valid:
+                    return ValidationLoopOutcome(
+                        final_result=worker_result,
+                        attempts=attempts,
+                        total_input_tokens=total_in,
+                        total_output_tokens=total_out,
+                    )
+                failure_reason = reviewer_result.reason
+                reviewer_verdict = reviewer_result.verdict_json
+
+            if attempts >= task.max_validation_attempts:
+                raise ValidationAttemptsExhausted(
+                    f"Task {task.name!r} failed validation after "
+                    f"{attempts} attempts. Last validation reason: {failure_reason}"
+                )
+
+            compact_in, compact_out = await compact_if_needed(worker_result)
+            total_in += compact_in
+            total_out += compact_out
+
+            if reviewer_verdict is not None:
+                assert goal_text is not None
+                retry_prompt = build_reviewer_retry_prompt(goal_text, reviewer_verdict)
+            else:
+                retry_prompt = build_validation_retry_prompt(goal_text, failure_reason)
+            worker_result = await worker_process.start(retry_prompt)
+            total_in += worker_result.total_input_tokens
+            total_out += worker_result.total_output_tokens
+    except TaskValidationError as e:
+        e.input_tokens += total_in
+        e.output_tokens += total_out
+        e.attempts = attempts
+        raise

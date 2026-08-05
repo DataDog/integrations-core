@@ -10,7 +10,11 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
-from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, run_goal_loop
+from ddev.ai.phases.goal import (
+    GOAL_TASK_SUFFIX,
+    TaskValidationError,
+    run_validation_loop,
+)
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.checkpoints import (
@@ -18,11 +22,11 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
-    GoalValidationRecord,
+    TaskValidationRecord,
 )
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.goal import GoalLoopOutcome
+    from ddev.ai.phases.goal import DeterministicCheck, ValidationLoopOutcome
     from ddev.ai.phases.resources import PhaseResources
     from ddev.ai.react.factory import ReActProcessFactory
     from ddev.ai.react.types import ReActResult
@@ -80,7 +84,7 @@ class AgenticPhase(Phase):
         self._agent_config = agent_config
         self._process_factory = process_factory
         self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE, phase_id=phase_id)
-        self._goal_attempt_log: list[GoalValidationRecord] = []
+        self._validation_log: list[TaskValidationRecord] = []
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0
 
@@ -124,6 +128,10 @@ class AgenticPhase(Phase):
     def after_react(self) -> None:
         """Called once after all tasks complete. Override for phase-specific teardown."""
 
+    def deterministic_checks(self, task: TaskConfig, context: dict[str, Any]) -> tuple[DeterministicCheck, ...]:
+        """Return the deterministic checks that must pass before task acceptance."""
+        return ()
+
     async def run_tasks(
         self,
         process: ReActProcess,
@@ -150,13 +158,14 @@ class AgenticPhase(Phase):
         await self._manage_context(process, task, last_result)
 
         has_goal = self._task_has_goal(task)
+        deterministic_checks = self.deterministic_checks(task, context)
         prompt = self._render_task_prompt(task, context, has_goal)
         result = await self._start_task(process, prompt)
 
-        if not has_goal:
+        if not has_goal and not deterministic_checks:
             return result
 
-        return await self._run_goal_validation(process, task, context, prompt, result)
+        return await self._run_validation(process, task, context, prompt, result, deterministic_checks)
 
     async def _manage_context(
         self,
@@ -210,17 +219,18 @@ class AgenticPhase(Phase):
         self._add_tokens(result.total_input_tokens, result.total_output_tokens)
         return result
 
-    async def _run_goal_validation(
+    async def _run_validation(
         self,
         process: ReActProcess,
         task: TaskConfig,
         context: dict[str, Any],
         prompt: str,
         result: ReActResult,
+        deterministic_checks: tuple[DeterministicCheck, ...],
     ) -> ReActResult:
-        goal_text = render_inline(cast(str, task.goal), context, self._resolver)
+        goal_text = render_inline(task.goal, context, self._resolver) if task.goal is not None else None
         try:
-            outcome: GoalLoopOutcome = await run_goal_loop(
+            outcome: ValidationLoopOutcome = await run_validation_loop(
                 task=task,
                 goal_text=goal_text,
                 rendered_task_prompt=prompt,
@@ -231,25 +241,26 @@ class AgenticPhase(Phase):
                 callbacks=self._callbacks,
                 phase_id=self._phase_id,
                 compact_if_needed=lambda r: self._compact_if_needed(process, r),
+                deterministic_checks=deterministic_checks,
             )
-        except GoalValidationError as e:
-            self._record_goal_attempt(task, e.attempts, final_valid=False)
+        except TaskValidationError as e:
+            self._record_validation(task, e.attempts, final_valid=False)
             self._add_tokens(e.input_tokens, e.output_tokens)
             raise
 
-        self._record_goal_attempt(task, outcome.attempts, final_valid=True)
+        self._record_validation(task, outcome.attempts, final_valid=True)
         self._add_tokens(outcome.total_input_tokens, outcome.total_output_tokens)
         return outcome.final_result
 
-    def _record_goal_attempt(
+    def _record_validation(
         self,
         task: TaskConfig,
         attempts: int,
         *,
         final_valid: bool,
     ) -> None:
-        self._goal_attempt_log.append(
-            GoalValidationRecord(
+        self._validation_log.append(
+            TaskValidationRecord(
                 task=task.name,
                 attempts=attempts,
                 final_valid=final_valid,
@@ -305,15 +316,15 @@ class AgenticPhase(Phase):
             memory_text=memory_text,
             total_input_tokens=self._total_input_tokens + mem_in,
             total_output_tokens=self._total_output_tokens + mem_out,
-            goal_validations=self._goal_attempt_log or None,
+            task_validations=self._validation_log or None,
         )
 
     def build_failed_checkpoint(self, error: BaseException) -> FailedCheckpoint:
-        """Include partial token and goal progress in a failed checkpoint."""
+        """Include partial token and task-validation progress in a failed checkpoint."""
         checkpoint = super().build_failed_checkpoint(error)
         checkpoint.tokens = CheckpointTokenInfo(
             total_input=self._total_input_tokens,
             total_output=self._total_output_tokens,
         )
-        checkpoint.goal_validations = self._goal_attempt_log or None
+        checkpoint.task_validations = self._validation_log or None
         return checkpoint

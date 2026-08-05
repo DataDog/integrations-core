@@ -14,6 +14,7 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
+from ddev.ai.phases.goal import DeterministicCheck
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
@@ -22,8 +23,8 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointTokenInfo,
     FailedCheckpoint,
-    GoalValidationRecord,
     SuccessCheckpoint,
+    TaskValidationRecord,
 )
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
@@ -415,8 +416,45 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
 
 
 # ---------------------------------------------------------------------------
-# Goal validation integration tests
+# Task validation integration tests
 # ---------------------------------------------------------------------------
+
+
+async def test_phase_supports_deterministic_checks_without_goal(flow_dir, monkeypatch, message_queue):
+    failures = iter(["`required_field` is missing", None])
+
+    class DeterministicOnlyPhase(AgenticPhase):
+        def deterministic_checks(self, task: TaskConfig, context: dict[str, object]) -> tuple[DeterministicCheck, ...]:
+            return (DeterministicCheck(name="artifact schema", run=lambda: next(failures)),)
+
+    def unexpected_reviewer(_owner_id: str) -> AgentRuntime:
+        raise AssertionError("deterministic-only validation must not create a reviewer")
+
+    worker = MockAgent(
+        [
+            make_response("initial work", 10, 5),
+            make_response("fixed work", 8, 4),
+            make_response("summary", 3, 2),
+        ]
+    )
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        worker,
+        monkeypatch,
+        message_queue,
+        tasks=[TaskConfig(name="t1", prompt="Do it.", max_validation_attempts=2)],
+        goal_runtime_builder=unexpected_reviewer,
+        phase_cls=DeterministicOnlyPhase,
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    checkpoint = mgr.read()["p1"]
+    assert isinstance(checkpoint, SuccessCheckpoint)
+    assert checkpoint.task_validations == [TaskValidationRecord(task="t1", attempts=2, final_valid=True)]
+    assert worker.send_calls[0] == "Do it."
+    assert "`required_field` is missing" in worker.send_calls[1]
+    assert "Goal:" not in worker.send_calls[1]
 
 
 async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, message_queue):
@@ -448,7 +486,7 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
 
     cp = mgr.read()["p1"]
     assert isinstance(cp, SuccessCheckpoint)
-    assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
+    assert cp.task_validations == [TaskValidationRecord(task="t1", attempts=1, final_valid=True)]
     assert worker.send_calls[0].startswith("Do it.")
     assert "independent reviewer" in worker.send_calls[0]
     assert cp.tokens == CheckpointTokenInfo(total_input=100 + 7 + 10, total_output=50 + 3 + 5)
@@ -482,17 +520,17 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
         worker,
         monkeypatch,
         message_queue,
-        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_goal_attempts=2)],
+        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_validation_attempts=2)],
         goal_runtime_builder=goal_builder,
     )
 
-    from ddev.ai.phases.goal import GoalAttemptsExhausted
+    from ddev.ai.phases.goal import ValidationAttemptsExhausted
 
-    with pytest.raises(GoalAttemptsExhausted):
+    with pytest.raises(ValidationAttemptsExhausted):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.read() == {}
-    assert phase._goal_attempt_log == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+    assert phase._validation_log == [TaskValidationRecord(task="t1", attempts=2, final_valid=False)]
 
     # The reviewer ran (and succeeded as an agent) on each attempt; its per-run
     # log exists. The goal-loop verdict itself lives in the phase checkpoint.
@@ -533,20 +571,20 @@ async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, mon
         monkeypatch,
         message_queue,
         tasks=[
-            TaskConfig(name="t1", prompt="First.", goal="check t1", max_goal_attempts=2),
-            TaskConfig(name="t2", prompt="Second.", goal="check t2", max_goal_attempts=2),
+            TaskConfig(name="t1", prompt="First.", goal="check t1", max_validation_attempts=2),
+            TaskConfig(name="t2", prompt="Second.", goal="check t2", max_validation_attempts=2),
         ],
         goal_runtime_builder=goal_builder,
     )
 
-    from ddev.ai.phases.goal import GoalAttemptsExhausted
+    from ddev.ai.phases.goal import ValidationAttemptsExhausted
 
-    with pytest.raises(GoalAttemptsExhausted):
+    with pytest.raises(ValidationAttemptsExhausted):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert phase._goal_attempt_log == [
-        GoalValidationRecord(task="t1", attempts=1, final_valid=True),
-        GoalValidationRecord(task="t2", attempts=2, final_valid=False),
+    assert phase._validation_log == [
+        TaskValidationRecord(task="t1", attempts=1, final_valid=True),
+        TaskValidationRecord(task="t2", attempts=2, final_valid=False),
     ]
 
 
@@ -575,21 +613,21 @@ async def test_goal_exhaustion_tokens_captured_on_phase(flow_dir, monkeypatch, m
         worker,
         monkeypatch,
         message_queue,
-        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_goal_attempts=2)],
+        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_validation_attempts=2)],
         goal_runtime_builder=goal_builder,
     )
 
-    from ddev.ai.phases.goal import GoalAttemptsExhausted
+    from ddev.ai.phases.goal import ValidationAttemptsExhausted
 
-    with pytest.raises(GoalAttemptsExhausted):
+    with pytest.raises(ValidationAttemptsExhausted):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert phase._total_input_tokens == 10 + 8 + 10 + 8
     assert phase._total_output_tokens == 5 + 4 + 5 + 4
 
 
-async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_dir, monkeypatch, message_queue):
-    """on_error includes token counts and goal_validations in the failure checkpoint."""
+async def test_on_error_writes_tokens_and_task_validations_to_checkpoint(flow_dir, monkeypatch, message_queue):
+    """on_error includes token counts and task validations in the failure checkpoint."""
     from ddev.ai.phases.messages import PhaseTrigger
     from ddev.event_bus.exceptions import MessageProcessingError
 
@@ -598,7 +636,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
 
     phase._total_input_tokens = 42
     phase._total_output_tokens = 17
-    phase._goal_attempt_log = [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+    phase._validation_log = [TaskValidationRecord(task="t1", attempts=2, final_valid=False)]
     phase._started_at = None
 
     err = MessageProcessingError(
@@ -611,7 +649,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     cp = mgr.read()["p1"]
     assert isinstance(cp, FailedCheckpoint)
     assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
-    assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+    assert cp.task_validations == [TaskValidationRecord(task="t1", attempts=2, final_valid=False)]
     assert cp.error == "something went wrong"
 
 
@@ -768,8 +806,8 @@ async def test_compact_context_before_on_first_task_is_noop(flow_dir, monkeypatc
 
 
 async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch, message_queue):
-    """GoalParseError is treated the same as GoalAttemptsExhausted: logged with final_valid=False."""
-    from ddev.ai.phases.goal import GoalParseError
+    """Reviewer parse errors are logged with final_valid=False."""
+    from ddev.ai.phases.goal import ReviewerParseError
 
     worker = MockAgent([make_response("worker done", 10, 5)])
 
@@ -793,10 +831,10 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
         goal_runtime_builder=goal_builder,
     )
 
-    with pytest.raises(GoalParseError):
+    with pytest.raises(ReviewerParseError):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert phase._goal_attempt_log == [GoalValidationRecord(task="t1", attempts=1, final_valid=False)]
+    assert phase._validation_log == [TaskValidationRecord(task="t1", attempts=1, final_valid=False)]
     assert phase._total_input_tokens == 10 + 8 + 6
     assert phase._total_output_tokens == 5 + 4 + 3
 

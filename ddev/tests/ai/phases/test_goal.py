@@ -14,13 +14,15 @@ from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
     GOAL_REVIEWER_RESET_THRESHOLD_PCT,
     GOAL_REVIEWER_SYSTEM_PROMPT,
-    GoalAttemptsExhausted,
-    GoalCheckResult,
-    GoalParseError,
+    DeterministicCheck,
+    ReviewerCheckResult,
+    ReviewerParseError,
+    ValidationAttemptsExhausted,
     _select_reviewer_message,
     build_reviewer_user_message,
     parse_reviewer_verdict,
-    run_goal_loop,
+    run_deterministic_checks,
+    run_validation_loop,
 )
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
@@ -155,7 +157,7 @@ def test_select_reviewer_message(
 ) -> None:
     previous_check = None
     if has_previous_check:
-        previous_check = GoalCheckResult(
+        previous_check = ReviewerCheckResult(
             valid=False,
             reason="missing X",
             input_tokens=20,
@@ -179,7 +181,7 @@ def test_select_reviewer_message(
 
 
 # ---------------------------------------------------------------------------
-# Helpers used by run_goal_loop tests
+# Helpers used by run_validation_loop tests
 # ---------------------------------------------------------------------------
 
 
@@ -227,11 +229,11 @@ async def _noop_compact(_):
 
 
 # ---------------------------------------------------------------------------
-# run_goal_loop
+# run_validation_loop
 # ---------------------------------------------------------------------------
 
 
-async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
+async def test_run_validation_loop_passes_on_first_attempt(tmp_path):
     worker_process, worker_agent = _make_worker_process([])
     initial_result = ReActResult(
         final_response=make_response("did things"),
@@ -246,7 +248,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         callbacks=Callbacks([run_logger.as_callback_set()]),
     )
 
-    outcome = await run_goal_loop(
+    outcome = await run_validation_loop(
         task=TaskConfig(name="t1", prompt="x", goal="verify"),
         goal_text="verify",
         rendered_task_prompt="TASK",
@@ -274,7 +276,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     assert {"start", "finish"} <= events
 
 
-async def test_run_goal_loop_inherits_parent_config_with_read_only_tools(tmp_path):
+async def test_run_validation_loop_inherits_parent_config_with_read_only_tools(tmp_path):
     worker_process, _ = _make_worker_process([])
     initial_result = ReActResult(
         final_response=make_response("did things"),
@@ -291,7 +293,7 @@ async def test_run_goal_loop_inherits_parent_config_with_read_only_tools(tmp_pat
         max_tokens=999,
     )
 
-    await run_goal_loop(
+    await run_validation_loop(
         task=TaskConfig(name="t1", prompt="x", goal="verify"),
         goal_text="verify",
         rendered_task_prompt="TASK",
@@ -313,7 +315,7 @@ async def test_run_goal_loop_inherits_parent_config_with_read_only_tools(tmp_pat
     assert builder_calls[0]["owner_id"] == "p1.goal.t1"
 
 
-async def test_run_goal_loop_one_retry_then_pass(tmp_path):
+async def test_run_validation_loop_one_retry_then_pass(tmp_path):
     worker_process, worker_agent = _make_worker_process([make_response("fixed it", 30, 15)])
     initial_result = ReActResult(
         final_response=make_response("initial work"),
@@ -331,7 +333,7 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
         ]
     )
 
-    outcome = await run_goal_loop(
+    outcome = await run_validation_loop(
         task=TaskConfig(name="t1", prompt="x", goal="g"),
         goal_text="g",
         rendered_task_prompt="TASK",
@@ -361,7 +363,7 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     assert outcome.total_output_tokens == 10 + 12 + 15
 
 
-async def test_run_goal_loop_resets_large_reviewer_context_before_retry(tmp_path):
+async def test_run_validation_loop_resets_large_reviewer_context_before_retry(tmp_path):
     worker_process, _ = _make_worker_process([make_response("fixed it", 30, 15)])
     initial_result = ReActResult(
         final_response=make_response("initial work"),
@@ -378,7 +380,7 @@ async def test_run_goal_loop_resets_large_reviewer_context_before_retry(tmp_path
         ]
     )
 
-    outcome = await run_goal_loop(
+    outcome = await run_validation_loop(
         task=TaskConfig(name="t1", prompt="x", goal="g"),
         goal_text="GOAL",
         rendered_task_prompt="TASK",
@@ -404,7 +406,161 @@ async def test_run_goal_loop_resets_large_reviewer_context_before_retry(tmp_path
     assert "## Worker repair summary\nfixed it" in retry_message
 
 
-async def test_run_goal_loop_exhausts_attempts(tmp_path):
+async def test_run_validation_loop_repairs_deterministic_failure_before_calling_reviewer() -> None:
+    worker_process, worker_agent = _make_worker_process([make_response("fixed it", 30, 15)])
+    initial_result = ReActResult(
+        final_response=make_response("initial work"),
+        iterations=1,
+        total_input_tokens=100,
+        total_output_tokens=50,
+        context_usage=None,
+    )
+    factory, builder_calls, reviewer_agent = _reviewer_factory([make_response(make_goal_verdict(True), 20, 10)])
+    calls: list[str] = []
+    schema_failures = iter(["`required_field` is missing", None])
+    coverage_failures = iter(["`resource` is missing from the manifest", None])
+
+    def check_artifact_schema() -> str | None:
+        calls.append("artifact schema")
+        return next(schema_failures)
+
+    def check_resource_coverage() -> str | None:
+        calls.append("resource coverage")
+        return next(coverage_failures)
+
+    def check_configuration() -> None:
+        calls.append("configuration")
+        return None
+
+    outcome = await run_validation_loop(
+        task=TaskConfig(name="t1", prompt="x", goal="g"),
+        goal_text="g",
+        rendered_task_prompt="TASK",
+        worker_process=worker_process,
+        initial_result=initial_result,
+        parent_agent_config=make_agent_config(tools=[]),
+        process_factory=factory,
+        callbacks=Callbacks(),
+        phase_id="p1",
+        compact_if_needed=_noop_compact,
+        deterministic_checks=(
+            DeterministicCheck(name="artifact schema", run=check_artifact_schema),
+            DeterministicCheck(name="resource coverage", run=check_resource_coverage),
+            DeterministicCheck(name="configuration", run=check_configuration),
+        ),
+    )
+
+    assert outcome.attempts == 2
+    assert outcome.final_result.final_response.text == "fixed it"
+    assert len(worker_agent.send_calls) == 1
+    assert "Deterministic checks failed" in worker_agent.send_calls[0]
+    assert "## artifact schema" in worker_agent.send_calls[0]
+    assert "`required_field` is missing" in worker_agent.send_calls[0]
+    assert "## resource coverage" in worker_agent.send_calls[0]
+    assert "`resource` is missing from the manifest" in worker_agent.send_calls[0]
+    assert "## configuration" not in worker_agent.send_calls[0]
+    assert len(reviewer_agent.send_calls) == 1
+    assert len(builder_calls) == 1
+    assert calls == [
+        "artifact schema",
+        "resource coverage",
+        "configuration",
+        "artifact schema",
+        "resource coverage",
+        "configuration",
+    ]
+    assert outcome.total_input_tokens == 30 + 20
+    assert outcome.total_output_tokens == 15 + 10
+
+
+async def test_run_validation_loop_deterministic_exhaustion_never_creates_reviewer() -> None:
+    worker_process, worker_agent = _make_worker_process([])
+    initial_result = ReActResult(
+        final_response=make_response("initial work"),
+        iterations=1,
+        total_input_tokens=100,
+        total_output_tokens=50,
+        context_usage=None,
+    )
+    factory, builder_calls, reviewer_agent = _reviewer_factory([])
+
+    with pytest.raises(ValidationAttemptsExhausted, match=r"(?s)Last validation reason.*required_field") as exc_info:
+        await run_validation_loop(
+            task=TaskConfig(name="t1", prompt="x", goal="g", max_validation_attempts=1),
+            goal_text="g",
+            rendered_task_prompt="TASK",
+            worker_process=worker_process,
+            initial_result=initial_result,
+            parent_agent_config=make_agent_config(tools=[]),
+            process_factory=factory,
+            callbacks=Callbacks(),
+            phase_id="p1",
+            compact_if_needed=_noop_compact,
+            deterministic_checks=(
+                DeterministicCheck(name="artifact schema", run=lambda: "`required_field` is missing"),
+            ),
+        )
+
+    assert exc_info.value.attempts == 1
+    assert worker_agent.send_calls == []
+    assert reviewer_agent.send_calls == []
+    assert builder_calls == []
+
+
+async def test_run_validation_loop_accepts_passing_deterministic_checks_without_goal() -> None:
+    worker_process, worker_agent = _make_worker_process([])
+    initial_result = ReActResult(
+        final_response=make_response("initial work"),
+        iterations=1,
+        total_input_tokens=100,
+        total_output_tokens=50,
+        context_usage=None,
+    )
+    factory, builder_calls, reviewer_agent = _reviewer_factory([])
+
+    outcome = await run_validation_loop(
+        task=TaskConfig(name="t1", prompt="x"),
+        goal_text=None,
+        rendered_task_prompt="TASK",
+        worker_process=worker_process,
+        initial_result=initial_result,
+        parent_agent_config=make_agent_config(tools=[]),
+        process_factory=factory,
+        callbacks=Callbacks(),
+        phase_id="p1",
+        compact_if_needed=_noop_compact,
+        deterministic_checks=(DeterministicCheck(name="artifact schema", run=lambda: None),),
+    )
+
+    assert outcome.attempts == 1
+    assert outcome.final_result is initial_result
+    assert worker_agent.send_calls == []
+    assert reviewer_agent.send_calls == []
+    assert builder_calls == []
+
+
+def test_run_deterministic_checks_rejects_duplicate_names_before_running_checks() -> None:
+    calls: list[str] = []
+    checks = (
+        DeterministicCheck(name="duplicate", run=lambda: calls.append("first")),
+        DeterministicCheck(name="duplicate", run=lambda: calls.append("second")),
+    )
+
+    with pytest.raises(ValueError, match="must be unique.*duplicate"):
+        run_deterministic_checks(checks)
+
+    assert calls == []
+
+
+def test_run_deterministic_checks_propagates_checker_exceptions() -> None:
+    def broken_check() -> None:
+        raise RuntimeError("catalog is unreadable")
+
+    with pytest.raises(RuntimeError, match="catalog is unreadable"):
+        run_deterministic_checks((DeterministicCheck(name="broken", run=broken_check),))
+
+
+async def test_run_validation_loop_exhausts_attempts(tmp_path):
     worker_process, _ = _make_worker_process([make_response("attempt 2", 10, 5)])
     initial_result = ReActResult(
         final_response=make_response("attempt 1"),
@@ -420,9 +576,9 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
         ]
     )
 
-    with pytest.raises(GoalAttemptsExhausted, match="2 attempts") as exc_info:
-        await run_goal_loop(
-            task=TaskConfig(name="t1", prompt="x", goal="g", max_goal_attempts=2),
+    with pytest.raises(ValidationAttemptsExhausted, match="2 attempts") as exc_info:
+        await run_validation_loop(
+            task=TaskConfig(name="t1", prompt="x", goal="g", max_validation_attempts=2),
             goal_text="g",
             rendered_task_prompt="TASK",
             worker_process=worker_process,
@@ -439,7 +595,7 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
     assert err.output_tokens == 3 + 5 + 4
 
 
-async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
+async def test_run_validation_loop_parse_retry_succeeds(tmp_path):
     worker_process, _ = _make_worker_process([])
     initial_result = ReActResult(
         final_response=make_response("done"),
@@ -455,7 +611,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
         ]
     )
 
-    outcome = await run_goal_loop(
+    outcome = await run_validation_loop(
         task=TaskConfig(name="t1", prompt="x", goal="g"),
         goal_text="g",
         rendered_task_prompt="TASK",
@@ -473,7 +629,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
     assert outcome.total_output_tokens == 5 + 7
 
 
-async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
+async def test_run_validation_loop_parse_retry_fails_raises(tmp_path):
     worker_process, _ = _make_worker_process([])
     initial_result = ReActResult(
         final_response=make_response("done"),
@@ -489,8 +645,8 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
         ]
     )
 
-    with pytest.raises(GoalParseError) as exc_info:
-        await run_goal_loop(
+    with pytest.raises(ReviewerParseError) as exc_info:
+        await run_validation_loop(
             task=TaskConfig(name="t1", prompt="x", goal="g"),
             goal_text="g",
             rendered_task_prompt="TASK",
@@ -508,7 +664,7 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
     assert err.output_tokens == 3 + 4
 
 
-async def test_run_goal_loop_fires_callbacks(tmp_path):
+async def test_run_validation_loop_fires_callbacks(tmp_path):
     events: list = []
     cb_set = CallbackSet()
 
@@ -535,7 +691,7 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         ]
     )
 
-    await run_goal_loop(
+    await run_validation_loop(
         task=TaskConfig(name="t1", prompt="x", goal="g"),
         goal_text="g",
         rendered_task_prompt="TASK",
