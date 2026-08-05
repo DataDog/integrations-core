@@ -3,10 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from typing import Any, cast
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.proxmox.config_models import ConfigMixin
 
@@ -26,6 +28,8 @@ from .constants import (
 )
 from .resource_filters import create_resource_filter, is_resource_collected_by_filters
 
+NULL_DEFAULT = object()
+
 
 def resource_type_for_event_type(event_type):
     if event_type.startswith('vz'):
@@ -42,7 +46,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(ProxmoxCheck, self).__init__(name, init_config, instances)
         self.all_resources = {}
-        self.last_event_collect_time = get_current_datetime()
+        self.initial_event_collect_time = get_current_datetime()
+        self.last_event_collect_times = {}
         self.resource_filters = self._parse_resource_filters(self.instance.get('resource_filters', []))
         self.check_initializations.append(self._parse_config)
 
@@ -145,6 +150,51 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                     metric_tags = list(tags) + [f'infra_mode:{infra_mode}']
                 metric_method(f'{metric_name_remapped}', metric_value, tags=metric_tags, hostname=hostname)
 
+    def _extract_data[T](
+        self,
+        response_json: object,
+        url: str,
+        expected_type: type[T],
+        null_default: T | object = NULL_DEFAULT,
+    ) -> T:
+        """Extract and validate data from a Proxmox API response."""
+        if not isinstance(response_json, dict):
+            raise CheckException(f"Proxmox API returned an invalid response for {url}: expected an object")
+
+        data = response_json.get('data')
+        if data is None:
+            if message := response_json.get('message'):
+                raise CheckException(f"Proxmox API returned an error for {url}: {message}")
+            if null_default is not NULL_DEFAULT:
+                return cast(T, null_default)
+            raise CheckException(f"Proxmox API returned null data for {url}")
+
+        if not isinstance(data, expected_type):
+            raise CheckException(
+                f"Proxmox API returned invalid data for {url}: expected {expected_type.__name__}, "
+                f"got {type(data).__name__}"
+            )
+
+        return data
+
+    def _response_data[T](
+        self,
+        response: Any,
+        url: str,
+        expected_type: type[T],
+        null_default: T | object = NULL_DEFAULT,
+    ) -> T:
+        """Raise API errors and return validated response data."""
+        try:
+            response_json = response.json()
+        except JSONDecodeError:
+            response.raise_for_status()
+            raise
+
+        data = self._extract_data(response_json, url, expected_type, null_default)
+        response.raise_for_status()
+        return data
+
     def _get_vm_hostname(self, vm_id, vm_name, node):
         try:
             url = f"{self.config.proxmox_server}/nodes/{node}/qemu/{vm_id}/agent/get-host-name"
@@ -211,9 +261,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def _collect_ha_metrics(self):
         self.log.debug("Collecting HA metrics")
-        ha_response = self.http.get(f"{self.config.proxmox_server}/cluster/ha/status/current")
-        ha_response_json = ha_response.json()
-        ha_statuses = ha_response_json.get('data', [])
+        url = f"{self.config.proxmox_server}/cluster/ha/status/current"
+        ha_response = self.http.get(url)
+        ha_statuses = self._response_data(ha_response, url, list, [])
         for ha_status in ha_statuses:
             if not ha_status.get('type') == 'quorum':
                 continue
@@ -228,15 +278,16 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def _collect_performance_metrics(self):
         self.log.debug("Collecting performance metrics")
-        metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
-        if not metrics_response.ok:
+        url = f"{self.config.proxmox_server}/cluster/metrics/export"
+        metrics_response = self.http.get(url)
+        if metrics_response.status_code in {404, 501}:
             self.log.warning(
                 "Performance metrics endpoint not available (HTTP %s), skipping collection",
                 metrics_response.status_code,
             )
             return
-        metrics_response_json = metrics_response.json()
-        metrics = metrics_response_json.get('data', {}).get('data', [])
+        metrics_response_data = self._response_data(metrics_response, url, dict)
+        metrics = self._extract_data(metrics_response_data, f"{url} response data", list, [])
 
         for metric in metrics:
             resource_id = metric.get('id')
@@ -258,9 +309,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def _collect_resource_metrics(self):
         self.log.debug("Collecting resource metrics.")
-        resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
-        resources_response_json = resources_response.json()
-        resources = resources_response_json.get("data", [])
+        url = f"{self.config.proxmox_server}/cluster/resources"
+        resources_response = self.http.get(url)
+        resources = self._response_data(resources_response, url, list)
 
         external_tags = []
         all_resources = {}
@@ -359,18 +410,21 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 continue
 
             node_name = resource.get('hostname')
-            since = int(get_timestamp(self.last_event_collect_time))
+            last_collect_time = self.last_event_collect_times.get(node_name, self.initial_event_collect_time)
+            since = int(get_timestamp(last_collect_time))
             self.log.debug("Collecting events for node %s since %s", node_name, since)
 
-            now = get_current_datetime()
+            collection_time = get_current_datetime()
             params = {'since': since}
-            response = self.http.get(f"{self.config.proxmox_server}/nodes/{node_name}/tasks", params=params)
-            response.raise_for_status()
+            url = f"{self.config.proxmox_server}/nodes/{node_name}/tasks"
+            try:
+                response = self.http.get(url, params=params)
+                tasks = self._response_data(response, url, list, [])
+            except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, CheckException) as e:
+                self.log.warning("Failed to collect tasks for node %s; endpoint: %s; %s", node_name, url, e)
+                continue
 
-            response_json = response.json().get("data", [])
-            self.last_event_collect_time = now
-
-            for task in response_json:
+            for task in tasks:
                 task_type = task.get('type')
 
                 if task_type not in self.config.collected_task_types:
@@ -381,17 +435,18 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                     self.log.debug("Submitting event %s", event)
                     self.event(event)
 
+            self.last_event_collect_times[node_name] = collection_time
+
     def check(self, _):
         try:
-            response = self.http.get(f"{self.config.proxmox_server}/version")
-            response.raise_for_status()
-
-            response_json = response.json()
-            version = response_json.get("data", {}).get("version")
+            url = f"{self.config.proxmox_server}/version"
+            response = self.http.get(url)
+            version_data = self._response_data(response, url, dict)
+            version = version_data.get("version")
             self.set_metadata('version', version)
             self.gauge("api.up", 1, tags=self.base_tags + ['proxmox_status:up'])
 
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, CheckException) as e:
             self.log.error(
                 "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
             )
