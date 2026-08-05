@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import socket
 import subprocess
+import threading
 import time
 
 import mock
@@ -910,3 +912,64 @@ class TestReplicaReplicationStatusParameterized:
         for call in mock_cursor.execute.call_args_list:
             query_str = call[0][0]
             assert channel not in query_str
+
+
+def test_can_connect_fires_critical_on_read_timeout():
+    """
+    mysql.can_connect must fire CRITICAL when MySQL accepts the TCP connection
+    but never sends the server greeting (e.g. during InnoDB recovery after restart).
+
+    Without a read_timeout the check hangs indefinitely and emits nothing.
+    This test verifies that the default read_timeout=10 is passed through to
+    pymysql so that a socket-level hang triggers an OperationalError, which
+    _connect() catches and turns into a CRITICAL service check.
+    """
+    # TCP server that completes the handshake but never sends any data,
+    # simulating a MySQL process frozen mid-startup.
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(('127.0.0.1', 0))
+    server.listen(1)
+    port = server.getsockname()[1]
+
+    accepted = []
+
+    def _accept():
+        conn, _ = server.accept()
+        accepted.append(conn)  # hold the connection open but send nothing
+
+    threading.Thread(target=_accept, daemon=True).start()
+
+    instance = {
+        'host': '127.0.0.1',
+        'port': port,
+        'username': 'dog',
+        'password': 'dog',
+        'read_timeout': 2,  # keep the test fast; default is 10
+    }
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+
+    service_checks = []
+    original = check.service_check
+
+    def capture(name, status, *args, **kwargs):
+        service_checks.append((name, status))
+        return original(name, status, *args, **kwargs)
+
+    check.service_check = capture
+
+    start = time.time()
+    with pytest.raises(Exception):
+        check.check(None)
+    elapsed = time.time() - start
+
+    server.close()
+    for conn in accepted:
+        conn.close()
+
+    assert any(name == 'mysql.can_connect' and status == MySql.CRITICAL for name, status in service_checks), (
+        f"Expected mysql.can_connect CRITICAL, got {service_checks}"
+    )
+
+    # Should fire within a reasonable multiple of read_timeout, not hang forever
+    assert elapsed < 10, f"Check took {elapsed:.1f}s — read_timeout not enforced"
