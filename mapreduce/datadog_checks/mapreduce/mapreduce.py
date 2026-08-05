@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError,
     HTTPInvalidURLError,
+    HTTPRequestError,
     HTTPStatusError,
     HTTPTimeoutError,
 )
@@ -429,7 +430,9 @@ class MapReduceCheck(AgentCheck):
             self._critical_service(service_name, service_check_tags, "JSON Parse failed: {}, {}".format(url, e))
             raise
 
-        except ValueError as e:
+        # HTTPRequestError is the translator's fallthrough type. It carries requests'
+        # InvalidHeader, which subclassed ValueError and so reached this arm before the migration.
+        except (ValueError, HTTPRequestError) as e:
             self._critical_service(service_name, service_check_tags, str(e))
             raise
 

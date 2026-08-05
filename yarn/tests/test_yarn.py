@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPSSLError
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
     APPLICATION_STATUS_SERVICE_CHECK,
@@ -286,6 +286,32 @@ def test_ssl_verification_error(aggregator, mock_http):
         tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=1,
     )
+
+
+def test_malformed_header_still_reports_critical(aggregator, mock_http):
+    """A server-sent malformed header must still emit yarn.can_connect.
+
+    urllib3 raises InvalidHeader for a multi-valued Content-Length and requests re-raises it as
+    its own InvalidHeader, which subclasses ValueError. The agnostic translator has no equivalent
+    subtype and collapses it into a bare HTTPRequestError, so the last arm has to name that type.
+    """
+    message = 'Content-Length contained multiple unmatching values'
+    mock_http.get.side_effect = HTTPRequestError(message)
+    instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    with pytest.raises(HTTPRequestError, match=message):
+        yarn.check(instance)
+
+    aggregator.assert_service_check(
+        SERVICE_CHECK_NAME,
+        status=YarnCheck.CRITICAL,
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=1,
+    )
+    # Merge base reported the bare error text here, not the "Request failed" prefix that the
+    # status/connection arm uses. Pin it so the fix stays on the last arm.
+    assert aggregator.service_checks(SERVICE_CHECK_NAME)[0].message == message
 
 
 def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):

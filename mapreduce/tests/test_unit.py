@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.mapreduce import MapReduceCheck
 
@@ -171,3 +172,24 @@ def test_disable_legacy_cluster_tag(aggregator, dd_run_check, mocked_request):
             tags=attributes["tags"] + expected_tags,
             count=1,
         )
+
+
+def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
+    """A server-sent malformed header must still emit mapreduce.resource_manager.can_connect.
+
+    urllib3 raises InvalidHeader for a multi-valued Content-Length and requests re-raises it as
+    its own InvalidHeader, which subclasses ValueError. The agnostic translator has no equivalent
+    subtype and collapses it into a bare HTTPRequestError, so the last arm has to name that type.
+    """
+    message = 'Content-Length contained multiple unmatching values'
+    mock_http.get.side_effect = HTTPRequestError(message)
+    instance = MR_CONFIG['instances'][0]
+    mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
+
+    with pytest.raises(Exception, match=message):
+        dd_run_check(mapreduce)
+
+    aggregator.assert_service_check(MapReduceCheck.YARN_SERVICE_CHECK, status=MapReduceCheck.CRITICAL, count=1)
+    # Merge base reported the bare error text here, not the "Request failed" prefix that the
+    # status/connection arm uses. Pin it so the fix stays on the last arm.
+    assert aggregator.service_checks(MapReduceCheck.YARN_SERVICE_CHECK)[0].message == message

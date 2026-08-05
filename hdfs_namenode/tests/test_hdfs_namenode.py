@@ -4,6 +4,7 @@
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
@@ -88,6 +89,27 @@ def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check,
 
     message = aggregator.service_checks(HDFSNameNode.JMX_SERVICE_CHECK)[0].message
     assert message.startswith('JSON Parse failed: {}'.format(NAMENODE_URI))
+
+
+def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
+    """A server-sent malformed header must still emit hdfs.namenode.jmx.can_connect.
+
+    urllib3 raises InvalidHeader for a multi-valued Content-Length and requests re-raises it as
+    its own InvalidHeader, which subclasses ValueError. The agnostic translator has no equivalent
+    subtype and collapses it into a bare HTTPRequestError, so the last arm has to name that type.
+    """
+    message = 'Content-Length contained multiple unmatching values'
+    mock_http.get.side_effect = HTTPRequestError(message)
+    instance = HDFS_NAMENODE_CONFIG['instances'][0]
+    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
+
+    with pytest.raises(Exception, match=message):
+        dd_run_check(hdfs_namenode)
+
+    aggregator.assert_service_check(HDFSNameNode.JMX_SERVICE_CHECK, status=HDFSNameNode.CRITICAL, count=1)
+    # Merge base reported the bare error text here, not the "Request failed" prefix that the
+    # status/connection arm uses. Pin it so the fix stays on the last arm.
+    assert aggregator.service_checks(HDFSNameNode.JMX_SERVICE_CHECK)[0].message == message
 
 
 def test_auth():

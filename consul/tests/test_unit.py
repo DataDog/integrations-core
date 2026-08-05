@@ -6,7 +6,13 @@ import logging
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPInvalidURLError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPInvalidURLError,
+    HTTPReadTimeoutError,
+    HTTPRequestError,
+    HTTPSSLError,
+    HTTPStatusError,
+)
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
 
@@ -745,6 +751,48 @@ def test_prometheus_endpoint_invalid_url_does_not_abort_check(aggregator, caplog
 
     assert 'does not support the prometheus endpoint' in caplog.text
     aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
+
+
+def test_prometheus_endpoint_malformed_header_does_not_abort_check(aggregator, caplog):
+    """A server-sent malformed header must be swallowed here, not abort check() at its first statement.
+
+    urllib3 raises InvalidHeader for a multi-valued Content-Length and requests re-raises it as
+    its own InvalidHeader, which subclasses ValueError. The agnostic translator has no equivalent
+    subtype and collapses it into a bare HTTPRequestError.
+    """
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(
+        side_effect=HTTPRequestError('Content-Length contained multiple unmatching values')
+    )
+    caplog.set_level(logging.WARNING)
+
+    consul_check.check(None)
+
+    assert 'does not support the prometheus endpoint' in caplog.text
+    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
+
+
+@pytest.mark.parametrize(
+    'exception',
+    [
+        pytest.param(HTTPReadTimeoutError('read timed out'), id='read_timeout'),
+        pytest.param(HTTPSSLError('certificate verify failed'), id='ssl'),
+    ],
+)
+def test_prometheus_endpoint_transport_failures_still_abort_check(exception):
+    """Transport failures say nothing about the Consul version, and merge base propagated them.
+
+    They are HTTPRequestError subclasses, so the widened arm above has to let them back out.
+    """
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(side_effect=exception)
+
+    with pytest.raises(type(exception)):
+        consul_check.check(None)
 
 
 def test_prometheus_endpoint_status_error_without_response_is_surfaced(aggregator):

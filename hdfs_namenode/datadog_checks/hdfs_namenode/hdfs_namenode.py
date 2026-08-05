@@ -13,6 +13,7 @@ from datadog_checks.base.utils.common import compute_percent
 from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError,
     HTTPInvalidURLError,
+    HTTPRequestError,
     HTTPStatusError,
     HTTPTimeoutError,
 )
@@ -183,7 +184,9 @@ class HDFSNameNode(AgentCheck):
             )
             raise
 
-        except ValueError as e:
+        # HTTPRequestError is the translator's fallthrough type. It carries requests'
+        # InvalidHeader, which subclassed ValueError and so reached this arm before the migration.
+        except (ValueError, HTTPRequestError) as e:
             self.service_check(self.JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags, message=str(e))
             raise
 

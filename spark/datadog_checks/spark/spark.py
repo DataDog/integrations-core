@@ -14,6 +14,7 @@ from datadog_checks.base.utils.http_exceptions import (
 from datadog_checks.base.utils.http_exceptions import (
     HTTPInvalidURLError,
     HTTPReadTimeoutError,
+    HTTPRequestError,
     HTTPStatusError,
     HTTPTimeoutError,
 )
@@ -705,7 +706,9 @@ class SparkCheck(AgentCheck):
             )
             raise
 
-        except ValueError as e:
+        # HTTPRequestError is the translator's fallthrough type. It carries requests'
+        # InvalidHeader, which subclassed ValueError and so reached this arm before the migration.
+        except (ValueError, HTTPRequestError) as e:
             self.service_check(service_name, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
 
