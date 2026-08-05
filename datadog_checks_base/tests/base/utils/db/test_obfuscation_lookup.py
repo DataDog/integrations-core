@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Unit tests for ObfuscationLookup."""
 
+from unittest import mock
+
 from datadog_checks.base.utils.db.obfuscation_lookup import ObfuscationLookup
 
 
@@ -60,10 +62,32 @@ class TestObfuscationLookup:
 
     def test_populate_returns_results(self):
         lk = self._make_lookup()
-        results = lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        results, failures = lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
         assert (1, 1, 1) in results
         assert (2, 1, 1) in results
         assert results[(1, 1, 1)].obfuscated_query is not None
+        assert failures == set()
+
+    def test_populate_reports_obfuscation_failures(self):
+        lk = self._make_lookup()
+
+        def obfuscate(raw_text, _options):
+            if raw_text == 'BAD':
+                raise RuntimeError('cannot obfuscate')
+            return {'query': raw_text, 'metadata': {}}
+
+        with mock.patch(
+            'datadog_checks.base.utils.db.obfuscation_lookup.obfuscate_sql_with_metadata',
+            side_effect=obfuscate,
+        ):
+            results, failures = lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'BAD'})
+
+        assert (1, 1, 1) in results
+        assert failures == {(2, 1, 1)}
+        # The failed key is not cached either way, so it stays a miss until the caller ignores it.
+        assert lk.key_map_size == 1
+        _, misses = lk.lookup({(2, 1, 1)})
+        assert misses == {(2, 1, 1)}
 
     def test_evict_does_not_remove_shared_signature(self):
         """Evicting one key removes tier-1 mapping but keeps tier-2 if other keys share it."""

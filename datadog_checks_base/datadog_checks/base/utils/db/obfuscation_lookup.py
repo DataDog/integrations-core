@@ -149,13 +149,21 @@ class ObfuscationLookup[K: Hashable]:
             self._trim_ignored()
             logger.debug("mark_ignored: added=%d ignored_map=%d", len(keys), len(self._ignored_keys))
 
-    def populate(self, raw_texts: dict[K, str]) -> dict[K, ObfuscationResult]:
-        """Obfuscate raw texts, store results, and return key -> ObfuscationResult."""
+    def populate(self, raw_texts: dict[K, str]) -> tuple[dict[K, ObfuscationResult], set[K]]:
+        """Obfuscate raw texts and store the results.
+
+        Returns (results, failures), where failures are the keys whose text could not be
+        obfuscated. Obfuscation depends only on the text, so a failure will recur for as long as
+        the key keeps resolving to that text; callers that know the text is stable should pass
+        these to :meth:`mark_ignored` rather than re-fetching them every collection.
+        """
         results: dict[K, ObfuscationResult] = {}
+        failures: set[K] = set()
 
         for key, raw_text in raw_texts.items():
             result = self._obfuscate_single(raw_text)
             if result is None:
+                failures.add(key)
                 continue
 
             self._key_to_sig[key] = result.query_signature
@@ -170,13 +178,14 @@ class ObfuscationLookup[K: Hashable]:
             results[key] = result
 
         logger.debug(
-            "populate: input=%d obfuscated=%d key_map=%d sig_map=%d",
+            "populate: input=%d obfuscated=%d failed=%d key_map=%d sig_map=%d",
             len(raw_texts),
             len(results),
+            len(failures),
             len(self._key_to_sig),
             len(self._sig_to_result),
         )
-        return results
+        return results, failures
 
     def evict(self, keys: set[K]) -> None:
         """Forget all state (positive and negative) for keys that left the source table."""
