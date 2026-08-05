@@ -67,6 +67,45 @@ def datadog_agent():
     return __datadog_agent
 
 
+@pytest.fixture
+def mock_os_interface():
+    """Install a ``MockOSInterface`` at every seam a check reaches the OS layer through.
+
+    A check performs filesystem and subprocess operations either through the
+    per-instance ``self.os_interface`` property or through the module-level
+    ``os_interface`` singleton (used by module-level helper functions). This
+    fixture patches both to the same double for the duration of the test, so a
+    test configures one object without having to know which seam the code under
+    test uses. Configure it declaratively::
+
+        def test_check(mock_os_interface, dd_run_check):
+            mock_os_interface.add_file('/proc/stat', 'cpu 1 2 3')
+            mock_os_interface.set_command_output('netstat -i', stdout='...')
+            ...
+
+    or drive the underlying MagicMocks directly (``mock_os_interface.popen.side_effect = [...]``).
+    """
+    try:
+        from unittest import mock
+
+        from datadog_checks.base import AgentCheck
+        from datadog_checks.base.stubs.os_interface import METHOD_NAMES, MockOSInterface
+        from datadog_checks.base.utils import os_interface as os_interface_module
+    except ImportError:
+        raise ImportError('datadog-checks-base is not installed!')
+
+    fake = MockOSInterface()
+
+    # Patching the singleton's methods, rather than rebinding the name, reaches
+    # every module that did `from ... import os_interface`.
+    singleton_patches = {name: getattr(fake, name) for name in METHOD_NAMES}
+    with (
+        mock.patch.object(AgentCheck, 'os_interface', new_callable=mock.PropertyMock, return_value=fake),
+        mock.patch.multiple(os_interface_module.os_interface, **singleton_patches),
+    ):
+        yield fake
+
+
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment_runner(request):
     # Skip the runner if the skip environment variable is specified
