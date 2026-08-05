@@ -545,14 +545,17 @@ class OpenStackCheck(AgentCheck):
             resp.raise_for_status()
         except HTTPStatusError as e:
             self.log.debug("Error contacting openstack endpoint: %s", e)
-            if resp.status_code == 401:
+            # The auth-token seam raises before the request is sent, so there is neither a response on
+            # the error nor a local one to read: an unknown status matches none of the cases below.
+            status_code = e.response.status_code if e.response is not None else None
+            if status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
 
                 # Delete the scope, we'll populate a new one on the next run for this instance
                 self.delete_current_scope()
-            elif resp.status_code == 409:
+            elif status_code == 409:
                 raise InstancePowerOffFailure()
-            elif resp.status_code == 404:
+            elif status_code == 404:
                 raise e
             else:
                 raise

@@ -30,6 +30,26 @@ def test_check_registries_health(aggregator, harbor_check, harbor_api):
 
 
 @pytest.mark.usefixtures("patch_requests")
+def test_check_registries_health_reraises_when_the_status_is_unknown(harbor_check, harbor_api):
+    # 401 and 403 are what mean the configured user is not an admin, the one case where skipping the
+    # registry checks is right. The auth-token poll raises before the request is sent, so its error
+    # carries no response and no status: nothing there says the user lacks permission.
+    harbor_api.http.get.side_effect = HTTPStatusError('failed to fetch auth token')
+
+    with pytest.raises(HTTPStatusError):
+        harbor_check._check_registries_health(harbor_api, ['tag1:val1'])
+
+
+@pytest.mark.usefixtures("patch_requests")
+def test_submit_disk_metrics_reraises_when_the_status_is_unknown(harbor_check, harbor_api):
+    # Same contract as the registries check above, on the endpoint that only an admin may read.
+    harbor_api.http.get.side_effect = HTTPStatusError('failed to fetch auth token')
+
+    with pytest.raises(HTTPStatusError):
+        harbor_check._submit_disk_metrics(harbor_api, ['tag1:val1'])
+
+
+@pytest.mark.usefixtures("patch_requests")
 def test_submit_project_metrics(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._submit_project_metrics(harbor_api, tags)
