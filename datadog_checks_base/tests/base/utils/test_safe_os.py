@@ -873,3 +873,19 @@ def test_resolve_path_still_resolves(sos, tmp_path):
     # does not. Callers that need the resolved form keep using resolve_path.
     p = tmp_path / 'x'
     assert sos.resolve_path(str(p)) == os.path.realpath(str(p))
+
+
+def test_tls_ca_cert_directory_probe_goes_through_safe_os(tmp_path):
+    """The one direct filesystem call in the TLS builder is mediated.
+
+    Everything else it does with a certificate path is handed to ssl, which
+    opens the file itself and cannot be intercepted.
+    """
+    from datadog_checks.base.utils import tls
+
+    capath = tmp_path / "certs"
+    capath.mkdir()
+    with mock.patch.object(tls.safe_os, 'isdir', wraps=tls.safe_os.isdir) as isdir:
+        with mock.patch('ssl.SSLContext.load_verify_locations'):
+            tls.create_ssl_context({'tls_verify': True, 'tls_ca_cert': str(capath)})
+    isdir.assert_called_once_with(str(capath))
