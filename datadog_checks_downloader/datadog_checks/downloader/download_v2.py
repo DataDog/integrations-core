@@ -27,6 +27,7 @@ from .exceptions import (
     MissingVersion,
     TargetNotFoundError,
 )
+from .network import create_tuf_fetcher
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,7 @@ class TUFPointerDownloader:
             target_dir=str(target_dir),
             config=UpdaterConfig(prefix_targets_with_hash=True),
             bootstrap=(metadata_dir / 'root.json').read_bytes(),
+            fetcher=create_tuf_fetcher(),
         )
 
     @staticmethod

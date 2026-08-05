@@ -36,6 +36,7 @@ from .exceptions import (
     RevokedDeveloperOrMachine,
     TargetNotFoundError,
 )
+from .network import create_tuf_fetcher
 from .parameters import substitute
 
 # After we import everything we need, shut off all existing loggers.
@@ -117,12 +118,8 @@ class TUFDownloader:
             target_base_url=f'{repository_url_prefix}/targets/',
             target_dir=self.__targets_dir,
             bootstrap=None,
+            fetcher=create_tuf_fetcher(socket_timeout=60),
         )
-
-        # Increase the fetcher timeout by relying on python-tuf internals.
-        # - https://github.com/theupdateframework/python-tuf/blob/v7.0.0/tuf/ngclient/updater.py
-        # - https://github.com/theupdateframework/python-tuf/blob/v7.0.0/tuf/ngclient/urllib3_fetcher.py
-        self.__updater._fetcher.socket_timeout = 60
 
         # NOTE: Update to the latest top-level role metadata only ONCE, so that
         # we use the same consistent snapshot to download targets.

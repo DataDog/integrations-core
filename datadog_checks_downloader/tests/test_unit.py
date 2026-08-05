@@ -24,6 +24,7 @@ from datadog_checks.downloader.download import TUFDownloader, _load_public_keys
 from datadog_checks.downloader.exceptions import TargetNotFoundError
 
 HTTPS_RESPONSE = b'downloader TLS test response'
+CA_BUNDLE_VARIABLES = ('SSL_CERT_FILE', 'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE')
 
 
 class HTTPSRequestHandler(BaseHTTPRequestHandler):
@@ -144,10 +145,15 @@ def test_tuf_downloader_explicitly_uses_cached_root_as_bootstrap(mocker):
     assert updater.call_args.kwargs['bootstrap'] is None
 
 
-def test_tuf_fetcher_trusts_ssl_cert_file(mocker, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+@pytest.mark.parametrize('ca_bundle_variable', CA_BUNDLE_VARIABLES)
+def test_tuf_fetcher_trusts_ca_bundle_environment_variable(
+    mocker, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, ca_bundle_variable: str
+) -> None:
     mocker.patch('datadog_checks.downloader.download.Updater.refresh')
     with _local_https_server(tmp_path) as (url, ca_path):
-        monkeypatch.setenv('SSL_CERT_FILE', str(ca_path))
+        for variable in CA_BUNDLE_VARIABLES:
+            monkeypatch.delenv(variable, raising=False)
+        monkeypatch.setenv(ca_bundle_variable, str(ca_path))
         monkeypatch.setenv('NO_PROXY', 'localhost')
         monkeypatch.setenv('no_proxy', 'localhost')
         downloader = TUFDownloader()
