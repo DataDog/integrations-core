@@ -483,6 +483,16 @@ async def test_run_validation_loop_deterministic_exhaustion_never_creates_review
         context_usage=None,
     )
     factory, builder_calls, reviewer_agent = _reviewer_factory([])
+    events: list[tuple[str, bool | None]] = []
+    callback_set = CallbackSet()
+
+    @callback_set.on_before_task_validation
+    async def _before(_phase_id: str, _task_name: str, _attempt: int) -> None:
+        events.append(("before", None))
+
+    @callback_set.on_after_task_validation
+    async def _after(_phase_id: str, _task_name: str, _attempt: int, valid: bool, _reason: str) -> None:
+        events.append(("after", valid))
 
     with pytest.raises(ValidationAttemptsExhausted, match=r"(?s)Last validation reason.*required_field") as exc_info:
         await run_validation_loop(
@@ -493,7 +503,7 @@ async def test_run_validation_loop_deterministic_exhaustion_never_creates_review
             initial_result=initial_result,
             parent_agent_config=make_agent_config(tools=[]),
             process_factory=factory,
-            callbacks=Callbacks(),
+            callbacks=Callbacks([callback_set]),
             phase_id="p1",
             compact_if_needed=_noop_compact,
             deterministic_checks=(
@@ -505,6 +515,7 @@ async def test_run_validation_loop_deterministic_exhaustion_never_creates_review
     assert worker_agent.send_calls == []
     assert reviewer_agent.send_calls == []
     assert builder_calls == []
+    assert events == [("before", None), ("after", False)]
 
 
 async def test_run_validation_loop_accepts_passing_deterministic_checks_without_goal() -> None:
@@ -691,11 +702,11 @@ async def test_run_validation_loop_fires_callbacks(tmp_path):
     events: list = []
     cb_set = CallbackSet()
 
-    @cb_set.on_before_goal_check
+    @cb_set.on_before_task_validation
     async def _before(phase_id: str, task_name: str, attempt: int) -> None:
         events.append(("before", phase_id, task_name, attempt))
 
-    @cb_set.on_after_goal_check
+    @cb_set.on_after_task_validation
     async def _after(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
         events.append(("after", phase_id, task_name, attempt, valid, reason))
 

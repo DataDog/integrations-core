@@ -16,7 +16,7 @@ from ddev.ai.tools.core.types import ToolResult
 from ddev.cli.meta.ai.tui.bridge import build_app_callback_set
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
-    AfterGoalCheck,
+    AfterTaskValidation,
     AgentBeforeSend,
     AgentErrored,
     AgentFinished,
@@ -24,7 +24,7 @@ from ddev.cli.meta.ai.tui.messages import (
     AgentStarted,
     AgentToolCalled,
     BeforeCompact,
-    BeforeGoalCheck,
+    BeforeTaskValidation,
     ContextCleared,
     PhaseErrored,
     PhaseFinished,
@@ -86,8 +86,8 @@ class StubOrchestrator:
         await self.cb_set.fire_context_cleared(SCOPE)
         await self.cb_set.fire_agent_finish(SCOPE, _make_react_result())
         await self.cb_set.fire_agent_error(SCOPE, ValueError("boom"))
-        await self.cb_set.fire_before_goal_check("phase1", "task1", 1)
-        await self.cb_set.fire_after_goal_check("phase1", "task1", 1, True, "looks good")
+        await self.cb_set.fire_before_task_validation("phase1", "task1", 1)
+        await self.cb_set.fire_after_task_validation("phase1", "task1", 1, True, "looks good")
 
 
 # ---------------------------------------------------------------------------
@@ -213,16 +213,16 @@ async def test_agent_errored_payload(received_from_stub):
     assert str(msgs[0].error) == "boom"
 
 
-async def test_before_goal_check_payload(received_from_stub):
-    msgs = [m for m in received_from_stub if isinstance(m, BeforeGoalCheck)]
+async def test_before_task_validation_payload(received_from_stub):
+    msgs = [m for m in received_from_stub if isinstance(m, BeforeTaskValidation)]
     assert len(msgs) == 1
     assert msgs[0].phase_id == "phase1"
     assert msgs[0].task_name == "task1"
     assert msgs[0].attempt == 1
 
 
-async def test_after_goal_check_payload(received_from_stub):
-    msgs = [m for m in received_from_stub if isinstance(m, AfterGoalCheck)]
+async def test_after_task_validation_payload(received_from_stub):
+    msgs = [m for m in received_from_stub if isinstance(m, AfterTaskValidation)]
     assert len(msgs) == 1
     assert msgs[0].phase_id == "phase1"
     assert msgs[0].task_name == "task1"

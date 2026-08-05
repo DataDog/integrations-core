@@ -22,7 +22,7 @@ from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.palette import STATUS_DONE, STATUS_FAILED, STATUS_PENDING, STATUS_RUNNING
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
-    AfterGoalCheck,
+    AfterTaskValidation,
     AgentBeforeSend,
     AgentErrored,
     AgentFinished,
@@ -30,7 +30,7 @@ from ddev.cli.meta.ai.tui.messages import (
     AgentStarted,
     AgentToolCalled,
     BeforeCompact,
-    BeforeGoalCheck,
+    BeforeTaskValidation,
     ContextCleared,
     PhaseErrored,
     PhaseFinished,
@@ -185,8 +185,8 @@ class TogoApp(App):
     async def on_context_cleared(self, msg: ContextCleared) -> None:
         self._record(msg)
 
-    async def on_before_goal_check(self, msg: BeforeGoalCheck) -> None:
+    async def on_before_task_validation(self, msg: BeforeTaskValidation) -> None:
         self._record(msg)
 
-    async def on_after_goal_check(self, msg: AfterGoalCheck) -> None:
+    async def on_after_task_validation(self, msg: AfterTaskValidation) -> None:
         self._record(msg)

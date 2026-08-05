@@ -454,11 +454,13 @@ async def run_validation_loop(
     try:
         while True:
             attempts += 1
+            await callbacks.fire_before_task_validation(phase_id, task.name, attempts)
             failure_reason = run_deterministic_checks(deterministic_checks).failure_reason()
             reviewer_feedback: tuple[str, str] | None = None
 
             if failure_reason is None:
                 if goal_text is None:
+                    await callbacks.fire_after_task_validation(phase_id, task.name, attempts, True, "")
                     return ValidationLoopOutcome(
                         final_result=worker_result,
                         attempts=attempts,
@@ -483,19 +485,12 @@ async def run_validation_loop(
                 if needs_reset:
                     await reviewer_process.reset()
 
-                await callbacks.fire_before_goal_check(phase_id, task.name, attempts)
                 reviewer_result = await _run_reviewer_once(reviewer_process, user_message)
                 previous_check = reviewer_result
                 total_in += reviewer_result.input_tokens
                 total_out += reviewer_result.output_tokens
-                await callbacks.fire_after_goal_check(
-                    phase_id,
-                    task.name,
-                    attempts,
-                    reviewer_result.valid,
-                    reviewer_result.reason,
-                )
                 if reviewer_result.valid:
+                    await callbacks.fire_after_task_validation(phase_id, task.name, attempts, True, "")
                     return ValidationLoopOutcome(
                         final_result=worker_result,
                         attempts=attempts,
@@ -505,6 +500,7 @@ async def run_validation_loop(
                 failure_reason = reviewer_result.reason
                 reviewer_feedback = (goal_text, reviewer_result.verdict_json)
 
+            await callbacks.fire_after_task_validation(phase_id, task.name, attempts, False, failure_reason)
             if attempts >= task.max_validation_attempts:
                 raise ValidationAttemptsExhausted(
                     f"Task {task.name!r} failed validation after "

@@ -32,6 +32,7 @@ from ddev.cli.meta.ai.rendering import (
     render_prompt_panel,
     render_response_header,
     render_response_text,
+    render_task_validation_line,
     render_tool_call_line,
     render_tool_result_line,
     render_web_fetch_line,
@@ -39,7 +40,7 @@ from ddev.cli.meta.ai.rendering import (
 )
 from ddev.cli.meta.ai.tui.app import OrchestratorLike
 from ddev.cli.meta.ai.tui.messages import (
-    AfterGoalCheck,
+    AfterTaskValidation,
     AgentBeforeSend,
     AgentErrored,
     AgentFinished,
@@ -47,7 +48,7 @@ from ddev.cli.meta.ai.tui.messages import (
     AgentStarted,
     AgentToolCalled,
     BeforeCompact,
-    BeforeGoalCheck,
+    BeforeTaskValidation,
     ContextCleared,
     ExecutionFailed,
     PhaseErrored,
@@ -426,14 +427,19 @@ class ExecutionScreen(TogoScreen):
             self._mark_phase_failed(phase_id)
         self._update_display()
 
-    def on_before_goal_check(self, msg: BeforeGoalCheck) -> None:
+    def on_before_task_validation(self, msg: BeforeTaskValidation) -> None:
         key = (msg.phase_id, msg.task_name)
         if key in self._task_statuses:
             self._task_statuses[key] = RunStatus.RUNNING
             self._update_display()
+        self._write_output(render_task_validation_line(msg.task_name, msg.attempt, None), phase_id=msg.phase_id)
 
-    def on_after_goal_check(self, msg: AfterGoalCheck) -> None:
+    def on_after_task_validation(self, msg: AfterTaskValidation) -> None:
         key = (msg.phase_id, msg.task_name)
         if key in self._task_statuses:
-            self._task_statuses[key] = RunStatus.DONE if msg.valid else RunStatus.FAILED
+            self._task_statuses[key] = RunStatus.DONE if msg.valid else RunStatus.RUNNING
             self._update_display()
+        self._write_output(
+            render_task_validation_line(msg.task_name, msg.attempt, msg.valid, msg.reason),
+            phase_id=msg.phase_id,
+        )

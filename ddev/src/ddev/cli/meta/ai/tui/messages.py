@@ -136,8 +136,8 @@ class AgentBeforeSend(Message):
         self.iteration = iteration
 
 
-class BeforeGoalCheck(Message):
-    """Fired immediately before each reviewer agent run for a task with a goal."""
+class BeforeTaskValidation(Message):
+    """Fired immediately before each validation attempt for a task."""
 
     def __init__(self, phase_id: str, task_name: str, attempt: int) -> None:
         super().__init__()
@@ -146,8 +146,8 @@ class BeforeGoalCheck(Message):
         self.attempt = attempt
 
 
-class AfterGoalCheck(Message):
-    """Fired after each reviewer agent run, with the parsed verdict."""
+class AfterTaskValidation(Message):
+    """Fired after each validation attempt, with its verdict."""
 
     def __init__(
         self,

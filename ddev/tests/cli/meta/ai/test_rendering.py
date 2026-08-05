@@ -42,6 +42,7 @@ from ddev.cli.meta.ai.rendering import (
     render_prompt_panel,
     render_response_header,
     render_response_text,
+    render_task_validation_line,
     render_tool_call_line,
     render_tool_result_line,
     render_web_fetch_line,
@@ -446,6 +447,16 @@ def test_render_context_cleared_notice_returns_text():
     result = render_context_cleared_notice()
     assert isinstance(result, Text)
     assert "context cleared" in result.plain.lower()
+
+
+def test_render_task_validation_line_distinguishes_progress_repair_and_success():
+    started = render_task_validation_line("write_code", 1, None)
+    repair = render_task_validation_line("write_code", 1, False, "rename `version`")
+    passed = render_task_validation_line("write_code", 2, True)
+
+    assert started.plain == "  ◆ validating · write_code · attempt 1"
+    assert repair.plain == "  ↻ repair requested · write_code · attempt 1\n    rename `version`"
+    assert passed.plain == "  ✓ validation passed · write_code · attempt 2"
 
 
 # ---------------------------------------------------------------------------

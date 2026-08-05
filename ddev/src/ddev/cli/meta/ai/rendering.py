@@ -29,6 +29,7 @@ from ddev.cli.meta.ai.palette import (
     STATUS_RUNNING,
     TOOL_CALL,
     TOOL_SEARCH,
+    WARNING,
 )
 
 if TYPE_CHECKING:
@@ -280,6 +281,27 @@ def render_compact_notice() -> Text:
 def render_context_cleared_notice() -> Text:
     """Build the context-cleared notice line."""
     return Text("  ↻ context cleared", style="dim")
+
+
+def render_task_validation_line(task_name: str, attempt: int, valid: bool | None, reason: str = "") -> Text:
+    """Build a validation progress line without presenting retries as terminal failures."""
+    if valid is None:
+        line = Text("  ◆ ", style=STATUS_RUNNING)
+        label = "validating"
+        color = STATUS_RUNNING
+    elif valid:
+        line = Text("  ✓ ", style=STATUS_DONE)
+        label = "validation passed"
+        color = STATUS_DONE
+    else:
+        line = Text("  ↻ ", style=WARNING)
+        label = "repair requested"
+        color = WARNING
+    line.append(label, style=f"bold {color}")
+    line.append(f" · {task_name} · attempt {attempt}", style="dim")
+    if reason:
+        line.append(f"\n    {reason}", style="dim")
+    return line
 
 
 def render_agent_finish_line(scope: AgentScope, result: ReActResult) -> Text:
