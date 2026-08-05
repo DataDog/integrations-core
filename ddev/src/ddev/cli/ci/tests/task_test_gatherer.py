@@ -54,10 +54,13 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
 
     It is constructed with the complete batch plan, keeps an in-memory registry of every job's full
     result across all batches and, on each finished batch, emits an ``UpdatePRComment`` carrying a
-    monotonically increasing ``revision`` and the whole accumulated state — as a ``DispatcherProgress``
-    snapshot covering every planned batch, including those still to run. ``done`` is derived from that
-    snapshot: it is set once no planned batch is left unfinished. It does not post to GitHub —
+    monotonically increasing ``revision`` and a ``DispatcherProgress`` snapshot covering every planned
+    batch, including those still to run. That snapshot is the message's whole payload; ``done`` is
+    derived from it, set once no planned batch is left unfinished. It does not post to GitHub —
     rendering the comment (and rejecting stale revisions) is a separate consumer's job.
+
+    ``WorkflowStatus``/``JobResult`` are kept as the local registry of what each batch reported. They
+    are not published: the snapshot is what consumers read.
 
     Every registry is keyed by ``batch_id``, the batch's logical identity, which stays stable across
     workflow attempts while ``run_id`` and the message id do not.
@@ -106,7 +109,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
                 self._logger.warning("Duplicate BatchFinished ignored", extra=log_extra)
                 return
             if results:
-                # The flat view counts job outcomes, so a run that reported none has no entry there;
+                # The registry records job outcomes, so a run that reported none has no entry there;
                 # the aggregate is where a batch that finished empty is recorded as failed.
                 self._results_by_batch[message.batch_id] = results
                 self._status_by_batch[message.batch_id] = status
@@ -141,8 +144,6 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         return UpdatePRComment(
             id=message_id,
             revision=revision,
-            done=done,
-            workflows=list(self._status_by_batch.values()),
             progress=DispatcherProgress(batches=tuple(self._progress_by_batch.values()), done=done),
         )
 

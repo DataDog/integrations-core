@@ -26,6 +26,7 @@ from ddev.cli.ci.tests.messages import (
     Platform,
     TestBatch,
     UpdatePRComment,
+    WorkflowStatus,
 )
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
@@ -167,16 +168,25 @@ def _batch_progress(update: UpdatePRComment, batch_id: str):
 
 def _totals(update: UpdatePRComment) -> tuple[int, int, int, int]:
     """The update's aggregate (passed, failed, skipped, complete) job counts."""
-    return (update.passed, update.failed, update.skipped, update.complete)
+    progress = update.progress
+    return (progress.passed, progress.failed, progress.skipped, progress.complete)
 
 
 def _failed_ids(result: JobResult) -> list[str]:
     return [case.identifier for case in result.failed_tests]
 
 
-def _find_result(update: UpdatePRComment, integration: str) -> JobResult:
+def _registry(gatherer: TaskTestGatherer) -> list[WorkflowStatus]:
+    """Every batch the gatherer has recorded, in the order it recorded them."""
+    return list(gatherer._status_by_batch.values())
+
+
+def _find_result(gatherer: TaskTestGatherer, integration: str) -> JobResult:
     return next(
-        result for workflow in update.workflows for result in workflow.results if result.integration == integration
+        result
+        for results in gatherer._results_by_batch.values()
+        for result in results
+        if result.integration == integration
     )
 
 
@@ -201,9 +211,8 @@ def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path) -> None
     update = messages[0]
     assert isinstance(update, UpdatePRComment)
     assert update.revision == 1
-    assert update.done is True
-    assert len(update.workflows) == 1
-    status = update.workflows[0]
+    assert update.progress.done is True
+    [status] = _registry(gatherer)
     assert status.id == 100
     assert status.success_count == 1
     assert status.failed_count == 0
@@ -232,7 +241,8 @@ def test_failure_path_records_failed_steps_and_reports(tmp_path: Path) -> None:
         )
     )
 
-    status = _drain_queue(gatherer.queue)[0].workflows[0]
+    _drain_queue(gatherer.queue)
+    [status] = _registry(gatherer)
     assert status.failed_count == 1
 
     result = gatherer._results_by_batch["batch-1"][0]
@@ -273,7 +283,8 @@ def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
     batch_jobs = [_batch_job_result(job) for job in jobs]
     gatherer.process_message(_batch_finished("", status="failure", run_id=300, batch_jobs=batch_jobs, timed_out=True))
 
-    status = _drain_queue(gatherer.queue)[0].workflows[0]
+    _drain_queue(gatherer.queue)
+    [status] = _registry(gatherer)
     assert status.failed_count == 2
     # The timeout is the batch's, not a step of any job: no step name is invented for it.
     assert {tuple(result.failed_steps) for result in status.results} == {()}
@@ -293,7 +304,8 @@ def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) -> Non
     ]
     gatherer.process_message(_batch_finished(artifacts, status="failure", batch_jobs=batch_jobs))
 
-    status = _drain_queue(gatherer.queue)[0].workflows[0]
+    _drain_queue(gatherer.queue)
+    [status] = _registry(gatherer)
     assert status.success_count == 1
     assert status.failed_count == 1
     failed = [result.integration for result in status.results if result.status == "failure"]
@@ -338,8 +350,8 @@ def test_emits_update_per_batch_done_on_last(tmp_path: Path) -> None:
     first = _drain_queue(gatherer.queue)
     assert len(first) == 1
     assert first[0].revision == 1
-    assert first[0].done is False
-    assert {status.id for status in first[0].workflows} == {100}
+    assert first[0].progress.done is False
+    assert {batch.run_id for batch in first[0].progress.batches if batch.run_id is not None} == {100}
 
     artifacts2 = tmp_path / "artifacts" / "200"
     j1_dir2 = _make_job_tree(artifacts2, "j1")
@@ -356,8 +368,9 @@ def test_emits_update_per_batch_done_on_last(tmp_path: Path) -> None:
     second = _drain_queue(gatherer.queue)
     assert len(second) == 1
     assert second[0].revision == 2
-    assert second[0].done is True
-    assert {status.id for status in second[0].workflows} == {100, 200}
+    assert second[0].progress.done is True
+    assert {batch.run_id for batch in second[0].progress.batches} == {100, 200}
+    assert {status.id for status in _registry(gatherer)} == {100, 200}
 
 
 def test_multiple_failing_steps_all_collected(tmp_path: Path) -> None:
@@ -459,14 +472,14 @@ def test_missing_workflow_job_raises(tmp_path: Path) -> None:
         )
 
 
-def test_empty_batch_jobs_has_no_entry_in_the_flat_view(tmp_path: Path) -> None:
-    # Nothing was gathered, so the per-job registry stays empty — the batch's fate lives in the
-    # aggregate, which can say "finished with no results" where a counts-only view cannot.
+def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
+    # Nothing was gathered, so the registry stays empty — the batch's fate lives in the aggregate,
+    # which can say "finished with no results" where a counts-only record cannot.
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished("", batch_jobs=[]))
 
     assert gatherer._results_by_batch == {}
-    assert _drain_queue(gatherer.queue)[0].workflows == []
+    assert _registry(gatherer) == []
 
 
 def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path) -> None:
@@ -493,7 +506,7 @@ def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:
     gatherer = _make_gatherer(tmp_path, _one_job_plan("b1", "b2"))
 
     gatherer.process_message(_batch_finished("", id="b1", run_id=100, batch_jobs=[]))
-    assert _drain_queue(gatherer.queue)[0].done is False
+    assert _drain_queue(gatherer.queue)[0].progress.done is False
 
     gatherer.process_message(
         _batch_finished(
@@ -505,7 +518,6 @@ def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:
     )
 
     final = _drain_queue(gatherer.queue)[0]
-    assert final.done is True
     assert final.progress.done is True
     assert _batch_progress(final, "b1").error == ProgressError.NO_JOB_RESULTS
 
@@ -564,7 +576,7 @@ def test_duplicate_is_detected_by_batch_id_not_message_id(tmp_path: Path) -> Non
     updates = _drain_queue(gatherer.queue)
     assert [update.revision for update in updates] == [1]
     assert gatherer._revision == 1
-    assert len(updates[0].workflows) == 1
+    assert len(_registry(gatherer)) == 1
 
 
 def test_no_emission_without_batch_finished(tmp_path: Path) -> None:
@@ -581,8 +593,7 @@ def test_build_update_message(tmp_path: Path) -> None:
     assert isinstance(message, UpdatePRComment)
     assert message.id == "final"
     assert message.revision == 2
-    assert message.done is True
-    assert message.workflows == []
+    # done is stamped on the snapshot, which is the message's only payload.
     assert message.progress.done is True
 
 
@@ -596,8 +607,8 @@ def test_initial_update_is_revision_zero_over_the_whole_plan(tmp_path: Path) -> 
     gatherer = _make_gatherer(tmp_path, plan)
 
     update = gatherer.build_initial_update("initial")
-    assert (update.id, update.revision, update.done) == ("initial", 0, False)
-    assert update.workflows == []
+    assert (update.id, update.revision) == ("initial", 0)
+    assert _registry(gatherer) == []
 
     progress = update.progress
     assert progress.done is False
@@ -633,8 +644,9 @@ def test_finished_batch_leaves_other_batches_planned(tmp_path: Path) -> None:
     assert (update.progress.complete, update.progress.total) == (1, 2)
 
 
-def test_progress_and_workflows_agree(tmp_path: Path) -> None:
-    # Both views are built from the same gathered jobs; they must never disagree on counts.
+def test_progress_and_registry_agree(tmp_path: Path) -> None:
+    # The published snapshot and the local registry are built from the same gathered jobs in one pass;
+    # they must never disagree on counts, or the registry stops being a usable cross-check.
     artifacts = tmp_path / "artifacts" / "100"
     j1_dir = _make_job_tree(artifacts, "j1", environment="py3.12")
     j2_dir = _make_job_tree(artifacts, "j2", environment="py3.13", junit=JUNIT_FAILING)
@@ -654,7 +666,7 @@ def test_progress_and_workflows_agree(tmp_path: Path) -> None:
     )
 
     update = _drain_queue(gatherer.queue)[0]
-    workflow = update.workflows[0]
+    [workflow] = _registry(gatherer)
     assert (update.progress.passed, update.progress.failed, update.progress.skipped) == (
         workflow.success_count,
         workflow.failed_count,
@@ -707,7 +719,7 @@ def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
 
     updates = _drain_queue(gatherer.queue)
     assert sorted(update.revision for update in updates) == [1, 2, 3, 4, 5]
-    assert [update.done for update in updates].count(True) == 1
+    assert [update.progress.done for update in updates].count(True) == 1
 
     final = max(updates, key=lambda update: update.revision)
     assert {batch.state for batch in final.progress.batches} == {ExecutionState.FINISHED}
@@ -829,7 +841,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     gatherer.process_message(_batch_finished(a1, id="b1", run_id=1, batch_jobs=batch_01))
     rev1 = _drain_queue(gatherer.queue)
     assert len(rev1) == 1
-    assert (rev1[0].revision, rev1[0].done) == (1, False)
+    assert (rev1[0].revision, rev1[0].progress.done) == (1, False)
     assert _totals(rev1[0]) == (4, 0, 0, 4)
 
     # Batch-02 (steps 13-14): 3 pass + 1 fail (mysql py3.12 linux).
@@ -843,7 +855,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     gatherer.process_message(_batch_finished(a2, id="b2", run_id=2, batch_jobs=batch_02))
     rev2 = _drain_queue(gatherer.queue)
     assert len(rev2) == 1
-    assert (rev2[0].revision, rev2[0].done) == (2, False)
+    assert (rev2[0].revision, rev2[0].progress.done) == (2, False)
     assert _totals(rev2[0]) == (7, 1, 0, 8)
 
     # Batch-03 (steps 15-16): 3 pass + 1 skip. Terminal — revision 3, done.
@@ -858,30 +870,31 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     rev3 = _drain_queue(gatherer.queue)
     assert len(rev3) == 1
     final = rev3[0]
-    assert (final.revision, final.done) == (3, True)
+    assert (final.revision, final.progress.done) == (3, True)
     assert _totals(final) == (10, 1, 1, 12)
 
-    # Every batch's workflow is present with its batch id, URL, and the full per-job registry.
-    assert {workflow.id for workflow in final.workflows} == {1, 2, 3}
-    assert {workflow.batch_id for workflow in final.workflows} == {"b1", "b2", "b3"}
-    assert all(workflow.url for workflow in final.workflows)
-    assert sum(len(workflow.results) for workflow in final.workflows) == 12
+    # The gatherer's registry holds every batch with its id, URL, and the full per-job results.
+    registry = _registry(gatherer)
+    assert {workflow.id for workflow in registry} == {1, 2, 3}
+    assert {workflow.batch_id for workflow in registry} == {"b1", "b2", "b3"}
+    assert all(workflow.url for workflow in registry)
+    assert sum(len(workflow.results) for workflow in registry) == 12
 
     # Batch-level labels for the "Batch-0X : passed/failed" comment line (b3 is success: 3 pass + 1 skip).
-    labels = {workflow.batch_id: workflow.status for workflow in final.workflows}
+    labels = {workflow.batch_id: workflow.status for workflow in registry}
     assert labels == {"b1": "success", "b2": "failure", "b3": "success"}
 
     # The failing job surfaces its failed step and failing test.
-    mysql = _find_result(final, "mysql")
+    mysql = _find_result(gatherer, "mysql")
     assert mysql.status == "failure"
     assert mysql.failed_steps == ["Run unit tests"]
     assert FAILING_TEST_ID in _failed_ids(mysql)
 
     # The skipped job is recorded as skipped.
-    assert _find_result(final, "consul").status == "skipped"
+    assert _find_result(gatherer, "consul").status == "skipped"
 
-    # The same run, as the aggregate the PR updater renders: 12 planned jobs, all complete, and the
-    # per-batch labels and links matching the flat view exactly.
+    # The same run as the published snapshot, which is what the PR updater renders: 12 planned jobs,
+    # all complete, with per-batch labels and links matching the registry exactly.
     progress = final.progress
     assert progress.done is True
     assert (progress.passed, progress.failed, progress.skipped) == (10, 1, 1)

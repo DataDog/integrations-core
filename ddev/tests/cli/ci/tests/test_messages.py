@@ -145,23 +145,13 @@ def test_workflow_status_label() -> None:
     assert _workflow("b4", 4, 3, 0, 1, _results(success=3, skipped=1)).status == Status.SUCCESS
 
 
-def test_update_pr_comment_aggregates() -> None:
-    b1 = _workflow("b1", 1, 4, 0, 0, [_job("postgres", Status.SUCCESS)] * 4)
-    b2 = _workflow("b2", 2, 3, 1, 0, [_job("mysql", Status.FAILURE)] + [_job("disk", Status.SUCCESS)] * 3)
-    b3 = _workflow("b3", 3, 3, 0, 1, [_job("consul", Status.SKIPPED)] + [_job("nginx", Status.SUCCESS)] * 3)
-    update = UpdatePRComment(
-        id="m1",
-        revision=3,
-        done=True,
-        workflows=[b1, b2, b3],
-        progress=DispatcherProgress(batches=(), done=True),
-    )
-
-    assert (update.passed, update.failed, update.skipped, update.complete) == (10, 1, 1, 12)
-
-
-def test_update_pr_comment_carries_the_progress_snapshot() -> None:
+def test_update_pr_comment_carries_only_the_revision_and_the_snapshot() -> None:
+    # The message is ordering metadata plus the aggregate: every count and the done flag live on the
+    # snapshot, so there is no second copy for a consumer to disagree with.
     progress = DispatcherProgress(batches=(), done=False)
-    update = UpdatePRComment(id="m1", revision=0, done=False, workflows=[], progress=progress)
+    update = UpdatePRComment(id="m1", revision=0, progress=progress)
 
+    assert (update.id, update.revision) == ("m1", 0)
     assert update.progress is progress
+    assert not hasattr(update, "workflows")
+    assert not hasattr(update, "done")

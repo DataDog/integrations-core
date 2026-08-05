@@ -194,33 +194,13 @@ class BatchFinished(BaseMessage):
 class UpdatePRComment(BaseMessage):
     """Emitted per finished batch to request a PR comment update.
 
-    ``revision`` is the gatherer's monotonic counter (revision ``0`` is the initial plan, then one per
-    consumed ``BatchFinished``); the PR-updater renders the latest and rejects stale revisions.
-    ``done`` is ``True`` only on the revision that completes the final expected batch.
+    ``revision`` is ordering metadata: the gatherer's monotonic counter, revision ``0`` being the
+    initial plan and then one per consumed ``BatchFinished``. The PR updater renders the latest and
+    rejects stale revisions.
 
-    ``progress`` is the complete immutable snapshot of the aggregate at this revision and is the only
-    payload the PR updater needs; the ``workflows`` list and its derived counters are the earlier flat
-    view, kept until the updater is migrated.
+    ``progress`` is the whole payload — the complete immutable snapshot of the aggregate at this
+    revision, including whether the run is done and every count the comment needs.
     """
 
     revision: int
-    done: bool
-    workflows: list[WorkflowStatus]
     progress: DispatcherProgress
-
-    @property
-    def passed(self) -> int:
-        return sum(workflow.success_count for workflow in self.workflows)
-
-    @property
-    def failed(self) -> int:
-        return sum(workflow.failed_count for workflow in self.workflows)
-
-    @property
-    def skipped(self) -> int:
-        return sum(workflow.skipped_count for workflow in self.workflows)
-
-    @property
-    def complete(self) -> int:
-        """Total jobs finished so far (passed + failed + skipped across all gathered batches)."""
-        return sum(len(workflow.results) for workflow in self.workflows)
