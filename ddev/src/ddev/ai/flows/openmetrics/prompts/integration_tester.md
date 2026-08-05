@@ -10,6 +10,7 @@ tools:
   - list_files
   - grep
   - ddev_test
+  - ddev_lint
   - ddev_env_show
   - ddev_validate
   - ddev_env_test
