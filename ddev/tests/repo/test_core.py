@@ -261,6 +261,20 @@ class TestIntegrationsIteration:
 
         assert [integration.name for integration in integrations] == ["tekton"]
 
+    def test_integrations_iteration_changed_includes_a_rename_source(self, repository):
+        # Moving a file between integrations changes both: the source lost it and the destination
+        # gained it, so both must be selected.
+        repo = Repository(repository.path.name, str(repository.path))
+
+        # The file has to already exist on the comparison base, otherwise the diff reports a plain
+        # addition rather than a rename.
+        repo.git.capture('mv', 'tekton/README.md', 'nginx/moved_from_tekton.md')
+        repo.git.capture('commit', '-m', 'move a file to another integration')
+
+        integrations = list(repo.integrations.iter(['changed']))
+
+        assert sorted(integration.name for integration in integrations) == ['nginx', 'tekton']
+
     @pytest.mark.parametrize(
         "method_name, integration_filter",
         iter_test_params,

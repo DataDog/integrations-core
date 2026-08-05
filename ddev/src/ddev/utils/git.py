@@ -43,6 +43,18 @@ class ChangedFile:
     path: str
     previous_path: str | None = None
 
+    @property
+    def affected_paths(self) -> tuple[str, ...]:
+        """Every path this change touches.
+
+        A rename also affects its source, which lost the file. A copy leaves the source untouched,
+        so only the destination is affected.
+        """
+        if self.change_type is ChangeType.RENAMED and self.previous_path is not None:
+            return (self.path, self.previous_path)
+
+        return (self.path,)
+
 
 def is_git_warning_line(line: str) -> bool:
     """Return whether a line of git output is an ignorable warning rather than a record."""
@@ -238,30 +250,20 @@ class GitRepository:
     def changed_files(self, base: str = 'origin/master', head: str | None = None) -> list[ChangedFile]:
         """Return the files that changed between two points, deepest path first.
 
-        The comparison always starts at the merge base of `base` and `head`, so passing `C^1` as
-        the base gives exactly the changes `C` introduced.
-
-        Leaving `head` unset compares against the working tree, which additionally picks up
-        uncommitted and untracked changes. Passing a ref compares committed state only.
-
-        A path reported by more than one of those sources keeps the change type furthest from
-        `base`, so a file committed as added and then edited locally is still reported as added.
+        `--merge-base` starts the comparison where the two points diverged, so changes made on
+        `base` since then are not reported as ours. Without a `head` the comparison runs against
+        the working tree, which also picks up uncommitted and untracked files.
         """
-        changed: dict[str, ChangedFile] = {}
-        comparison = f'{base}...' if head is None else f'{base}...{head}'
-        for record in parse_name_status(self.capture('diff', '--name-status', comparison)):
-            changed.setdefault(record.path, record)
-
+        comparison = ['diff', '--name-status', '--merge-base', base]
         if head is not None:
-            return self.__sort_changed_files(changed.values())
+            comparison.append(head)
 
-        for record in parse_name_status(self.capture('diff', '--name-status', 'HEAD')):
-            changed.setdefault(record.path, record)
-
-        # Worktrees inside the repo root show up as untracked and are not changes to this checkout
-        for path in self.capture('ls-files', '--others', '--exclude-standard').splitlines():
-            if not self.is_worktree(self.repo_root / path):
-                changed.setdefault(path, ChangedFile(change_type=ChangeType.ADDED, path=path))
+        changed = {record.path: record for record in parse_name_status(self.capture(*comparison))}
+        if head is None:
+            # Worktrees inside the repo root show up as untracked and are not changes to this checkout
+            for path in self.capture('ls-files', '--others', '--exclude-standard').splitlines():
+                if not self.is_worktree(self.repo_root / path):
+                    changed.setdefault(path, ChangedFile(change_type=ChangeType.ADDED, path=path))
 
         return self.__sort_changed_files(changed.values())
 

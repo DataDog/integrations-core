@@ -185,11 +185,9 @@ class TestNew:
         mocker.patch(
             'ddev.utils.git.GitRepository.capture',
             side_effect=[
-                'M ddev/pyproject.toml',
+                'M\tddev/pyproject.toml',
                 '',
-                '',
-                'M ddev/pyproject.toml',
-                '',
+                'M\tddev/pyproject.toml',
                 '',
                 '0000000000000000000000000000000000000000\nFoo',
             ],
@@ -247,8 +245,7 @@ class TestNew:
         mocker.patch(
             'ddev.utils.git.GitRepository.capture',
             side_effect=[
-                'M tests/conftest.py',
-                '',
+                'M\ttests/conftest.py',
                 '',
                 '0000000000000000000000000000000000000000\nFoo',
             ],

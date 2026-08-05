@@ -26,11 +26,10 @@ def error(exception_class, message='', **kwargs):
 
 
 def changed_file_processes(files: list[str]):
-    # This returns subprocess calls used in `ddev.utils.git.GitRepository.get_changed_files`
-    # for tests that have to mock subprocess calls
+    # This returns subprocess calls used in `ddev.utils.git.GitRepository.changed_files`
+    # for tests that have to mock subprocess calls: the diff, then the untracked-file listing.
     return [
-        CompletedProcess([], 0, stdout='\n'.join(f'M {f}' for f in files)),
-        CompletedProcess([], 0, stdout=''),
+        CompletedProcess([], 0, stdout='\n'.join(f'M\t{f}' for f in files)),
         CompletedProcess([], 0, stdout=''),
     ]
 

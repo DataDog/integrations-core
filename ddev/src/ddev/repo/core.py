@@ -234,7 +234,9 @@ class IntegrationRegistry:
         """
         for integration in self.__iter_filtered(selection):
             for changed_file in self.repo.git.changed_files():
-                if integration.requires_changelog_entry(self.repo.path / changed_file.path):
+                if any(
+                    integration.requires_changelog_entry(self.repo.path / path) for path in changed_file.affected_paths
+                ):
                     yield integration
                     break
 
@@ -276,4 +278,8 @@ class IntegrationRegistry:
         return set() if 'all' in selection else set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
-        return {changed_file.path.split('/', 1)[0] for changed_file in self.repo.git.changed_files()}
+        return {
+            path.split('/', 1)[0]
+            for changed_file in self.repo.git.changed_files()
+            for path in changed_file.affected_paths
+        }

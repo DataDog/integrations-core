@@ -268,6 +268,27 @@ def test_parse_name_status(output, expected):
 
 
 @pytest.mark.parametrize(
+    ("changed_file", "expected"),
+    [
+        pytest.param(ChangedFile(ChangeType.MODIFIED, "a.py"), ("a.py",), id="modified"),
+        pytest.param(ChangedFile(ChangeType.DELETED, "a.py"), ("a.py",), id="deleted"),
+        pytest.param(
+            ChangedFile(ChangeType.RENAMED, "new/a.py", previous_path="old/a.py"),
+            ("new/a.py", "old/a.py"),
+            id="rename-affects-its-source-too",
+        ),
+        pytest.param(
+            ChangedFile(ChangeType.COPIED, "new/a.py", previous_path="old/a.py"),
+            ("new/a.py",),
+            id="copy-leaves-the-source-untouched",
+        ),
+    ],
+)
+def test_affected_paths(changed_file, expected):
+    assert changed_file.affected_paths == expected
+
+
+@pytest.mark.parametrize(
     ("output", "message"),
     [
         pytest.param("M", "Malformed diff line", id="missing-path"),
