@@ -137,7 +137,8 @@ This is a mediation layer for direct standard-library I/O. It is not a containme
 following are explicitly out of scope:
 
 - Paths opened inside a third-party library, beyond validating the path at the handoff as shown above.
-- The shared TLS context builder, which resolves its own configuration and has no check reference, so the
-  certificate paths it hands to `ssl` are not yet validated.
+- The certificate paths the shared TLS context builder hands to `ssl`. Its one direct filesystem call is
+  mediated, but it has no check reference, so those handoffs are not validated against the allowlist. This
+  only matters with enforcement enabled.
 - Anything a subprocess does once it has been launched.
 - What a shell string executes under `shell=True`, beyond validating the shell itself.

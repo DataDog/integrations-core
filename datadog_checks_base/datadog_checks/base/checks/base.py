@@ -577,10 +577,7 @@ class AgentCheck(object):
             from datadog_checks.base.utils.tls import TlsContextWrapper
 
             self._tls_context_wrapper = TlsContextWrapper(
-                self.instance or {},
-                self.TLS_CONFIG_REMAPPER,
-                overrides=overrides,
-                safe_os=self.safe_os,
+                self.instance or {}, self.TLS_CONFIG_REMAPPER, overrides=overrides
             )
 
         if refresh:
