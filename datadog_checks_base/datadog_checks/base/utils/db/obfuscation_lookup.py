@@ -23,6 +23,36 @@ class ObfuscationResult:
     comments: list[str] | None
 
 
+def obfuscate_statement(
+    raw_text: str, obfuscate_options: str, log_unobfuscated_queries: bool = False
+) -> ObfuscationResult | None:
+    """Obfuscate one statement via the FFI, returning None if it cannot be obfuscated.
+
+    Exposed separately from :class:`ObfuscationLookup` for statement sources whose identity does
+    not determine their text, which therefore cannot be cached. MySQL's
+    ``prepared_statements_instances`` is one: it is keyed on a reusable memory address, so a
+    recycled instance can carry unrelated text and every row has to be obfuscated afresh.
+    """
+    try:
+        statement = obfuscate_sql_with_metadata(raw_text, obfuscate_options)
+    except Exception as e:
+        if log_unobfuscated_queries:
+            logger.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_text, e)
+        else:
+            logger.debug("Failed to obfuscate query | err=[%s]", e)
+        return None
+
+    obfuscated_query = statement['query']
+    metadata = statement['metadata']
+    return ObfuscationResult(
+        obfuscated_query=obfuscated_query,
+        query_signature=compute_sql_signature(obfuscated_query),
+        tables=metadata.get('tables', None),
+        commands=metadata.get('commands', None),
+        comments=metadata.get('comments', None),
+    )
+
+
 class ObfuscationLookup[K: Hashable]:
     """LRU cache mapping statement identity keys to obfuscated query results.
 
@@ -201,24 +231,7 @@ class ObfuscationLookup[K: Hashable]:
             )
 
     def _obfuscate_single(self, raw_text: str) -> ObfuscationResult | None:
-        try:
-            statement = obfuscate_sql_with_metadata(raw_text, self._obfuscate_options)
-        except Exception as e:
-            if self._log_unobfuscated_queries:
-                logger.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_text, e)
-            else:
-                logger.debug("Failed to obfuscate query | err=[%s]", e)
-            return None
-
-        obfuscated_query = statement['query']
-        metadata = statement['metadata']
-        return ObfuscationResult(
-            obfuscated_query=obfuscated_query,
-            query_signature=compute_sql_signature(obfuscated_query),
-            tables=metadata.get('tables', None),
-            commands=metadata.get('commands', None),
-            comments=metadata.get('comments', None),
-        )
+        return obfuscate_statement(raw_text, self._obfuscate_options, self._log_unobfuscated_queries)
 
     def _trim(self):
         self._trim_keys()
