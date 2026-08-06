@@ -206,6 +206,24 @@ def mock_http_responses(mock_http, responses_by_url):
 
 
 class TestAuth:
+    @pytest.mark.parametrize(
+        ('overrides', 'auth_disabled'),
+        [
+            pytest.param({}, True, id='nifi credentials configured'),
+            pytest.param({'username': None, 'password': None}, False, id='no nifi credentials'),
+        ],
+    )
+    def test_http_auth_disabled_only_for_nifi_token_auth(self, mock_http, overrides, auth_disabled):
+        """NiFi carries its own bearer token, so the client's own auth is suppressed when it would collide.
+
+        Left in place, config-derived or .netrc credentials ride along on every NiFi API call next to the
+        token, and NiFi rejects requests carrying both. Reverse-proxy auth still needs the client's auth
+        when no NiFi credentials are configured.
+        """
+        NifiCheck('nifi', {}, [_make_instance(**overrides)])
+
+        assert mock_http.disable_auth.called is auth_disabled
+
     def test_auth_success(self, mock_http):
         """Token endpoint returns 201 with raw JWT string."""
         check = NifiCheck('nifi', {}, [_make_instance()])

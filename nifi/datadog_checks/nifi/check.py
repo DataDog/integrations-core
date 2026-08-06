@@ -33,7 +33,7 @@ class NifiCheck(AgentCheck):
         # Only disable the HTTP client's automatic auth when NiFi credentials are provided,
         # so that reverse-proxy auth configurations (Basic, Digest, Kerberos) still work.
         if self.instance.get('username') and self.instance.get('password'):
-            self.http.options['auth'] = None
+            self.http.disable_auth()
         self._api = None
 
     def _get_api(self):
