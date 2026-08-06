@@ -5,6 +5,7 @@
 #
 ad_identifiers:
   - envoy
+  - envoy-distroless
 
 ## Enables configuration discovery
 #

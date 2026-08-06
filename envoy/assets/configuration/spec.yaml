@@ -133,4 +133,5 @@ files:
     overrides:
       value.example:
       - envoy
+      - envoy-distroless
   - template: auto_conf/discovery
