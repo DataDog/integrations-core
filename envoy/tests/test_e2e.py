@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from collections.abc import Callable
+
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
@@ -22,7 +25,7 @@ from .common import (
 pytestmark = [requires_new_environment]
 
 
-def assert_prometheus_metrics(aggregator) -> None:
+def assert_prometheus_metrics(aggregator: AggregatorStub) -> None:
     for metric in (
         PROMETHEUS_METRICS
         + LOCAL_RATE_LIMIT_METRICS
@@ -41,7 +44,7 @@ def assert_prometheus_metrics(aggregator) -> None:
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, exercise_envoy):
+def test_e2e(dd_agent_check: Callable[..., AggregatorStub], exercise_envoy: None) -> None:
     aggregator = dd_agent_check(DEFAULT_INSTANCE, rate=True)
 
     assert_prometheus_metrics(aggregator)
@@ -51,7 +54,7 @@ def test_e2e(dd_agent_check, exercise_envoy):
 
 
 @pytest.mark.e2e
-def test_e2e_discovery(dd_agent_check_discovery, exercise_envoy):
+def test_e2e_discovery(dd_agent_check_discovery: Callable[..., AggregatorStub], exercise_envoy: None) -> None:
     aggregator = dd_agent_check_discovery(rate=True)
 
     assert_prometheus_metrics(aggregator)
@@ -62,5 +65,5 @@ def test_e2e_discovery(dd_agent_check_discovery, exercise_envoy):
 
 
 @pytest.mark.e2e
-def test_e2e_discovery_all_candidates(dd_agent_check):
+def test_e2e_discovery_all_candidates(dd_agent_check: Callable[..., AggregatorStub]) -> None:
     assert_all_discovery_candidates_stable(dd_agent_check, Envoy, compose_service='front-envoy')
