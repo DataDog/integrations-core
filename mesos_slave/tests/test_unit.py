@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPReadTimeoutError
 from datadog_checks.mesos_slave import MesosSlave
 
 from .common import MESOS_SLAVE_VERSION, PARAMETERS
@@ -237,3 +238,25 @@ def test_can_connect_service_check_stats(
             raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+
+
+@pytest.mark.parametrize(
+    ('error', 'expected_warning'),
+    [
+        pytest.param(HTTPReadTimeoutError('read timed out'), 'Timeout for', id='timeout'),
+        pytest.param(HTTPConnectionError('connection refused'), "Couldn't connect to URL", id='connection error'),
+    ],
+)
+def test_get_json_warns_by_failure_kind_and_propagates(instance, mock_http, error, expected_warning):
+    """A timeout is reported as a timeout, and anything else as a connection failure.
+
+    Both arms re-raise, because the callers turn the exception into the can_connect service check, and a
+    swallowed failure would report the slave as healthy.
+    """
+    check = MesosSlave('mesos_slave', {}, [instance])
+    mock_http.get.side_effect = error
+
+    with pytest.raises(type(error)):
+        check._get_json('http://hello.com/state')
+
+    assert any(expected_warning in warning for warning in check.warnings)

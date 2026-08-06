@@ -155,3 +155,28 @@ def test_service_check(monkeypatch, mock_openmetrics_http, side_effect, expected
         check.service_check.assert_called_with(
             'kube_controller_manager.up', expected_status, tags=[], message=expected_message
         )
+
+
+@pytest.mark.parametrize(
+    ('instance_overrides', 'expected_verify', 'expected_ignore_warning'),
+    [
+        pytest.param({}, False, True, id='no ca cert'),
+        pytest.param({'ssl_ca_cert': '/etc/ca.crt'}, '/etc/ca.crt', False, id='ca cert configured'),
+    ],
+)
+def test_healthcheck_client_carries_instance_tls_config(instance_overrides, expected_verify, expected_ignore_warning):
+    """The healthcheck builds its own client, so the instance TLS settings have to reach it.
+
+    With no CA certificate configured it falls back to an unverified connection with the warning
+    suppressed, which is what an endpoint serving a self-signed certificate depends on.
+    """
+    # slis_available short-circuits the SLI probe that __init__ would otherwise send.
+    check = KubeControllerManagerCheck(CHECK_NAME, {}, [{**instance, 'slis_available': False, **instance_overrides}])
+    health_url = check.instance['health_url']
+
+    handler = check._healthcheck_http_handler(check.instance, health_url)
+
+    assert handler.options['verify'] == expected_verify
+    assert handler.ignore_tls_warning is expected_ignore_warning
+    # Cached per endpoint, so repeated healthchecks reuse one client rather than building each time.
+    assert check._healthcheck_http_handler(check.instance, health_url) is handler
