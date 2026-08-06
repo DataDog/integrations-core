@@ -3,8 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from collections import defaultdict
+from collections.abc import Mapping
 
 from datadog_checks.base.utils.format import json
+
+
+def validate_telemetry_labels(labels):
+    if not isinstance(labels, Mapping):
+        raise TypeError('Agent telemetry labels must be a mapping, got {}.'.format(type(labels).__name__))
+    for key, value in labels.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            raise TypeError('Agent telemetry labels must map strings to strings, got {!r}: {!r}.'.format(key, value))
 
 
 class DatadogAgentStub(object):
@@ -27,6 +36,7 @@ class DatadogAgentStub(object):
         self._external_tags = []
         self._host_tags = "{}"
         self._sent_telemetry = defaultdict(list)
+        self._sent_labeled_telemetry = defaultdict(list)
         self._sent_reported_issues = defaultdict(list)
         self._sent_resolved_issues = []
 
@@ -41,6 +51,8 @@ class DatadogAgentStub(object):
         self._process_start_time = 0
         self._external_tags = []
         self._host_tags = "{}"
+        self._sent_telemetry.clear()
+        self._sent_labeled_telemetry.clear()
         self._sent_reported_issues.clear()
         self._sent_resolved_issues.clear()
 
@@ -90,6 +102,24 @@ class DatadogAgentStub(object):
         values = self._sent_telemetry[(check_name, metric_name, metric_type)]
         assert metric_value in values, 'Expected value {} for check {}, metric {}, type {}. Found {}.'.format(
             metric_value, check_name, metric_name, metric_type, values
+        )
+
+    def labeled_telemetry(self, check_name, metric_name, metric_type):
+        """Return the ``(value, labels)`` pairs emitted for a labeled telemetry metric."""
+        return list(self._sent_labeled_telemetry[(check_name, metric_name, metric_type)])
+
+    def assert_labeled_telemetry(self, check_name, metric_name, metric_type, metric_value, labels):
+        emitted = self.labeled_telemetry(check_name, metric_name, metric_type)
+        assert (metric_value, labels) in emitted, (
+            'Expected value {} with labels {} for check {}, metric {}, type {}. Found {}.'.format(
+                metric_value, labels, check_name, metric_name, metric_type, emitted
+            )
+        )
+
+    def assert_no_labeled_telemetry(self, check_name, metric_name, metric_type):
+        emitted = self.labeled_telemetry(check_name, metric_name, metric_type)
+        assert not emitted, 'Expected no telemetry for check {}, metric {}, type {}. Found {}.'.format(
+            check_name, metric_name, metric_type, emitted
         )
 
     def assert_reported_issue(self, check_name, issue_id, issue):
@@ -173,8 +203,11 @@ class DatadogAgentStub(object):
         # Passthrough stub: obfuscation implementation is in Go code.
         return command
 
-    def emit_agent_telemetry(self, check_name, metric_name, metric_value, metric_type):
+    def emit_agent_telemetry(self, check_name, metric_name, metric_value, metric_type, labels=None):
         self._sent_telemetry[(check_name, metric_name, metric_type)].append(metric_value)
+        if labels is not None:
+            validate_telemetry_labels(labels)
+            self._sent_labeled_telemetry[(check_name, metric_name, metric_type)].append((metric_value, dict(labels)))
 
     def report_issue(self, check_name, report_json):
         self._sent_reported_issues[check_name].append(json.decode(report_json))

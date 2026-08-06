@@ -1162,6 +1162,16 @@ class LimitedCheck(AgentCheck):
             self.gauge('foo', i)
 
 
+class UnlimitedCheck(LimitedCheck):
+    """Mirrors the product-specific OpenMetrics packages that disable the limiter with a zero default."""
+
+    DEFAULT_METRIC_LIMIT = 0
+
+
+class DefaultLimitedCheck(LimitedCheck):
+    DEFAULT_METRIC_LIMIT = 3
+
+
 class TestLimits:
     def test_context_uid(self, aggregator):
         check = LimitedCheck()
@@ -1293,6 +1303,86 @@ class TestLimits:
         assert len(aggregator.metrics('foo')) == 3
         aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 3)
         aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+
+    @pytest.fixture
+    def emit_agent_telemetry(self, monkeypatch):
+        emit = mock.MagicMock()
+        monkeypatch.setattr('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry', emit)
+        return emit
+
+    @staticmethod
+    def expected_telemetry_calls(check_name, dropped, limit_type='custom'):
+        labels = {'check_name': check_name, 'limit_type': limit_type}
+        return [
+            mock.call('checks', 'max_returned_metrics_reached', 1, 'counter', labels=labels),
+            mock.call('checks', 'max_returned_metrics_dropped', dropped, 'counter', labels=labels),
+        ]
+
+    @pytest.mark.parametrize('debug_metrics', [False, True])
+    def test_metric_limit_telemetry_once_per_run(self, aggregator, dd_run_check, debug_metrics, emit_agent_telemetry):
+        """The debug path resets the limiter early, so both signals must be read before it is cleared."""
+        instance = {'max_returned_metrics': 3}
+        if debug_metrics:
+            instance['debug_metrics'] = {'metric_contexts': True}
+        check = LimitedCheck('a_check', {}, [instance])
+
+        dd_run_check(check)
+        dd_run_check(check)
+
+        assert emit_agent_telemetry.call_args_list == self.expected_telemetry_calls('a_check', 2) * 2
+        assert len(aggregator.metrics('foo')) == 6
+
+    def test_metric_limit_telemetry_default_limit_type(self, dd_run_check, emit_agent_telemetry):
+        check = DefaultLimitedCheck('a_check', {}, [{}])
+
+        dd_run_check(check)
+
+        assert emit_agent_telemetry.call_args_list == self.expected_telemetry_calls('a_check', 2, 'default')
+
+    @pytest.mark.parametrize(
+        'check_class, instance',
+        [
+            pytest.param(LimitedCheck, {'max_returned_metrics': 10}, id='under-limit'),
+            pytest.param(UnlimitedCheck, {}, id='no-limiter'),
+        ],
+    )
+    def test_metric_limit_telemetry_not_emitted_when_limit_not_reached(
+        self, dd_run_check, emit_agent_telemetry, check_class, instance
+    ):
+        check = check_class('a_check', {}, [instance])
+
+        dd_run_check(check)
+
+        emit_agent_telemetry.assert_not_called()
+        assert not check.get_warnings()
+
+    def test_metric_limit_telemetry_attempts_dropped_signal_when_reached_signal_fails(self, dd_run_check, monkeypatch):
+        """Each signal is guarded separately, so losing the first one must not cost the second."""
+        emit_agent_telemetry = mock.MagicMock(side_effect=[RuntimeError('bridge failure'), None])
+        monkeypatch.setattr('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry', emit_agent_telemetry)
+        check = LimitedCheck('a_check', {}, [{'max_returned_metrics': 3}])
+
+        dd_run_check(check)
+
+        assert emit_agent_telemetry.call_args_list == self.expected_telemetry_calls('a_check', 2)
+
+    @pytest.mark.parametrize(
+        'broken_bridge',
+        [
+            pytest.param(mock.MagicMock(side_effect=RuntimeError('bridge failure')), id='bridge-raises'),
+            pytest.param(lambda check_name, metric_name, metric_value, metric_type: None, id='bridge-without-labels'),
+        ],
+    )
+    def test_metric_limit_telemetry_failure_leaves_the_check_intact(
+        self, aggregator, dd_run_check, monkeypatch, broken_bridge
+    ):
+        monkeypatch.setattr('datadog_checks.base.checks.base.datadog_agent.emit_agent_telemetry', broken_bridge)
+        check = LimitedCheck('a_check', {}, [{'max_returned_metrics': 3}])
+
+        dd_run_check(check)
+        dd_run_check(check)
+
+        assert len(aggregator.metrics('foo')) == 6
 
 
 class TestCheckInitializations:

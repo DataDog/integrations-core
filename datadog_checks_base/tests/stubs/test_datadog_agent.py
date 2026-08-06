@@ -76,3 +76,26 @@ def test_assert_external_tags_count(datadog_agent, external_tags, count, raise_e
     except AssertionError:
         if not raise_exception:
             raise
+
+
+@pytest.mark.parametrize(
+    'labels',
+    [
+        pytest.param({'key': 1}, id='non-string value'),
+        pytest.param([('key', 'value')], id='not a mapping'),
+    ],
+)
+def test_emit_agent_telemetry_rejects_invalid_labels(datadog_agent, labels):
+    with pytest.raises(TypeError):
+        datadog_agent.emit_agent_telemetry('checks', 'a_metric', 1, 'counter', labels=labels)
+
+
+def test_emit_agent_telemetry_records_labels(datadog_agent):
+    datadog_agent.emit_agent_telemetry('checks', 'a_metric', 1, 'counter', labels={'check_name': 'a_check'})
+    datadog_agent.emit_agent_telemetry('checks', 'another_metric', 1, 'counter')
+
+    datadog_agent.assert_telemetry('checks', 'a_metric', 'counter', 1)
+    datadog_agent.assert_labeled_telemetry('checks', 'a_metric', 'counter', 1, {'check_name': 'a_check'})
+
+    datadog_agent.assert_telemetry('checks', 'another_metric', 'counter', 1)
+    datadog_agent.assert_no_labeled_telemetry('checks', 'another_metric', 'counter')

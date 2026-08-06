@@ -1648,6 +1648,10 @@ class AgentCheck(object):
             error_report = json.encode([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
+                reached_metric_limit = self.metric_limiter.reached_limit
+                dropped_metric_count = max(0, self.metric_limiter.count - self.metric_limiter.limit)
+                limit_type = 'default' if self.metric_limiter.limit == self.DEFAULT_METRIC_LIMIT else 'custom'
+
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
                     debug_metrics = self.metric_limiter.get_debug_metrics()
 
@@ -1660,7 +1664,34 @@ class AgentCheck(object):
 
                 self.metric_limiter.reset()
 
+                if reached_metric_limit:
+                    self._emit_metric_limit_telemetry(dropped_metric_count, limit_type)
+
         return error_report
+
+    def _emit_metric_limit_telemetry(self, dropped_metric_count, limit_type):
+        # type: (int, str) -> None
+        try:
+            datadog_agent.emit_agent_telemetry(
+                'checks',
+                'max_returned_metrics_reached',
+                1,
+                'counter',
+                labels={'check_name': self.name, 'limit_type': limit_type},
+            )
+        except Exception:
+            self.log.debug('Failed to emit max_returned_metrics_reached Agent telemetry', exc_info=True)
+
+        try:
+            datadog_agent.emit_agent_telemetry(
+                'checks',
+                'max_returned_metrics_dropped',
+                dropped_metric_count,
+                'counter',
+                labels={'check_name': self.name, 'limit_type': limit_type},
+            )
+        except Exception:
+            self.log.debug('Failed to emit max_returned_metrics_dropped Agent telemetry', exc_info=True)
 
     def run_check_initializations(self):
         while self.check_initializations:
