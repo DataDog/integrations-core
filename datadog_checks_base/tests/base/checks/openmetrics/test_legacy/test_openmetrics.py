@@ -2725,6 +2725,38 @@ def test_ssl_verify_not_raise_warning(caplog, mock_openmetrics_http, mock_respon
         assert message != expected_message
 
 
+@pytest.mark.parametrize(
+    ('instance_overrides', 'expected_verify', 'expected_ignore_warning'),
+    [
+        pytest.param({'ssl_ca_cert': False}, False, True, id='ssl_ca_cert false disables verification'),
+        pytest.param({'ssl_verify': False}, False, True, id='ssl_verify false suppresses the warning'),
+        pytest.param({}, True, False, id='verification on by default'),
+    ],
+)
+def test_get_http_handler_applies_tls_deprecation_shims(
+    mocked_openmetrics_check_factory, instance_overrides, expected_verify, expected_ignore_warning
+):
+    """The two shims translating the ssl_ prefixed settings have to reach the client they configure.
+
+    A user setting ssl_ca_cert to false is asking for an unverified scrape, and the client only learns
+    that through these translations, so losing either one turns verification back on and every scrape
+    against a self-signed endpoint starts failing.
+    """
+    instance = {
+        'prometheus_url': 'https://www.example.com/metrics',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+        **instance_overrides,
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    http_handler = check.get_http_handler(scraper_config)
+
+    assert http_handler.options['verify'] == expected_verify
+    assert http_handler.ignore_tls_warning is expected_ignore_warning
+
+
 def test_send_request_with_dynamic_prometheus_url(
     caplog, mock_openmetrics_http, mock_response, mocked_openmetrics_check_factory
 ):
