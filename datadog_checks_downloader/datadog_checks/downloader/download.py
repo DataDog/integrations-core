@@ -15,11 +15,12 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
 from packaging.version import parse as parse_version
-from securesystemslib import interface
+from securesystemslib.signer import SSlibKey
 from tuf.ngclient import Updater
 
 from .exceptions import (
@@ -55,6 +56,20 @@ DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
 # Global variables.
 logger = logging.getLogger(__name__)
+
+
+def _load_public_keys(filepaths: list[str]) -> dict[str, dict[str, object]]:
+    public_keys = {}
+    for filepath in filepaths:
+        # Layout signatures use historical key IDs encoded in TUF target filenames.
+        key_id = pathlib.Path(filepath).stem
+        crypto_key = load_pem_public_key(pathlib.Path(filepath).read_bytes())
+        key = SSlibKey.from_crypto(crypto_key, keyid=key_id)
+        key_data = key.to_dict()
+        key_data['keyid'] = key_id
+        public_keys[key_id] = key_data
+
+    return public_keys
 
 
 class TUFDownloader:
@@ -101,13 +116,12 @@ class TUFDownloader:
             metadata_base_url=f'{repository_url_prefix}/metadata.staged/',
             target_base_url=f'{repository_url_prefix}/targets/',
             target_dir=self.__targets_dir,
+            bootstrap=None,
         )
 
-        # Increase requests timeout.
-        # There's no officially supported way to do this without either writing our own
-        # fetcher from scratch or relying on internals. We're choosing the latter for now.
-        # - https://github.com/theupdateframework/python-tuf/blob/v2.0.0/tuf/ngclient/updater.py#L99
-        # - https://github.com/theupdateframework/python-tuf/blob/v2.0.0/tuf/ngclient/_internal/requests_fetcher.py#L49
+        # Increase the fetcher timeout by relying on python-tuf internals.
+        # - https://github.com/theupdateframework/python-tuf/blob/v7.0.0/tuf/ngclient/updater.py
+        # - https://github.com/theupdateframework/python-tuf/blob/v7.0.0/tuf/ngclient/urllib3_fetcher.py
         self.__updater._fetcher.socket_timeout = 60
 
         # NOTE: Update to the latest top-level role metadata only ONCE, so that
@@ -230,8 +244,7 @@ class TUFDownloader:
 
     def __load_root_layout(self, target_relpath):
         root_layout = Metablock.load(self.__root_layout)
-        root_layout_pubkeys = glob.glob('*.pub')
-        root_layout_pubkeys = interface.import_publickeys_from_file(root_layout_pubkeys)
+        root_layout_pubkeys = _load_public_keys(glob.glob('*.pub'))
         # Parameter substitution.
         root_layout_params = substitute(target_relpath)
         return root_layout, root_layout_pubkeys, root_layout_params
