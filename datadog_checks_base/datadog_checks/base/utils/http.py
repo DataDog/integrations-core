@@ -17,6 +17,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
@@ -28,6 +29,26 @@ from datadog_checks.base.utils import _http_utils
 
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .headers import set_header as set_header_value
+
+# Re-export HTTP exceptions for single import location
+from .http_exceptions import (  # noqa: F401
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPError,
+    HTTPInvalidURLError,
+    HTTPReadTimeoutError,
+    HTTPRequestError,
+    HTTPSSLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
+from .http_protocol import (  # noqa: F401
+    HTTPClient,
+    HTTPRequest,
+    HTTPRequestSnapshot,
+    HTTPResponse,
+)
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -216,13 +237,35 @@ class ResponseWrapper(ObjectProxy):
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
+    def get_peer_cert(self, binary_form=False):
+        raw = getattr(self.__wrapped__, 'raw', None)
+        connection = getattr(raw, 'connection', None)
+        sock = getattr(connection, 'sock', None)
+        # sock is None once the connection is released, and a bare (non-TLS) socket has no getpeercert,
+        # so a plain http:// request lands here. Either way there is no peer certificate to report.
+        getpeercert = getattr(sock, 'getpeercert', None)
+        if getpeercert is None:
+            return None
+        return getpeercert(binary_form=binary_form)
+
+    @property
+    def history(self):
+        # Wrap redirect responses so history items satisfy the protocol too, never leaking a raw backend object.
+        return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
+
     def __enter__(self):
         return self
+
+
+def suppress_default_auth(request):
+    """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
+    return request
 
 
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        '_trust_env',
         '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
@@ -414,6 +457,11 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
+        # Whether to trust environment configuration (proxies, auth, CA bundles).
+        # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
+        # value so the reported state matches it.
+        self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
+
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
@@ -433,6 +481,64 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    @property
+    def trust_env(self) -> bool:
+        """Whether the client trusts environment config (proxies, auth, CA bundles)."""
+        return self._trust_env
+
+    @trust_env.setter
+    def trust_env(self, value: bool) -> None:
+        self._trust_env = value
+        if self._session is not None:
+            self._session.trust_env = value
+
+    def close(self) -> None:
+        """Close any open connections. Idempotent; the client stays usable and lazily rebuilds a default
+        session on the next request. An injected session is not restored after being closed."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Look up a cookie by name on the persistent session, returning its value, or default if absent or ambiguous.
+
+        Only cookies retained on the persistent session are visible. Requests made without persistence
+        (the default unless persist_connections is set or persist=True is passed) use a throwaway session
+        whose cookies are discarded, so a cookie set by such a request is not found here.
+        """
+        try:
+            return self.session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
+
+    def should_bypass_proxy(self, url: str) -> bool:
+        """Whether url should bypass any configured proxy under the client's no_proxy rules."""
+        return should_bypass_proxy(url, self.no_proxy_uris or [])
+
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Look up a request header by name. Lookup is case-insensitive.
+
+        The header mapping is an ordinary dict, so it can hold the same header under several
+        spellings. Requests collapses those into a CaseInsensitiveDict per request, where the last
+        spelling wins, so the last match is the value that actually reaches the wire. Returning the
+        first match instead would report a value that is never sent, and a caller negotiating over a
+        seeded default would read the default, conclude the header is unset, and overwrite the value
+        the user configured under the other spelling.
+        """
+        found = default
+        for key, value in self.options['headers'].items():
+            if key.lower() == name.lower():
+                found = value
+        return found
+
+    def set_header(self, name: str, value: str) -> None:
+        set_header_value(self.options['headers'], name, value)
+
+    def disable_auth(self) -> None:
+        """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
+        # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
+        self.options['auth'] = suppress_default_auth
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -608,6 +714,7 @@ class RequestsWrapper(object):
         # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
+        session.trust_env = self._trust_env
         return session
 
     @property
@@ -630,13 +737,28 @@ class RequestsWrapper(object):
             # before _session was ever defined (since __del__ executes even if __init__ fails).
             pass
 
+    def apply_tls_to_requests_session(self, session: requests.Session) -> None:
+        """Apply this wrapper's TLS configuration to a requests session it does not own.
+
+        For third-party libraries that build their own requests transport and accept only verify and
+        cert, which cannot express tls_validate_hostname, tls_ciphers, tls_private_key_password or
+        tls_intermediate_ca_certs. Those live on the SSLContext, so the adapter carrying it has to be
+        mounted on the foreign session for them to take effect.
+        """
+        # A dedicated adapter, never one from the cache. Closing a requests session closes every
+        # adapter mounted on it, and the owner of a foreign session decides when that happens, so a
+        # shared adapter would let it drop the connection pool this client's own requests run on.
+        session.mount('https://', self._create_https_adapter(self.tls_config))
+
     def _mount_https_adapter(self, session, tls_config):
         # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)
-        if tls_config_key in self._https_adapters:
-            session.mount('https://', self._https_adapters[tls_config_key])
-            return
+        if tls_config_key not in self._https_adapters:
+            self._https_adapters[tls_config_key] = self._create_https_adapter(tls_config)
 
+        session.mount('https://', self._https_adapters[tls_config_key])
+
+    def _create_https_adapter(self, tls_config):
         context = create_ssl_context(tls_config)
         # Enables HostHeaderSSLAdapter if needed
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
@@ -654,13 +776,16 @@ class RequestsWrapper(object):
                         self, connections, maxsize, block=block, **pool_kwargs
                     )
 
-            https_adapter = SSLContextHostHeaderAdapter(context)
-        else:
-            https_adapter = _SSLContextAdapter(context)
+            return SSLContextHostHeaderAdapter(context)
 
-        # Cache the adapter for reuse
-        self._https_adapters[tls_config_key] = https_adapter
-        session.mount('https://', https_adapter)
+        return _SSLContextAdapter(context)
+
+
+def create_http_client(
+    instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
+) -> HTTPClient:
+    """Build the agnostic HTTP client from explicit config, confining the concrete backend to one place."""
+    return RequestsWrapper(instance or {}, init_config, remapper, logger)
 
 
 @contextmanager

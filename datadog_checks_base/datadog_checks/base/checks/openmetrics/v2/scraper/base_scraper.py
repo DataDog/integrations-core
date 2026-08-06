@@ -24,7 +24,6 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
 
 
 class OpenMetricsScraper:
@@ -218,7 +217,7 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http = self.check.create_http_client(config)
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
