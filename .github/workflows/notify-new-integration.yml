@@ -38,14 +38,11 @@ jobs:
               continue
             fi
 
-            # Check that the __init__.py has more than one import (actual check code, not just version re-export)
-            if [ $(grep -c 'import ' "$init_file") -gt 1 ]; then
-              check_name=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
-              if [ -z "$new_checks" ]; then
-                new_checks="$check_name"
-              else
-                new_checks="$new_checks, $check_name"
-              fi
+            check_name=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
+            if [ -z "$new_checks" ]; then
+              new_checks="$check_name"
+            else
+              new_checks="$new_checks, $check_name"
             fi
           done
 
