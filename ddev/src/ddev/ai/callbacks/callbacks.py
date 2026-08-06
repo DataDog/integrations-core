@@ -6,6 +6,7 @@ from typing import Any, Protocol
 
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolCall
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
@@ -107,9 +108,16 @@ class OnBeforeTaskValidationCallback(Protocol):
 
 
 class OnAfterTaskValidationCallback(Protocol):
-    """Called after each validation attempt, with its verdict."""
+    """Called after each validation attempt, with its status."""
 
-    async def __call__(self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None: ...
+    async def __call__(
+        self,
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
+    ) -> None: ...
 
 
 # ---------------------------------------------------------------------------
@@ -260,9 +268,14 @@ class CallbackSet:
         return func
 
     async def fire_after_task_validation(
-        self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str
+        self,
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
     ) -> None:
-        await self._fire(self._on_after_task_validation, phase_id, task_name, attempt, valid, reason)
+        await self._fire(self._on_after_task_validation, phase_id, task_name, attempt, status, reason)
 
 
 class Callbacks:
@@ -332,7 +345,12 @@ class Callbacks:
             await s.fire_before_task_validation(phase_id, task_name, attempt)
 
     async def fire_after_task_validation(
-        self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str
+        self,
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
     ) -> None:
         for s in self._sets:
-            await s.fire_after_task_validation(phase_id, task_name, attempt, valid, reason)
+            await s.fire_after_task_validation(phase_id, task_name, attempt, status, reason)

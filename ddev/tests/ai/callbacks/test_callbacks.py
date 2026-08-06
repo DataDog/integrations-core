@@ -7,6 +7,7 @@ import pytest
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
@@ -584,8 +585,8 @@ async def test_task_validation_callbacks_register_fire_and_swallow_exceptions(ev
         await cb.fire_before_task_validation("phase-a", "task-x", 3)
         assert fired == [("phase-a", "task-x", 3)]
     else:
-        await cb.fire_after_task_validation("phase-a", "task-x", 3, False, "missing y")
-        assert fired == [("phase-a", "task-x", 3, False, "missing y")]
+        await cb.fire_after_task_validation("phase-a", "task-x", 3, TaskValidationStatus.RETRYING, "missing y")
+        assert fired == [("phase-a", "task-x", 3, TaskValidationStatus.RETRYING, "missing y")]
 
 
 async def test_callbacks_dispatches_task_validation_to_all_sets():
@@ -597,15 +598,15 @@ async def test_callbacks_dispatches_task_validation_to_all_sets():
         fired.append(("s1", phase_id, name, attempt))
 
     @s2.on_after_task_validation
-    async def h2(phase_id, name, attempt, valid, reason):
-        fired.append(("s2", phase_id, name, attempt, valid, reason))
+    async def h2(phase_id, name, attempt, status, reason):
+        fired.append(("s2", phase_id, name, attempt, status, reason))
 
     cb = Callbacks([s1, s2])
     await cb.fire_before_task_validation("phase-a", "t", 1)
-    await cb.fire_after_task_validation("phase-a", "t", 1, True, "")
+    await cb.fire_after_task_validation("phase-a", "t", 1, TaskValidationStatus.PASSED, "")
     assert fired == [
         ("s1", "phase-a", "t", 1),
-        ("s2", "phase-a", "t", 1, True, ""),
+        ("s2", "phase-a", "t", 1, TaskValidationStatus.PASSED, ""),
     ]
 
 
@@ -647,7 +648,7 @@ async def test_callbacks_empty_is_noop(
     await callbacks.fire_phase_error("p", RuntimeError("boom"))
     await callbacks.fire_run_error()
     await callbacks.fire_before_task_validation("p", "t", 1)
-    await callbacks.fire_after_task_validation("p", "t", 1, True, "")
+    await callbacks.fire_after_task_validation("p", "t", 1, TaskValidationStatus.PASSED, "")
 
 
 async def test_callbacks_dispatches_to_all_sets(scope: AgentScope, response: AgentResponse) -> None:

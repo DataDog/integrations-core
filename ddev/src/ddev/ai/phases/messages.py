@@ -3,8 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from dataclasses import dataclass
+from enum import Enum, auto
 
 from ddev.event_bus.orchestrator import BaseMessage
+
+
+class TaskValidationStatus(Enum):
+    """Status of a task validation attempt."""
+
+    VALIDATING = auto()
+    PASSED = auto()
+    RETRYING = auto()
+    FAILED = auto()
 
 
 @dataclass

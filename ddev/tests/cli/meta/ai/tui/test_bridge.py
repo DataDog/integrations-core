@@ -11,6 +11,7 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse as AgentResponsePayload
 from ddev.ai.agent.types import StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 from ddev.cli.meta.ai.tui.bridge import build_app_callback_set
@@ -87,7 +88,7 @@ class StubOrchestrator:
         await self.cb_set.fire_agent_finish(SCOPE, _make_react_result())
         await self.cb_set.fire_agent_error(SCOPE, ValueError("boom"))
         await self.cb_set.fire_before_task_validation("phase1", "task1", 1)
-        await self.cb_set.fire_after_task_validation("phase1", "task1", 1, True, "looks good")
+        await self.cb_set.fire_after_task_validation("phase1", "task1", 1, TaskValidationStatus.PASSED, "looks good")
 
 
 # ---------------------------------------------------------------------------
@@ -227,7 +228,7 @@ async def test_after_task_validation_payload(received_from_stub):
     assert msgs[0].phase_id == "phase1"
     assert msgs[0].task_name == "task1"
     assert msgs[0].attempt == 1
-    assert msgs[0].valid is True
+    assert msgs[0].status is TaskValidationStatus.PASSED
     assert msgs[0].reason == "looks good"
 
 

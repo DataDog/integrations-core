@@ -12,7 +12,7 @@ visual output across phase logs.
 from __future__ import annotations
 
 import textwrap
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, assert_never
 
 from rich.markdown import Markdown, TableElement
 from rich.panel import Panel
@@ -20,6 +20,7 @@ from rich.text import Text
 
 from ddev.ai.agent.exceptions import describe_agent_error
 from ddev.ai.agent.scope import AgentRole
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.cli.meta.ai.palette import (
     ERROR,
     ROLE_GOAL_REVIEWER,
@@ -283,20 +284,31 @@ def render_context_cleared_notice() -> Text:
     return Text("  ↻ context cleared", style="dim")
 
 
-def render_task_validation_line(task_name: str, attempt: int, valid: bool | None, reason: str = "") -> Text:
-    """Build a validation progress line without presenting retries as terminal failures."""
-    if valid is None:
+def render_task_validation_line(
+    task_name: str,
+    attempt: int,
+    status: TaskValidationStatus,
+    reason: str = "",
+) -> Text:
+    """Build a ``◆/✓/↻/✗ <status> · <task> · attempt N`` validation line."""
+    if status is TaskValidationStatus.VALIDATING:
         line = Text("  ◆ ", style=STATUS_RUNNING)
         label = "validating"
         color = STATUS_RUNNING
-    elif valid:
+    elif status is TaskValidationStatus.PASSED:
         line = Text("  ✓ ", style=STATUS_DONE)
         label = "validation passed"
         color = STATUS_DONE
-    else:
+    elif status is TaskValidationStatus.RETRYING:
         line = Text("  ↻ ", style=WARNING)
         label = "repair requested"
         color = WARNING
+    elif status is TaskValidationStatus.FAILED:
+        line = Text("  ✗ ", style=ERROR)
+        label = "validation failed"
+        color = ERROR
+    else:
+        assert_never(status)
     line.append(label, style=f"bold {color}")
     line.append(f" · {task_name} · attempt {attempt}", style="dim")
     if reason:

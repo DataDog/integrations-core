@@ -20,6 +20,7 @@ from textual.worker import Worker
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
 from ddev.cli.meta.ai.rendering import (
     render_agent_error_line,
@@ -432,14 +433,22 @@ class ExecutionScreen(TogoScreen):
         if key in self._task_statuses:
             self._task_statuses[key] = RunStatus.RUNNING
             self._update_display()
-        self._write_output(render_task_validation_line(msg.task_name, msg.attempt, None), phase_id=msg.phase_id)
+        self._write_output(
+            render_task_validation_line(msg.task_name, msg.attempt, TaskValidationStatus.VALIDATING),
+            phase_id=msg.phase_id,
+        )
 
     def on_after_task_validation(self, msg: AfterTaskValidation) -> None:
         key = (msg.phase_id, msg.task_name)
         if key in self._task_statuses:
-            self._task_statuses[key] = RunStatus.DONE if msg.valid else RunStatus.RUNNING
+            if msg.status is TaskValidationStatus.PASSED:
+                self._task_statuses[key] = RunStatus.DONE
+            elif msg.status is TaskValidationStatus.FAILED:
+                self._task_statuses[key] = RunStatus.FAILED
+            else:
+                self._task_statuses[key] = RunStatus.RUNNING
             self._update_display()
         self._write_output(
-            render_task_validation_line(msg.task_name, msg.attempt, msg.valid, msg.reason),
+            render_task_validation_line(msg.task_name, msg.attempt, msg.status, msg.reason),
             phase_id=msg.phase_id,
         )

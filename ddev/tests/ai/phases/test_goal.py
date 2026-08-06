@@ -24,6 +24,7 @@ from ddev.ai.phases.goal import (
     run_deterministic_checks,
     run_validation_loop,
 )
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.runtime.agent_log import AgentLogger
@@ -483,7 +484,7 @@ async def test_run_validation_loop_deterministic_exhaustion_never_creates_review
         context_usage=None,
     )
     factory, builder_calls, reviewer_agent = _reviewer_factory([])
-    events: list[tuple[str, bool | None]] = []
+    events: list[tuple[str, TaskValidationStatus | None]] = []
     callback_set = CallbackSet()
 
     @callback_set.on_before_task_validation
@@ -491,8 +492,14 @@ async def test_run_validation_loop_deterministic_exhaustion_never_creates_review
         events.append(("before", None))
 
     @callback_set.on_after_task_validation
-    async def _after(_phase_id: str, _task_name: str, _attempt: int, valid: bool, _reason: str) -> None:
-        events.append(("after", valid))
+    async def _after(
+        _phase_id: str,
+        _task_name: str,
+        _attempt: int,
+        status: TaskValidationStatus,
+        _reason: str,
+    ) -> None:
+        events.append(("after", status))
 
     with pytest.raises(ValidationAttemptsExhausted, match=r"(?s)Last validation reason.*required_field") as exc_info:
         await run_validation_loop(
@@ -515,7 +522,7 @@ async def test_run_validation_loop_deterministic_exhaustion_never_creates_review
     assert worker_agent.send_calls == []
     assert reviewer_agent.send_calls == []
     assert builder_calls == []
-    assert events == [("before", None), ("after", False)]
+    assert events == [("before", None), ("after", TaskValidationStatus.FAILED)]
 
 
 async def test_run_validation_loop_accepts_passing_deterministic_checks_without_goal() -> None:
@@ -528,6 +535,18 @@ async def test_run_validation_loop_accepts_passing_deterministic_checks_without_
         context_usage=None,
     )
     factory, builder_calls, reviewer_agent = _reviewer_factory([])
+    statuses: list[TaskValidationStatus] = []
+    callback_set = CallbackSet()
+
+    @callback_set.on_after_task_validation
+    async def _after(
+        _phase_id: str,
+        _task_name: str,
+        _attempt: int,
+        status: TaskValidationStatus,
+        _reason: str,
+    ) -> None:
+        statuses.append(status)
 
     outcome = await run_validation_loop(
         task=TaskConfig(name="t1", prompt="x"),
@@ -537,7 +556,7 @@ async def test_run_validation_loop_accepts_passing_deterministic_checks_without_
         initial_result=initial_result,
         parent_agent_config=make_agent_config(tools=[]),
         process_factory=factory,
-        callbacks=Callbacks(),
+        callbacks=Callbacks([callback_set]),
         phase_id="p1",
         compact_if_needed=_noop_compact,
         deterministic_checks=(DeterministicCheck(name="artifact schema", run=lambda: None),),
@@ -548,6 +567,7 @@ async def test_run_validation_loop_accepts_passing_deterministic_checks_without_
     assert worker_agent.send_calls == []
     assert reviewer_agent.send_calls == []
     assert builder_calls == []
+    assert statuses == [TaskValidationStatus.PASSED]
 
 
 def test_run_deterministic_checks_rejects_duplicate_names_before_running_checks() -> None:
@@ -707,8 +727,14 @@ async def test_run_validation_loop_fires_callbacks(tmp_path):
         events.append(("before", phase_id, task_name, attempt))
 
     @cb_set.on_after_task_validation
-    async def _after(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        events.append(("after", phase_id, task_name, attempt, valid, reason))
+    async def _after(
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
+    ) -> None:
+        events.append(("after", phase_id, task_name, attempt, status, reason))
 
     worker_process, _ = _make_worker_process([make_response("attempt 2", 0, 0)])
     initial_result = ReActResult(
@@ -739,7 +765,7 @@ async def test_run_validation_loop_fires_callbacks(tmp_path):
     )
     assert events == [
         ("before", "p1", "t1", 1),
-        ("after", "p1", "t1", 1, False, "fix X"),
+        ("after", "p1", "t1", 1, TaskValidationStatus.RETRYING, "fix X"),
         ("before", "p1", "t1", 2),
-        ("after", "p1", "t1", 2, True, ""),
+        ("after", "p1", "t1", 2, TaskValidationStatus.PASSED, ""),
     ]

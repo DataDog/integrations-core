@@ -16,6 +16,7 @@ from textual.message_pump import MessagePump
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolCall
 from ddev.ai.callbacks.callbacks import CallbackSet
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 from ddev.cli.meta.ai.tui.messages import (
@@ -118,7 +119,13 @@ def build_app_callback_set(app: BridgeApp) -> CallbackSet:
         _target().post_message(BeforeTaskValidation(phase_id, task_name, attempt))
 
     @cb.on_after_task_validation
-    async def _(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        _target().post_message(AfterTaskValidation(phase_id, task_name, attempt, valid, reason))
+    async def _(
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
+    ) -> None:
+        _target().post_message(AfterTaskValidation(phase_id, task_name, attempt, status, reason))
 
     return cb

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import pytest
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
@@ -20,6 +21,7 @@ from ddev.ai.agent.types import (
     WebFetchCall,
     WebSearchCall,
 )
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 from ddev.cli.meta.ai.palette import ROLE_GOAL_REVIEWER, ROLE_PHASE, ROLE_SUBAGENT
@@ -449,14 +451,46 @@ def test_render_context_cleared_notice_returns_text():
     assert "context cleared" in result.plain.lower()
 
 
-def test_render_task_validation_line_distinguishes_progress_repair_and_success():
-    started = render_task_validation_line("write_code", 1, None)
-    repair = render_task_validation_line("write_code", 1, False, "rename `version`")
-    passed = render_task_validation_line("write_code", 2, True)
-
-    assert started.plain == "  ◆ validating · write_code · attempt 1"
-    assert repair.plain == "  ↻ repair requested · write_code · attempt 1\n    rename `version`"
-    assert passed.plain == "  ✓ validation passed · write_code · attempt 2"
+@pytest.mark.parametrize(
+    ("status", "attempt", "reason", "expected"),
+    [
+        pytest.param(
+            TaskValidationStatus.VALIDATING,
+            1,
+            "",
+            "  ◆ validating · write_code · attempt 1",
+            id="validating",
+        ),
+        pytest.param(
+            TaskValidationStatus.RETRYING,
+            1,
+            "rename `version`",
+            "  ↻ repair requested · write_code · attempt 1\n    rename `version`",
+            id="retrying",
+        ),
+        pytest.param(
+            TaskValidationStatus.PASSED,
+            2,
+            "",
+            "  ✓ validation passed · write_code · attempt 2",
+            id="passed",
+        ),
+        pytest.param(
+            TaskValidationStatus.FAILED,
+            2,
+            "rename `version`",
+            "  ✗ validation failed · write_code · attempt 2\n    rename `version`",
+            id="failed",
+        ),
+    ],
+)
+def test_render_task_validation_line(
+    status: TaskValidationStatus,
+    attempt: int,
+    reason: str,
+    expected: str,
+) -> None:
+    assert render_task_validation_line("write_code", attempt, status, reason).plain == expected
 
 
 # ---------------------------------------------------------------------------
