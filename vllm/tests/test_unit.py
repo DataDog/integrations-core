@@ -13,6 +13,13 @@ from datadog_checks.vllm import vLLMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:10 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert vLLMCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
     check = vLLMCheck("vLLM", {}, [instance])
@@ -71,6 +78,53 @@ def _get_version_metadata(raw_version):
         "version.patch": patch,
         "version.raw": raw_version,
     }
+
+
+def test_submit_version_metadata_skipped_when_metadata_collection_disabled(datadog_agent, mock_http_response, instance):
+    # Kills the core/RemoveDecorator mutant at check.py:23 (removing @AgentCheck.metadata_entrypoint would run
+    # version submission even though metadata collection is disabled).
+    datadog_agent._config['enable_metadata_collection'] = False
+    mock_http_response(json_data={"version": "1.2.3"})
+    check = vLLMCheck("vLLM", {}, [instance])
+    check.check_id = "test:123"
+
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_submit_version_metadata_with_too_few_parts_is_ignored(datadog_agent, mock_http_response, instance):
+    # Kills the core/ReplaceComparisonOperator_GtE_LtE and core/NumberReplacer(3->2) mutants at check.py:32
+    # (`len(version_split) >= 3` mutated to `<= 3` or `>= 2`), which would index a non-existent third
+    # version part for a 2-part version and either raise or submit bogus metadata.
+    mock_http_response(json_data={"version": "1.2"})
+    check = vLLMCheck("vLLM", {}, [instance])
+    check.check_id = "test:123"
+
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_submit_version_metadata_with_extra_parts_uses_first_three(datadog_agent, mock_http_response, instance):
+    # Kills the core/ReplaceComparisonOperator_GtE_Eq mutant at check.py:32 (`len(version_split) >= 3` mutated to
+    # `== 3`), which would skip metadata submission for a version with more than 3 dot-separated parts.
+    mock_http_response(json_data={"version": "1.2.3.4"})
+    check = vLLMCheck("vLLM", {}, [instance])
+    check.check_id = "test:123"
+
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata(
+        "test:123",
+        {
+            "version.scheme": "semver",
+            "version.major": "1",
+            "version.minor": "2",
+            "version.patch": "3",
+            "version.raw": "1.2.3",
+        },
+    )
 
 
 def test_emits_critical_openemtrics_service_check_when_service_is_down(
