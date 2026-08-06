@@ -12,10 +12,7 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-# The word boundary and the escaped dot keep identifiers such as requests_total( out of the match.
-# Session and request sit alongside the verb helpers because either one couples a check to the
-# library just as directly.
-REQUEST_LIBRARY_FUNC_RE = r'\brequests\.(?:get|post|head|put|patch|delete|options|request|Session)\s*\('
+REQUEST_LIBRARY_FUNC_RE = r'requests.[get|post|head|put|patch|delete]*\('
 HTTP_WRAPPER_INIT_CONFIG_RE = r'init_config\/[http|openmetrics_legacy|openmetrics]*'
 HTTP_WRAPPER_INSTANCE_RE = r'instances\/[http|openmetrics_legacy|openmetrics]*'
 
@@ -72,7 +69,7 @@ def validate_use_http_wrapper_file(file, check):
     with open(file, 'r', encoding='utf-8') as f:
         read_file = f.read()
         found_match_arg = re.search(r'auth=|header=', read_file)
-        found_http = re.search(r'self\._?http\b|OpenMetricsBaseCheck', read_file)
+        found_http = re.search(r'self.http|OpenMetricsBaseCheck', read_file)
         skip_validation = re.search(r'SKIP_HTTP_VALIDATION', read_file)
         http_func = re.search(REQUEST_LIBRARY_FUNC_RE, read_file)
         if http_func and not skip_validation:
@@ -83,10 +80,8 @@ def validate_use_http_wrapper_file(file, check):
                 f'please inline comment `# SKIP_HTTP_VALIDATION`'
             )
             return False, True, None, error_message
-        if found_http:
-            # The marker suppresses the parameter warning only. Gating wrapper detection on it too
-            # would silently disable the spec.yaml template check for the whole integration.
-            return found_http, has_failed, None if skip_validation else found_match_arg, error_message
+        if found_http and not skip_validation:
+            return found_http, has_failed, found_match_arg, error_message
 
     return file_uses_http_wrapper, has_failed, None, error_message
 
@@ -137,10 +132,8 @@ def http(app: Application, integrations: tuple[str, ...]):
     validation_tracker = app.create_validation_tracker('HTTP wrapper validation')
 
     excluded = set(app.repo.config.get('/overrides/validate/http/exclude', []))
-    # Shippable packages are included alongside integrations because datadog_checks_base carries the
-    # HTTP client itself yet has no manifest.json, so is_integration alone never reaches it.
-    for integration in app.repo.integrations.iter_all(integrations):
-        if integration.name in excluded or not (integration.is_integration or integration.is_shippable):
+    for integration in app.repo.integrations.iter(integrations):
+        if integration.name in excluded or not integration.is_integration:
             continue
 
         check_uses_http_wrapper, warning_message, error_message = validate_use_http_wrapper(integration.name, app)

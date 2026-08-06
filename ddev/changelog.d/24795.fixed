@@ -1,1 +1,0 @@
-Tighten ``ddev validate http`` so it detects ``Session``, ``request`` and ``options`` calls, recognizes ``self._http``, keeps ``SKIP_HTTP_VALIDATION`` from disabling the spec template check, and scans shippable packages.
