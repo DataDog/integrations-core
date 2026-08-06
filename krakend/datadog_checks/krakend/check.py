@@ -74,5 +74,7 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
             # Only rename the version label when go_metrics are enabled, as
             # documented in the tile.
             rename_labels["version"] = "go_version"
-        # `config` comes first so a user-provided `rename_labels` still wins over ours.
-        return ChainMap(config, {"rename_labels": rename_labels}, super().get_config_with_defaults(config))
+        # Merge per label rather than letting the instance replace the whole mapping, so an
+        # instance that renames one label does not lose the renames it did not mention.
+        rename_labels.update(config.get("rename_labels") or {})
+        return ChainMap({"rename_labels": rename_labels}, super().get_config_with_defaults(config))
