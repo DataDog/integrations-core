@@ -382,14 +382,17 @@ def _validate_discovery_template(
     template: str, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str] | None]
 ) -> None:
     try:
-        parsed_template = Formatter().parse(template)
+        parsed_template = list(Formatter().parse(template))
     except ValueError as e:
         loader.errors.append(f'{location}, {field_name}: Invalid candidate template: {e}')
         return
 
-    for _, placeholder, _, _ in parsed_template:
+    for _, placeholder, _, conversion in parsed_template:
         if placeholder is None:
             continue
+
+        if conversion is not None and conversion not in ('s', 'r', 'a'):
+            loader.errors.append(f'{location}, {field_name}: Unknown conversion `!{conversion}`')
 
         root, separator, attr = placeholder.partition('.')
         if not separator or root not in placeholders:

@@ -6,6 +6,9 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
+import httpx
+import pytest
+
 from ddev.cli.release.test_agent.dispatch import DispatchedWorkflow
 from ddev.cli.release.test_agent.monitoring import (
     JobState,
@@ -18,6 +21,7 @@ from ddev.cli.release.test_agent.monitoring import (
 from ddev.cli.terminal import Terminal
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import WorkflowJob, WorkflowJobsList, WorkflowRun
+from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 monitoring_module = importlib.import_module('ddev.cli.release.test_agent.monitoring')
@@ -251,6 +255,38 @@ async def test_monitor_workflows_does_not_raise_on_job_failure(fake_async_github
         ],
         poll_interval=0,
     )
+
+
+async def test_monitor_workflows_does_not_swallow_authentication_errors(
+    fake_async_github: FakeAsyncGitHubClient,
+) -> None:
+    terminal = Terminal(verbosity=0, enable_color=False, interactive=False)
+    request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/actions/runs/123')
+    error = httpx.HTTPStatusError('forbidden', request=request, response=httpx.Response(403))
+    fake_async_github.mock_response(
+        'get_workflow_run',
+        GitHubAuthenticationError.from_http_status_error(error),
+    )
+
+    async def unexpected_sleep(_: float) -> None:
+        raise AssertionError('authentication error was swallowed')
+
+    with pytest.raises(GitHubAuthenticationError):
+        await monitor_workflows(
+            terminal,
+            fake_async_github,
+            ref='7.80.x',
+            workflows=[
+                DispatchedWorkflow(
+                    label='Linux',
+                    workflow_id='test-agent.yml',
+                    run_id=123,
+                    html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
+                )
+            ],
+            poll_interval=0,
+            sleep=unexpected_sleep,
+        )
 
 
 async def test_monitor_workflows_does_not_use_alternate_screen(

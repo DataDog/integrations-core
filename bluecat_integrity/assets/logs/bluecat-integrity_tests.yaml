@@ -493,6 +493,11 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: "Response"
+        answers:
+          - class: "IN"
+            rdata: "bdds1.google.local.postmaster.no.email.please.783096803360060025920003600"
+            ttl: 3600
+            type: "SOA"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "DNS Activity"

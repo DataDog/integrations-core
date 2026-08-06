@@ -200,6 +200,7 @@ def test_collect_view_refresh_emits_gauges(check):
     assert 'db:mydb' in by_name['view.refresh.status'][1]
     assert 'view:mv_orders' in by_name['view.refresh.status'][1]
     assert 'host:replica-1' in by_name['view.refresh.status'][1]
+    assert 'clickhouse_node:replica-1' in by_name['view.refresh.status'][1]
     assert by_name['view.refresh.rows'][0] == 500
     assert by_name['view.refresh.bytes'][0] == 4096
 
