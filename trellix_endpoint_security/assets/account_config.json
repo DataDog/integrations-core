@@ -1,29 +1,38 @@
 {
-  "supported_auth_methods": [],
-  "additional_config_fields": [
+  "supported_auth_methods": [
     {
-      "text": {},
-      "key": "client_id",
-      "label": "Client ID",
-      "help": "Trellix Client ID.",
-      "editable": true,
-      "required": true
+      "auth_name": "basic",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "help": "Trellix Client ID.",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client Secret",
+          "help": "Trellix Client Secret.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
     },
     {
-      "password": {},
-      "key": "client_secret",
-      "label": "Client Secret",
-      "help": "Trellix Client Secret.",
-      "editable": true,
-      "required": true
-    },
-    {
-      "password": {},
-      "key": "api_key",
-      "label": "API Key",
-      "help": "Trellix API Key.",
-      "editable": true,
-      "required": true
+      "auth_name": "api_key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "help": "Trellix API Key.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
     }
   ],
   "dataflow_config": [

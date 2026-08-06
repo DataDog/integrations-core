@@ -1,12 +1,17 @@
 {
-  "additional_config_fields": [
+  "supported_auth_methods": [
     {
-      "key": "api_key",
-      "label": "Admin API key",
-      "help": "An Anthropic Admin API key with permission to read usage and cost data. Generate one in the Anthropic Console under Settings > Admin Keys.",
-      "editable": true,
-      "required": true,
-      "password": {}
+      "auth_name": "api_key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "Admin API key",
+          "help": "An Anthropic Admin API key with permission to read usage and cost data. Generate one in the Anthropic Console under Settings > Admin Keys.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
     }
   ],
   "dataflow_config": [

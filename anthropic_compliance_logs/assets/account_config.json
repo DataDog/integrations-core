@@ -1,11 +1,16 @@
 {
-  "additional_config_fields": [
+  "supported_auth_methods": [
     {
-      "key": "api_key",
-      "label": "Admin API key",
-      "editable": true,
-      "required": true,
-      "password": {}
+      "auth_name": "api_key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "Admin API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
     }
   ],
   "dataflow_config": [

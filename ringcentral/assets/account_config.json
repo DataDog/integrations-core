@@ -25,38 +25,50 @@
       "label": "Tags",
       "editable": true,
       "tags": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "ringcentral-logs",
+      "additional_config_fields": [
+        {
+          "key": "get_voice_calls",
+          "label": "Voice calls",
+          "editable": true,
+          "checkbox": {
+            "default": true
+          }
+        },
+        {
+          "key": "get_audit_logs",
+          "label": "Audit logs",
+          "editable": true,
+          "checkbox": {
+            "default": true
+          }
+        }
+      ]
     },
     {
-      "key": "get_voice_calls",
-      "label": "Voice calls",
-      "editable": true,
-      "checkbox": {
-        "default": true
-      }
-    },
-    {
-      "key": "get_audit_logs",
-      "label": "Audit logs",
-      "editable": true,
-      "checkbox": {
-        "default": true
-      }
-    },
-    {
-      "key": "get_analytics_metrics",
-      "label": "Analytics metrics",
-      "editable": true,
-      "checkbox": {
-        "default": true
-      }
-    },
-    {
-      "key": "get_message_metrics",
-      "label": "SMS metrics",
-      "editable": true,
-      "checkbox": {
-        "default": true
-      }
+      "dataflow_id": "ringcentral-metrics",
+      "additional_config_fields": [
+        {
+          "key": "get_analytics_metrics",
+          "label": "Analytics metrics",
+          "editable": true,
+          "checkbox": {
+            "default": true
+          }
+        },
+        {
+          "key": "get_message_metrics",
+          "label": "SMS metrics",
+          "editable": true,
+          "checkbox": {
+            "default": true
+          }
+        }
+      ]
     }
   ]
 }
