@@ -67,6 +67,13 @@ class WorkflowRun(BaseModel):
     The `workflow-run` schema declares `status` and `conclusion` as plain
     nullable strings with no `enum`, so they are intentionally kept as free-form
     strings rather than modeled as a StrEnum.
+
+    The ordering fields come from the same schema: `run_number` (integer, in
+    `required`, not nullable) is the auto-incrementing run number, `head_sha`
+    (string, in `required`, not nullable) is the commit the run was triggered
+    for, and `run_attempt` (integer, *not* in `required`, not nullable) is the
+    attempt number, so it is modeled as optional and absent rather than null.
+    None of the three declares an `enum`.
     Reference:
     https://docs.github.com/en/rest/actions/workflow-runs#get-a-workflow-run
     """
@@ -78,6 +85,9 @@ class WorkflowRun(BaseModel):
     status: str
     conclusion: str | None = None
     html_url: str
+    head_sha: str
+    run_number: int
+    run_attempt: int | None = None
     created_at: str | None = None
     updated_at: str | None = None
 
@@ -85,6 +95,22 @@ class WorkflowRun(BaseModel):
     def is_completed(self) -> bool:
         """Whether the run has finished (``status == "completed"``)."""
         return self.status == "completed"
+
+
+class WorkflowRunsList(BaseModel):
+    """A list of workflow runs with a total count.
+
+    The `list workflow runs for a workflow` 200 response declares an inline object
+    whose `required` list is `[total_count, workflow_runs]`, with `workflow_runs`
+    holding `workflow-run` items.
+    Reference:
+    https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-workflow
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    total_count: int
+    workflow_runs: list[WorkflowRun]
 
 
 class WorkflowDispatchResult(BaseModel):

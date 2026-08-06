@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     from .workflow import WorkflowJobsList as WorkflowJobsList
     from .workflow import WorkflowJobStatus as WorkflowJobStatus
     from .workflow import WorkflowRun as WorkflowRun
+    from .workflow import WorkflowRunsList as WorkflowRunsList
 
 # Map of exported attribute name -> submodule (relative to this package) that
 # defines it. Submodules are imported on demand by `__getattr__`.
@@ -69,6 +70,7 @@ MODULE_BY_NAME: dict[str, str] = {
     'WorkflowJobStatus': 'workflow',
     'WorkflowJobsList': 'workflow',
     'WorkflowRun': 'workflow',
+    'WorkflowRunsList': 'workflow',
 }
 
 

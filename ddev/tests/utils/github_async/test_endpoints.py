@@ -29,6 +29,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.utils.github_async.helpers import ENDPOINT_CALLS, json_response, make_client
@@ -124,6 +125,70 @@ async def test_get_workflow_run_success(status: str, is_completed: bool) -> None
     assert result.data.id == 42
     assert result.data.status == status
     assert result.data.is_completed is is_completed
+
+
+async def test_list_workflow_runs_single_page() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path.endswith("/actions/workflows/resolve-build-deps.yaml/runs")
+        assert request.url.params["head_sha"] == "deadbeef"
+        assert request.url.params["per_page"] == "100"
+        return json_response(
+            {
+                "total_count": 1,
+                "workflow_runs": [workflow_run_payload(id=7, head_sha="deadbeef", run_number=12, run_attempt=2)],
+            }
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = []
+    async for page in client.list_workflow_runs(
+        "owner", "repo", "resolve-build-deps.yaml", head_sha="deadbeef", per_page=100
+    ):
+        pages.append(page)
+
+    assert len(pages) == 1
+    assert isinstance(pages[0].data, WorkflowRunsList)
+    assert pages[0].data.total_count == 1
+
+    (run,) = pages[0].data.workflow_runs
+    assert isinstance(run, WorkflowRun)
+    assert run.id == 7
+    assert run.head_sha == "deadbeef"
+    assert run.run_number == 12
+    assert run.run_attempt == 2
+
+
+async def test_list_workflow_runs_omits_head_sha_when_not_given() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert "head_sha" not in request.url.params
+        return json_response({"total_count": 0, "workflow_runs": []})
+
+    client = make_client(httpx.MockTransport(handler))
+    async for _ in client.list_workflow_runs("owner", "repo", "wf.yml"):
+        pass
+
+
+async def test_list_workflow_runs_collects_every_page() -> None:
+    """The runs of one commit can span pages, so every page must be yielded."""
+    call_count = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            return json_response(
+                {"total_count": 2, "workflow_runs": [workflow_run_payload(id=1, run_number=1)]},
+                headers={"link": f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'},
+            )
+        return json_response({"total_count": 2, "workflow_runs": [workflow_run_payload(id=2, run_number=2)]})
+
+    client = make_client(httpx.MockTransport(handler))
+    runs = []
+    async for page in client.list_workflow_runs("owner", "repo", "wf.yml"):
+        runs.extend(page.data.workflow_runs)
+
+    assert [(run.id, run.run_number) for run in runs] == [(1, 1), (2, 2)]
 
 
 async def test_list_workflow_run_artifacts_single_page() -> None:

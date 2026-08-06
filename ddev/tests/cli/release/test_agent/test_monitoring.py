@@ -168,6 +168,8 @@ async def test_collect_monitor_state_fetches_workflow_jobs(fake_async_github: Fa
             status='completed',
             conclusion='failure',
             html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
+            head_sha='deadbeef',
+            run_number=1,
         ),
     )
     fake_async_github.mock_response(
@@ -217,6 +219,8 @@ async def test_monitor_workflows_does_not_raise_on_job_failure(fake_async_github
                 status='completed',
                 conclusion='failure',
                 html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
+                head_sha='deadbeef',
+                run_number=1,
             ),
             headers={},
         ),
@@ -318,6 +322,8 @@ async def test_monitor_workflows_does_not_use_alternate_screen(
                 status='completed',
                 conclusion='success',
                 html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
+                head_sha='deadbeef',
+                run_number=1,
             ),
             headers={},
         ),

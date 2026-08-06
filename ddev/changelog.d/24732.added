@@ -1,0 +1,1 @@
+Refuse to dispatch ``ddev dep promote`` unless dependency resolution finished successfully for the pull request head, and refuse it outright for pull requests from forks, since in both cases promotion would publish the wheels from the previous run.

@@ -275,6 +275,16 @@ class GitHubManager:
             return None
         return response.json()
 
+    def pull_request_is_from_fork(self, pr_number: int) -> bool:
+        """Whether the pull request's head branch lives outside this repository.
+
+        A head repository that no longer exists counts as a fork, since its branch is
+        equally out of reach.
+        """
+        response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        head_repo = response.json()['head'].get('repo') or {}
+        return head_repo.get('full_name') != self.repo_id
+
     def get_pull_request_comments(self, pr_number: int) -> list[dict]:
         response = self.__api_get(
             self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),

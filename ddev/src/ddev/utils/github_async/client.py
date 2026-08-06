@@ -36,6 +36,7 @@ from .models import (
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
+    WorkflowRunsList,
 )
 
 GITHUB_API_VERSION = "2022-11-28"
@@ -387,6 +388,39 @@ class AsyncGitHubClient:
         """
         response = await self._request("GET", f"/repos/{owner}/{repo}/actions/runs/{run_id}", timeout=timeout)
         return self._parse_response(response, WorkflowRun)
+
+    async def list_workflow_runs(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str,
+        head_sha: str | None = None,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowRunsList]]:
+        """
+        Calls the GitHub API to list the runs of a single workflow (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-workflow
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            workflow_id: Workflow file name (for example `resolve-build-deps.yaml`) or numeric workflow ID.
+            head_sha: When given, only runs associated with that head commit SHA are returned.
+            per_page: Number of runs per page (default 30, max 100).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            AsyncIterator[GitHubResponse[WorkflowRunsList]]: One page of workflow runs per iteration.
+        """
+        endpoint = f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
+        params: dict[str, Any] = {"per_page": per_page}
+        if head_sha is not None:
+            params["head_sha"] = head_sha
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params=params):
+            yield self._parse_response(response, WorkflowRunsList)
 
     async def list_workflow_run_artifacts(
         self,
