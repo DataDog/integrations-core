@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.5.1 / 2026-08-05
+
+***Fixed***:
+
+* Fix parsing logic and query params for squeue ([#24513](https://github.com/DataDog/integrations-core/pull/24513))
+
 ## 2.5.0 / 2026-07-08
 
 ***Security***:
