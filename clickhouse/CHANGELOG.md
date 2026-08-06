@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 7.2.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Add async insert buffer snapshot collection for DBM, piggybacked into the query samples job. ([#24517](https://github.com/DataDog/integrations-core/pull/24517))
+* Add collection of asynchronous insert flush health from ``system.asynchronous_insert_log`` for DBM. ([#24549](https://github.com/DataDog/integrations-core/pull/24549))
+* Add ClickHouse node-level data across DBM checks: a `server_node` field on query metrics, node identity on query samples, completions, and errors (`@clickhouse.clickhouse_node`), and a `clickhouse_node` tag on parts/merges and view-refresh metrics. ([#24633](https://github.com/DataDog/integrations-core/pull/24633))
+* Add a `clickhouse_cluster` tag to ClickHouse DBM metrics and events. ([#24711](https://github.com/DataDog/integrations-core/pull/24711))
+* Add a `hosting_type` tag identifying whether the ClickHouse instance is ClickHouse Cloud or self-hosted. ([#24736](https://github.com/DataDog/integrations-core/pull/24736))
+
+***Fixed***:
+
+* Collect standard system table metrics per node via clusterAllReplicas in single endpoint mode so per-node counters no longer produce phantom failures (e.g. clickhouse.query.failed.count). ([#24266](https://github.com/DataDog/integrations-core/pull/24266))
+* Fixes query completions payload always reporting a null service. ([#24632](https://github.com/DataDog/integrations-core/pull/24632))
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
 ## 7.1.0 / 2026-07-08 / Agent 7.82.0
 
 ***Added***:
