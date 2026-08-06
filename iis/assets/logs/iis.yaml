@@ -104,7 +104,7 @@ pipeline:
           _username %{notSpace:user.name}
           _method %{word:http.method}
           _win32_status %{integer:iis.win32_status}
-	  _x_forwarded_for %{notSpace:x_forwarded_for}
+	      _x_forwarded_for %{notSpace:x_forwarded_for}
         matchRules: |
           iis.default %{_date_iis} %{_server_name} %{_method} %{_http_url} %{_http_query} %{_client_port} %{_auth} %{_client_ip} %{_user_agent} %{_status_code} %{_sub_status_code} %{_win32_status} %{_duration} ?{_x_forwarded_for}
 
