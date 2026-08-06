@@ -25,7 +25,6 @@ intersystems_iris.ecp.byte_sent_per_sec,gauge,,byte,second,Bytes sent (per secon
 intersystems_iris.ecp.clients,gauge,,,,"One series per ECP client connection, reporting the client and its connection state.",0,intersystems_iris,,,
 intersystems_iris.ecp.conn,gauge,,,,Total active ECP connections on this system as an ECP application server.,0,intersystems_iris,,,
 intersystems_iris.ecp.conn_max,gauge,,,,Maximum active ECP connections from this system as an ECP application server.,0,intersystems_iris,,,
-intersystems_iris.ecp.connections,gauge,,connection,,Number of active ECP connections on this system as an ECP application server (older IRIS versions).,0,intersystems_iris,,,
 intersystems_iris.ecp.glo_ref_per_sec,gauge,,,second,Global references (per second) on this system as an ECP application server.,0,intersystems_iris,,,
 intersystems_iris.ecp.latency,gauge,,millisecond,,Latency (in milliseconds) between the ECP application server and the ECP data server.,0,intersystems_iris,,,
 intersystems_iris.ecp.servers,gauge,,,,Outgoing ECP connections.,0,intersystems_iris,,,

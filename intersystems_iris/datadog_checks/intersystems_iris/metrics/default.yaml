@@ -146,16 +146,15 @@ iris_wqm_max_work_queue_depth: wqm.max_work_queue_depth
 iris_wqm_waiting_worker_jobs: wqm.waiting_worker_jobs
 
 # ECP, global, journal-update and interoperability metrics.
-# `*_conn`/`*_conn_max`, plus the app-server `connections`/`latency`, always emit (0 on an
-# idle instance). The granular per-operation families require an active ECP connection
-# carrying traffic, so they are absent from an idle instance and from a point-in-time fixture.
+# `*_conn`/`*_conn_max`, plus the app-server `latency`, always emit (0 on an idle instance).
+# The granular per-operation families require an active ECP connection carrying traffic, so
+# they are absent from an idle instance and from a point-in-time fixture.
 # `iris_ecp_*` = this system acting as an ECP application server (client side);
 # `iris_ecps_*` = this system acting as an ECP data server. `iris_ecp_clients`/
 # `iris_ecp_servers` (IRIS 2025.3+) emit one label-bearing series per connection, reporting
 # the peer and its connection state.
 iris_ecp_conn: ecp.conn
 iris_ecp_conn_max: ecp.conn_max
-iris_ecp_connections: ecp.connections
 iris_ecp_latency: ecp.latency
 iris_ecp_clients: ecp.clients
 iris_ecp_servers: ecp.servers

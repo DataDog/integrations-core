@@ -50,6 +50,11 @@ instances:
     ## Prometheus/OpenMetrics telemetry. This endpoint is unauthenticated by default; use the
     ## `auth_token`, `username`/`password`, or `headers` options below if the endpoint has been
     ## secured.
+    ##
+    ## Note: interoperability metrics (`interop.*`) are only emitted once the "Record Statistics
+    ## for SAM" setting is enabled (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a
+    ## running production. The always-on interface-count family is served separately at
+    ## `/api/monitor/interop/interfaces`; add a second instance pointing there to collect it.
     #
   - openmetrics_endpoint: http://%%host%%:52773/api/monitor/metrics
 
