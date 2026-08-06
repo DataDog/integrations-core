@@ -82,16 +82,13 @@ CREDENTIAL_CASES = [
 ]
 
 
-def test_check_disables_http_auth():
-    # type: () -> None
+def test_check_disables_http_auth(mock_http):
     # VoltDB authenticates via query params, so the check disables HTTP-level auth (config-derived and .netrc).
     instance = {'url': 'http://localhost:8080', 'username': 'doggo', 'password': 'doggopass'}
-    fake = mock.MagicMock()
 
-    with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
-        VoltDBCheck('voltdb', {}, [instance])
+    VoltDBCheck('voltdb', {}, [instance])
 
-    fake.disable_auth.assert_called_once_with()
+    mock_http.disable_auth.assert_called_once_with()
 
 
 def test_raise_for_status_includes_response_details():
@@ -158,8 +155,7 @@ def test_request_encodes_parameters(parameters, expected_value):
 
 
 @pytest.mark.parametrize('password_hashed, password_field, absent_field', CREDENTIAL_CASES)
-def test_check_wires_credentials_into_query_params(password_hashed, password_field, absent_field):
-    # type: (bool, str, str) -> None
+def test_check_wires_credentials_into_query_params(mock_http, password_hashed, password_field, absent_field):
     # Only the through-the-check path proves config.password_hashed selects the right field, with no per-call auth.
     instance = {
         'url': 'http://localhost:8080',
@@ -168,26 +164,12 @@ def test_check_wires_credentials_into_query_params(password_hashed, password_fie
         'password_hashed': password_hashed,
     }
 
-    class FakeHTTPClient:
-        def __init__(self):
-            self.options = {'auth': ('admin', 'secret')}
-            self.captured = {}
+    check = VoltDBCheck('voltdb', {}, [instance])
+    check._client.request('@SystemInformation', parameters=['OVERVIEW'])
 
-        def disable_auth(self):
-            self.options['auth'] = None
-
-        def get(self, url, **options):
-            self.captured = options
-            return mock.MagicMock()
-
-    fake = FakeHTTPClient()
-    with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
-        check = VoltDBCheck('voltdb', {}, [instance])
-        check._client.request('@SystemInformation', parameters=['OVERVIEW'])
-
-    assert fake.options['auth'] is None  # disable_auth() cleared the config Basic-auth tuple
-    assert 'auth' not in fake.captured  # and no per-call auth override is sent
-    params = fake.captured['params']
+    _, options = mock_http.get.call_args
+    assert 'auth' not in options  # no per-call auth override is sent alongside the query params
+    params = options['params']
     assert params['User'] == 'admin'
     assert params[password_field] == 'secret'
     assert absent_field not in params

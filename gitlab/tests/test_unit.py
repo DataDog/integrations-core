@@ -6,6 +6,7 @@ from mock.mock import MagicMock
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError, HTTPReadTimeoutError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
@@ -62,20 +63,18 @@ def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_con
         "5.6.7",
     ],
 )
-def test_get_gitlab_version(raw_version):
-    http = MagicMock()
-    http.get.return_value.json.return_value = {"version": raw_version}
+def test_get_gitlab_version(mock_http, raw_version):
+    mock_http.get.return_value = MockHTTPResponse(json_data={"version": raw_version})
 
-    version = get_gitlab_version(http, MagicMock(), "http://localhost", "my-token")
+    version = get_gitlab_version(mock_http, MagicMock(), "http://localhost", "my-token")
 
-    http.get.assert_called_with("http://localhost/api/v4/version", params={'access_token': "my-token"})
+    mock_http.get.assert_called_with("http://localhost/api/v4/version", params={'access_token': "my-token"})
     assert version == raw_version
 
 
-def test_get_gitlab_version_without_token():
-    http = MagicMock()
-    version = get_gitlab_version(http, MagicMock(), "http://localhost", None)
-    http.get.assert_not_called()
+def test_get_gitlab_version_without_token(mock_http):
+    version = get_gitlab_version(mock_http, MagicMock(), "http://localhost", None)
+    mock_http.get.assert_not_called()
     assert version is None
 
 
