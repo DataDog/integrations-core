@@ -312,7 +312,8 @@ def render_task_validation_line(
     line.append(label, style=f"bold {color}")
     line.append(f" · {task_name} · attempt {attempt}", style="dim")
     if reason:
-        line.append(f"\n    {reason}", style="dim")
+        indented_reason = textwrap.indent(reason, "    ")
+        line.append(f"\n{indented_reason}", style="dim")
     return line
 
 
