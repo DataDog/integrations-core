@@ -1,0 +1,1 @@
+Add the backend-agnostic ``HTTPClient`` and ``HTTPResponse`` protocols, the ``http_exceptions`` type library, and the client capability methods and ``create_http_client`` factory that back them.
