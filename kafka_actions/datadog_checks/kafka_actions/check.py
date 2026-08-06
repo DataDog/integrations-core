@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck
 from .config import KafkaActionsConfig
 from .kafka_client import KafkaActionsClient
 from .message_deserializer import DeserializedMessage, MessageDeserializer
+from .message_serializer import MessageSerializer
 from .schema_registry import SchemaRegistryClient
 
 
@@ -73,6 +74,7 @@ class KafkaActionsCheck(AgentCheck):
             schema_registry = SchemaRegistryClient(self.http, schema_registry_url, self.log, self.instance)
 
         self.deserializer = MessageDeserializer(self.log, schema_registry=schema_registry)
+        self.serializer = MessageSerializer(self.log, schema_registry=schema_registry)
 
         self.action_handlers = {
             'read_messages': self._action_read_messages,
@@ -777,9 +779,10 @@ class KafkaActionsCheck(AgentCheck):
     def _action_produce_message(self):
         """Produce a message to a Kafka topic (RFC Action #7).
 
-        All values (key, value, headers) must be base64-encoded strings.
-        This ensures they can be safely transmitted via YAML configuration
-        and supports binary data.
+        Key/value are base64-encoded strings unless {side}_uses_schema_registry is set,
+        in which case they're JSON text serialized against the latest schema registered
+        for the topic's subject and framed with the Confluent Schema Registry wire format.
+        Headers are always base64-encoded strings.
 
         Config format:
             produce_message:
@@ -796,24 +799,28 @@ class KafkaActionsCheck(AgentCheck):
         self.cluster = config['cluster']
         self._verify_cluster_id()
         topic = config['topic']
-        value_b64 = config['value']
-        key_b64 = config.get('key')
+        value = config['value']
+        key = config.get('key')
         partition = config.get('partition', -1)
         headers_b64 = config.get('headers', {})
 
         self.log.debug("Producing message to topic '%s' on cluster '%s'", topic, self.cluster)
 
-        try:
-            value_bytes = base64.b64decode(value_b64)
-        except Exception as e:
-            raise Exception(f"Failed to decode base64 value: {e}")
+        value_uses_schema_registry = config.get('value_uses_schema_registry', False)
+        value_schema_subject = config.get('value_schema_subject') or f"{topic}-value"
+        value_bytes = self.serializer.serialize_message(
+            value, uses_schema_registry=value_uses_schema_registry, schema_subject=value_schema_subject
+        )
 
-        key_bytes = None
-        if key_b64:
-            try:
-                key_bytes = base64.b64decode(key_b64)
-            except Exception as e:
-                raise Exception(f"Failed to decode base64 key: {e}")
+        key_uses_schema_registry = config.get('key_uses_schema_registry', False)
+        key_schema_subject = config.get('key_schema_subject') or f"{topic}-key"
+        key_bytes = (
+            self.serializer.serialize_message(
+                key, uses_schema_registry=key_uses_schema_registry, schema_subject=key_schema_subject
+            )
+            if key
+            else None
+        )
 
         headers_decoded = {}
         for header_key, header_value_b64 in headers_b64.items():

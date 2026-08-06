@@ -348,3 +348,36 @@ class TestProduceMessageValidation:
         assert config.action == 'produce_message'
         assert config.remote_config_id == 'test-id'
         assert config.kafka_connect_str == 'localhost:9092'
+
+    def test_schema_registry_requirement_violations(self):
+        """Test that value_uses_schema_registry rejects a missing schema_registry_url."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'produce_message': {
+                'cluster': 'test',
+                'topic': 'test',
+                'value': 'test',
+                'value_uses_schema_registry': True,
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="requires 'schema_registry_url' to be configured"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_schema_subject_override_does_not_require_schema_registry_url(self):
+        """Test that value_schema_subject alone (without value_uses_schema_registry) needs no registry."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'produce_message': {
+                'cluster': 'test',
+                'topic': 'test',
+                'value': base64.b64encode(b'test').decode('utf-8'),
+                'value_schema_subject': 'custom-subject',
+            },
+        }
+
+        config = KafkaActionsConfig(instance, None)
+        config.validate_config()
