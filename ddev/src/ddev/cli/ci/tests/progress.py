@@ -6,10 +6,8 @@
 ``DispatcherProgress`` -> ``BatchProgress`` -> ``JobProgress`` -> ``JobAttemptProgress``: batches,
 their planned jobs, and each job's executions in attempt order.
 
-No GitHub API models are exposed. ``conclusion`` is the exception, kept as its enum because it
-distinguishes outcomes (cancelled, timed out, action required) that ``Status`` collapses.
-``BatchJob`` (in ``messages``) is the planned-job representation, treated as immutable after
-planning.
+``conclusion`` is the one GitHub value kept, as its enum, because it distinguishes outcomes
+(cancelled, timed out, action required) that ``Status`` collapses.
 """
 
 from __future__ import annotations
@@ -30,10 +28,7 @@ if TYPE_CHECKING:
 
 
 class ProgressError(StrEnum):
-    """Why a batch or execution is unavailable, as a closed set to branch on rather than prose.
-
-    The subject is the object carrying the error: ``NO_ARTIFACTS`` on an attempt means that job's.
-    """
+    """Why a batch or execution is unavailable, as a closed set to branch on rather than prose."""
 
     TIMED_OUT = auto()
     NO_JOB_RESULTS = auto()
@@ -43,8 +38,7 @@ class ProgressError(StrEnum):
 class ExecutionState(Enum):
     """Where an execution is in its lifecycle, orthogonal to its outcome (``Status``).
 
-    ``RUNNING`` and ``RETRYING`` become reachable with the retry work; until then a batch is
-    ``PLANNED`` until its ``BatchFinished`` arrives.
+    ``RUNNING`` and ``RETRYING`` become reachable with the retry work.
     """
 
     PLANNED = "planned"
@@ -58,9 +52,8 @@ class JobAttemptProgress:
     """One observed execution of one planned job.
 
     An attempt exists only because the job ran, so ``status`` is always known: an undetermined job
-    has no attempt. ``attempt`` is its 1-based position in the job's history, ``failed_steps`` holds
-    every failing step (a job can fail more than one). ``job_id``, ``conclusion`` and ``job_url``
-    are ``None`` only when GitHub never reported the job, which today means the batch timed out.
+    has no attempt. ``attempt`` is its 1-based position in the job's history. ``job_id``,
+    ``conclusion`` and ``job_url`` are ``None`` when GitHub never reported the job.
     """
 
     attempt: int
@@ -88,8 +81,7 @@ class JobAttemptProgress:
 class JobProgress:
     """One logical planned job throughout execution.
 
-    ``attempts`` is its history in attempt order, and can be sparse: a job that already succeeded
-    does not run again in a failed-job rerun.
+    ``attempts`` can be sparse: a job that already succeeded does not run again in a failed-job rerun.
     """
 
     job: BatchJob
@@ -110,9 +102,8 @@ class JobProgress:
 class BatchProgress:
     """One logical batch, from planning through its terminal outcome.
 
-    ``batch_id`` is the stable logical identity, unrelated to any message id. ``run_id`` and
-    ``workflow_url`` are filled once GitHub has a run. ``status`` stays ``None`` until ``FINISHED``.
-    ``jobs`` covers every planned job, including those with no attempt yet.
+    ``status`` is the workflow's own, not a roll-up of ``jobs_progress``: a workflow can fail in a
+    step no tracked job covers. It stays ``None`` until ``FINISHED``.
     """
 
     batch_id: str
@@ -124,7 +115,7 @@ class BatchProgress:
     max_attempts: int
     retries_remaining: int
     retrying_jobs: tuple[BatchJob, ...]
-    jobs: tuple[JobProgress, ...]
+    jobs_progress: tuple[JobProgress, ...]
     error: ProgressError | None = None
 
 
@@ -132,11 +123,9 @@ class BatchProgress:
 class DispatcherProgress:
     """The complete point-in-time aggregate across all batches.
 
-    Carries all state known at its revision, including batches that have not started, so the PR
-    updater can render the newest snapshot and discard the rest. ``revision`` is absent by design:
-    it is ordering metadata owned by ``UpdatePRComment``.
-
-    The counters derive from ``JobProgress.latest`` only, so a job retried to success counts once.
+    Carries all state known at its revision, so the PR updater renders the newest snapshot and
+    discards the rest. The counters derive from ``JobProgress.latest`` only, so a job retried to
+    success counts once.
     """
 
     batches: tuple[BatchProgress, ...]
@@ -157,16 +146,16 @@ class DispatcherProgress:
     @property
     def complete(self) -> int:
         """Planned jobs that have run."""
-        return sum(1 for job in self._jobs if job.latest is not None)
+        return sum(1 for job in self._jobs_progress if job.latest is not None)
 
     @property
     def total(self) -> int:
         """Every planned job, run or not."""
-        return sum(1 for _ in self._jobs)
+        return sum(1 for _ in self._jobs_progress)
 
     @property
-    def _jobs(self) -> Iterator[JobProgress]:
-        return (job for batch in self.batches for job in batch.jobs)
+    def _jobs_progress(self) -> Iterator[JobProgress]:
+        return (job for batch in self.batches for job in batch.jobs_progress)
 
     def _count(self, status: Status) -> int:
-        return sum(1 for job in self._jobs if job.latest is not None and job.latest.status == status)
+        return sum(1 for job in self._jobs_progress if job.latest is not None and job.latest.status == status)

@@ -8,7 +8,7 @@ import logging
 import shutil
 import threading
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
@@ -26,7 +26,7 @@ from ddev.cli.ci.tests.progress import (
     JobProgress,
     ProgressError,
 )
-from ddev.cli.ci.tests.status import Status, batch_status, conclusion_to_status
+from ddev.cli.ci.tests.status import Status, conclusion_to_status
 from ddev.event_bus.orchestrator import SyncProcessor
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import parse_junit_dir
@@ -48,20 +48,10 @@ JUNIT_GLOB = "test-*.xml"
 
 
 class TaskTestGatherer(SyncProcessor[BatchFinished]):
-    """
-    Reads ``BatchFinished`` messages, analyzes the downloaded artifacts on disk, builds per-job
-    ``JobResult`` records, and organizes coverage/JUnit files for later publishing.
+    """Builds each batch's results from the artifacts the runner downloaded, organizes the coverage
+    and JUnit files, and publishes a ``DispatcherProgress`` snapshot per finished batch.
 
-    It is constructed with the complete batch plan and, on each finished batch, emits an
-    ``UpdatePRComment`` carrying a monotonic ``revision`` and a ``DispatcherProgress`` snapshot of
-    every planned batch, including those still to run. ``done`` is derived from that snapshot, set
-    once no batch is left unfinished. Rendering the comment is a separate consumer's job.
-
-    ``WorkflowStatus``/``JobResult`` are the local registry of what each batch reported; they are not
-    published. Every registry is keyed by ``batch_id``, which stays stable across workflow attempts
-    while ``run_id`` and the message id do not.
-
-    Makes no GitHub API calls: it works only from the artifacts the runner already downloaded.
+    Registries are keyed by ``batch_id``: it is stable across workflow attempts, ``run_id`` is not.
     """
 
     def __init__(self, name: str, output_base_path: Path, batches: list[TestBatch]) -> None:
@@ -83,7 +73,12 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             # Still terminal and still worth a revision, or it renders as planned forever.
             self._logger.warning("BatchFinished carried no jobs; nothing to gather", extra=log_extra)
 
-        # Outside the lock: these touch only this batch's own files.
+        # Rejected before gathering: gathering writes into the shared output tree, where a batch that
+        # is not in the plan could overwrite the files another batch publishes.
+        with self._lock:
+            if not self._accepts(message.batch_id, log_extra):
+                return
+
         gathered = [self._gather_job(batch_job_result, message) for batch_job_result in message.batch_jobs]
         results = [result for result, _ in gathered]
         status = self._build_workflow_status(message, results)
@@ -91,18 +86,11 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         # Register, bump the revision, and emit under one lock, so two batches finishing at once
         # cannot build a comment from half-updated state.
         with self._lock:
-            planned = self._progress_by_batch.get(message.batch_id)
-            if planned is None:
-                self._logger.warning("BatchFinished for an unplanned batch ignored", extra=log_extra)
+            # Re-checked: another thread may have gathered this batch while this one parsed.
+            if not self._accepts(message.batch_id, log_extra):
                 return
-            # The aggregate is the record of what was gathered, so an already-terminal batch is a
-            # duplicate; ignoring it keeps it from inflating the revision.
-            if planned.state is ExecutionState.FINISHED:
-                self._logger.warning("Duplicate BatchFinished ignored", extra=log_extra)
-                return
+            planned = self._progress_by_batch[message.batch_id]
             if results:
-                # The registry records job outcomes; a run that reported none belongs only in the
-                # aggregate, which can say it finished empty.
                 self._results_by_batch[message.batch_id] = results
                 self._status_by_batch[message.batch_id] = status
             self._progress_by_batch[message.batch_id] = self._finished_batch_progress(planned, message, gathered)
@@ -117,6 +105,17 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             done,
             extra=log_extra,
         )
+
+    def _accepts(self, batch_id: str, log_extra: dict[str, Any]) -> bool:
+        """Whether this batch is in the plan and not already gathered. Hold ``self._lock``."""
+        planned = self._progress_by_batch.get(batch_id)
+        if planned is None:
+            self._logger.warning("BatchFinished for an unplanned batch ignored", extra=log_extra)
+            return False
+        if planned.state is ExecutionState.FINISHED:
+            self._logger.warning("Duplicate BatchFinished ignored", extra=log_extra)
+            return False
+        return True
 
     def build_initial_update(self, message_id: str) -> UpdatePRComment:
         """Revision ``0``: the complete plan, before any batch has been dispatched.
@@ -148,7 +147,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             max_attempts=1,
             retries_remaining=0,
             retrying_jobs=(),
-            jobs=tuple(JobProgress(job=job, attempts=()) for job in batch.job_list),
+            jobs_progress=tuple(JobProgress(job=job, attempts=()) for job in batch.job_list),
         )
 
     def _gather_job(
@@ -182,15 +181,20 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             failed_steps=failed_steps,
             reports=reports,
         )
-        workflow_job = batch_job_result.workflow_job
+        job_id = conclusion = job_url = None
+        if (workflow_job := batch_job_result.workflow_job) is not None:
+            job_id = workflow_job.id
+            conclusion = workflow_job.conclusion
+            job_url = workflow_job.html_url
+
         attempt = JobAttemptProgress(
             # Provisional: the real position is known only when appended to the plan, under the lock.
             attempt=1,
-            job_id=None if workflow_job is None else workflow_job.id,
+            job_id=job_id,
             status=status,
-            conclusion=None if workflow_job is None else workflow_job.conclusion,
+            conclusion=conclusion,
             failed_steps=tuple(failed_steps),
-            job_url=None if workflow_job is None else workflow_job.html_url,
+            job_url=job_url,
             reports=reports,
             error=error,
         )
@@ -246,54 +250,52 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         Built from *planned*, not from the message alone, so a run reporting only a subset — what a
         failed-job rerun does — adds attempts to the jobs it covers and leaves the rest untouched.
 
+        The batch's own status is the workflow's, not a roll-up of these jobs: a workflow also runs
+        setup and finalization steps that can fail while every tracked job passes.
+
         Must be called while holding ``self._lock``.
         """
-        reported_jobs = {batch_job_result.job.name: batch_job_result.job for batch_job_result in message.batch_jobs}
         attempts = {
             batch_job_result.job.name: attempt
             for batch_job_result, (_, attempt) in zip(message.batch_jobs, gathered, strict=True)
         }
 
         jobs = []
-        for job in planned.jobs:
+        for job in planned.jobs_progress:
             attempt = attempts.pop(job.job.name, None)
             if attempt is None:
                 jobs.append(job)
                 continue
-            # The attempt number is the execution's position in this job's history.
+            # Renumbered here because the position in the job's history is only known now.
             numbered = dataclasses.replace(attempt, attempt=len(job.attempts) + 1)
             jobs.append(dataclasses.replace(job, attempts=(*job.attempts, numbered)))
-        for name, attempt in attempts.items():
-            # An unplanned job is a runner bug, but dropping its result would hide it.
+        for name in attempts:
+            # Reported but never planned: recorded so it can be investigated, kept out of the totals.
             self._logger.warning(
                 "Gathered a job that is not in the batch plan", extra={"batch_id": message.batch_id, "job": name}
             )
-            jobs.append(JobProgress(job=reported_jobs[name], attempts=(attempt,)))
 
-        statuses = [job.latest.status for job in jobs if job.latest is not None]
         attempts_run = max((len(job.attempts) for job in jobs), default=0)
-
         return BatchProgress(
             batch_id=message.batch_id,
             run_id=message.run_id,
             workflow_url=message.workflow_url,
             state=ExecutionState.FINISHED,
-            # Nothing reported means nothing to collapse, and a failed batch.
-            status=batch_status(statuses) if statuses else Status.FAILURE,
+            status=message.status,
             # The batch ran, so it is on at least its first attempt.
             current_attempt=max(attempts_run, 1),
             max_attempts=1,
             retries_remaining=0,
             retrying_jobs=(),
-            jobs=tuple(jobs),
-            error=self._batch_error(message, statuses),
+            jobs_progress=tuple(jobs),
+            error=self._batch_error(message, jobs),
         )
 
     @staticmethod
-    def _batch_error(message: BatchFinished, statuses: list[Status]) -> ProgressError | None:
+    def _batch_error(message: BatchFinished, jobs: list[JobProgress]) -> ProgressError | None:
         if message.timed_out:
             return ProgressError.TIMED_OUT
-        if not statuses:
+        if not any(job.latest is not None for job in jobs):
             return ProgressError.NO_JOB_RESULTS
         return None
 

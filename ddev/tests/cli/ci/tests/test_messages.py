@@ -129,20 +129,12 @@ def _workflow(batch_id: str, run_id: int, success: int, failed: int, skipped: in
     )
 
 
-def _results(success: int = 0, failed: int = 0, skipped: int = 0) -> list[JobResult]:
-    return (
-        [_job("postgres", Status.SUCCESS)] * success
-        + [_job("mysql", Status.FAILURE)] * failed
-        + [_job("consul", Status.SKIPPED)] * skipped
-    )
-
-
 def test_workflow_status_label() -> None:
-    assert _workflow("b1", 1, 2, 0, 0, _results(success=2)).status == Status.SUCCESS
-    assert _workflow("b2", 2, 1, 1, 0, _results(success=1, failed=1)).status == Status.FAILURE
-    assert _workflow("b3", 3, 0, 0, 2, _results(skipped=2)).status == Status.SKIPPED
+    assert _workflow("b1", 1, 2, 0, 0, []).status == Status.SUCCESS
+    assert _workflow("b2", 2, 1, 1, 0, []).status == Status.FAILURE
+    assert _workflow("b3", 3, 0, 0, 2, []).status == Status.SKIPPED
     # A batch with passes and skips (no failures) reads as success.
-    assert _workflow("b4", 4, 3, 0, 1, _results(success=3, skipped=1)).status == Status.SUCCESS
+    assert _workflow("b4", 4, 3, 0, 1, []).status == Status.SUCCESS
 
 
 def test_update_pr_comment_carries_only_the_revision_and_the_snapshot() -> None:

@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum, auto
 from typing import TYPE_CHECKING
 
-from ddev.cli.ci.tests.status import Status, batch_status
+from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.junit import TestStatus
 
@@ -154,8 +154,12 @@ class WorkflowStatus:
 
     @property
     def status(self) -> Status:
-        """Batch-level label, from the same rule the aggregate uses."""
-        return batch_status(result.status for result in self.results)
+        """Batch-level label: FAILURE if any job failed, else SUCCESS if any passed, else SKIPPED."""
+        if self.failed_count > 0:
+            return Status.FAILURE
+        if self.success_count > 0:
+            return Status.SUCCESS
+        return Status.SKIPPED
 
 
 @dataclass

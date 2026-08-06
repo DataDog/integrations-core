@@ -12,6 +12,7 @@ of every job's result — not just failures.
 from __future__ import annotations
 
 import asyncio
+import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -484,7 +485,7 @@ def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
 def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path) -> None:
     # Terminal, unsuccessful, and carrying the reason — and still emitting a revision.
     gatherer = _make_gatherer(tmp_path)
-    gatherer.process_message(_batch_finished("", run_id=100, batch_jobs=[]))
+    gatherer.process_message(_batch_finished("", status="failure", run_id=100, batch_jobs=[]))
 
     update = _drain_queue(gatherer.queue)[0]
     assert update.revision == 1
@@ -537,6 +538,8 @@ def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
     assert _drain_queue(gatherer.queue) == []
     assert gatherer._revision == 0
     assert [batch.batch_id for batch in gatherer.build_initial_update("initial").progress.batches] == ["batch-1"]
+    # Nor may it write into the output tree the planned batches publish from.
+    assert not (tmp_path / "out").exists()
 
 
 def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
@@ -554,9 +557,13 @@ def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
     assert len(first) == 1
     assert first[0].revision == 1
 
+    # Removed so the replay has to recreate it to be caught organizing artifacts a second time.
+    shutil.rmtree(tmp_path / "out")
+
     gatherer.process_message(batch)
     assert _drain_queue(gatherer.queue) == []
     assert gatherer._revision == 1
+    assert not (tmp_path / "out").exists()
 
 
 def test_duplicate_is_detected_by_batch_id_not_message_id(tmp_path: Path) -> None:
@@ -613,8 +620,8 @@ def test_initial_update_is_revision_zero_over_the_whole_plan(tmp_path: Path) -> 
     assert all(
         batch.status is None and batch.run_id is None and batch.current_attempt is None for batch in progress.batches
     )
-    assert [len(batch.jobs) for batch in progress.batches] == [2, 1]
-    assert all(job.attempts == () and job.latest is None for batch in progress.batches for job in batch.jobs)
+    assert [len(batch.jobs_progress) for batch in progress.batches] == [2, 1]
+    assert all(job.attempts == () and job.latest is None for batch in progress.batches for job in batch.jobs_progress)
     assert (progress.total, progress.complete) == (3, 0)
 
 
@@ -667,7 +674,55 @@ def test_progress_and_registry_agree(tmp_path: Path) -> None:
         workflow.failed_count,
         workflow.skipped_count,
     )
-    assert _batch_progress(update, "batch-1").status == workflow.status
+    # The batch label is the workflow's, not a roll-up of the jobs the registry counted.
+    assert _batch_progress(update, "batch-1").status == Status.FAILURE
+
+
+def test_batch_status_comes_from_the_workflow_not_from_its_jobs(tmp_path: Path) -> None:
+    # A workflow also runs steps no tracked job covers (setup, finalization). When one of those fails
+    # the batch failed, even though every job it tracked passed.
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1")
+
+    gatherer = _make_gatherer(tmp_path)
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            status="failure",
+            batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)],
+        )
+    )
+
+    update = _drain_queue(gatherer.queue)[0]
+    batch = _batch_progress(update, "batch-1")
+    assert batch.status == Status.FAILURE
+    assert [job.latest.status for job in batch.jobs_progress] == [Status.SUCCESS]
+    # The job counters still report the job as passed: the discrepancy is the signal.
+    assert (update.progress.passed, update.progress.failed) == (1, 0)
+
+
+def test_unplanned_job_is_warned_about_but_left_out_of_the_totals(tmp_path: Path) -> None:
+    # A job the plan never mentioned would mangle the totals, so it is logged and dropped.
+    artifacts = tmp_path / "artifacts" / "100"
+    planned_dir = _make_job_tree(artifacts, "j1")
+    stray_dir = _make_job_tree(artifacts, "j2")
+    gatherer = _make_gatherer(tmp_path)
+
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), planned_dir),
+                _batch_job_result(_batch_job("j2", target="kafka"), _workflow_job("j2", "failure"), stray_dir),
+            ],
+        )
+    )
+
+    update = _drain_queue(gatherer.queue)[0]
+    batch = _batch_progress(update, "batch-1")
+    assert [job.job.name for job in batch.jobs_progress] == ["j1"]
+    assert (update.progress.total, update.progress.complete) == (1, 1)
+    assert (update.progress.passed, update.progress.failed) == (1, 0)
 
 
 def test_timed_out_batch_is_recorded_on_the_batch(tmp_path: Path) -> None:
@@ -684,10 +739,10 @@ def test_timed_out_batch_is_recorded_on_the_batch(tmp_path: Path) -> None:
     batch = _batch_progress(_drain_queue(gatherer.queue)[0], "batch-1")
     assert batch.status == Status.FAILURE
     assert batch.error == ProgressError.TIMED_OUT
-    assert batch.jobs[0].latest is not None
+    assert batch.jobs_progress[0].latest is not None
     # The job never reported a step, and GitHub never reported the job at all.
-    assert batch.jobs[0].latest.failed_steps == ()
-    assert batch.jobs[0].latest.conclusion is None
+    assert batch.jobs_progress[0].latest.failed_steps == ()
+    assert batch.jobs_progress[0].latest.conclusion is None
 
 
 def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
@@ -726,7 +781,7 @@ def test_missing_artifact_dir_is_recorded_as_an_attempt_error(tmp_path: Path) ->
         _batch_finished("", batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), None)])
     )
 
-    attempt = _batch_progress(_drain_queue(gatherer.queue)[0], "batch-1").jobs[0].latest
+    attempt = _batch_progress(_drain_queue(gatherer.queue)[0], "batch-1").jobs_progress[0].latest
     assert attempt is not None
     assert attempt.error == ProgressError.NO_ARTIFACTS
     assert attempt.reports == ()
@@ -767,7 +822,7 @@ def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) 
 
     batch = gatherer._progress_by_batch["batch-1"]
     assert batch.batch_id == "batch-1"
-    by_name = {job.job.name: job for job in batch.jobs}
+    by_name = {job.job.name: job for job in batch.jobs_progress}
     assert sorted(by_name) == ["j1", "j2"]
     assert by_name["j1"].retry_count == 0
     assert by_name["j2"].retry_count == 1
@@ -845,7 +900,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
         _scenario_job(a2, "http_check", "success", JUNIT_PASSING, run_id=2),
         _scenario_job(a2, "mysql", "failure", JUNIT_FAILING, run_id=2, failed_step="Run unit tests"),
     ]
-    gatherer.process_message(_batch_finished(a2, id="b2", run_id=2, batch_jobs=batch_02))
+    gatherer.process_message(_batch_finished(a2, id="b2", status="failure", run_id=2, batch_jobs=batch_02))
     rev2 = _drain_queue(gatherer.queue)
     assert len(rev2) == 1
     assert (rev2[0].revision, rev2[0].progress.done) == (2, False)
@@ -903,7 +958,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     assert all(batch.workflow_url for batch in progress.batches)
 
     # No retries have run, so every job has exactly one execution and no retry state is reported.
-    all_jobs = [job for batch in progress.batches for job in batch.jobs]
+    all_jobs = [job for batch in progress.batches for job in batch.jobs_progress]
     assert all(job.retry_count == 0 for job in all_jobs)
     assert all(batch.retrying_jobs == () and batch.retries_remaining == 0 for batch in progress.batches)
 

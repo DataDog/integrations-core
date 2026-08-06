@@ -92,7 +92,7 @@ def _batch(*jobs: JobProgress, batch_id: str = "batch-01", **overrides) -> Batch
         "max_attempts": 1,
         "retries_remaining": 0,
         "retrying_jobs": (),
-        "jobs": jobs,
+        "jobs_progress": jobs,
     }
     defaults.update(overrides)
     return BatchProgress(**defaults)
