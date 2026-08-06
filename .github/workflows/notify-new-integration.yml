@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "**/datadog_checks/**/__init__.py"
+      - "*/pyproject.toml"
 
 env:
   PYTHON_VERSION: "3.13"
@@ -28,15 +28,7 @@ jobs:
       - name: Detect new integration checks
         id: detect
         run: |
-          for init_file in $(git diff --diff-filter=A --name-only HEAD~1 HEAD -- '*/datadog_checks/*/__init__.py'); do
-            check_dir=$(echo "$init_file" | cut -d'/' -f1)
-            pyproject="${check_dir}/pyproject.toml"
-
-            # Only consider directories that are actual integrations (have a pyproject.toml)
-            if [ ! -f "$pyproject" ]; then
-              continue
-            fi
-
+          for pyproject in $(git diff --diff-filter=A --name-only HEAD~1 HEAD -- '*/pyproject.toml'); do
             check_name=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
             echo "found=true" >> "$GITHUB_OUTPUT"
             echo "name=$check_name" >> "$GITHUB_OUTPUT"
