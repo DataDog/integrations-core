@@ -2,7 +2,7 @@
 # Regenerate with `evalya init --force`. See .evalya/init.yml for config.
 variables:
   EVALYA_IMAGE: registry.ddbuild.io/ci/evalya:${EVALYA_TAG}
-  EVALYA_TAG: main
+  EVALYA_TAG: v0.15.0
 .evalya:generate-pipeline:
   image: $EVALYA_IMAGE
   tags:
@@ -50,4 +50,3 @@ variables:
     - evalya manifest validate-all
   variables:
     DD_METRICS_TAGS: evalya:true,evalya-stage:validate
-

@@ -1,1 +1,4 @@
 registry: registry.ddbuild.io/ci/integrations-core
+ci:
+  impact:
+    enabled: true

@@ -9,4 +9,4 @@ ci:
   testStage: validate
   publishStage: release
   publishMeta: true
-  evalyaTag: main
+  evalyaTag: v0.15.0
