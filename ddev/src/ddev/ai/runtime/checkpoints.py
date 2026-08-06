@@ -72,10 +72,15 @@ class ResumeState:
     ``completed`` is the dependency-closed set of phases that succeeded and whose every transitive
     dependency also succeeded; a resume skips exactly these. ``frontier`` is the phases a resume
     would start with. The default, empty state means there is no prior run to resume.
+
+    ``error`` distinguishes "nothing was recorded" from "the recording could not be read". Callers
+    that turn a :class:`CheckpointReadError` into a state rather than propagating it set it so the
+    reason survives; it is never set by :meth:`CheckpointManager.resume_state`, which raises instead.
     """
 
     completed: frozenset[str] = frozenset()
     frontier: frozenset[str] = frozenset()
+    error: str | None = None
 
     @property
     def is_resumable(self) -> bool:

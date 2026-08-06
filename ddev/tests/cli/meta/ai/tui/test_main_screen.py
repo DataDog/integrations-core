@@ -12,6 +12,7 @@ from rich.text import Text
 
 from ddev.ai.config.errors import ErrorKind, FlowError
 from ddev.ai.config.models import ConfigStatus, FlowResult
+from ddev.ai.runtime.checkpoints import ResumeState
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -296,7 +297,7 @@ async def test_flow_card_keeps_resumable_footer_with_long_description(make_flow,
     async with app.run_test(size=(120, 50)) as pilot:
         await pilot.pause()
         card = app.screen.query_one("FlowCard")
-        card.resumable = True
+        card.resume_state = ResumeState(frontier=frozenset({"phase_1"}))
         await card.recompose()
         await pilot.pause()
 
@@ -304,6 +305,44 @@ async def test_flow_card_keeps_resumable_footer_with_long_description(make_flow,
         assert str(footer.render()).splitlines() == ["● 2 phases", "↻ resumable run available"]
         assert footer.region.height == 2
         assert footer.region.bottom <= card.content_region.bottom
+
+
+async def test_flow_card_footer_reports_an_unreadable_checkpoint(make_flow, make_togo_app) -> None:
+    """A corrupt checkpoint is surfaced on the tile instead of reading as a clean slate."""
+    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
+
+    flow = make_flow("Corrupt Checkpoint", n_phases=2)
+    app = make_togo_app([flow])
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        card = app.screen.query_one(FlowCard)
+        card.resume_state = ResumeState(error="Failed to load checkpoints from checkpoints.yaml: boom")
+        await card.recompose()
+        await pilot.pause()
+
+        footer = str(card.query_one(".flow-card-footer").render())
+        assert footer.splitlines() == ["● 2 phases", "✕ checkpoint unreadable"]
+        assert not card.resumable
+
+
+async def test_flow_card_unreadable_checkpoint_supersedes_resumable_label(make_flow, make_togo_app) -> None:
+    """The footer never claims a resume is available while the checkpoint cannot be read."""
+    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
+
+    flow = make_flow("Corrupt And Frontier", n_phases=2)
+    app = make_togo_app([flow])
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        card = app.screen.query_one(FlowCard)
+        card.resume_state = ResumeState(frontier=frozenset({"phase_1"}), error="unreadable")
+        await card.recompose()
+        await pilot.pause()
+
+        footer = str(card.query_one(".flow-card-footer").render())
+        assert "resumable run available" not in footer
+        assert "✕ checkpoint unreadable" in footer
 
 
 async def test_flow_card_click_does_not_navigate_when_text_is_selected(monkeypatch, make_togo_app):

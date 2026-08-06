@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
@@ -20,6 +21,9 @@ from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchInputValues
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.status import RunStatus
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineGraph
+
+if TYPE_CHECKING:
+    from ddev.ai.runtime.checkpoints import ResumeState
 
 
 class FlowScreen(TogoScreen):
@@ -87,23 +91,37 @@ class FlowScreen(TogoScreen):
             if config.tools:
                 yield Static(" · ".join(config.tools), classes="flow-agent-tools")
 
-    def on_mount(self) -> None:
-        self._refresh_resume_state()
-
+    # Textual posts ScreenResume on push as well as pop, so this covers the initial open too.
     def on_screen_resume(self) -> None:
         """Re-read resume state whenever this screen becomes active again."""
-        self._refresh_resume_state()
+        self._apply_resume_state(self._read_resume_state())
 
-    def _refresh_resume_state(self) -> None:
-        """Show the Resume button only while a resumable run exists for this flow."""
+    def _read_resume_state(self) -> ResumeState:
         from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_resume_state
 
         runs_dir = self._runs_dir or ai_runs_dir(self.togo_app.ddev_app.repo.path)
-        state = flow_resume_state(self.flow, runs_dir)
+        return flow_resume_state(self.flow, runs_dir)
+
+    def _apply_resume_state(self, state: ResumeState) -> None:
+        """Show the Resume button only while a resumable run exists for this flow."""
         try:
             self.query_one("#resume", Button).display = state.is_resumable
         except NoMatches:
             pass
+
+    def _confirm_resumable(self) -> bool:
+        """Re-read the checkpoint before committing to a resume, resyncing the UI if it went stale."""
+        state = self._read_resume_state()
+        if state.is_resumable:
+            return True
+
+        self._apply_resume_state(state)
+        if state.error is not None:
+            message = f"Cannot resume: {state.error} Delete the checkpoint file and launch from scratch."
+        else:
+            message = "Nothing left to resume — launch the flow instead."
+        self.notify(message, severity="warning")
+        return False
 
     def on_phase_selected(self, event: PhaseSelected) -> None:
         self.app.push_screen(PhaseConfigScreen(self.flow, event.phase_id))
@@ -131,15 +149,22 @@ class FlowScreen(TogoScreen):
         from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
         from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
 
+        if not self._confirm_resumable():
+            return
+
         def _on_dismiss(values: LaunchInputValues | None) -> None:
-            if values is not None:
-                self.app.push_screen(
-                    ExecutionScreen(
-                        self.flow,
-                        runtime_variables=values,
-                        resume=True,
-                        runs_dir=self._runs_dir,
-                    )
+            # The state can go stale while the modal is open, and the dismiss callback runs before
+            # the ScreenResume refresh, so re-check rather than commit to a resume that will fail.
+            if values is None or not self._confirm_resumable():
+                return
+
+            self.app.push_screen(
+                ExecutionScreen(
+                    self.flow,
+                    runtime_variables=values,
+                    resume=True,
+                    runs_dir=self._runs_dir,
                 )
+            )
 
         self.app.push_screen(LaunchModal(self.flow), _on_dismiss)

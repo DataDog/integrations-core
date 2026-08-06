@@ -176,14 +176,31 @@ def test_flow_resume_state_no_checkpoints_file(tmp_path: Path) -> None:
 
 
 def test_flow_resume_state_unreadable_checkpoints(tmp_path: Path) -> None:
-    """A corrupt checkpoints file reads as nothing to resume rather than crashing the grid."""
-    from ddev.cli.meta.ai.tui.runs import flow_slug
+    """A corrupt checkpoints file reports the reason rather than crashing the grid."""
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state, flow_slug
 
     flow = _make_flow()
     run_dir = tmp_path / flow_slug(flow)
     run_dir.mkdir()
     (run_dir / "checkpoints.yaml").write_text("{ not: valid: yaml")
-    _assert_no_resume_state(flow, tmp_path)
+
+    state = flow_resume_state(flow, runs_dir=tmp_path)
+    assert not state.is_resumable
+    assert state.error is not None
+    assert "checkpoints.yaml" in state.error
+
+
+def test_flow_resume_state_distinguishes_corrupt_from_clean_slate(tmp_path: Path) -> None:
+    """An unreadable checkpoint is not reported as an absent one."""
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state, flow_slug
+
+    corrupt = _make_flow(name="Corrupt")
+    run_dir = tmp_path / flow_slug(corrupt)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text("just a string, not a mapping")
+
+    assert flow_resume_state(corrupt, runs_dir=tmp_path).error is not None
+    assert flow_resume_state(_make_flow(name="Never Ran"), runs_dir=tmp_path).error is None
 
 
 def test_flow_resume_state_failed_checkpoint(tmp_path: Path) -> None:
@@ -678,6 +695,85 @@ async def test_resume_pushes_execution_screen_with_resume_flag(tmp_path: Path) -
         screen = pilot.app.screen
         assert isinstance(screen, ExecutionScreen)
         assert screen.resume is True
+
+
+async def test_resume_refuses_when_run_completes_while_modal_is_open(tmp_path: Path) -> None:
+    """The dismiss callback re-checks, so a run finished elsewhere cannot start a doomed resume."""
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        await pilot.click("#resume")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, LaunchModal)
+
+        _provide_prd(pilot.app.screen, tmp_path)
+        _write_complete_run(tmp_path, flow)
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert not isinstance(pilot.app.screen, ExecutionScreen)
+        assert pilot.app.screen is flow_screen
+        assert not flow_screen.query_one("#resume", Button).display
+        assert "Nothing left to resume" in " ".join(n.message for n in pilot.app._notifications)
+
+
+async def test_resume_refuses_when_checkpoint_becomes_unreadable_while_modal_is_open(tmp_path: Path) -> None:
+    """A checkpoint corrupted mid-flight reports the remedy instead of a wrapped hook error."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        await pilot.click("#resume")
+        await pilot.pause()
+
+        _provide_prd(pilot.app.screen, tmp_path)
+        (tmp_path / flow_slug(flow) / "checkpoints.yaml").write_text("{ not: valid: yaml")
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert not isinstance(pilot.app.screen, ExecutionScreen)
+        notifications = " ".join(n.message for n in pilot.app._notifications)
+        assert "Cannot resume" in notifications
+        assert "Delete the checkpoint file" in notifications
+
+
+async def test_resume_refuses_before_opening_the_modal_when_nothing_to_resume(tmp_path: Path) -> None:
+    """A stale Resume button is refused up front rather than after collecting inputs."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert flow_screen.query_one("#resume", Button).display
+
+        _write_complete_run(tmp_path, flow)
+        flow_screen._do_resume()
+        await pilot.pause()
+
+        assert not isinstance(pilot.app.screen, LaunchModal)
+        assert not flow_screen.query_one("#resume", Button).display
 
 
 async def test_resume_with_inputs_reopens_modal_and_passes_converted_values(tmp_path: Path) -> None:

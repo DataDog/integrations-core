@@ -13,6 +13,7 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from ddev.ai.config.models import ResolvedFlow
+from ddev.ai.runtime.checkpoints import ResumeState
 from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_resume_state
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
@@ -33,16 +34,16 @@ class MainScreen(TogoScreen):
         yield Static(f"DISCOVERED FLOWS · {len(results)}", classes="eyebrow")
         grid = VerticalScroll(id="flow-grid")
         for i, result in enumerate(results):
-            grid.compose_add_child(FlowCard(result=result, index=i, resumable=self._is_resumable(result.resolved)))
+            grid.compose_add_child(FlowCard(result=result, index=i, resume_state=self._resume_state(result.resolved)))
         yield grid
 
-    def _is_resumable(self, flow: ResolvedFlow | None) -> bool:
-        return flow is not None and flow_resume_state(flow, self.runs_dir).is_resumable
+    def _resume_state(self, flow: ResolvedFlow | None) -> ResumeState:
+        return flow_resume_state(flow, self.runs_dir) if flow is not None else ResumeState()
 
     def on_screen_resume(self) -> None:
         """Re-read resume state whenever this screen becomes active again."""
         for card in self.query(FlowCard):
-            card.resumable = self._is_resumable(card.flow)
+            card.resume_state = self._resume_state(card.flow)
 
     def on_flow_card_selected(self, event: FlowCard.Selected) -> None:
         if event.result.resolved is not None:

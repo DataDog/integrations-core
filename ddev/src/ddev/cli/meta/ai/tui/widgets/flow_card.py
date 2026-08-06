@@ -14,6 +14,7 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from ddev.ai.config.models import ConfigStatus, FlowResult
+from ddev.ai.runtime.checkpoints import ResumeState
 from ddev.cli.meta.ai.palette import ERROR, SUCCESS
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import COLOR_RUNNING
 
@@ -48,9 +49,9 @@ class FlowCard(Widget):
 
     BINDINGS = [Binding("enter", "select", "Select")]
 
-    # Recomposes rather than repaints: the resumable line lives in the footer child, which a
+    # Recomposes rather than repaints: the resume line lives in the footer child, which a
     # repaint of the card would not rebuild.
-    resumable: reactive[bool] = reactive(False, init=False, recompose=True)
+    resume_state: reactive[ResumeState] = reactive(ResumeState(), init=False, recompose=True)
 
     class Selected(Message):
         """Posted when the card is activated (Enter or click)."""
@@ -59,13 +60,18 @@ class FlowCard(Widget):
             super().__init__()
             self.result = result
 
-    def __init__(self, result: FlowResult, index: int, *, resumable: bool = False) -> None:
+    def __init__(self, result: FlowResult, index: int, *, resume_state: ResumeState | None = None) -> None:
         classes = "broken" if result.status is ConfigStatus.BROKEN else "valid"
         super().__init__(classes=classes)
         self.result = result
         self.flow = result.resolved
         self.index = index
-        self.set_reactive(FlowCard.resumable, resumable)
+        self.set_reactive(FlowCard.resume_state, resume_state or ResumeState())
+
+    @property
+    def resumable(self) -> bool:
+        """Whether the recorded run leaves something for a resume to do."""
+        return self.resume_state.is_resumable
 
     @property
     def phase_count(self) -> int:
@@ -97,7 +103,9 @@ class FlowCard(Widget):
             phase_word = "phase" if n == 1 else "phases"
             content.append("●", style=SUCCESS)
             content.append(f" {n} {phase_word}")
-            if self.resumable:
+            if self.resume_state.error is not None:
+                content.append("\n✕ checkpoint unreadable", style=ERROR)
+            elif self.resumable:
                 content.append("\n↻ resumable run available", style=COLOR_RUNNING)
         return content
 

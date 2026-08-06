@@ -29,7 +29,9 @@ def ai_runs_dir(repo_root: str | Path) -> Path:
 def flow_resume_state(flow: ResolvedFlow, runs_dir: Path) -> ResumeState:
     """Return the resume state recorded for *flow* below *runs_dir*.
 
-    Unreadable checkpoints return an empty state: a corrupt file reads as nothing to resume.
+    Unreadable checkpoints are reported through ``ResumeState.error`` rather than raised, so one
+    corrupt file cannot crash a grid of flows. The reason is kept so callers can tell a corrupt
+    file apart from a clean slate and surface the remedy.
 
     Args:
         flow: The flow whose run directory to inspect.
@@ -38,5 +40,5 @@ def flow_resume_state(flow: ResolvedFlow, runs_dir: Path) -> ResumeState:
     manager = CheckpointManager(runs_dir / flow_slug(flow) / "checkpoints.yaml")
     try:
         return manager.resume_state(flow)
-    except CheckpointReadError:
-        return ResumeState()
+    except CheckpointReadError as e:
+        return ResumeState(error=str(e))
