@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 2
 
@@ -60,9 +60,24 @@ jobs:
         if: steps.detect.outputs.found == 'true'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.NEW_INTEGRATION_SLACK_WEBHOOK_URL }}
+          NAME: ${{ steps.detect.outputs.names }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
         run: |
+          message=$(cat <<MSGEOF
+          New integration merged to master: ${NAME}
+          Commit: ${COMMIT_URL}
+
+          A PyPI admin must fill the pending publisher form at https://pypi.org/manage/account/publishing/:
+          - PyPI Project Name: ${NAME}
+          - Owner: DataDog
+          - Repository name: integrations-core
+          - Workflow name: publish-pypi.yml
+          - Environment name: publish-pypi
+
+          Please react to this message once completed.
+          Ask #agent-integrations if you have any questions.
+          MSGEOF
+          )
           curl -sf -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
-            -d "$(jq -n \
-              --arg text "New integration check(s) merged to master: ${{ steps.detect.outputs.names }} (${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" \
-              '{text: $text}')"
+            -d "$(jq -n --arg text "$message" '{text: $text}')"
