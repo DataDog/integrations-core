@@ -28,7 +28,6 @@ jobs:
       - name: Detect new integration checks
         id: detect
         run: |
-          new_checks=""
           for init_file in $(git diff --diff-filter=A --name-only HEAD~1 HEAD -- '*/datadog_checks/*/__init__.py'); do
             check_dir=$(echo "$init_file" | cut -d'/' -f1)
             pyproject="${check_dir}/pyproject.toml"
@@ -39,25 +38,18 @@ jobs:
             fi
 
             check_name=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
-            if [ -z "$new_checks" ]; then
-              new_checks="$check_name"
-            else
-              new_checks="$new_checks, $check_name"
-            fi
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "name=$check_name" >> "$GITHUB_OUTPUT"
+            exit 0
           done
 
-          if [ -z "$new_checks" ]; then
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "names=$new_checks" >> "$GITHUB_OUTPUT"
-          fi
+          echo "found=false" >> "$GITHUB_OUTPUT"
 
       - name: Send Slack notification
         if: steps.detect.outputs.found == 'true'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.NEW_INTEGRATION_SLACK_WEBHOOK_URL }}
-          NAME: ${{ steps.detect.outputs.names }}
+          NAME: ${{ steps.detect.outputs.name }}
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
         run: |
           message=$(cat <<MSGEOF
