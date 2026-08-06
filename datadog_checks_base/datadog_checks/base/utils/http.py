@@ -110,7 +110,12 @@ UDS_SCHEME = 'unix'
 
 
 def load_x509_certificate(data: bytes) -> Certificate:
-    """Load a certificate that may be DER (the RFC 5280 convention for AIA responses) or PEM encoded."""
+    """Load a certificate that may be DER (the RFC 5280 convention for AIA responses) or PEM encoded.
+
+    Assumes `data` holds a single certificate. Some issuers serve a multi-cert PEM bundle (e.g. issuer
+    plus cross-signed root) at the CA Issuers URI; only the first certificate in such a bundle is parsed
+    and the rest are silently discarded. This is not a regression versus prior behavior.
+    """
     try:
         return _http_utils.cryptography_x509_load_certificate(data)
     except ValueError:
@@ -610,6 +615,9 @@ class RequestsWrapper(object):
                     .decode('ascii')
                 )
             except Exception as e:
+                # Best-effort: skip this issuer and keep trying the rest rather than aborting the whole
+                # chase. A partial chain may still be enough to complete verification; if it isn't, the
+                # retry in `make_request_aia_chasing` fails with the original SSLError.
                 self.logger.error('Error while deserializing intermediate certificate from `%s`: %s', uri, e)
                 continue
 
