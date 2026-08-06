@@ -654,6 +654,58 @@ async def test_flow_screen_pipeline_legend_shown_with_checkpointed_phases(tmp_pa
         assert pilot.app.screen.query_one("#pipeline-legend", Static).display
 
 
+async def test_flow_screen_legend_reports_an_unreadable_checkpoint(tmp_path: Path) -> None:
+    """A corrupt checkpoint states the remedy on the flow screen instead of leaving it silent."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import CHECKPOINT_UNREADABLE_LEGEND, FlowScreen
+
+    flow = _make_chain_flow(n_phases=2)
+    run_dir = tmp_path / flow_slug(flow)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text("{ not: valid: yaml")
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+
+        legend = pilot.app.screen.query_one("#pipeline-legend", Static)
+        assert legend.display
+        assert str(legend.render()) == CHECKPOINT_UNREADABLE_LEGEND
+        assert legend.has_class("legend-error")
+        assert not pilot.app.screen.query_one("#resume", Button).display
+
+
+async def test_flow_screen_legend_returns_to_checkpoint_text_when_file_is_repaired(tmp_path: Path) -> None:
+    """The legend follows the state in both directions rather than latching on the error."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import PIPELINE_LEGEND, FlowScreen
+    from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+
+    flow = _make_chain_flow(n_phases=2)
+    run_dir = tmp_path / flow_slug(flow)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text("{ not: valid: yaml")
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert flow_screen.query_one("#pipeline-legend", Static).has_class("legend-error")
+
+        await pilot.app.push_screen(PhaseConfigScreen(flow, flow.flow[0].phase))
+        await pilot.pause()
+        _write_incomplete_run(tmp_path, flow)
+        pilot.app.pop_screen()
+        await pilot.pause()
+
+        legend = flow_screen.query_one("#pipeline-legend", Static)
+        assert legend.display
+        assert str(legend.render()) == PIPELINE_LEGEND
+        assert not legend.has_class("legend-error")
+
+
 async def test_phase_config_agent_panel_renders_tools_and_prompt() -> None:
     """PhaseConfigScreen shows agent tools and system prompt inline."""
     from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen

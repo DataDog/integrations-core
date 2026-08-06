@@ -52,7 +52,15 @@ async def test_togo_app_css_loads_without_error(make_togo_app):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("key", STATUS_VARIABLE_KEYS)
+EXPECTED_STATUS_KEYS = ("status-running", "status-pending", "status-done", "status-failed", "status-checkpointed")
+
+
+def test_status_variable_keys_cover_every_expected_status():
+    """STATUS_VARIABLE_KEYS tracks the status palette without silently losing a key."""
+    assert set(STATUS_VARIABLE_KEYS) == set(EXPECTED_STATUS_KEYS)
+
+
+@pytest.mark.parametrize("key", EXPECTED_STATUS_KEYS)
 def test_get_theme_variable_defaults_returns_status_key(key, make_togo_app):
     """TogoApp.get_theme_variable_defaults() includes all status keys."""
     defaults = make_togo_app([]).get_theme_variable_defaults()
@@ -62,7 +70,7 @@ def test_get_theme_variable_defaults_returns_status_key(key, make_togo_app):
 def test_get_theme_variable_defaults_values_match_theme(make_togo_app):
     """Default values match the corresponding togo_theme variables."""
     defaults = make_togo_app([]).get_theme_variable_defaults()
-    for key in STATUS_VARIABLE_KEYS:
+    for key in EXPECTED_STATUS_KEYS:
         assert defaults[key] == togo_theme.variables[key]
 
 

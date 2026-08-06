@@ -1779,7 +1779,7 @@ async def test_resume_flag_passed_to_orchestrator():
 
 
 async def test_resume_initializes_completed_phase_statuses(tmp_path: Path) -> None:
-    """Dependency-closed checkpoint successes render done before resumed work starts."""
+    """Dependency-closed checkpoint successes render checkpointed, not done, before resumed work starts."""
     from ddev.cli.meta.ai.tui.runs import flow_slug
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
@@ -1815,8 +1815,51 @@ final_review:
         await app.push_screen(screen)
         await pilot.pause()
 
-        assert screen._phase_statuses["research"] is RunStatus.DONE
+        assert screen._phase_statuses["research"] is RunStatus.CHECKPOINTED
         assert screen._phase_statuses["final_review"] is RunStatus.PENDING
+        assert all(
+            status is RunStatus.CHECKPOINTED
+            for (phase, _task), status in screen._task_statuses.items()
+            if phase == "research"
+        )
+
+
+async def test_resume_distinguishes_carried_over_phases_from_freshly_run_ones(tmp_path: Path) -> None:
+    """A phase skipped on resume keeps the checkpointed glyph while a phase that runs turns done."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    run_dir = tmp_path / flow_slug(flow)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text(
+        """phase_1:
+  status: success
+  started_at: '2024-01-01T00:00:00'
+  finished_at: '2024-01-01T00:01:00'
+  tokens: {total_input: 1, total_output: 1}
+  memory_path: phase_1_memory.md
+"""
+    )
+
+    class ResumeOrchestrator:
+        failed_phase = None
+
+        def __init__(self, callbacks: Any) -> None:
+            self.callbacks = callbacks
+
+        async def run_async(self) -> None:
+            await self.callbacks.fire_phase_finish("phase_2")
+
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, resume=True, runs_dir=tmp_path, orchestrator_builder=ResumeOrchestrator)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        assert screen._phase_statuses["phase_1"] is RunStatus.CHECKPOINTED
+        assert screen._phase_statuses["phase_2"] is RunStatus.DONE
 
 
 async def test_resume_transitions_to_finishing_after_remaining_phase(tmp_path: Path) -> None:

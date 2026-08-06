@@ -26,6 +26,9 @@ from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineG
 if TYPE_CHECKING:
     from ddev.ai.runtime.checkpoints import ResumeState
 
+PIPELINE_LEGEND = "◇ completed in a previous run · skipped on resume"
+CHECKPOINT_UNREADABLE_LEGEND = "✕ checkpoint unreadable · delete it and launch the flow from scratch"
+
 
 class FlowScreen(TogoScreen):
     """Show resolved flow details and controls for launching or resuming execution."""
@@ -59,9 +62,7 @@ class FlowScreen(TogoScreen):
                 graph.border_title = "Pipeline"
                 yield graph
 
-                legend = Static(
-                    "◇ completed in a previous run · skipped on resume", id="pipeline-legend", classes="desc"
-                )
+                legend = Static(PIPELINE_LEGEND, id="pipeline-legend", classes="desc")
                 legend.display = False
                 yield legend
 
@@ -122,9 +123,16 @@ class FlowScreen(TogoScreen):
         try:
             self.query_one("#resume", Button).display = state.is_resumable
             self.query_one("#flow-pipeline", PipelineGraph).update_statuses(self._preview_statuses(state.completed))
-            self.query_one("#pipeline-legend", Static).display = bool(state.completed)
+            self._apply_legend(self.query_one("#pipeline-legend", Static), state)
         except NoMatches:
             pass
+
+    def _apply_legend(self, legend: Static, state: ResumeState) -> None:
+        """Explain the checkpointed glyphs, or report a checkpoint file that could not be read."""
+        unreadable = state.error is not None
+        legend.update(CHECKPOINT_UNREADABLE_LEGEND if unreadable else PIPELINE_LEGEND)
+        legend.set_class(unreadable, "legend-error")
+        legend.display = unreadable or bool(state.completed)
 
     def _confirm_resumable(self) -> bool:
         """Re-read the checkpoint before committing to a resume, resyncing the UI if it went stale."""

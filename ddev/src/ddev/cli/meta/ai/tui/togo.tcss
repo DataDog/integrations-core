@@ -310,6 +310,10 @@ Collapsible {
     margin: 1 0 0 0;
 }
 
+#pipeline-legend.legend-error {
+    color: $status-failed;
+}
+
 #phase-configuration {
     height: 1fr;
     margin: 0 0 1 0;
