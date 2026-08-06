@@ -100,7 +100,9 @@ def test__get_urls(instance, url_fix):
 def test_aws_auth_url(instance, expected_aws_host, expected_aws_service):
     with mock.patch('datadog_checks.base.utils.http._http_utils.BotoAWSRequestsAuth') as boto_auth:
         check = ESCheck('elastic', {}, instances=[instance])
-        check.http.get('http://example.com')
+        # The client is built on first access, and it builds the AWS auth handler while doing so, so
+        # reading the handler off the client covers the whole path without issuing a request.
+        assert check.http.options['auth'] is boto_auth.return_value
         boto_auth.assert_called_once_with(
             aws_host=expected_aws_host,
             aws_region=instance['aws_region'],
