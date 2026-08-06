@@ -71,8 +71,8 @@ jobs:
           - PyPI Project Name: ${NAME}
           - Owner: DataDog
           - Repository name: integrations-core
-          - Workflow name: publish-pypi.yml
-          - Environment name: publish-pypi
+          - Workflow name: claim-pypi-name.yaml
+          - Environment name: typo-squatting-release
 
           Please react to this message once completed.
           Ask #agent-integrations if you have any questions.
