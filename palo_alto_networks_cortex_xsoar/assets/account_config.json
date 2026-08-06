@@ -1,92 +1,74 @@
 {
-  "supported_auth_methods": [
-    {
-      "auth_name": "api_key",
-      "basic": {
-        "user_setting": {
-          "key": "api_key_id",
-          "label": "API Key ID",
-          "help": "Palo Alto Networks Cortex XSOAR API Key ID.",
-          "editable": true,
-          "required": true,
-          "text": {}
-        },
-        "password_setting": {
-          "key": "api_key",
-          "label": "API Key",
-          "help": "Palo Alto Networks Cortex XSOAR API Key.",
-          "editable": true,
-          "required": true,
-          "password": {}
-        }
-      }
-    }
-  ],
+  "supported_auth_methods": [],
   "additional_config_fields": [
     {
+      "text": {},
       "key": "api_url",
       "label": "API URL",
       "help": "Palo Alto Networks Cortex XSOAR API URL (e.g. the tenant FQDN shown in Settings, such as https://api-<tenant>.<region>.paloaltonetworks.com).",
       "editable": true,
-      "required": true,
-      "text": {}
-    }
-  ],
-  "dataflow_config": [
-    {
-      "dataflow_id": "palo-alto-networks-cortex-xsoar-logs",
-      "additional_config_fields": [
-        {
-          "key": "collect_incidents",
-          "label": "Collect Incidents",
-          "editable": true,
-          "required": false,
-          "checkbox": {
-            "default": true
-          }
-        },
-        {
-          "key": "collect_audit_logs",
-          "label": "Collect Audit Logs",
-          "editable": true,
-          "required": false,
-          "checkbox": {
-            "default": true
-          }
-        }
-      ]
+      "required": true
     },
     {
-      "dataflow_id": "palo-alto-networks-cortex-xsoar-metrics",
-      "additional_config_fields": [
-        {
-          "key": "collect_automation_insights",
-          "label": "Collect Automation Insights metrics",
-          "editable": true,
-          "required": false,
-          "checkbox": {
-            "default": true
-          }
-        },
-        {
-          "key": "collect_api_execution_metrics",
-          "label": "Collect API Execution metrics",
-          "editable": true,
-          "required": false,
-          "checkbox": {
-            "default": true
-          }
-        },
-        {
-          "key": "collect_sla_metrics",
-          "label": "Collect SLA metrics",
-          "editable": true,
-          "required": false,
-          "checkbox": {
-            "default": true
-          }
-        }
-      ]
+      "text": {},
+      "key": "api_key_id",
+      "label": "API Key ID",
+      "help": "Palo Alto Networks Cortex XSOAR API Key ID.",
+      "editable": true,
+      "required": true
+    },
+    {
+      "password": {},
+      "key": "api_key",
+      "label": "API Key",
+      "help": "Palo Alto Networks Cortex XSOAR API Key.",
+      "editable": true,
+      "required": true
+    },
+    {
+      "key": "collect_incidents",
+      "label": "Collect Incidents",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "collect_audit_logs",
+      "label": "Collect Audit Logs",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "collect_automation_insights",
+      "label": "Collect Automation Insights metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "collect_api_execution_metrics",
+      "label": "Collect API Execution metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "collect_sla_metrics",
+      "label": "Collect SLA metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
     }
   ]
 }
