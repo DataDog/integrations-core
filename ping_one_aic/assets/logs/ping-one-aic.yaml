@@ -770,7 +770,7 @@ pipeline:
                   name: Failure
                   id: 2
                 - filter:
-                    query: "@ocsf.status:*"
+                    query: "@payload.level:*"
                   name: Other
                   id: 99
               targets:

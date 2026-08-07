@@ -49,6 +49,8 @@ tests:
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
+        status: "INFO"
+        status_id: 99
         time: 1775162566229
       payload:
         _id: "7b6d5a19-7d91-48da-b600-5a3590d6442f-29082"
@@ -1418,6 +1420,80 @@ tests:
        "type": "application/json"
      }
   result:
+    custom:
+      evt:
+        category: "am-config"
+        name: "AM-CONFIG-CHANGE"
+      ocsf:
+        activity_id: 99
+        activity_name: "UNEXPECTED"
+        actor:
+          user:
+            uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          uid: "ou=org-sync-client,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config"
+        metadata:
+          correlation_uid: "7a144689-d6e4-4dfa-9f02-800c2e4485ef/0"
+          event_code: "AM-CONFIG-CHANGE"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "7b6d5a19-7d91-48da-b600-5a3590d6442f-4335"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "INFO"
+        status_id: 99
+        time: 1775151181131
+      payload:
+        _id: "7b6d5a19-7d91-48da-b600-5a3590d6442f-4335"
+        eventName: "AM-CONFIG-CHANGE"
+        level: "INFO"
+        objectId: "ou=org-sync-client,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config"
+        operation: "UNEXPECTED"
+        realm: "/alpha"
+        runAs: "id=dsameuser,ou=user,ou=am-config"
+        source: "audit"
+        timestamp: "2026-04-02T17:33:01.111Z"
+        topic: "config"
+        trackingIds:
+         - "7b6d5a19-7d91-48da-b600-5a3590d6442f-2957"
+        transactionId: "7a144689-d6e4-4dfa-9f02-800c2e4485ef/0"
+        userId: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+      source: "am-config"
+      timestamp: "2026-04-02T17:33:01.131776505Z"
+      type: "application/json"
+      usr:
+        id: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+    message: |-
+      {
+        "payload" : {
+          "runAs" : "id=dsameuser,ou=user,ou=am-config",
+          "level" : "INFO",
+          "source" : "audit",
+          "userId" : "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+          "transactionId" : "7a144689-d6e4-4dfa-9f02-800c2e4485ef/0",
+          "eventName" : "AM-CONFIG-CHANGE",
+          "topic" : "config",
+          "realm" : "/alpha",
+          "_id" : "7b6d5a19-7d91-48da-b600-5a3590d6442f-4335",
+          "trackingIds" : [ "7b6d5a19-7d91-48da-b600-5a3590d6442f-2957" ],
+          "operation" : "UNEXPECTED",
+          "objectId" : "ou=org-sync-client,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config",
+          "timestamp" : "2026-04-02T17:33:01.111Z"
+        },
+        "source" : "am-config",
+        "type" : "application/json",
+        "timestamp" : "2026-04-02T17:33:01.131776505Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1775151181131
  -
   sample: |-
     {
@@ -1455,3 +1531,100 @@ tests:
       "type": "application/json"
     }
   result:
+    custom:
+      evt:
+        category: "am-authentication"
+        name: "AM-NODE-LOGIN-COMPLETED"
+        outcome: "Unexpected"
+      info:
+        nodeOutcome: "Unexpected"
+        nodeType: "IdentityStoreDecisionNode"
+        treeName: "Login"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "carlamj"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          correlation_uid: "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-6/0"
+          event_code: "Login"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1933"
+          version: "1.5.0"
+        service:
+          name: "Access Management"
+        severity: "Informational"
+        severity_id: 1
+        status: "Other"
+        status_id: 99
+        time: 1774982841410
+        user:
+          name: "carlamj"
+      payload:
+        _id: "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1933"
+        component: "Authentication"
+        entries:
+         -
+          info:
+            authLevel: "0"
+            displayName: "Identity Store Decision"
+            nodeId: "7f0c2aee-8c74-4d02-82a6-9d4ed9d11708"
+            nodeOutcome: "Unexpected"
+            nodeType: "IdentityStoreDecisionNode"
+            treeName: "Login"
+        eventName: "AM-NODE-LOGIN-COMPLETED"
+        level: "INFO"
+        principal:
+         - "carlamj"
+        realm: "/alpha"
+        source: "audit"
+        timestamp: "2026-03-31T18:47:21.409Z"
+        topic: "authentication"
+        trackingIds:
+         - "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1510"
+        transactionId: "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-6/0"
+      source: "am-authentication"
+      timestamp: "2026-03-31T18:47:21.410587638Z"
+      type: "application/json"
+      usr:
+        id: "carlamj"
+    message: |-
+      {
+        "payload" : {
+          "principal" : [ "carlamj" ],
+          "component" : "Authentication",
+          "entries" : [ {
+            "info" : {
+              "nodeOutcome" : "Unexpected",
+              "treeName" : "Login",
+              "displayName" : "Identity Store Decision",
+              "nodeType" : "IdentityStoreDecisionNode",
+              "authLevel" : "0",
+              "nodeId" : "7f0c2aee-8c74-4d02-82a6-9d4ed9d11708"
+            }
+          } ],
+          "level" : "INFO",
+          "eventName" : "AM-NODE-LOGIN-COMPLETED",
+          "topic" : "authentication",
+          "realm" : "/alpha",
+          "_id" : "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1933",
+          "source" : "audit",
+          "trackingIds" : [ "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1510" ],
+          "transactionId" : "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-6/0",
+          "timestamp" : "2026-03-31T18:47:21.409Z"
+        },
+        "source" : "am-authentication",
+        "type" : "application/json",
+        "timestamp" : "2026-03-31T18:47:21.410587638Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774982841410
