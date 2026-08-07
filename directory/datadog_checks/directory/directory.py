@@ -45,7 +45,7 @@ class DirectoryCheck(AgentCheck):
     def check(self, _):
         service_check_tags = ['dir_name:{}'.format(self._config.name)]
         service_check_tags.extend(self._config.tags)
-        if not self.safe_os.exists(self._config.abs_directory):
+        if not self.os.exists(self._config.abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
                 "have permissions to access it, skipping.".format(self._config.abs_directory)
@@ -117,7 +117,7 @@ class DirectoryCheck(AgentCheck):
                 try:
                     self.log.debug('File entries in matched files: %s', str(file_entry))
                     file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
-                    real_path = self.safe_os.realpath(file_entry.path)
+                    real_path = self.os.realpath(file_entry.path)
                 except OSError as ose:
                     self.log.debug(
                         'DirectoryCheck: could not stat file %s, skipping it - %s', join(root, file_entry.name), ose
@@ -215,7 +215,7 @@ class DirectoryCheck(AgentCheck):
         nondirs = []
 
         try:
-            scandir_iter = self.safe_os.scandir(top)
+            scandir_iter = self.os.scandir(top)
         except OSError as error:
             if onerror is not None:
                 onerror(error)

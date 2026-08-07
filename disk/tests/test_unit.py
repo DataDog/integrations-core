@@ -322,7 +322,7 @@ def test_get_devices_label():
     c = Disk('disk', {}, [{}])
 
     with mock.patch.object(
-        c.safe_os,
+        c.os,
         "get_subprocess_output",
         return_value=mock_blkid_output(),
         __name__='get_subprocess_output',
@@ -368,7 +368,7 @@ def test_get_devices_label_from_lsblk():
     c = Disk('disk', {}, [{}])
 
     with mock.patch.object(
-        c.safe_os,
+        c.os,
         "get_subprocess_output",
         return_value=mock_lsblk_output(),
         __name__='get_subprocess_output',

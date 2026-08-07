@@ -76,7 +76,7 @@ class OpenLDAP(AgentCheck):
 
         validate = ssl.CERT_REQUIRED if ssl_params["verify"] else ssl.CERT_NONE
 
-        if ssl_params["ca_certs"] is None or self.safe_os.isfile(ssl_params["ca_certs"]):
+        if ssl_params["ca_certs"] is None or self.os.isfile(ssl_params["ca_certs"]):
             tls = ldap3.core.tls.Tls(
                 local_private_key_file=ssl_params["key"],
                 local_certificate_file=ssl_params["cert"],
@@ -84,7 +84,7 @@ class OpenLDAP(AgentCheck):
                 version=ssl.PROTOCOL_SSLv23,
                 validate=validate,
             )
-        elif self.safe_os.isdir(ssl_params["ca_certs"]):
+        elif self.os.isdir(ssl_params["ca_certs"]):
             tls = ldap3.core.tls.Tls(
                 local_private_key_file=ssl_params["key"],
                 local_certificate_file=ssl_params["cert"],

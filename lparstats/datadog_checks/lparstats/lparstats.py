@@ -32,7 +32,7 @@ class LPARStats(AgentCheck):
         if sudo:
             cmd = ['sudo'] + list(cmd)
         try:
-            result = self.safe_os.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+            result = self.os.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
             return (
                 result.stdout.decode('utf-8', errors='replace'),
                 result.stderr.decode('utf-8', errors='replace'),

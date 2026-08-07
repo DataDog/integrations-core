@@ -52,9 +52,9 @@ class InfinibandCheck(AgentCheck):
             raise Exception("collection_type must be one of: 'gauge', 'monotonic_count', 'both'")
 
         # Test to see if the path exist. In containerized environments it's customary to mount it to /host
-        if not self.safe_os.exists(self.base_path):
+        if not self.os.exists(self.base_path):
             alternative_path = os.path.join('/host', self.base_path.lstrip('/'))
-            if self.safe_os.exists(alternative_path):
+            if self.os.exists(alternative_path):
                 self.base_path = alternative_path
             else:
                 raise Exception(f"Path {self.base_path} and {alternative_path} does not exist")
@@ -62,19 +62,19 @@ class InfinibandCheck(AgentCheck):
         self.log.info("Using InfiniBand path: %s", self.base_path)
 
     def check(self, _):
-        for device in self.safe_os.listdir(self.base_path):
+        for device in self.os.listdir(self.base_path):
             # Skip excluded devices
             if device in self.exclude_devices:
                 self.log.debug("Skipping device %s as it is in the exclude list", device)
                 continue
 
             dev_path = os.path.join(self.base_path, device, "ports")
-            if not self.safe_os.isdir(dev_path):
+            if not self.os.isdir(dev_path):
                 self.log.debug("Skipping device %s as it does not have a ports directory", device)
                 continue
 
             device_tags = self._get_device_tags(os.path.join(self.base_path, device))
-            for port in self.safe_os.listdir(dev_path):
+            for port in self.os.listdir(dev_path):
                 self._collect_counters(device, port, device_tags)
 
     def _collect_counters(self, device, port, device_tags):
@@ -92,7 +92,7 @@ class InfinibandCheck(AgentCheck):
 
     def _read_sysfs_file(self, file_path):
         try:
-            with self.safe_os.open(file_path, "r") as f:
+            with self.os.open(file_path, "r") as f:
                 return f.read().strip()
         except OSError as e:
             self.log.debug("Failed to read value from %s: %s", file_path, e)
@@ -132,7 +132,7 @@ class InfinibandCheck(AgentCheck):
     def _get_gid_attr_tags(self, port_path):
         gid_attrs_path = os.path.join(port_path, "gid_attrs")
         tags = []
-        for ndev_path in sorted(self.safe_os.glob(os.path.join(gid_attrs_path, "ndevs", "*"))):
+        for ndev_path in sorted(self.os.glob(os.path.join(gid_attrs_path, "ndevs", "*"))):
             gid_index = os.path.basename(ndev_path)
             self._append_tag(tags, self._get_file_tag(ndev_path, "netdev"))
             self._append_tag(tags, self._get_file_tag(os.path.join(gid_attrs_path, "types", gid_index), "gid_type"))
@@ -161,11 +161,11 @@ class InfinibandCheck(AgentCheck):
 
     def _collect_counter_metrics(self, port_path, tags):
         counters_path = os.path.join(port_path, "counters")
-        if not self.safe_os.isdir(counters_path):
+        if not self.os.isdir(counters_path):
             self.log.debug("Skipping device %s as counters directory does not exist", counters_path)
             return
 
-        for file in self.safe_os.glob(f"{counters_path}/*"):
+        for file in self.os.glob(f"{counters_path}/*"):
             filename = os.path.basename(file)
             if (
                 filename in IB_COUNTERS or filename in self.additional_counters
@@ -174,11 +174,11 @@ class InfinibandCheck(AgentCheck):
 
     def _collect_hw_counter_metrics(self, port_path, tags):
         hw_counters_path = os.path.join(port_path, "hw_counters")
-        if not self.safe_os.isdir(hw_counters_path):
+        if not self.os.isdir(hw_counters_path):
             self.log.debug("Skipping device %s as hw_counters directory does not exist", hw_counters_path)
             return
 
-        for file in self.safe_os.glob(f"{hw_counters_path}/*"):
+        for file in self.os.glob(f"{hw_counters_path}/*"):
             filename = os.path.basename(file)
             if (
                 filename in RDMA_COUNTERS or filename in self.additional_hw_counters
@@ -191,8 +191,8 @@ class InfinibandCheck(AgentCheck):
                 self.log.debug("Skipping status counter %s as it is in the exclude list", status_file)
                 continue
             file_path = os.path.join(port_path, status_file)
-            if self.safe_os.exists(file_path):
-                with self.safe_os.open(file_path, "r") as f:
+            if self.os.exists(file_path):
+                with self.os.open(file_path, "r") as f:
                     content = f.read().strip()
                     # "4: ACTIVE" - split to get value and state
                     parts = content.split(":", 1)

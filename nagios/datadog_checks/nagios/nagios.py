@@ -156,7 +156,7 @@ class NagiosCheck(AgentCheck):
         output = {}
 
         try:
-            with self.safe_os.open(filename) as f:
+            with self.os.open(filename) as f:
                 for line in f:
                     line = line.strip()
                     if not line:

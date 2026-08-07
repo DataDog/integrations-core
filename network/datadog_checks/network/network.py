@@ -70,7 +70,7 @@ class Network(AgentCheck):
         self.check_initializations.append(self._validate)
 
     def find_executable(self, name):
-        return self.safe_os.which(name)
+        return self.os.which(name)
 
     def _validate(self):
         if not isinstance(self._excluded_ifaces, list):

@@ -37,7 +37,7 @@ def _untrusted_check(directory):
     check = DirectoryCheck('directory', {}, [{'directory': str(directory)}])
     check.provider = 'untrusted'
     check._AgentCheck__security_config = None
-    check._AgentCheck__safe_os = None
+    check._AgentCheck__os = None
     return check
 
 

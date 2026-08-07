@@ -70,9 +70,9 @@ def _mock_subprocess_run(cmd, **kwargs):
     return _make_proc()
 
 
-def test_check_runs(aggregator, dd_run_check, instance, mock_safe_os):
+def test_check_runs(aggregator, dd_run_check, instance, mock_os):
     check = LPARStats('lparstats', {}, [instance])
-    mock_safe_os.run.side_effect = _mock_subprocess_run
+    mock_os.run.side_effect = _mock_subprocess_run
     dd_run_check(check)
 
     # Memory metrics (no tags expected)
@@ -87,18 +87,18 @@ def test_check_runs(aggregator, dd_run_check, instance, mock_safe_os):
     aggregator.assert_service_check('lparstats.can_collect', status=AgentCheck.OK)
 
 
-def test_lparstat_command_failure(aggregator, instance, mock_safe_os):
+def test_lparstat_command_failure(aggregator, instance, mock_os):
     """Service check is CRITICAL when lparstat exits non-zero."""
     check = LPARStats('lparstats', {}, [instance])
     failed_proc = _make_proc('')
     failed_proc.returncode = 1
-    mock_safe_os.run.return_value = failed_proc
+    mock_os.run.return_value = failed_proc
     check.check(instance)
     aggregator.assert_service_check('lparstats.can_collect', status=AgentCheck.CRITICAL)
     assert len(aggregator.metrics('system.lpar.memory.physb')) == 0
 
 
-def test_hypervisor_and_entitlements(aggregator, dd_run_check, mock_safe_os):
+def test_hypervisor_and_entitlements(aggregator, dd_run_check, mock_os):
     """Hypervisor and memory-entitlement collectors emit metrics with call/iompn tags."""
     inst = {
         'name': 'lparstats',
@@ -110,7 +110,7 @@ def test_hypervisor_and_entitlements(aggregator, dd_run_check, mock_safe_os):
         'sudo': True,  # makes root=True so both collectors are activated
     }
     check = LPARStats('lparstats', {}, [inst])
-    mock_safe_os.run.side_effect = _mock_subprocess_run
+    mock_os.run.side_effect = _mock_subprocess_run
     dd_run_check(check)
 
     aggregator.assert_metric('system.lpar.hypervisor.n_calls', value=12345.0, tags=['call:mmap'])
@@ -119,15 +119,15 @@ def test_hypervisor_and_entitlements(aggregator, dd_run_check, mock_safe_os):
     aggregator.assert_metric('system.lpar.memory.entitlement.iomin', value=8.0, tags=['iompn:P1'])
 
 
-def test_memory_output_too_short(aggregator, instance, mock_safe_os):
+def test_memory_output_too_short(aggregator, instance, mock_os):
     check = LPARStats('lparstats', {}, [instance])
-    mock_safe_os.run.return_value = _make_proc('')
+    mock_os.run.return_value = _make_proc('')
     check.check(instance)
     # No metrics should be emitted for empty output
     assert len(aggregator.metrics('system.lpar.memory.physb')) == 0
 
 
-def test_spurr_zero_total(aggregator, instance, mock_safe_os):
+def test_spurr_zero_total(aggregator, instance, mock_os):
     """SPURR pct metrics should not be emitted when total is 0 (avoid div-by-zero)."""
     zero_spurr = """\
 
@@ -141,7 +141,7 @@ Physical Processor Utilisation:
 0.000 0.000 0.000 0.000 3.5GHz[100%] 0.000 0.000 0.000 0.000
 """
     check = LPARStats('lparstats', {}, [instance])
-    mock_safe_os.run.side_effect = lambda cmd, **kw: _make_proc(zero_spurr) if '-E' in cmd else _make_proc('')
+    mock_os.run.side_effect = lambda cmd, **kw: _make_proc(zero_spurr) if '-E' in cmd else _make_proc('')
     check.check(instance)
     # .pct metrics should not be emitted when total is 0
     assert len(aggregator.metrics('system.lpar.spurr.user.pct')) == 0

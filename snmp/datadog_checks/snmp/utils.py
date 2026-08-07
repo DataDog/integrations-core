@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequen
 
 import yaml
 
-from datadog_checks.base.utils.safe_os import safe_os
+from datadog_checks.base.utils.os_wrapper import unchecked_os
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
@@ -77,11 +77,11 @@ def _resolve_definition_file(definition_file):
         return definition_file
 
     definition_conf_file = os.path.join(_get_profiles_confd_user_root(), definition_file)
-    if safe_os.isfile(definition_conf_file):
+    if unchecked_os.isfile(definition_conf_file):
         return definition_conf_file
 
     definition_conf_file = os.path.join(_get_profiles_confd_default_root(), definition_file)
-    if safe_os.isfile(definition_conf_file):
+    if unchecked_os.isfile(definition_conf_file):
         return definition_conf_file
 
     return os.path.join(_get_profiles_site_root(), definition_file)
@@ -91,7 +91,7 @@ def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
     definition_file = _resolve_definition_file(definition_file)
 
-    with safe_os.open(definition_file) as f:
+    with unchecked_os.open(definition_file) as f:
         return yaml.safe_load(f)
 
 
@@ -126,10 +126,10 @@ def _iter_default_profile_file_paths():
     paths = [_get_profiles_confd_user_root(), _get_profiles_confd_default_root(), _get_profiles_site_root()]
 
     for path in paths:
-        if not safe_os.isdir(path):
+        if not unchecked_os.isdir(path):
             continue
 
-        for filename in safe_os.listdir(path):
+        for filename in unchecked_os.listdir(path):
             base, ext = os.path.splitext(filename)
             if ext != '.yaml':
                 continue

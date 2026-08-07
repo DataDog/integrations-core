@@ -18,7 +18,7 @@ validations = [
     "metadata",
     "models",
     "openmetrics",
-    "safe-os",
+    "os-wrapper",
     "package",
     "readmes",
     "saved-views",
@@ -26,7 +26,7 @@ validations = [
     "qa-label"
 ]
 
-[overrides.validate.safe-os]
+[overrides.validate.os-wrapper]
 # php_fpm ships vendored third-party FastCGI client sources that we do not
 # maintain; they are not check code and must not be rewritten here.
 exclude = [

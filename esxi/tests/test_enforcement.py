@@ -36,7 +36,7 @@ def _untrusted_check(instance):
     check = EsxiCheck('esxi', {}, [instance])
     check.provider = 'untrusted'
     check._AgentCheck__security_config = None
-    check._AgentCheck__safe_os = None
+    check._AgentCheck__os = None
     return check
 
 

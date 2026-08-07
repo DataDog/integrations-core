@@ -16,11 +16,11 @@ def _read_fixture(name):
 
 
 # Really a basic check to see if all metrics are there
-def test_check(aggregator, check, mock_safe_os):
+def test_check(aggregator, check, mock_os):
     check.tags = []
     check.set_paths()
 
-    mock_safe_os.add_files(
+    mock_os.add_files(
         {
             check.proc_path_map['entropy_info']: _read_fixture("entropy_avail"),
             check.proc_path_map['inode_info']: _read_fixture("inode-nr"),
@@ -28,7 +28,7 @@ def test_check(aggregator, check, mock_safe_os):
             check.proc_path_map['interrupts_info']: _read_fixture("interrupts"),
         }
     )
-    mock_safe_os.set_command_output(['ps', '--no-header', '-eo', 'stat'], stdout=_read_fixture("process_stats"))
+    mock_os.set_command_output(['ps', '--no-header', '-eo', 'stat'], stdout=_read_fixture("process_stats"))
 
     check.get_entropy_info()
     check.get_inode_info()

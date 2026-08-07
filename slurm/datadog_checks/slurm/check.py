@@ -64,7 +64,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def get_subprocess_output(self, cmd):
         try:
-            result = self.safe_os.run(cmd, capture_output=True, text=True)
+            result = self.os.run(cmd, capture_output=True, text=True)
             return result.stdout, result.stderr, result.returncode
         except Exception as e:
             return None, f"Error running {cmd}: {e}", 1
@@ -685,7 +685,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         host_pid_matches_by_namespace_pid = {}
 
         try:
-            proc_entries = self.safe_os.scandir(host_proc)
+            proc_entries = self.os.scandir(host_proc)
         except OSError as e:
             self.log.debug("Unable to scan host proc path '%s': %s", host_proc, e)
             return host_pid_matches_by_namespace_pid
@@ -706,7 +706,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def _read_namespace_pids(self, proc_path, host_pid):
         try:
-            with self.safe_os.open(os.path.join(proc_path, "status")) as status_file:
+            with self.os.open(os.path.join(proc_path, "status")) as status_file:
                 for line in status_file:
                     if line.startswith("NSpid:"):
                         return line.split()[1:]

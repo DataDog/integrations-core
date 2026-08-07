@@ -100,7 +100,7 @@ def mock_os():
     # every module that did `from ... import unchecked_os`.
     singleton_patches = {name: getattr(fake, name) for name in METHOD_NAMES}
     with (
-        mock.patch.object(AgentCheck, 'unchecked_os', new_callable=mock.PropertyMock, return_value=fake),
+        mock.patch.object(AgentCheck, 'os', new_callable=mock.PropertyMock, return_value=fake),
         mock.patch.multiple(os_wrapper_module.unchecked_os, **singleton_patches),
     ):
         yield fake

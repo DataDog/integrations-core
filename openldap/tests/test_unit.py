@@ -76,8 +76,8 @@ def test_check(check, aggregator, mocker):
 
 
 def test__get_tls_object(check, mocker):
-    isfile_mock = mocker.patch.object(check.safe_os, "isfile")
-    isdir_mock = mocker.patch.object(check.safe_os, "isdir")
+    isfile_mock = mocker.patch.object(check.os, "isfile")
+    isdir_mock = mocker.patch.object(check.os, "isdir")
     ldap3_tls_mock = mocker.patch("datadog_checks.openldap.openldap.ldap3.core.tls.Tls")
     ssl_mock = mocker.patch("datadog_checks.openldap.openldap.ssl")
 

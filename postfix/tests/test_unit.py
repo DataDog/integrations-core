@@ -9,7 +9,7 @@ from datadog_checks.postfix import PostfixCheck
 MOCK_VERSION = '1.3.1'
 
 
-def test__get_postqueue_stats(aggregator, mock_safe_os):
+def test__get_postqueue_stats(aggregator, mock_os):
     check = PostfixCheck('postfix', {}, [])
     common_tags = ['instance:/etc/postfix', 'foo:bar']
 
@@ -17,7 +17,7 @@ def test__get_postqueue_stats(aggregator, mock_safe_os):
     with open(filepath, 'r') as f:
         mocked_output = f.read()
 
-    mock_safe_os.get_subprocess_output.side_effect = [(False, None, None), (mocked_output, None, None)]
+    mock_os.get_subprocess_output.side_effect = [(False, None, None), (mocked_output, None, None)]
     check._get_postqueue_stats('/etc/postfix', ['foo:bar'])
 
     aggregator.assert_metric('postfix.queue.size', 1, tags=common_tags + ['queue:active'])
@@ -25,11 +25,11 @@ def test__get_postqueue_stats(aggregator, mock_safe_os):
     aggregator.assert_metric('postfix.queue.size', 2, tags=common_tags + ['queue:deferred'])
 
 
-def test__get_postqueue_stats_empty(aggregator, mock_safe_os):
+def test__get_postqueue_stats_empty(aggregator, mock_os):
     check = PostfixCheck('postfix', {}, [])
     common_tags = ['instance:/etc/postfix']
 
-    mock_safe_os.get_subprocess_output.side_effect = [(False, None, None), ('Mail queue is empty', None, None)]
+    mock_os.get_subprocess_output.side_effect = [(False, None, None), ('Mail queue is empty', None, None)]
     check._get_postqueue_stats('/etc/postfix', [])
 
     aggregator.assert_metric('postfix.queue.size', 0, tags=common_tags + ['queue:active'])
@@ -37,9 +37,9 @@ def test__get_postqueue_stats_empty(aggregator, mock_safe_os):
     aggregator.assert_metric('postfix.queue.size', 0, tags=common_tags + ['queue:deferred'])
 
 
-def test_collect_metadata(aggregator, datadog_agent, mock_safe_os):
+def test_collect_metadata(aggregator, datadog_agent, mock_os):
     # TODO: Migrate this test as e2e test when it's possible to retrieve the metadata from the Agent
-    mock_safe_os.get_subprocess_output.return_value = ('mail_version = {}'.format(MOCK_VERSION), None, None)
+    mock_os.get_subprocess_output.return_value = ('mail_version = {}'.format(MOCK_VERSION), None, None)
     check = PostfixCheck('postfix', {}, [{}])
     check.check_id = 'test:123'
 

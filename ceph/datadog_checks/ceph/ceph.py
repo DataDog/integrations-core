@@ -46,7 +46,7 @@ class Ceph(AgentCheck):
     def _collect_raw(self, ceph_cmd, ceph_cluster, instance):
         use_sudo = _is_affirmative(instance.get('use_sudo', False))
         if use_sudo:
-            # SKIP_SAFE_OS_VALIDATION: fixed literal probe, needs a shell for
+            # SKIP_OS_WRAPPER_VALIDATION: fixed literal probe, needs a shell for
             # the redirect. The config-derived ceph_cmd below does go through it.
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
@@ -62,7 +62,7 @@ class Ceph(AgentCheck):
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
-                output, _, _ = self.safe_os.get_subprocess_output(args.split(), self.log)
+                output, _, _ = self.os.get_subprocess_output(args.split(), self.log)
                 res = json.loads(output)
             except Exception as e:
                 self.log.warning('Unable to parse data from cmd=%s: %s', cmd, e)

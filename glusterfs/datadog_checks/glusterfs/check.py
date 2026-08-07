@@ -46,7 +46,7 @@ class GlusterfsCheck(AgentCheck):
             if path.endswith('/run'):
                 path = path[:-4]
             path = path + GSTATUS_PATH_SUFFIX
-            if self.safe_os.exists(path):
+            if self.os.exists(path):
                 self.gstatus_cmd = path
             else:
                 raise ConfigurationError(
@@ -56,7 +56,7 @@ class GlusterfsCheck(AgentCheck):
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
     def get_gstatus_output(self, cmd):
-        res = self.safe_os.run(cmd.split(), capture_output=True, text=True)
+        res = self.os.run(cmd.split(), capture_output=True, text=True)
         return res.stdout, res.stderr, res.returncode
 
     def check(self, _):

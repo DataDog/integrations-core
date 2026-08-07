@@ -127,7 +127,7 @@ class Varnish(AgentCheck):
         if self.name is not None:
             cmd.extend(['-n', self.name])
 
-        output, _, _ = self.safe_os.get_subprocess_output(cmd, self.log)
+        output, _, _ = self.os.get_subprocess_output(cmd, self.log)
         return output
 
     def check(self, _):
@@ -167,7 +167,7 @@ class Varnish(AgentCheck):
 
         err, output = None, None
         try:
-            output, err, _ = self.safe_os.get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
+            output, err, _ = self.os.get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
         except OSError as e:
             self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
             output = None
@@ -177,7 +177,7 @@ class Varnish(AgentCheck):
 
     def _get_version_info(self):
         # Get the varnish version from varnishstat
-        output, error, _ = self.safe_os.get_subprocess_output(
+        output, error, _ = self.os.get_subprocess_output(
             self.varnishstat_path + ["-V"], self.log, raise_on_empty_output=False
         )
 

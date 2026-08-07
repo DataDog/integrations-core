@@ -168,7 +168,7 @@ class GUnicornCheck(AgentCheck):
         # Splitting cmd by whitespace is "Good Enough"(tm):
         # - shex.split is not available on Windows
         # - passing shell=True exposes us to shell injection vulnerabilities since we get cmd from user config
-        res = self.safe_os.run(cmd.split(), capture_output=True, text=True)
+        res = self.os.run(cmd.split(), capture_output=True, text=True)
         return res.stdout, res.stderr, res.returncode
 
     def _get_version(self):

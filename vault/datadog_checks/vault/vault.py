@@ -314,7 +314,7 @@ class Vault(OpenMetricsBaseCheck):
         self._set_header(self.get_http_handler(self._scraper_config), 'X-Vault-Token', client_token)
 
     def renew_client_token(self):
-        with self.safe_os.open(self._client_token_path, 'rb') as f:
+        with self.os.open(self._client_token_path, 'rb') as f:
             self.set_client_token(f.read().decode('utf-8'))
 
     def _set_header(self, http_wrapper, header, value):

@@ -241,7 +241,7 @@ class ProcessCheck(AgentCheck):
             self.log.debug("Running num_fds using sudo")
             try:
                 ls_args = ['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)]
-                process_ls = self.safe_os.run(ls_args, capture_output=True, check=True).stdout
+                process_ls = self.os.run(ls_args, capture_output=True, check=True).stdout
                 result = len(process_ls.splitlines())
             except Exception as e:
                 self.log.exception("Trying to retrieve %s with sudo failed with error: %s", method, e)
@@ -373,7 +373,7 @@ class ProcessCheck(AgentCheck):
             return None
 
         def file_to_string(path):
-            with self.safe_os.open(path, 'r') as f:
+            with self.os.open(path, 'r') as f:
                 res = f.read()
             return res
 
@@ -436,7 +436,7 @@ class ProcessCheck(AgentCheck):
             pids = self._get_pid_set(self.pid)
         elif self.pid_file is not None:
             try:
-                with self.safe_os.open(self.pid_file, 'r') as file_pid:
+                with self.os.open(self.pid_file, 'r') as file_pid:
                     pid_line = file_pid.readline().strip()
                     pids = self._get_pid_set(int(pid_line))
             except IOError as e:
