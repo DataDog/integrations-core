@@ -496,8 +496,7 @@ class ClusterMetadataCollector:
             )
             for tp, future in futures.items():
                 try:
-                    info = future.result()
-                    result[(tp.topic, tp.partition)] = info.offset
+                    offset = future.result().offset
                 except Exception as e:
                     errors += 1
                     if errors <= 3:
@@ -507,6 +506,20 @@ class ClusterMetadataCollector:
                             tp.partition,
                             e,
                         )
+                    continue
+                # A Kafka offset is never negative, so the client library mangled this one.
+                # https://github.com/confluentinc/confluent-kafka-python/issues/1696
+                if offset < 0:
+                    errors += 1
+                    if errors <= 3:
+                        self.log.debug(
+                            "Discarding negative earliest offset %s for %s:%s",
+                            offset,
+                            tp.topic,
+                            tp.partition,
+                        )
+                    continue
+                result[(tp.topic, tp.partition)] = offset
         except Exception as e:
             self.log.warning(
                 "Failed to issue list_offsets request; partition.beginning_offset, "
