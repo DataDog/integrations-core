@@ -34,7 +34,7 @@ from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.utils.github_async.models import JobStep, WorkflowJob
 from ddev.utils.junit import TestStatus
 from ddev.utils.platform import PlatformName
-from tests.helpers.batching import drain_queue, make_job
+from tests.cli.ci.tests.helpers import drain_queue, make_job
 
 # ---------------------------------------------------------------------------
 # Helpers

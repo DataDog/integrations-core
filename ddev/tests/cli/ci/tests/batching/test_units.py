@@ -15,7 +15,7 @@ from ddev.cli.ci.tests.batching.units import (
     resolve_platforms,
 )
 from ddev.utils.platform import PlatformName
-from tests.helpers.batching import DEFAULT_PYTHON_VERSION, env
+from tests.cli.ci.tests.helpers import DEFAULT_PYTHON_VERSION, env
 
 expand = functools.partial(expand_test_units, default_python_version=DEFAULT_PYTHON_VERSION)
 

@@ -20,7 +20,7 @@ from ddev.cli.ci.tests.progress import DispatcherProgress
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models import WorkflowJob
 from ddev.utils.platform import PlatformName
-from tests.helpers.batching import make_job
+from tests.cli.ci.tests.helpers import make_job
 
 
 def test_artifact_name_built_from_target_env_platform():

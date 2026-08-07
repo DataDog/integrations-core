@@ -25,7 +25,7 @@ from ddev.cli.ci.tests.progress import (
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
-from tests.helpers.batching import make_job
+from tests.cli.ci.tests.helpers import make_job
 
 CONCLUSIONS = {
     Status.SUCCESS: WorkflowJobConclusion.SUCCESS,

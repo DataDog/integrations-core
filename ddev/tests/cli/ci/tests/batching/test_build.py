@@ -19,10 +19,10 @@ from ddev.cli.ci.tests.batching.build import (
     create_test_batches,
     resolve_hatch_environments,
 )
-from ddev.cli.ci.tests.batching.exceptions import BatchValidationError
+from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.utils.platform import PlatformName
-from tests.helpers.batching import DEFAULT_PYTHON_VERSION, FakeIntegration, FakeRegistry, env, jobs, modified
+from tests.cli.ci.tests.helpers import DEFAULT_PYTHON_VERSION, FakeIntegration, FakeRegistry, env, jobs, modified
 
 
 class FakeConfig:
@@ -180,6 +180,18 @@ def test_resolve_hatch_environments_includes_both_facets_and_excludes_neither():
         ("e2e-only", False, True),
         ("both", True, True),
     ]
+
+
+@pytest.mark.parametrize("python", ["3", "3.13t", "/usr/bin/python3.13", "three.thirteen"])
+def test_resolve_hatch_environments_rejects_a_python_that_is_not_major_minor(python):
+    # A unit-only environment never reaches the Agent image resolver, so this boundary is the only
+    # place its version is checked.
+    environments = [EnvStub("unit-only", test_env=True, e2e_env=False, python=python)]
+
+    with pytest.raises(PlanningError, match="expected a `major.minor` version"):
+        resolve_hatch_environments(
+            environments, default_python_version=DEFAULT_PYTHON_VERSION, platforms=[PlatformName.LINUX]
+        )
 
 
 def test_resolve_hatch_environments_routes_constrained_platforms_without_crossing():

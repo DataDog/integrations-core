@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
 from ddev.cli.ci.tests.messages import BatchJob
@@ -111,8 +111,9 @@ class FakeIntegration:
 class FakeRegistry:
     """Stand-in for ddev's IntegrationRegistry; `get` raises OSError for an unknown name."""
 
-    def __init__(self, integrations: Sequence[FakeIntegration]):
+    def __init__(self, integrations: Sequence[FakeIntegration], *, changed: Sequence[str] = ()):
         self._integrations = {integration.name: integration for integration in integrations}
+        self._changed = set(changed)
 
     def get(self, name: str) -> FakeIntegration:
         try:
@@ -120,8 +121,14 @@ class FakeRegistry:
         except KeyError:
             raise OSError(f"Integration does not exist: {name}") from None
 
-    def iter_testable(self) -> list[FakeIntegration]:
-        return [integration for integration in self._integrations.values() if integration.is_testable]
+    def iter_testable(self, selection: Iterable[str] = ()) -> list[FakeIntegration]:
+        # ddev's registry resolves an empty selection to `changed`, so only `all` sees everything
+        candidates = (
+            self._integrations.values()
+            if "all" in selection
+            else [integration for integration in self._integrations.values() if integration.name in self._changed]
+        )
+        return [integration for integration in candidates if integration.is_testable]
 
 
 def modified(path: str) -> ChangedFile:
