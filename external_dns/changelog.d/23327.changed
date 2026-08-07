@@ -1,0 +1,1 @@
+Add OpenMetrics V2 support with openmetrics_endpoint configuration option alongside legacy prometheus_url. Add support for external-dns v1.18+ vector metrics with record_type label.
