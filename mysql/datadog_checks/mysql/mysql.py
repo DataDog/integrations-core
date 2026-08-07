@@ -27,12 +27,14 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
+from datadog_checks.mysql.data_observability import MySQLDataObservability
 from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig, sanitize
+from .config_models.instance import DataObservability
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -147,6 +149,18 @@ class MySql(DatabaseCheck):
             'aws' in self.cloud_metadata
             and 'managed_authentication' in self.cloud_metadata.get('aws', {})
             and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
+        )
+
+        self._do_config = DataObservability(
+            **{
+                'enabled': False,
+                'run_sync': False,
+                'collection_interval': 10,
+                **(self.instance.get('data_observability') or {}),
+            }
+        )
+        self._data_observability = MySQLDataObservability(
+            self, self._do_config, self._config, self._get_connection_args, self._uses_aws_managed_auth
         )
 
         # Pass function reference and managed auth flag to async jobs
@@ -403,6 +417,9 @@ class MySql(DatabaseCheck):
                     self._query_activity.run_job_loop(dbm_tags)
                     self._mysql_metadata.run_job_loop(dbm_tags)
 
+                if self._do_config.enabled:
+                    self._data_observability.run_job_loop(tags)
+
                 # keeping track of these:
                 self._put_qcache_stats()
 
@@ -421,6 +438,7 @@ class MySql(DatabaseCheck):
         self._statement_metrics.cancel()
         self._query_activity.cancel()
         self._mysql_metadata.cancel()
+        self._data_observability.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
