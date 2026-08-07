@@ -1,0 +1,1 @@
+Recommend the REFERENCES privilege in the schema collection insufficient-privileges warning and in the shipped sample configuration. REFERENCES makes a table's metadata visible in INFORMATION_SCHEMA without granting any ability to read table data, so it is preferred over SELECT for schema collection and for the table and schema size metrics.
