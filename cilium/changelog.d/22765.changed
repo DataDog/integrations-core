@@ -1,0 +1,1 @@
+Stop emitting the value-less ``cilium.version`` gauge; the Cilium version is now surfaced only as Agent version metadata (``version.major``/``version.minor``/``version.patch``/``version.raw``).
