@@ -6,7 +6,7 @@ This check monitors [InterSystems IRIS][1] through the Datadog Agent.
 
 InterSystems IRIS is a data platform combining a high-performance database, interoperability engine, and analytics. This integration scrapes the built-in `/api/monitor/metrics` OpenMetrics endpoint that IRIS exposes, giving you visibility into instance health without any agent-side plugins or SQL queries.
 
-The check collects instance telemetry across CPU and cache efficiency, licensing, journaling, the write daemon, the work queue manager, SQL activity, databases and disk usage, shared memory, locks, ECP (Enterprise Cache Protocol), the Web Gateway/CSP, mirroring, overall system status, and — when a production is running with SAM statistics enabled — interoperability metrics.
+The check collects instance telemetry across CPU and cache efficiency, licensing, journaling, the write daemon, the work queue manager, SQL activity, databases and disk usage, shared memory, locks, ECP (Enterprise Cache Protocol), the Web Gateway/CSP, mirroring, overall system status, and, when a production is running with SAM statistics enabled, interoperability metrics.
 
 ## Setup
 
@@ -65,6 +65,34 @@ Several families only report when the corresponding subsystem is active, and are
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `intersystems_iris` under the Checks section.
+
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add the InterSystems IRIS `messages.log` file to your log collection by editing the `logs` block in `intersystems_iris.d/conf.yaml`:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /usr/irissys/mgr/messages.log
+       source: intersystems_iris
+       service: <SERVICE>
+       log_processing_rules:
+         - type: multi_line
+           name: new_log_start_with_date
+           pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
+   ```
+
+   Change the `path` value to match your instance's installation directory. For example, IRIS for Health typically uses `/opt/irishealth/mgr/messages.log`.
+
+3. Restart the Agent.
+
+**Note**: InterSystems IRIS writes `messages.log` timestamps in the instance's local time with no timezone offset. The log pipeline interprets these timestamps as UTC. If your IRIS instance does not run in UTC, collected log timestamps are shifted by the instance's UTC offset. Run your IRIS instance in UTC to keep log timestamps accurate.
 
 ## Data collected
 
