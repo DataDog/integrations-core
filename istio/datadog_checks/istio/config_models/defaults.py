@@ -169,7 +169,7 @@ def instance_use_legacy_auth_encoding():
 
 
 def instance_use_openmetrics():
-    return False
+    return True
 
 
 def instance_use_process_start_time():

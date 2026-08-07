@@ -9,11 +9,27 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio
+from datadog_checks.istio.check import IstioCheckV2
 
 from . import common
 from .utils import _assert_tags_excluded, get_fixture_path
 
 FIXTURE_DIR = '{}/fixtures'.format(get_here())
+
+
+def test_uses_openmetrics_v2_when_use_openmetrics_is_unset():
+    """
+    spec.yaml/conf.yaml.example show `use_openmetrics: true` uncommented and PR #10304's stated intent
+    was to make OpenMetrics V2 the default. Confirm that intent actually holds when the key is omitted
+    entirely from the config, as it is for any pre-existing install or anyone following docs/tutorials
+    that predate this option.
+    """
+    instance = {k: v for k, v in common.MOCK_LEGACY_ISTIOD_INSTANCE.items() if k != 'use_openmetrics'}
+    assert 'use_openmetrics' not in instance
+
+    check = Istio(common.CHECK_NAME, {}, [instance])
+
+    assert isinstance(check, IstioCheckV2)
 
 
 def test_istiod(aggregator, dd_run_check, mock_http_response):
