@@ -2,8 +2,8 @@
   "supported_auth_methods": [
     {
       "auth_name": "aws_credentials",
-      "alibaba_cloud_request_signing": {
-        "access_key_id_setting": {
+      "basic": {
+        "user_setting": {
           "key": "aws_access_key_id",
           "label": "AWS Access Key ID",
           "help": "The AWS Access Key ID generated for your CrowdStrike FDR feed.",
@@ -11,7 +11,7 @@
           "editable": true,
           "text": {}
         },
-        "access_key_secret_setting": {
+        "password_setting": {
           "key": "aws_secret_key",
           "label": "AWS Secret Key",
           "help": "The AWS Secret Key generated for your CrowdStrike FDR feed.",
