@@ -314,3 +314,24 @@ class MockHTTPResponse:
     def __bool__(self) -> bool:
         # Dunder lookups skip __getattr__, so truthiness has to be forwarded by hand.
         return bool(self.__wrapped__)
+
+
+def __getattr__(name: str) -> Any:
+    # Resolving MockResponse lazily keeps `requests` out of this module's import graph while still serving
+    # downstream repositories that import it from here. See datadog_checks.dev.http_legacy for why they cannot
+    # use MockHTTPResponse yet.
+    if name == 'MockResponse':
+        import warnings
+
+        from datadog_checks.dev.http_legacy import MockResponse
+
+        warnings.warn(
+            'datadog_checks.dev.http.MockResponse is deprecated and will be removed in a future release. '
+            'Use MockHTTPResponse, which mocks the backend-agnostic HTTPResponse protocol, once your '
+            'integration runs against a datadog-checks-base that exposes it.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return MockResponse
+
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')

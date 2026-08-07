@@ -4,6 +4,7 @@
 import codecs
 
 import pytest
+import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
@@ -48,8 +49,47 @@ def test_mock_http_get_cookie_return_value_is_configurable(mock_http):
     assert mock_http.get_cookie('csrftoken') == 'token'
 
 
-def test_legacy_mock_response_is_not_exposed():
-    assert not hasattr(http_testing, 'MockResponse')
+def test_legacy_mock_response_is_a_requests_response():
+    with pytest.warns(DeprecationWarning, match='MockHTTPResponse'):
+        legacy = http_testing.MockResponse
+
+    assert issubclass(legacy, requests.Response)
+
+
+def test_legacy_mock_response_raises_on_the_requests_exception_tree():
+    """Downstream repositories run against a released, requests-backed base and catch requests.HTTPError."""
+    with pytest.warns(DeprecationWarning):
+        legacy = http_testing.MockResponse
+
+    with pytest.raises(requests.HTTPError):
+        legacy(json_data={'message': 'Session expired.'}, status_code=401).raise_for_status()
+
+
+def test_legacy_mock_response_reads_json_and_headers():
+    with pytest.warns(DeprecationWarning):
+        legacy = http_testing.MockResponse
+
+    response = legacy(json_data={'key': 'value'}, headers={'X-Custom': 'value'}, status_code=200)
+
+    assert response.json() == {'key': 'value'}
+    assert response.headers['x-custom'] == 'value'
+    assert response.status_code == 200
+
+
+def test_legacy_mock_response_reads_a_file(tmp_path):
+    path = tmp_path / 'payload.json'
+    path.write_text('{"key": "value"}')
+
+    with pytest.warns(DeprecationWarning):
+        legacy = http_testing.MockResponse
+
+    assert legacy(file_path=str(path)).json() == {'key': 'value'}
+
+
+def test_unknown_module_attribute_still_raises():
+    absent = 'MockNonsense'
+    with pytest.raises(AttributeError, match=absent):
+        getattr(http_testing, absent)
 
 
 def test_mock_response_json_with_custom_headers():

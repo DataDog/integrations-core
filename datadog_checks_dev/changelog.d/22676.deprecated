@@ -1,0 +1,1 @@
+Deprecate the requests-backed ``MockResponse`` testing utility in favor of ``MockHTTPResponse``. Importing it now emits a ``DeprecationWarning``.
