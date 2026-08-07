@@ -13,7 +13,7 @@ import dataclasses
 
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchJob, Platform
+from ddev.cli.ci.tests.messages import BatchJob
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
     DispatcherProgress,
@@ -25,6 +25,7 @@ from ddev.cli.ci.tests.progress import (
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
+from tests.helpers.batching import make_job
 
 CONCLUSIONS = {
     Status.SUCCESS: WorkflowJobConclusion.SUCCESS,
@@ -38,15 +39,7 @@ CONCLUSIONS = {
 
 
 def _batch_job(name: str = "j1", target: str = "ntp") -> BatchJob:
-    return BatchJob(
-        name=name,
-        target=target,
-        runner="ubuntu-latest",
-        environment="py3.13",
-        platform=Platform.LINUX,
-        unit_tests=True,
-        e2e_tests=False,
-    )
+    return make_job(name, target=target)
 
 
 def _attempt(attempt: int = 1, status: Status = Status.SUCCESS, **overrides) -> JobAttemptProgress:
