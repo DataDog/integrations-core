@@ -10,7 +10,7 @@ import pytest
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
 from ddev.e2e.agent_images import UnknownPythonVersion
 from ddev.utils.platform import PlatformName
-from tests.helpers.batching import env, make_unit
+from tests.cli.ci.tests.helpers import env, make_unit
 
 
 def fake_resolver(python_version: str, platform: PlatformName) -> str:

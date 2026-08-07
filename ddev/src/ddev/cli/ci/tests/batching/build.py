@@ -9,6 +9,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
 from ddev.cli.ci.tests.batching.strategy import BatchStrategy, default_strategy
 from ddev.cli.ci.tests.batching.targets import (
@@ -25,6 +26,7 @@ from ddev.cli.ci.tests.batching.units import (
 )
 from ddev.cli.ci.tests.batching.validation import validate_batches
 from ddev.cli.ci.tests.messages import TestBatch
+from ddev.e2e.agent_images import PYTHON_VERSION_PATTERN
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -197,12 +199,19 @@ def resolve_hatch_environments(
         else:
             candidate_platforms = [platforms[0]]
 
+        python_version = environment.python or default_python_version
+        if not PYTHON_VERSION_PATTERN.match(python_version):
+            raise PlanningError(
+                f'Environment {environment.name!r} reports Python {python_version!r}; '
+                f'expected a `major.minor` version such as `3.13`'
+            )
+
         for platform in candidate_platforms:
             resolved.append(
                 ResolvedEnvironment(
                     name=environment.name,
                     platform=platform,
-                    python_version=environment.python or default_python_version,
+                    python_version=python_version,
                     test_available=environment.test_env,
                     e2e_available=environment.e2e_env,
                 )

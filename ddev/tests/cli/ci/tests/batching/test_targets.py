@@ -15,7 +15,7 @@ from ddev.cli.ci.tests.batching.targets import (
     default_target_rules,
     find_affected_targets,
 )
-from tests.helpers.batching import FakeIntegration, FakeRegistry, copied, modified, renamed
+from tests.cli.ci.tests.helpers import FakeIntegration, FakeRegistry, copied, modified, renamed
 
 CORE_RULES = default_target_rules(is_core=True)
 
@@ -100,6 +100,15 @@ def test_repository_wide_rule_triggers_full_eligible_set_in_core():
         "mysql",
         "postgres",
     ]
+
+
+def test_repository_wide_rule_fires_on_a_rename_away_from_a_repository_wide_path():
+    # Moving a shared planning module out of its package removes it from every target that relied
+    # on it, so the source path has to trigger the expansion even though the destination does not.
+    rule = RepositoryWideRule(is_core=True)
+    changed = [renamed("ddev/src/ddev/cli/ci/tests/batching/units.py", "ddev/src/ddev/utils/units.py")]
+
+    assert list(rule(changed, facts("postgres", "mysql"))) == ["mysql", "postgres"]
 
 
 def test_repository_wide_rule_still_fires_alongside_a_dependency_bump():

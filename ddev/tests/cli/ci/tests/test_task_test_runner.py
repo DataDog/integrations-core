@@ -23,7 +23,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
-from tests.helpers.batching import drain_queue, make_job
+from tests.cli.ci.tests.helpers import drain_queue, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------

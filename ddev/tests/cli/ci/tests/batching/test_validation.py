@@ -14,7 +14,7 @@ from ddev.cli.ci.tests.batching.strategy import default_strategy
 from ddev.cli.ci.tests.batching.validation import validate_batches
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.cli.ci.tests.messages import BatchJob
-from tests.helpers.batching import jobs, make_job
+from tests.cli.ci.tests.helpers import jobs, make_job
 
 
 def config(*, capacity: int = 240, allow_integration_splitting: bool = False) -> BatchingConfig:

@@ -87,9 +87,10 @@ class RegistryRepositoryFacts:
             return False
 
     def eligible_targets(self) -> list[str]:
+        # An empty selection means `changed`, so the whole repository has to be asked for explicitly
         return sorted(
             integration.name
-            for integration in self.registry.iter_testable()
+            for integration in self.registry.iter_testable('all')
             if integration.name not in UNTESTABLE_TARGETS
         )
 
@@ -146,7 +147,7 @@ class RepositoryWideRule:
         if not self.is_core:
             return
 
-        if any(self.patterns.search(changed_file.path) for changed_file in changed_files):
+        if any(self.patterns.search(path) for changed_file in changed_files for path in changed_file.affected_paths):
             yield from facts.eligible_targets()
 
 
