@@ -1,0 +1,1 @@
+Default to the OpenMetrics V2 implementation when ``use_openmetrics`` is unset, fixing a regression where it was never actually applied.
