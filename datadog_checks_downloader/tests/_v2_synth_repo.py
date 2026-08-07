@@ -59,7 +59,7 @@ def build_delegated_repo(
     delegated_role_name: str = 'pointers',
     paths: list[str] | None = None,
     path_hash_prefixes: list[str] | None = None,
-) -> None:
+) -> dict[str, SSlibSigner]:
     """Materialize a signed v2-style TUF repo with one delegated targets role."""
     if (paths is None) == (path_hash_prefixes is None):
         raise ValueError('exactly one of paths or path_hash_prefixes must be set')
@@ -137,6 +137,8 @@ def build_delegated_repo(
     root_md.sign(signers['root'])
     root_md.to_file(str(metadata_dir / '1.root.json'))
     root_md.to_file(str(metadata_dir / 'root.json'))
+
+    return signers
 
 
 class _ReuseTCPServer(TCPServer):

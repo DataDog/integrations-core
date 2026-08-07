@@ -157,3 +157,6 @@ datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/*
 datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/*
 !datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/.gitignore
 !datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/root.json
+
+# Ignore persistent v2 TUF client metadata created by downloader invocations
+/datadog_checks_downloader/datadog_checks/downloader/data/v2/repositories/
