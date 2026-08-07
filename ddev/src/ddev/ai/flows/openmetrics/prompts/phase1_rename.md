@@ -32,17 +32,18 @@ integration-identity rule. It may or may not be there already.
 - **integration name** — the name derived by your standing integration-identity rule.
 - **display name** — `${integration}`, exactly as given here.
 - **metrics prefix** — the derived metric prefix **followed by a dot**.
-- **platforms** — `linux`, `windows`, `mac_os` (all three) unless `${integration}`
-  clearly cannot run on one of them.
+- **supported Agent platforms** — `linux`, `windows`, `mac_os` (all three) unless
+  `${integration}` clearly cannot run on one of them.
 
 This creates the `<integration_name>/` directory and registers the display name,
-metrics prefix, and platforms in `.ddev/config.toml`.
+metrics prefix, and supported Agent platforms in `.ddev/config.toml`.
 
 **If it is already there,** do not run the scaffolding tool over it and do not create a second
 package. Adopt the existing directory and make its registration correct instead: read
-`.ddev/config.toml` and confirm the display name, metrics prefix, and platforms match the values
-listed above, editing that file where they do not. The identity above is what the rest of the flow
-relies on, so it wins over whatever is recorded.
+`.ddev/config.toml` and confirm the display name, metrics prefix, and supported Agent platforms
+match the values listed above, editing their existing registration where needed. Supported Agent
+platforms are separate from CI test platforms; leave CI platform overrides unchanged. The identity
+above is what the rest of the flow relies on, so it wins over whatever is recorded.
 
 ## Step 2 — Read the catalogs and choose the delegation shape
 

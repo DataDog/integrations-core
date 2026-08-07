@@ -55,8 +55,6 @@ done for you:
 - Any Python, test, or configuration file that happens to be present is **not** authoritative and
   carries no weight as a design decision. Later phases own those files and will replace them; you
   neither rely on them nor touch them.
-- Report what you found in your summary, so the phases that own those files know what they are
-  inheriting.
 
 ## Endpoint inspection inputs
 

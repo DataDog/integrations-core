@@ -11,9 +11,11 @@ lives, which is not always the same directory from one integration to the next. 
 deliver the unit, integration, and end-to-end tests, then run the whole suite yourself. Apply your
 standing testing expertise — this prompt gives the task-specific inputs and the steps.
 
-`tests/` may already hold files that this flow did not create. The handoff names them. They are not
-a specification: fold in what is genuinely right for the suite and remove the rest, so what you
-leave behind is one coherent suite rather than two overlapping ones.
+`tests/` may already hold files that this flow did not create. The handoff names them. Existing
+test code is not a specification, but it may be usable: fold in what is genuinely right and remove
+only what is irrelevant, incorrect, or duplicates the final suite. Preserve the endpoint fixtures
+and Docker environment materialized by the preceding phase; they are required inputs, not cleanup
+targets.
 
 You also have `web_search` and `web_fetch` tools. Reach for them when something you need is not in the inputs —
 how the service must be configured to expose certain metrics, what a compose variable is for,
@@ -70,12 +72,16 @@ ${prd}
 
 ## Steps
 
-1. Deliver `conftest.py`, `test_unit.py`, `test_integration.py`, and `test_e2e.py`, and remove or
-   absorb anything else in `tests/` that is not one of those or a shared helper they import. Apply
-   the complete testing contract from your system instructions to the endpoint and fixture set
-   described above, plus every mandatory product requirement in this task.
+1. Deliver `conftest.py`, `test_unit.py`, `test_integration.py`, and `test_e2e.py`. Reuse or absorb
+   any sound pre-existing test code, and remove only test modules or helpers that are irrelevant,
+   incorrect, or duplicate the final suite. Keep the materialized `tests/fixtures/` and Docker
+   environment intact. Apply the complete testing contract from your system instructions to the
+   endpoint and fixture set described above, plus every mandatory product requirement in this
+   task.
 
 2. **Run the whole suite yourself before finishing:**
+   - use `ddev_env_show`, start every concrete environment with `ddev_env_start` and `dev=true`,
+     then stop each one with `ddev_env_stop` before running tests;
    - the format/lint pass (`ddev test` in format-and-fix mode);
    - the offline unit suite;
    - the **end-to-end environment** with the e2e tooling (`ddev env test`), which starts
