@@ -1,0 +1,191 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Expansion of affected targets into test units."""
+
+from __future__ import annotations
+
+import logging
+import re
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, ClassVar, NamedTuple, Protocol
+
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
+from ddev.utils.platform import PlatformName
+
+if TYPE_CHECKING:
+    from ddev.integration.core import Integration
+
+
+class PlatformSpec(NamedTuple):
+    """Display name and default GitHub runner image for one platform."""
+
+    name: str
+    image: str
+
+
+PLATFORMS: dict[PlatformName, PlatformSpec] = {
+    PlatformName.LINUX: PlatformSpec("Linux", "ubuntu-22.04"),
+    PlatformName.WINDOWS: PlatformSpec("Windows", "windows-2022"),
+    PlatformName.MACOS: PlatformSpec("macOS", "macos-14-large"),
+}
+
+# Targets rendered before everything else, in this order.
+DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
+    name: index
+    for index, name in enumerate(
+        (
+            "ddev",
+            "datadog_checks_base",
+            "datadog_checks_dev",
+            "datadog_checks_downloader",
+        )
+    )
+}
+
+# Job names end up in file paths, so characters Windows reserves must be replaced.
+# https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
+JOB_NAME_RESERVED_PATTERN = re.compile(r'[<>:"/\\|?*]')
+
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class ResolvedEnvironment:
+    """One environment a target runs, already routed onto a platform."""
+
+    name: str
+    platform: PlatformName
+    python_version: str  # `major.minor`, picks both the runner Python and the E2E Agent image
+    test_available: bool = True  # ddev's `test_env`
+    e2e_available: bool = False  # ddev's `e2e_env`
+
+
+class EnvironmentProvider(Protocol):
+    """Resolves the environments an integration runs, routed onto the given platforms."""
+
+    def __call__(self, integration: Integration, platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]: ...
+
+
+@dataclass(frozen=True)
+class TargetDefinition:
+    """A single target to expand, with everything expansion needs already resolved."""
+
+    name: str
+    display_name: str | None = None
+    platforms: tuple[PlatformName, ...] = (PlatformName.LINUX,)
+    runners: Mapping[str, Sequence[str]] = field(default_factory=dict)
+    environments: tuple[ResolvedEnvironment, ...] = ()
+
+
+@dataclass(frozen=True)
+class TestUnit:
+    """One target, on one platform, in one environment. Becomes exactly one job.
+
+    `name` is already unique across the plan and is reused verbatim as the job's display name.
+    """
+
+    # Prevent pytest from collecting this domain class as a test case.
+    __test__: ClassVar[bool] = False
+
+    target: str
+    name: str
+    platform: PlatformName
+    runner_labels: tuple[str, ...]
+    environment: ResolvedEnvironment
+
+
+def normalize_job_name(job_name: str) -> str:
+    """Replace characters reserved on Windows so the name can be used in file paths."""
+    return JOB_NAME_RESERVED_PATTERN.sub("_", job_name)
+
+
+def parse_platform_name(value: str, *, target: str) -> PlatformName:
+    """Convert a configured platform string into a `PlatformName`, naming the target on failure."""
+    try:
+        return PlatformName(value.lower())
+    except ValueError:
+        supported = ", ".join(sorted(PLATFORMS))
+        raise ValueError(f"Unsupported platform for `{target}`: {value} (expected one of {supported})") from None
+
+
+def resolve_platforms(
+    platform_override: Sequence[str],
+    supported_os: Sequence[str],
+    *,
+    target: str,
+) -> list[PlatformName]:
+    """Resolve the platforms a target runs on, from CI overrides then its supported OS list."""
+    if platform_override:
+        return [parse_platform_name(value, target=target) for value in platform_override]
+
+    platform_ids = [parse_platform_name(value, target=target) for value in supported_os]
+    # Only a Windows-exclusive target runs on Windows by default. Anything else runs on Linux
+    # alone, and extra platforms are opt-in through the CI `platforms` override handled above.
+    if platform_ids != [PlatformName.WINDOWS]:
+        platform_ids = [PlatformName.LINUX]
+
+    return platform_ids
+
+
+def group_environments_by_platform(
+    environments: Sequence[ResolvedEnvironment],
+) -> dict[PlatformName, list[ResolvedEnvironment]]:
+    """Group resolved environments by their target platform, preserving order."""
+    grouped: dict[PlatformName, list[ResolvedEnvironment]] = {}
+    for environment in environments:
+        grouped.setdefault(environment.platform, []).append(environment)
+    return grouped
+
+
+def _display_order_key(target: str) -> tuple[int, str]:
+    return DISPLAY_ORDER_OVERRIDE.get(target, len(DISPLAY_ORDER_OVERRIDE)), target
+
+
+def expand_test_units(targets: Sequence[TargetDefinition], *, default_python_version: str) -> list[TestUnit]:
+    """Expand targets into deterministically ordered test units, one per resolved environment.
+
+    A platform whose environments are all constrained elsewhere gets no units, which is the
+    constraint working as intended rather than an error.
+    """
+    ordered_targets = sorted(targets, key=lambda target: _display_order_key(target.name))
+
+    units: list[TestUnit] = []
+    for target in ordered_targets:
+        if not target.environments:
+            raise PlanningError(f"{target.name!r} reached unit expansion with no environments")
+
+        display_name = target.display_name or target.name
+        environments_by_platform = group_environments_by_platform(target.environments)
+
+        for platform_id in target.platforms:
+            platform = PLATFORMS[platform_id]
+            base_name = display_name
+            if len(target.platforms) > 1:
+                base_name += f" on {platform.name}"
+            job_name = normalize_job_name(base_name)
+            runner_labels = tuple(target.runners.get(platform_id, [platform.image]))
+
+            platform_environments = environments_by_platform.get(platform_id, [])
+            if not platform_environments:
+                logger.warning("%s runs on %s but no environment tests it", target.name, platform_id)
+                continue
+
+            for environment in platform_environments:
+                if environment.name and environment.name != target.name:
+                    name = f"{job_name} ({environment.name})"
+                else:
+                    name = job_name
+                units.append(
+                    TestUnit(
+                        target=target.name,
+                        name=name,
+                        platform=platform_id,
+                        runner_labels=runner_labels,
+                        environment=environment,
+                    )
+                )
+
+    return units
