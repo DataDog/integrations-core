@@ -605,8 +605,10 @@ class RequestsWrapper(object):
 
     def load_intermediate_certs(self, der_cert, certs):
         """
-        RFC 3280 4.2.2.1 / RFC 5280 5.2.7 - fetch missing intermediate certs via Authority Information
-        Access (AIA) chasing.
+        Fetch missing intermediate certs via Authority Information Access (AIA) chasing.
+
+        https://tools.ietf.org/html/rfc3280#section-4.2.2.1
+        https://tools.ietf.org/html/rfc5280#section-5.2.7
 
         A CA Issuers URI conventionally serves a single DER-encoded certificate, but some issuers serve a
         PEM bundle containing multiple certificates (e.g. a cross-signed cert alongside its own issuer).
