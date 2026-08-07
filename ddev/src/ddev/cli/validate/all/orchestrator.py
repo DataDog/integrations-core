@@ -98,8 +98,8 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Validate configuration data models match spec.yaml",
         fix_flag="--sync",
     ),
-    "safe-os": ValidationConfig(
-        description="Validate integrations use the safe_os interface for file and subprocess access",
+    "os-wrapper": ValidationConfig(
+        description="Validate integrations use the OS wrapper for file and subprocess access",
     ),
     "openmetrics": ValidationConfig(
         description="Validate OpenMetrics integrations disable the metric limit",
