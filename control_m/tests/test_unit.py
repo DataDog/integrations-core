@@ -3,14 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+import logging
 import time
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 from pytest import MonkeyPatch
-from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
@@ -45,7 +47,7 @@ def test_connect_server_error_emits_critical(
     check = _make_check(instance)
     _mock_api(check, monkeypatch, server_status=500)
 
-    with pytest.raises(HTTPError, match="500"):
+    with pytest.raises(HTTPStatusError, match="500"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
@@ -71,11 +73,36 @@ def test_connect_session_login_failure_emits_critical(
     check = _make_check(session_instance)
     _mock_api(check, monkeypatch, login_status=401)
 
-    with pytest.raises(HTTPError, match="401"):
+    with pytest.raises(HTTPStatusError, match="401"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_login", value=0, count=1)
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        pytest.param(HTTPConnectionError("connection refused"), id="connection_error"),
+        # The pre-request auth-token poll raises this one, and it escapes `post` uncaught.
+        pytest.param(HTTPStatusError("503 Server Error"), id="status_error"),
+    ],
+)
+def test_login_transport_failure_logs_unreachable_endpoint(
+    session_instance: dict[str, Any],
+    monkeypatch: MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    error: Exception,
+) -> None:
+    """An unreachable endpoint names the failing URL in the log before the error propagates."""
+    check = _make_check(session_instance)
+    monkeypatch.setattr(type(check.http), "post", Mock(side_effect=error))
+    caplog.set_level(logging.ERROR)
+
+    with pytest.raises(type(error)):
+        _run_check(check)
+
+    assert "Could not reach Control-M API at https://example.com/automation-api/session/login" in caplog.text
 
 
 def test_connect_static_token_401_falls_back_to_session(

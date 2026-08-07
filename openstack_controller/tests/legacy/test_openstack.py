@@ -8,11 +8,12 @@ import os
 from copy import deepcopy
 
 import mock
+import openstack.exceptions
 import pytest
 from mock import ANY
-from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 from datadog_checks.openstack_controller.legacy.api import AbstractApi, Authenticator, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import IncompleteConfig, KeystoneUnreachable
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
@@ -28,6 +29,13 @@ pytestmark = [
 ]
 
 
+def sdk_http_exception(status_code: int | None = None) -> openstack.exceptions.HttpException:
+    if status_code is None:
+        return openstack.exceptions.HttpException()
+
+    return openstack.exceptions.HttpException(response=mock.Mock(status_code=status_code, headers={}, request=None))
+
+
 def test_parse_uptime_string(aggregator):
     instance = copy.deepcopy(common.KEYSTONE_INSTANCE)
     instance['tags'] = ['optional:tag1']
@@ -38,16 +46,13 @@ def test_parse_uptime_string(aggregator):
     assert uptime_parsed == [0.04, 0.14, 0.19]
 
 
-def test_api_error_log_no_password(check, instance, caplog):
+def test_api_error_log_no_password(check, instance, caplog, mock_http):
+    mock_http.post.side_effect = HTTPStatusError('not found')
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(KeystoneUnreachable):
-            with mock.patch('datadog_checks.base.utils.http.requests.Session.post') as req:
-                req.side_effect = HTTPError(mock.Mock(status=404), 'not found')
-                check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)
-                identity = Authenticator._get_user_identity(instance.get("user"))
-                Authenticator._post_auth_token(
-                    check._api.logger, instance.get("keystone_server_url"), identity, check.http
-                )
+            check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)
+            identity = Authenticator._get_user_identity(instance.get("user"))
+            Authenticator._post_auth_token(check._api.logger, instance.get("keystone_server_url"), identity, check.http)
 
     expected_pass = "'password': '********'"
 
@@ -142,6 +147,18 @@ def test_check_with_config_file(mock_api, aggregator):
     aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.OK)
     mock_api.assert_called_with(ANY, common.CONFIG_FILE_INSTANCE, ANY)
+
+
+def test_send_api_service_checks_handles_sdk_http_exception(aggregator):
+    check = OpenStackControllerLegacyCheck("test", {'ssl_verify': False}, [common.CONFIG_FILE_INSTANCE])
+
+    with mock.patch.object(check, 'get_nova_endpoint', side_effect=sdk_http_exception(500)):
+        with mock.patch.object(check, 'get_neutron_endpoint', side_effect=sdk_http_exception(500)):
+            check._send_api_service_checks('http://10.0.2.15:5000', ['tag'])
+
+    tags = ['keystone_server: http://10.0.2.15:5000', 'tag']
+    aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.CRITICAL, tags=tags)
+    aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.CRITICAL, tags=tags)
 
 
 def get_server_details_response(params):
@@ -368,6 +385,94 @@ def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggr
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+@mock.patch(
+    'datadog_checks.openstack_controller.legacy.openstack_controller_legacy.OpenStackControllerLegacyCheck.get_os_aggregates',
+    return_value=OS_AGGREGATES_RESPONSE,
+)
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(HTTPStatusError('not found', response=mock.Mock(status_code=404)), id='agnostic_status_error'),
+        pytest.param(sdk_http_exception(404), id='sdk_http_exception'),
+    ],
+)
+def test_collect_server_diagnostic_metrics_404_is_debug_logged(os_aggregates, error, aggregator, caplog):
+    check = OpenStackControllerLegacyCheck(
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, [common.KEYSTONE_INSTANCE]
+    )
+    with mock.patch.object(check, 'get_server_diagnostics', side_effect=error):
+        with mock.patch.object(check, 'warning') as warning:
+            with caplog.at_level(logging.DEBUG):
+                check.collect_server_diagnostic_metrics({'server_id': 'srv-1', 'server_name': 'srv-1'})
+
+    assert any("is not in an ACTIVE state" in message for _, _, message in caplog.record_tuples)
+    warning.assert_not_called()
+    aggregator.assert_metric('openstack.nova.server.vda_read_req', count=0)
+
+
+@mock.patch(
+    'datadog_checks.openstack_controller.legacy.openstack_controller_legacy.OpenStackControllerLegacyCheck.get_os_aggregates',
+    return_value=OS_AGGREGATES_RESPONSE,
+)
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(HTTPStatusError('boom', response=mock.Mock(status_code=500)), id='agnostic_status_500'),
+        pytest.param(HTTPStatusError('boom'), id='agnostic_missing_response'),
+        pytest.param(sdk_http_exception(500), id='sdk_status_500'),
+        pytest.param(sdk_http_exception(), id='sdk_missing_response'),
+    ],
+)
+def test_collect_server_diagnostic_metrics_non_404_warns(os_aggregates, error, aggregator):
+    check = OpenStackControllerLegacyCheck(
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, [common.KEYSTONE_INSTANCE]
+    )
+    with mock.patch.object(check, 'get_server_diagnostics', side_effect=error):
+        with mock.patch.object(check, 'warning') as warning:
+            check.collect_server_diagnostic_metrics({'server_id': 'srv-1', 'server_name': 'srv-1'})
+
+    warning.assert_called_once()
+    aggregator.assert_metric('openstack.nova.server.vda_read_req', count=0)
+
+
+@mock.patch(
+    'datadog_checks.openstack_controller.legacy.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi)
+)
+@pytest.mark.parametrize(
+    'error, expect_backoff',
+    [
+        (HTTPStatusError('client error', response=mock.Mock(status_code=400)), False),
+        (HTTPStatusError('server error', response=mock.Mock(status_code=500)), True),
+        (HTTPStatusError('no response'), True),
+        (HTTPConnectionError('connection refused'), True),
+        (sdk_http_exception(400), False),
+        (sdk_http_exception(500), True),
+        (sdk_http_exception(), True),
+    ],
+    ids=[
+        'status_lt_500_warns',
+        'status_ge_500_backs_off',
+        'missing_response_backs_off',
+        'connection_error_backs_off',
+        'sdk_status_lt_500_warns',
+        'sdk_status_ge_500_backs_off',
+        'sdk_missing_response_backs_off',
+    ],
+)
+def test_check_nova_api_error_backoff(mock_api, error, expect_backoff):
+    check = OpenStackControllerLegacyCheck("test", {'ssl_verify': False}, [common.KEYSTONE_INSTANCE])
+    with mock.patch.object(check, 'init_api', side_effect=error):
+        with mock.patch.object(check, 'do_backoff') as do_backoff:
+            with mock.patch.object(check, 'warning') as warning:
+                check.check(common.KEYSTONE_INSTANCE)
+
+    if expect_backoff:
+        do_backoff.assert_called_once()
+    else:
+        do_backoff.assert_not_called()
+        warning.assert_called()
 
 
 def test_get_keystone_url_from_openstack_config():

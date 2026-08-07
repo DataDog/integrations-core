@@ -8,6 +8,7 @@ from typing import Optional  # noqa: F401
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.check import VoltDBCheck, _parse_query
 from datadog_checks.voltdb.config import Config
@@ -368,7 +369,9 @@ def test_http_client_serializes_list_params_as_json():
 
     calls = []
 
-    def fake_get(url, auth=None, params=None, **_):
+    def fake_get(url, params=None, **options):
+        # Credentials travel as query params, so no per-call auth override is sent.
+        assert 'auth' not in options
         calls.append(params)
         resp = mock.MagicMock()
         resp.raise_for_status = lambda: None
@@ -380,9 +383,10 @@ def test_http_client_serializes_list_params_as_json():
     client.call_procedure('@Statistics', '[CPU, 0]')  # passthrough string
     client.call_procedure('@Ping')  # no parameters
 
-    assert calls[0] == {'Procedure': '@Statistics', 'Parameters': json.dumps(['CPU', 0])}
-    assert calls[1] == {'Procedure': '@Statistics', 'Parameters': '[CPU, 0]'}
-    assert calls[2] == {'Procedure': '@Ping'}
+    credentials = {'User': 'u', 'Password': 'p'}
+    assert calls[0] == {'Procedure': '@Statistics', 'Parameters': json.dumps(['CPU', 0]), **credentials}
+    assert calls[1] == {'Procedure': '@Statistics', 'Parameters': '[CPU, 0]', **credentials}
+    assert calls[2] == {'Procedure': '@Ping', **credentials}
 
 
 def test_http_client_raise_for_status():
@@ -396,6 +400,49 @@ def test_http_client_raise_for_status():
     bad = HttpResponse({'status': 0, 'statusstring': 'unauthorized', 'results': []})
     with pytest.raises(VoltDBError, match='unauthorized'):
         client.raise_for_status(bad)
+
+
+def test_http_mode_disables_http_auth(mock_http):
+    # VoltDB authenticates via query params, so the check disables HTTP-level auth (config-derived and .netrc).
+    VoltDBCheck('voltdb', {}, [{'url': 'http://vmc.example:8080', 'username': 'doggo', 'password': 'doggopass'}])
+
+    mock_http.disable_auth.assert_called_once_with()
+
+
+def test_native_mode_leaves_http_auth_alone(mock_http):
+    # The native transport never touches self.http, so it must not disable auth either.
+    VoltDBCheck('voltdb', {}, [{'host': 'db-1.example', 'username': 'doggo', 'password': 'doggopass'}])
+
+    assert not mock_http.disable_auth.called
+
+
+@pytest.mark.parametrize(
+    'password_hashed, password_field, absent_field',
+    [
+        pytest.param(False, 'Password', 'Hashedpassword', id='plain'),
+        pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
+    ],
+)
+def test_http_mode_wires_credentials_into_query_params(mock_http, password_hashed, password_field, absent_field):
+    # Only the through-the-check path proves config.password_hashed selects the right field.
+    instance = {
+        'url': 'http://vmc.example:8080',
+        'username': 'admin',
+        'password': 'secret',
+        'password_hashed': password_hashed,
+    }
+
+    mock_http.get.return_value = MockHTTPResponse(json_data={'status': 1, 'results': []})
+
+    check = VoltDBCheck('voltdb', {}, [instance])
+    check._client.call_procedure('@SystemInformation', ['OVERVIEW'])
+
+    _, options = mock_http.get.call_args
+    assert 'auth' not in options  # no per-call auth override alongside the query params
+    params = options['params']
+    assert params['User'] == 'admin'
+    assert params[password_field] == 'secret'
+    assert absent_field not in params
 
 
 def test_url_takes_precedence_over_host():

@@ -12,8 +12,8 @@ from .metrics import METRICS
 pytestmark = pytest.mark.unit
 
 
-def test_check(dd_run_check, aggregator, check, mocked_openmetrics_instance, mocker):
-    mocker.patch('requests.Session.get', wraps=mock_http_responses())
+def test_check(dd_run_check, aggregator, check, mocked_openmetrics_instance, mock_http):
+    mock_http.get.side_effect = mock_http_responses()
     dd_run_check(check(mocked_openmetrics_instance))
 
     for name, expected_values in METRICS.items():

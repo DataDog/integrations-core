@@ -8,6 +8,7 @@ from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.nutanix import NutanixCheck
 from tests.conftest import load_fixture_page
 from tests.constants import BASE_TAGS, CLUSTER_TAGS
@@ -22,13 +23,8 @@ def test_health_check_success(dd_run_check, aggregator, mock_instance, mock_http
     aggregator.assert_metric("nutanix.health.up", value=1, count=1, tags=BASE_TAGS)
 
 
-def test_health_check_failure(dd_run_check, aggregator, mock_instance, mocker):
-    def mock_exception(*args, **kwargs):
-        from requests.exceptions import ConnectionError
-
-        raise ConnectionError("Connection failed")
-
-    mocker.patch('requests.Session.get', side_effect=mock_exception)
+def test_health_check_failure(dd_run_check, aggregator, mock_instance, mock_http):
+    mock_http.get.side_effect = HTTPConnectionError("Connection failed")
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 

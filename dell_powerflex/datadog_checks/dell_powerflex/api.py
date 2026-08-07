@@ -1,11 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from time import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.base.utils.http import RequestsWrapper
+
+if TYPE_CHECKING:
+    from datadog_checks.base.utils.http_protocol import HTTPClient
 
 TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 
@@ -13,7 +17,7 @@ TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 class PowerFlexAPI:
     def __init__(
         self,
-        http: RequestsWrapper,
+        http: HTTPClient,
         gateway_url: str,
         logger: CheckLoggingAdapter,
         username: str | None = None,

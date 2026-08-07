@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from unittest import mock
 
 import pytest
 
@@ -104,3 +105,33 @@ def test_e2e(dd_agent_check, integration_instance, get_expected_metrics):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'instance_overrides',
+    [
+        pytest.param({}, id='default'),
+        pytest.param({'use_latest_spec': True}, id='use_latest_spec'),
+    ],
+)
+def test_scrape_asks_the_controller_for_any_representation(unit_instance, instance_overrides):
+    """The controller is queried with the client's own Accept header.
+
+    The scraper runs against the check's authenticated client, so an exposition format negotiated
+    here would decide which representation the controller returns for every metric endpoint.
+    """
+    check = AviVantageCheck('avi_vantage', {}, [{**unit_instance, **instance_overrides}])
+    check.load_configuration_models()
+    check.configure_scrapers()
+    scraper = next(iter(check.scrapers.values()))
+    captured = {}
+
+    def fake_send(session_self, request, **kwargs):
+        captured['accept'] = request.headers.get('Accept')
+        return mock.MagicMock(status_code=200)
+
+    with mock.patch('requests.sessions.Session.send', new=fake_send):
+        scraper.send_request()
+
+    assert captured['accept'] == '*/*'

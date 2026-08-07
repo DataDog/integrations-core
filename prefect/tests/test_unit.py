@@ -1,11 +1,20 @@
 from datetime import datetime, timezone
+from json import JSONDecodeError
 from typing import Callable, NamedTuple
 from unittest.mock import Mock
 
 import pytest
-from requests.exceptions import InvalidURL
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPInvalidURLError,
+    HTTPReadTimeoutError,
+    HTTPSSLError,
+    HTTPStatusError,
+)
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.prefect import PrefectCheck
 from datadog_checks.prefect.check import PrefectClient
@@ -603,24 +612,13 @@ class EventCase(NamedTuple):
 pytestmark = [pytest.mark.usefixtures("mock_prefect_client"), pytest.mark.unit]
 
 
-class MockResponse:
-    def __init__(self, payload: dict):
-        self.payload = payload
-
-    def raise_for_status(self):
-        return None
-
-    def json(self) -> dict:
-        return self.payload
-
-
 def test_paginate_events_rejects_external_next_page():
     http = Mock()
-    http.post.return_value = MockResponse(
-        {
+    http.post.return_value = MockHTTPResponse(
+        json_data={
             "events": [{"id": "event-1"}],
             "next_page": "http://attacker.example/evil",
-        }
+        },
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)
@@ -632,23 +630,23 @@ def test_paginate_events_rejects_external_next_page():
     log.error.assert_called_once()
     args = log.error.call_args[0]
     assert args[0] == "Could not collect next page of events: %s, data is incomplete"
-    assert isinstance(args[1], InvalidURL)
+    assert isinstance(args[1], HTTPInvalidURLError)
     assert str(args[1]) == "Invalid next_page URL with unexpected host: http://attacker.example/evil"
 
 
 def test_paginate_events_allows_same_host_absolute_next_page():
     http = Mock()
-    http.post.return_value = MockResponse(
-        {
+    http.post.return_value = MockHTTPResponse(
+        json_data={
             "events": [{"id": "event-1"}],
             "next_page": "http://prefect.local/api/events/filter?page=2",
-        }
+        },
     )
-    http.get.return_value = MockResponse(
-        {
+    http.get.return_value = MockHTTPResponse(
+        json_data={
             "events": [{"id": "event-2"}],
             "next_page": None,
-        }
+        },
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)
@@ -772,3 +770,36 @@ def test_events(ready_check: PrefectCheck, aggregator: AggregatorStub):
             raise AssertionError(
                 f"Excluded event was emitted: id='{ee.mid}', msg_title='{ee.msg_title}':\n{err}"
             ) from err
+
+
+@pytest.mark.parametrize(
+    'failure',
+    [
+        pytest.param(HTTPConnectTimeoutError('connect timed out'), id="connect timeout"),
+        pytest.param(HTTPReadTimeoutError('read timed out'), id="read timeout"),
+        pytest.param(HTTPSSLError('certificate verify failed'), id="tls failure"),
+        pytest.param(HTTPConnectionError('connection refused'), id="connection refused"),
+        pytest.param(HTTPInvalidURLError('no scheme supplied'), id="invalid url"),
+        pytest.param(HTTPStatusError('503 Server Error'), id="error status"),
+        pytest.param(JSONDecodeError('Expecting value', '<html>Sign in</html>', 0), id="malformed body"),
+    ],
+)
+def test_api_status_reports_zero_for_every_failure_the_client_handles(
+    check: PrefectCheck, dd_run_check: Callable, aggregator: AggregatorStub, mocker, mock_prefect_client, failure
+):
+    # Each of these has to leave the check running so health and ready report zero, which is what a
+    # monitor on those gauges distinguishes from no data at all. The handler tuple is read off a real
+    # client rather than restated here, so a name in it that does not match what the endpoint actually
+    # raises fails this test instead of passing against a matching copy.
+    mock_prefect_client.http_exceptions = PrefectClient("http://prefect.local/api", Mock(), Mock()).http_exceptions
+    mock_prefect_client.get.side_effect = failure
+    mocker.patch(
+        "datadog_checks.prefect.check._utcnow", return_value=datetime(2026, 1, 20, 15, 2, 0, tzinfo=timezone.utc)
+    )
+    mocker.patch.object(check, '_get_last_check_time')
+    reset_check_time(check)
+
+    dd_run_check(check)
+
+    aggregator.assert_metric('prefect.server.health', value=0.0)
+    aggregator.assert_metric('prefect.server.ready', value=0.0)

@@ -4,11 +4,11 @@
 from copy import deepcopy
 from unittest.mock import MagicMock
 
-import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.couch import CouchDb
-from datadog_checks.couch.couch import CouchDB2
+from datadog_checks.couch.couch import CouchDB1, CouchDB2
 
 from . import common
 
@@ -30,24 +30,8 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content='{}')
-
-        check.check(instance)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.get.assert_called_with('http://{}:5984/_all_dbs/'.format(common.HOST), **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_new_version_system_metrics(load_test_data):
@@ -69,3 +53,43 @@ def test_new_version_system_metrics(load_test_data):
 
     assert mock_agent_check.gauge.call_count >= 183
     mock_agent_check.log.debug.assert_any_call("Skipping distribution events")
+
+
+def test_v1_status_error_without_response_is_not_an_attribute_error():
+    """The auth-token seam raises without a response, so the exclusion guard must not dereference None."""
+    mock_agent_check = MagicMock()
+    mock_agent_check.instance = {}
+    mock_agent_check.MAX_DB = 50
+    mock_agent_check.get.side_effect = [{}, ['db1'], HTTPStatusError('403 Client Error')]
+
+    couchdb_check = CouchDB1(mock_agent_check)
+
+    data = couchdb_check.get_data('http://localhost:5984', [])
+
+    # The database is unresolved, so it is absent rather than present with a None placeholder
+    # that _create_metric would dereference.
+    assert data['databases'] == {}
+    mock_agent_check.warning.assert_not_called()
+
+
+def test_v1_unresolved_database_still_emits_overall_stats():
+    """A per-database status the exclusion guard cannot act on must not cost the whole run.
+
+    The auth-token seam raises with no response at all, so the guard has no status to read and the
+    database stays unresolved. The overall stats still have to reach the aggregator.
+    """
+    mock_agent_check = MagicMock()
+    mock_agent_check.instance = {}
+    mock_agent_check.MAX_DB = 50
+    mock_agent_check.get_server.return_value = 'http://localhost:5984'
+    mock_agent_check.get_config_tags.return_value = []
+    overall_stats = {'httpd': {'requests': {'current': 12}}}
+    mock_agent_check.get.side_effect = [overall_stats, ['db1'], HTTPStatusError('404 Client Error')]
+
+    couchdb_check = CouchDB1(mock_agent_check)
+
+    couchdb_check.check()
+
+    mock_agent_check.gauge.assert_called_once_with(
+        'couchdb.httpd.requests', 12, tags=['instance:http://localhost:5984']
+    )

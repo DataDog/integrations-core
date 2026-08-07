@@ -11,11 +11,15 @@ from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 from urllib.parse import urljoin
 
-import requests
 from cachetools import TTLCache
-from requests import HTTPError
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPRequestError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 from datadog_checks.base.utils.serialization import json
 
 from .common import (
@@ -139,7 +143,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         }
 
         if 'acl_token' in self.instance:
-            self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+            self.http.set_header('X-Consul-Token', self.instance['acl_token'])
 
         cache_size = self.instance.get(
             'health_checks_cache_size',
@@ -168,7 +172,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
             resp.raise_for_status()
 
-        except requests.exceptions.Timeout as e:
+        except HTTPTimeoutError as e:
             msg = 'Consul request to {} timed out'.format(url)
             self.log.exception(msg)
             self.service_check(
@@ -717,14 +721,20 @@ class ConsulCheck(OpenMetricsBaseCheck):
         try:
             self.process(self.scraper_config)
         # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
-        except ValueError as e:
+        except (ValueError, HTTPRequestError) as e:
+            # HTTPRequestError is the translator's fallthrough type and subsumes HTTPInvalidURLError,
+            # so a malformed header or an unusable URL lands here and does suggest an older Consul.
+            # A timeout or a connection failure says nothing about the version, so let those out.
+            if isinstance(e, (HTTPTimeoutError, HTTPConnectionError)):
+                raise
             self.log.warning(
                 "This Consul version probably does not support the prometheus endpoint. "
                 "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
                 str(e),
             )
-        except HTTPError as e:
-            if e.response.status_code == 404:
+        except HTTPStatusError as e:
+            # The auth-token seam raises without a response, so the status is unknowable there.
+            if e.response is not None and e.response.status_code == 404:
                 self.log.warning(
                     "This Consul version (< 1.1.0) does not support the prometheus endpoint. "
                     "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",

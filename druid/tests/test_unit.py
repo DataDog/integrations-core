@@ -3,10 +3,15 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+    HTTPTimeoutError,
+)
 from datadog_checks.druid import DruidCheck
 
 pytestmark = pytest.mark.unit
@@ -19,17 +24,15 @@ def test_missing_url_config(aggregator):
         check.check({})
 
 
-def test_service_check_can_connect_success(aggregator, instance):
+def test_service_check_can_connect_success(aggregator, instance, mock_http):
     check = DruidCheck('druid', {}, [instance])
 
-    req = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
-        mock_resp = mock.MagicMock(status_code=200)
-        mock_resp.json.return_value = {'abc': '123'}
-        req.get.return_value = mock_resp
+    mock_resp = mock.MagicMock(status_code=200)
+    mock_resp.json.return_value = {'abc': '123'}
+    mock_http.get.return_value = mock_resp
 
-        resp = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
-        assert resp == {'abc': '123'}
+    resp = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
+    assert resp == {'abc': '123'}
 
     aggregator.assert_service_check(
         'druid.service.can_connect',
@@ -38,18 +41,46 @@ def test_service_check_can_connect_success(aggregator, instance):
     )
 
 
-@pytest.mark.parametrize("exception_class", [requests.exceptions.ConnectionError, requests.exceptions.Timeout])
-def test_service_check_can_connect_failure(aggregator, instance, exception_class):
+@pytest.mark.parametrize(
+    'error_type, expected_warning',
+    [
+        pytest.param(
+            HTTPConnectTimeoutError,
+            "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
+            id='connect-timeout',
+        ),
+        pytest.param(
+            HTTPReadTimeoutError,
+            "Connection timeout when connecting to %s: %s",
+            id='read-timeout',
+        ),
+    ],
+)
+def test_make_request_timeout_warning(instance, mock_http, error_type, expected_warning):
+    check = DruidCheck('druid', {}, [instance])
+    error = error_type('timed out')
+    mock_http.get.side_effect = error
+
+    with mock.patch.object(check, 'warning') as warning:
+        assert check._make_request('http://hello-world.com:8899/status') is None
+
+    warning.assert_called_once_with(expected_warning, 'http://hello-world.com:8899/status', error)
+
+
+@pytest.mark.parametrize(
+    "exception",
+    [HTTPConnectionError('boom'), HTTPTimeoutError('boom')],
+    ids=["connection_error", "timeout"],
+)
+def test_service_check_can_connect_failure(aggregator, instance, mock_http, exception):
     check = DruidCheck('druid', {}, [instance])
 
-    req = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
-        attrs = {'raise_for_status.side_effect': exception_class}
-        req.get.side_effect = [mock.MagicMock(status_code=500, **attrs)]
+    attrs = {'raise_for_status.side_effect': exception}
+    mock_http.get.side_effect = [mock.MagicMock(status_code=500, **attrs)]
 
-        with pytest.raises(CheckException):
-            properties = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
-            assert properties is None
+    with pytest.raises(CheckException):
+        properties = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
+        assert properties is None
 
     aggregator.assert_service_check(
         'druid.service.can_connect',

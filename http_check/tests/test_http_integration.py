@@ -10,6 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.http_check import HTTPCheck
 
 from .common import (
@@ -485,7 +486,7 @@ def test_enable_http_outcome_tag_leaves_ssl_metrics_untagged(aggregator, http_ch
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=AgentCheck.OK, tags=url_tag + instance_tag, count=1)
 
 
-def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
+def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check, mock_http):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -497,14 +498,15 @@ def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
         'skip_proxy': 'false',
     }
 
-    with (
-        mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning,
-        mock.patch('requests.Session.get'),
-    ):
+    mock_http.get.return_value = MockHTTPResponse()
+    with mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning:
         check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+        check.get_tls_context()
         dd_run_check(check)
         mock_warning.assert_called()
-        assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)
+        # Search every warning rather than the last one: the check run below the context build emits
+        # its own, and the one naming the CA path would then be out of reach.
+        assert any(instance['tls_ca_cert'] in call.args for call in mock_warning.call_args_list)
 
 
 def test_instance_auth_token(dd_run_check):
@@ -648,9 +650,9 @@ def test_case_insensitive_header_content_type(dd_run_check, headers):
     dd_run_check(check)
 
     if headers == {}:
-        assert check.http.options["headers"] == default_headers
+        assert check.http.options['headers'] == default_headers
     else:
-        assert check.http.options["headers"] == headers
+        assert check.http.options['headers'] == headers
 
 
 def test_http_response_status_code_accepts_int_value(aggregator, dd_run_check):

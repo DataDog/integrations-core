@@ -5,7 +5,8 @@ import os
 
 import mock
 import pytest
-import requests
+
+from datadog_checks.base.utils.http_exceptions import HTTPSSLError
 
 from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT_SSL, TAGS_WITH_HOST, TAGS_WITH_HOST_AND_PORT, USING_VTS
 from .utils import mocked_perform_request, requires_static_version
@@ -57,7 +58,7 @@ def test_connect_ssl(check, instance_ssl, aggregator):
     aggregator.assert_metric("nginx.net.connections", tags=TAGS_WITH_HOST + ['port:{}'.format(PORT_SSL)], count=1)
 
     # assert ssl validation throws an error
-    with pytest.raises(requests.exceptions.SSLError):
+    with pytest.raises(HTTPSSLError):
         instance_ssl['ssl_validation'] = True
         check_ssl = check(instance_ssl)
         check_ssl.check(instance_ssl)

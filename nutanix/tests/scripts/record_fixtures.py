@@ -2,6 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+# NOTE: Exclude this file from the requests -> agnostic HTTP client migration.
+# It is a standalone developer helper run by hand to record fixtures. It is not
+# shipped with the Agent and is not exercised in CI, so it may keep using the
+# requests library directly.
+
 """Script to record fixtures from a live Nutanix Prism Central instance.
 
 This script connects to the AWS_INSTANCE defined in conftest.py and records

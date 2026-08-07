@@ -7,6 +7,7 @@ from mock import MagicMock
 from datadog_checks.ambari import AmbariCheck
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError, HTTPReadTimeoutError
 
 from . import responses
 
@@ -22,6 +23,42 @@ def test_flatten_service_metrics():
         "pfx",
     )
     assert metrics == {'pfx.metric_a': 10, 'pfx.metric_b': 15, 'pfx.submetric_c': 'hello', 'pfx.subsub_d': 25}
+
+
+@pytest.mark.parametrize(
+    'error_type, expected_warning, includes_error',
+    [
+        pytest.param(
+            HTTPConnectTimeoutError,
+            "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
+            True,
+            id='connect-timeout',
+        ),
+        pytest.param(
+            HTTPReadTimeoutError,
+            "Connection timeout when connecting to %s",
+            False,
+            id='read-timeout',
+        ),
+    ],
+)
+def test_make_request_timeout_warning(mock_http, init_config, instance, error_type, expected_warning, includes_error):
+    check = AmbariCheck('Ambari', init_config, [instance])
+    error = error_type('timed out')
+    mock_http.get.side_effect = error
+    check.warning = warning = MagicMock()
+
+    assert check._make_request('http://localhost/api') is None
+
+    expected_args = (
+        (expected_warning, 'http://localhost/api', error)
+        if includes_error
+        else (
+            expected_warning,
+            'http://localhost/api',
+        )
+    )
+    warning.assert_called_once_with(*expected_args)
 
 
 def test_flatten_host_metrics():

@@ -5,18 +5,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from requests import Response
-
-from datadog_checks.base.utils.http import RequestsWrapper
-
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
+    from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPResponse
 
 
 class _BaseClient:
     """Shared HTTP client with transparent 401 re-login."""
 
-    def __init__(self, http: RequestsWrapper, base_url: str) -> None:
+    def __init__(self, http: HTTPClient, base_url: str) -> None:
         self._http = http
         self._base_url = base_url
         self._creds: tuple[str, str] | None = None
@@ -28,7 +25,7 @@ class _BaseClient:
     def _do_login(self, username: str, password: str) -> None:
         raise NotImplementedError
 
-    def _request(self, method: str, path: str, *, raise_on_error: bool = True, **kwargs: Any) -> Response:
+    def _request(self, method: str, path: str, *, raise_on_error: bool = True, **kwargs: Any) -> HTTPResponse:
         """Issue an HTTP request, transparently re-logging in once on 401 (expired session)."""
         url = f'{self._base_url}{path}'
         send = getattr(self._http, method)
@@ -44,7 +41,7 @@ class _BaseClient:
 class OrchestratorClient(_BaseClient):
     """HTTP client for the HPE Aruba EdgeConnect orchestrator API."""
 
-    def __init__(self, http: RequestsWrapper, orch_ip: str) -> None:
+    def __init__(self, http: HTTPClient, orch_ip: str) -> None:
         super().__init__(http, f'https://{orch_ip}')
 
     def _do_login(self, username: str, password: str) -> None:
@@ -53,9 +50,9 @@ class OrchestratorClient(_BaseClient):
             json={'user': username, 'password': password},
         )
         resp.raise_for_status()
-        csrf_token = self._http.session.cookies.get('orchCsrfToken')
+        csrf_token = self._http.get_cookie('orchCsrfToken')
         if csrf_token:
-            self._http.session.headers.update({'X-XSRF-TOKEN': csrf_token})
+            self._http.set_header('X-XSRF-TOKEN', csrf_token)
 
     def get_appliances(self) -> list[dict[str, Any]]:
         resp = self._request('get', '/gms/rest/appliance')
@@ -84,7 +81,7 @@ class OrchestratorClient(_BaseClient):
 class ApplianceClient(_BaseClient):
     """HTTP client for an individual EdgeConnect appliance."""
 
-    def __init__(self, http: RequestsWrapper, app_ip: str, logger: CheckLoggingAdapter) -> None:
+    def __init__(self, http: HTTPClient, app_ip: str, logger: CheckLoggingAdapter) -> None:
         super().__init__(http, f'https://{app_ip}')
         self._app_ip = app_ip
         self._log = logger
@@ -99,13 +96,13 @@ class ApplianceClient(_BaseClient):
             json={'user': username, 'password': password},
         )
         resp.raise_for_status()
-        csrf_token = self._http.session.cookies.get('edgeosCsrfToken')
+        csrf_token = self._http.get_cookie('edgeosCsrfToken')
         if csrf_token:
-            self._http.session.headers.update({'X-XSRF-TOKEN': csrf_token})
+            self._http.set_header('X-XSRF-TOKEN', csrf_token)
         else:
-            session_id = self._http.session.cookies.get('vxoaSessionID')
+            session_id = self._http.get_cookie('vxoaSessionID')
             if session_id:
-                self._http.session.headers.update({'vxoaSessionID': session_id})
+                self._http.set_header('vxoaSessionID', session_id)
 
     def get_newest_timestamp(self) -> int:
         resp = self._request('get', '/rest/json/stats/minuteRange')

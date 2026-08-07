@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPReadTimeoutError
 from datadog_checks.mesos_slave import MesosSlave
 
 from .common import MESOS_SLAVE_VERSION, PARAMETERS
@@ -177,37 +178,40 @@ stats_test_data = [
 @pytest.mark.parametrize(PARAMETERS, state_test_data)
 @pytest.mark.integration
 def test_can_connect_service_check_state(
-    instance, aggregator, test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status
+    instance,
+    aggregator,
+    mock_http,
+    test_case_name,
+    request_mock_effects,
+    expected_tags,
+    expect_exception,
+    expected_status,
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = request_mock_effects
-        try:
-            check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
-            assert not expect_exception
-        except Exception:
-            if not expect_exception:
-                raise
+    mock_http.get.side_effect = request_mock_effects
+    try:
+        check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
+        assert not expect_exception
+    except Exception:
+        if not expect_exception:
+            raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
 
 
 @pytest.mark.integration
-def test_can_connect_service_with_instance_cluster_name(instance, aggregator):
+def test_can_connect_service_with_instance_cluster_name(instance, aggregator, mock_http):
     instance['cluster_name'] = 'test-cluster'
     expected_tags = ['url:http://hello.com/state'] + cluster_name_tag + additional_tags
     expected_status = AgentCheck.OK
     check = MesosSlave('mesos_slave', {}, [instance])
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = [mock.MagicMock(status_code=200, content='{}')]
-        try:
-            check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
-            assert not False
-        except Exception:
-            if not False:
-                raise
+    mock_http.get.side_effect = [mock.MagicMock(status_code=200, content='{}')]
+    try:
+        check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
+        assert not False
+    except Exception:
+        if not False:
+            raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
 
@@ -215,17 +219,44 @@ def test_can_connect_service_with_instance_cluster_name(instance, aggregator):
 @pytest.mark.parametrize(PARAMETERS, stats_test_data)
 @pytest.mark.integration
 def test_can_connect_service_check_stats(
-    instance, aggregator, test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status
+    instance,
+    aggregator,
+    mock_http,
+    test_case_name,
+    request_mock_effects,
+    expected_tags,
+    expect_exception,
+    expected_status,
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = request_mock_effects
-        try:
-            check._process_stats_info('http://hello.com', instance['tags'])
-            assert not expect_exception
-        except Exception:
-            if not expect_exception:
-                raise
+    mock_http.get.side_effect = request_mock_effects
+    try:
+        check._process_stats_info('http://hello.com', instance['tags'])
+        assert not expect_exception
+    except Exception:
+        if not expect_exception:
+            raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+
+
+@pytest.mark.parametrize(
+    ('error', 'expected_warning'),
+    [
+        pytest.param(HTTPReadTimeoutError('read timed out'), 'Timeout for', id='timeout'),
+        pytest.param(HTTPConnectionError('connection refused'), "Couldn't connect to URL", id='connection error'),
+    ],
+)
+def test_get_json_warns_by_failure_kind_and_propagates(instance, mock_http, error, expected_warning):
+    """A timeout is reported as a timeout, and anything else as a connection failure.
+
+    Both arms re-raise, because the callers turn the exception into the can_connect service check, and a
+    swallowed failure would report the slave as healthy.
+    """
+    check = MesosSlave('mesos_slave', {}, [instance])
+    mock_http.get.side_effect = error
+
+    with pytest.raises(type(error)):
+        check._get_json('http://hello.com/state')
+
+    assert any(expected_warning in warning for warning in check.warnings)
