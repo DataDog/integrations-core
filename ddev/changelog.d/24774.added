@@ -1,0 +1,1 @@
+Adds the batch and job progress aggregate (`DispatcherProgress`) to the test gatherer.

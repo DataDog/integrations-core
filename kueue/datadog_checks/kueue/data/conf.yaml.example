@@ -646,6 +646,32 @@ instances:
     #
     # cluster_check: true
 
+    ## @param collect_workload_events - boolean - optional - default: true
+    ## Collect Kueue Workload lifecycle events by polling Workload custom resources from the Kubernetes API.
+    ##
+    ## This requires `get` and `list` RBAC permissions on `workloads.kueue.x-k8s.io`.
+    #
+    # collect_workload_events: true
+
+    ## @param kube_config_dict - mapping - optional
+    ## Optional kubeconfig dictionary used to configure the Kubernetes API client.
+    ##
+    ## If unset, the check uses in-cluster Kubernetes configuration.
+    #
+    # kube_config_dict:
+    #   apiVersion: v1
+    #   kind: Config
+    #   clusters: []
+    #   contexts: []
+    #   users: []
+
+    ## @param workload_events_namespaces - list of strings - optional
+    ## Optional list of namespaces to collect Workload events from. If unset, Workloads are collected from all
+    ## namespaces.
+    #
+    # workload_events_namespaces:
+    #   - default
+
     ## @param resource_name_map - mapping - optional
     ## Mapping of Kueue resource label values to metric name suffixes for resource metrics.
     ##
@@ -654,3 +680,23 @@ instances:
     #
     # resource_name_map:
     #   example.com/fpga: fpga
+
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event).
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: docker
+#     source: kueue
+#     service: <SERVICE>

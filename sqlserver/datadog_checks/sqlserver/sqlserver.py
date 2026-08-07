@@ -129,6 +129,8 @@ KEY_PREFIX = "dbm-sqlserver-"
 
 
 class SQLServer(DatabaseCheck):
+    DBMS = "sqlserver"
+
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True
@@ -1132,7 +1134,7 @@ class SQLServer(DatabaseCheck):
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "sqlserver",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 "dbms_version": self.dbms_version,

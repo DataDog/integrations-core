@@ -347,25 +347,52 @@ def discovery_validator(discovery: Any, options: list, loader: Any, file_name: s
                     continue
                 if instance_option_names and field_name not in instance_option_names:
                     loader.errors.append(f'{candidate_location}, {field_name}: Not a recognized instance option')
-                if not isinstance(template, str):
-                    loader.errors.append(f'{candidate_location}, {field_name}: Candidate templates must be strings')
-                    continue
 
-                _validate_discovery_template(template, loader, candidate_location, field_name, placeholders)
+                validate_discovery_candidate_value(template, loader, candidate_location, field_name, placeholders)
+
+
+def validate_discovery_candidate_value(
+    value: Any, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str] | None]
+) -> None:
+    if isinstance(value, str):
+        _validate_discovery_template(value, loader, location, field_name, placeholders)
+    elif isinstance(value, dict):
+        validate_discovery_candidate_mapping_keys(value, loader, location, field_name)
+
+
+def validate_discovery_candidate_mapping_keys(
+    value: dict[str, Any], loader: Any, location: str, field_name: str
+) -> None:
+    for key, item in value.items():
+        if not isinstance(key, str):
+            loader.errors.append(f'{location}, {field_name}: Candidate mapping keys must be strings')
+            continue
+
+        if isinstance(item, dict):
+            validate_discovery_candidate_mapping_keys(item, loader, location, f'{field_name}.{key}')
+        elif isinstance(item, list):
+            for index, nested_item in enumerate(item, 1):
+                if isinstance(nested_item, dict):
+                    validate_discovery_candidate_mapping_keys(
+                        nested_item, loader, location, f'{field_name}.{key}[{index}]'
+                    )
 
 
 def _validate_discovery_template(
     template: str, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str] | None]
 ) -> None:
     try:
-        parsed_template = Formatter().parse(template)
+        parsed_template = list(Formatter().parse(template))
     except ValueError as e:
         loader.errors.append(f'{location}, {field_name}: Invalid candidate template: {e}')
         return
 
-    for _, placeholder, _, _ in parsed_template:
+    for _, placeholder, _, conversion in parsed_template:
         if placeholder is None:
             continue
+
+        if conversion is not None and conversion not in ('s', 'r', 'a'):
+            loader.errors.append(f'{location}, {field_name}: Unknown conversion `!{conversion}`')
 
         root, separator, attr = placeholder.partition('.')
         if not separator or root not in placeholders:

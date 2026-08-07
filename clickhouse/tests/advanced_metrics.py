@@ -304,6 +304,9 @@ BASE_METRICS = [
 
 # These are the common metrics that are not always available.
 OPTIONAL_METRICS = [
+    # JIT execution counter; only appears once a compiled function is actually run, so it is optional.
+    'clickhouse.compilation.function.execute.count',
+    'clickhouse.compilation.function.execute.total',
     'clickhouse.asynchronous_metrics.AsynchronousHeavyMetricsCalculationTimeSpent',
     'clickhouse.asynchronous_metrics.AsynchronousHeavyMetricsUpdateInterval',
     'clickhouse.asynchronous_metrics.AsynchronousMetricsCalculationTimeSpent',

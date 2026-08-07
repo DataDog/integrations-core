@@ -128,6 +128,10 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_parts_and_merges().model_dump(),
                 **(instance.get('parts_and_merges', {})),
             },
+            "collect_pending_async_inserts": {
+                **dict_defaults.instance_collect_pending_async_inserts().model_dump(),
+                **(instance.get('collect_pending_async_inserts', {})),
+            },
             "schema_metrics": {
                 **dict_defaults.instance_schema_metrics().model_dump(),
                 **(instance.get('schema_metrics', {})),
@@ -135,6 +139,10 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
             "collect_schemas": {
                 **dict_defaults.instance_collect_schemas().model_dump(),
                 **(instance.get('collect_schemas', {})),
+            },
+            "collect_async_inserts": {
+                **dict_defaults.instance_collect_async_inserts().model_dump(),
+                **(instance.get('collect_async_inserts', {})),
             },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
@@ -232,11 +240,46 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"parts_and_merges.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    if _safefloat(args.get('collect_pending_async_inserts', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_collect_pending_async_inserts().collection_interval
+        args['collect_pending_async_inserts']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"collect_pending_async_inserts.collection_interval must be greater than 0, "
+            f"defaulting to {default_value} seconds."
+        )
+
+    max_samples_per_collection = _safefloat(
+        args.get('collect_pending_async_inserts', {}).get('max_samples_per_collection')
+    )
+    if max_samples_per_collection < 1 or max_samples_per_collection != int(max_samples_per_collection):
+        default_value = dict_defaults.instance_collect_pending_async_inserts().max_samples_per_collection
+        args['collect_pending_async_inserts']['max_samples_per_collection'] = default_value
+        validation_result.add_warning(
+            f"collect_pending_async_inserts.max_samples_per_collection must be an integer greater than 0, "
+            f"defaulting to {default_value}."
+        )
+
     if _safefloat(args.get('collect_schemas', {}).get('collection_interval')) <= 0:
         default_value = dict_defaults.instance_collect_schemas().collection_interval
         args['collect_schemas']['collection_interval'] = default_value
         validation_result.add_warning(
             f"collect_schemas.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if _safefloat(args.get('collect_async_inserts', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_collect_async_inserts().collection_interval
+        args['collect_async_inserts']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"collect_async_inserts.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    max_samples_per_collection = _safefloat(args.get('collect_async_inserts', {}).get('max_samples_per_collection'))
+    if max_samples_per_collection < 1 or max_samples_per_collection != int(max_samples_per_collection):
+        default_value = dict_defaults.instance_collect_async_inserts().max_samples_per_collection
+        args['collect_async_inserts']['max_samples_per_collection'] = default_value
+        validation_result.add_warning(
+            f"collect_async_inserts.max_samples_per_collection must be an integer greater than 0, "
+            f"defaulting to {default_value}."
         )
 
     _pm_defaults = dict_defaults.instance_parts_and_merges()

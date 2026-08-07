@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from datadog_checks.slurm import SlurmCheck
+from datadog_checks.slurm.check import ProcessPidMatch
 from datadog_checks.slurm.constants import SACCT_PARAMS
 
 from .common import (
@@ -228,6 +229,148 @@ def test_scontrol_processing(mock_get_subprocess_output, instance, aggregator):
 
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_processing_resolves_host_pid(mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path):
+    instance['collect_scontrol_stats'] = True
+    instance['resolve_scontrol_host_pids'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    host_proc = tmp_path / "proc"
+    host_process = host_proc / "12345"
+    other_process = host_proc / "999"
+    host_process.mkdir(parents=True)
+    other_process.mkdir()
+    (host_process / "status").write_text("Name:\tjob\nNSpid:\t12345\t3771\n")
+    (other_process / "status").write_text("Name:\tother\n")
+    monkeypatch.setenv("HOST_PROC", str(host_proc))
+
+    mock_get_subprocess_output.side_effect = [
+        (mock_output('scontrol.txt'), "", 0),
+        ("c1", "", 0),
+        (mock_output('scontrol_squeue.txt'), "", 0),
+        (mock_output('scontrol_squeue2.txt'), "", 0),
+    ]
+
+    check.check(None)
+
+    aggregator.assert_metric(
+        name='slurm.scontrol.jobs.info',
+        value=1,
+        tags=[
+            "nspid:3771",
+            "pid:12345",
+            "slurm_global_id:0",
+            "slurm_job_id:14",
+            "slurm_local_id:0",
+            "slurm_node_name:c1",
+            "slurm_step_id:batch",
+            "slurm_job_name:my_job",
+            "slurm_job_state:RUNNING",
+            "slurm_job_user:root",
+        ],
+    )
+    aggregator.assert_metric(
+        name='slurm.scontrol.jobs.info',
+        value=1,
+        tags=[
+            "pid:3772",
+            "slurm_global_id:-",
+            "slurm_job_id:14",
+            "slurm_local_id:-",
+            "slurm_node_name:c1",
+            "slurm_step_id:batch",
+            "slurm_job_name:my_job",
+            "slurm_job_state:RUNNING",
+            "slurm_job_user:root",
+        ],
+    )
+    aggregator.assert_metric(
+        name='slurm.scontrol.jobs.info',
+        value=1,
+        tags=[
+            "pid:3773",
+            "slurm_global_id:0",
+            "slurm_job_id:15",
+            "slurm_local_id:0",
+            "slurm_node_name:c1",
+            "slurm_step_id:batch",
+            "slurm_job_name:my_job2",
+            "slurm_job_state:RUNNING",
+            "slurm_job_user:root",
+        ],
+    )
+    aggregator.assert_all_metrics_covered()
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_processing_does_not_resolve_host_pid_by_default(
+    mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path
+):
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    host_proc = tmp_path / "proc"
+    host_process = host_proc / "12345"
+    host_process.mkdir(parents=True)
+    (host_process / "status").write_text("Name:\tjob\nNSpid:\t12345\t3771\n")
+    monkeypatch.setenv("HOST_PROC", str(host_proc))
+
+    mock_get_subprocess_output.side_effect = [
+        (mock_output('scontrol.txt'), "", 0),
+        ("c1", "", 0),
+        (mock_output('scontrol_squeue.txt'), "", 0),
+        (mock_output('scontrol_squeue2.txt'), "", 0),
+    ]
+
+    check.check(None)
+
+    for metric in SCONTROL_MAP['metrics']:
+        aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
+    aggregator.assert_all_metrics_covered()
+
+
+def test_resolve_scontrol_host_pid_logs_multiple_matches(instance, caplog):
+    check = SlurmCheck('slurm', {}, [instance])
+    first_match = ProcessPidMatch(host_pid="1", namespace_pids=["1"])
+    second_match = ProcessPidMatch(host_pid="12345", namespace_pids=["12345", "1"])
+
+    assert check._resolve_scontrol_host_pid("1", {"1": [first_match, second_match]}) == second_match
+    assert "Found multiple host PID matches for scontrol namespace PID 1" in caplog.text
+
+
+def test_resolve_scontrol_host_pid_returns_match_without_nspids_when_missing(instance):
+    check = SlurmCheck('slurm', {}, [instance])
+
+    assert check._resolve_scontrol_host_pid("3771", {}) == ProcessPidMatch(host_pid="3771", namespace_pids=[])
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck._get_process_tags')
+def test_scontrol_processing_gets_process_tags_for_host_pid_only(
+    mock_get_process_tags, mock_get_subprocess_output, instance, monkeypatch, tmp_path
+):
+    instance['collect_scontrol_stats'] = True
+    instance['resolve_scontrol_host_pids'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    host_proc = tmp_path / "proc"
+    host_process = host_proc / "12345"
+    host_process.mkdir(parents=True)
+    (host_process / "status").write_text("Name:\tjob\nNSpid:\t12345\t3771\n")
+    monkeypatch.setenv("HOST_PROC", str(host_proc))
+    mock_get_process_tags.return_value = []
+    mock_get_subprocess_output.side_effect = [
+        (mock_output('scontrol.txt'), "", 0),
+        ("c1", "", 0),
+        (mock_output('scontrol_squeue.txt'), "", 0),
+        (mock_output('scontrol_squeue2.txt'), "", 0),
+    ]
+
+    check.check(None)
+
+    mock_get_process_tags.assert_any_call("12345")
+    mock_get_process_tags.assert_any_call("3772")
+    mock_get_process_tags.assert_any_call("3773")
+    assert mock_get_process_tags.call_count == 3
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check):
     instance['collect_sinfo_stats'] = True
     instance['sinfo_collection_level'] = 1
@@ -310,3 +453,76 @@ def test_process_seff_metric_submission(mock_get_subprocess_output, instance, ag
     aggregator.assert_metric('slurm.seff.memory_utilized_mb', value=0.0, tags=tags)
     aggregator.assert_metric('slurm.seff.memory_efficiency', value=0.0, tags=tags)
     aggregator.assert_all_metrics_covered()
+
+
+def test_sinfo_gpu_gres_slurm_2505(instance, aggregator):
+    # Slurm 25.05 sinfo appends a socket-affinity suffix, e.g. 'gpu:<type>:8(S:0-1)', to GRES.
+    # The count parser must ignore the suffix so gpu_total is still emitted (regression).
+    check = SlurmCheck('slurm', {}, [instance])
+    check.process_sinfo_node(mock_output('sinfo_gres_2505.txt'))
+
+    gpu_type = 'slurm_node_gpu_type:nvidia_rtx_pro_6000_blackwell_server_edition'
+    node1 = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-rtx-pro-129-015',
+        'slurm_cluster_name:N/A',
+        gpu_type,
+    ]
+    node2 = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-rtx-pro-134-237',
+        'slurm_cluster_name:N/A',
+        gpu_type,
+    ]
+    aggregator.assert_metric('slurm.node.gpu_total', value=8, tags=node1)
+    aggregator.assert_metric('slurm.node.gpu_used', value=3, tags=node1)
+    aggregator.assert_metric('slurm.node.gpu_total', value=8, tags=node2)
+    aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=node2)
+
+
+def test_sinfo_gpu_gres_multi_type(instance, aggregator):
+    # A node advertising multiple GPU models renders a comma-separated GRES list, e.g.
+    # 'gpu:tesla:2,gpu:kepler:2'. Every type must be counted, not just the first entry.
+    check = SlurmCheck('slurm', {}, [instance])
+    check.process_sinfo_node(mock_output('sinfo_gres_multi_2505.txt'))
+
+    base = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-mixed-gpu-001',
+        'slurm_cluster_name:N/A',
+    ]
+    tesla = base + ['slurm_node_gpu_type:tesla']
+    kepler = base + ['slurm_node_gpu_type:kepler']
+    aggregator.assert_metric('slurm.node.gpu_total', value=2, tags=tesla)
+    aggregator.assert_metric('slurm.node.gpu_used', value=1, tags=tesla)
+    aggregator.assert_metric('slurm.node.gpu_total', value=2, tags=kepler)
+    aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=kepler)
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_process_seff_normalizes_kilobytes(mock_get_subprocess_output, instance, aggregator):
+    # Slurm 25.05 seff reports small jobs in KB (and large ones in GB); memory must still
+    # normalize to MB rather than being dropped (regression for the hardcoded 'MB').
+    mock_get_subprocess_output.return_value = (mock_output('seff_2505.txt'), '', 0)
+    instance['collect_seff_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    tags = ["slurm_job_id:317"]
+    check.process_seff("317", tags)
+
+    aggregator.assert_metric('slurm.seff.memory_utilized_mb', value=0.7578125, tags=tags)
+    aggregator.assert_metric('slurm.seff.cpu_utilized', value=0.0, tags=tags)
+
+
+def test_sacct_running_job_skips_none_avgcpu(instance, aggregator):
+    # RUNNING jobs report an empty AveCPU; avgcpu must be skipped rather than submitted as
+    # None (regression: previously only duration had a None guard).
+    check = SlurmCheck('slurm', {}, [instance])
+    running_job = (
+        "315|dd-fix-run|rtx-pro|cw-sup|12|billing=12,cpu=12,gres/gpu=1,mem=93585408K,node=1|"
+        "00:00:12|144|||||RUNNING|0:0|2026-07-10T18:45:32|Unknown|slurm-rtx-pro-129-015|||"
+    )
+    check.process_sacct(running_job)
+
+    aggregator.assert_metric('slurm.sacct.slurm_job_avgcpu', count=0)
+    aggregator.assert_metric('slurm.sacct.job.duration', value=12, count=1)
+    aggregator.assert_metric('slurm.sacct.job.info', value=1, count=1)

@@ -4,7 +4,7 @@
 
 import os
 
-USE_TELEPORT_CADDY = os.environ.get("USE_TELEPORT_CADDY", False)
+USE_TELEPORT_CADDY = os.environ.get("USE_TELEPORT_CADDY", "false").lower() == "true"
 
 INSTANCE = {"teleport_url": "http://127.0.0.1", "diag_port": "3000"}
 

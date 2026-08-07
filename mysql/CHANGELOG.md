@@ -2,7 +2,34 @@
 
 <!-- towncrier release notes start -->
 
-## 15.17.2 / 2026-06-18
+## 15.19.0 / 2026-08-05
+
+***Added***:
+
+* Add the `binlog_size_metrics` option to skip binary log size collection. ([#24082](https://github.com/DataDog/integrations-core/pull/24082))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+***Fixed***:
+
+* Fix MySQL query metrics inflation when new digest variants share a normalized query signature. ([#24194](https://github.com/DataDog/integrations-core/pull/24194))
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
+## 15.18.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Fix `mysql.index.reads`, `mysql.index.updates`, and `mysql.index.deletes` metrics by submitting them as monotonic counts instead of gauges, so they correctly reflect per-interval operations rather than cumulative `performance_schema` lifetime totals. ([#24125](https://github.com/DataDog/integrations-core/pull/24125))
+* Fix MariaDB multi-channel replication reporting 0 channels by using `SHOW ALL REPLICAS STATUS` when no specific channel is configured. ([#24178](https://github.com/DataDog/integrations-core/pull/24178))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24269](https://github.com/DataDog/integrations-core/pull/24269))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24273](https://github.com/DataDog/integrations-core/pull/24273))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24277](https://github.com/DataDog/integrations-core/pull/24277))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 15.17.2 / 2026-06-18 / Agent 7.81.0
 
 ***Fixed***:
 
