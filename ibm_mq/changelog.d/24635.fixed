@@ -1,0 +1,1 @@
+Reduce MQI round-trips per queue by reusing a single `PCFExecute` connection across queue stats, status, and reset metric collection instead of opening three separate ones.
