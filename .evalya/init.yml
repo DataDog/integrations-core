@@ -1,6 +1,6 @@
 # evalya init configuration.
 # Regenerate with: evalya init --force
-version: v0.17.0
+version: v0.18.0
 registry: registry.ddbuild.io/ci/integrations-core
 ci:
   labels:
@@ -9,4 +9,4 @@ ci:
   testStage: validate
   publishStage: release
   publishMeta: true
-  evalyaTag: v0.17.0
+  evalyaTag: v0.18.0
