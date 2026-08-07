@@ -374,3 +374,63 @@ def test_queue_stats_respects_filter_flag_and_names(filter_on, filtered_names, e
     raw = _raw_queue_statistics_message(['QUEUE.A', 'QUEUE.B'])
     stats = QueueStats(raw, filtered_names, timezone=tz.UTC, filter_queue_statistics_metrics=filter_on)
     assert [q.name for q in stats.queues] == expected_queue_names
+
+
+def test_collect_queue_metrics_issues_bulk_wildcard_commands_not_per_queue(instance):
+    """AGENT-16599 issue 2: per-queue PCF collection is collapsed to one wildcard command per
+    queue manager. This guards against a regression to O(N) commands — the class of cost defect
+    that went unnoticed for years because nothing in the suite counted PCF commands."""
+    instance['collect_reset_queue_metrics'] = True
+    config = IBMMQConfig(instance, {})
+    collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+
+    queues = {'APP.QUEUE.{}'.format(i) for i in range(50)}
+    collector.discover_queues = Mock(return_value=queues)
+    collector.queue_manager_stats = Mock()
+
+    def bulk_rows(*args, **kwargs):
+        # One response row per queue, keyed by MQCA_Q_NAME (as a real wildcard PCF reply is).
+        return [{pymqi.CMQC.MQCA_Q_NAME: q.encode()} for q in queues]
+
+    pcf = Mock()
+    pcf.MQCMD_INQUIRE_Q.side_effect = bulk_rows
+    pcf.MQCMD_INQUIRE_Q_STATUS.side_effect = bulk_rows
+    pcf.MQCMD_RESET_Q_STATS.side_effect = bulk_rows
+
+    with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf):
+        collector.collect_queue_metrics(Mock())
+
+    # One command of each type per queue manager, regardless of the 50 queues — not one per queue.
+    assert pcf.MQCMD_INQUIRE_Q.call_count == 1
+    assert pcf.MQCMD_INQUIRE_Q_STATUS.call_count == 1
+    assert pcf.MQCMD_RESET_Q_STATS.call_count == 1
+    # Each is a generic (wildcard) query.
+    assert pcf.MQCMD_INQUIRE_Q.call_args[0][0][pymqi.CMQC.MQCA_Q_NAME] == b'*'
+    assert pcf.MQCMD_INQUIRE_Q_STATUS.call_args[0][0][pymqi.CMQC.MQCA_Q_NAME] == b'*'
+
+
+def test_collect_queue_metrics_falls_back_per_queue_when_bulk_unavailable(instance):
+    """If a bulk wildcard command yields no data (e.g. the queue manager errors), each queue must
+    still be collected via a per-queue PCF call, preserving behaviour and per-queue error isolation."""
+    instance['collect_reset_queue_metrics'] = False
+    config = IBMMQConfig(instance, {})
+    collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+
+    queues = {'APP.QUEUE.0', 'APP.QUEUE.1'}
+    collector.discover_queues = Mock(return_value=queues)
+    collector.queue_manager_stats = Mock()
+
+    # Bulk calls return nothing (empty) -> maps are empty -> per-queue fallback for every queue.
+    pcf = Mock()
+    pcf.MQCMD_INQUIRE_Q.return_value = []
+    pcf.MQCMD_INQUIRE_Q_STATUS.return_value = []
+
+    with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf):
+        collector.collect_queue_metrics(Mock())
+
+    # 1 bulk INQUIRE_Q + 1 bulk INQUIRE_Q_STATUS, then a per-queue call of each for the 2 queues.
+    assert pcf.MQCMD_INQUIRE_Q.call_count == 1 + len(queues)
+    assert pcf.MQCMD_INQUIRE_Q_STATUS.call_count == 1 + len(queues)
+    # The fallback calls target specific queues, not the wildcard.
+    fallback_names = {call[0][0][pymqi.CMQC.MQCA_Q_NAME] for call in pcf.MQCMD_INQUIRE_Q_STATUS.call_args_list}
+    assert fallback_names == {b'*'} | {q.encode() for q in queues}
