@@ -30,7 +30,10 @@ class TestErrorSanitizer:
         ('25.1', [25, 1]),
         ('25.1.2', [25, 1, 2]),
         ('25.1.2.3', [25, 1, 2, 3]),
+        # Altinity FIPS builds append a non-numeric qualifier to the version string.
+        ('25.3.8.30001.altinityfips', [25, 3, 8, 30001]),
+        ('25.3.8.30001.altinityfips-alpine', [25, 3, 8, 30001]),
     ],
 )
 def test_parse_version(version: str, expected: list[int]):
-    expected == utils.parse_version(version)
+    assert utils.parse_version(version) == expected
