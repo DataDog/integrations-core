@@ -37,7 +37,7 @@ deps = [
     "binary==1.0.2",
     "cachetools==7.1.4",
     "cryptography==48.0.1",
-    "ddtrace==3.19.5",
+    "ddtrace==4.12.2",
     "jellyfish==1.2.1",
     "lazy-loader==0.5",
     "prometheus-client==0.25.0",
@@ -51,7 +51,7 @@ deps = [
     "requests==2.34.2",
     "simplejson==4.1.1",
     "urllib3==2.7.0",
-    "wrapt==2.2.2",
+    "wrapt==2.3.0",
 ]
 http = [
     "aws-requests-auth==0.4.3",
