@@ -35,7 +35,7 @@
     name: build_integration
     description: >-
       Copy the test environment and captured fixtures, then implement the OpenMetrics check and its configuration specification.
-    class: AgenticPhase
+    class: OpenMetricsBuildPhase
     agent: integration_coder
     variables:
       - name: integration

@@ -32,14 +32,16 @@ the exact artifact to produce, its paths, delegation strategy, format, and accep
 ## Integration identity
 
 Derive the integration name and metric prefix from the supplied display name with one rule:
-lowercase it and replace every run of non-alphanumeric characters with one underscore. The
-integration name and metric prefix are identical, except the scaffolding command receives the
-prefix with a trailing dot.
+lowercase it, replace every run of non-alphanumeric characters with one underscore, and remove
+leading or trailing underscores. The result must be a valid Python identifier starting with a
+letter. The integration name and metric prefix are identical, except the scaffolding command
+receives the prefix with a trailing dot.
 
 Examples:
 
 - `MyIntegration` -> `myintegration`
 - `HPE Aruba Edge` -> `hpe_aruba_edge`
+- `Iris DB!` -> `iris_db`
 - `Kuma` -> `kuma`
 
 Use this identity consistently in package paths, emitted metric names, metadata, and summaries.

@@ -17,8 +17,8 @@ ${inspect_endpoint_memory}
    `<integration_name>/datadog_checks/<integration_name>/metrics.yaml`; multiple endpoints
    use one `<integration_name>/datadog_checks/<integration_name>/metrics/<endpoint_name>.yaml`
    per normalized endpoint, where `<integration_name>` is `${integration}` lowercased with
-   each run of non-alphanumeric characters replaced by `_`. The mapping-file count must equal
-   the endpoint count.
+   each run of non-alphanumeric characters replaced by `_`, with leading and trailing
+   underscores removed. The mapping-file count must equal the endpoint count.
 3. For each endpoint, that mapping's YAML **keys** must match that endpoint's catalog names:
    - every catalog family appears as a key in the correct endpoint file (no source metric dropped), and
    - no key exists that is neither a catalog family nor a metric the worker added from an

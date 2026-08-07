@@ -12,8 +12,8 @@ ${inspect_endpoint_memory}
 ## What must be true
 
 `<integration_name>` is `${integration}` lowercased with each run of non-alphanumeric
-characters replaced by `_`; the metric prefix is `<integration_name>`. The worker summary
-lists the exact file paths; use them.
+characters replaced by `_` and leading and trailing underscores removed; the metric prefix is
+`<integration_name>`. The worker summary lists the exact file paths; use them.
 
 1. Read every rename mapping: `metrics.yaml` for a single endpoint, or every
    `metrics/<endpoint_name>.yaml` for multiple endpoints. Collect the deduplicated union of

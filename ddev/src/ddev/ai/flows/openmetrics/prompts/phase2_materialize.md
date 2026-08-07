@@ -10,7 +10,8 @@ here — you do not author, read, or modify their contents.
 
 The integration lives in the scaffolded directory named after `${integration}` in
 snake_case (lowercase, each run of non-alphanumeric characters replaced by a single
-underscore). List the working tree if you need to confirm the exact directory name.
+underscore, with leading and trailing underscores removed). List the working tree if you need
+to confirm the exact directory name.
 
 **Use the `copy_path` tool for every copy below.** Do not read a file and re-create it —
 these inputs are large, and copying them through your response is impossible and

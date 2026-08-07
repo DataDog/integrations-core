@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from functools import cached_property
+from pathlib import Path
 
 from ddev.ai.agent.build import AgentRuntimeFactory, AgentRuntimeFactoryProtocol
 from ddev.ai.agent.registry import AgentProviderRegistry
@@ -40,6 +41,11 @@ class RunResources:
             return self._agents[name]
         except KeyError as e:
             raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
+
+    @property
+    def write_root(self) -> Path:
+        """Return the root where phases and their agents may create integration artifacts."""
+        return self._file_access_policy.write_root
 
     @cached_property
     def agent_runtime_factory(self) -> AgentRuntimeFactoryProtocol:

@@ -738,6 +738,7 @@ def test_normalize_endpoint_name_variants():
     assert normalize_endpoint_name("App Controller") == "app_controller"
     assert normalize_endpoint_name("api-server") == "api_server"
     assert normalize_endpoint_name("  Mixed_Case  ") == "mixed_case"
+    assert normalize_endpoint_name("Iris DB!") == "iris_db"
     assert normalize_endpoint_name("foo123") == "foo123"
 
 
