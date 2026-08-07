@@ -1,4 +1,4 @@
-# safe_os
+# OS Wrapper
 
 -----
 
@@ -6,7 +6,7 @@ Whenever a check reads a file, lists a directory, or runs a subprocess, use the 
 provides rather than calling `open`, `os`, `shutil`, `glob`, or `subprocess` directly:
 
 ```python
-with self.safe_os.open(self.instance['log_path']) as f:
+with self.os.open(self.instance['log_path']) as f:
     contents = f.read()
 ```
 
@@ -21,34 +21,33 @@ not have to be repeated correctly at every call site.
 
 ## Which binding to use
 
-There are two ways to reach the interface, and choosing the wrong one silently disables validation.
+There are two, and choosing the wrong one silently disables validation. Their names are deliberately
+asymmetric so the difference is visible at the call site.
 
-Use `self.safe_os` for anything that touches a config-derived path. It is bound to a validator built
-from the check's own security configuration, and it is the only binding that can enforce anything.
+Use `self.os` for anything that touches a config-derived path. It is bound to a validator built from the
+check's own security configuration, and it is the only binding that can enforce anything.
 
-There is also a module-level `safe_os` singleton. It is permanently bound to the no-op validator and
-has no injection point, so validation can never be attached to it. It exists only for code that has no
-check instance and touches paths configuration cannot influence, such as loading a bundled asset shipped
-inside the wheel.
-
-A module-level helper that needs the interface should take it as a parameter rather than importing the
-singleton:
+The module-level `unchecked_os` singleton is permanently bound to the no-op validator and has no injection
+point, so validation can never be attached to it. It exists only for code that has no check instance and
+touches paths configuration cannot influence, such as loading a bundled asset shipped inside the wheel:
 
 ```python
-def get_version(osx, cmd):
-    # `osx` is required rather than defaulted, so a caller cannot accidentally
-    # get the unenforcing singleton.
-    return osx.run(cmd.split(), capture_output=True, text=True)
+from datadog_checks.base.utils.os_wrapper import unchecked_os
 
-
-class MyCheck(AgentCheck):
-    def check(self, _):
-        get_version(self.safe_os, self.instance['binary'])
+DATA = unchecked_os.open(BUNDLED_ASSET)   # reads as what it is
 ```
 
-`ddev validate safe-os` enforces both rules: it flags raw stdlib I/O in check code, and it flags use of
+A helper that needs the interface belongs on the check, as a method, rather than importing the singleton:
+
+```python
+class MyCheck(AgentCheck):
+    def get_version(self, cmd):
+        return self.os.run(cmd.split(), capture_output=True, text=True)
+```
+
+`ddev validate os-wrapper` enforces both rules: it flags raw stdlib I/O in check code, and it flags use of
 the singleton in a module that defines a check class. When a call genuinely cannot involve a config-derived
-path, waive it with an inline `# SKIP_SAFE_OS_VALIDATION` comment explaining why. The comment can span
+path, waive it with an inline `# SKIP_OS_WRAPPER_VALIDATION` comment explaining why. The comment can span
 several lines and applies to the call directly below it.
 
 ## Available operations
@@ -72,7 +71,7 @@ Some libraries open a path themselves, so the read cannot be intercepted: `ssl.S
 is the last point the check controls:
 
 ```python
-context.load_verify_locations(cafile=self.safe_os.validate_path(self.instance['ssl_cafile']))
+context.load_verify_locations(cafile=self.os.validate_path(self.instance['ssl_cafile']))
 ```
 
 Use `validate_path` rather than `resolve_path` here. Both validate, but `resolve_path` also normalizes, which
@@ -110,12 +109,12 @@ load-time behavior exactly.
 
 ## Testing
 
-The `mock_safe_os` fixture replaces the interface at both bindings at once, so a test does not need to
+The `mock_os` fixture replaces the interface at both bindings at once, so a test does not need to
 know which one the check uses:
 
 ```python
-def test_version(aggregator, mock_safe_os):
-    mock_safe_os.set_command_output(['mytool', '--version'], stdout='mytool 1.2.3')
+def test_version(aggregator, mock_os):
+    mock_os.set_command_output(['mytool', '--version'], stdout='mytool 1.2.3')
     ...
 ```
 
@@ -127,7 +126,7 @@ The fixture is all-or-nothing: it redirects every method to the fake. A test tha
 operation and let other I/O reach the real filesystem should patch that one method instead:
 
 ```python
-with mock.patch.object(check.safe_os, 'get_subprocess_output', return_value=(out, '', 0)):
+with mock.patch.object(check.os, 'get_subprocess_output', return_value=(out, '', 0)):
     ...
 ```
 

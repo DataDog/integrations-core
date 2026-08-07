@@ -68,40 +68,40 @@ def datadog_agent():
 
 
 @pytest.fixture
-def mock_safe_os():
-    """Install a ``MockSafeOS`` at every seam a check reaches the OS layer through.
+def mock_os():
+    """Install a ``MockOSWrapper`` at every seam a check reaches the OS layer through.
 
     A check performs filesystem and subprocess operations either through the
-    per-instance ``self.safe_os`` property or through the module-level
-    ``safe_os`` singleton (used by module-level helper functions). This
+    per-instance ``self.os`` property or through the module-level
+    ``self.os`` singleton (used by module-level helper functions). This
     fixture patches both to the same double for the duration of the test, so a
     test configures one object without having to know which seam the code under
     test uses. Configure it declaratively::
 
-        def test_check(mock_safe_os, dd_run_check):
-            mock_safe_os.add_file('/proc/stat', 'cpu 1 2 3')
-            mock_safe_os.set_command_output('netstat -i', stdout='...')
+        def test_check(mock_os, dd_run_check):
+            mock_os.add_file('/proc/stat', 'cpu 1 2 3')
+            mock_os.set_command_output('netstat -i', stdout='...')
             ...
 
-    or drive the underlying MagicMocks directly (``mock_safe_os.popen.side_effect = [...]``).
+    or drive the underlying MagicMocks directly (``mock_os.popen.side_effect = [...]``).
     """
     try:
         from unittest import mock
 
         from datadog_checks.base import AgentCheck
-        from datadog_checks.base.stubs.safe_os import METHOD_NAMES, MockSafeOS
-        from datadog_checks.base.utils import safe_os as safe_os_module
+        from datadog_checks.base.stubs.os_wrapper import METHOD_NAMES, MockOSWrapper
+        from datadog_checks.base.utils import os_wrapper as os_wrapper_module
     except ImportError:
         raise ImportError('datadog-checks-base is not installed!')
 
-    fake = MockSafeOS()
+    fake = MockOSWrapper()
 
     # Patching the singleton's methods, rather than rebinding the name, reaches
-    # every module that did `from ... import safe_os`.
+    # every module that did `from ... import unchecked_os`.
     singleton_patches = {name: getattr(fake, name) for name in METHOD_NAMES}
     with (
-        mock.patch.object(AgentCheck, 'safe_os', new_callable=mock.PropertyMock, return_value=fake),
-        mock.patch.multiple(safe_os_module.safe_os, **singleton_patches),
+        mock.patch.object(AgentCheck, 'unchecked_os', new_callable=mock.PropertyMock, return_value=fake),
+        mock.patch.multiple(os_wrapper_module.unchecked_os, **singleton_patches),
     ):
         yield fake
 

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
 from pydantic import BaseModel
 
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.safe_os import safe_os
+from datadog_checks.base.utils.os_wrapper import unchecked_os
 
 if TYPE_CHECKING:
     from datadog_checks.base.types import InstanceType  # noqa: F401
@@ -84,7 +84,7 @@ def _load_ca_certs(context, config):
     if ca_cert:
         ca_cert = os.path.expanduser(ca_cert)
         try:
-            if safe_os.isdir(ca_cert):
+            if unchecked_os.isdir(ca_cert):
                 context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
             else:
                 context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
