@@ -107,25 +107,25 @@ def test_build_warns_about_a_target_with_no_testable_environment(caplog):
             repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
         )
 
-    assert len(units) == 1
+    # The target is dropped rather than planned with an invented environment.
+    assert units == []
     assert "ddev has a hatch.toml but no testable environment" in caplog.text
 
 
-def test_build_does_not_warn_when_a_platform_alone_has_no_environments(caplog):
-    # `disk` and friends run on Linux and Windows but declare only unconstrained environments, so
-    # Windows legitimately falls back to an unnamed environment. That is not worth a warning.
+def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_elsewhere(caplog):
+    # A target declaring a platform that every environment is constrained away from is a weaker
+    # version of the same contradiction: odd configuration, worth surfacing, not worth failing.
     repo = FakeRepo([FakeIntegration("disk")], ci={"disk": {"platforms": ["linux", "windows"]}})
     provider = FakeEnvironmentProvider({"disk": [env("py3.13", platform=PlatformName.LINUX)]})
     changed = [modified("disk/tests/test_a.py")]
 
-    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.build"):
+    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.units"):
         units = build_test_units(
             repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
         )
 
-    # Both platforms are still planned; only the absence of a warning is under test here.
-    assert len(units) == 2
-    assert caplog.text == ""
+    assert [unit.platform for unit in units] == [PlatformName.LINUX]
+    assert "disk runs on windows but no environment tests it" in caplog.text
 
 
 def test_build_excludes_target_via_ci_override():
@@ -215,7 +215,7 @@ def test_resolve_hatch_environments_routes_constrained_platforms_without_crossin
     ]
 
 
-def test_resolve_hatch_environments_unconstrained_uses_single_default_platform():
+def test_resolve_hatch_environments_unconstrained_runs_on_every_platform():
     environments = [EnvStub("py3.11", platforms=[])]
 
     resolved = resolve_hatch_environments(
@@ -224,8 +224,29 @@ def test_resolve_hatch_environments_unconstrained_uses_single_default_platform()
         platforms=[PlatformName.LINUX, PlatformName.WINDOWS],
     )
 
-    # No cross-product: an unconstrained env is routed only to the default (first) platform.
-    assert [(r.name, r.platform) for r in resolved] == [("py3.11", PlatformName.LINUX)]
+    # An environment that names no platform belongs to all of them, so the platform a target
+    # happens to list first carries no meaning.
+    assert [(r.name, r.platform) for r in resolved] == [
+        ("py3.11", PlatformName.LINUX),
+        ("py3.11", PlatformName.WINDOWS),
+    ]
+
+
+def test_resolve_hatch_environments_carries_facets_and_python_to_every_platform():
+    # Regression: the second platform used to fall through to a synthesised environment that
+    # claimed the default Python and no E2E, silently dropping Windows E2E for targets like disk.
+    environments = [EnvStub("py3.11", test_env=True, e2e_env=True, python="3.11")]
+
+    resolved = resolve_hatch_environments(
+        environments,
+        default_python_version=DEFAULT_PYTHON_VERSION,
+        platforms=[PlatformName.LINUX, PlatformName.WINDOWS],
+    )
+
+    assert [(r.platform, r.python_version, r.test_available, r.e2e_available) for r in resolved] == [
+        (PlatformName.LINUX, "3.11", True, True),
+        (PlatformName.WINDOWS, "3.11", True, True),
+    ]
 
 
 def test_resolve_hatch_environments_reads_the_python_version_from_hatch():

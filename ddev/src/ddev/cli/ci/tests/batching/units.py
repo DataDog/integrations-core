@@ -5,11 +5,13 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar, NamedTuple, Protocol
 
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.utils.platform import PlatformName
 
 if TYPE_CHECKING:
@@ -45,6 +47,9 @@ DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
 # Job names end up in file paths, so characters Windows reserves must be replaced.
 # https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
 JOB_NAME_RESERVED_PATTERN = re.compile(r'[<>:"/\\|?*]')
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -142,13 +147,16 @@ def _display_order_key(target: str) -> tuple[int, str]:
 def expand_test_units(targets: Sequence[TargetDefinition], *, default_python_version: str) -> list[TestUnit]:
     """Expand targets into deterministically ordered test units, one per resolved environment.
 
-    A target with no environments on a platform still gets one unit there, under an unnamed
-    environment running `default_python_version`.
+    A platform whose environments are all constrained elsewhere gets no units, which is the
+    constraint working as intended rather than an error.
     """
     ordered_targets = sorted(targets, key=lambda target: _display_order_key(target.name))
 
     units: list[TestUnit] = []
     for target in ordered_targets:
+        if not target.environments:
+            raise PlanningError(f"{target.name!r} reached unit expansion with no environments")
+
         display_name = target.display_name or target.name
         environments_by_platform = group_environments_by_platform(target.environments)
 
@@ -160,9 +168,11 @@ def expand_test_units(targets: Sequence[TargetDefinition], *, default_python_ver
             job_name = normalize_job_name(base_name)
             runner_labels = tuple(target.runners.get(platform_id, [platform.image]))
 
-            platform_environments = environments_by_platform.get(platform_id, []) or [
-                ResolvedEnvironment(name="", platform=platform_id, python_version=default_python_version)
-            ]
+            platform_environments = environments_by_platform.get(platform_id, [])
+            if not platform_environments:
+                logger.warning("%s runs on %s but no environment tests it", target.name, platform_id)
+                continue
+
             for environment in platform_environments:
                 if environment.name and environment.name != target.name:
                     name = f"{job_name} ({environment.name})"
