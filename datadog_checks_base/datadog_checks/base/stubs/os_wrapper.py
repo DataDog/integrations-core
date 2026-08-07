@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""A unit-test double for :class:`~datadog_checks.base.utils.safe_os.SafeOS`.
+"""A unit-test double for :class:`~datadog_checks.base.utils.os_wrapper.OSWrapper`.
 
 The point of this stub is to give integration tests a *single* place to mock the
 filesystem and subprocess operations a check performs, regardless of how the code
-under test reaches the OS layer (the per-check ``self.safe_os`` property or
-the module-level ``safe_os`` singleton). Test authors configure one object
+under test reaches the OS layer (the per-check ``self.os`` property or
+the module-level ``self.os`` singleton). Test authors configure one object
 instead of hunting for the right ``mock.patch`` target.
 
 Every method on the double is a :class:`unittest.mock.MagicMock`, so the full
@@ -15,13 +15,13 @@ scalars and lists), ``assert_called_with``/``assert_any_call``, ``call_count``,
 and so on. On top of that, declarative helpers wire an in-memory filesystem and a
 command registry into the read/subprocess methods for the common cases:
 
-    fake = MockSafeOS()
+    fake = MockOSWrapper()
     fake.add_file("/sys/class/infiniband/mlx5_0/ports/1/rate", "100 Gb/sec")
     fake.add_dir("/sys/class/infiniband/mlx5_0/ports")
     fake.set_command_output("netstat -i", stdout="...", returncode=0)
 
 Anything not configured behaves like a bare ``MagicMock``. Use the fixture
-``mock_safe_os`` (from the ``datadog_checks.dev`` pytest plugin) to install
+``mock_os`` (from the ``datadog_checks.dev`` pytest plugin) to install
 one of these at both seams for the duration of a test.
 """
 
@@ -35,7 +35,7 @@ import re
 import subprocess
 from unittest import mock
 
-# The public method surface of SafeOS, asserted in sync by the tests.
+# The public method surface of OSWrapper, asserted in sync by the tests.
 METHOD_NAMES = (
     "open",
     "os_open",
@@ -153,7 +153,7 @@ def _normalize_command(command) -> str:
     return " ".join(os.fspath(part) if isinstance(part, os.PathLike) else str(part) for part in command)
 
 
-class MockSafeOS:
+class MockOSWrapper:
     """Configurable test double whose methods are MagicMocks.
 
     Populate it declaratively with :meth:`add_file`, :meth:`add_dir`, and

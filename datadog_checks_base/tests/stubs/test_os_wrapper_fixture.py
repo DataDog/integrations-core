@@ -4,24 +4,24 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.safe_os import safe_os as singleton
+from datadog_checks.base.utils.os_wrapper import unchecked_os as singleton
 
 pytestmark = pytest.mark.unit
 
 
-def test_fixture_redirects_check_property(mock_safe_os):
-    """A check's self.safe_os resolves to the injected double."""
-    mock_safe_os.add_file("/etc/conf", "data")
+def test_fixture_redirects_check_property(mock_os):
+    """A check's self.os resolves to the injected double."""
+    mock_os.add_file("/etc/conf", "data")
 
     check = AgentCheck("test", {}, [{}])
-    assert check.safe_os is mock_safe_os
-    assert check.safe_os.exists("/etc/conf") is True
-    assert check.safe_os.exists("/missing") is False
+    assert check.os is mock_os
+    assert check.os.exists("/etc/conf") is True
+    assert check.os.exists("/missing") is False
 
 
-def test_fixture_redirects_module_singleton(mock_safe_os):
-    """Module-level helpers that use the safe_os singleton are covered too."""
-    mock_safe_os.set_command_output("id -u", stdout="0")
+def test_fixture_redirects_module_singleton(mock_os):
+    """Module-level helpers that use the unchecked_os singleton are covered too."""
+    mock_os.set_command_output("id -u", stdout="0")
 
     # This mirrors how a module-level helper calls the shared singleton.
     out, err, code = singleton.get_subprocess_output("id -u", None)
