@@ -38,6 +38,7 @@ from ddev.cli.meta.ai.rendering import (
     render_web_search_line,
 )
 from ddev.cli.meta.ai.tui.app import OrchestratorLike
+from ddev.cli.meta.ai.tui.errors import compact_error_detail
 from ddev.cli.meta.ai.tui.messages import (
     AfterGoalCheck,
     AgentBeforeSend,
@@ -68,8 +69,6 @@ if TYPE_CHECKING:
 
 
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
-
-BANNER_ERROR_MAX_CHARS = 200
 
 
 class ExecutionScreen(TogoScreen):
@@ -233,13 +232,11 @@ class ExecutionScreen(TogoScreen):
             pass
 
     def _compact_error_detail(self, error: BaseException, phase_id: str | None = None) -> str:
-        detail = next((line.strip() for line in str(error).splitlines() if line.strip()), type(error).__name__)
+        detail = str(error) or type(error).__name__
         if phase_id is not None:
             detail = detail.removeprefix(f"Phase '{phase_id}' failed: ")
             detail = detail.removeprefix(f"Phase '{phase_id}': ")
-        if len(detail) > BANNER_ERROR_MAX_CHARS:
-            detail = f"{detail[: BANNER_ERROR_MAX_CHARS - 1].rstrip()}…"
-        return detail
+        return compact_error_detail(detail)
 
     def _show_error_banner(self, message: str) -> None:
         try:

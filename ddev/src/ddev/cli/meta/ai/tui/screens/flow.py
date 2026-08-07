@@ -16,6 +16,7 @@ from textual.widget import Widget
 from textual.widgets import Button, Static
 
 from ddev.ai.config.models import AgentConfig, ResolvedFlow
+from ddev.cli.meta.ai.tui.errors import compact_error_detail
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchInputValues
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
@@ -117,10 +118,11 @@ class FlowScreen(TogoScreen):
 
         self._apply_resume_state(state)
         if state.error is not None:
-            message = f"Cannot resume: {state.error} Delete the checkpoint file and launch from scratch."
+            detail = compact_error_detail(state.error).rstrip(".")
+            message = f"Cannot resume: {detail}. Delete the checkpoint file and launch from scratch."
         else:
             message = "Nothing left to resume — launch the flow instead."
-        self.notify(message, severity="warning")
+        self.notify(message, severity="warning", markup=False)
         return False
 
     def on_phase_selected(self, event: PhaseSelected) -> None:

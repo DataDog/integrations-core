@@ -751,6 +751,64 @@ async def test_resume_refuses_when_checkpoint_becomes_unreadable_while_modal_is_
         notifications = " ".join(n.message for n in pilot.app._notifications)
         assert "Cannot resume" in notifications
         assert "Delete the checkpoint file" in notifications
+        # One line, and the remedy follows a sentence rather than a YAML caret.
+        assert len(notifications.splitlines()) == 1
+        assert notifications.endswith("Delete the checkpoint file and launch from scratch.")
+
+
+# `run_test` disables notifications by default (`notifications=False`), so toasts are never
+# mounted and a message that Textual cannot render raises nothing. These two render for real.
+
+
+async def test_resume_refusal_toast_renders_schema_invalid_checkpoint_text(tmp_path: Path) -> None:
+    """A schema-invalid checkpoint must not take the app down when the refusal toast renders."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50), notifications=True) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert flow_screen.query_one("#resume", Button).display
+
+        # Valid YAML mapping, invalid checkpoint entry: pydantic reports bracketed fragments
+        # such as "[type=missing, input_value={'status': 'success'}]" that break content markup.
+        (tmp_path / flow_slug(flow) / "checkpoints.yaml").write_text("phase_0:\n  status: success\n")
+
+        flow_screen._do_resume()
+        for _ in range(4):
+            await pilot.pause()
+
+        assert app.is_running
+        assert not flow_screen.query_one("#resume", Button).display
+
+
+async def test_resume_refusal_toast_renders_unparsable_checkpoint_text(tmp_path: Path) -> None:
+    """The YAML-parse variant renders too, and its caret block never reaches the toast."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50), notifications=True) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        (tmp_path / flow_slug(flow) / "checkpoints.yaml").write_text("{ not: valid: yaml")
+
+        flow_screen._do_resume()
+        for _ in range(4):
+            await pilot.pause()
+
+        assert app.is_running
+        message = next(n.message for n in app._notifications)
+        assert "^" not in message
 
 
 async def test_resume_refuses_before_opening_the_modal_when_nothing_to_resume(tmp_path: Path) -> None:
