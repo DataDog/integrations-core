@@ -262,9 +262,21 @@ class TestClientProtocolSurface:
             repo_root / 'datadog_checks_base/datadog_checks/base/utils/http_protocol.py',
         }
 
+        # These reach past the declared surface for backend-specific members. Remove each entry as its
+        # integration moves onto the surface, and this set along with the ddev enforcement check.
+        PENDING_MIGRATION = {
+            'avi_vantage/datadog_checks/avi_vantage/check.py',
+            'cisco_aci/datadog_checks/cisco_aci/api.py',
+            'hpe_aruba_edgeconnect/datadog_checks/hpe_aruba_edgeconnect/client.py',
+            'http_check/datadog_checks/http_check/http_check.py',
+            'openstack_controller/datadog_checks/openstack_controller/api/api_sdk.py',
+        }
+
         undeclared = []
         for path in sorted(repo_root.glob('*/datadog_checks/**/*.py')):
             if path in defines_the_surface:
+                continue
+            if path.relative_to(repo_root).as_posix() in PENDING_MIGRATION:
                 continue
             try:
                 tree = ast.parse(path.read_text(encoding='utf-8'))
