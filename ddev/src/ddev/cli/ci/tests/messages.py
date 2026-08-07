@@ -15,6 +15,7 @@ from ddev.utils.junit import TestStatus
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async.models import WorkflowJob
     from ddev.utils.junit import JUnitReport, JUnitTestCase
 
@@ -163,8 +164,13 @@ class WorkflowStatus:
 
 @dataclass
 class TestBatch(BaseMessage):
-    """Dispatched to trigger a matrix of test jobs."""
+    """Dispatched to trigger a matrix of test jobs.
 
+    ``batch_id`` is the logical batch identity (e.g. ``batch-01``): assigned during planning, stable
+    across workflow attempts, and distinct from ``BaseMessage.id``, which identifies one message.
+    """
+
+    batch_id: str
     job_list: list[BatchJob]
     jobs_count: int
     integrations: list[str]
@@ -172,8 +178,13 @@ class TestBatch(BaseMessage):
 
 @dataclass
 class BatchFinished(BaseMessage):
-    """Emitted when a GitHub Actions test workflow has completed."""
+    """Emitted when a GitHub Actions test workflow has completed.
 
+    ``batch_id`` is the identity of the ``TestBatch`` this run came from, so the gatherer can resolve
+    it in the plan.
+    """
+
+    batch_id: str
     status: Status
     run_id: int
     workflow_url: str
@@ -186,28 +197,10 @@ class BatchFinished(BaseMessage):
 class UpdatePRComment(BaseMessage):
     """Emitted per finished batch to request a PR comment update.
 
-    ``revision`` is the gatherer's monotonic counter (one per consumed ``BatchFinished``); the
-    PR-updater renders the latest and rejects stale revisions. ``done`` is ``True`` only on the
-    revision that completes the final expected batch.
+    ``revision`` is ordering metadata: revision ``0`` is the initial plan, then one per consumed
+    ``BatchFinished``. The updater renders the latest and rejects stale revisions. ``progress`` is
+    the whole payload, including whether the run is done and every count the comment needs.
     """
 
     revision: int
-    done: bool
-    workflows: list[WorkflowStatus]
-
-    @property
-    def passed(self) -> int:
-        return sum(workflow.success_count for workflow in self.workflows)
-
-    @property
-    def failed(self) -> int:
-        return sum(workflow.failed_count for workflow in self.workflows)
-
-    @property
-    def skipped(self) -> int:
-        return sum(workflow.skipped_count for workflow in self.workflows)
-
-    @property
-    def complete(self) -> int:
-        """Total jobs finished so far (passed + failed + skipped across all gathered batches)."""
-        return sum(len(workflow.results) for workflow in self.workflows)
+    progress: DispatcherProgress
