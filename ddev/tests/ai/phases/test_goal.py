@@ -12,11 +12,14 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
+    GOAL_REVIEWER_RESET_THRESHOLD_PCT,
     GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,
+    GoalCheckResult,
     GoalParseError,
+    _select_reviewer_message,
     build_reviewer_user_message,
-    parse_reviewer_output,
+    parse_reviewer_verdict,
     run_goal_loop,
 )
 from ddev.ai.react.process import ReActProcess
@@ -25,35 +28,54 @@ from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
 
-from .conftest import MockAgent, make_response
+from .helpers import MockAgent, make_goal_verdict, make_response
 
 # ---------------------------------------------------------------------------
-# parse_reviewer_output
+# parse_reviewer_verdict
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
     "text,expected",
     [
-        ('{"valid": true, "reason": ""}', (True, "")),
-        ('{"valid": false, "reason": "missing metric x"}', (False, "missing metric x")),
-        ('  {"valid": true, "reason": "ok"}  ', (True, "ok")),
-        ('```json\n{"valid": true, "reason": ""}\n```', (True, "")),
-        ('```\n{"valid": false, "reason": "no"}\n```', (False, "no")),
+        (make_goal_verdict(True), (True, "")),
         (
-            'I read every file and verified the prefix.\nEverything checks out.\n{"valid": true, "reason": ""}',
+            make_goal_verdict(
+                False,
+                "missing metric x",
+                [{"id": "missing-x", "criterion": "metrics", "reason": "missing metric x"}],
+            ),
+            (False, "missing metric x"),
+        ),
+        (f"  {make_goal_verdict(True, 'ok')}  ", (True, "ok")),
+        (
+            make_goal_verdict(
+                False,
+                "missing x",
+                [{"id": "x", "criterion": "files", "reason": "missing x"}],
+            ),
+            (False, "missing x"),
+        ),
+        (f"```json\n{make_goal_verdict(True)}\n```", (True, "")),
+        (
+            f"```\n{make_goal_verdict(False, 'no')}\n```",
+            (False, "no"),
+        ),
+        (
+            f"I read every file and verified the prefix.\nEverything checks out.\n{make_goal_verdict(True)}",
             (True, ""),
         ),
         (
-            'Detailed reasoning across\nseveral lines of prose.\n{"valid": false, "reason": "missing metric x"}\n',
+            f"Detailed reasoning across\nseveral lines of prose.\n{make_goal_verdict(False, 'missing metric x')}\n",
             (False, "missing metric x"),
         ),
-        ('{\n  "valid": true,\n  "reason": "ok"\n}', (True, "ok")),
+        ('{\n  "valid": true,\n  "reason": "ok",\n  "findings": []\n}', (True, "ok")),
     ],
     ids=[
         "plain_true",
         "plain_false",
         "whitespace",
+        "structured_state",
         "fenced_json",
         "fenced_plain",
         "prose_then_verdict_line",
@@ -61,8 +83,10 @@ from .conftest import MockAgent, make_response
         "pretty_printed_pure_json",
     ],
 )
-def test_parse_reviewer_output_accepts(text, expected):
-    assert parse_reviewer_output(text) == expected
+def test_parse_reviewer_verdict_accepts(text, expected):
+    verdict = parse_reviewer_verdict(text)
+    assert verdict is not None
+    assert (verdict["valid"], verdict["reason"]) == expected
 
 
 @pytest.mark.parametrize(
@@ -74,11 +98,26 @@ def test_parse_reviewer_output_accepts(text, expected):
         '{"valid": true, "reason": 42}',
         '{"reason": "x"}',
         '["valid", true]',
+        '{"valid": false, "reason": "x", "findings": ["not structured"]}',
+        '{"valid": true, "reason": ""}',
+        '{"valid": false, "reason": "x", "findings": []}',
+        '{"valid": true, "reason": "", "findings": [{"id": "x", "criterion": "x", "reason": "x"}]}',
     ],
-    ids=["empty", "prose", "valid_not_bool", "reason_not_str", "missing_valid", "not_object"],
+    ids=[
+        "empty",
+        "prose",
+        "valid_not_bool",
+        "reason_not_str",
+        "missing_valid",
+        "not_object",
+        "malformed_findings",
+        "missing_findings",
+        "rejection_without_findings",
+        "valid_with_findings",
+    ],
 )
-def test_parse_reviewer_output_rejects(text):
-    assert parse_reviewer_output(text) is None
+def test_parse_reviewer_verdict_rejects(text):
+    assert parse_reviewer_verdict(text) is None
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +134,48 @@ def test_build_reviewer_user_message_sections():
     assert "## Original task\nTASK" in msg
     assert "## Goal to verify\nGOAL" in msg
     assert "## Worker summary\nSUMMARY" in msg
+
+
+@pytest.mark.parametrize(
+    "has_previous_check,context_pct,expected_reset,expected_section",
+    [
+        (False, None, False, "## Worker summary\nSUMMARY"),
+        (True, None, False, "## Worker repair summary\nSUMMARY"),
+        (True, GOAL_REVIEWER_RESET_THRESHOLD_PCT - 1, False, "## Worker repair summary\nSUMMARY"),
+        (True, GOAL_REVIEWER_RESET_THRESHOLD_PCT, True, "## Previous reviewer verdict"),
+        (True, GOAL_REVIEWER_RESET_THRESHOLD_PCT + 1, True, "## Previous reviewer verdict"),
+    ],
+    ids=["initial", "unknown", "below_threshold", "at_threshold", "above_threshold"],
+)
+def test_select_reviewer_message(
+    has_previous_check: bool,
+    context_pct: float | None,
+    expected_reset: bool,
+    expected_section: str,
+) -> None:
+    previous_check = None
+    if has_previous_check:
+        previous_check = GoalCheckResult(
+            valid=False,
+            reason="missing X",
+            input_tokens=20,
+            output_tokens=10,
+            verdict_json=make_goal_verdict(False, "missing X"),
+            context_pct=context_pct,
+        )
+
+    message, needs_reset = _select_reviewer_message(
+        previous_check=previous_check,
+        rendered_task_prompt="TASK",
+        goal_text="GOAL",
+        worker_summary="SUMMARY",
+    )
+
+    assert needs_reset is expected_reset
+    assert expected_section in message
+    if expected_reset:
+        assert "## Original task\nTASK" in message
+        assert "## Goal to verify\nGOAL" in message
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +242,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     )
     run_logger = AgentLogger(tmp_path)
     factory, builder_calls, _ = _reviewer_factory(
-        [make_response('{"valid": true, "reason": ""}', 20, 10)],
+        [make_response(make_goal_verdict(True), 20, 10)],
         callbacks=Callbacks([run_logger.as_callback_set()]),
     )
 
@@ -202,7 +283,7 @@ async def test_run_goal_loop_inherits_parent_config_with_read_only_tools(tmp_pat
         total_output_tokens=50,
         context_usage=None,
     )
-    factory, builder_calls, _ = _reviewer_factory([make_response('{"valid": true, "reason": ""}', 20, 10)])
+    factory, builder_calls, _ = _reviewer_factory([make_response(make_goal_verdict(True), 20, 10)])
     parent_config = make_agent_config(
         provider="anthropic",
         tools=["read_file", "edit_file", "grep", "create_file"],
@@ -243,8 +324,10 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     )
     factory, _, reviewer_agent = _reviewer_factory(
         [
-            make_response('{"valid": false, "reason": "missing X"}', 20, 10),
-            make_response('{"valid": true, "reason": ""}', 25, 12),
+            make_response(
+                make_goal_verdict(False, "missing X"), 20, 10, context_pct=GOAL_REVIEWER_RESET_THRESHOLD_PCT - 1
+            ),
+            make_response(make_goal_verdict(True), 25, 12),
         ]
     )
 
@@ -264,11 +347,61 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     assert outcome.attempts == 2
     assert outcome.final_result.final_response.text == "fixed it"
     assert len(worker_agent.send_calls) == 1
-    assert "missing X" in worker_agent.send_calls[0]
-    assert "g" in worker_agent.send_calls[0]
+    worker_retry_message = worker_agent.send_calls[0]
+    assert "missing X" in worker_retry_message
+    assert '"valid": false' in worker_retry_message
+    assert "g" in worker_retry_message
+    assert "Reviewer verdict:" in worker_retry_message
     assert len(reviewer_agent.send_calls) == 2
+    assert reviewer_agent.reset_call_count == 0
+    assert "## Re-review instructions" not in reviewer_agent.send_calls[0]
+    assert "## Re-review instructions" in reviewer_agent.send_calls[1]
+    assert "## Previous reviewer verdict" not in reviewer_agent.send_calls[1]
     assert outcome.total_input_tokens == 20 + 25 + 30
     assert outcome.total_output_tokens == 10 + 12 + 15
+
+
+async def test_run_goal_loop_resets_large_reviewer_context_before_retry(tmp_path):
+    worker_process, _ = _make_worker_process([make_response("fixed it", 30, 15)])
+    initial_result = ReActResult(
+        final_response=make_response("initial work"),
+        iterations=1,
+        total_input_tokens=100,
+        total_output_tokens=50,
+        context_usage=None,
+    )
+    previous_verdict = make_goal_verdict(False, "missing X")
+    factory, _, reviewer_agent = _reviewer_factory(
+        [
+            make_response(previous_verdict, 20, 10, context_pct=GOAL_REVIEWER_RESET_THRESHOLD_PCT),
+            make_response(make_goal_verdict(True), 25, 12),
+        ]
+    )
+
+    outcome = await run_goal_loop(
+        task=TaskConfig(name="t1", prompt="x", goal="g"),
+        goal_text="GOAL",
+        rendered_task_prompt="TASK",
+        worker_process=worker_process,
+        initial_result=initial_result,
+        parent_agent_config=make_agent_config(tools=[]),
+        process_factory=factory,
+        callbacks=Callbacks(),
+        phase_id="p1",
+        compact_if_needed=_noop_compact,
+    )
+
+    assert outcome.attempts == 2
+    assert reviewer_agent.reset_call_count == 1
+    assert reviewer_agent.compact_call_count == 0
+    assert len(reviewer_agent.send_calls) == 2
+    retry_message = reviewer_agent.send_calls[1]
+    assert "## Re-review instructions" in retry_message
+    assert "## Original task\nTASK" in retry_message
+    assert "## Goal to verify\nGOAL" in retry_message
+    assert "## Previous reviewer verdict" in retry_message
+    assert '"reason": "missing X"' in retry_message
+    assert "## Worker repair summary\nfixed it" in retry_message
 
 
 async def test_run_goal_loop_exhausts_attempts(tmp_path):
@@ -282,8 +415,8 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
     )
     factory, _, _ = _reviewer_factory(
         [
-            make_response('{"valid": false, "reason": "first miss"}', 5, 3),
-            make_response('{"valid": false, "reason": "second miss"}', 7, 4),
+            make_response(make_goal_verdict(False, "first miss"), 5, 3),
+            make_response(make_goal_verdict(False, "second miss"), 7, 4),
         ]
     )
 
@@ -318,7 +451,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
     factory, _, reviewer_agent = _reviewer_factory(
         [
             make_response("not json", 5, 5),
-            make_response('{"valid": true, "reason": ""}', 7, 7),
+            make_response(make_goal_verdict(True), 7, 7),
         ]
     )
 
@@ -397,8 +530,8 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
     )
     factory, _, _ = _reviewer_factory(
         [
-            make_response('{"valid": false, "reason": "fix X"}', 0, 0),
-            make_response('{"valid": true, "reason": ""}', 0, 0),
+            make_response(make_goal_verdict(False, "fix X"), 0, 0),
+            make_response(make_goal_verdict(True), 0, 0),
         ]
     )
 
