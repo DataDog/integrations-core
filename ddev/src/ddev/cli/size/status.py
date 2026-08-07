@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes file. If no")
 @click.option("--commit", help="Commit hash to check the status of. It takes the commit's dependency sizes file.")
+@click.option("--branch", help="Branch name used to tag metrics sent to Datadog.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(
@@ -40,6 +41,7 @@ def status(
     to_dd_key: str | None,
     dependency_sizes: Path | None,
     commit: str | None,
+    branch: str | None,
 ) -> None:
     """
     Show the current size of all integrations and dependencies in your local repo.
@@ -108,7 +110,7 @@ def status(
         if (to_dd_org or to_dd_key) and commit:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
 
-            send_metrics_to_dd(app, commit, modules_plat_ver, to_dd_org, to_dd_key, compressed)
+            send_metrics_to_dd(app, commit, modules_plat_ver, to_dd_org, to_dd_key, compressed, branch or "unknown")
     except Exception as e:
         app.abort(str(e))
 
