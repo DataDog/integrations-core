@@ -31,7 +31,7 @@ class CheckpointTokenInfo(BaseModel):
     total_output: int
 
 
-class GoalValidationRecord(BaseModel):
+class TaskValidationRecord(BaseModel):
     task: str
     attempts: int
     final_valid: bool
@@ -45,7 +45,7 @@ class SuccessCheckpoint(BaseModel):
     finished_at: str
     tokens: CheckpointTokenInfo
     memory_path: str
-    goal_validations: list[GoalValidationRecord] | None = None
+    task_validations: list[TaskValidationRecord] | None = None
     phase_data: dict[str, Any] = {}
 
 
@@ -57,7 +57,7 @@ class FailedCheckpoint(BaseModel):
     finished_at: str
     error: str
     tokens: CheckpointTokenInfo
-    goal_validations: list[GoalValidationRecord] | None = None
+    task_validations: list[TaskValidationRecord] | None = None
 
 
 PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discriminator="status")]

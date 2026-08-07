@@ -12,8 +12,8 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointTokenInfo,
     FailedCheckpoint,
-    GoalValidationRecord,
     SuccessCheckpoint,
+    TaskValidationRecord,
 )
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
 
@@ -240,7 +240,7 @@ async def test_process_message_writes_memory_and_checkpoint(flow_dir, flow_conte
         memory_text="stub-memory-body",
         total_input_tokens=123,
         total_output_tokens=45,
-        goal_validations=[GoalValidationRecord(task="t1", attempts=1, final_valid=True)],
+        task_validations=[TaskValidationRecord(task="t1", attempts=1, final_valid=True)],
         checkpoint_data={"custom_field": "custom_value", "count": 7},
     )
     phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue, outcome=outcome)
@@ -254,6 +254,6 @@ async def test_process_message_writes_memory_and_checkpoint(flow_dir, flow_conte
     assert checkpoint.tokens == CheckpointTokenInfo(total_input=123, total_output=45)
     assert checkpoint.memory_path == str(mgr.memory_path("p1"))
     assert checkpoint.phase_data == {"custom_field": "custom_value", "count": 7}
-    assert checkpoint.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
+    assert checkpoint.task_validations == [TaskValidationRecord(task="t1", attempts=1, final_valid=True)]
     assert checkpoint.started_at
     assert checkpoint.finished_at

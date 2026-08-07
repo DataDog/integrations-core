@@ -143,6 +143,7 @@ def make_agent_phase(
     goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
     agent_config: AgentConfig | None = None,
     resume_frontier: frozenset[str] = frozenset(),
+    phase_cls: type[AgenticPhase] = AgenticPhase,
 ) -> tuple[AgenticPhase, CheckpointManager]:
     """Build an AgenticPhase ready for process_message-driven tests."""
     effective_agent_config = agent_config or make_agent_config(tools=[])
@@ -169,7 +170,7 @@ def make_agent_phase(
         captured_kwargs=captured_worker_kwargs,
         goal_runtime_builder=goal_runtime_builder,
     )
-    phase = AgenticPhase(
+    phase = phase_cls(
         phase_id=phase_id,
         dependencies=dependencies or [],
         config=config,
