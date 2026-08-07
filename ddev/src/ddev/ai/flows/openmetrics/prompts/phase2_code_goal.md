@@ -44,8 +44,13 @@ Read `<integration_name>/datadog_checks/<integration_name>/check.py`. It must:
      ordered `METRICS_MAP` tuple of unconditional `MetricsMapping(Path(...))` entries.
      There must be no manual YAML parsing or dictionary concatenation. If
      `get_config_with_defaults()` is overridden, it must call `super()` so the mappings load.
-6. Carry **no** leftover scaffold boilerplate (placeholder `__init__`/`check` bodies,
-   commented database/HTTP examples, unused imports).
+6. Contain **nothing** the inputs do not justify. Every method, option, import, and comment in the
+   file must be traceable to the mappings, the inspection summary, or a product requirement. Judge
+   the code by that standard alone and ignore where it came from: a placeholder body, a commented
+   database/HTTP example, an unused import, and a plausible-looking option nobody asked for all
+   fail the same way, whether the worker wrote them or inherited them from a file that already
+   existed. The worker was told the previous contents carry no weight, so "it was already there"
+   is not a defense.
 
 A minimal check is the expected and correct outcome for one endpoint. For multiple endpoints,
 the declarative `METRICS_MAP` tuple and imports are required and are not unnecessary complexity. Anything beyond that
@@ -77,8 +82,10 @@ Read `assets/configuration/spec.yaml`. It must:
 Then confirm the generated files exist and are consistent with the spec:
 `<integration_name>/datadog_checks/<integration_name>/config_models/` and
 `<integration_name>/datadog_checks/<integration_name>/data/conf.yaml.example` — they
-must be present and reflect an OpenMetrics instance (not a leftover default-template
-config).
+must be present and reflect **this** spec's OpenMetrics instance. Compare them against
+`spec.yaml` rather than just checking they exist and mention OpenMetrics: they are generated
+files, so anything in them that the current spec does not produce means they were never
+regenerated, and that is a fail.
 
 Also confirm the effective mapping composition: the number of `MetricsMapping` declarations
 equals the number of endpoint mapping files and the union of their emitted names matches the

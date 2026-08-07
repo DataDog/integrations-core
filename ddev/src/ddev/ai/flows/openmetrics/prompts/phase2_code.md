@@ -50,14 +50,23 @@ configuration example.
 
 ## Steps
 
-1. **`check.py`** — replace the scaffold placeholder at
-   `<integration_name>/datadog_checks/<integration_name>/check.py` with an OpenMetrics V2
-   check. Import `OpenMetricsBaseCheckV2` from `datadog_checks.base`, subclass it, set
+1. **`check.py`** — write `<integration_name>/datadog_checks/<integration_name>/check.py` as an
+   OpenMetrics V2 check.
+
+   Whatever that file currently holds is **not authoritative**, whether it is an untouched
+   scaffold placeholder or something that already looks like a working check. It carries no design
+   decision you have to honor and no behavior you have to preserve. The check is defined entirely
+   by the mapping files, the inspection summary, and the product requirements below — write that,
+   and keep nothing you cannot justify from those inputs. Delete the rest rather than working
+   around it.
+
+   Import `OpenMetricsBaseCheckV2` from `datadog_checks.base`, subclass it, set
    `__NAMESPACE__` to the metric prefix from the handoff (exactly, no trailing dot), and set
    `DEFAULT_METRIC_LIMIT = 0`. Override `get_config_with_defaults()`, call `super()` to preserve
    file-based metric mappings and other defaults, and force `enable_health_service_check` to
    `False` in the returned config so the deprecated OpenMetrics health service check cannot be
-   enabled or emitted. Remove all placeholder scaffold methods, examples, and unused imports.
+   enabled or emitted. Leave behind no methods, examples, commented-out blocks, or imports that
+   this check does not need, whatever put them there.
 
    Then wire the mappings according to their count:
 
@@ -89,9 +98,11 @@ configuration example.
    numeric `id`). This is situational — many integrations need none of it — but when a label
    the catalog exposes calls for it, applying it is mandatory.
 
-2. **`spec.yaml`** — replace `assets/configuration/spec.yaml` with a metrics-only spec using
-   both mandatory shared templates: `init_config/openmetrics` nested under `init_config`, and
-   `instances/openmetrics` nested under `instances`. Use this structure:
+2. **`spec.yaml`** — write `assets/configuration/spec.yaml` as a metrics-only spec using both
+   mandatory shared templates: `init_config/openmetrics` nested under `init_config`, and
+   `instances/openmetrics` nested under `instances`. As with `check.py`, its current contents are a
+   starting point at best; replace them outright rather than editing around what is there. Use this
+   structure:
 
    ```yaml
    name: <DisplayName>

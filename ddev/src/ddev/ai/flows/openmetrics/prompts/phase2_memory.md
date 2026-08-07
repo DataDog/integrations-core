@@ -14,8 +14,16 @@ Keep it tight and factual. Include:
   (exactly, no trailing dot).
 - Every endpoint mapping file and how `check.py` links it. State whether convention loads the
   single `metrics.yaml` or a `METRICS_MAP` tuple loads multiple endpoint YAMLs.
-- Every endpoint URL and copied fixture path the tests must mock, and whether the Docker
+- Every endpoint URL and fixture path the tests must mock, and whether the Docker
   environment exposes all endpoints in one service topology.
+- **Where the Docker environment lives and what it declares.** The directory relative to the
+  integration root and the exact compose filename — it is not always `tests/docker/` and not always
+  `docker-compose.yaml`, and the test author builds `conftest.py` from what you state here rather
+  than from any convention. Include the service names, the ports the compose publishes and whether
+  they are hardcoded or read from variables, and every environment variable it references.
+- **Anything already under `tests/` that this phase did not create** — test modules, helper modules,
+  fixtures you did not copy. Name them plainly and state that you left them untouched. The test
+  author owns that directory and decides what to keep; it needs to know what is there.
 - Repeat the fixture-exclusion list from the rename/metadata handoff exactly: the expanded
   Datadog names for officially sourced metrics absent from every captured fixture. Do not add
   observed metrics to this list.

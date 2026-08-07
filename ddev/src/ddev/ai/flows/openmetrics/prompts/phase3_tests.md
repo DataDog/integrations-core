@@ -6,9 +6,16 @@ name: phase3_tests
 
 You are building the Datadog integration for **${integration}**. The check, the spec,
 endpoint mapping YAML(s), and the single `metadata.csv` already exist, and the Docker environment
-and all endpoint fixtures are in place under `tests/`. In this task you write the unit, integration, and
-end-to-end tests, then run the whole suite yourself. Apply your standing testing expertise —
-this prompt gives the task-specific inputs and the steps.
+and all endpoint fixtures are in place under `tests/` — the handoff below says where the environment
+lives, which is not always the same directory from one integration to the next. In this task you
+deliver the unit, integration, and end-to-end tests, then run the whole suite yourself. Apply your
+standing testing expertise — this prompt gives the task-specific inputs and the steps.
+
+`tests/` may already hold files that this flow did not create. The handoff names them. Existing
+test code is not a specification, but it may be usable: fold in what is genuinely right and remove
+only what is irrelevant, incorrect, or duplicates the final suite. Preserve the endpoint fixtures
+and Docker environment materialized by the preceding phase; they are required inputs, not cleanup
+targets.
 
 You also have `web_search` and `web_fetch` tools. Reach for them when something you need is not in the inputs —
 how the service must be configured to expose certain metrics, what a compose variable is for,
@@ -52,6 +59,8 @@ ${prd}
 
 - **Endpoint fixtures** — use every fixture identified by the build handoff and present under
   `tests/fixtures/`.
+- **The Docker environment** — at the directory and compose filename the build handoff reports.
+  Confirm both by listing `tests/` and reading the compose file before you wire `conftest.py` to it.
 - **`metadata.csv`** — every metric the integration is expected to emit.
 - **Fixture exclusions** — use the exact expanded Datadog names from the handoff for officially
   sourced metrics absent from all captured catalogs. Apply only these names to the unit
@@ -63,11 +72,16 @@ ${prd}
 
 ## Steps
 
-1. Write `conftest.py`, `test_unit.py`, `test_integration.py`, and `test_e2e.py`. Apply the
-   complete testing contract from your system instructions to the endpoint and fixture set
-   described above, plus every mandatory product requirement in this task.
+1. Deliver `conftest.py`, `test_unit.py`, `test_integration.py`, and `test_e2e.py`. Reuse or absorb
+   any sound pre-existing test code, and remove only test modules or helpers that are irrelevant,
+   incorrect, or duplicate the final suite. Keep the materialized `tests/fixtures/` and Docker
+   environment intact. Apply the complete testing contract from your system instructions to the
+   endpoint and fixture set described above, plus every mandatory product requirement in this
+   task.
 
 2. **Run the whole suite yourself before finishing:**
+   - use `ddev_env_show`, start every concrete environment with `ddev_env_start` and `dev=true`,
+     then stop each one with `ddev_env_stop` before running tests;
    - the format/lint pass (`ddev test` in format-and-fix mode);
    - the offline unit suite;
    - the **end-to-end environment** with the e2e tooling (`ddev env test`), which starts
@@ -78,7 +92,8 @@ ${prd}
 
 ## Finish
 
-Summarize the files you wrote, the exact doc-only fixture exclusions applied to the unit metadata
-assertion, any targeted assertions you added (with the custom behavior each pins down), any
-additional live-service exclusions and why, and the outcome of the format, unit, and end-to-end
-runs. A reviewer will run the full environment against your tests again.
+Summarize the files you wrote, anything pre-existing you absorbed or deleted and why, the exact
+doc-only fixture exclusions applied to the unit metadata assertion, any targeted assertions you
+added (with the custom behavior each pins down), any additional live-service exclusions and why, and
+the outcome of the format, unit, and end-to-end runs. A reviewer will run the full environment
+against your tests again.
