@@ -26,10 +26,17 @@ def error(exception_class, message='', **kwargs):
 
 
 def changed_file_processes(files: list[str]):
-    # This returns subprocess calls used in `ddev.utils.git.GitRepository.changed_files`
-    # for tests that have to mock subprocess calls: the diff, then the untracked-file listing.
+    # This returns the subprocess calls behind `IntegrationRegistry.changed_paths` for tests that
+    # have to mock them: a merge base, a diff and an untracked-file listing for every entry in
+    # `DEFAULT_COMPARISONS`. The files are reported against the first comparison, which leaves the
+    # working tree clean for the second.
+    merge_base = CompletedProcess([], 0, stdout='0000000000000000000000000000000000000000\n')
     return [
+        merge_base,
         CompletedProcess([], 0, stdout='\n'.join(f'M\t{f}' for f in files)),
+        CompletedProcess([], 0, stdout=''),
+        merge_base,
+        CompletedProcess([], 0, stdout=''),
         CompletedProcess([], 0, stdout=''),
     ]
 

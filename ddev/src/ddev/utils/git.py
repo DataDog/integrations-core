@@ -56,6 +56,14 @@ class ChangedFile:
         return (self.path,)
 
 
+@dataclass(frozen=True)
+class Comparison:
+    """The two points `GitRepository.changed_files` compares."""
+
+    base: str = 'origin/master'
+    head: str | None = None  # None compares against the working tree
+
+
 def is_git_warning_line(line: str) -> bool:
     """Return whether a line of git output is an ignorable warning rather than a record."""
     return line.startswith('warning: ') or 'original line endings' in line
@@ -250,11 +258,14 @@ class GitRepository:
     def changed_files(self, base: str = 'origin/master', head: str | None = None) -> list[ChangedFile]:
         """Return the files that changed between two points, deepest path first.
 
-        `--merge-base` starts the comparison where the two points diverged, so changes made on
-        `base` since then are not reported as ours. Without a `head` the comparison runs against
-        the working tree, which also picks up uncommitted and untracked files.
+        The comparison starts where the two points diverged, so changes made on `base` since then
+        are not reported as ours. Without a `head` it runs against the working tree, which also
+        picks up uncommitted and untracked files.
+
+        The divergence point is resolved separately rather than with `git diff --merge-base`, which
+        is fatal when a criss-cross history has more than one.
         """
-        comparison = ['diff', '--name-status', '--merge-base', base]
+        comparison = ['diff', '--name-status', self.merge_base(base, head or 'HEAD')]
         if head is not None:
             comparison.append(head)
 

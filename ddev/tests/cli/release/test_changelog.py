@@ -1,12 +1,37 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable
 from functools import partial
 
 import pytest
 
 from ddev.repo.core import Repository
 from tests.helpers.changelog import reset_fragments_dir
+
+
+def git_capture(changed: list[str], *, subject: str = 'Foo') -> Callable[..., str]:
+    """Return a `GitRepository.capture` replacement that answers by command rather than call order.
+
+    Every changed path is reported as modified by any diff, so a test does not have to know how
+    many comparisons `IntegrationRegistry.changed_paths` makes.
+    """
+    sha = '0' * 40
+
+    def capture(*args: str) -> str:
+        match args[0]:
+            case 'merge-base':
+                return f'{sha}\n'
+            case 'diff':
+                return '\n'.join(f'M\t{path}' for path in changed)
+            case 'ls-files':
+                return ''
+            case 'log':
+                return f'{sha}\n{subject}'
+            case _:
+                raise AssertionError(f'unexpected git command: {args}')
+
+    return capture
 
 
 class TestFix:
@@ -182,16 +207,7 @@ class TestNew:
         repo = Repository(repo_with_towncrier.path.name, str(repo_with_towncrier.path))
         repo.git.capture('add', '.')
         repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitRepository.capture',
-            side_effect=[
-                'M\tddev/pyproject.toml',
-                '',
-                'M\tddev/pyproject.toml',
-                '',
-                '0000000000000000000000000000000000000000\nFoo',
-            ],
-        )
+        mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=git_capture(['ddev/pyproject.toml']))
         mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
         return repo_with_towncrier.path / 'ddev' / 'changelog.d'
 
@@ -242,14 +258,7 @@ class TestNew:
         assert fragment_file.read_text() == "Foo"
 
     def test_start_no_changelog(self, ddev, fragments_dir, helpers, mocker):
-        mocker.patch(
-            'ddev.utils.git.GitRepository.capture',
-            side_effect=[
-                'M\ttests/conftest.py',
-                '',
-                '0000000000000000000000000000000000000000\nFoo',
-            ],
-        )
+        mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=git_capture(['tests/conftest.py']))
         edit_patch = mocker.patch('click.edit', return_value=None)
         result = ddev('release', 'changelog', 'new', 'added')
 

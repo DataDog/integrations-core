@@ -219,6 +219,23 @@ def test_changed_files_between_refs_ignores_the_working_tree(repository):
     assert ChangedFile(ChangeType.ADDED, "untracked.txt") in repo.git.changed_files()
 
 
+def test_changed_files_ignores_changes_made_on_the_base_after_divergence(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    base = repo.git.capture("rev-parse", "HEAD").strip()
+    (repo.path / "mine.txt").touch()
+    repo.git.capture("add", "mine.txt")
+    repo.git.capture("commit", "-m", "my work")
+    head = repo.git.capture("rev-parse", "HEAD").strip()
+
+    repo.git.capture("checkout", "-b", "base-branch", base)
+    (repo.path / "theirs.txt").touch()
+    repo.git.capture("add", "theirs.txt")
+    repo.git.capture("commit", "-m", "their work")
+
+    assert repo.git.changed_files("base-branch", head) == [ChangedFile(ChangeType.ADDED, "mine.txt")]
+
+
 def test_changed_files_reports_renames_with_their_source(repository):
     repo = Repository(repository.path.name, str(repository.path))
 
