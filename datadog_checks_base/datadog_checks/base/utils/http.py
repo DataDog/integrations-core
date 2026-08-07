@@ -109,17 +109,17 @@ KERBEROS_STRATEGIES = {}
 UDS_SCHEME = 'unix'
 
 
-def load_x509_certificate(data: bytes) -> Certificate:
-    """Load a certificate that may be DER (the RFC 5280 convention for AIA responses) or PEM encoded.
+def load_x509_certificates(data: bytes) -> list[Certificate]:
+    """Load one or more certificates from data that may be DER or PEM encoded.
 
-    Assumes `data` holds a single certificate. Some issuers serve a multi-cert PEM bundle (e.g. issuer
-    plus cross-signed root) at the CA Issuers URI; only the first certificate in such a bundle is parsed
-    and the rest are silently discarded. This is not a regression versus prior behavior.
+    A CA Issuers URI conventionally serves a single DER-encoded certificate (the RFC 5280 convention),
+    tried first here, but some issuers serve a PEM bundle containing multiple certificates instead (e.g.
+    a cross-signed cert alongside its own issuer), so all certificates in the bundle are returned.
     """
     try:
-        return _http_utils.cryptography_x509_load_certificate(data)
+        return [_http_utils.cryptography_x509_load_certificate(data)]
     except ValueError:
-        return _http_utils.cryptography_x509_load_pem_certificate(data)
+        return list(_http_utils.cryptography_x509_load_pem_certificates(data))
 
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
@@ -570,13 +570,30 @@ class RequestsWrapper(object):
         return certs
 
     def load_intermediate_certs(self, der_cert, certs):
-        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
-        # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        """
+        RFC 3280 4.2.2.1 / RFC 5280 5.2.7 - fetch missing intermediate certs via Authority Information
+        Access (AIA) chasing.
+
+        A CA Issuers URI conventionally serves a single DER-encoded certificate, but some issuers serve a
+        PEM bundle containing multiple certificates (e.g. a cross-signed cert alongside its own issuer).
+        All certificates discovered are appended to `certs` (as PEM strings), but AIA chasing continues
+        for a given certificate only if its issuer isn't already among the certs collected so far, to
+        avoid redundant network fetches.
+        """
         try:
-            cert = load_x509_certificate(der_cert)
+            cert_objects = load_x509_certificates(der_cert)
         except Exception as e:
             self.logger.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
-            return
+            return certs
+
+        known_subjects = {load_x509_certificates(pem_cert.encode('ascii'))[0].subject for pem_cert in certs}
+        for cert in cert_objects:
+            self._chase_certificate_issuer(cert, certs, known_subjects)
+        return certs
+
+    def _chase_certificate_issuer(self, cert, certs, known_subjects):
+        if cert.issuer in known_subjects:
+            return  # issuer already available; no need to fetch it again
 
         try:
             authority_information_access = cert.extensions.get_extension_for_oid(
@@ -603,17 +620,9 @@ class RequestsWrapper(object):
             except Exception as e:
                 self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
                 continue
-            else:
-                intermediate_cert = response.content
 
-            # CA Issuers URIs conventionally serve DER-encoded certificates, but downstream TLS
-            # config (`tls_intermediate_ca_certs`) expects PEM strings, so convert here.
             try:
-                pem_cert = (
-                    load_x509_certificate(intermediate_cert)
-                    .public_bytes(_http_utils.cryptography_serialization.Encoding.PEM)
-                    .decode('ascii')
-                )
+                fetched_certs = load_x509_certificates(response.content)
             except Exception as e:
                 # Best-effort: skip this issuer and keep trying the rest rather than aborting the whole
                 # chase. A partial chain may still be enough to complete verification; if it isn't, the
@@ -621,9 +630,17 @@ class RequestsWrapper(object):
                 self.logger.error('Error while deserializing intermediate certificate from `%s`: %s', uri, e)
                 continue
 
-            certs.append(pem_cert)
-            self.load_intermediate_certs(intermediate_cert, certs)
-        return certs
+            for fetched_cert in fetched_certs:
+                if fetched_cert.subject in known_subjects:
+                    continue  # already have this certificate
+                pem_cert = fetched_cert.public_bytes(_http_utils.cryptography_serialization.Encoding.PEM).decode(
+                    'ascii'
+                )
+                certs.append(pem_cert)
+                known_subjects.add(fetched_cert.subject)
+
+            for fetched_cert in fetched_certs:
+                self._chase_certificate_issuer(fetched_cert, certs, known_subjects)
 
     def _create_session(self):
         """

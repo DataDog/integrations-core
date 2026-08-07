@@ -33,10 +33,10 @@ def __getattr__(name: str) -> Any:
 
         return load_der_x509_certificate
 
-    if name == 'cryptography_x509_load_pem_certificate':
-        from cryptography.x509 import load_pem_x509_certificate
+    if name == 'cryptography_x509_load_pem_certificates':
+        from cryptography.x509 import load_pem_x509_certificates
 
-        return load_pem_x509_certificate
+        return load_pem_x509_certificates
 
     if name == 'cryptography_x509_ExtensionNotFound':
         from cryptography.x509.extensions import ExtensionNotFound
