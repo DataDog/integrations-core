@@ -16,7 +16,7 @@ files:
           fleet_configurable: true
           value:
             example: true
-            display_default: false
+            display_default: true
             type: boolean
           enabled: true
         - name: istio_mode
@@ -125,7 +125,7 @@ files:
           `istiod_endpoint` or `istio_mesh_endpoint`.
         value:
           example: true
-          display_default: false
+          display_default: true
           type: boolean
       - name: istio_mode
         description: |

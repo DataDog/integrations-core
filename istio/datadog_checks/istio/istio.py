@@ -44,7 +44,7 @@ class Istio(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if is_affirmative(instance.get('use_openmetrics', False)):
+        if is_affirmative(instance.get('use_openmetrics', True)):
             return IstioCheckV2(name, init_config, instances)
         else:
             if instance.get('istiod_endpoint'):
