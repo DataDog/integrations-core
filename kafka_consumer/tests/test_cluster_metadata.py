@@ -1190,6 +1190,34 @@ def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
     assert saved['expire_at'] == expire_at
 
 
+def test_fetch_earliest_offsets_drops_negative_offsets(check):
+    """A negative earliest offset is discarded instead of being reported as a log-start offset."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+    }
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+
+    def negative_offset_for_partition_1(requests, **_kwargs):
+        futures = {}
+        for tp in requests:
+            future = mock.MagicMock()
+            future.result.return_value = mock.MagicMock(offset=10 if tp.partition == 0 else -1533701557)
+            futures[tp] = future
+        return futures
+
+    mock_kafka_client.kafka_client.list_offsets.side_effect = negative_offset_for_partition_1
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    _wire_cache(kafka_consumer_check)
+
+    result = kafka_consumer_check.metadata_collector.fetch_earliest_offsets({'test-topic': [0, 1]})
+
+    assert result == {('test-topic', 0): 10}
+
+
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     """Test that OIDC OAuth token is fetched and passed as Bearer header for Schema Registry."""
     instance = {
