@@ -1,0 +1,52 @@
+{
+  "additional_config_fields": [
+    {
+      "key": "service_principal",
+      "label": "Service principal",
+      "help": "Your Proofpoint TAP service principal.",
+      "editable": true,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "secret",
+      "label": "Secret",
+      "help": "Your Proofpoint TAP secret.",
+      "editable": true,
+      "required": true,
+      "password": {}
+    },
+    {
+      "key": "click_blocked",
+      "label": "Collect click blocked events",
+      "editable": true,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "click_permitted",
+      "label": "Collect click permitted events",
+      "editable": true,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "message_blocked",
+      "label": "Collect message blocked events",
+      "editable": true,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "message_delivered",
+      "label": "Collect message delivered events",
+      "editable": true,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ]
+}

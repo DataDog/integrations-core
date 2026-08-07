@@ -704,6 +704,20 @@ def test_collect_replication_metrics_returns_vars_when_has_replicas_connected():
     assert results.get('Replicas_connected') == 2
 
 
+def test_get_replica_stats_tags_each_mariadb_connection():
+    """Each MariaDB Connection_name maps to its own channel tag in _get_replica_stats."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    mysql_check._config.replication_enabled = True
+    mysql_check._get_replica_replication_status = mock.MagicMock(
+        return_value=[
+            {'Connection_name': 'conn_a', 'Seconds_Behind_Master': 1},
+            {'Connection_name': 'conn_b', 'Seconds_Behind_Master': 2},
+        ]
+    )
+    results = mysql_check._get_replica_stats(mock.MagicMock())
+    assert results['Seconds_Behind_Master'] == {'channel:conn_a': 1, 'channel:conn_b': 2}
+
+
 def test_source_with_zero_replicas_emits_warning_service_check(aggregator, instance_basic):
     """Test that a source with 0 connected replicas emits WARNING for replica-loss detection."""
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
@@ -777,10 +791,28 @@ class TestShowReplicaStatusQuery:
                 'my-channel',
                 'SHOW REPLICA STATUS',
                 (),
-                id='mariadb_ignores_channel',
+                id='mariadb_modern_with_channel',
             ),
             pytest.param(
-                '10.4.0-MariaDB', 'MariaDB', True, '', 'SHOW SLAVE STATUS', (), id='mariadb_legacy_no_channel'
+                '10.5.1-MariaDB',
+                'MariaDB',
+                True,
+                '',
+                'SHOW ALL REPLICAS STATUS',
+                (),
+                id='mariadb_modern_no_channel',
+            ),
+            pytest.param(
+                '10.4.0-MariaDB', 'MariaDB', True, '', 'SHOW ALL SLAVES STATUS', (), id='mariadb_legacy_no_channel'
+            ),
+            pytest.param(
+                '10.4.0-MariaDB',
+                'MariaDB',
+                True,
+                'my-channel',
+                'SHOW SLAVE STATUS',
+                (),
+                id='mariadb_legacy_with_channel',
             ),
         ],
     )

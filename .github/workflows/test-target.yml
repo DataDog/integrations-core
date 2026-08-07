@@ -102,6 +102,8 @@ jobs:
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts to fetch a temporary API key via OIDC
+       id-token: write
     steps:
 
     - name: Set up Windows
@@ -158,6 +160,13 @@ jobs:
         sparse-checkout: .github/actions
         # Use a specific sub-folder
         path: core-temp
+
+    - name: Get Datadog credentials
+      if: github.event.pull_request.head.repo.fork != true
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-test-target-api-key
 
     - name: Install workflow scripts (core)
       if: inputs.repo == 'core'
@@ -220,7 +229,7 @@ jobs:
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
         INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
         INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
-        DD_API_KEY_SECRET: ${{ secrets.DD_API_KEY }}
+        DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
@@ -230,12 +239,12 @@ jobs:
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Tag job for CI Visibility
-      # Skip on fork PRs and non-core repos since secrets won't be available
+      # Skip on fork PRs and non-core repos since dd-sts credentials won't be available
       if: env.INPUT_IS_FORK != 'true' && env.INPUT_REPO == 'core'
       uses: ./.github/actions/tag-job
       with:
         tags: ${{ env.DD_TAGS }}
-        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
         dd_site: ${{ env.DD_SITE }}
 
     - name: Set up Python 2.7

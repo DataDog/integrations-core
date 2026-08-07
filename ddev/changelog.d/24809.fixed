@@ -1,0 +1,1 @@
+Read the repository worktrees once per lookup instead of once per checked path.

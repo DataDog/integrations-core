@@ -1,1 +1,0 @@
-Run `diagnose` on check initialization then emit any warnings and failures as Agent Health events.
