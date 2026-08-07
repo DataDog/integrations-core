@@ -412,6 +412,81 @@ def test_discovery_unknown_placeholder():
     ) in spec.errors
 
 
+def test_discovery_rejects_unknown_conversion() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host!x}"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1, candidate #1, server: Unknown conversion `!x`' in spec.errors
+
+
+def test_discovery_accepts_str_conversion() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host!s}"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert spec.errors == []
+
+
+def test_discovery_rejects_malformed_template() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        "test, test.yaml, discovery, strategy #1, candidate #1, server: Invalid candidate template: "
+        "expected '}' before end of string"
+    ) in spec.errors
+
+
 def test_discovery_rejects_ad_identifiers_field():
     spec = get_spec(
         """
@@ -542,6 +617,44 @@ def test_discovery_candidate_field_cross_check():
     assert (
         'test, test.yaml, discovery, strategy #1, candidate #1, unknown_field: Not a recognized instance option'
     ) in spec.errors
+
+
+def test_discovery_candidate_accepts_literal_values():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/metrics
+                metric_patterns:
+                  include:
+                  - test.metric.{2}
+          options:
+          - template: init_config
+          - template: instances
+            options:
+            - name: endpoint
+              description: endpoint
+              required: true
+              value:
+                type: string
+            - name: metric_patterns
+              description: metric patterns
+              value:
+                type: object
+                additionalProperties: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
 
 
 def test_discovery_local_strategy_accepted():

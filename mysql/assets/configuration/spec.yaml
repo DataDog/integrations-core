@@ -70,7 +70,7 @@ files:
               type: string
 
           - name: dbm
-            display_priority: 2
+            display_priority: 0
             fleet_configurable: true
             description: |
               Set to `true` to enable Database Monitoring.
@@ -356,6 +356,19 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
+
+              - name: binlog_size_metrics
+                description: |
+                  Set to `false` to disable the collection of binary log size metrics.
+
+                  When binary logging is enabled, the check runs `SHOW BINARY LOGS;` to compute the
+                  `mysql.binlog.disk_use` metric. This query relies on binary log mutexes and can be slower on
+                  high traffic MySQL databases and Aurora instances, due to the number of binary log files to
+                  load and iterate. Set this to `false` to skip that query if it impacts your database performance.
+                value:
+                  type: boolean
+                  example: true
                 fleet_configurable: false
 
               - name: schema_size_metrics
@@ -1023,7 +1036,7 @@ files:
                   tags:
                     - test:mysql
                   metric_prefix: mysql
-              custom_queries.display_priority: 1
+              custom_queries.display_priority: 0
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
@@ -1032,7 +1045,7 @@ files:
                 Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
                 other integrations tags.
 
-              tags.display_priority: 3
+              tags.display_priority: 0
       - template: logs
         example:
           - type: file

@@ -4,7 +4,6 @@
 from subprocess import PIPE, STDOUT, Popen
 
 from datadog_checks.base.utils.common import ensure_bytes
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.errors import SubprocessError
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.voltdb.client import Client
@@ -56,27 +55,33 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
 
     def __init__(self, instance):
         # type: (Instance) -> None
-        http = RequestsWrapper(instance, {})
-        self._client = Client(url=instance['url'], http_get=http.get, username='admin', password='admin')
+        # Always use the native binary client for the priming step — the
+        # database client port is available regardless of which transport
+        # the integration under test is configured for.
+        self._client = Client(
+            endpoints=[(common.HOST, common.VOLTDB_CLIENT_PORT)],
+            username='admin',
+            password='admin',
+            use_ssl=common.TLS_ENABLED,
+            ssl_config_file=common.TLS_CONFIG_FILE if common.TLS_ENABLED else None,
+        )
 
     def __call__(self):
         # type: () -> None
-        # Call procedures to make PROCEDURE and PROCEDUREDETAIL metrics show up...
-        # Built-in procedure.
-        r = self._client.request('Hero.insert', parameters=[0, 'Bits'])
-        assert r.status_code == 200
-        assert r.json()["status"] == 1
-        # Custom procedure.
-        r = self._client.request('LookUpHero', parameters=[0])
-        assert r.status_code == 200
-        data = r.json()
-        assert data["status"] == 1
-        rows = data["results"][0]["data"]
-        assert rows == [[0, "Bits"]]
+        try:
+            # Call procedures to make PROCEDURE and PROCEDUREDETAIL metrics show up...
+            r = self._client.call_procedure('Hero.insert', [0, 'Bits'])
+            self._client.raise_for_status(r)
 
-        # Create a snapshot to make SNAPSHOTSTATUS metrics appear.
-        # See: https://docs.voltdb.com/UsingVoltDB/sysprocsave.php
-        block_transactions = 0  # We don't really care, but this is required.
-        r = self._client.request('@SnapshotSave', parameters=['/tmp/voltdb/backup/', 'heroes', block_transactions])
-        assert r.status_code == 200
-        assert r.json()["status"] == 1
+            r = self._client.call_procedure('LookUpHero', [0])
+            self._client.raise_for_status(r)
+            rows = r.tables[0].tuples
+            assert rows == [[0, 'Bits']]
+
+            # Create a snapshot to make SNAPSHOTSTATUS metrics appear.
+            # See: https://docs.voltdb.com/UsingVoltDB/sysprocsave.php
+            block_transactions = 0  # We don't really care, but this is required.
+            r = self._client.call_procedure('@SnapshotSave', ['/tmp/voltdb/backup/', 'heroes', block_transactions])
+            self._client.raise_for_status(r)
+        finally:
+            self._client.close()

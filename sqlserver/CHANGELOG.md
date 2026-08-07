@@ -2,7 +2,33 @@
 
 <!-- towncrier release notes start -->
 
-## 23.2.0 / 2026-06-09
+## 23.4.0 / 2026-08-05
+
+***Added***:
+
+* Add ``query_metrics.collect_plans`` option to disable SQL Server execution plan collection independently of query metrics. ([#23961](https://github.com/DataDog/integrations-core/pull/23961))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+***Fixed***:
+
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
+## 23.3.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Escape SQL Server passwords when building connection strings. ([#24138](https://github.com/DataDog/integrations-core/pull/24138))
+* Parameterize SQL Server Agent job history collection to avoid plan cache churn. ([#24203](https://github.com/DataDog/integrations-core/pull/24203))
+* Parameterize the SQL Server Agent job history row limit. ([#24206](https://github.com/DataDog/integrations-core/pull/24206))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24271](https://github.com/DataDog/integrations-core/pull/24271))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24274](https://github.com/DataDog/integrations-core/pull/24274))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24279](https://github.com/DataDog/integrations-core/pull/24279))
+
+## 23.2.0 / 2026-06-09 / Agent 7.81.0
 
 ***Added***:
 

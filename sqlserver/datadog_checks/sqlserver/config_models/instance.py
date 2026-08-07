@@ -389,6 +389,7 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_plans: Optional[bool] = None
     collection_interval: Optional[float] = None
     disable_secondary_tags: Optional[bool] = None
     dm_exec_query_stats_row_limit: Optional[int] = None

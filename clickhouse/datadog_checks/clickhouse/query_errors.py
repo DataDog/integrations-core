@@ -204,7 +204,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
                 row_dict = {
                     'normalized_query_hash': str(normalized_query_hash),
-                    'hostname': server_node or '',
+                    'clickhouse_node': server_node or '',
                     'query': query_text or '',
                     'user': str(user) if user else '',
                     'query_type': query_type or '',
@@ -296,7 +296,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                 'event_time_microseconds': row.get('event_time_microseconds', 0),
                 'initial_query_id': row.get('initial_query_id', ''),
                 'is_initial_query': row.get('is_initial_query', True),
-                'hostname': row.get('hostname', ''),
+                'clickhouse_node': row.get('clickhouse_node', ''),
                 'exception': row.get('exception', ''),
                 'exception_code': row.get('exception_code', 0),
                 'stack_trace': row.get('stack_trace', ''),

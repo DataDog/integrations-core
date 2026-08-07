@@ -25,6 +25,7 @@ class GitRepository:
         self.__repo_root = repo_root
 
         self.__filtered_tags: dict[str, list[str]] = {}
+        self.__worktree_paths: list[Path] | None = None
 
     @property
     def repo_root(self) -> Path:
@@ -36,9 +37,7 @@ class GitRepository:
         If `include_root` is True, the worktree representing the root of the repo is included.
         If `only_subpaths` is True, worktrees outside of the repo root are not included.
         """
-        worktree_output = self.capture('worktree', 'list', '--porcelain')
-
-        worktree_paths = [Path(line.split()[1]) for line in worktree_output.splitlines() if line.startswith('worktree')]
+        worktree_paths = self.__list_worktrees()
 
         # Use the resolved repo path because git will show the resolved path of the worktrees
         # in the porcelain output
@@ -51,6 +50,20 @@ class GitRepository:
 
         result = [worktree_path for worktree_path in worktree_paths if include_root or worktree_path != repo_root]
         return result
+
+    def __list_worktrees(self) -> list[Path]:
+        """Return every worktree path, asking git once per set of worktrees.
+
+        Callers such as `IntegrationRegistry` ask whether each of hundreds of directories is a
+        worktree, and the answer only changes when this repository adds or removes one.
+        """
+        if self.__worktree_paths is None:
+            output = self.capture('worktree', 'list', '--porcelain')
+            self.__worktree_paths = [
+                Path(line.split()[1]) for line in output.splitlines() if line.startswith('worktree')
+            ]
+
+        return self.__worktree_paths
 
     def is_worktree(self, path: Path, include_root=False, only_subpaths=True) -> bool:
         """
@@ -124,13 +137,15 @@ class GitRepository:
     def push(self, ref):
         return self.capture('push', 'origin', ref)
 
-    def tag(self, value, message=None):
+    def tag(self, value, message=None, ref=None):
         """
-        Create a tag with an optional message.
+        Create a tag with an optional message, optionally at a specific commit/ref.
         """
         cmd = ['tag', value]
         if message is not None:
-            cmd.extend(['--message', value])
+            cmd.extend(['--message', message])
+        if ref is not None:
+            cmd.append(ref)
         return self.capture(*cmd)
 
     def tags(self, glob_pattern=None) -> list[str]:
@@ -189,6 +204,7 @@ class GitRepository:
     def run(self, *args):
         import subprocess
 
+        self.__forget_worktrees(args)
         with self.repo_root.as_cwd():
             try:
                 subprocess.run(['git', *args], check=True)
@@ -198,6 +214,7 @@ class GitRepository:
     def capture(self, *args):
         import subprocess
 
+        self.__forget_worktrees(args)
         with self.repo_root.as_cwd():
             try:
                 process = subprocess.run(
@@ -207,6 +224,11 @@ class GitRepository:
                 raise OSError(f'{str(e)[:-1]}:\n{e.output}') from None
 
         return process.stdout
+
+    def __forget_worktrees(self, args: tuple[str, ...]) -> None:
+        """Drop the cached worktree paths when a command is about to change them."""
+        if args[:1] == ('worktree',) and args[1:2] != ('list',):
+            self.__worktree_paths = None
 
     def merge_base(self, ref_a: str, ref_b: str | None = "HEAD") -> str:
         return self.capture('merge-base', ref_a, ref_b).splitlines()[0]

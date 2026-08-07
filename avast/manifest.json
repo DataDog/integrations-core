@@ -3,7 +3,7 @@
   "app_uuid": "565f6318-d5c4-494f-a001-5427c6be2948",
   "app_id": "avast",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

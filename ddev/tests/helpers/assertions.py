@@ -1,4 +1,13 @@
+import asyncio
 from unittest.mock import _Call, call
+
+import pytest
+
+
+async def assert_blocks(coro, timeout: float = 0.05) -> None:
+    """Assert that a coroutine blocks without completing within the timeout."""
+    with pytest.raises(asyncio.TimeoutError):
+        await asyncio.wait_for(coro, timeout=timeout)
 
 
 def assert_calls(actual_calls: list[_Call], expected_calls: list[_Call], ignored_kwargs: list[str] | None = None):
