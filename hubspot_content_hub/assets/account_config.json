@@ -24,29 +24,43 @@
       "label": "Tags",
       "editable": true,
       "tags": {}
-    },
+    }
+  ],
+  "dataflow_config": [
     {
-      "key": "metrics_enabled",
-      "label": "Metrics",
-      "editable": true,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "hubspot-content-hub-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Metrics",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "metrics_enabled",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "logs_enabled",
-      "label": "Logs",
-      "editable": true,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "hubspot-content-hub-logs",
+      "toggle": {
+        "default": true,
+        "label": "Logs",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "logs_enabled",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "companies_reference_table_enabled",
-      "label": "Companies Reference Table",
-      "editable": true,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "hubspot-content-hub-reference-tables",
+      "toggle": {
+        "default": true,
+        "label": "Companies Reference Table",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "companies_reference_table_enabled",
+        "should_map_legacy_fields": true
       }
     }
   ]
