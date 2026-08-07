@@ -185,13 +185,14 @@ pipeline:
         valueToExtract: info.nodeOutcome
         type: select
     - type: attribute-remapper
-      name: Map `payload.result`, `payload.status`, `info.nodeOutcome`  to
+      name: Map `payload.result`, `payload.status`, `info.nodeOutcome`, `payload.response.status` to
         `evt.outcome`
       enabled: true
       sources:
         - payload.result
         - payload.status
         - info.nodeOutcome
+        - payload.response.status
       sourceType: attribute
       target: evt.outcome
       targetType: attribute
@@ -236,7 +237,7 @@ pipeline:
         valueToExtract: info.treeName
         type: select
     - type: string-builder-processor
-      name: Map `payload.principal[0]` to `info.principal`
+      name: Add `payload.principal[0]` to `info.principal`
       enabled: true
       template: "%{payload.principal}"
       target: info.principal
@@ -296,7 +297,7 @@ pipeline:
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: grok-parser
-          name: Parsing timestamp to `ocsf.time`
+          name: Parse timestamp to `ocsf.time`
           enabled: true
           source: timestamp
           samples:
@@ -336,84 +337,38 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `payload.result`, `payload.status`, `info.nodeOutcome`  to
+          name: Map `payload.result`, `payload.status`, `info.nodeOutcome`, `payload.response.status` to
             `ocsf.status`
           enabled: true
           sources:
             - payload.result
             - payload.status
             - info.nodeOutcome
+            - payload.response.status
           sourceType: attribute
           target: ocsf.status
           targetType: attribute
           preserveSource: true
-          overrideOnConflict: false
+          overrideOnConflict: true
+    - type: pipeline
+      name: OCSF sub pipeline for class Account Change [3001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@source:idm-activity"
+      processors:
         - type: schema-processor
-          name: Apply OCSF schema for 0
+          name: Apply OCSF schema for 3001
           enabled: true
           schema:
             schemaType: ocsf
             version: 1.5.0
-            className: Base Event
-            classUid: 0
+            className: Account Change
+            classUid: 3001
             extensions: []
             profiles: []
           mappers:
-            - type: schema-category-mapper
-              name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-            - type: schema-category-mapper
-              name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Informational
-                  id: 1
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              target: ocsf.metadata.product.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              target: ocsf.metadata.product.vendor_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
-              sources:
-                - ocsf.metadata.event_code
-              target: ocsf.metadata.event_code
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.time` to `ocsf.time`
-              sources:
-                - ocsf.time
-              target: ocsf.time
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.status` to `ocsf.status`
-              sources:
-                - ocsf.status
-              target: ocsf.status
-              preserveSource: true
-              overrideOnConflict: true
             - name: Map `payload._id` to `ocsf.metadata.uid`
               sources:
                 - payload._id
@@ -430,7 +385,7 @@ pipeline:
                   name: Success
                   id: 1
                 - filter:
-                    query: "@ocsf.status:(false OR FALSE OR FAILED)"
+                    query: "@ocsf.status:(false OR FALSE OR FAILED OR Failed OR Failure)"
                   name: Failure
                   id: 2
                 - filter:
@@ -457,25 +412,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-    - type: pipeline
-      name: OCSF sub pipeline for class Account Change [3001]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@source:idm-activity"
-      processors:
-        - type: schema-processor
-          name: Apply OCSF schema for 3001
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Account Change
-            classUid: 3001
-            extensions: []
-            profiles: []
-          mappers:
             - type: schema-remapper
               name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
@@ -562,7 +498,7 @@ pipeline:
                   ocsf.activity_name: Other
                 sources:
                   ocsf.activity_name:
-                    - type
+                    - payload.operation
               type: schema-category-mapper
             - name: ocsf.severity_id
               categories:
@@ -611,6 +547,49 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - name: Map `payload._id` to `ocsf.metadata.uid`
+              sources:
+                - payload._id
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@ocsf.status:(true OR TRUE OR SUCCESS OR SUCCESSFUL)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@ocsf.status:(false OR FALSE OR FAILED OR Failed OR Failure)"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@ocsf.status:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status_id: "99"
+                  ocsf.status: Other
+                sources:
+                  ocsf.status:
+                    - ocsf.status
+              type: schema-category-mapper
+            - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
+              sources:
+                - payload.transactionId
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - type: schema-remapper
               name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
@@ -688,7 +667,7 @@ pipeline:
                   ocsf.activity_name: Other
                 sources:
                   ocsf.activity_name:
-                    - type
+                    - ocsf.metadata.event_code
               type: schema-category-mapper
             - name: ocsf.severity_id
               categories:
@@ -771,6 +750,49 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - name: Map `payload._id` to `ocsf.metadata.uid`
+              sources:
+                - payload._id
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@ocsf.status:(true OR TRUE OR SUCCESS OR SUCCESSFUL)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@ocsf.status:(false OR FALSE OR FAILED OR Failed OR Failure)"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@ocsf.status:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status_id: "99"
+                  ocsf.status: Other
+                sources:
+                  ocsf.status:
+                    - payload.level
+              type: schema-category-mapper
+            - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
+              sources:
+                - payload.transactionId
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - type: schema-remapper
               name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
@@ -847,7 +869,7 @@ pipeline:
                   ocsf.activity_name: Other
                 sources:
                   ocsf.activity_name:
-                    - type
+                    - payload.operation
               type: schema-category-mapper
             - name: ocsf.severity_id
               categories:
@@ -896,6 +918,24 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - name: Map `payload._id` to `ocsf.metadata.uid`
+              sources:
+                - payload._id
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
+              sources:
+                - payload.transactionId
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - type: schema-remapper
               name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
@@ -972,13 +1012,28 @@ pipeline:
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
-            - type: schema-category-mapper
-              name: ocsf.status_id
+            - name: ocsf.status_id
               categories:
                 - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
+                    query: "@ocsf.status:(true OR TRUE OR SUCCESS OR SUCCESSFUL)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@ocsf.status:(false OR FALSE OR FAILED OR Failed OR Failure)"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@ocsf.status:*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status_id: "99"
+                  ocsf.status: Other
+                sources:
+                  ocsf.status:
+                    - ocsf.status
+              type: schema-category-mapper

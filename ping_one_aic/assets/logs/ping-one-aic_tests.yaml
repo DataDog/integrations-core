@@ -532,6 +532,7 @@ tests:
       evt:
         category: "am-access"
         name: "AM-ACCESS-OUTCOME"
+        outcome: "FAILED"
       network:
         client:
           geoip: {}
@@ -552,6 +553,8 @@ tests:
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
+        status: "Failure"
+        status_id: 2
         time: 1772633184742
       payload:
         _id: "a62fa996-47c1-4327-a86c-1c8fd6f475fe-5698"
@@ -781,3 +784,674 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1774982974856
+ -
+  sample: |-
+    {
+        "payload": {
+          "_id": "6eb31b32-1075-423a-bf30-4d30f36876d0-5675",
+          "after": {
+            "_id": "f3f82414-3d3c-4821-8667-1c6603fd1113",
+            "_rev": "cbaa21b8-46bc-47d0-b5f0-d905940b69e5-6554",
+            "accountStatus": "active",
+            "aliasList": [],
+            "assignedDashboard": [],
+            "city": null,
+            "cn": "Carla McJones",
+            "consentedMappings": [],
+            "country": null,
+            "description": null,
+            "devicePrintProfiles": [],
+            "deviceProfiles": [],
+            "displayName": null,
+            "effectiveApplications": [],
+            "effectiveAssignments": [],
+            "effectiveGroups": [],
+            "effectiveRoles": [],
+            "frIndexedDate1": null,
+            "frIndexedDate2": null,
+            "frIndexedDate3": null,
+            "frIndexedDate4": null,
+            "frIndexedDate5": null,
+            "frIndexedInteger1": null,
+            "frIndexedInteger2": null,
+            "frIndexedInteger3": null,
+            "frIndexedInteger4": null,
+            "frIndexedInteger5": null,
+            "frIndexedMultivalued1": [],
+            "frIndexedMultivalued2": [],
+            "frIndexedMultivalued3": [],
+            "frIndexedMultivalued4": [],
+            "frIndexedMultivalued5": [],
+            "frIndexedString1": null,
+            "frIndexedString10": null,
+            "frIndexedString11": null,
+            "frIndexedString12": null,
+            "frIndexedString13": null,
+            "frIndexedString14": null,
+            "frIndexedString15": null,
+            "frIndexedString16": null,
+            "frIndexedString17": null,
+            "frIndexedString18": null,
+            "frIndexedString19": null,
+            "frIndexedString2": null,
+            "frIndexedString20": null,
+            "frIndexedString3": null,
+            "frIndexedString4": null,
+            "frIndexedString5": null,
+            "frIndexedString6": null,
+            "frIndexedString7": null,
+            "frIndexedString8": null,
+            "frIndexedString9": null,
+            "frUnindexedDate1": null,
+            "frUnindexedDate2": null,
+            "frUnindexedDate3": null,
+            "frUnindexedDate4": null,
+            "frUnindexedDate5": null,
+            "frUnindexedInteger1": null,
+            "frUnindexedInteger2": null,
+            "frUnindexedInteger3": null,
+            "frUnindexedInteger4": null,
+            "frUnindexedInteger5": null,
+            "frUnindexedMultivalued1": [],
+            "frUnindexedMultivalued2": [],
+            "frUnindexedMultivalued3": [],
+            "frUnindexedMultivalued4": [],
+            "frUnindexedMultivalued5": [],
+            "frUnindexedString1": null,
+            "frUnindexedString2": null,
+            "frUnindexedString3": null,
+            "frUnindexedString4": null,
+            "frUnindexedString5": null,
+            "givenName": "Carla",
+            "kbaInfo": [
+              {
+                "answer": "REDACTED",
+                "questionId": "1"
+              }
+            ],
+            "mail": "brian+carla@mayalane.com",
+            "memberOfOrgIDs": [],
+            "oathDeviceProfiles": [],
+            "passwordExpirationTime": null,
+            "passwordLastChangedTime": "2026-03-31T17:59:37.587Z",
+            "postalAddress": null,
+            "postalCode": null,
+            "preferences": {
+              "marketing": false,
+              "updates": true
+            },
+            "profileImage": null,
+            "pushDeviceProfiles": [],
+            "sn": "McJones",
+            "stateProvince": null,
+            "telephoneNumber": null,
+            "userName": "carlamj",
+            "webauthnDeviceProfiles": []
+          },
+          "before": null,
+          "changedFields": [
+            "/mail",
+            "/memberOfOrgIDs",
+            "/assignedDashboard",
+            "/password",
+            "/frIndexedMultivalued3",
+            "/consentedMappings",
+            "/frIndexedMultivalued4",
+            "/frIndexedMultivalued5",
+            "/effectiveGroups",
+            "/frIndexedMultivalued1",
+            "/frIndexedMultivalued2",
+            "/devicePrintProfiles",
+            "/givenName",
+            "/_id",
+            "/effectiveAssignments",
+            "/effectiveApplications",
+            "/accountStatus",
+            "/frUnindexedMultivalued1",
+            "/frUnindexedMultivalued3",
+            "/frUnindexedMultivalued2",
+            "/aliasList",
+            "/frUnindexedMultivalued5",
+            "/frUnindexedMultivalued4",
+            "/kbaInfo",
+            "/sn",
+            "/preferences",
+            "/deviceProfiles",
+            "/cn",
+            "/userName",
+            "/oathDeviceProfiles",
+            "/webauthnDeviceProfiles",
+            "/pushDeviceProfiles",
+            "/passwordLastChangedTime",
+            "/effectiveRoles"
+          ],
+          "eventName": "activity",
+          "level": "INFO",
+          "message": "create",
+          "objectId": "managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113",
+          "operation": "CREATE",
+          "passwordChanged": true,
+          "revision": "cbaa21b8-46bc-47d0-b5f0-d905940b69e5-6554",
+          "runAs": "idm-provisioning",
+          "source": "audit",
+          "status": "SUCCESS",
+          "timestamp": "2026-03-31T17:59:37.746Z",
+          "topic": "activity",
+          "transactionId": "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4",
+          "userId": "idm-provisioning"
+        },
+        "source": "idm-activity",
+        "timestamp": "2026-03-31T17:59:37.753925669Z",
+        "type": "application/json"
+    }
+  result:
+    custom:
+      evt:
+        category: "idm-activity"
+        name: "activity"
+        outcome: "SUCCESS"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          user:
+            uid: "idm-provisioning"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        metadata:
+          correlation_uid: "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4"
+          event_code: "activity"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "6eb31b32-1075-423a-bf30-4d30f36876d0-5675"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1774979977753
+      payload:
+        _id: "6eb31b32-1075-423a-bf30-4d30f36876d0-5675"
+        after:
+          _id: "f3f82414-3d3c-4821-8667-1c6603fd1113"
+          _rev: "cbaa21b8-46bc-47d0-b5f0-d905940b69e5-6554"
+          accountStatus: "active"
+          cn: "Carla McJones"
+          givenName: "Carla"
+          kbaInfo:
+           -
+            answer: "REDACTED"
+            questionId: "1"
+          mail: "brian+carla@mayalane.com"
+          passwordLastChangedTime: "2026-03-31T17:59:37.587Z"
+          preferences:
+            marketing: false
+            updates: true
+          sn: "McJones"
+          userName: "carlamj"
+        changedFields:
+         - "/mail"
+         - "/memberOfOrgIDs"
+         - "/assignedDashboard"
+         - "/password"
+         - "/frIndexedMultivalued3"
+         - "/consentedMappings"
+         - "/frIndexedMultivalued4"
+         - "/frIndexedMultivalued5"
+         - "/effectiveGroups"
+         - "/frIndexedMultivalued1"
+         - "/frIndexedMultivalued2"
+         - "/devicePrintProfiles"
+         - "/givenName"
+         - "/_id"
+         - "/effectiveAssignments"
+         - "/effectiveApplications"
+         - "/accountStatus"
+         - "/frUnindexedMultivalued1"
+         - "/frUnindexedMultivalued3"
+         - "/frUnindexedMultivalued2"
+         - "/aliasList"
+         - "/frUnindexedMultivalued5"
+         - "/frUnindexedMultivalued4"
+         - "/kbaInfo"
+         - "/sn"
+         - "/preferences"
+         - "/deviceProfiles"
+         - "/cn"
+         - "/userName"
+         - "/oathDeviceProfiles"
+         - "/webauthnDeviceProfiles"
+         - "/pushDeviceProfiles"
+         - "/passwordLastChangedTime"
+         - "/effectiveRoles"
+        eventName: "activity"
+        level: "INFO"
+        message: "create"
+        objectId: "managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113"
+        operation: "CREATE"
+        passwordChanged: true
+        revision: "cbaa21b8-46bc-47d0-b5f0-d905940b69e5-6554"
+        runAs: "idm-provisioning"
+        source: "audit"
+        status: "SUCCESS"
+        timestamp: "2026-03-31T17:59:37.746Z"
+        topic: "activity"
+        transactionId: "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4"
+        userId: "idm-provisioning"
+      source: "idm-activity"
+      timestamp: "2026-03-31T17:59:37.753925669Z"
+      type: "application/json"
+      usr:
+        id: "idm-provisioning"
+    message: |-
+      {
+        "payload" : {
+          "runAs" : "idm-provisioning",
+          "level" : "INFO",
+          "changedFields" : [ "/mail", "/memberOfOrgIDs", "/assignedDashboard", "/password", "/frIndexedMultivalued3", "/consentedMappings", "/frIndexedMultivalued4", "/frIndexedMultivalued5", "/effectiveGroups", "/frIndexedMultivalued1", "/frIndexedMultivalued2", "/devicePrintProfiles", "/givenName", "/_id", "/effectiveAssignments", "/effectiveApplications", "/accountStatus", "/frUnindexedMultivalued1", "/frUnindexedMultivalued3", "/frUnindexedMultivalued2", "/aliasList", "/frUnindexedMultivalued5", "/frUnindexedMultivalued4", "/kbaInfo", "/sn", "/preferences", "/deviceProfiles", "/cn", "/userName", "/oathDeviceProfiles", "/webauthnDeviceProfiles", "/pushDeviceProfiles", "/passwordLastChangedTime", "/effectiveRoles" ],
+          "source" : "audit",
+          "message" : "create",
+          "userId" : "idm-provisioning",
+          "transactionId" : "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4",
+          "revision" : "cbaa21b8-46bc-47d0-b5f0-d905940b69e5-6554",
+          "passwordChanged" : true,
+          "eventName" : "activity",
+          "topic" : "activity",
+          "_id" : "6eb31b32-1075-423a-bf30-4d30f36876d0-5675",
+          "after" : {
+            "accountStatus" : "active",
+            "preferences" : {
+              "marketing" : false,
+              "updates" : true
+            },
+            "mail" : "brian+carla@mayalane.com",
+            "givenName" : "Carla",
+            "kbaInfo" : [ {
+              "questionId" : "1",
+              "answer" : "REDACTED"
+            } ],
+            "_rev" : "cbaa21b8-46bc-47d0-b5f0-d905940b69e5-6554",
+            "passwordLastChangedTime" : "2026-03-31T17:59:37.587Z",
+            "_id" : "f3f82414-3d3c-4821-8667-1c6603fd1113",
+            "cn" : "Carla McJones",
+            "sn" : "McJones",
+            "userName" : "carlamj"
+          },
+          "operation" : "CREATE",
+          "objectId" : "managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113",
+          "status" : "SUCCESS",
+          "timestamp" : "2026-03-31T17:59:37.746Z"
+        },
+        "source" : "idm-activity",
+        "type" : "application/json",
+        "timestamp" : "2026-03-31T17:59:37.753925669Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774979977753
+ -
+  sample: |-
+     {
+       "payload": {
+         "_id": "29e47e58-6b07-4873-83c8-6d289410127d-50746",
+         "after": {
+           "_id": "ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b",
+           "_rev": "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5262",
+           "name": "WorkAs",
+           "ssoEntities": {
+             "idpLoginUrl": "http://localhost:8080",
+             "oidcId": "WorkAs"
+           },
+           "templateName": "web",
+           "templateVersion": "1.0"
+         },
+         "before": {
+           "_id": "ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b",
+           "_rev": "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5240",
+           "name": "WorkAs",
+           "ssoEntities": {
+             "oidcId": "WorkAs"
+           },
+           "templateName": "web",
+           "templateVersion": "1.0"
+         },
+         "changedFields": [
+           "/ssoEntities"
+         ],
+         "eventName": "activity",
+         "level": "INFO",
+         "message": "",
+         "objectId": "managed/alpha_application/ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b",
+         "operation": "PATCH",
+         "passwordChanged": false,
+         "revision": "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5262",
+         "runAs": "b1f39518-5805-427e-b76e-09851154e05a",
+         "source": "audit",
+         "status": "SUCCESS",
+         "timestamp": "2026-04-02T20:42:46.311Z",
+         "topic": "activity",
+         "transactionId": "f4565b1f-3335-417a-bb4f-c1afe0ad66fb/0",
+         "userId": "b1f39518-5805-427e-b76e-09851154e05a"
+       },
+       "source": "idm-activity",
+       "timestamp": "2026-04-02T20:42:46.312629448Z",
+       "type": "application/json"
+     }
+  result:
+    custom:
+      evt:
+        category: "idm-activity"
+        name: "activity"
+        outcome: "SUCCESS"
+      ocsf:
+        activity_id: 99
+        activity_name: "PATCH"
+        actor:
+          user:
+            uid: "b1f39518-5805-427e-b76e-09851154e05a"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        metadata:
+          correlation_uid: "f4565b1f-3335-417a-bb4f-c1afe0ad66fb/0"
+          event_code: "activity"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "29e47e58-6b07-4873-83c8-6d289410127d-50746"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1775162566312
+      payload:
+        _id: "29e47e58-6b07-4873-83c8-6d289410127d-50746"
+        after:
+          _id: "ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b"
+          _rev: "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5262"
+          name: "WorkAs"
+          ssoEntities:
+            idpLoginUrl: "http://localhost:8080"
+            oidcId: "WorkAs"
+          templateName: "web"
+          templateVersion: "1.0"
+        before:
+          _id: "ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b"
+          _rev: "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5240"
+          name: "WorkAs"
+          ssoEntities:
+            oidcId: "WorkAs"
+          templateName: "web"
+          templateVersion: "1.0"
+        changedFields:
+         - "/ssoEntities"
+        eventName: "activity"
+        level: "INFO"
+        message: ""
+        objectId: "managed/alpha_application/ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b"
+        operation: "PATCH"
+        passwordChanged: false
+        revision: "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5262"
+        runAs: "b1f39518-5805-427e-b76e-09851154e05a"
+        source: "audit"
+        status: "SUCCESS"
+        timestamp: "2026-04-02T20:42:46.311Z"
+        topic: "activity"
+        transactionId: "f4565b1f-3335-417a-bb4f-c1afe0ad66fb/0"
+        userId: "b1f39518-5805-427e-b76e-09851154e05a"
+      source: "idm-activity"
+      timestamp: "2026-04-02T20:42:46.312629448Z"
+      type: "application/json"
+      usr:
+        id: "b1f39518-5805-427e-b76e-09851154e05a"
+    message: |-
+      {
+        "payload" : {
+          "runAs" : "b1f39518-5805-427e-b76e-09851154e05a",
+          "before" : {
+            "ssoEntities" : {
+              "oidcId" : "WorkAs"
+            },
+            "templateName" : "web",
+            "_rev" : "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5240",
+            "name" : "WorkAs",
+            "templateVersion" : "1.0",
+            "_id" : "ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b"
+          },
+          "level" : "INFO",
+          "changedFields" : [ "/ssoEntities" ],
+          "source" : "audit",
+          "message" : "",
+          "userId" : "b1f39518-5805-427e-b76e-09851154e05a",
+          "transactionId" : "f4565b1f-3335-417a-bb4f-c1afe0ad66fb/0",
+          "revision" : "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5262",
+          "passwordChanged" : false,
+          "eventName" : "activity",
+          "topic" : "activity",
+          "_id" : "29e47e58-6b07-4873-83c8-6d289410127d-50746",
+          "after" : {
+            "ssoEntities" : {
+              "idpLoginUrl" : "http://localhost:8080",
+              "oidcId" : "WorkAs"
+            },
+            "templateName" : "web",
+            "_rev" : "8fa0de2b-21d5-4400-8616-7f5d5edeabe9-5262",
+            "name" : "WorkAs",
+            "templateVersion" : "1.0",
+            "_id" : "ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b"
+          },
+          "operation" : "PATCH",
+          "objectId" : "managed/alpha_application/ed4d29f2-cd6e-4fe3-91fa-a4a7f10be88b",
+          "status" : "SUCCESS",
+          "timestamp" : "2026-04-02T20:42:46.311Z"
+        },
+        "source" : "idm-activity",
+        "type" : "application/json",
+        "timestamp" : "2026-04-02T20:42:46.312629448Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1775162566312
+ -
+  sample: |-
+    {
+      "payload": {
+        "_id": "273a7e98-b45d-432c-abb7-09b1a1accc7b-136995",
+        "component": "Authentication",
+        "entries": [
+          {
+            "info": {
+              "authLevel": "0",
+              "displayName": "Data Store Decision",
+              "nodeId": "9fdb38dd-7d6e-45b4-a4a6-dad8ce11b2e9",
+              "nodeOutcome": "false",
+              "nodeType": "DataStoreDecisionNode",
+              "treeName": "Login Public"
+            }
+          }
+        ],
+        "eventName": "AM-NODE-LOGIN-COMPLETED",
+        "level": "INFO",
+        "principal": [
+          "bernaise"
+        ],
+        "realm": "/alpha",
+        "source": "audit",
+        "timestamp": "2026-04-06T11:55:16.028Z",
+        "topic": "authentication",
+        "trackingIds": [
+          "273a7e98-b45d-432c-abb7-09b1a1accc7b-136927"
+        ],
+        "transactionId": "e8d64ac5-d286-4035-8408-eac18aca00a4-request-2/0"
+      },
+      "source": "am-authentication",
+      "timestamp": "2026-04-06T11:55:16.02942242Z",
+      "type": "application/json"
+    }
+  result:
+    custom:
+      evt:
+        category: "am-authentication"
+        name: "AM-NODE-LOGIN-COMPLETED"
+        outcome: "false"
+      info:
+        nodeOutcome: "false"
+        nodeType: "DataStoreDecisionNode"
+        treeName: "Login Public"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "bernaise"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          correlation_uid: "e8d64ac5-d286-4035-8408-eac18aca00a4-request-2/0"
+          event_code: "Login Public"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "273a7e98-b45d-432c-abb7-09b1a1accc7b-136995"
+          version: "1.5.0"
+        service:
+          name: "Access Management"
+        severity: "Informational"
+        severity_id: 1
+        status: "Failure"
+        status_id: 2
+        time: 1775476516029
+        user:
+          name: "bernaise"
+      payload:
+        _id: "273a7e98-b45d-432c-abb7-09b1a1accc7b-136995"
+        component: "Authentication"
+        entries:
+         -
+          info:
+            authLevel: "0"
+            displayName: "Data Store Decision"
+            nodeId: "9fdb38dd-7d6e-45b4-a4a6-dad8ce11b2e9"
+            nodeOutcome: "false"
+            nodeType: "DataStoreDecisionNode"
+            treeName: "Login Public"
+        eventName: "AM-NODE-LOGIN-COMPLETED"
+        level: "INFO"
+        principal:
+         - "bernaise"
+        realm: "/alpha"
+        source: "audit"
+        timestamp: "2026-04-06T11:55:16.028Z"
+        topic: "authentication"
+        trackingIds:
+         - "273a7e98-b45d-432c-abb7-09b1a1accc7b-136927"
+        transactionId: "e8d64ac5-d286-4035-8408-eac18aca00a4-request-2/0"
+      source: "am-authentication"
+      timestamp: "2026-04-06T11:55:16.02942242Z"
+      type: "application/json"
+      usr:
+        id: "bernaise"
+    message: |-
+      {
+        "payload" : {
+          "principal" : [ "bernaise" ],
+          "component" : "Authentication",
+          "entries" : [ {
+            "info" : {
+              "nodeOutcome" : "false",
+              "treeName" : "Login Public",
+              "displayName" : "Data Store Decision",
+              "nodeType" : "DataStoreDecisionNode",
+              "authLevel" : "0",
+              "nodeId" : "9fdb38dd-7d6e-45b4-a4a6-dad8ce11b2e9"
+            }
+          } ],
+          "level" : "INFO",
+          "eventName" : "AM-NODE-LOGIN-COMPLETED",
+          "topic" : "authentication",
+          "realm" : "/alpha",
+          "_id" : "273a7e98-b45d-432c-abb7-09b1a1accc7b-136995",
+          "source" : "audit",
+          "trackingIds" : [ "273a7e98-b45d-432c-abb7-09b1a1accc7b-136927" ],
+          "transactionId" : "e8d64ac5-d286-4035-8408-eac18aca00a4-request-2/0",
+          "timestamp" : "2026-04-06T11:55:16.028Z"
+        },
+        "source" : "am-authentication",
+        "type" : "application/json",
+        "timestamp" : "2026-04-06T11:55:16.02942242Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1775476516029
+ -
+  sample: |-
+     {
+       "payload": {
+         "_id": "7b6d5a19-7d91-48da-b600-5a3590d6442f-4335",
+         "eventName": "AM-CONFIG-CHANGE",
+         "level": "INFO",
+         "objectId": "ou=org-sync-client,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config",
+         "operation": "UNEXPECTED",
+         "realm": "/alpha",
+         "runAs": "id=dsameuser,ou=user,ou=am-config",
+         "source": "audit",
+         "timestamp": "2026-04-02T17:33:01.111Z",
+         "topic": "config",
+         "trackingIds": [
+           "7b6d5a19-7d91-48da-b600-5a3590d6442f-2957"
+         ],
+         "transactionId": "7a144689-d6e4-4dfa-9f02-800c2e4485ef/0",
+         "userId": "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+       },
+       "source": "am-config",
+       "timestamp": "2026-04-02T17:33:01.131776505Z",
+       "type": "application/json"
+     }
+  result:
+ -
+  sample: |-
+    {
+      "payload": {
+        "_id": "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1933",
+        "component": "Authentication",
+        "entries": [
+          {
+            "info": {
+              "authLevel": "0",
+              "displayName": "Identity Store Decision",
+              "nodeId": "7f0c2aee-8c74-4d02-82a6-9d4ed9d11708",
+              "nodeOutcome": "Unexpected",
+              "nodeType": "IdentityStoreDecisionNode",
+              "treeName": "Login"
+            }
+          }
+        ],
+        "eventName": "AM-NODE-LOGIN-COMPLETED",
+        "level": "INFO",
+        "principal": [
+          "carlamj"
+        ],
+        "realm": "/alpha",
+        "source": "audit",
+        "timestamp": "2026-03-31T18:47:21.409Z",
+        "topic": "authentication",
+        "trackingIds": [
+          "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1510"
+        ],
+        "transactionId": "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-6/0"
+      },
+      "source": "am-authentication",
+      "timestamp": "2026-03-31T18:47:21.410587638Z",
+      "type": "application/json"
+    }
+  result:
