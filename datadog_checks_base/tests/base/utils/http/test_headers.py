@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import RequestsWrapper
 
-from .common import DEFAULT_OPTIONS
+from .common import DEFAULT_OPTIONS, get_wire_headers
 
 pytestmark = [pytest.mark.unit]
 
@@ -68,6 +68,53 @@ def test_config_extra_headers_string_values():
     assert http.options['headers'] == complete_headers
 
 
+def test_config_extra_headers_non_canonical_case_takes_precedence_over_the_seeded_default():
+    instance = {'extra_headers': {'accept': 'application/openmetrics-text'}}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.get_header('Accept') == 'application/openmetrics-text'
+
+
+def test_config_extra_headers_override_config_headers_across_case():
+    instance = {'headers': {'x-token': 'from-headers'}, 'extra_headers': {'X-Token': 'from-extra-headers'}}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.get_header('X-Token') == 'from-extra-headers'
+
+
+def test_get_header_reports_the_value_that_reaches_the_wire():
+    """Callers negotiate a default only when a header is unset, so a lookup that disagreed with what
+    is sent would let them overwrite a value the user configured under a different spelling."""
+    http = RequestsWrapper({'extra_headers': {'accept': 'application/openmetrics-text'}}, {})
+
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com/hello')
+
+    assert get.call_args.kwargs['headers']['accept'] == http.get_header('Accept')
+
+
+def test_config_headers_keep_every_configured_spelling():
+    # The header mapping is not deduplicated: requests collapses spellings per request, and the
+    # `Host` detection below reads the exact key. Collapsing here would silently disable the
+    # HostHeaderSSLAdapter for a config that spells Host more than one way.
+    instance = {'headers': {'host': 'first'}, 'extra_headers': {'Host': 'second'}, 'tls_use_host_header': True}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.options['headers'] == {'host': 'first', 'Host': 'second'}
+    assert http.tls_use_host_header is True
+
+
+def test_tls_use_host_header_sees_a_canonically_spelled_host_header():
+    instance = {'headers': {'Host': 'example.com'}, 'tls_use_host_header': True}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.tls_use_host_header is True
+
+
 def test_extra_headers_on_http_method_call():
     instance = {'extra_headers': {'answer': 42}}
     init_config = {}
@@ -97,3 +144,73 @@ def test_extra_headers_on_http_method_call():
     # make sure the original headers are not modified
     assert http.options['headers'] == complete_headers
     assert extra_headers == {"foo": "bar"}
+
+
+def test_request_headers_override_defaults_before_extra_headers():
+    http = RequestsWrapper({'headers': {'X-Default': 'default', 'X-Precedence': 'default'}}, {})
+
+    wire_headers = get_wire_headers(
+        http,
+        headers={'X-Request': 'request', 'X-Precedence': 'request'},
+        extra_headers={'X-Extra': 'extra', 'X-Precedence': 'extra'},
+    )
+
+    assert wire_headers['X-Request'] == 'request'
+    assert wire_headers['X-Extra'] == 'extra'
+    assert wire_headers['X-Precedence'] == 'extra'
+    # A per-request mapping does not discard the configured one.
+    assert wire_headers['X-Default'] == 'default'
+
+
+def test_a_per_request_mapping_keeps_the_configured_headers():
+    # cisco_aci and cloud_foundry_api pass a per-request mapping holding only their session cookie, so
+    # the Agent's User-Agent and everything the user configured reach the wire through the merge alone.
+    http = RequestsWrapper({'extra_headers': {'X-Configured': 'configured'}}, {})
+
+    wire_headers = get_wire_headers(http, headers={'Cookie': 'APIC-cookie=token'})
+
+    assert wire_headers['Cookie'] == 'APIC-cookie=token'
+    assert wire_headers['User-Agent'] == 'Datadog Agent/0.0.0'
+    assert wire_headers['X-Configured'] == 'configured'
+
+
+def test_get_header_default_for_missing():
+    http = RequestsWrapper({}, {})
+    assert http.get_header('X-Missing') is None
+    assert http.get_header('X-Missing', 'fallback') == 'fallback'
+
+
+def test_get_header_case_insensitive():
+    http = RequestsWrapper({}, {})
+    assert http.get_header('accept') == '*/*'
+    assert http.get_header('Accept') == '*/*'
+    assert http.get_header('ACCEPT') == '*/*'
+
+
+def test_set_header():
+    http = RequestsWrapper({}, {})
+    http.set_header('X-Token', 'abc123')
+    assert http.get_header('X-Token') == 'abc123'
+    http.set_header('Accept', 'application/json')
+    assert http.get_header('Accept') == 'application/json'
+
+
+def test_set_header_case_insensitive():
+    http = RequestsWrapper({}, {})
+    http.set_header('accept', 'application/json')
+    # Overwrites the existing 'Accept' key (preserving original casing)
+    assert http.get_header('Accept') == 'application/json'
+    # No duplicate key created
+    assert sum(1 for k in http.options['headers'] if k.lower() == 'accept') == 1
+
+
+def test_set_header_collapses_case_insensitive_duplicates():
+    http = RequestsWrapper({}, {})
+    http.options['headers'] = OrderedDict(
+        (('x-vault-token', 'configured-lower'), ('X-Vault-Token', 'configured-canonical'))
+    )
+
+    http.set_header('X-Vault-Token', 'runtime-token')
+
+    assert http.get_header('X-Vault-Token') == 'runtime-token'
+    assert sum(1 for key in http.options['headers'] if key.lower() == 'x-vault-token') == 1

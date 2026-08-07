@@ -41,15 +41,18 @@ class KubeletBase(AgentCheck):
         try:
             cutoff_date = self.compute_pod_expiration_datetime()
             with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
+                # Parsed from the response bytes rather than its decoded text. A kubelet answering
+                # with a text/* content type and no charset makes the client decode as ISO-8859-1,
+                # which mangles every non-ASCII pod label.
                 if cutoff_date:
                     f = ExpiredPodFilter(cutoff_date)
-                    pod_list = json.load(r.raw, object_hook=f.json_hook)
+                    pod_list = json.loads(r.content, object_hook=f.json_hook)
                     pod_list['expired_count'] = f.expired_count
                     if pod_list.get('items') is not None:
                         # Filter out None items from the list
                         pod_list['items'] = [p for p in pod_list['items'] if p is not None]
                 else:
-                    pod_list = json.load(r.raw)
+                    pod_list = json.loads(r.content)
 
             if pod_list.get('items') is None:
                 # Sanitize input: if no pods are running, 'items' is a NoneObject
