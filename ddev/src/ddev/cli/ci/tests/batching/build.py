@@ -73,10 +73,10 @@ def build_test_units(
         platforms = resolve_platforms(ci_override.get("platforms", []), _supported_os(integration), target=name)
         environments = tuple(environment_provider(integration, platforms))
         if not environments:
-            # The target is still planned, one job per platform, the way `ci_matrix` does. Hatch
-            # reporting nothing testable usually means a `hatch.toml` that never enables a test or
-            # E2E environment, which is worth surfacing even though it does not block the plan.
+            # A `hatch.toml` makes a target testable, so one that enables no test or E2E
+            # environment contradicts itself. Deliberate opt-out is `overrides.ci.<target>.exclude`.
             logger.warning("%s has a hatch.toml but no testable environment", name)
+            continue
 
         definitions.append(
             TargetDefinition(
@@ -178,7 +178,7 @@ def resolve_hatch_environments(
     """Map ddev `Environment` values onto target platforms, keeping environments that test anything.
 
     An environment constrained to specific platforms is routed only to those the target also runs
-    on; an unconstrained one goes to the target's first platform rather than to all of them.
+    on; an unconstrained one runs on every platform the target runs on.
 
     The Python version comes from Hatch's own `python` value, never from the environment name,
     which only encodes it by convention.
@@ -197,7 +197,7 @@ def resolve_hatch_environments(
             # instead of failing the plan.
             candidate_platforms = [by_name[name] for name in environment.platforms if name in by_name]
         else:
-            candidate_platforms = [platforms[0]]
+            candidate_platforms = list(platforms)
 
         python_version = environment.python or default_python_version
         if not PYTHON_VERSION_PATTERN.match(python_version):
