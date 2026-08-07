@@ -26,6 +26,11 @@ class HTTPError(Exception):
 
     Catch this to catch everything the HTTP client can raise. Note that it roots at Exception and not at
     OSError or ValueError, so arms written against the requests tree do not transfer by inheritance.
+
+    The types in this module stay free of any backend import. The client does not raise them directly: it
+    raises the subclasses built in ``http.py`` (``_COMPAT_EXCEPTIONS``), which add the matching requests
+    classes as extra bases so handlers in checks outside this repository keep matching while requests is
+    still the backend. Testing against the types here is unaffected, since those subclasses derive from them.
     """
 
     def __init__(

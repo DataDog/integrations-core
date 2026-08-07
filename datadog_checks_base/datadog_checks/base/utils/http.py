@@ -236,11 +236,60 @@ def _translate_requests_request(
     )
 
 
+def _backend_compat_type(agnostic: type[HTTPError], *backend: type[BaseException]) -> type[HTTPError]:
+    """Build the raised type: the agnostic exception plus its requests counterparts as extra bases.
+
+    The agnostic tree roots at ``Exception``, so an ``except requests.exceptions.*``,
+    ``except RequestException`` or ``except OSError`` arm written against a released
+    ``datadog_checks_base`` stops matching once a check runs on this client. Those arms live in
+    repositories whose CI never sees this one, and the Agent ships a single ``datadog_checks_base``
+    for all of them, so the major version bump warns nobody. While requests is still the backend,
+    carrying the matching backend classes keeps those arms working at no cost.
+
+    Delete this helper and ``_COMPAT_EXCEPTIONS`` when the backend changes, after a deprecation
+    cycle. ``http_exceptions`` itself stays free of any backend import.
+    """
+    compat = type(agnostic.__name__, (agnostic, *backend), {})
+    compat.__module__ = agnostic.__module__
+    compat.__qualname__ = agnostic.__qualname__
+    compat.__doc__ = agnostic.__doc__
+    return compat
+
+
+# Built once at import. Keyed by the agnostic type so tests and callers can resolve what a given
+# agnostic class is actually raised as.
+_COMPAT_EXCEPTIONS: dict[type[HTTPError], type[HTTPError]] = {
+    HTTPError: _backend_compat_type(HTTPError, requests_exceptions.RequestException),
+    HTTPRequestError: _backend_compat_type(HTTPRequestError, requests_exceptions.RequestException),
+    HTTPStatusError: _backend_compat_type(HTTPStatusError, requests_exceptions.HTTPError),
+    HTTPTimeoutError: _backend_compat_type(HTTPTimeoutError, requests_exceptions.Timeout),
+    HTTPConnectTimeoutError: _backend_compat_type(HTTPConnectTimeoutError, requests_exceptions.ConnectTimeout),
+    # requests split this case, so both bases are needed to preserve the old arms: a header-phase
+    # read timeout was ReadTimeout, a body-phase one was ConnectionError.
+    HTTPReadTimeoutError: _backend_compat_type(
+        HTTPReadTimeoutError, requests_exceptions.ReadTimeout, requests_exceptions.ConnectionError
+    ),
+    HTTPConnectionError: _backend_compat_type(HTTPConnectionError, requests_exceptions.ConnectionError),
+    # The translator collapses all four URL types into one agnostic type, so all four are carried.
+    HTTPInvalidURLError: _backend_compat_type(
+        HTTPInvalidURLError,
+        requests_exceptions.InvalidURL,
+        requests_exceptions.MissingSchema,
+        requests_exceptions.InvalidSchema,
+        requests_exceptions.URLRequired,
+    ),
+    HTTPSSLError: _backend_compat_type(HTTPSSLError, requests_exceptions.SSLError),
+}
+
+
 def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
     """Translate a requests exception into the library-agnostic equivalent.
 
     Order is significant. Several requests types subclass others, so the most
     specific must be tested first.
+
+    The type actually raised is the ``_COMPAT_EXCEPTIONS`` entry for the agnostic class, which is a
+    subclass of it. ``isinstance`` against the agnostic type is unaffected.
 
     ``response`` is supplied only by the ``raise_for_status`` seam, which passes the
     agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
@@ -256,28 +305,28 @@ def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapp
             requests_exceptions.URLRequired,
         ),
     ):
-        return HTTPInvalidURLError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPInvalidURLError](message, request=request)
     if isinstance(exc, requests_exceptions.SSLError):
-        return HTTPSSLError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPSSLError](message, request=request)
     if isinstance(exc, requests_exceptions.ConnectTimeout):
-        return HTTPConnectTimeoutError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPConnectTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.ReadTimeout):
-        return HTTPReadTimeoutError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPReadTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.Timeout):
-        return HTTPTimeoutError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError) and any(
         isinstance(cause, Urllib3ReadTimeoutError) for cause in (exc.__context__, exc.args[0] if exc.args else None)
     ):
-        return HTTPReadTimeoutError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPReadTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError):
-        return HTTPConnectionError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPConnectionError](message, request=request)
     if isinstance(exc, requests_exceptions.ContentDecodingError):
-        return HTTPRequestError(message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPRequestError](message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):
-        return HTTPStatusError(message, request=request, response=response)
+        return _COMPAT_EXCEPTIONS[HTTPStatusError](message, request=request, response=response)
     if isinstance(exc, requests_exceptions.RequestException):
-        return HTTPRequestError(message, request=request)
-    return HTTPError(message)
+        return _COMPAT_EXCEPTIONS[HTTPRequestError](message, request=request)
+    return _COMPAT_EXCEPTIONS[HTTPError](message)
 
 
 @contextmanager

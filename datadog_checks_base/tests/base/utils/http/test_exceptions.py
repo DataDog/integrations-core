@@ -9,7 +9,12 @@ import pytest
 import requests
 from urllib3.exceptions import ReadTimeoutError
 
-from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper, _translate_requests_exception
+from datadog_checks.base.utils.http import (
+    _COMPAT_EXCEPTIONS,
+    RequestsWrapper,
+    ResponseWrapper,
+    _translate_requests_exception,
+)
 from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError,
     HTTPConnectTimeoutError,
@@ -41,7 +46,7 @@ def test_transport_exception_mapping(raised, expected):
         with pytest.raises(expected) as exc_info:
             http.get('http://example.test/')
 
-    assert type(exc_info.value) is expected
+    assert type(exc_info.value) is _COMPAT_EXCEPTIONS[expected]
 
 
 def test_phase_specific_timeouts_share_generic_base():
@@ -93,7 +98,9 @@ def test_raise_for_status_maps_to_status_error():
 )
 def test_translate_maps_requests_to_agnostic(raised, expected):
     result = _translate_requests_exception(raised)
-    assert type(result) is expected, f"{type(raised).__name__} -> {type(result).__name__}, expected {expected.__name__}"
+    assert type(result) is _COMPAT_EXCEPTIONS[expected], (
+        f"{type(raised).__name__} -> {type(result).__name__}, expected {expected.__name__}"
+    )
 
 
 def test_invalid_header_leaves_the_value_error_family():
@@ -105,6 +112,81 @@ def test_invalid_header_leaves_the_value_error_family():
     translated = _translate_requests_exception(requests.exceptions.InvalidHeader('multiple values'))
 
     assert not isinstance(translated, ValueError)
+
+
+# Group A2: the backend-compatibility bases. Checks outside this repository catch the requests tree
+# around self.http and the Agent ships one datadog_checks_base for all of them, so while requests is
+# the backend the arms they were written against must keep matching. Each case names the arms that
+# caught the failure before the agnostic types existed.
+@pytest.mark.parametrize(
+    'raised, still_caught_by',
+    [
+        pytest.param(
+            requests.exceptions.ConnectTimeout('boom'),
+            [requests.exceptions.Timeout, requests.exceptions.ConnectionError],
+            id='connect-timeout',
+        ),
+        pytest.param(
+            requests.exceptions.ReadTimeout('slow'),
+            [requests.exceptions.Timeout, requests.exceptions.ReadTimeout],
+            id='read-timeout-header-phase',
+        ),
+        pytest.param(
+            requests.exceptions.ConnectionError('refused'),
+            [requests.exceptions.ConnectionError],
+            id='connection-error',
+        ),
+        pytest.param(
+            requests.exceptions.SSLError('cert'),
+            [requests.exceptions.SSLError, requests.exceptions.ConnectionError],
+            id='ssl',
+        ),
+        pytest.param(requests.exceptions.HTTPError('500'), [requests.exceptions.HTTPError], id='status'),
+        pytest.param(
+            requests.exceptions.MissingSchema('no-scheme'),
+            [requests.exceptions.MissingSchema, requests.exceptions.InvalidURL, ValueError],
+            id='missing-schema',
+        ),
+        pytest.param(
+            requests.exceptions.TooManyRedirects('loop'),
+            [requests.exceptions.RequestException],
+            id='fallthrough',
+        ),
+    ],
+)
+def test_translated_exceptions_keep_matching_the_requests_arms(raised, still_caught_by):
+    translated = _translate_requests_exception(raised)
+
+    # Every failure stays catchable by the two broadest arms, whatever its specific type.
+    assert isinstance(translated, requests.exceptions.RequestException)
+    assert isinstance(translated, OSError)
+
+    for arm in still_caught_by:
+        assert isinstance(translated, arm), f'{type(raised).__name__} no longer caught by except {arm.__name__}'
+
+
+def test_body_phase_read_timeout_keeps_matching_connection_error():
+    # requests reported a body-phase read timeout as ConnectionError, not ReadTimeout. The agnostic
+    # type unifies both phases, so it has to satisfy the arms for both.
+    raised = requests.exceptions.ConnectionError(ReadTimeoutError(None, 'http://example.test/', 'timed out'))
+
+    translated = _translate_requests_exception(raised)
+
+    assert isinstance(translated, HTTPReadTimeoutError)
+    assert isinstance(translated, requests.exceptions.ConnectionError)
+
+
+def test_compat_bases_do_not_leak_into_the_agnostic_tree():
+    # The compat subclass is what gets raised, but the agnostic hierarchy it is built on is unchanged.
+    assert not isinstance(_translate_requests_exception(requests.exceptions.HTTPError('500')), HTTPRequestError)
+    assert not isinstance(
+        _translate_requests_exception(requests.exceptions.ConnectTimeout('boom')), HTTPConnectionError
+    )
+    for agnostic, compat in _COMPAT_EXCEPTIONS.items():
+        assert compat.__bases__[0] is agnostic
+        # Tracebacks and reprs must be indistinguishable from the agnostic class.
+        assert compat.__name__ == agnostic.__name__
+        assert compat.__module__ == agnostic.__module__
 
 
 def requests_exception_types():
