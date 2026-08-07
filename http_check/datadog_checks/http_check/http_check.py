@@ -418,7 +418,8 @@ class HTTPCheck(AgentCheck):
         sock.connect((host, port))
 
         context = self.get_tls_context()
-        context.load_verify_locations(instance_ca_certs)
+        # ssl opens this path itself; validate at the handoff.
+        context.load_verify_locations(self.os.validate_path(instance_ca_certs))
 
         ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
         return ssl_sock.getpeercert(binary_form=True)

@@ -28,7 +28,7 @@ class GuarddogCheck(AgentCheck):
     def get_guarddog_output(self, command_parts) -> subprocess.CompletedProcess:
         try:
             self.log.debug("Running command: %s", command_parts)
-            cmd_output_with_abs_path = subprocess.run(command_parts, capture_output=True, text=True)
+            cmd_output_with_abs_path = self.os.run(command_parts, capture_output=True, text=True)
             return cmd_output_with_abs_path
         except FileNotFoundError as cmd_error:
             err_message = "GuardDog is not found at configured path."
@@ -50,12 +50,12 @@ class GuarddogCheck(AgentCheck):
             self.log.error(err_message)
             raise ConfigurationError(err_message)
 
-        elif not os.path.exists(self.path):
+        elif not self.os.exists(self.path):
             err_message = f"Dependency file does not exist at the configured path: {self.path}"
             self.log.error(err_message)
             raise ConfigurationError(err_message)
 
-        elif not os.access(self.path, os.R_OK):
+        elif not self.os.access(self.path, os.R_OK):
             err_message = f"Dependency file not readable by agent: {self.path}"
             self.log.error(err_message)
             raise ConfigurationError(err_message)

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-import subprocess
 from datetime import datetime, timezone
 from ipaddress import ip_address
 from typing import Any, Dict, List, Set, Tuple, Union
@@ -260,7 +259,7 @@ class LustreCheck(AgentCheck):
             cmd.insert(0, "sudo")
         try:
             self.log.debug('Running command: %s', cmd)
-            output = subprocess.run(
+            output = self.os.run(
                 cmd, timeout=5, shell=False, capture_output=True, text=True
             )  # Explicitly disable shell invocation to prevent command injection
             if not output.returncode == 0 and output.stderr:

@@ -84,11 +84,11 @@ class CactiCheck(AgentCheck):
     def _get_whitelist_patterns(self, whitelist=None):
         patterns = []
         if whitelist:
-            if not os.path.isfile(whitelist) or not os.access(whitelist, os.R_OK):
+            if not self.os.isfile(whitelist) or not self.os.access(whitelist, os.R_OK):
                 # Don't run the check if the whitelist is unavailable
                 self.log.exception("Unable to read whitelist file at %s", whitelist)
 
-            wl = open(whitelist)
+            wl = self.os.open(whitelist)
             for line in wl:
                 patterns.append(line.strip())
             wl.close()

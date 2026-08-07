@@ -8,8 +8,6 @@ try:
 except ImportError:
     from simplejson import JSONDecodeError
 
-import os
-import subprocess
 from typing import Dict, List  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -48,7 +46,7 @@ class GlusterfsCheck(AgentCheck):
             if path.endswith('/run'):
                 path = path[:-4]
             path = path + GSTATUS_PATH_SUFFIX
-            if os.path.exists(path):
+            if self.os.exists(path):
                 self.gstatus_cmd = path
             else:
                 raise ConfigurationError(
@@ -58,7 +56,7 @@ class GlusterfsCheck(AgentCheck):
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
     def get_gstatus_output(self, cmd):
-        res = subprocess.run(cmd.split(), capture_output=True, text=True)
+        res = self.os.run(cmd.split(), capture_output=True, text=True)
         return res.stdout, res.stderr, res.returncode
 
     def check(self, _):

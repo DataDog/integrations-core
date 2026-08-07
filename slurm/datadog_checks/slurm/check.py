@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-import subprocess
 import time
 from dataclasses import dataclass
 from datetime import timedelta
@@ -35,14 +34,6 @@ from .constants import (
 )
 
 
-def get_subprocess_output(cmd):
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        return result.stdout, result.stderr, result.returncode
-    except Exception as e:
-        return None, f"Error running {cmd}: {e}", 1
-
-
 def parse_duration(time_str):
     try:
         hours, minutes, seconds = map(int, time_str.split(':'))
@@ -70,6 +61,13 @@ class ProcessPidMatch:
 class SlurmCheck(AgentCheck, ConfigMixin):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'slurm'
+
+    def get_subprocess_output(self, cmd):
+        try:
+            result = self.os.run(cmd, capture_output=True, text=True)
+            return result.stdout, result.stderr, result.returncode
+        except Exception as e:
+            return None, f"Error running {cmd}: {e}", 1
 
     def get_slurm_command(self, cmd_name, params):
         cmd_path = self.instance.get(f'{cmd_name}_path', os.path.join(self.slurm_binaries_dir, cmd_name))
@@ -175,7 +173,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         for name, cmd, process_func in commands:
             self.log.debug("Running %s command: %s", name, cmd)
-            out, err, ret = get_subprocess_output(cmd)
+            out, err, ret = self.get_subprocess_output(cmd)
             if ret != 0:
                 self.log.error("Error running %s: %s", name, err)
             elif out:
@@ -344,7 +342,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def process_seff(self, job_id, tags):
         cmd = self.seff_cmd + [str(job_id)]
         self.log.debug("Running seff command: %s", cmd)
-        out, err, ret = get_subprocess_output(cmd)
+        out, err, ret = self.get_subprocess_output(cmd)
         if ret != 0 or not out:
             self.log.debug("seff command failed for job %s: %s", job_id, err)
             return
@@ -605,7 +603,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # 3772     14       batch    -       -
         base_cmd = self.scontrol_cmd[:-1]
         hostname = os.uname()[1]
-        slurm_node, _, _ = get_subprocess_output(base_cmd + ["show", "hostname", hostname])
+        slurm_node, _, _ = self.get_subprocess_output(base_cmd + ["show", "hostname", hostname])
         lines = output.strip().splitlines()
         headers = lines[0].split()
 
@@ -687,7 +685,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         host_pid_matches_by_namespace_pid = {}
 
         try:
-            proc_entries = os.scandir(host_proc)
+            proc_entries = self.os.scandir(host_proc)
         except OSError as e:
             self.log.debug("Unable to scan host proc path '%s': %s", host_proc, e)
             return host_pid_matches_by_namespace_pid
@@ -708,7 +706,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def _read_namespace_pids(self, proc_path, host_pid):
         try:
-            with open(os.path.join(proc_path, "status")) as status_file:
+            with self.os.open(os.path.join(proc_path, "status")) as status_file:
                 for line in status_file:
                     if line.startswith("NSpid:"):
                         return line.split()[1:]
@@ -721,7 +719,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # Tries to enrich the scontrol job with additional details from squeue.
         try:
             cmd = self.get_slurm_command('squeue', ["-j", job_id, "-ho", "%u %T %j"])
-            res, err, code = get_subprocess_output(cmd)
+            res, err, code = self.get_subprocess_output(cmd)
 
             if code == 0 and res.strip():
                 output_line = res.strip()
@@ -745,7 +743,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # even if it fails and thus should not stop the check from running.
         try:
             # slurm 21.08.6\n
-            out, err, ret = get_subprocess_output([self.sinfo_partition_cmd[0], '--version'])
+            out, err, ret = self.get_subprocess_output([self.sinfo_partition_cmd[0], '--version'])
             if ret != 0:
                 self.log.error("Error running sinfo --version: %s", err)
             elif out:

@@ -7,7 +7,6 @@ Collects network metrics.
 """
 
 import re
-import shutil
 import socket
 
 import psutil
@@ -21,10 +20,6 @@ try:
     import fcntl
 except ImportError:
     fcntl = None
-
-
-def find_executable(name):
-    return shutil.which(name)
 
 
 class Network(AgentCheck):
@@ -73,6 +68,9 @@ class Network(AgentCheck):
         # along with a few other things
         self._setup_metrics(self.instance)
         self.check_initializations.append(self._validate)
+
+    def find_executable(self, name):
+        return self.os.which(name)
 
     def _validate(self):
         if not isinstance(self._excluded_ifaces, list):
@@ -295,7 +293,7 @@ class Network(AgentCheck):
 
         if proc_location != "/proc":
             # If we have `ss`, we're fine with a non-standard `/proc` location
-            if find_executable("ss") is None:
+            if self.find_executable("ss") is None:
                 self.warning(
                     "Cannot collect connection state: `ss` cannot be found and currently with a custom /proc path: %s",
                     proc_location,

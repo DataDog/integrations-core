@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError
 
 from . import Network
 from .const import BSD_TCP_METRICS
@@ -24,7 +24,7 @@ class BSDNetwork(Network):
             netstat_flags.append('-W')
 
         try:
-            output, _, _ = get_subprocess_output(["netstat"] + netstat_flags, self.log)
+            output, _, _ = self.os.get_subprocess_output(["netstat"] + netstat_flags, self.log)
             lines = output.splitlines()
             # Name  Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll
             # lo0   16384 <Link#1>                        318258     0  428252203   318258     0  428252203     0
@@ -90,7 +90,7 @@ class BSDNetwork(Network):
             self.log.exception("Error collecting connection stats.")
 
         try:
-            netstat, _, _ = get_subprocess_output(["netstat", "-s", "-p", "tcp"], self.log)
+            netstat, _, _ = self.os.get_subprocess_output(["netstat", "-s", "-p", "tcp"], self.log)
             # 3651535 packets sent
             #         972097 data packets (615753248 bytes)
             #         5009 data packets (2832232 bytes) retransmitted
@@ -120,8 +120,8 @@ class BSDNetwork(Network):
         if self.is_collect_cx_state_runnable(net_proc_base_location):
             try:
                 self.log.debug("Using `netstat` to collect connection state")
-                output_tcp, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"], self.log)
-                output_udp, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "udp"], self.log)
+                output_tcp, _, _ = self.os.get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"], self.log)
+                output_udp, _, _ = self.os.get_subprocess_output(["netstat", "-n", "-a", "-p", "udp"], self.log)
                 lines = output_tcp.splitlines() + output_udp.splitlines()
                 # Active Internet connections (w/o servers)
                 # Proto Recv-Q Send-Q Local Address           Foreign Address         State

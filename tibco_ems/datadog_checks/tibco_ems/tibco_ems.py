@@ -87,7 +87,7 @@ class TibcoEMSCheck(AgentCheck):
 
     def run_tibco_command(self):
         try:
-            output = subprocess.run(self.cmd, capture_output=True).stdout
+            output = self.os.run(self.cmd, capture_output=True).stdout
         except subprocess.CalledProcessError as e:
             self.log.error('Error running command: %s', e)
             return

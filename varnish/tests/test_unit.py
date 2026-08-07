@@ -15,7 +15,6 @@ pyestmark = [pytest.mark.unit]
 
 @mock.patch('datadog_checks.varnish.varnish.geteuid')
 @mock.patch('datadog_checks.varnish.varnish.Varnish._get_version_info')
-@mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=mocks.backend_manual_unhealthy_mock)
 @pytest.mark.parametrize(
     'version, uuid, expected_cmd',
     [
@@ -37,7 +36,7 @@ pyestmark = [pytest.mark.unit]
     ],
 )
 def test_command_line_manually_unhealthy(
-    mock_subprocess, mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd
+    mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd, mock_os
 ):
     """
     Test the varnishadm output with manually set health
@@ -48,9 +47,10 @@ def test_command_line_manually_unhealthy(
 
     mock_version.return_value = version
     mock_geteuid.return_value = uuid
+    mock_os.get_subprocess_output.side_effect = mocks.backend_manual_unhealthy_mock
     check.check(instance)
 
-    args, _ = mock_subprocess.call_args
+    args, _ = mock_os.get_subprocess_output.call_args
     assert args[0] == expected_cmd
     aggregator.assert_service_check(
         "varnish.backend_healthy", status=check.CRITICAL, tags=['backend:default', 'varnish_cluster:webs'], count=1
@@ -150,7 +150,7 @@ def test_command_line_manually_unhealthy(
     ],
 )
 def test_command_line_healthy(
-    mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd, output_mock
+    mock_version, mock_geteuid, aggregator, instance, version, uuid, expected_cmd, output_mock, mock_os
 ):
     """
     Test the Varnishadm output for version >= 4.x
@@ -162,10 +162,10 @@ def test_command_line_healthy(
     mock_version.return_value = version
     mock_geteuid.return_value = uuid
 
-    with mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=output_mock) as mock_subprocess:
-        check.check(instance)
-        args, _ = mock_subprocess.call_args
-        assert args[0] == expected_cmd
+    mock_os.get_subprocess_output.side_effect = output_mock
+    check.check(instance)
+    args, _ = mock_os.get_subprocess_output.call_args
+    assert args[0] == expected_cmd
     aggregator.assert_service_check(
         "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'varnish_cluster:webs'], count=1
     )

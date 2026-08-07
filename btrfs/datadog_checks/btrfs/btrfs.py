@@ -13,6 +13,7 @@ from collections import defaultdict
 import psutil
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.os_wrapper import unchecked_os
 
 MIXED = "mixed"
 DATA = "data"
@@ -84,7 +85,8 @@ def sized_array(count):
 
 class FileDescriptor(object):
     def __init__(self, mountpoint):
-        self.fd = os.open(mountpoint, os.O_DIRECTORY)
+        # SKIP_OS_WRAPPER_VALIDATION: mountpoints come from psutil, not config.
+        self.fd = unchecked_os.os_open(mountpoint, os.O_DIRECTORY)
 
     def __enter__(self):
         return self

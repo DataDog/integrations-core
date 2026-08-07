@@ -9,23 +9,11 @@ http://gunicorn.org/
 """
 
 import re
-import subprocess
 import time
 
 import psutil
 
 from datadog_checks.base import AgentCheck
-
-
-def get_gunicorn_version(cmd):
-    """
-    Adapter around a subprocess call to gunicorn.
-    """
-    # Splitting cmd by whitespace is "Good Enough"(tm):
-    # - shex.split is not available on Windows
-    # - passing shell=True exposes us to shell injection vulnerabilities since we get cmd from user config
-    res = subprocess.run(cmd.split(), capture_output=True, text=True)
-    return res.stdout, res.stderr, res.returncode
 
 
 class GUnicornCheck(AgentCheck):
@@ -175,11 +163,19 @@ class GUnicornCheck(AgentCheck):
         if raw_version:
             self.set_metadata('version', raw_version)
 
+    def get_gunicorn_version(self, cmd):
+        """Adapter around a subprocess call to gunicorn."""
+        # Splitting cmd by whitespace is "Good Enough"(tm):
+        # - shex.split is not available on Windows
+        # - passing shell=True exposes us to shell injection vulnerabilities since we get cmd from user config
+        res = self.os.run(cmd.split(), capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
+
     def _get_version(self):
         """Get version from `gunicorn --version`"""
         cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
-            pc_out, pc_err, _ = get_gunicorn_version(cmd)
+            pc_out, pc_err, _ = self.get_gunicorn_version(cmd)
         except OSError:
             self.log.debug("Error collecting gunicorn version.")
             return None

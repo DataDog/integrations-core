@@ -8,6 +8,7 @@ from urllib.parse import unquote, urlparse
 
 import socks
 
+from datadog_checks.base.utils.os_wrapper import unchecked_os
 from datadog_checks.base.utils.platform import Platform
 
 EMBEDDED_DIR = 'embedded'
@@ -21,7 +22,7 @@ def get_ca_certs_path():
     Get a path to the trusted certificates of the system
     """
     for f in _get_ca_certs_paths():
-        if os.path.exists(f):
+        if unchecked_os.exists(f):
             return f
     return None
 

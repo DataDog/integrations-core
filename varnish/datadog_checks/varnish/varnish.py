@@ -11,7 +11,6 @@ from packaging.version import Version
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class BackendStatus(object):
@@ -128,7 +127,7 @@ class Varnish(AgentCheck):
         if self.name is not None:
             cmd.extend(['-n', self.name])
 
-        output, _, _ = get_subprocess_output(cmd, self.log)
+        output, _, _ = self.os.get_subprocess_output(cmd, self.log)
         return output
 
     def check(self, _):
@@ -168,7 +167,7 @@ class Varnish(AgentCheck):
 
         err, output = None, None
         try:
-            output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
+            output, err, _ = self.os.get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
         except OSError as e:
             self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
             output = None
@@ -178,7 +177,9 @@ class Varnish(AgentCheck):
 
     def _get_version_info(self):
         # Get the varnish version from varnishstat
-        output, error, _ = get_subprocess_output(self.varnishstat_path + ["-V"], self.log, raise_on_empty_output=False)
+        output, error, _ = self.os.get_subprocess_output(
+            self.varnishstat_path + ["-V"], self.log, raise_on_empty_output=False
+        )
 
         # Assumptions regarding varnish's version
         varnishstat_format = "json"

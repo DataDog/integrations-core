@@ -366,7 +366,7 @@ class MongoDb(AgentCheck):
 
     def _diagnose_readable(self, name, path, option_name):
         try:
-            open(path).close()
+            self.os.open(path).close()
         except FileNotFoundError:
             self.diagnosis.fail(name, f"file `{path}` provided in the `{option_name}` option does not exist")
         except OSError as exc:
