@@ -7,6 +7,7 @@ import pytest
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
@@ -561,16 +562,16 @@ async def test_before_agent_send_exception_is_swallowed(scope: AgentScope) -> No
 
 
 # ---------------------------------------------------------------------------
-# on_before_goal_check and on_after_goal_check
+# on_before_task_validation and on_after_task_validation
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("event", ["before", "after"], ids=["before", "after"])
-async def test_goal_check_callbacks_register_fire_and_swallow_exceptions(event):
+async def test_task_validation_callbacks_register_fire_and_swallow_exceptions(event):
     cb = CallbackSet()
     fired: list = []
 
-    decorator = cb.on_before_goal_check if event == "before" else cb.on_after_goal_check
+    decorator = cb.on_before_task_validation if event == "before" else cb.on_after_task_validation
 
     @decorator
     async def bad(*args):
@@ -581,45 +582,45 @@ async def test_goal_check_callbacks_register_fire_and_swallow_exceptions(event):
         fired.append(args)
 
     if event == "before":
-        await cb.fire_before_goal_check("phase-a", "task-x", 3)
+        await cb.fire_before_task_validation("phase-a", "task-x", 3)
         assert fired == [("phase-a", "task-x", 3)]
     else:
-        await cb.fire_after_goal_check("phase-a", "task-x", 3, False, "missing y")
-        assert fired == [("phase-a", "task-x", 3, False, "missing y")]
+        await cb.fire_after_task_validation("phase-a", "task-x", 3, TaskValidationStatus.RETRYING, "missing y")
+        assert fired == [("phase-a", "task-x", 3, TaskValidationStatus.RETRYING, "missing y")]
 
 
-async def test_callbacks_dispatches_goal_check_to_all_sets():
+async def test_callbacks_dispatches_task_validation_to_all_sets():
     s1, s2 = CallbackSet(), CallbackSet()
     fired: list = []
 
-    @s1.on_before_goal_check
+    @s1.on_before_task_validation
     async def h1(phase_id, name, attempt):
         fired.append(("s1", phase_id, name, attempt))
 
-    @s2.on_after_goal_check
-    async def h2(phase_id, name, attempt, valid, reason):
-        fired.append(("s2", phase_id, name, attempt, valid, reason))
+    @s2.on_after_task_validation
+    async def h2(phase_id, name, attempt, status, reason):
+        fired.append(("s2", phase_id, name, attempt, status, reason))
 
     cb = Callbacks([s1, s2])
-    await cb.fire_before_goal_check("phase-a", "t", 1)
-    await cb.fire_after_goal_check("phase-a", "t", 1, True, "")
+    await cb.fire_before_task_validation("phase-a", "t", 1)
+    await cb.fire_after_task_validation("phase-a", "t", 1, TaskValidationStatus.PASSED, "")
     assert fired == [
         ("s1", "phase-a", "t", 1),
-        ("s2", "phase-a", "t", 1, True, ""),
+        ("s2", "phase-a", "t", 1, TaskValidationStatus.PASSED, ""),
     ]
 
 
-async def test_goal_callbacks_distinguish_duplicate_task_names_across_phases():
+async def test_validation_callbacks_distinguish_duplicate_task_names_across_phases():
     callback_set = CallbackSet()
     fired: list[tuple[str, str]] = []
 
-    @callback_set.on_before_goal_check
+    @callback_set.on_before_task_validation
     async def record(phase_id: str, task_name: str, attempt: int) -> None:
         fired.append((phase_id, task_name))
 
     callbacks = Callbacks([callback_set])
-    await callbacks.fire_before_goal_check("phase-a", "review", 1)
-    await callbacks.fire_before_goal_check("phase-b", "review", 1)
+    await callbacks.fire_before_task_validation("phase-a", "review", 1)
+    await callbacks.fire_before_task_validation("phase-b", "review", 1)
 
     assert fired == [("phase-a", "review"), ("phase-b", "review")]
 
@@ -646,8 +647,8 @@ async def test_callbacks_empty_is_noop(
     await callbacks.fire_phase_finish("p")
     await callbacks.fire_phase_error("p", RuntimeError("boom"))
     await callbacks.fire_run_error()
-    await callbacks.fire_before_goal_check("p", "t", 1)
-    await callbacks.fire_after_goal_check("p", "t", 1, True, "")
+    await callbacks.fire_before_task_validation("p", "t", 1)
+    await callbacks.fire_after_task_validation("p", "t", 1, TaskValidationStatus.PASSED, "")
 
 
 async def test_callbacks_dispatches_to_all_sets(scope: AgentScope, response: AgentResponse) -> None:

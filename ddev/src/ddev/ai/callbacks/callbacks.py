@@ -6,6 +6,7 @@ from typing import Any, Protocol
 
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolCall
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
@@ -100,16 +101,23 @@ class OnRunErrorCallback(Protocol):
     async def __call__(self) -> None: ...
 
 
-class OnBeforeGoalCheckCallback(Protocol):
-    """Called immediately before each reviewer agent run for a task with a goal."""
+class OnBeforeTaskValidationCallback(Protocol):
+    """Called immediately before each validation attempt for a task."""
 
     async def __call__(self, phase_id: str, task_name: str, attempt: int) -> None: ...
 
 
-class OnAfterGoalCheckCallback(Protocol):
-    """Called after each reviewer agent run, with the parsed verdict."""
+class OnAfterTaskValidationCallback(Protocol):
+    """Called after each validation attempt, with its status."""
 
-    async def __call__(self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None: ...
+    async def __call__(
+        self,
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
+    ) -> None: ...
 
 
 # ---------------------------------------------------------------------------
@@ -147,8 +155,8 @@ class CallbackSet:
         self._on_phase_finish: list[OnPhaseFinishCallback] = []
         self._on_phase_error: list[OnPhaseErrorCallback] = []
         self._on_run_error: list[OnRunErrorCallback] = []
-        self._on_before_goal_check: list[OnBeforeGoalCheckCallback] = []
-        self._on_after_goal_check: list[OnAfterGoalCheckCallback] = []
+        self._on_before_task_validation: list[OnBeforeTaskValidationCallback] = []
+        self._on_after_task_validation: list[OnAfterTaskValidationCallback] = []
 
     async def _fire(self, handlers: list[Any], *args: Any) -> None:
         for handler in handlers:
@@ -248,21 +256,26 @@ class CallbackSet:
     async def fire_run_error(self) -> None:
         await self._fire(self._on_run_error)
 
-    def on_before_goal_check(self, func: OnBeforeGoalCheckCallback) -> OnBeforeGoalCheckCallback:
-        self._on_before_goal_check.append(func)
+    def on_before_task_validation(self, func: OnBeforeTaskValidationCallback) -> OnBeforeTaskValidationCallback:
+        self._on_before_task_validation.append(func)
         return func
 
-    async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
-        await self._fire(self._on_before_goal_check, phase_id, task_name, attempt)
+    async def fire_before_task_validation(self, phase_id: str, task_name: str, attempt: int) -> None:
+        await self._fire(self._on_before_task_validation, phase_id, task_name, attempt)
 
-    def on_after_goal_check(self, func: OnAfterGoalCheckCallback) -> OnAfterGoalCheckCallback:
-        self._on_after_goal_check.append(func)
+    def on_after_task_validation(self, func: OnAfterTaskValidationCallback) -> OnAfterTaskValidationCallback:
+        self._on_after_task_validation.append(func)
         return func
 
-    async def fire_after_goal_check(
-        self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str
+    async def fire_after_task_validation(
+        self,
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
     ) -> None:
-        await self._fire(self._on_after_goal_check, phase_id, task_name, attempt, valid, reason)
+        await self._fire(self._on_after_task_validation, phase_id, task_name, attempt, status, reason)
 
 
 class Callbacks:
@@ -327,12 +340,17 @@ class Callbacks:
         for s in self._sets:
             await s.fire_run_error()
 
-    async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
+    async def fire_before_task_validation(self, phase_id: str, task_name: str, attempt: int) -> None:
         for s in self._sets:
-            await s.fire_before_goal_check(phase_id, task_name, attempt)
+            await s.fire_before_task_validation(phase_id, task_name, attempt)
 
-    async def fire_after_goal_check(
-        self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str
+    async def fire_after_task_validation(
+        self,
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
     ) -> None:
         for s in self._sets:
-            await s.fire_after_goal_check(phase_id, task_name, attempt, valid, reason)
+            await s.fire_after_task_validation(phase_id, task_name, attempt, status, reason)

@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig, TaskConfig
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
@@ -451,20 +452,31 @@ async def run_validation_loop(
     reviewer_process: ReActProcess | None = None
     previous_check: ReviewerCheckResult | None = None
 
+    async def _succeed() -> ValidationLoopOutcome:
+        await callbacks.fire_after_task_validation(
+            phase_id,
+            task.name,
+            attempts,
+            TaskValidationStatus.PASSED,
+            "",
+        )
+        return ValidationLoopOutcome(
+            final_result=worker_result,
+            attempts=attempts,
+            total_input_tokens=total_in,
+            total_output_tokens=total_out,
+        )
+
     try:
         while True:
             attempts += 1
+            await callbacks.fire_before_task_validation(phase_id, task.name, attempts)
             failure_reason = run_deterministic_checks(deterministic_checks).failure_reason()
             reviewer_feedback: tuple[str, str] | None = None
 
             if failure_reason is None:
                 if goal_text is None:
-                    return ValidationLoopOutcome(
-                        final_result=worker_result,
-                        attempts=attempts,
-                        total_input_tokens=total_in,
-                        total_output_tokens=total_out,
-                    )
+                    return await _succeed()
                 if reviewer_process is None:
                     reviewer_process = build_reviewer_process(
                         task=task,
@@ -483,29 +495,28 @@ async def run_validation_loop(
                 if needs_reset:
                     await reviewer_process.reset()
 
-                await callbacks.fire_before_goal_check(phase_id, task.name, attempts)
                 reviewer_result = await _run_reviewer_once(reviewer_process, user_message)
                 previous_check = reviewer_result
                 total_in += reviewer_result.input_tokens
                 total_out += reviewer_result.output_tokens
-                await callbacks.fire_after_goal_check(
-                    phase_id,
-                    task.name,
-                    attempts,
-                    reviewer_result.valid,
-                    reviewer_result.reason,
-                )
                 if reviewer_result.valid:
-                    return ValidationLoopOutcome(
-                        final_result=worker_result,
-                        attempts=attempts,
-                        total_input_tokens=total_in,
-                        total_output_tokens=total_out,
-                    )
+                    return await _succeed()
                 failure_reason = reviewer_result.reason
                 reviewer_feedback = (goal_text, reviewer_result.verdict_json)
 
-            if attempts >= task.max_validation_attempts:
+            validation_status = (
+                TaskValidationStatus.RETRYING
+                if attempts < task.max_validation_attempts
+                else TaskValidationStatus.FAILED
+            )
+            await callbacks.fire_after_task_validation(
+                phase_id,
+                task.name,
+                attempts,
+                validation_status,
+                failure_reason,
+            )
+            if validation_status is TaskValidationStatus.FAILED:
                 raise ValidationAttemptsExhausted(
                     f"Task {task.name!r} failed validation after "
                     f"{attempts} attempts. Last validation reason: {failure_reason}"

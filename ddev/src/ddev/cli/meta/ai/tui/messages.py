@@ -12,6 +12,7 @@ from textual.message import Message
 
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolCall
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
@@ -136,8 +137,8 @@ class AgentBeforeSend(Message):
         self.iteration = iteration
 
 
-class BeforeGoalCheck(Message):
-    """Fired immediately before each reviewer agent run for a task with a goal."""
+class BeforeTaskValidation(Message):
+    """Fired immediately before each validation attempt for a task."""
 
     def __init__(self, phase_id: str, task_name: str, attempt: int) -> None:
         super().__init__()
@@ -146,20 +147,20 @@ class BeforeGoalCheck(Message):
         self.attempt = attempt
 
 
-class AfterGoalCheck(Message):
-    """Fired after each reviewer agent run, with the parsed verdict."""
+class AfterTaskValidation(Message):
+    """Fired after each validation attempt, with its status."""
 
     def __init__(
         self,
         phase_id: str,
         task_name: str,
         attempt: int,
-        valid: bool,
+        status: TaskValidationStatus,
         reason: str,
     ) -> None:
         super().__init__()
         self.phase_id = phase_id
         self.task_name = task_name
         self.attempt = attempt
-        self.valid = valid
+        self.status = status
         self.reason = reason

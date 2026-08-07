@@ -17,6 +17,7 @@ from textual.widgets import Input
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import AgentConfig, FlowConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
+from ddev.ai.phases.messages import TaskValidationStatus
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
@@ -199,8 +200,14 @@ class _FakeOrchestrator:
 
         # Goal validation for each task
         for task_name in task_names:
-            await self._callbacks.fire_before_goal_check(phase_id, task_name, 1)
-            await self._callbacks.fire_after_goal_check(phase_id, task_name, 1, True, "Goal achieved.")
+            await self._callbacks.fire_before_task_validation(phase_id, task_name, 1)
+            await self._callbacks.fire_after_task_validation(
+                phase_id,
+                task_name,
+                1,
+                TaskValidationStatus.PASSED,
+                "",
+            )
 
         react_result = _make_react_result(resp2)
         await self._callbacks.fire_agent_finish(scope, react_result)
@@ -338,21 +345,27 @@ async def test_fake_orchestrator_fires_sentinel_prompt():
     assert TOOL_RESULTS_SENTINEL in all_prompts
 
 
-async def test_fake_orchestrator_fires_goal_check_events():
-    """_FakeOrchestrator fires before/after_goal_check for each task."""
+async def test_fake_orchestrator_fires_task_validation_events():
+    """_FakeOrchestrator fires before/after validation for each task."""
     from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 
-    goal_results: list[tuple[str, str, bool]] = []
+    validation_results: list[tuple[str, str, TaskValidationStatus]] = []
     cb_set = CallbackSet()
 
-    @cb_set.on_after_goal_check
-    async def _(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        goal_results.append((phase_id, task_name, valid))
+    @cb_set.on_after_task_validation
+    async def _(
+        phase_id: str,
+        task_name: str,
+        attempt: int,
+        status: TaskValidationStatus,
+        reason: str,
+    ) -> None:
+        validation_results.append((phase_id, task_name, status))
 
     demo = _FakeOrchestrator(Callbacks([cb_set]), DEMO_PHASES)
     await demo.run_async()
-    assert ("phase_1", "task_one", True) in goal_results
-    assert ("phase_2", "task_two", True) in goal_results
+    assert ("phase_1", "task_one", TaskValidationStatus.PASSED) in validation_results
+    assert ("phase_2", "task_two", TaskValidationStatus.PASSED) in validation_results
 
 
 async def test_fake_orchestrator_failure_raises():
@@ -643,9 +656,9 @@ def test_phase_error_is_written_in_full_to_failed_phase_log() -> None:
     assert "https://errors.example.test/noise" in rendered
 
 
-def test_scoped_goal_event_only_mutates_identified_phase() -> None:
-    """A goal verdict for phase A cannot update the same-named task in phase B."""
-    from ddev.cli.meta.ai.tui.messages import AfterGoalCheck, BeforeGoalCheck, PhaseStarted
+def test_scoped_validation_event_only_mutates_identified_phase() -> None:
+    """A validation verdict for phase A cannot update the same-named task in phase B."""
+    from ddev.cli.meta.ai.tui.messages import AfterTaskValidation, BeforeTaskValidation, PhaseStarted
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     flow = _make_flow(phases=[("phase_1", ["shared_task"]), ("phase_2", ["shared_task"])])
@@ -653,17 +666,30 @@ def test_scoped_goal_event_only_mutates_identified_phase() -> None:
     screen.on_phase_started(PhaseStarted("phase_1"))
     screen.on_phase_started(PhaseStarted("phase_2"))
 
-    screen.on_before_goal_check(BeforeGoalCheck("phase_1", "shared_task", 1))
-    screen.on_before_goal_check(BeforeGoalCheck("phase_2", "shared_task", 1))
-    screen.on_after_goal_check(AfterGoalCheck("phase_1", "shared_task", 1, True, "done"))
+    screen.on_before_task_validation(BeforeTaskValidation("phase_1", "shared_task", 1))
+    assert "validating" in str(screen._phase_logs["phase_1"][-1])
+    assert screen._phase_logs["phase_2"] == []
+
+    screen.on_before_task_validation(BeforeTaskValidation("phase_2", "shared_task", 1))
+    screen.on_after_task_validation(AfterTaskValidation("phase_1", "shared_task", 1, TaskValidationStatus.PASSED, ""))
 
     assert screen._task_statuses[("phase_1", "shared_task")] is RunStatus.DONE
     assert screen._task_statuses[("phase_2", "shared_task")] is RunStatus.RUNNING
 
-    screen.on_after_goal_check(AfterGoalCheck("phase_2", "shared_task", 1, False, "failed"))
+    screen.on_after_task_validation(
+        AfterTaskValidation("phase_2", "shared_task", 1, TaskValidationStatus.RETRYING, "needs repair")
+    )
 
     assert screen._task_statuses[("phase_1", "shared_task")] is RunStatus.DONE
+    assert screen._task_statuses[("phase_2", "shared_task")] is RunStatus.RUNNING
+    assert "needs repair" in str(screen._phase_logs["phase_2"][-1])
+
+    screen.on_after_task_validation(
+        AfterTaskValidation("phase_2", "shared_task", 2, TaskValidationStatus.FAILED, "still invalid")
+    )
+
     assert screen._task_statuses[("phase_2", "shared_task")] is RunStatus.FAILED
+    assert "validation failed" in str(screen._phase_logs["phase_2"][-1])
 
 
 def test_context_cleared_notice_is_written_to_scoped_phase_log() -> None:
