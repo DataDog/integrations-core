@@ -368,6 +368,10 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_outlier_detection_ejections_detected_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin',  # noqa: E501
     'envoy_access_logs_grpc_access_log_logs_dropped': 'access_logs.grpc_access_log.logs_dropped',
     'envoy_access_logs_grpc_access_log_logs_written': 'access_logs.grpc_access_log.logs_written',
+    'envoy_access_logs_grpc_access_log_grpc_entries_flushed': 'access_logs.grpc_access_log.grpc_entries_flushed',
+    'envoy_access_logs_grpc_access_log_grpc_entries_flush_failed': (
+        'access_logs.grpc_access_log.grpc_entries_flush_failed'
+    ),
     'envoy_tcp_downstream_cx': 'tcp.downstream_cx',
     'envoy_tcp_downstream_cx_no_route': 'tcp.downstream_cx_no_route',
     'envoy_tcp_downstream_cx_tx_bytes': 'tcp.downstream_cx_tx_bytes',
@@ -4027,6 +4031,22 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'access_logs.grpc_access_log.logs_written': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'access_logs.grpc_access_log.grpc_entries_flushed': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'access_logs.grpc_access_log.grpc_entries_flush_failed': {
         'tags': (
             (),
             (),
