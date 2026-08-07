@@ -6,9 +6,11 @@ import ssl
 
 import mock
 import pytest
+import requests
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPSSLError
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -67,6 +69,20 @@ class TestCert:
 
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
+
+    def test_missing_ca_cert_file_is_reported(self, tmp_path, caplog):
+        # http_check holds the only other assertion on this warning, and it reads it off that check's
+        # own get_tls_context(), which builds a context beside the client rather than the one the request
+        # uses. Only the client's tls_config decides what the request's context loads, so a tls_ca_cert
+        # that stopped reaching the client would leave that assertion intact while every request ran
+        # against the system trust store instead of the operator's CA.
+        missing_ca_cert = str(tmp_path / 'unexisting.crt')
+        http = RequestsWrapper({'tls_ca_cert': missing_ca_cert}, {})
+
+        with mock.patch('requests.Session.get'), caplog.at_level(logging.WARNING):
+            http.get('https://example.com')
+
+        assert 'TLS CA certificate file not found: {}'.format(missing_ca_cert) in caplog.text
 
     @pytest.mark.skipif(ON_WINDOWS, reason="Windows uses the default store locations.")
     def test_bad_default_verify_paths_and_fallback_to_certifi(self, monkeypatch, caplog):
@@ -285,7 +301,7 @@ class TestAIAChasing:
 
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
             with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.handle_auth_token'):
-                with pytest.raises(SSLError):
+                with pytest.raises(HTTPSSLError):
                     with mock.patch('requests.Session.get', side_effect=SSLError):
                         http.get('https://localhost:{}'.format(port))
 
@@ -397,3 +413,25 @@ class TestSSLContextAdapter:
                 http.get('https://example.com', verify=True)
 
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+
+    def test_foreign_session_does_not_share_this_client_adapter(self):
+        """A session this client does not own gets its own adapter, carrying the same TLS configuration.
+
+        requests.Session.close() closes every adapter mounted on it, and a library that builds its own
+        transport closes it when the transport is collected. Sharing the adapter would take down the
+        connection pool this client's own requests run on.
+        """
+        http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
+        own_adapter = http.session.get_adapter('https://example.com')
+        foreign_session = requests.Session()
+
+        http.apply_tls_to_requests_session(foreign_session)
+
+        foreign_adapter = foreign_session.get_adapter('https://example.com')
+        assert foreign_adapter.ssl_context.verify_mode == ssl.CERT_REQUIRED
+        assert foreign_adapter.ssl_context.check_hostname is True
+
+        own_adapter.poolmanager.connection_from_url('https://example.com')
+        foreign_session.close()
+
+        assert len(own_adapter.poolmanager.pools) == 1
