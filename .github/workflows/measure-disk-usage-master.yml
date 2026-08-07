@@ -58,6 +58,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ddev -v size status --commit "${{ github.sha }}" --format json --to-dd-key ${{ steps.dd-sts.outputs.api_key }} --compressed
 
+      # Resolved explicitly rather than using github.event.before, which is all-zeros on the first push to a
+      # branch and points at a discarded commit after a force-push. Passing a rev like "<sha>^" instead is not an
+      # option either: ddev size diff fetches each commit by hash into a temporary clone.
+      - name: Resolve parent commit
+        id: parent
+        run: echo "sha=$(git rev-parse '${{ github.sha }}^')" >> "$GITHUB_OUTPUT"
+
+      # Supplementary telemetry: a failure here must not mask the absolute size metrics sent above.
+      - name: Measure disk usage difference (Uncompressed)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          ddev -v size diff "${{ steps.parent.outputs.sha }}" "${{ github.sha }}"
+          --to-dd-key ${{ steps.dd-sts.outputs.api_key }}
+
+      - name: Measure disk usage difference (Compressed)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          ddev -v size diff "${{ steps.parent.outputs.sha }}" "${{ github.sha }}"
+          --to-dd-key ${{ steps.dd-sts.outputs.api_key }} --compressed
+
       - name: Upload JSON uncompressed sizes artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
