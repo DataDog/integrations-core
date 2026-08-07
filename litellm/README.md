@@ -68,7 +68,10 @@ Note: The listed metrics can only be collected if they are available. Some metri
 
 #### Kubernetes-based
 
-For LiteLLM Proxy running on Kubernetes, configuration can be easily done via pod annotations. See the example below:
+For LiteLLM Proxy running on Kubernetes, choose one of the following Autodiscovery configurations:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -94,6 +97,33 @@ spec:
     - name: <CONTAINER_NAME>
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <LITELLM_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: litellm
+        containerName: litellm
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:4000/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 For more information and alternative ways to configure the check in Kubernetes-based environments, see the [Kubernetes Integration Setup documentation][3].
 
@@ -140,3 +170,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://docs.litellm.ai/docs/proxy/logging
 [12]: https://docs.datadoghq.com/llm_observability/quickstart/
 [13]: https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python#litellm
+[14]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

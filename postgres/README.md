@@ -284,7 +284,10 @@ To configure this check for an Agent running on Kubernetes:
 ##### Metric collection
 **Note**: The `<container-name>.check_names` must match the container name where the integration needs to collect metrics. In the example, we are using `postgres.check_names` because the container name is postgres.
 
-Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][14].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][14].
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -336,6 +339,36 @@ spec:
   containers:
     - name: postgres
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <POSTGRESQL_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: postgres
+        containerName: postgres
+        initConfig: {}
+        instances:
+          - host: "%%host%%"
+            port: "5432"
+            username: "datadog"
+            password: "<PASSWORD>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ##### Log collection
 
@@ -524,3 +557,4 @@ Additional helpful documentation, links, and articles:
 [28]: https://docs.datadoghq.com/database_monitoring/setup_postgres/
 [29]: https://docs.datadoghq.com/database_monitoring/#postgres
 [30]: https://docs.datadoghq.com/integrations/postgres/?tab=host#faq
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

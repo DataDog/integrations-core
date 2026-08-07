@@ -77,7 +77,10 @@ For containerized environments, see [Configure integrations with Autodiscovery o
 
 **Example**
 
-Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
+Choose a Kubernetes Autodiscovery configuration, where `<CONTAINER_NAME>` is the Aerospike container name:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
@@ -88,6 +91,33 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
     }
   } 
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <AEROSPIKE_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: aerospike
+        containerName: <CONTAINER_NAME>
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:9145/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 
 ##### Log collection
@@ -155,3 +185,4 @@ Need help? Contact [Datadog support][9].
 [13]: https://github.com/DataDog/integrations-core/blob/7.36.x/aerospike/datadog_checks/aerospike/data/conf.yaml.example
 [14]: https://docs.datadoghq.com/containers/docker/integrations/
 [15]: https://docs.datadoghq.com/containers/guide/ad_identifiers/
+[16]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

@@ -443,7 +443,10 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 Ensure that `url` matches your Airflow [webserver `base_url`][19], the URL used to connect to your Airflow instance. Replace `localhost` with the template variable `%%host%%`.
 
-If you are using the [official Airflow Helm chart][24], this should be applied on the `webserver` pod and its `webserver` container. For example, with the [`webserver.podAnnotations`][22], your Autodiscovery Annotations may look like the following:
+If you are using the [official Airflow Helm chart][24], target the `webserver` pod and its `webserver` container. Choose one of the following Autodiscovery configurations:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 webserver:
@@ -459,6 +462,35 @@ webserver:
         }
       }
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+The official Airflow Helm chart runs the webserver in a Deployment named `<RELEASE_NAME>-webserver`:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: <RELEASE_NAME>-webserver
+  config:
+    checks:
+      - integration: airflow
+        containerName: webserver
+        initConfig: {}
+        instances:
+          - url: "http://%%host%%:8080"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][28].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 Adjust the `ad.datadoghq.com/<CONTAINER_NAME>.checks` annotation accordingly if your container name differs.
 
@@ -608,3 +640,4 @@ Need help? Contact [Datadog support][11].
 [25]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/index.html
 [26]: https://airflow.apache.org/docs/docker-stack/entrypoint.html#installing-additional-requirements
 [27]: https://docs.datadoghq.com/developers/dogstatsd/?tab=cgroups#origin-detection
+[28]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

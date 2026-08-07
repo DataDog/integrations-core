@@ -81,7 +81,10 @@ Note that when Temporal services in a cluster are deployed independently, every 
 
 **Example**
 
-The following Kubernetes annotation is applied to a pod under `metadata`, where `<CONTAINER_NAME>` is the name of your Temporal container (or a [custom identifier][16]):
+Choose one of the following Kubernetes Autodiscovery configurations, where `<CONTAINER_NAME>` is the name of your Temporal container:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
@@ -92,6 +95,35 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
     }
   } 
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Temporal services are commonly deployed separately. Create one resource for each service workload that you monitor:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <TEMPORAL_SERVICE_NAME>
+  config:
+    checks:
+      - integration: temporal
+        containerName: <CONTAINER_NAME>
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "<LISTEN_ADDRESS>/<HANDLER_PATH>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ##### Log collection
 
@@ -174,3 +206,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://docs.datadoghq.com/containers/guide/ad_identifiers/
 [17]: https://docs.datadoghq.com/agent/kubernetes/log/
 [18]: https://docs.datadoghq.com/containers/docker/log/
+[19]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

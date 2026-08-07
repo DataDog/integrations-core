@@ -185,7 +185,10 @@ labels:
 <!-- xxz tab xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
 
-This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as Kubernetes annotations on your Torchserve pods:
+Choose one of the following Kubernetes Autodiscovery configurations. The example uses the three APIs described in the previous sections:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -225,6 +228,42 @@ spec:
     - name: 'torchserve'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <TORCHSERVE_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: torchserve
+        containerName: torchserve
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8082/metrics"
+            extra_metrics:
+              - "my_custom_torchserve_metric"
+          - inference_api_url: "http://%%host%%:8080"
+          - management_api_url: "http://%%host%%:8081"
+            include:
+              - ".*"
+            exclude:
+              - ".*-test"
+            interval: 3600
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][17].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -308,3 +347,4 @@ Need help? Contact [Datadog support][9].
 [14]: https://pytorch.org/serve/inference_api.html
 [15]: https://pytorch.org/serve/metrics_api.html
 [16]: https://pytorch.org/serve/logging.html?highlight=logs
+[17]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
