@@ -67,6 +67,45 @@ def datadog_agent():
     return __datadog_agent
 
 
+@pytest.fixture
+def mock_os():
+    """Install a ``MockOSWrapper`` at every seam a check reaches the OS layer through.
+
+    A check performs filesystem and subprocess operations either through the
+    per-instance ``self.os`` property or through the module-level
+    ``self.os`` singleton (used by module-level helper functions). This
+    fixture patches both to the same double for the duration of the test, so a
+    test configures one object without having to know which seam the code under
+    test uses. Configure it declaratively::
+
+        def test_check(mock_os, dd_run_check):
+            mock_os.add_file('/proc/stat', 'cpu 1 2 3')
+            mock_os.set_command_output('netstat -i', stdout='...')
+            ...
+
+    or drive the underlying MagicMocks directly (``mock_os.popen.side_effect = [...]``).
+    """
+    try:
+        from unittest import mock
+
+        from datadog_checks.base import AgentCheck
+        from datadog_checks.base.stubs.os_wrapper import METHOD_NAMES, MockOSWrapper
+        from datadog_checks.base.utils import os_wrapper as os_wrapper_module
+    except ImportError:
+        raise ImportError('datadog-checks-base is not installed!')
+
+    fake = MockOSWrapper()
+
+    # Patching the singleton's methods, rather than rebinding the name, reaches
+    # every module that did `from ... import unchecked_os`.
+    singleton_patches = {name: getattr(fake, name) for name in METHOD_NAMES}
+    with (
+        mock.patch.object(AgentCheck, 'unchecked_os', new_callable=mock.PropertyMock, return_value=fake),
+        mock.patch.multiple(os_wrapper_module.unchecked_os, **singleton_patches),
+    ):
+        yield fake
+
+
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment_runner(request):
     # Skip the runner if the skip environment variable is specified

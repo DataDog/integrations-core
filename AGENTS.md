@@ -79,6 +79,14 @@ This rule concerns the single-leading-underscore convention. It does not apply t
 
 Extract duplicated logic when it represents the same concept and a shared helper improves clarity or consistency. Do not introduce an abstraction merely because two small code blocks look similar.
 
+### Filesystem and Subprocess Access
+
+Use `self.os` instead of calling `open`, `os`, `shutil`, `glob`, or `subprocess` directly, so paths that come from configuration are validated at the point of use. A helper that performs such access belongs on the check, as a method, so it can reach `self.os` too.
+
+Do not use the module-level `unchecked_os` singleton for a config-derived path. It is bound to a no-op validator, so substituting it preserves behavior and passes every test while enforcing nothing, which is harder to notice than an obvious bypass. Its name is deliberately unflattering for that reason. `ddev validate os-wrapper` enforces both rules; waive a genuinely non-config path with an inline `# SKIP_OS_WRAPPER_VALIDATION` comment stating why.
+
+See [OS Wrapper](docs/developer/base/os-wrapper.md) for the available operations, when validation applies, and the `mock_os` test fixture.
+
 ## Configuration Models
 
 **Applicable to:** `**/config_models/*.py`, `*/assets/configuration/spec.yaml`.
