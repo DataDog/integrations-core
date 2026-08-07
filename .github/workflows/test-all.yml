@@ -2804,6 +2804,8 @@ jobs:
         - py3.13-mariadb-10.6
         - py3.13-mariadb-10.11
         - py3.13-mariadb-11.4
+        - py3.13-mariadb-12.0
+        - py3.13-mariadb-13
         - py3.13-percona-8.0.42
         - py3.13-percona-8.4
       fail-fast: false
