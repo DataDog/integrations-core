@@ -1,0 +1,64 @@
+name: Notify New Integration
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "*/pyproject.toml"
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  notify:
+    name: Notify Slack on new integration check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: Detect new integration checks
+        id: detect
+        run: |
+          for pyproject in $(git diff --diff-filter=A --name-only HEAD~1 HEAD -- '*/pyproject.toml'); do
+            check_name=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "name=$check_name" >> "$GITHUB_OUTPUT"
+            exit 0
+          done
+
+          echo "found=false" >> "$GITHUB_OUTPUT"
+
+      - name: Send Slack notification
+        if: steps.detect.outputs.found == 'true'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NEW_INTEGRATION_SLACK_WEBHOOK_URL }}
+          NAME: ${{ steps.detect.outputs.name }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: |
+          message=$(cat <<MSGEOF
+          New integration merged to master: ${NAME}
+          Commit: ${COMMIT_URL}
+
+          A PyPI admin must fill the pending publisher form at https://pypi.org/manage/account/publishing/:
+          - PyPI Project Name: ${NAME}
+          - Owner: DataDog
+          - Repository name: integrations-core
+          - Workflow name: claim-pypi-name.yaml
+          - Environment name: typo-squatting-release
+
+          Please react to this message once completed.
+          Ask #agent-integrations if you have any questions.
+          MSGEOF
+          )
+          curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -n --arg text "$message" '{text: $text}')"
