@@ -333,14 +333,23 @@ def test_worktrees_asks_git_once(repository, mocker):
     assert [call.args for call in capture.call_args_list] == [('worktree', 'list', '--porcelain')]
 
 
-def test_worktrees_are_looked_up_again_after_the_set_changes(repository):
+# Both entry points must invalidate: `capture` is what ddev reads through, `run` is what
+# `ddev release port-commit` adds and removes its worktree with.
+@pytest.mark.parametrize('entry_point', ['capture', 'run'])
+def test_worktrees_are_looked_up_again_after_the_set_changes(repository, entry_point):
     repo = Repository(repository.path.name, str(repository.path))
-    added = repo.path / 'wt3'
+    git = getattr(repo.git, entry_point)
+    added = repo.path / f'wt-{entry_point}'
 
     assert not repo.git.is_worktree(added)
 
     # Registering the worktree is enough, and checking out this repository exceeds the Windows
     # path length limit
-    repo.git.capture('worktree', 'add', '--no-checkout', str(added), 'HEAD')
+    git('worktree', 'add', '--no-checkout', str(added), 'HEAD')
+    try:
+        assert repo.git.is_worktree(added)
+    finally:
+        # `reset_branch` cannot undo this, so the session-scoped clone would keep the worktree
+        git('worktree', 'remove', '--force', str(added))
 
-    assert repo.git.is_worktree(added)
+    assert not repo.git.is_worktree(added)
