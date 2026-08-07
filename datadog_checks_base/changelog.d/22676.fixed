@@ -1,1 +1,0 @@
-Parse the kubelet pod list from the response bytes, so a compressed body or one sent with a ``text/*`` content type decodes correctly.
