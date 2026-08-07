@@ -13,6 +13,13 @@ from datadog_checks.velero import VeleroCheck
 
 from .common import OPTIONAL_METRICS, TEST_METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit():
+    # Kills the core/NumberReplacer mutant at check.py:12 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert VeleroCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('velero_payload.txt'))
