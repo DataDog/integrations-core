@@ -22,7 +22,7 @@ from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
 
-from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT
+from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, mysql_root_password
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -707,7 +707,7 @@ def test_mdl_blocking_activity(aggregator, dbm_instance, dd_run_check, root_conn
     # Commit to release it before we set up the intentional MDL contention.
     root_conn.commit()
 
-    root_password = 'mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION in ('group', 'hybrid') else None
+    root_password = mysql_root_password()
     holder_conn = pymysql.connect(host=HOST, port=PORT, user='root', password=root_password)
     ddl_conn = pymysql.connect(host=HOST, port=PORT, user='root', password=root_password)
     ddl_ready = Event()
