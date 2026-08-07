@@ -321,3 +321,26 @@ def test_is_worktree(
         repo.git.is_worktree(repo.path.parent / "wt2", include_root=include_root, only_subpaths=only_subpaths)
         is not only_subpaths
     )
+
+
+def test_worktrees_asks_git_once(repository, mocker):
+    repo = Repository(repository.path.name, str(repository.path))
+    capture = mocker.spy(repo.git, 'capture')
+
+    for path in repository.path.iterdir():
+        repo.git.is_worktree(path)
+
+    assert [call.args for call in capture.call_args_list] == [('worktree', 'list', '--porcelain')]
+
+
+def test_worktrees_are_looked_up_again_after_the_set_changes(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+    added = repo.path / 'wt3'
+
+    assert not repo.git.is_worktree(added)
+
+    # Registering the worktree is enough, and checking out this repository exceeds the Windows
+    # path length limit
+    repo.git.capture('worktree', 'add', '--no-checkout', str(added), 'HEAD')
+
+    assert repo.git.is_worktree(added)
