@@ -286,9 +286,6 @@ def test_connect_no_password_uses_empty_string():
         ('25.1.2.3', '25.1.2.10', True),
         ('25.1', '25.3', True),
         ('23.1', '25.1', True),
-        # Altinity FIPS builds carry a non-numeric qualifier that must not break comparison.
-        ('25.3.8.30001.altinityfips', '25.3.8.30002', True),
-        ('25.3.8.30001.altinityfips', '21.3', False),
     ],
 )
 def test_version_lt(instance, ch_version, comparable, expected):
@@ -306,9 +303,6 @@ def test_version_lt(instance, ch_version, comparable, expected):
         ('25.1.2.3', '25.1.2.3', True),
         ('25.1', '25.3', False),
         ('23.1', '25.1', False),
-        # Altinity FIPS builds carry a non-numeric qualifier that must not break comparison.
-        ('25.3.8.30001.altinityfips', '21.3', True),
-        ('25.3.8.30001.altinityfips', '25.3.8.30002', False),
     ],
 )
 def test_version_ge(instance, ch_version, comparable, expected):

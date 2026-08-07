@@ -112,13 +112,10 @@ LEADING_DIGITS = re.compile(r'\d+')
 
 
 def parse_version(version: str) -> list[int]:
-    # Parse the leading numeric parts of a dot-separated version, stopping at the
-    # first segment that doesn't start with a digit. Some distributions append a
-    # non-numeric qualifier (e.g. Altinity FIPS builds report
-    # `25.3.8.30001.altinityfips`), which would otherwise break ``int()``.
     parts = []
     for segment in version.split('.'):
         match = LEADING_DIGITS.match(segment)
+        # do not include non-numeric version segments (e.g. Altinity's `altinityfips` suffix)
         if match is None:
             break
         parts.append(int(match.group()))
