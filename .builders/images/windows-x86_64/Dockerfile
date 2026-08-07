@@ -127,11 +127,11 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.6.2"
+ENV OPENSSL_VERSION="3.6.3"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash 'aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f'; `
+      -Hash '243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
@@ -170,7 +170,7 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.20.0"
+ENV CURL_VERSION="8.21.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

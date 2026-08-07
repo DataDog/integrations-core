@@ -1,0 +1,33 @@
+{
+  "additional_config_fields": [
+    {
+      "key": "api_key",
+      "label": "Admin API key",
+      "help": "An Anthropic Admin API key with permission to read usage and cost data. Generate one in the Anthropic Console under Settings > Admin Keys.",
+      "editable": true,
+      "required": true,
+      "password": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "anthropic-usage-metrics"
+    },
+    {
+      "dataflow_id": "claude-daily-usage-dora-metrics"
+    },
+    {
+      "dataflow_id": "anthropic-cloud-cost-metrics",
+      "toggle": {
+        "default": false,
+        "label": "Enable cost data ingestion",
+        "help": "You must be subscribed to Cloud Cost Management to use this data.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "ccm_enabled",
+        "should_map_legacy_fields": true
+      }
+    }
+  ]
+}

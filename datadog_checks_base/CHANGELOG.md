@@ -2,6 +2,33 @@
 
 <!-- towncrier release notes start -->
 
+## 38.0.0 / 2026-08-05
+
+***Changed***:
+
+* Patch prometheus_client to restore v0.21.1 parsing behavior to fix a performance regression introduced in v0.22.0, with up to ~40% improvement in check execution time for parsing-heavy workloads. This drops support for UTF-8 metric names, quoted dotted label names (OpenMetrics 2.0), and structural characters ({, }, =, ,) inside quoted label values. Set ``patch_prometheus_client`` to ``false`` in ``datadog.yaml`` to disable. ([#24651](https://github.com/DataDog/integrations-core/pull/24651))
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Add an async job registry to `DatabaseCheck` so DBM integrations can register `DBMAsyncJob`s additively and run, cancel, or shut them all down through a single entry point (`register_async_job`, `run_async_jobs`, `cancel_async_jobs`, `shutdown_async_jobs`), along with a `DBMAsyncJob.shutdown()` hook for releasing lifetime-scoped resources on unschedule. ([#24442](https://github.com/DataDog/integrations-core/pull/24442))
+* Add a discovery helper for selecting service ports by name. ([#24555](https://github.com/DataDog/integrations-core/pull/24555))
+* Allow disabling fallback ports for configuration discovery candidates. ([#24706](https://github.com/DataDog/integrations-core/pull/24706))
+
+***Fixed***:
+
+* Bracket IPv6-literal hosts in discovery URL templates. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
+## 37.42.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add a `DBMS` class attribute to `DatabaseCheck` so integrations can declare their DBM platform identifier explicitly. The `dbms` property now returns `DBMS` when set and only falls back to the deprecated class-name derivation (with a warning) when it is not. ([#24297](https://github.com/DataDog/integrations-core/pull/24297))
+
 ## 37.41.0 / 2026-06-30
 
 ***Added***:
@@ -14,7 +41,7 @@
 * Implement the `DatabaseCheck.tags` property backed by a shared `TagManager` so DBM integrations can consolidate tag handling. ([#24244](https://github.com/DataDog/integrations-core/pull/24244))
 * Provide a default `database_identifier` implementation on the `DatabaseCheck` base class that is built (and cached) from the `database_identifier_template` and `database_identifier_params` hooks, so integrations no longer need to reimplement the database identifier templating logic. ([#24250](https://github.com/DataDog/integrations-core/pull/24250))
 
-## 37.40.1 / 2026-06-18
+## 37.40.1 / 2026-06-18 / Agent 7.81.0
 
 ***Fixed***:
 

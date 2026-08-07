@@ -1,7 +1,9 @@
 # ClickHouse integration agent notes
 
-A small orientation guide. Read this before touching `advanced_queries/` or
-`scripts/generate_metrics.py`.
+This supplements the repository's root `AGENTS.md` — read that first for general
+conventions (naming, testing, changelogs, PRs); it still applies here. This file
+adds ClickHouse-specific orientation. Read it before touching `advanced_queries/`
+or `scripts/generate_metrics.py`.
 
 ## Bulk match queries live in JSON, not Python
 

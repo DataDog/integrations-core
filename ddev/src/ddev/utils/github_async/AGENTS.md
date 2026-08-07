@@ -25,12 +25,28 @@ is real and must be checked per field:
   a `StrEnum` must list all six, not a guessed subset.
 
 ```python
-from enum import StrEnum
+from enum import StrEnum, auto
 
 
 class PullRequestState(StrEnum):
-    OPEN = "open"
-    CLOSED = "closed"
+    OPEN = auto()
+    CLOSED = auto()
+```
+
+Prefer `auto()` for the values: on a `StrEnum` it generates each value as the
+**lowercased member name**, with underscores preserved (`IN_PROGRESS` becomes
+`"in_progress"`). Use it only when every declared enum value is exactly
+`member_name.lower()`. When the API's value differs — a different case, hyphens,
+or any form that isn't the lowercased name — spell the value out explicitly
+instead of forcing `auto()`. For example `pull-request.author_association`
+declares UPPERCASE values, so `auto()` would wrongly lowercase them and each must
+be written out:
+
+```python
+class AuthorAssociation(StrEnum):
+    OWNER = "OWNER"
+    COLLABORATOR = "COLLABORATOR"
+    # ...
 ```
 
 A plain `str` field for a declared enum hides the contract and lets invalid

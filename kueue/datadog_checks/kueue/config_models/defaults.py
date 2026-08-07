@@ -44,6 +44,10 @@ def instance_collect_histogram_buckets():
     return True
 
 
+def instance_collect_workload_events():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 

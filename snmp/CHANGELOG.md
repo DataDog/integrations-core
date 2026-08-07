@@ -2,7 +2,30 @@
 
 <!-- towncrier release notes start -->
 
-## 13.0.0 / 2026-06-09
+## 13.2.0 / 2026-08-05
+
+***Added***:
+
+* Add NetScout switch SNMP profile for CPU and memory metrics. ([#24283](https://github.com/DataDog/integrations-core/pull/24283))
+* Add the `use_remote_config_profiles` option to the SNMP configuration spec so it is accepted by config validation and Remote Configuration. ([#24528](https://github.com/DataDog/integrations-core/pull/24528))
+
+## 13.1.1 / 2026-07-23 / Agent 7.82.0
+
+***Fixed***:
+
+* Rename mem_pool_index tag to mem in cisco-firepower-asa profile. ([#24582](https://github.com/DataDog/integrations-core/pull/24582))
+
+## 13.1.0 / 2026-07-08
+
+***Added***:
+
+* Route Cisco Catalyst 1200/1300/1300X and Cisco Business 350 (CBS350) devices to the ``cisco-sb`` SNMP profile, and add ``serial_number`` device metadata for them through ``entPhysicalSerialNum.67109120``. ([#23939](https://github.com/DataDog/integrations-core/pull/23939))
+
+***Fixed***:
+
+* Fix Cisco ASAv memory coverage in the `cisco-firepower-asa` SNMP profile by replacing hardcoded single-pool scalar OIDs with a full table walk of `cempMemPoolTable` tagged by pool name. ([#24107](https://github.com/DataDog/integrations-core/pull/24107))
+
+## 13.0.0 / 2026-06-09 / Agent 7.81.0
 
 ***Changed***:
 
