@@ -350,6 +350,22 @@ class TestAIAChasing:
 
         mock_create_socket_connection.assert_called_with('localhost', port)
 
+    def test_aia_chasing_retry_still_fails_logs_clearly(self, caplog):
+        """If AIA chasing recovers a cert but the chain is still incomplete, the failure should be obvious."""
+        http = RequestsWrapper({}, {})
+        with (
+            mock.patch.object(RequestsWrapper, 'fetch_intermediate_certs', return_value=['fake-pem-cert']),
+            mock.patch.object(RequestsWrapper, '_mount_https_adapter'),
+            mock.patch('requests.Session.get', side_effect=SSLError('cert verify failed')),
+            caplog.at_level(logging.DEBUG),
+        ):
+            with pytest.raises(SSLError):
+                http.get('https://localhost:8443/')
+
+        assert 'AIA chasing: request to `https://localhost:8443/` failed with an SSLError' in caplog.text
+        assert 'AIA chasing: recovered 1 intermediate certificate(s)' in caplog.text
+        assert 'AIA chasing: request to `https://localhost:8443/` still failed after mounting' in caplog.text
+
     def test_fetch_intermediate_certs_tls_ciphers(self):
         """Test that fetch_intermediate_certs uses the correct ciphers."""
         instance = {'tls_verify': True, 'tls_ciphers': TEST_CIPHERS[0]}
