@@ -79,6 +79,16 @@ def _workflow_job(name: str, conclusion: str, failed_step: str | None = None, ru
     return WorkflowJob(id=1, run_id=run_id, name=name, status="completed", conclusion=conclusion, steps=steps)
 
 
+def _batch_job(
+    name: str,
+    target: str = "ntp",
+    environment: str = "py3.13",
+    platform: PlatformName = PlatformName.LINUX,
+    runner: str = "ubuntu-latest",
+) -> BatchJob:
+    return make_job(name, target=target, environment=environment, platform=platform, runner_labels=(runner,))
+
+
 def _batch_job_result(
     job: BatchJob,
     workflow_job: WorkflowJob | None = None,
@@ -110,13 +120,6 @@ def _batch_finished(artifacts_path: Path | str, **overrides) -> BatchFinished:
     # The logical batch id defaults to the message id unless a test sets them apart on purpose.
     defaults.setdefault("batch_id", defaults["id"])
     return BatchFinished(**defaults)
-
-
-def _drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
-    messages: list[BaseMessage] = []
-    while not queue.empty():
-        messages.append(queue.get_nowait())
-    return messages
 
 
 def _test_batch(batch_id: str, jobs: list[BatchJob]) -> TestBatch:
@@ -225,7 +228,7 @@ def test_failure_path_records_failed_steps_and_reports(tmp_path: Path):
         )
     )
 
-    _drain_queue(gatherer.queue)
+    drain_queue(gatherer.queue)
     [status] = _registry(gatherer)
     assert status.failed_count == 1
 
@@ -267,7 +270,7 @@ def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
     batch_jobs = [_batch_job_result(job) for job in jobs]
     gatherer.process_message(_batch_finished("", status="failure", run_id=300, batch_jobs=batch_jobs, timed_out=True))
 
-    _drain_queue(gatherer.queue)
+    drain_queue(gatherer.queue)
     [status] = _registry(gatherer)
     assert status.failed_count == 2
     # The timeout is the batch's, not a step of any job: no step name is invented for it.
@@ -288,7 +291,7 @@ def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path):
     ]
     gatherer.process_message(_batch_finished(artifacts, status="failure", batch_jobs=batch_jobs))
 
-    _drain_queue(gatherer.queue)
+    drain_queue(gatherer.queue)
     [status] = _registry(gatherer)
     assert status.success_count == 1
     assert status.failed_count == 1
@@ -502,7 +505,7 @@ def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path) -> None:
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished("", status="failure", run_id=100, batch_jobs=[]))
 
-    update = _drain_queue(gatherer.queue)[0]
+    update = drain_queue(gatherer.queue)[0]
     assert update.revision == 1
     batch = update.progress.batches[0]
     assert batch.state == ExecutionState.FINISHED
@@ -520,7 +523,7 @@ def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:
     gatherer = _make_gatherer(tmp_path, _one_job_plan("b1", "b2"))
 
     gatherer.process_message(_batch_finished("", id="b1", run_id=100, batch_jobs=[]))
-    assert _drain_queue(gatherer.queue)[0].progress.done is False
+    assert drain_queue(gatherer.queue)[0].progress.done is False
 
     gatherer.process_message(
         _batch_finished(
@@ -531,7 +534,7 @@ def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:
         )
     )
 
-    final = _drain_queue(gatherer.queue)[0]
+    final = drain_queue(gatherer.queue)[0]
     assert final.progress.done is True
     assert _batch_progress(final, "b1").error == ProgressError.NO_JOB_RESULTS
 
@@ -550,7 +553,7 @@ def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
         )
     )
 
-    assert _drain_queue(gatherer.queue) == []
+    assert drain_queue(gatherer.queue) == []
     assert gatherer._revision == 0
     assert [batch.batch_id for batch in gatherer.build_initial_update("initial").progress.batches] == ["batch-1"]
     # Nor may it write into the output tree the planned batches publish from.
@@ -576,7 +579,7 @@ def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
     shutil.rmtree(tmp_path / "out")
 
     gatherer.process_message(batch)
-    assert _drain_queue(gatherer.queue) == []
+    assert drain_queue(gatherer.queue) == []
     assert gatherer._revision == 1
     assert not (tmp_path / "out").exists()
 
@@ -591,7 +594,7 @@ def test_duplicate_is_detected_by_batch_id_not_message_id(tmp_path: Path) -> Non
     gatherer.process_message(_batch_finished(artifacts, id="msg-a", batch_id="batch-1", batch_jobs=[job]))
     gatherer.process_message(_batch_finished(artifacts, id="msg-b", batch_id="batch-1", batch_jobs=[job]))
 
-    updates = _drain_queue(gatherer.queue)
+    updates = drain_queue(gatherer.queue)
     assert [update.revision for update in updates] == [1]
     assert gatherer._revision == 1
     assert len(_registry(gatherer)) == 1
@@ -603,7 +606,7 @@ def test_correlates_on_batch_id_not_message_id(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
 
-    gatherer = _make_gatherer(tmp_path)
+    gatherer = _make_gatherer(tmp_path, {"batch-09": [make_job("j1")]})
     gatherer.process_message(
         _batch_finished(
             artifacts,
@@ -615,7 +618,8 @@ def test_correlates_on_batch_id_not_message_id(tmp_path: Path):
     )
 
     assert set(gatherer._results_by_batch) == {"batch-09"}
-    status = drain_queue(gatherer.queue)[0].workflows[0]
+    drain_queue(gatherer.queue)
+    [status] = _registry(gatherer)
     assert status.batch_id == "batch-09"
     assert status.id == 555
 
@@ -627,13 +631,13 @@ def test_duplicate_correlates_on_batch_id_across_reruns(tmp_path: Path):
     job_dir = _make_job_tree(artifacts, "j1")
     jobs = [_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
 
-    gatherer = _make_gatherer(tmp_path)
+    gatherer = _make_gatherer(tmp_path, {"batch-09": [make_job("j1")]})
     gatherer.process_message(_batch_finished(artifacts, id="msg-a", batch_id="batch-09", run_id=100, batch_jobs=jobs))
     assert len(drain_queue(gatherer.queue)) == 1
 
     gatherer.process_message(_batch_finished(artifacts, id="msg-b", batch_id="batch-09", run_id=200, batch_jobs=jobs))
     assert drain_queue(gatherer.queue) == []
-    assert gatherer._received_batches == 1
+    assert gatherer._revision == 1
 
 
 def test_no_emission_without_batch_finished(tmp_path: Path):
@@ -693,7 +697,7 @@ def test_finished_batch_leaves_other_batches_planned(tmp_path: Path) -> None:
         )
     )
 
-    update = _drain_queue(gatherer.queue)[0]
+    update = drain_queue(gatherer.queue)[0]
     assert update.progress.done is False
     assert _batch_progress(update, "b1").state == ExecutionState.FINISHED
     assert _batch_progress(update, "b2").state == ExecutionState.PLANNED
@@ -721,7 +725,7 @@ def test_progress_and_registry_agree(tmp_path: Path) -> None:
         )
     )
 
-    update = _drain_queue(gatherer.queue)[0]
+    update = drain_queue(gatherer.queue)[0]
     [workflow] = _registry(gatherer)
     assert (update.progress.passed, update.progress.failed, update.progress.skipped) == (
         workflow.success_count,
@@ -747,7 +751,7 @@ def test_batch_status_comes_from_the_workflow_not_from_its_jobs(tmp_path: Path) 
         )
     )
 
-    update = _drain_queue(gatherer.queue)[0]
+    update = drain_queue(gatherer.queue)[0]
     batch = _batch_progress(update, "batch-1")
     assert batch.status == Status.FAILURE
     assert [job.latest.status for job in batch.jobs_progress] == [Status.SUCCESS]
@@ -772,7 +776,7 @@ def test_unplanned_job_is_warned_about_but_left_out_of_the_totals(tmp_path: Path
         )
     )
 
-    update = _drain_queue(gatherer.queue)[0]
+    update = drain_queue(gatherer.queue)[0]
     batch = _batch_progress(update, "batch-1")
     assert [job.job.name for job in batch.jobs_progress] == ["j1"]
     assert (update.progress.total, update.progress.complete) == (1, 1)
@@ -790,7 +794,7 @@ def test_timed_out_batch_is_recorded_on_the_batch(tmp_path: Path) -> None:
         )
     )
 
-    batch = _batch_progress(_drain_queue(gatherer.queue)[0], "batch-1")
+    batch = _batch_progress(drain_queue(gatherer.queue)[0], "batch-1")
     assert batch.status == Status.FAILURE
     assert batch.error == ProgressError.TIMED_OUT
     assert batch.jobs_progress[0].latest is not None
@@ -820,7 +824,7 @@ def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
         for future in [pool.submit(gather, message) for message in messages]:
             future.result()
 
-    updates = _drain_queue(gatherer.queue)
+    updates = drain_queue(gatherer.queue)
     assert sorted(update.revision for update in updates) == [1, 2, 3, 4, 5]
     assert [update.progress.done for update in updates].count(True) == 1
 
@@ -835,7 +839,7 @@ def test_missing_artifact_dir_is_recorded_as_an_attempt_error(tmp_path: Path) ->
         _batch_finished("", batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), None)])
     )
 
-    attempt = _batch_progress(_drain_queue(gatherer.queue)[0], "batch-1").jobs_progress[0].latest
+    attempt = _batch_progress(drain_queue(gatherer.queue)[0], "batch-1").jobs_progress[0].latest
     assert attempt is not None
     assert attempt.error == ProgressError.NO_ARTIFACTS
     assert attempt.reports == ()
@@ -860,7 +864,7 @@ def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) 
             ],
         )
     )
-    _drain_queue(gatherer.queue)
+    drain_queue(gatherer.queue)
 
     rerun_dir = _make_job_tree(tmp_path / "artifacts" / "101", "j2")
     rerun = _batch_finished(
@@ -892,7 +896,9 @@ def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) 
 # ---------------------------------------------------------------------------
 
 
-def _scenario_batch_job(target: str, platform: PlatformName = PlatformName.LINUX, runner: str = "ubuntu-latest") -> BatchJob:
+def _scenario_batch_job(
+    target: str, platform: PlatformName = PlatformName.LINUX, runner: str = "ubuntu-latest"
+) -> BatchJob:
     return _batch_job(target, target=target, environment="py3.12", platform=platform, runner=runner)
 
 
@@ -907,7 +913,7 @@ def _scenario_job(
     runner_labels: tuple[str, ...] = ("ubuntu-latest",),
     failed_step: str | None = None,
 ) -> BatchJobResult:
-    job = _scenario_batch_job(target, platform, runner)
+    job = _scenario_batch_job(target, platform, runner_labels[0])
     job_dir = _make_job_tree(artifacts, target, environment="py3.12", junit=junit, e2e=False)
     workflow_job = _workflow_job(target, conclusion, failed_step=failed_step, run_id=run_id)
     return _batch_job_result(job, workflow_job, job_dir)
@@ -961,7 +967,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
         _scenario_job(a2, "mysql", "failure", JUNIT_FAILING, run_id=2, failed_step="Run unit tests"),
     ]
     gatherer.process_message(_batch_finished(a2, id="b2", status="failure", run_id=2, batch_jobs=batch_02))
-    rev2 = _drain_queue(gatherer.queue)
+    rev2 = drain_queue(gatherer.queue)
     assert len(rev2) == 1
     assert (rev2[0].revision, rev2[0].progress.done) == (2, False)
     assert _totals(rev2[0]) == (7, 1, 0, 8)
