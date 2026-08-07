@@ -1,18 +1,18 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Guard against erosion of the safe_os seam.
+"""Guard against erosion of the OS wrapper seam.
 
 Two regressions are cheap to introduce and invisible in tests:
 
 1. A raw ``open()``/``subprocess`` call reintroduces unmediated I/O, so a
    config-derived path bypasses validation entirely.
-2. A check module reaches for the module-level ``safe_os`` singleton, which
+2. A check module reaches for the module-level ``unchecked_os`` singleton, which
    is permanently bound to the no-op validator. That passes every existing test
    while enforcing nothing, which is worse than an obvious bypass because it
    looks like coverage.
 
-Both are legitimate in narrow cases, so an inline ``# SKIP_SAFE_OS_VALIDATION``
+Both are legitimate in narrow cases, so an inline ``# SKIP_OS_WRAPPER_VALIDATION``
 waiver is honored on the offending line or in the comment block above it, forcing
 the decision to be written down. A waiver in a file header waives the whole file.
 
@@ -30,7 +30,7 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-WAIVER = 'SKIP_SAFE_OS_VALIDATION'
+WAIVER = 'SKIP_OS_WRAPPER_VALIDATION'
 
 # Dotted stdlib call targets that must go through the interface instead.
 MEDIATED_CALLS = frozenset(
@@ -158,7 +158,7 @@ def validate_file(path: str) -> list[str]:
             if not waived(node.lineno):
                 errors.append(
                     f'{path}:{node.lineno}: uses `open(` directly; route it through '
-                    f'`self.safe_os.open` so config-derived paths are validated. If the path '
+                    f'`self.os.open` so config-derived paths are validated. If the path '
                     f'cannot come from config, add an inline `# {WAIVER}` comment.'
                 )
             continue
@@ -168,7 +168,7 @@ def validate_file(path: str) -> list[str]:
             if not waived(node.lineno):
                 errors.append(
                     f'{path}:{node.lineno}: uses `{aliases[target.id]}` directly (imported as '
-                    f'`{target.id}`); route it through `self.safe_os` so config-derived paths are '
+                    f'`{target.id}`); route it through `self.os` so config-derived paths are '
                     f'validated. If the path cannot come from config, add an inline `# {WAIVER}` comment.'
                 )
             continue
@@ -180,34 +180,34 @@ def validate_file(path: str) -> list[str]:
         if dotted in MEDIATED_CALLS and not waived(node.lineno):
             errors.append(
                 f'{path}:{node.lineno}: uses `{dotted}` directly; route it through '
-                f'`self.safe_os` so config-derived paths are validated. If the path cannot '
+                f'`self.os` so config-derived paths are validated. If the path cannot '
                 f'come from config, add an inline `# {WAIVER}` comment.'
             )
-        elif check_module and dotted.startswith('safe_os.') and not waived(node.lineno):
+        elif check_module and dotted.startswith('unchecked_os.') and not waived(node.lineno):
             errors.append(
-                f'{path}:{node.lineno}: uses the module-level `safe_os` singleton in a check '
+                f'{path}:{node.lineno}: uses the module-level `unchecked_os` singleton in a check '
                 f'module. That singleton is bound to the no-op validator and can never enforce '
-                f'anything. Use `self.safe_os`, or pass it into module-level helpers. If this '
+                f'anything. Use `self.os`, or pass it into module-level helpers. If this '
                 f'path cannot come from config, add an inline `# {WAIVER}` comment.'
             )
 
     return errors
 
 
-@click.command(short_help='Validate safe_os usage')
+@click.command(short_help='Validate OS wrapper usage')
 @click.argument('integrations', nargs=-1)
 @click.pass_obj
-def safe_os(app: Application, integrations: tuple[str, ...]):
+def os_wrapper(app: Application, integrations: tuple[str, ...]):
     """Validate that integrations reach the filesystem and subprocesses through
-    the safe_os interface rather than raw stdlib calls or the unenforcing
+    the OS wrapper rather than raw stdlib calls or the unenforcing
     module-level singleton.
 
     If `integrations` is specified, only those will be validated; 'all' validates
     every integration.
     """
-    validation_tracker = app.create_validation_tracker('safe_os validation')
+    validation_tracker = app.create_validation_tracker('OS wrapper validation')
 
-    excluded = set(app.repo.config.get('/overrides/validate/safe-os/exclude', []))
+    excluded = set(app.repo.config.get('/overrides/validate/os-wrapper/exclude', []))
     for integration in app.repo.integrations.iter(integrations):
         if integration.name in excluded or not integration.is_integration:
             continue
