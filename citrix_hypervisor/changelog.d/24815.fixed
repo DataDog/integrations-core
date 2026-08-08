@@ -1,0 +1,1 @@
+Catch the standard library ``JSONDecodeError`` instead of the ``requests`` one when parsing malformed metric responses.

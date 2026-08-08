@@ -1,0 +1,1 @@
+Probe the cAdvisor endpoint through the check's configured HTTP client instead of a bare requests call, and stop following redirects so a redirected endpoint is not reported as absent.
