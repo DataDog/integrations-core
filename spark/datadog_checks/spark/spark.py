@@ -104,7 +104,7 @@ class SparkCheck(AgentCheck):
         spark_apps = self._get_running_apps()
 
         if not spark_apps:
-            self.log.warning('No running apps found. No metrics will be collected.')
+            self.log.warning('No running apps found. No application metrics will be collected.')
             return
 
         # Get the job metrics
@@ -253,6 +253,22 @@ class SparkCheck(AgentCheck):
 
         if metrics_json is None:
             return {}
+
+        # Always report worker capacity, even with zero active apps: it's the only
+        # metric this check can emit while idle, which config discovery's probe
+        # requires to accept a standalone-master candidate (it rejects configs that
+        # produce a service check but no metrics). Only do this when `workers` is
+        # actually present as a list, i.e. the response really is master state JSON —
+        # otherwise a non-master endpoint that happens to return unrelated JSON (e.g.
+        # `{}`) would still emit a 0-value metric and get accepted as a false-positive
+        # discovery candidate.
+        workers = metrics_json.get('workers')
+        if isinstance(workers, list):
+            self.gauge(
+                'spark.master.worker_count',
+                len(workers),
+                tags=['url:%s' % self.master_address] + tags,
+            )
 
         running_apps = {}
         version_set = False
