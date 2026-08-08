@@ -807,7 +807,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 /anomali_threatstream/                                               @DataDog/saas-integrations
 /anomali_threatstream/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /anomali_threatstream/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
-/anomali_threatstream/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
 /palo_alto_networks_cortex_xsoar/*.md                                 @DataDog/saas-integrations @DataDog/documentation
