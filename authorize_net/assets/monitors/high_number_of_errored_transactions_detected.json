@@ -8,7 +8,7 @@
 		"id": 156177853,
 		"name": "High number of errored transactions detected",
 		"type": "log alert",
-		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:(generalError OR settlementError OR communicationError)\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 25",
+		"query": "logs(\"source:authorize-net @log.transactionStatus:(generalError OR settlementError OR communicationError)\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 25",
 		"message": "{{#is_alert}}\nAn errored transaction in Authorize.Net indicates a problem during payment processing at any stage, including but not limited to authorization, capture, or settlement.\n\nA high number of errored transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
 		"tags": [
 			"integration:authorize-net"
