@@ -23,7 +23,13 @@ The GitLab Runner check is included in the [Datadog Agent][3] package, so you do
 
 Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to point to the Runner's Prometheus metrics endpoint and to the GitLab master to have a service check. See the [sample gitlab_runner.d/conf.yaml][5] for all available configuration options.
 
-The `allowed_metrics` item in the `init_config` section allows you to specify the metrics that should be extracted. Some metrics should be reported as `rate`, for example: `ci_runner_errors`.
+The `allowed_metrics` item in the `init_config` section allows you to specify additional metrics to collect beyond the integration's built-in metric set. Some metrics should be reported as `rate`, for example: `ci_runner_errors`.
+
+#### Container-based configuration discovery
+
+This check supports [Autodiscovery][2] based on containers exposing a GitLab Runner metrics port. For discovery to find a Runner, its [metrics HTTP server][1] must be enabled and its metrics port must be exposed in the container or service metadata. Port `9252`, the default metrics port, is the preferred hint, but any other exposed port is probed as well.
+
+Discovery only generates a `prometheus_endpoint` for the instance, since `gitlab_url` refers to a separate GitLab server that cannot be derived from the Runner container. Auto-discovered instances therefore collect Runner metrics and emit the Prometheus endpoint service check, but do not emit the `gitlab_runner.can_connect` service check. If you need that service check, add a static configuration with `gitlab_url` set.
 
 ### Validation
 

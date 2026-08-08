@@ -2,54 +2,15 @@
 #
 init_config:
 
-    ## @param allowed_metrics - list of strings - required
-    ## List of metrics to extract from Prometheus.
+    ## @param allowed_metrics - list of strings - optional - default: []
+    ## Additional Prometheus metrics to collect beyond the integration's built-in metric set.
+    ## Leaving this empty only collects the built-in metrics.
     #
-    allowed_metrics:
-      - ci_docker_machines_provider_machine_creation_duration_seconds
-      - ci_docker_machines_provider_machine_states
-      - ci_runner_builds
-      - ci_runner_errors
-      - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
-      - ci_ssh_docker_machines_provider_machine_states
-      - gitlab_runner_api_request_duration_seconds
-      - gitlab_runner_autoscaling_machine_creation_duration_seconds
-      - gitlab_runner_autoscaling_machine_states
-      - gitlab_runner_errors_total
-      - gitlab_runner_job_queue_duration_seconds
-      - gitlab_runner_jobs
-      - gitlab_runner_version_info
-      - go_gc_duration_seconds
-      - go_goroutines
-      - go_memstats_alloc_bytes
-      - go_memstats_alloc_bytes_total
-      - go_memstats_buck_hash_sys_bytes
-      - go_memstats_frees_total
-      - go_memstats_gc_sys_bytes
-      - go_memstats_heap_alloc_bytes
-      - go_memstats_heap_idle_bytes
-      - go_memstats_heap_inuse_bytes
-      - go_memstats_heap_objects
-      - go_memstats_heap_released_bytes_total
-      - go_memstats_heap_sys_bytes
-      - go_memstats_last_gc_time_seconds
-      - go_memstats_lookups_total
-      - go_memstats_mallocs_total
-      - go_memstats_mcache_inuse_bytes
-      - go_memstats_mcache_sys_bytes
-      - go_memstats_mspan_inuse_bytes
-      - go_memstats_mspan_sys_bytes
-      - go_memstats_next_gc_bytes
-      - go_memstats_other_sys_bytes
-      - go_memstats_stack_inuse_bytes
-      - go_memstats_stack_sys_bytes
-      - go_memstats_sys_bytes
-      - process_cpu_seconds_total
-      - process_max_fds
-      - process_open_fds
-      - process_resident_memory_bytes
-      - process_start_time_seconds
-      - process_virtual_memory_bytes
+    # allowed_metrics:
+    #   - gitlab_runner_concurrent
+    #   - gitlab_runner_limit
+    #   - gitlab_runner_request_concurrency
+    #   - gitlab_runner_request_concurrency_exceeded_total
 
     ## @param proxy - mapping - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
@@ -94,12 +55,13 @@ init_config:
 #
 instances:
 
-    ## @param gitlab_url - string - required
+  -
+    ## @param gitlab_url - string - optional
     ## Master URL to probe for service health status.
     ## If you are using GitLab CE and not EE, use this URL with
     ## the authorization token: http://localhost/?token=<TOKEN>.
     #
-  - gitlab_url: <GITLAB_URL>
+    # gitlab_url: <GITLAB_URL>
 
     ## @param prometheus_endpoint - string - required
     ## URL of the metrics endpoint of prometheus
