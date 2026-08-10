@@ -9,7 +9,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import Artifact, ArtifactsList, PullRequest
+from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 
@@ -241,6 +241,44 @@ async def test_assert_called_with_fails_when_no_match(fake: FakeAsyncGitHubClien
             draft=False,
             timeout=None,
         )
+
+
+async def test_list_issue_comments_defaults_to_no_comments(fake: FakeAsyncGitHubClient) -> None:
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+    assert [comment for page in pages for comment in page.data] == []
+
+
+async def test_list_issue_comments_treats_a_bare_list_as_one_page(fake: FakeAsyncGitHubClient) -> None:
+    """A page of comments is itself a list, so the usual "a list means pages" rule cannot apply."""
+    fake.mock_response('list_issue_comments', [IssueComment(id=1, body='a'), IssueComment(id=2, body='b')])
+
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+
+    assert len(pages) == 1
+    assert [comment.id for comment in pages[0].data] == [1, 2]
+
+
+async def test_list_issue_comments_treats_a_list_of_responses_as_pages(fake: FakeAsyncGitHubClient) -> None:
+    fake.mock_response(
+        'list_issue_comments',
+        [
+            GitHubResponse.model_validate({'data': [IssueComment(id=1, body='a')], 'headers': {}}),
+            GitHubResponse.model_validate({'data': [IssueComment(id=2, body='b')], 'headers': {}}),
+        ],
+    )
+
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+
+    assert len(pages) == 2
+    assert [comment.id for page in pages for comment in page.data] == [1, 2]
+
+
+async def test_issue_comment_writes_are_recorded(fake: FakeAsyncGitHubClient) -> None:
+    created = await fake.create_issue_comment('o', 'r', 7, 'hello')
+    await fake.update_issue_comment('o', 'r', created.data.id, 'edited')
+
+    assert fake.last_call('create_issue_comment').kwargs['body'] == 'hello'
+    assert fake.last_call('update_issue_comment').kwargs['comment_id'] == created.data.id
 
 
 async def test_assert_not_called_passes_when_method_unused(fake: FakeAsyncGitHubClient) -> None:

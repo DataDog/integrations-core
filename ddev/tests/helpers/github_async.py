@@ -46,6 +46,7 @@ from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
+    IssueComment,
     Label,
     PullRequest,
     WorkflowDispatchResult,
@@ -56,6 +57,10 @@ from ddev.utils.github_async.models import (
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
 DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
+
+# Id returned by the default `create_issue_comment` / `update_issue_comment` responses. Exported so
+# tests can assert the updater edits the comment it created rather than duplicating the literal.
+DEFAULT_COMMENT_ID = 4242
 
 
 @dataclass
@@ -84,6 +89,16 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             headers={},
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        'create_issue_comment': lambda: GitHubResponse(
+            data=IssueComment(id=DEFAULT_COMMENT_ID, body=''),
+            headers={},
+        ),
+        'update_issue_comment': lambda: GitHubResponse(
+            data=IssueComment(id=DEFAULT_COMMENT_ID, body=''),
+            headers={},
+        ),
+        # Default to a PR with no existing Dispatcher comment, so the updater creates one.
+        'list_issue_comments': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         # Default to "PR not found" so tests that don't care about PR lookup auto-fall-through
         # to commit resolution. Tests that need a specific PR register their own mock_response.
         'get_pull_request': lambda: httpx.HTTPStatusError(
@@ -242,6 +257,78 @@ class FakeAsyncGitHubClient:
             draft=draft,
             timeout=timeout,
         )
+
+    async def create_issue_comment(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
+        return self._call(
+            'create_issue_comment',
+            owner=owner,
+            repo=repo,
+            issue_number=issue_number,
+            body=body,
+            timeout=timeout,
+        )
+
+    async def update_issue_comment(
+        self,
+        owner: str,
+        repo: str,
+        comment_id: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
+        return self._call(
+            'update_issue_comment',
+            owner=owner,
+            repo=repo,
+            comment_id=comment_id,
+            body=body,
+            timeout=timeout,
+        )
+
+    async def list_issue_comments(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
+        """Async-generator mirror.
+
+        Unlike the other paginated mirrors, one page here is itself a list, so "a list of pages" and
+        "one page" are ambiguous. Register a list of `GitHubResponse` for several pages; anything
+        else — including a bare list of `IssueComment` — is taken as the data of a single page.
+        """
+        self._record(
+            'list_issue_comments',
+            owner=owner,
+            repo=repo,
+            issue_number=issue_number,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_issue_comments',
+            {'owner': owner, 'repo': repo, 'issue_number': issue_number, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        if isinstance(response, list) and all(isinstance(page, GitHubResponse) for page in response):
+            pages = response
+        else:
+            pages = [response]
+        for page in pages:
+            if isinstance(page, GitHubResponse):
+                yield page
+            else:
+                yield GitHubResponse.model_validate({'data': page, 'headers': {}})
 
     async def add_labels_to_issue(
         self,

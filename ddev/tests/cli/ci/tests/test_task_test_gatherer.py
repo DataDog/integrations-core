@@ -12,6 +12,8 @@ of every job's result — not just failures.
 from __future__ import annotations
 
 import asyncio
+import logging
+import re
 import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -31,10 +33,12 @@ from ddev.cli.ci.tests.messages import (
 )
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
+from ddev.cli.ci.tests.task_pull_request_updater import PullRequestUpdaterOptions, TaskPullRequestUpdater
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
-from ddev.event_bus.orchestrator import BaseMessage
+from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.utils.github_async.models import JobStep, WorkflowJob
 from ddev.utils.junit import TestStatus
+from tests.helpers.github_async import FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -985,3 +989,72 @@ def test_dispatcher_scenario_revisions_are_monotonic(tmp_path: Path) -> None:
         revisions.append(emitted[0].revision)
 
     assert revisions == [1, 2, 3]
+
+
+# ---------------------------------------------------------------------------
+# Gatherer -> PR updater, over a real event bus
+# ---------------------------------------------------------------------------
+
+
+class _DispatcherBus(EventBusOrchestrator):
+    """Minimal concrete orchestrator, so the two processors are wired the way production wires them."""
+
+    async def on_initialize(self) -> None:
+        pass
+
+    async def on_finalize(self, exception: Exception | None) -> None:
+        pass
+
+    async def on_message_received(self, message: BaseMessage) -> None:
+        pass
+
+
+def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path) -> None:
+    """The contract between the two processors, not each half in isolation.
+
+    The gatherer emits ``UpdatePRComment`` and the updater consumes it: one comment created for the
+    initial plan, then edited once per finished batch, never regressing.
+    """
+    plan = _scenario_plan()
+    gatherer = TaskTestGatherer("gatherer", output_base_path=tmp_path / "out", batches=_scenario_batches(plan))
+    client = FakeAsyncGitHubClient()
+    updater = TaskPullRequestUpdater(
+        "pr-updater",
+        client,
+        PullRequestUpdaterOptions(owner="DataDog", repo="integrations-core", pr_number=42),
+    )
+
+    bus = _DispatcherBus(logging.getLogger("test-bus"), max_timeout=30, grace_period=0.2)
+    bus.register_processor(gatherer, [BatchFinished])
+    bus.register_processor(updater, [UpdatePRComment])
+
+    bus.submit_message(gatherer.build_initial_update("initial"))
+    for index, (batch_id, jobs) in enumerate(plan.items(), start=1):
+        artifacts = tmp_path / "artifacts" / batch_id
+        results = [_scenario_job(artifacts, job.target, "success", JUNIT_PASSING, run_id=index) for job in jobs]
+        bus.submit_message(_batch_finished(artifacts, id=batch_id, run_id=index, batch_jobs=results))
+
+    bus.run()
+
+    # One comment, created once and edited for each of the three batches.
+    assert len(client.calls_to("create_issue_comment")) == 1
+    assert len(client.calls_to("update_issue_comment")) == 3
+
+    bodies = [client.calls_to("create_issue_comment")[0].kwargs["body"]]
+    bodies += [call.kwargs["body"] for call in client.calls_to("update_issue_comment")]
+
+    # The comment only ever moves forward: revisions increase and so does the completed count.
+    revisions = [int(re.search(r"Revision (\d+)", body).group(1)) for body in bodies]
+    completed = [int(re.search(r"\*\*(\d+)/\d+ jobs\*\*", body).group(1)) for body in bodies]
+    assert revisions == sorted(revisions)
+    assert completed == sorted(completed)
+
+    assert completed[0] == 0
+    assert "in progress" in bodies[0]
+    assert "**12/12 jobs**" in bodies[-1]
+    assert "## ✅ Dispatcher tests · passed" in bodies[-1]
+    assert "Final result" in bodies[-1]
+
+
+def _scenario_batches(plan: dict[str, list[BatchJob]]) -> list[TestBatch]:
+    return [_test_batch(batch_id, jobs) for batch_id, jobs in plan.items()]

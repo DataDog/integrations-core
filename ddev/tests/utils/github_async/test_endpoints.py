@@ -220,6 +220,64 @@ async def test_create_issue_comment_success() -> None:
     assert result.data.user.login == "octocat"
 
 
+async def test_update_issue_comment_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "PATCH"
+        assert request.url.path == "/repos/owner/repo/issues/comments/99"
+        assert json.loads(request.content) == {"body": "edited"}
+        return json_response(issue_comment_payload(id=99, body="edited"))
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.update_issue_comment("owner", "repo", 99, "edited")
+    assert isinstance(result.data, IssueComment)
+    assert (result.data.id, result.data.body) == (99, "edited")
+
+
+async def test_list_issue_comments_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/issues/7/comments"
+        # The response body is a bare array, not an object with a wrapper key.
+        return json_response([issue_comment_payload(id=1), issue_comment_payload(id=2, body="second")])
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_issue_comments("owner", "repo", 7)]
+
+    assert len(pages) == 1
+    comments = pages[0].data
+    assert [comment.id for comment in comments] == [1, 2]
+    assert all(isinstance(comment, IssueComment) for comment in comments)
+    assert comments[1].body == "second"
+
+
+async def test_list_issue_comments_follows_link_header() -> None:
+    """The updater must see every comment, or it creates a duplicate instead of editing its own."""
+    second_page_url = "https://api.github.com/repos/owner/repo/issues/7/comments?page=2"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.params.get("page") == "2":
+            return json_response([issue_comment_payload(id=2, body="second")])
+        return json_response(
+            [issue_comment_payload(id=1)],
+            headers={"link": f'<{second_page_url}>; rel="next"'},
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_issue_comments("owner", "repo", 7)]
+
+    assert [comment.id for page in pages for comment in page.data] == [1, 2]
+
+
+async def test_list_issue_comments_per_page_forwarded() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params["per_page"] == "100"
+        return json_response([])
+
+    client = make_client(httpx.MockTransport(handler))
+    async for _ in client.list_issue_comments("owner", "repo", 7):
+        pass
+
+
 async def test_create_pr_review_comment_success_with_position() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert "/pulls/3/comments" in request.url.path
