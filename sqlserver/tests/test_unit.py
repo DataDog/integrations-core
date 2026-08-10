@@ -539,15 +539,9 @@ def _mock_query_stats_cursor():
 @pytest.mark.parametrize(
     'engine_edition, disable_secondary_tags, expect_db_name_func, expect_database_name, expect_plan_attributes',
     [
-        # Azure SQL Database cannot read sys.dm_exec_plan_attributes on the Basic/S0/S1 service tiers, which is why
-        # disable_secondary_tags is the recommended workaround there. The database name must still be collected, via
-        # DB_NAME(), so that the backend can resolve the azure_sql_server_database resource.
         pytest.param(ENGINE_EDITION_SQL_DATABASE, True, True, True, False, id='azure_sql_database_no_secondary_tags'),
         pytest.param(ENGINE_EDITION_SQL_DATABASE, False, False, True, True, id='azure_sql_database_default'),
-        # Everywhere else sys.dm_exec_query_stats spans the whole server and the no-aggregates query does not group
-        # by database, so a single row can aggregate executions from several databases and has no one database to
-        # report. Leave database_name off rather than fabricating one from the connection's current database. This
-        # holds for Azure SQL Managed Instance too, which is an Azure engine but is not scoped to one database.
+        # Managed Instance is an Azure engine but is not scoped to one database, so it is excluded like self-hosted.
         pytest.param(ENGINE_EDITION_STANDARD, True, False, False, False, id='self_hosted_no_secondary_tags'),
         pytest.param(ENGINE_EDITION_STANDARD, False, False, True, True, id='self_hosted_default'),
         pytest.param(
@@ -592,8 +586,7 @@ def test_statement_metrics_query_database_name_column(
 def test_azure_sql_database_row_filtering_with_secondary_tags_disabled(
     instance_docker, configured_database, row_database_name, expected
 ):
-    # Once DB_NAME() supplies database_name, the existing Azure SQL Database row filter becomes reachable under
-    # disable_secondary_tags. Confirm it still admits the rows for the database the check is connected to.
+    # Supplying database_name makes the Azure SQL Database row filter reachable under this setting for the first time.
     instance = copy.deepcopy(instance_docker)
     if configured_database is None:
         instance.pop('database', None)

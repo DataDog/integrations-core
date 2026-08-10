@@ -336,10 +336,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # If disable_secondary_tags is enabled, we need to use the query without aggregates
             statements_query = STATEMENT_METRICS_QUERY_NO_AGGREGATES
             if is_azure_sql_database(engine_edition):
-                # The no-aggregates query drops the sys.dm_exec_plan_attributes lookup that resolves the database,
-                # and no longer groups by it, so elsewhere a row can aggregate executions from several databases
-                # and has no single database to report. An Azure SQL Database connection only ever sees its own
-                # database, so DB_NAME() resolves it correctly without that DMV.
+                # This query does not group by database, so elsewhere a row can span several. Azure SQL Database
+                # connects to one, so DB_NAME() names it. Keep it argument-less: resolving a dbid needs
+                # sys.dm_exec_plan_attributes, admin-only on the Basic/S0/S1 tiers this setting works around.
                 database_name_column = "\n    DB_NAME() as database_name,"
         elif is_azure_sql_database(engine_edition):
             # If the database is Azure SQL Database, we need to use the Azure SQL Database specific query
