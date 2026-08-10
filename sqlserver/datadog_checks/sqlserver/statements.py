@@ -140,7 +140,7 @@ select
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    encrypted as is_encrypted,
+    encrypted as is_encrypted,{database_name_column}
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
@@ -330,10 +330,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             return self._statement_metrics_query
         available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
 
+        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+        database_name_column = ""
         if self.disable_secondary_tags:
             # If disable_secondary_tags is enabled, we need to use the query without aggregates
             statements_query = STATEMENT_METRICS_QUERY_NO_AGGREGATES
-        elif is_azure_sql_database(self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")):
+            if is_azure_sql_database(engine_edition):
+                # The no-aggregates query drops the sys.dm_exec_plan_attributes lookup that resolves the database,
+                # but an Azure SQL Database connection is scoped to a single database, so DB_NAME() identifies it
+                # without that DMV. A self-hosted instance reports stats across every database, so it gets no column.
+                database_name_column = "\n    DB_NAME() as database_name,"
+        elif is_azure_sql_database(engine_edition):
             # If the database is Azure SQL Database, we need to use the Azure SQL Database specific query
             statements_query = STATEMENT_METRICS_QUERY_AZURE_SQL_DATABASE
         else:
@@ -345,6 +352,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=self._config.stored_procedure_characters_limit,
+            database_name_column=database_name_column,
         )
         return self._statement_metrics_query
 
