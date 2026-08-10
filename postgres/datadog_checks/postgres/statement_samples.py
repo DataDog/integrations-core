@@ -231,7 +231,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._time_since_last_activity_event = 0
         self._pg_stat_activity_cols = None
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._explain_parameterized_queries = None
         self._collection_strategy_cache = None

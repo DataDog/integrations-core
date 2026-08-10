@@ -13,6 +13,8 @@ from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql, util
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
+from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 
 pytestmark = pytest.mark.unit
 
@@ -409,7 +411,7 @@ def test_check_gc_after_cancel(pg_instance):
     2. Find which attribute on that object points back to the check (usually
        ``self.check`` or ``self._check``).
     3. Null that attribute in ``cancel()`` or add it to the relevant
-       ``_shutdown()`` method.
+       ``shutdown()`` method.
     4. If the referrer is a closure or ``functools.partial``, find the
        registration site and null or clear the container that holds it.
     """
@@ -515,6 +517,41 @@ def test_run_after_cancel_returns_immediately(pg_instance):
         result = check.run()
 
     assert result == ''
+
+
+@pytest.mark.parametrize(
+    'dbm, data_observability_enabled, expected_jobs',
+    [
+        (False, False, []),
+        (True, False, ['query-metrics', 'query-samples', 'database-metadata']),
+        (False, True, ['database-metadata', 'data-observability']),
+        (True, True, ['query-metrics', 'query-samples', 'database-metadata', 'data-observability']),
+    ],
+)
+def test_async_job_registry_matches_config(pg_instance, dbm, data_observability_enabled, expected_jobs):
+    """Only the jobs enabled by the instance config are registered with the check."""
+    pg_instance['dbm'] = dbm
+    pg_instance['data_observability'] = {'enabled': data_observability_enabled}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+
+    assert list(check._async_job_registry) == expected_jobs
+
+
+def test_initialize_statement_metrics_replaces_registered_job(pg_instance):
+    """The incremental collector replaces the placeholder registered before the version was known."""
+    pg_instance['dbm'] = True
+    pg_instance['query_metrics'] = {'enabled': True, 'incremental_query_metrics': True}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    assert isinstance(check._async_job_registry['query-metrics'], PostgresStatementMetrics)
+
+    check.version = VersionInfo(14, 0, 0)
+    check._initialize_statement_metrics()
+
+    assert isinstance(check.statement_metrics, PostgresStatementMetricsV2)
+    assert check._async_job_registry['query-metrics'] is check.statement_metrics
+    assert list(check._async_job_registry) == ['query-metrics', 'query-samples', 'database-metadata']
 
 
 def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
