@@ -11,10 +11,11 @@ from datadog_checks.base.checks.openmetrics.metric_limit_issue import (
     ISSUE_NAME,
     RESOLVE_AFTER_CLEAN_RUNS,
     MetricLimitIssueReporter,
+    _issue_id,
 )
 
 ENDPOINT = 'http://example.test/metrics'
-ISSUE_ID = 'openmetrics-dropped-config:81b0b5348322bbd4'
+ISSUE_ID = 'openmetrics-dropped-config:5505571e531f7cf6'
 
 
 class GenericLimitedCheck(AgentCheck):
@@ -172,6 +173,31 @@ def test_recurrence_after_resolution_reports_same_id(datadog_agent: Any) -> None
 
     assert [issue['id'] for issue in reported_issues(datadog_agent)] == [ISSUE_ID, ISSUE_ID]
     assert datadog_agent._sent_resolved_issues == [ISSUE_ID]
+
+
+def test_issue_id_is_stable_for_the_same_identity() -> None:
+    identity = ('stubbed.hostname', 'openmetrics_test', ENDPOINT, 'demo')
+
+    assert _issue_id(*identity) == _issue_id(*identity)
+
+
+@pytest.mark.parametrize(
+    ('hostname', 'check_name', 'endpoint', 'namespace'),
+    [
+        pytest.param('other.hostname', 'openmetrics_test', ENDPOINT, 'demo', id='hostname'),
+        pytest.param('stubbed.hostname', 'other_openmetrics_test', ENDPOINT, 'demo', id='check-name'),
+        pytest.param(
+            'stubbed.hostname', 'openmetrics_test', 'http://other.example.test/metrics', 'demo', id='endpoint'
+        ),
+        pytest.param('stubbed.hostname', 'openmetrics_test', ENDPOINT, 'other', id='namespace'),
+    ],
+)
+def test_issue_id_changes_with_identity_component(
+    hostname: str, check_name: str, endpoint: str, namespace: str
+) -> None:
+    base_id = _issue_id('stubbed.hostname', 'openmetrics_test', ENDPOINT, 'demo')
+
+    assert _issue_id(hostname, check_name, endpoint, namespace) != base_id
 
 
 def test_issue_id_does_not_include_metric_limit(datadog_agent: Any) -> None:

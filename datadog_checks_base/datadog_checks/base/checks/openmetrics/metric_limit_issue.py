@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -38,7 +39,7 @@ class MetricLimitIssueReporter:
             check.log.debug('Cannot handle the OpenMetrics metric limit state without an endpoint')
             return
 
-        issue_id = _issue_id(endpoint, check.instance.get('namespace', ''))
+        issue_id = _issue_id(check.hostname, check.name, endpoint, check.instance.get('namespace', ''))
 
         if reached_limit:
             self.clean_runs = 0
@@ -88,8 +89,9 @@ class MetricLimitIssueReporter:
             self.clean_runs = 0
 
 
-def _issue_id(endpoint: str, namespace: object) -> str:
-    digest = hashlib.sha256(f'{endpoint}|{namespace}'.encode('utf-8')).hexdigest()[:16]
+def _issue_id(hostname: str, check_name: str, endpoint: str, namespace: object) -> str:
+    identity = json.dumps((hostname, check_name, endpoint, str(namespace)), separators=(',', ':'))
+    digest = hashlib.sha256(identity.encode('utf-8')).hexdigest()[:16]
     return f'openmetrics-dropped-config:{digest}'
 
 
