@@ -3,15 +3,24 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheck
 
+from .check import ExternalDNS
 from .metrics import DEFAULT_METRICS
 
 
 class ExternalDNSCheck(OpenMetricsBaseCheck):
     """
-    Collect ExternalDNS metrics from its Prometheus endpoint
+    Collect ExternalDNS metrics from its Prometheus endpoint.
+
+    Dispatches to the OpenMetrics V2 implementation (check.ExternalDNS) when
+    `openmetrics_endpoint` is set, otherwise keeps the legacy V1 behavior.
     """
 
     DEFAULT_METRIC_LIMIT = 0
+
+    def __new__(cls, name, init_config, instances):
+        if 'openmetrics_endpoint' in instances[0]:
+            return ExternalDNS(name, init_config, instances)
+        return super(ExternalDNSCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(ExternalDNSCheck, self).__init__(
