@@ -1382,10 +1382,6 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "#risk_score",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "service",
                                             "width": "auto"
                                         },
@@ -1399,10 +1395,6 @@
                                             {
                                                 "expression": "concat(@threat_intel.results.indicator, \"\")",
                                                 "name": "indicator"
-                                            },
-                                            {
-                                                "expression": "max(@threat_intel.results.reputation)",
-                                                "name": "risk_score"
                                             },
                                             {
                                                 "expression": "concat(@threat_intel.results.intention, \"\")",
