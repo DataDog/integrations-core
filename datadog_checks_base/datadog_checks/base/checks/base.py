@@ -1648,6 +1648,10 @@ class AgentCheck(object):
             error_report = json.encode([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
+                reached_limit = self.metric_limiter.reached_limit
+                observed = self.metric_limiter.count
+                limit = self.metric_limiter.limit
+
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
                     debug_metrics = self.metric_limiter.get_debug_metrics()
 
@@ -1660,7 +1664,15 @@ class AgentCheck(object):
 
                 self.metric_limiter.reset()
 
+                try:
+                    self._on_metric_limit_state(reached_limit, observed, limit)
+                except Exception:
+                    self.log.debug('Error handling metric limit state', exc_info=True)
+
         return error_report
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed: int, limit: int) -> None:
+        """Called once per run for checks with an active metric limiter, after the limiter is reset."""
 
     def run_check_initializations(self):
         while self.check_initializations:

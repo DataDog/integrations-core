@@ -12,6 +12,7 @@ import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import handle_metric_limit_issue
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -95,6 +96,16 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                 except (ConnectionError, RequestException) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed: int, limit: int) -> None:
+        handle_metric_limit_issue(
+            self,
+            self.instance.get('openmetrics_endpoint'),
+            reached_limit,
+            observed,
+            limit,
+            legacy=False,
+        )
 
     def configure_scrapers(self):
         """
