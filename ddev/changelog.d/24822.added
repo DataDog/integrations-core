@@ -1,0 +1,1 @@
+Add the Dispatcher pull-request updater task, which renders each progress snapshot into one PR comment.
