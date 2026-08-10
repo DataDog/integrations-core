@@ -337,8 +337,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             statements_query = STATEMENT_METRICS_QUERY_NO_AGGREGATES
             if is_azure_sql_database(engine_edition):
                 # The no-aggregates query drops the sys.dm_exec_plan_attributes lookup that resolves the database,
-                # but an Azure SQL Database connection is scoped to a single database, so DB_NAME() identifies it
-                # without that DMV. A self-hosted instance reports stats across every database, so it gets no column.
+                # and no longer groups by it, so elsewhere a row can aggregate executions from several databases
+                # and has no single database to report. An Azure SQL Database connection only ever sees its own
+                # database, so DB_NAME() resolves it correctly without that DMV.
                 database_name_column = "\n    DB_NAME() as database_name,"
         elif is_azure_sql_database(engine_edition):
             # If the database is Azure SQL Database, we need to use the Azure SQL Database specific query

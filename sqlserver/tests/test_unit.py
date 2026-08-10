@@ -544,11 +544,23 @@ def _mock_query_stats_cursor():
         # DB_NAME(), so that the backend can resolve the azure_sql_server_database resource.
         pytest.param(ENGINE_EDITION_SQL_DATABASE, True, True, True, False, id='azure_sql_database_no_secondary_tags'),
         pytest.param(ENGINE_EDITION_SQL_DATABASE, False, False, True, True, id='azure_sql_database_default'),
-        # A self-hosted instance collects stats across every database on the server, so the connection's current
-        # database says nothing about which database a row belongs to. Leave database_name off entirely rather than
-        # mislabelling the rows.
+        # Everywhere else sys.dm_exec_query_stats spans the whole server and the no-aggregates query does not group
+        # by database, so a single row can aggregate executions from several databases and has no one database to
+        # report. Leave database_name off rather than fabricating one from the connection's current database. This
+        # holds for Azure SQL Managed Instance too, which is an Azure engine but is not scoped to one database.
         pytest.param(ENGINE_EDITION_STANDARD, True, False, False, False, id='self_hosted_no_secondary_tags'),
         pytest.param(ENGINE_EDITION_STANDARD, False, False, True, True, id='self_hosted_default'),
+        pytest.param(
+            ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
+            True,
+            False,
+            False,
+            False,
+            id='azure_managed_instance_no_secondary_tags',
+        ),
+        pytest.param(
+            ENGINE_EDITION_AZURE_MANAGED_INSTANCE, False, False, True, True, id='azure_managed_instance_default'
+        ),
     ],
 )
 def test_statement_metrics_query_database_name_column(
