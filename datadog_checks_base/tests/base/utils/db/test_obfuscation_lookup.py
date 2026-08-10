@@ -57,13 +57,27 @@ class TestObfuscationLookup:
         assert lk.hits == 1
         assert lk.misses == 1
 
-    def test_evict_removes_key(self):
+    def test_retain_drops_keys_absent_from_the_live_set(self):
         lk = self._make_lookup()
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
-        lk.evict({(1, 1, 1)})
+        assert lk.retain({(2, 1, 1)}) == 1
         hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1)})
         assert (1, 1, 1) in misses
         assert (2, 1, 1) in hits
+
+    def test_retain_keeps_everything_when_all_keys_are_live(self):
+        lk = self._make_lookup()
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        assert lk.retain({(1, 1, 1), (2, 1, 1)}) == 0
+        hits, _ = lk.lookup({(1, 1, 1), (2, 1, 1)})
+        assert len(hits) == 2
+
+    def test_retain_ignores_live_keys_it_has_never_seen(self):
+        """The live set is the whole snapshot, most of which was never a cache miss."""
+        lk = self._make_lookup()
+        lk.populate({(1, 1, 1): 'SELECT 1'})
+        assert lk.retain({(1, 1, 1), (9, 9, 9)}) == 0
+        assert lk.key_map_size == 1
 
     def test_multiple_keys_share_signature(self):
         """Different keys with the same normalized SQL share one ObfuscationResult."""
@@ -110,11 +124,11 @@ class TestObfuscationLookup:
         _, misses = lk.lookup({(2, 1, 1)})
         assert misses == {(2, 1, 1)}
 
-    def test_evict_does_not_remove_shared_signature(self):
-        """Evicting one key removes tier-1 mapping but keeps tier-2 if other keys share it."""
+    def test_retain_does_not_remove_shared_signature(self):
+        """Dropping one key removes tier-1 mapping but keeps tier-2 if other keys share it."""
         lk = self._make_lookup()
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
-        lk.evict({(1, 1, 1)})
+        lk.retain({(2, 1, 1)})
         hits, _ = lk.lookup({(2, 1, 1)})
         assert (2, 1, 1) in hits
 
@@ -159,7 +173,7 @@ class TestObfuscationLookup:
         hits, misses = lk.lookup({'digest_a', 'digest_c'})
         assert 'digest_a' in hits
         assert misses == {'digest_c'}
-        lk.evict({'digest_a'})
+        lk.retain({'digest_b'})
         _, misses = lk.lookup({'digest_a'})
         assert misses == {'digest_a'}
 
@@ -183,11 +197,11 @@ class TestObfuscationLookup:
         assert lk.misses == 0
         assert lk.hits == 0
 
-    def test_evict_forgets_ignored_key(self):
-        """Evicting a vanished key clears its negative-cache entry so it can be re-evaluated."""
+    def test_retain_forgets_ignored_key(self):
+        """Dropping a departed key clears its negative-cache entry so it can be re-evaluated."""
         lk = self._make_lookup()
         lk.mark_ignored({(1, 1, 1)})
-        lk.evict({(1, 1, 1)})
+        assert lk.retain(set()) == 1
         assert lk.ignored_map_size == 0
         _, misses = lk.lookup({(1, 1, 1)})
         assert (1, 1, 1) in misses

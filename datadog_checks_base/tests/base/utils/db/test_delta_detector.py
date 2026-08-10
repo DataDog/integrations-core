@@ -72,11 +72,15 @@ class TestDeltaDetector:
         result = dd.compute([self._make_row(101, calls=5, rows=50)])
         assert result.derivative_rows == []
 
-    def test_vanished_keys_detected(self):
+    def test_returning_key_is_rebaselined(self):
+        """A key that leaves the snapshot loses its baseline, so its counters are not diffed
+        against a stale one when it comes back."""
         dd = self._make_detector()
         dd.compute([self._make_row(101, calls=10), self._make_row(102, calls=20)])
-        result = dd.compute([self._make_row(101, calls=15)])
-        assert (102, 1, 1) in result.vanished_keys
+        dd.compute([self._make_row(101, calls=15)])
+
+        result = dd.compute([self._make_row(101, calls=16), self._make_row(102, calls=25)])
+        assert [row['queryid'] for row in result.derivative_rows] == [101]
 
     def test_execution_indicator_required(self):
         dd = self._make_detector()

@@ -16,8 +16,6 @@ class DeltaResult[K: Hashable]:
     """Rows whose counters advanced since the previous snapshot, with metric columns replaced by their deltas."""
     changed_keys: set[K]
     """Keys of the rows in ``derivative_rows``."""
-    vanished_keys: set[K]
-    """Keys present in the previous snapshot but absent from this one."""
 
 
 class DeltaDetector[K: Hashable]:
@@ -98,24 +96,17 @@ class DeltaDetector[K: Hashable]:
             derivative_rows.append(derivative)
             changed_keys.add(key)
 
-        vanished_keys = self._previous.keys() - current.keys()
-
         logger.debug(
-            "delta: snapshot=%d prev=%d derivative=%d changed=%d vanished=%d",
+            "delta: snapshot=%d prev=%d derivative=%d changed=%d",
             len(current),
             len(self._previous),
             len(derivative_rows),
             len(changed_keys),
-            len(vanished_keys),
         )
 
         self._update_cache(current)
 
-        return DeltaResult(
-            derivative_rows=derivative_rows,
-            changed_keys=changed_keys,
-            vanished_keys=vanished_keys,
-        )
+        return DeltaResult(derivative_rows=derivative_rows, changed_keys=changed_keys)
 
     def _collapse(self, rows: list[dict]) -> dict[K, dict]:
         """Group rows by key, summing metric columns across rows that share one.
