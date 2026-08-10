@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2026-08-07
+
+***Changed***:
+
+* Bump minimum datadog_checks_base to latest release. ([#24801](https://github.com/DataDog/integrations-core/pull/24801))
+
 ## 9.5.0 / 2026-08-05
 
 ***Added***:
