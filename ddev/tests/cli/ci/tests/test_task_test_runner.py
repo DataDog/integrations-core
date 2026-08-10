@@ -122,7 +122,7 @@ def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
 
 
 def make_batch(batch_id: str = "batch-err") -> TestBatch:
-    return TestBatch(id=batch_id, job_list=[make_job()], jobs_count=1, integrations=["ntp"])
+    return TestBatch(id=batch_id, batch_id=batch_id, job_list=[make_job()], jobs_count=1, integrations=["ntp"])
 
 
 async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFinished]:
@@ -130,6 +130,9 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
 
     The two jobs share a target/environment/platform, so their artifact names collide with each other
     and never match the generic ``artifact-N`` uploads: correlation therefore finds no match.
+
+    The batch's message id and its logical ``batch_id`` differ on purpose, so the assertions on the
+    workflow input, the check-run name, and the emitted ``BatchFinished`` show which one is used.
     """
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
@@ -137,7 +140,11 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
     runner = make_runner(fake, tmp_path)
 
     batch = TestBatch(
-        id="batch-1", job_list=[make_job("j1"), make_job("j2")], jobs_count=2, integrations=["ntp", "kafka"]
+        id="msg-1",
+        batch_id="batch-1",
+        job_list=[make_job("j1"), make_job("j2")],
+        jobs_count=2,
+        integrations=["ntp", "kafka"],
     )
     await runner.process_message(batch)
 
@@ -255,7 +262,9 @@ async def test_downloads_all_batch_artifacts(tmp_path: Path) -> None:
 async def test_emits_batch_finished_with_run_metadata(tmp_path: Path) -> None:
     _, finished = await run_happy_path(tmp_path)
 
-    assert finished.id == "batch-1"
+    assert finished.id == "msg-1"
+    # The logical batch identity is carried explicitly, not inferred from the message id.
+    assert finished.batch_id == "batch-1"
     assert finished.status == "success"
     assert finished.run_id == 123
     assert finished.workflow_url == "https://github.com/o/r/actions/runs/123"
@@ -309,7 +318,9 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
     mock_jobs(fake, [make_workflow_job("j1", "success"), make_workflow_job("j2", "failure")])
     runner = make_runner(fake, tmp_path)
 
-    await runner.process_message(TestBatch(id="batch-c", job_list=[j1, j2], jobs_count=2, integrations=["ntp"]))
+    await runner.process_message(
+        TestBatch(id="batch-c", batch_id="batch-c", job_list=[j1, j2], jobs_count=2, integrations=["ntp"])
+    )
 
     finished = drain_queue(runner.queue)[0]
     assert isinstance(finished, BatchFinished)
@@ -339,7 +350,9 @@ async def test_process_message_batch_job_without_workflow_match(tmp_path: Path) 
     # list_workflow_jobs defaults to an empty page.
     runner = make_runner(fake, tmp_path)
 
-    await runner.process_message(TestBatch(id="batch-d", job_list=[job], jobs_count=1, integrations=["ntp"]))
+    await runner.process_message(
+        TestBatch(id="batch-d", batch_id="batch-d", job_list=[job], jobs_count=1, integrations=["ntp"])
+    )
 
     finished = drain_queue(runner.queue)[0]
     assert isinstance(finished, BatchFinished)
@@ -359,7 +372,9 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> No
     mock_jobs(fake, [make_workflow_job("j1", "success")])
     runner = make_runner(fake, tmp_path)
 
-    await runner.process_message(TestBatch(id="batch-e", job_list=[job], jobs_count=1, integrations=["ntp"]))
+    await runner.process_message(
+        TestBatch(id="batch-e", batch_id="batch-e", job_list=[job], jobs_count=1, integrations=["ntp"])
+    )
 
     finished = drain_queue(runner.queue)[0]
     assert isinstance(finished, BatchFinished)
@@ -398,7 +413,9 @@ async def test_process_message_failure_path(tmp_path: Path) -> None:
     mock_artifacts(fake, [make_artifact(1)])
     runner = make_runner(fake, tmp_path)
 
-    await runner.process_message(TestBatch(id="batch-2", job_list=[make_job()], jobs_count=1, integrations=["ntp"]))
+    await runner.process_message(
+        TestBatch(id="batch-2", batch_id="batch-2", job_list=[make_job()], jobs_count=1, integrations=["ntp"])
+    )
 
     submitted = drain_queue(runner.queue)
     assert len(submitted) == 1
@@ -442,7 +459,9 @@ async def test_process_message_polls_until_completed(tmp_path: Path) -> None:
     mock_artifacts(fake, [])
     runner = make_runner(fake, tmp_path)
 
-    await runner.process_message(TestBatch(id="batch-3", job_list=[make_job()], jobs_count=1, integrations=["ntp"]))
+    await runner.process_message(
+        TestBatch(id="batch-3", batch_id="batch-3", job_list=[make_job()], jobs_count=1, integrations=["ntp"])
+    )
 
     assert len(fake.calls_to("get_workflow_run")) == 4
     submitted = drain_queue(runner.queue)
@@ -465,7 +484,9 @@ async def test_process_message_skips_expired_artifacts(tmp_path: Path) -> None:
     )
     runner = make_runner(fake, tmp_path)
 
-    await runner.process_message(TestBatch(id="batch-4", job_list=[make_job()], jobs_count=1, integrations=["ntp"]))
+    await runner.process_message(
+        TestBatch(id="batch-4", batch_id="batch-4", job_list=[make_job()], jobs_count=1, integrations=["ntp"])
+    )
 
     # Only the non-expired artifact with a download URL should be fetched.
     download_calls = fake.calls_to("download_artifact")
