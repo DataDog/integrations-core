@@ -236,8 +236,8 @@ def _translate_requests_request(
     )
 
 
-def _backend_compat_type(agnostic: type[HTTPError], *backend: type[BaseException]) -> type[HTTPError]:
-    """Build the raised type: the agnostic exception plus its requests counterparts as extra bases.
+def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[BaseException]) -> type[T]:
+    """Build the raised type: the target exception plus its requests counterparts as extra bases.
 
     The agnostic tree roots at ``Exception``, so an ``except requests.exceptions.*``,
     ``except RequestException`` or ``except OSError`` arm written against a released
@@ -280,6 +280,12 @@ _COMPAT_EXCEPTIONS: dict[type[HTTPError], type[HTTPError]] = {
     ),
     HTTPSSLError: _backend_compat_type(HTTPSSLError, requests_exceptions.SSLError),
 }
+
+# The JSON seam converges on the standard library error, but that class and the backend's own
+# JSONDecodeError are siblings under ValueError, so neither one catches the other. Carrying the
+# backend class as an extra base keeps an arm written against it matching. Where simplejson is
+# installed the backend class derives from it as well, so those arms ride on the same base.
+_COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
 
 
 def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
@@ -383,11 +389,17 @@ class ResponseWrapper(ObjectProxy):
             return self.__wrapped__.text
 
     def json(self, **kwargs):
+        # The decode error is raised after the translating block rather than inside it. The compat
+        # type carries the backend's JSONDecodeError as a base, so the translator would otherwise
+        # read it as a transport failure and convert it to HTTPRequestError.
+        decode_error = None
         with _translate_http_errors():
             try:
                 return self.__wrapped__.json(**kwargs)
             except requests_exceptions.JSONDecodeError as exc:
-                raise json.JSONDecodeError(exc.msg, exc.doc, exc.pos) from exc
+                decode_error = exc
+
+        raise _COMPAT_JSON_DECODE_ERROR(decode_error.msg, decode_error.doc, decode_error.pos) from decode_error
 
     def get_peer_cert(self, binary_form=False):
         raw = getattr(self.__wrapped__, 'raw', None)
