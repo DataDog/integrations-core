@@ -19,79 +19,73 @@ ISSUE_NAME = 'OpenMetrics Metrics Dropped By Configured Limit'
 
 
 @dataclass
-class MetricLimitIssueState:
+class MetricLimitIssueReporter:
+    legacy: bool
     clean_runs: int = 0
     store_synchronized: bool = False
     active: bool = False
 
-
-def handle_metric_limit_issue(
-    check: AgentCheck,
-    endpoint: str | None,
-    reached_limit: bool,
-    observed: int,
-    limit: int,
-    *,
-    legacy: bool,
-) -> None:
-    """Report or resolve an OpenMetrics configured-limit issue for one check run."""
-    if not endpoint:
-        check.log.debug('Cannot handle the OpenMetrics metric limit state without an endpoint')
-        return
-
-    state = getattr(check, '_openmetrics_metric_limit_issue_state', None)
-    if state is None:
-        state = MetricLimitIssueState()
-        check._openmetrics_metric_limit_issue_state = state
-
-    issue_id = _issue_id(endpoint, check.instance.get('namespace', ''))
-
-    if reached_limit:
-        state.clean_runs = 0
-        dropped = max(0, observed - limit)
-        if dropped < REPORT_FLOOR:
+    def handle(
+        self,
+        check: AgentCheck,
+        endpoint: str | None,
+        reached_limit: bool,
+        observed: int,
+        limit: int,
+    ) -> None:
+        """Report or resolve an OpenMetrics configured-limit issue for one check run."""
+        if not endpoint:
+            check.log.debug('Cannot handle the OpenMetrics metric limit state without an endpoint')
             return
 
-        ratio = dropped / observed
-        check.report_issue(
-            id=issue_id,
-            issue_name=ISSUE_NAME,
-            title=f'Dropping {dropped} of {observed} metrics from {endpoint}',
-            description=(
-                f'The {check.name} check collecting {endpoint} is configured to submit at most {limit} metric '
-                f'contexts per run, but the last collection produced {observed}. The Agent submitted {limit} and '
-                f'discarded the remaining {dropped}. Because the order of collection can change between runs, the '
-                'discarded metrics are not always the same ones, so dashboards and monitors built on this endpoint '
-                'may show intermittent gaps rather than a consistently missing set of metrics.'
-            ),
-            category='configuration',
-            severity=_severity(check, ratio),
-            extra={
-                'check_name': check.name,
-                'endpoint': endpoint,
-                'effective_limit': limit,
-                'observed_contexts': observed,
-                'dropped_contexts': dropped,
-                'dropped_ratio': round(ratio, 4),
-                'limit_is_default': limit == check.DEFAULT_METRIC_LIMIT,
-            },
-            remediation=_remediation(check.name, endpoint, dropped, observed, legacy=legacy),
-            tags=[f'integration:{check.name}', 'openmetrics', 'metric-limit'],
-        )
-        state.active = True
-        state.store_synchronized = True
-        return
+        issue_id = _issue_id(endpoint, check.instance.get('namespace', ''))
 
-    state.clean_runs += 1
-    if not state.store_synchronized:
-        check.resolve_issue(issue_id)
-        state.store_synchronized = True
-        return
+        if reached_limit:
+            self.clean_runs = 0
+            dropped = max(0, observed - limit)
+            if dropped < REPORT_FLOOR:
+                return
 
-    if state.active and state.clean_runs >= RESOLVE_AFTER_CLEAN_RUNS:
-        check.resolve_issue(issue_id)
-        state.active = False
-        state.clean_runs = 0
+            ratio = dropped / observed
+            check.report_issue(
+                id=issue_id,
+                issue_name=ISSUE_NAME,
+                title=f'Dropping {dropped} of {observed} metrics from {endpoint}',
+                description=(
+                    f'The {check.name} check collecting {endpoint} is configured to submit at most {limit} metric '
+                    f'contexts per run, but the last collection produced {observed}. The Agent submitted {limit} and '
+                    f'discarded the remaining {dropped}. Because the order of collection can change between runs, the '
+                    'discarded metrics are not always the same ones, so dashboards and monitors built on this endpoint '
+                    'may show intermittent gaps rather than a consistently missing set of metrics.'
+                ),
+                category='configuration',
+                severity=_severity(check, ratio),
+                extra={
+                    'check_name': check.name,
+                    'endpoint': endpoint,
+                    'effective_limit': limit,
+                    'observed_contexts': observed,
+                    'dropped_contexts': dropped,
+                    'dropped_ratio': round(ratio, 4),
+                    'limit_is_default': limit == check.DEFAULT_METRIC_LIMIT,
+                },
+                remediation=_remediation(check.name, endpoint, dropped, observed, legacy=self.legacy),
+                tags=[f'integration:{check.name}', 'openmetrics', 'metric-limit'],
+            )
+            self.active = True
+            self.store_synchronized = True
+            return
+
+        self.clean_runs += 1
+        if not self.store_synchronized:
+            check.resolve_issue(issue_id)
+            self.store_synchronized = True
+            return
+
+        if self.active and self.clean_runs >= RESOLVE_AFTER_CLEAN_RUNS:
+            check.resolve_issue(issue_id)
+            self.active = False
+            self.clean_runs = 0
 
 
 def _issue_id(endpoint: str, namespace: object) -> str:

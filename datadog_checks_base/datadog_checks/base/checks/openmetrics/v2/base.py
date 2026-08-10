@@ -12,7 +12,7 @@ import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.checks.openmetrics.metric_limit_issue import handle_metric_limit_issue
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -64,6 +64,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         When overriding, make sure to call this (the parent's) __init__ first!
         """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
+        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(legacy=False)
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]
@@ -98,13 +99,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
 
     def _on_metric_limit_state(self, reached_limit: bool, observed: int, limit: int) -> None:
-        handle_metric_limit_issue(
+        self.metric_limit_issue_reporter.handle(
             self,
             self.instance.get('openmetrics_endpoint'),
             reached_limit,
             observed,
             limit,
-            legacy=False,
         )
 
     def configure_scrapers(self):
