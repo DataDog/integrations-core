@@ -342,6 +342,22 @@ def test_json_parse_error_converges_to_stdlib():
     assert exc_info.value.pos == 0
 
 
+def test_json_parse_error_keeps_matching_requests_arms():
+    """An arm written against the backend's own JSONDecodeError has to keep matching.
+
+    That class and the stdlib one are siblings under ValueError, neither catching the other, so
+    converging on the stdlib type alone lets a malformed body escape an
+    ``except requests.exceptions.JSONDecodeError`` arm entirely. Those arms live in checks whose CI
+    never sees this repository, and the Agent ships one datadog_checks_base for all of them.
+    """
+    response = FailingRead(requests.exceptions.JSONDecodeError('Expecting value', 'not json', 0))
+    http = RequestsWrapper({}, {})
+    with mock.patch('requests.Session.get', return_value=response):
+        wrapped = http.get('http://example.test/')
+        with pytest.raises(requests.exceptions.JSONDecodeError):
+            wrapped.json()
+
+
 # Group E: the auth-token seam. The poll runs before the main request (see handle_auth_token), so a
 # transport failure while fetching the token must surface as an agnostic type, not a raw requests one.
 def test_auth_token_fetch_error_maps_to_agnostic():
