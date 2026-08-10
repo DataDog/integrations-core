@@ -1,1 +1,1 @@
-Reduce MQI round-trips per queue by reusing a single `PCFExecute` connection across queue stats, status, and reset metric collection instead of opening three separate ones.
+Reduce MQI round-trips per queue by reusing a single `PCFExecute` connection across queue stats, status, and reset metric collection instead of opening three separate ones. Also fix the `ibm_mq.queue` service check incorrectly reporting `CRITICAL` instead of `OK` when opening that shared connection hit a benign "no messages available" condition.
