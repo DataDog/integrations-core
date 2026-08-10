@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 13.1.1 / 2026-07-23
+## 13.2.0 / 2026-08-05
+
+***Added***:
+
+* Add NetScout switch SNMP profile for CPU and memory metrics. ([#24283](https://github.com/DataDog/integrations-core/pull/24283))
+* Add the `use_remote_config_profiles` option to the SNMP configuration spec so it is accepted by config validation and Remote Configuration. ([#24528](https://github.com/DataDog/integrations-core/pull/24528))
+
+## 13.1.1 / 2026-07-23 / Agent 7.82.0
 
 ***Fixed***:
 

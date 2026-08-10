@@ -9,10 +9,14 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
 from datadog_checks.clickhouse.utils import (
     BUILTIN_SAMPLE_CLUSTERS,
+    CLOUD_MODE_QUERY,
     CLUSTER_GROUP_PREFIX,
     CLUSTER_MACRO_QUERY,
     CLUSTER_NAME_QUERY,
     CLUSTER_TAG,
+    HOSTING_TYPE_TAG,
+    SHARED_MERGE_TREE_QUERY,
+    HostingType,
     cluster_aware_query,
 )
 
@@ -464,8 +468,11 @@ def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advan
     assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())
 
 
-def make_cluster_name_check(query_results):
-    """Build a check whose execute_query_raw replays query_results keyed by SQL."""
+def make_query_replaying_check(query_results):
+    """Build a check whose execute_query_raw replays query_results keyed by SQL.
+
+    An Exception value is raised instead of returned, to simulate a failed probe.
+    """
     check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
 
     def execute(query):
@@ -479,7 +486,7 @@ def make_cluster_name_check(query_results):
 
 
 def test_cluster_name_prefers_the_macro():
-    check = make_cluster_name_check({CLUSTER_MACRO_QUERY: [['macro_cluster']]})
+    check = make_query_replaying_check({CLUSTER_MACRO_QUERY: [['macro_cluster']]})
 
     assert check.cluster_name == 'macro_cluster'
     # system.clusters must not be consulted once the macro answers.
@@ -495,7 +502,7 @@ def test_cluster_name_prefers_the_macro():
     ],
 )
 def test_cluster_name_falls_back_to_system_clusters(macro_result):
-    check = make_cluster_name_check({CLUSTER_MACRO_QUERY: macro_result, CLUSTER_NAME_QUERY: [['prod_cluster']]})
+    check = make_query_replaying_check({CLUSTER_MACRO_QUERY: macro_result, CLUSTER_NAME_QUERY: [['prod_cluster']]})
 
     assert check.cluster_name == 'prod_cluster'
 
@@ -524,7 +531,7 @@ def test_cluster_name_query_excludes_cloud_group_pseudo_cluster():
 
 
 def test_cluster_name_absent_when_both_sources_fail():
-    check = make_cluster_name_check(
+    check = make_query_replaying_check(
         {
             CLUSTER_MACRO_QUERY: Error('query failed'),
             CLUSTER_NAME_QUERY: [],
@@ -536,7 +543,7 @@ def test_cluster_name_absent_when_both_sources_fail():
 
 
 def test_cluster_name_is_cached_including_the_absent_case():
-    check = make_cluster_name_check({CLUSTER_MACRO_QUERY: [], CLUSTER_NAME_QUERY: []})
+    check = make_query_replaying_check({CLUSTER_MACRO_QUERY: [], CLUSTER_NAME_QUERY: []})
 
     assert check.cluster_name is None
     assert check.cluster_name is None
@@ -582,3 +589,64 @@ def test_check_omits_cluster_tag_when_unresolved(instance):
             check.check({})
 
     assert not any(tag.startswith(f'{CLUSTER_TAG}:') for tag in check.tags)
+
+
+PROBE_FAILED = Error('Not enough privileges')
+
+
+@pytest.mark.parametrize(
+    'cloud_mode, shared_merge_tree, expected',
+    [
+        pytest.param([['1']], [[1]], HostingType.CLOUD, id='cloud'),
+        # A negative signal decides on its own, even if the other never answered.
+        pytest.param([], [[1]], HostingType.SELF_HOSTED, id='self-hosted-setting-absent'),
+        pytest.param([['0']], [[1]], HostingType.SELF_HOSTED, id='self-hosted-cloud-mode-off'),
+        pytest.param([['']], [[1]], HostingType.SELF_HOSTED, id='self-hosted-cloud-mode-empty'),
+        pytest.param([['1']], [[0]], HostingType.SELF_HOSTED, id='self-hosted-no-shared-merge-tree'),
+        pytest.param(PROBE_FAILED, [[0]], HostingType.SELF_HOSTED, id='self-hosted-despite-failed-probe'),
+        pytest.param([['0']], PROBE_FAILED, HostingType.SELF_HOSTED, id='self-hosted-despite-failed-engine-probe'),
+        # A failed probe is indeterminate, not a negative.
+        pytest.param(PROBE_FAILED, [[1]], HostingType.UNKNOWN, id='unknown-cloud-mode-unreadable'),
+        pytest.param([['1']], PROBE_FAILED, HostingType.UNKNOWN, id='unknown-engines-unreadable'),
+        pytest.param(PROBE_FAILED, PROBE_FAILED, HostingType.UNKNOWN, id='unknown-both-unreadable'),
+    ],
+)
+def test_hosting_type_resolution(cloud_mode, shared_merge_tree, expected):
+    check = make_query_replaying_check({CLOUD_MODE_QUERY: cloud_mode, SHARED_MERGE_TREE_QUERY: shared_merge_tree})
+
+    assert check.hosting_type == expected
+
+
+def test_hosting_type_is_cached_including_the_unknown_case():
+    check = make_query_replaying_check({CLOUD_MODE_QUERY: PROBE_FAILED, SHARED_MERGE_TREE_QUERY: PROBE_FAILED})
+
+    assert check.hosting_type == HostingType.UNKNOWN
+    assert check.hosting_type == HostingType.UNKNOWN
+
+    # One attempt per signal, not per access: a server that cannot answer is not re-asked.
+    assert check.execute_query_raw.call_count == 2
+
+
+def test_check_tags_with_hosting_type(instance):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = None
+        with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
+            hosting_type.return_value = HostingType.CLOUD
+            with mock.patch('clickhouse_connect.get_client'):
+                check.check({})
+
+    assert f'{HOSTING_TYPE_TAG}:{HostingType.CLOUD}' in check.tags
+
+
+def test_check_always_emits_a_hosting_type_tag(instance):
+    """Unlike the cluster tag, this one has a value for every outcome, so it is never omitted."""
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = None
+        with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
+            hosting_type.return_value = HostingType.UNKNOWN
+            with mock.patch('clickhouse_connect.get_client'):
+                check.check({})
+
+    assert f'{HOSTING_TYPE_TAG}:{HostingType.UNKNOWN}' in check.tags

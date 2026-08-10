@@ -74,6 +74,22 @@ CLUSTER_NAME_QUERY = (
 )
 
 
+HOSTING_TYPE_TAG = 'hosting_type'
+
+
+class HostingType:
+    CLOUD = 'clickhouse-cloud'
+    SELF_HOSTED = 'self-hosted'
+    UNKNOWN = 'unknown'
+
+
+# system.settings avoids raising on versions predating cloud_mode (before 23.x).
+CLOUD_MODE_QUERY = "SELECT value FROM system.settings WHERE name = 'cloud_mode'"
+
+# table_engines lists supported engines even before any tables exist; exact match avoids a LIKE regex compile.
+SHARED_MERGE_TREE_QUERY = "SELECT count() FROM system.table_engines WHERE name = 'SharedMergeTree'"
+
+
 def cluster_aware_query(base: dict) -> dict:
     """Build a cluster-aware variant that reads all replicas and tags each row per node.
 
@@ -92,5 +108,15 @@ def cluster_aware_query(base: dict) -> dict:
     }
 
 
+LEADING_DIGITS = re.compile(r'\d+')
+
+
 def parse_version(version: str) -> list[int]:
-    return [int(v) for v in version.split('.')]
+    parts = []
+    for segment in version.split('.'):
+        match = LEADING_DIGITS.match(segment)
+        # do not include non-numeric version segments (e.g. Altinity's `altinityfips` suffix)
+        if match is None:
+            break
+        parts.append(int(match.group()))
+    return parts
