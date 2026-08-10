@@ -69,8 +69,7 @@ To configure this check for an Agent running on Kubernetes:
 
 Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with a [file, configmap, or key-value store][6].
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -122,8 +121,7 @@ spec:
   containers:
     - name: coredns
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 This example targets the CoreDNS Deployment:
 
@@ -150,9 +148,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][25].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_endpoint` with `prometheus_url`:
 

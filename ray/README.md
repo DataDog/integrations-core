@@ -61,8 +61,7 @@ labels:
 
 Choose one of the following Kubernetes Autodiscovery configurations. See the [sample configuration file][4] for all available configuration options.
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 ```yaml
 apiVersion: v1
@@ -86,8 +85,7 @@ spec:
     - name: 'ray'
 # (...)
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -110,9 +108,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

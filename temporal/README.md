@@ -83,8 +83,7 @@ Note that when Temporal services in a cluster are deployed independently, every 
 
 Choose one of the following Kubernetes Autodiscovery configurations, where `<CONTAINER_NAME>` is the name of your Temporal container:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
@@ -95,8 +94,7 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
     }
   } 
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 Temporal services are commonly deployed separately. Create one resource for each service workload that you monitor:
 
@@ -121,9 +119,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ##### Log collection
 

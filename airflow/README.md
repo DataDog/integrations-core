@@ -445,8 +445,7 @@ Ensure that `url` matches your Airflow [webserver `base_url`][19], the URL used 
 
 If you are using the [official Airflow Helm chart][24], target the `webserver` pod and its `webserver` container. Choose one of the following Autodiscovery configurations:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 ```yaml
 webserver:
@@ -462,8 +461,7 @@ webserver:
         }
       }
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 The official Airflow Helm chart runs the webserver in a Deployment named `<RELEASE_NAME>-webserver`:
 
@@ -488,9 +486,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][28].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 Adjust the `ad.datadoghq.com/<CONTAINER_NAME>.checks` annotation accordingly if your container name differs.
 

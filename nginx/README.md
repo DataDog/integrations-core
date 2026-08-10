@@ -270,8 +270,7 @@ To collect metrics, set the following parameters and values with one of the Kube
 | `<INIT_CONFIG>`      | `[{}]`                                                                     |
 | `<INSTANCE_CONFIG>`  | `[{"nginx_status_url": "http://%%host%%:18080/nginx_status"}]`             |
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -315,8 +314,7 @@ metadata:
   labels:
     name: nginx
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -339,9 +337,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][24].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 

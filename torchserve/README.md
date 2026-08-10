@@ -187,8 +187,7 @@ labels:
 
 Choose one of the following Kubernetes Autodiscovery configurations. The example uses the three APIs described in the previous sections:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+##### Kubernetes annotations
 
 ```yaml
 apiVersion: v1
@@ -228,8 +227,7 @@ spec:
     - name: 'torchserve'
 # (...)
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+##### DatadogInstrumentation CRD
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -261,9 +259,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][17].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

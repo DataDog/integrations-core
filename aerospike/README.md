@@ -79,8 +79,7 @@ For containerized environments, see [Configure integrations with Autodiscovery o
 
 Choose a Kubernetes Autodiscovery configuration, where `<CONTAINER_NAME>` is the Aerospike container name:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
@@ -91,8 +90,7 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
     }
   } 
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -115,9 +113,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 
 ##### Log collection

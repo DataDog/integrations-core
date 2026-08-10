@@ -157,8 +157,7 @@ To collect metrics, set the following parameters and values with one of the Kube
 | `<INIT_CONFIG>`      | `[{}]`                                                                     |
 | `<INSTANCE_CONFIG>`  | `[{"host": "%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]` |
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -218,8 +217,7 @@ spec:
       ports:
         - containerPort: 6379
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -244,9 +242,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][27].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 **Note**: 
 - If no user is specified in the configuration, the Redis integration authenticates with the `default` user. The password specified in the configuration therefore applies to `default` user.

@@ -98,8 +98,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 Choose one of the following Kubernetes Autodiscovery configurations for the Deployment:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 ```yaml
 apiVersion: apps/v1
@@ -124,8 +123,7 @@ spec:
       containers:
         - name: haproxy
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 Target the HAProxy Deployment shown in the annotation example:
 
@@ -151,9 +149,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -289,8 +284,7 @@ To configure this check for an Agent running on Kubernetes:
 
 Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][13].
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent v7.36 or earlier)
 
@@ -336,8 +330,7 @@ spec:
   containers:
     - name: haproxy
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+###### DatadogInstrumentation CRD
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -360,9 +353,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ##### Log collection
 

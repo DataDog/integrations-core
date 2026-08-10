@@ -70,8 +70,7 @@ Note: The listed metrics can only be collected if they are available. Some metri
 
 For LiteLLM Proxy running on Kubernetes, choose one of the following Autodiscovery configurations:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Kubernetes annotations" xxx -->
+##### Kubernetes annotations
 
 ```yaml
 apiVersion: v1
@@ -97,8 +96,7 @@ spec:
     - name: <CONTAINER_NAME>
 # (...)
 ```
-<!-- xxz tab xxx -->
-<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+##### DatadogInstrumentation CRD
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -121,9 +119,6 @@ spec:
 ```
 
 For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 For more information and alternative ways to configure the check in Kubernetes-based environments, see the [Kubernetes Integration Setup documentation][3].
 
