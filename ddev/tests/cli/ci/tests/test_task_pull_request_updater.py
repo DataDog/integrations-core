@@ -186,6 +186,17 @@ def _http_error(status_code: int) -> httpx.HTTPStatusError:
     return httpx.HTTPStatusError("boom", request=request, response=httpx.Response(status_code, request=request))
 
 
+def _auth_error(status_code: int) -> GitHubAuthenticationError:
+    """What the real client raises for 401 and 403.
+
+    ``AsyncGitHubClient._request`` converts every non-rate-limit response with one of those statuses
+    into a ``GitHubAuthenticationError``, so a test that injects a bare ``HTTPStatusError`` for a 403
+    is asserting a shape the updater never actually receives.
+    """
+    request = httpx.Request("PATCH", "https://api.github.com/")
+    return GitHubAuthenticationError("boom", request=request, response=httpx.Response(status_code, request=request))
+
+
 def _comment_page(*comments: IssueComment) -> GitHubResponse:
     return GitHubResponse.model_validate({"data": list(comments), "headers": {}})
 
@@ -255,8 +266,18 @@ def test_a_comment_quoting_ours_is_not_mistaken_for_it() -> None:
     client.assert_not_called("update_issue_comment")
 
 
-@pytest.mark.parametrize("status", [403, 404])
-def test_a_comment_we_cannot_edit_is_replaced_by_one_we_own(status: int) -> None:
+@pytest.mark.parametrize(
+    "error",
+    [
+        # The status the real client produces for "you may not edit this comment". It arrives as a
+        # GitHubAuthenticationError, so recovery has to see it through that type rather than through
+        # the bare HTTPStatusError a hand-built 403 would give.
+        pytest.param(_auth_error(403), id="403-as-the-client-raises-it"),
+        pytest.param(_http_error(403), id="403-unconverted"),
+        pytest.param(_http_error(404), id="404-comment-is-gone"),
+    ],
+)
+def test_a_comment_we_cannot_edit_is_replaced_by_one_we_own(error: httpx.HTTPStatusError) -> None:
     """403 means the marker pointed at someone else's comment; 404 means it is gone.
 
     Neither improves on retry, and retrying until the budget ran out is what used to leave the run
@@ -264,7 +285,7 @@ def test_a_comment_we_cannot_edit_is_replaced_by_one_we_own(status: int) -> None
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("list_issue_comments", _comment_page(IssueComment(id=77, body=f"{COMMENT_MARKER}\nnot ours")))
-    client.mock_response("update_issue_comment", _http_error(status), once=True)
+    client.mock_response("update_issue_comment", error, once=True)
     updater = _updater(client)
 
     asyncio.run(updater.process_message(_update(1)))
@@ -471,6 +492,41 @@ def test_an_authentication_error_propagates_immediately(done: bool) -> None:
     assert len(client.calls_to("create_issue_comment")) == 1
 
 
+def test_a_rejected_token_still_propagates_when_a_comment_is_tracked() -> None:
+    """Recovering a 403 must not turn a genuine credentials failure into a silent comment rewrite.
+
+    The unusable-comment check runs first now, so this pins the other side of it: a 401 is not a
+    status it recovers from, and having a comment to forget does not change that.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("list_issue_comments", _comment_page(IssueComment(id=77, body=f"{COMMENT_MARKER}\nours")))
+    client.mock_response("update_issue_comment", _auth_error(401))
+
+    with pytest.raises(GitHubAuthenticationError):
+        asyncio.run(_updater(client).process_message(_update(1)))
+
+    assert len(client.calls_to("update_issue_comment")) == 1
+    client.assert_not_called("create_issue_comment")
+
+
+def test_a_token_refused_for_every_comment_propagates_rather_than_looping() -> None:
+    """A 403 on the comment we just created is not an ownership problem — the token cannot write.
+
+    Recovery forgets the tracked comment once; the create that follows has nothing left to forget, so
+    the error surfaces with its own message instead of consuming the whole attempt budget.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("list_issue_comments", _comment_page(IssueComment(id=77, body=f"{COMMENT_MARKER}\nours")))
+    client.mock_response("update_issue_comment", _auth_error(403))
+    client.mock_response("create_issue_comment", _auth_error(403))
+
+    with pytest.raises(GitHubAuthenticationError):
+        asyncio.run(_updater(client).process_message(_update(1)))
+
+    assert len(client.calls_to("update_issue_comment")) == 1
+    assert len(client.calls_to("create_issue_comment")) == 1
+
+
 def test_exhausted_attempts_on_the_final_revision_fail_the_run() -> None:
     client = FakeAsyncGitHubClient()
     for _ in range(3):
@@ -533,3 +589,61 @@ def test_a_failed_minimal_retry_on_an_intermediate_revision_does_not_raise() -> 
     # The revision did not advance, so the next snapshot is still attempted.
     asyncio.run(updater.process_message(_update(2)))
     assert len(client.calls_to("create_issue_comment")) == 3
+
+
+@pytest.mark.parametrize("done", [False, True])
+def test_a_minimal_retry_that_lands_advances_the_revision(done: bool) -> None:
+    """The minimal write returns straight out of the attempt loop, past the final-revision check.
+
+    So the final revision needs its own case: succeeding there must report the run and advance, not
+    fall through to the give-up policy that a final revision would otherwise trigger.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", _http_error(422), once=True)
+    updater = _updater(client)
+
+    asyncio.run(updater.process_message(_failing_update(1, done=done)))
+
+    assert len(client.calls_to("create_issue_comment")) == 2
+    # The revision advanced, so a repeat of it is rejected as stale rather than written again.
+    asyncio.run(updater.process_message(_failing_update(1, done=done)))
+    assert len(client.calls_to("create_issue_comment")) == 2
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        pytest.param(_auth_error(403), id="403-as-the-client-raises-it"),
+        pytest.param(_http_error(404), id="404-comment-is-gone"),
+    ],
+)
+def test_a_minimal_retry_also_recovers_from_a_comment_it_cannot_edit(error: httpx.HTTPStatusError) -> None:
+    """The fallback is the run's last chance to report, so it recovers the way the full write does.
+
+    Without this it gave up on a comment it was never allowed to edit, at the one point where losing
+    the write means the run reported nothing at all.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("list_issue_comments", _comment_page(IssueComment(id=77, body=f"{COMMENT_MARKER}\nnot ours")))
+    client.mock_response("update_issue_comment", _http_error(422), once=True)
+    client.mock_response("update_issue_comment", error, once=True)
+
+    asyncio.run(_updater(client).process_message(_failing_update(1, done=True)))
+
+    # The oversized edit, the minimal edit it refused, then a minimal comment of our own.
+    assert len(client.calls_to("update_issue_comment")) == 2
+    created = client.calls_to("create_issue_comment")
+    assert len(created) == 1
+    assert "test_number_0" not in created[0].kwargs["body"]
+
+
+def test_a_minimal_retry_refused_everywhere_still_fails_the_final_run() -> None:
+    """Recovery is bounded: forgetting the comment cannot loop, and a final revision still fails."""
+    client = FakeAsyncGitHubClient()
+    client.mock_response("list_issue_comments", _comment_page(IssueComment(id=77, body=f"{COMMENT_MARKER}\nnot ours")))
+    client.mock_response("update_issue_comment", _http_error(422), once=True)
+    client.mock_response("update_issue_comment", _http_error(404))
+    client.mock_response("create_issue_comment", _http_error(404))
+
+    with pytest.raises(FatalProcessingError, match="final Dispatcher PR comment"):
+        asyncio.run(_updater(client).process_message(_failing_update(1, done=True)))

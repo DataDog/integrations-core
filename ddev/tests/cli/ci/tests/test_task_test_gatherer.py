@@ -177,6 +177,13 @@ def _totals(update: UpdatePRComment) -> tuple[int, int, int, int]:
     return (progress.passed, progress.failed, progress.skipped, progress.complete)
 
 
+def _jobs_reported(body: str) -> int:
+    """The completed-job count a rendered comment shows, as a stand-in for the snapshot behind it."""
+    match = re.search(r"\*\*(\d+)/\d+ jobs\*\*", body)
+    assert match is not None, body
+    return int(match.group(1))
+
+
 def _failed_ids(result: JobResult) -> list[str]:
     return [case.identifier for case in result.failed_tests]
 
@@ -1045,7 +1052,7 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path) -
 
     # The comment only ever moves forward: each write reports at least as many finished jobs as the
     # one before it. The revision itself is not rendered, so the counts are what proves the ordering.
-    completed = [int(re.search(r"\*\*(\d+)/\d+ jobs\*\*", body).group(1)) for body in bodies]
+    completed = [_jobs_reported(body) for body in bodies]
     assert completed == sorted(completed)
 
     assert completed[0] == 0

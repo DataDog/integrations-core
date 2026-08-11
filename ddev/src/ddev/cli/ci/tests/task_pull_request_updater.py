@@ -108,7 +108,13 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         for attempt in range(1, self._options.max_write_attempts + 1):
             try:
                 await self._submit(pr_number, body)
-            except GitHubAuthenticationError:
+            except GitHubAuthenticationError as error:
+                # The client maps every 403 to this error, including the one GitHub returns for a
+                # comment we may not edit, so that case is offered to the recovery below before being
+                # read as a credentials problem. A 401, or a 403 with no comment to forget, is not
+                # recovered from and falls through.
+                if self._forget_unusable_comment(error, log_extra):
+                    continue
                 # A rejected token does not improve on retry, and the client's message is the only
                 # thing that says what to fix. Swallowing it would report a write problem instead.
                 self._logger.error("PR comment write refused by GitHub authentication", extra=log_extra)
@@ -139,18 +145,37 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         return False
 
     async def _write_minimal(self, pr_number: int, message: UpdatePRComment, log_extra: dict[str, object]) -> bool:
-        """Retry once with a header-and-footer-only body after GitHub rejected the full one."""
+        """Retry with a header-and-footer-only body after GitHub rejected the full one.
+
+        Recovers from an unusable comment the same way ``_write`` does. This is the run's last chance
+        to report anything, so giving up on a comment we were never allowed to edit is the worst place
+        to stop. One recovery is enough: the retry writes a comment we just created ourselves, so it
+        cannot be refused for not being ours a second time.
+
+        The body is already minimal, so a further rejection has nothing left to drop.
+        """
         self._logger.warning("PR comment body rejected as too long; retrying without detail", extra=log_extra)
-        try:
-            await self._submit(pr_number, render_minimal_comment(message.progress))
-        except GitHubAuthenticationError:
-            raise
-        except httpx.HTTPError as error:
-            self._logger.error("Minimal PR comment write also failed: %s", error, extra=log_extra)
-            if message.progress.done:
-                raise FatalProcessingError("Could not write the final Dispatcher PR comment") from error
-            return False
-        return True
+        body = render_minimal_comment(message.progress)
+        for _ in range(2):
+            try:
+                await self._submit(pr_number, body)
+            except GitHubAuthenticationError as error:
+                if self._forget_unusable_comment(error, log_extra):
+                    continue
+                self._logger.error("Minimal PR comment write refused by GitHub authentication", extra=log_extra)
+                raise
+            except httpx.HTTPError as error:
+                if self._forget_unusable_comment(error, log_extra):
+                    continue
+                self._logger.error("Minimal PR comment write also failed: %s", error, extra=log_extra)
+                return _give_up_on_minimal(message, error)
+            else:
+                return True
+
+        # Both passes were refused the comment they targeted, the second being one we had just
+        # created, so there is nothing further to recover to.
+        self._logger.error("Minimal PR comment write found no comment it may edit", extra=log_extra)
+        return _give_up_on_minimal(message, None)
 
     async def _submit(self, pr_number: int, body: str) -> None:
         """Create the comment on first use, then edit that same comment for every later revision."""
@@ -199,6 +224,13 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         self._unusable_comment_ids.add(self._comment_id)
         self._comment_id = None
         return True
+
+
+def _give_up_on_minimal(message: UpdatePRComment, error: httpx.HTTPError | None) -> bool:
+    """Fail the run if the snapshot was final, else report the revision as lost to the caller."""
+    if message.progress.done:
+        raise FatalProcessingError("Could not write the final Dispatcher PR comment") from error
+    return False
 
 
 def _is_body_too_long(error: httpx.HTTPError) -> bool:
