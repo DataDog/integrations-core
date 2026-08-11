@@ -140,7 +140,8 @@ select
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    encrypted as is_encrypted,{database_name_column}
+    encrypted as is_encrypted,
+    {database_name_column}
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
@@ -339,7 +340,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # This query does not group by database, so elsewhere a row can span several. Azure SQL Database
                 # connects to one, so DB_NAME() names it. Keep it argument-less: resolving a dbid needs
                 # sys.dm_exec_plan_attributes, admin-only on the Basic/S0/S1 tiers this setting works around.
-                database_name_column = "\n    DB_NAME() as database_name,"
+                database_name_column = "DB_NAME() as database_name,"
         elif is_azure_sql_database(engine_edition):
             # If the database is Azure SQL Database, we need to use the Azure SQL Database specific query
             statements_query = STATEMENT_METRICS_QUERY_AZURE_SQL_DATABASE
