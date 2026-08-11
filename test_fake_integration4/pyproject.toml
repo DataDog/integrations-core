@@ -1,7 +1,0 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
-name = "datadog-test-fake-integration4"
-version = "0.0.1"
