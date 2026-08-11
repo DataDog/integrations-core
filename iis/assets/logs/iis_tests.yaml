@@ -76,3 +76,4 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1020361335000
 
+  sample: "2026-08-06 14:07:58 10.69.163.31 GET /news-release/website.html - 8613 - 26.41.132.27 Mozilla/5.0+(Windows+NT+10.0;+Win64;+x64)+AppleWebKit/530.36+(KHTML,+like+Gecko)+Chrome/99.0.6844.51+Safari/537.36 - 200 0 0 65284 1274 36185 75.177.176.102,+23.48.200.135"
