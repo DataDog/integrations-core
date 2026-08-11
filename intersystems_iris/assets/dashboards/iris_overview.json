@@ -470,6 +470,38 @@
     "layout": { "x": 0, "y": 10, "width": 12, "height": 3 }
   }
 ] }, "layout": { "x": 0, "y": 27, "width": 12, "height": 15 } },
-    { "id": 7000, "definition": { "title": "Logs", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 42, "width": 12, "height": 5 } }
+    { "id": 7000, "definition": { "title": "Logs", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [
+  {
+    "id": 7001,
+    "definition": {
+      "title": "messages.log", "title_size": "16", "title_align": "left", "type": "list_stream",
+      "requests": [
+        { "response_format": "event_list",
+          "columns": [
+            { "field": "status_line", "width": "auto" },
+            { "field": "timestamp", "width": "auto" },
+            { "field": "host", "width": "auto" },
+            { "field": "content", "width": "compact" }
+          ],
+          "query": { "data_source": "logs_stream", "query_string": "source:intersystems_iris $env $host", "indexes": [], "storage": "hot",
+            "sort": { "column": "timestamp", "order": "desc" } } }
+      ]
+    },
+    "layout": { "x": 0, "y": 0, "width": 8, "height": 4 }
+  },
+  {
+    "id": 7002,
+    "definition": {
+      "title": "Log volume by status", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["value","sum"], "time": {},
+      "requests": [
+        { "display_type": "bars", "response_format": "timeseries",
+          "queries": [ { "data_source": "logs", "name": "query1", "search": { "query": "source:intersystems_iris $env $host" }, "indexes": ["*"], "group_by": [ { "facet": "status", "limit": 10, "sort": { "order": "desc", "aggregation": "count" } } ], "compute": { "aggregation": "count" }, "storage": "hot" } ],
+          "formulas": [ { "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 8, "y": 0, "width": 4, "height": 4 }
+  }
+] }, "layout": { "x": 0, "y": 42, "width": 12, "height": 5 } }
   ]
 }
