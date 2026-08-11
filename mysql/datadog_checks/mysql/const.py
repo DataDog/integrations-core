@@ -16,6 +16,8 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
 
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {
+    # Server Metrics
+    'Uptime': ('mysql.uptime', GAUGE),
     # Command Metrics
     'Prepared_stmt_count': ('mysql.performance.prepared_stmt_count', GAUGE),
     'Slow_queries': ('mysql.performance.slow_queries', RATE),

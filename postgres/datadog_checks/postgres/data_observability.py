@@ -52,7 +52,7 @@ class PostgresDataObservability(DBMAsyncJob):
             rate_limit=1 / float(collection_interval),
             run_sync=config.data_observability.run_sync,
             enabled=config.data_observability.enabled,
-            dbms="postgres",
+            dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="data-observability",
@@ -60,7 +60,7 @@ class PostgresDataObservability(DBMAsyncJob):
         # Filter bad queries on check construction.
         self._queries, self._schedulers = self._filter_valid_queries(self._do_config.queries or ())
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
 
     @property

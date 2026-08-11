@@ -9,26 +9,13 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch
+from ddev.cli.ci.tests.status import conclusion_to_status
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import WorkflowJob, WorkflowRun
-
-
-def _conclusion_to_status(conclusion: str | None) -> Literal["success", "failure", "skipped"]:
-    """Map a GitHub Actions conclusion string to a BatchFinished status.
-
-    Note: ``None`` maps to ``"failure"`` here while the check run reports ``"neutral"``
-    for the same input. The asymmetry is intentional — BatchFinished consumers want a
-    binary outcome, the check UI prefers an explicit ``"neutral"`` badge.
-    """
-    if conclusion == "success":
-        return "success"
-    if conclusion == "skipped":
-        return "skipped"
-    return "failure"
 
 
 @dataclass(frozen=True)
@@ -60,7 +47,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
     async def process_message(self, message: TestBatch) -> None:
         inputs = self._build_inputs(message)
-        log_extra: dict[str, Any] = {"batch_id": message.id}
+        log_extra: dict[str, Any] = {"batch_id": message.batch_id}
 
         dispatch = await self._client.create_workflow_dispatch(
             self._options.owner,
@@ -81,7 +68,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         check = await self._client.create_check_run(
             self._options.owner,
             self._options.repo,
-            name=f"test-batch/{message.id}",
+            name=f"test-batch/{message.batch_id}",
             head_sha=self._options.base_sha,
             status="in_progress",
             details_url=workflow_url,
@@ -111,7 +98,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
             finished = BatchFinished(
                 id=message.id,
-                status=_conclusion_to_status(raw),
+                batch_id=message.batch_id,
+                status=conclusion_to_status(raw),
                 run_id=run_id,
                 workflow_url=workflow_url,
                 artifacts_path=str(self._options.artifacts_base_path),
@@ -155,7 +143,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
         return {
-            "batch_id": message.id,
+            "batch_id": message.batch_id,
             "checkout_sha": self._options.checkout_sha,
             "integrations": json.dumps(message.integrations),
             "job_list": json.dumps([self._job_input(job) for job in message.job_list]),
