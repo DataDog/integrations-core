@@ -231,6 +231,100 @@ class SqlServerDataObservability(DBMAsyncJob):
             payload['cloud_metadata'] = cloud_metadata
         return payload
 
+    def _queue_for_retry(self, due: DueQuery, base_tags: list[str]) -> None:
+        q = due.query
+        self._pending_retries[q.monitor_id] = due
+        self._check.count(
+            'dd.sqlserver.data_observability.connection_failures',
+            1,
+            tags=base_tags + [f'monitor_id:{q.monitor_id}'],
+            hostname=self._check.reported_hostname,
+            raw=True,
+        )
+
+    def _run_due_query(self, due: DueQuery, base_tags: list[str]) -> None:
+        """Run one due query on the group's already-open connection.
+
+        Raises an expected DB exception (caught by the caller) if the shared connection
+        died mid-group; a fresh cursor is created per query so a per-query
+        set_command_timeout takes effect for every execute (pyodbc/adodbapi both copy the
+        connection timeout onto the command/cursor at creation time, not at execute time).
+        """
+        q = due.query
+        tags = base_tags + [f'monitor_id:{q.monitor_id}']
+        now_at_fire_start = time.time()
+
+        timeout_s = max(1, math.ceil(q.query_timeout / 1000)) if q.query_timeout else self._check.connection.timeout
+        self._check.connection.set_command_timeout(CONN_KEY_PREFIX, timeout_s, db_name=q.dbname)
+
+        cursor = self._check.connection.get_cursor(
+            self._check.connection.DEFAULT_DB_KEY,
+            db_name=q.dbname,
+            key_prefix=CONN_KEY_PREFIX,
+        )
+        try:
+            result = self._execute_single_query(cursor, q)
+        finally:
+            self._check.connection.close_cursor(cursor)
+
+        # Advance scheduling state before emission so an emit-side error cannot
+        # leave the query stuck re-firing the same tick.
+        # For cron mode, due_ticks() already advanced the scheduler's internal state.
+        if due.mode == "interval":
+            self._last_execution[q.monitor_id] = time.time()
+
+        try:
+            self._check.gauge(
+                'dd.sqlserver.data_observability.query_execution_time',
+                result['duration_s'],
+                tags=tags,
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            self._check.count(
+                'dd.sqlserver.data_observability.query_executions',
+                1,
+                tags=tags + [f'status:{result["status"]}'],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+
+            # Lateness measures scheduling delay only (time from tick to query start),
+            # not end-to-end result latency — query execution time is reported separately.
+            lateness = max(0.0, now_at_fire_start - due.scheduled_time)
+            self._check.gauge(
+                'dd.sqlserver.data_observability.query_fire_lateness_seconds',
+                lateness,
+                tags=tags + [f'mode:{due.mode}'],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+
+            payload = self._build_event_payload(q, result)
+            raw_event = json.dumps(payload, default=default_json_event_encoding)
+            self._log.debug(
+                "Query result for monitor_id=%d: status=%s row_count=%d",
+                q.monitor_id,
+                result['status'],
+                result['row_count'],
+            )
+            self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
+        except Exception as e:
+            self._log.exception(
+                "Failed to emit metrics/event for monitor_id=%d",
+                q.monitor_id,
+            )
+            try:
+                self._check.count(
+                    'dd.sqlserver.data_observability.emit_failures',
+                    1,
+                    tags=tags + [f'exc_class:{type(e).__name__}'],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+            except Exception:
+                pass
+
     def run_job(self):
         # Merge queries still pending retry from a previous failed connection attempt
         # with newly due queries, keyed by monitor_id so a fresher tick wins.
@@ -244,101 +338,39 @@ class SqlServerDataObservability(DBMAsyncJob):
 
         base_tags = self._build_base_tags()
 
+        # Group by dbname so queries against the same database share one physical
+        # connection instead of opening/closing a new one per query.
+        queries_by_dbname: dict[str, list[DueQuery]] = {}
         for due in due_queries:
-            q = due.query
-            tags = base_tags + [f'monitor_id:{q.monitor_id}']
+            queries_by_dbname.setdefault(due.query.dbname, []).append(due)
 
-            now_at_fire_start = time.time()
+        for dbname, group in queries_by_dbname.items():
             try:
                 with self._check.connection._open_managed_db_connections(
                     self._check.connection.DEFAULT_DB_KEY,
-                    db_name=q.dbname,
+                    db_name=dbname,
                     key_prefix=CONN_KEY_PREFIX,
                 ):
-                    if q.query_timeout:
-                        timeout_s = max(1, math.ceil(q.query_timeout / 1000))
-                        self._check.connection.set_command_timeout(CONN_KEY_PREFIX, timeout_s, db_name=q.dbname)
-
-                    cursor = self._check.connection.get_cursor(
-                        self._check.connection.DEFAULT_DB_KEY,
-                        db_name=q.dbname,
-                        key_prefix=CONN_KEY_PREFIX,
-                    )
-                    try:
-                        result = self._execute_single_query(cursor, q)
-                    finally:
-                        self._check.connection.close_cursor(cursor)
+                    for due in group:
+                        try:
+                            self._run_due_query(due, base_tags)
+                        except tuple(_EXPECTED_DB_EXCEPTIONS) as e:
+                            self._log.warning(
+                                "Failed to execute monitor_id=%d on db_name=%s; will retry next poll: %s",
+                                due.query.monitor_id,
+                                dbname,
+                                e,
+                            )
+                            self._queue_for_retry(due, base_tags)
             except tuple(_EXPECTED_DB_EXCEPTIONS) as e:
+                # Opening the shared connection itself failed before any query in this
+                # group ran, so all of them are safe to retry next poll.
                 self._log.warning(
-                    "Failed to open connection for monitor_id=%d db_name=%s; will retry next poll: %s",
-                    q.monitor_id,
-                    q.dbname,
+                    "Failed to open connection for db_name=%s; will retry %d quer%s next poll: %s",
+                    dbname,
+                    len(group),
+                    "y" if len(group) == 1 else "ies",
                     e,
                 )
-                self._pending_retries[q.monitor_id] = due
-                self._check.count(
-                    'dd.sqlserver.data_observability.connection_failures',
-                    1,
-                    tags=tags,
-                    hostname=self._check.reported_hostname,
-                    raw=True,
-                )
-                continue
-
-            # Advance scheduling state before emission so an emit-side error cannot
-            # leave the query stuck re-firing the same tick.
-            # For cron mode, due_ticks() already advanced the scheduler's internal state.
-            if due.mode == "interval":
-                self._last_execution[q.monitor_id] = time.time()
-
-            try:
-                self._check.gauge(
-                    'dd.sqlserver.data_observability.query_execution_time',
-                    result['duration_s'],
-                    tags=tags,
-                    hostname=self._check.reported_hostname,
-                    raw=True,
-                )
-                self._check.count(
-                    'dd.sqlserver.data_observability.query_executions',
-                    1,
-                    tags=tags + [f'status:{result["status"]}'],
-                    hostname=self._check.reported_hostname,
-                    raw=True,
-                )
-
-                # Lateness measures scheduling delay only (time from tick to query start),
-                # not end-to-end result latency — query execution time is reported separately.
-                lateness = max(0.0, now_at_fire_start - due.scheduled_time)
-                self._check.gauge(
-                    'dd.sqlserver.data_observability.query_fire_lateness_seconds',
-                    lateness,
-                    tags=tags + [f'mode:{due.mode}'],
-                    hostname=self._check.reported_hostname,
-                    raw=True,
-                )
-
-                payload = self._build_event_payload(q, result)
-                raw_event = json.dumps(payload, default=default_json_event_encoding)
-                self._log.debug(
-                    "Query result for monitor_id=%d: status=%s row_count=%d",
-                    q.monitor_id,
-                    result['status'],
-                    result['row_count'],
-                )
-                self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
-            except Exception as e:
-                self._log.exception(
-                    "Failed to emit metrics/event for monitor_id=%d",
-                    q.monitor_id,
-                )
-                try:
-                    self._check.count(
-                        'dd.sqlserver.data_observability.emit_failures',
-                        1,
-                        tags=tags + [f'exc_class:{type(e).__name__}'],
-                        hostname=self._check.reported_hostname,
-                        raw=True,
-                    )
-                except Exception:
-                    pass
+                for due in group:
+                    self._queue_for_retry(due, base_tags)

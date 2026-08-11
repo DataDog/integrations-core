@@ -107,6 +107,8 @@ def _make_connection_mocks(mock_cursor=None):
     mock_connection.set_command_timeout = MagicMock()
     mock_connection.get_host_with_port = MagicMock(return_value=BASE_INSTANCE['host'])
     mock_connection.DEFAULT_DB_KEY = 'database'
+    # Matches Connection.DEFAULT_COMMAND_TIMEOUT, the check-level default.
+    mock_connection.timeout = 10
 
     return mock_connection, mock_cursor, open_calls
 
@@ -174,6 +176,17 @@ def test_multiple_queries_different_dbnames(aggregator):
     assert len(open_calls) == 2
     assert open_calls[0]['db_name'] == 'db_one'
     assert open_calls[1]['db_name'] == 'db_two'
+
+
+def test_multiple_queries_same_dbname_share_one_connection(aggregator):
+    """Queries against the same dbname share a single connection open (grouping)."""
+    with patch.object(SQLServer, 'event_platform_event'):
+        _, _, _, open_calls = _setup_and_run(queries=deepcopy(MULTI_QUERIES))
+
+    assert len(open_calls) == 1
+    assert open_calls[0]['db_name'] == 'app_db'
+    status_metrics = aggregator.metrics('dd.sqlserver.data_observability.query_executions')
+    assert len(status_metrics) == 2
 
 
 # ── Error handling ────────────────────────────────────────────────────────────
@@ -248,14 +261,17 @@ def test_query_with_no_description(aggregator):
     assert 'status:error' in metrics[0].tags
 
 
-def test_connection_failure_does_not_block_other_due_queries(aggregator):
-    """A connection failure opening the first due query's db must not abort processing of
-    other queries already due in the same pass (they were already ticked/collected before
-    the failure)."""
+def test_connection_failure_does_not_block_other_dbname_groups(aggregator):
+    """A connection failure opening the first dbname group must not abort processing of
+    other dbname groups already due in the same pass."""
     from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 
+    queries = [
+        {**deepcopy(BASE_QUERY), 'dbname': 'db_one'},
+        {**deepcopy(MULTI_QUERIES[1]), 'dbname': 'db_two'},
+    ]
     mock_cursor = _make_mock_cursor()
-    instance = _make_do_instance(queries=deepcopy(MULTI_QUERIES))
+    instance = _make_do_instance(queries=queries)
     check = _create_check(instance)
     mock_connection, _, open_calls = _make_connection_mocks(mock_cursor)
 
@@ -276,11 +292,36 @@ def test_connection_failure_does_not_block_other_due_queries(aggregator):
 
     check.data_observability.run_job()
 
-    # First query's connection failed, but the second (already-due) query still ran.
+    # First group's connection failed, but the second (already-due) group still ran.
     status_metrics = aggregator.metrics('dd.sqlserver.data_observability.query_executions')
     assert len(status_metrics) == 1
     failure_metrics = aggregator.metrics('dd.sqlserver.data_observability.connection_failures')
     assert len(failure_metrics) == 1
+
+
+def test_connection_failure_retries_every_query_in_group(aggregator):
+    """When a shared connection fails to open, every query in that dbname group is
+    queued for retry, not just one."""
+    from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+
+    instance = _make_do_instance(queries=deepcopy(MULTI_QUERIES))  # both dbname=app_db
+    check = _create_check(instance)
+    mock_connection, _, _ = _make_connection_mocks()
+
+    @contextmanager
+    def always_fails(db_key, db_name=None, key_prefix=None):
+        raise SQLConnectionError("could not connect")
+        yield  # pragma: no cover
+
+    mock_connection._open_managed_db_connections = MagicMock(side_effect=always_fails)
+    check._connection = mock_connection
+
+    check.data_observability.run_job()
+
+    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
+    failure_metrics = aggregator.metrics('dd.sqlserver.data_observability.connection_failures')
+    assert len(failure_metrics) == 2
+    assert set(check.data_observability._pending_retries.keys()) == {1, 2}
 
 
 def test_connection_failure_retried_on_next_poll(aggregator, monkeypatch):
@@ -573,14 +614,18 @@ def test_query_timeout_minimum_1s(aggregator):
     assert timeout_s == 1
 
 
-def test_no_query_timeout_skips_set_command_timeout(aggregator):
-    """When query_timeout is not set, set_command_timeout is not called."""
+def test_no_query_timeout_uses_check_level_timeout(aggregator):
+    """When query_timeout is not set, the connection is set to the check-level configured
+    timeout rather than left untouched — important once a connection is shared across
+    queries in the same dbname group, so a prior query's timeout can't leak into this one."""
     query = deepcopy(BASE_QUERY)
     # No query_timeout key
 
     _, mock_conn, _, _ = _setup_and_run(queries=[query])
 
-    mock_conn.set_command_timeout.assert_not_called()
+    mock_conn.set_command_timeout.assert_called_once()
+    _, timeout_s, *_ = mock_conn.set_command_timeout.call_args[0]
+    assert timeout_s == mock_conn.timeout
 
 
 # ── Miscellaneous ─────────────────────────────────────────────────────────────
