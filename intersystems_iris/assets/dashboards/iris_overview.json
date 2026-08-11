@@ -12,7 +12,24 @@
     { "name": "interop_host", "prefix": "interop_host", "available_values": [], "default": "*" }
   ],
   "widgets": [
-    { "id": 1000, "definition": { "title": "About", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 0, "width": 12, "height": 2 } },
+    { "id": 1000, "definition": { "title": "About", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [
+  {
+    "id": 1001,
+    "definition": {
+      "type": "note",
+      "content": "## InterSystems IRIS\n\nThis dashboard tracks IRIS instance health, high availability (mirroring), distributed caching (ECP), and interoperability productions.\n\n- **Mirror**, **ECP**, and **outbound HTTP** sections show *No data* when those features are not in use — this is expected.\n- Event-style signals (failovers, process termination, license warnings) appear in the **Logs** section via the `messages.log` pipeline.\n\n[Setup & docs](https://docs.datadoghq.com/integrations/intersystems_iris/)",
+      "background_color": "white",
+      "font_size": "14",
+      "text_align": "left",
+      "vertical_align": "top",
+      "show_tick": false,
+      "tick_pos": "50%",
+      "tick_edge": "left",
+      "has_padding": true
+    },
+    "layout": { "x": 0, "y": 0, "width": 12, "height": 2 }
+  }
+] }, "layout": { "x": 0, "y": 0, "width": 12, "height": 2 } },
     { "id": 2000, "definition": { "title": "Health at a glance", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 2, "width": 12, "height": 3 } },
     { "id": 3000, "definition": { "title": "Instance health trends", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 5, "width": 12, "height": 10 } },
     { "id": 4000, "definition": { "title": "Mirror (high availability)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 15, "width": 12, "height": 8 } },
