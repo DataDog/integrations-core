@@ -1652,6 +1652,11 @@ class AgentCheck(object):
                 observed = self.metric_limiter.count
                 limit = self.metric_limiter.limit
 
+                try:
+                    self._on_metric_limit_state(reached_limit, observed, limit)
+                except Exception:
+                    self.log.debug('Error handling metric limit state', exc_info=True)
+
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
                     debug_metrics = self.metric_limiter.get_debug_metrics()
 
@@ -1662,12 +1667,7 @@ class AgentCheck(object):
                     for metric_name, value in debug_metrics:
                         self.gauge(metric_name, value, tags=tags, raw=True)
 
-                try:
-                    self._on_metric_limit_state(reached_limit, observed, limit)
-                except Exception:
-                    self.log.debug('Error handling metric limit state', exc_info=True)
-                finally:
-                    self.metric_limiter.reset()
+                self.metric_limiter.reset()
 
         return error_report
 
