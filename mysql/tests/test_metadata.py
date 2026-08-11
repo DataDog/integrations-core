@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import re
-
 import pytest
 from packaging.version import parse as parse_version
 
@@ -107,7 +105,11 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
+# ``None`` exercises the default (version-selected) strategy -- single_query on MySQL 8.0+, chunked
+# on 5.7 and MariaDB. ``'chunked'`` forces the chunked strategy, which works on every supported
+# version. Both must produce identical schema payloads.
+@pytest.mark.parametrize('collection_strategy', [None, 'chunked'])
+def test_collect_schemas(aggregator, dd_run_check, dbm_instance, collection_strategy):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
     is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
@@ -649,7 +651,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'datadog_test_schemas_second': exp_datadog_test_schemas_second,
     }
 
-    dbm_instance['schemas_collection'] = {"enabled": True}
+    schemas_config = {"enabled": True}
+    if collection_strategy is not None:
+        schemas_config["collection_strategy"] = collection_strategy
+    dbm_instance['collect_schemas'] = schemas_config
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
 
@@ -680,16 +685,17 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("dbms_version") is not None
         assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
         assert sorted(schema_event["tags"]) == sorted(expected_tags)
-        database_metadata = schema_event['metadata']
-        assert len(database_metadata) == 1
-        db_name = database_metadata[0]['name']
-        if db_name not in databases_to_find:
-            continue
-
-        if db_name in actual_payloads:
-            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
-        else:
-            actual_payloads[db_name] = database_metadata[0]
+        # The collector chunks a database's tables across multiple metadata entries (one table per
+        # entry). Reassemble per-database here so the assertions are agnostic to how many payloads
+        # the tables were split across.
+        for db_entry in schema_event['metadata']:
+            db_name = db_entry['name']
+            if db_name not in databases_to_find:
+                continue
+            if db_name in actual_payloads:
+                actual_payloads[db_name]['tables'].extend(db_entry.get('tables', []))
+            else:
+                actual_payloads[db_name] = {**db_entry, 'tables': list(db_entry.get('tables', []))}
 
     assert len(actual_payloads) == len(expected_data_for_db)
 
@@ -698,25 +704,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_values(expected_data_for_db[db_name])
         assert db_name in databases_to_find
         assert expected_data_for_db[db_name] == actual_payload
-
-
-@pytest.mark.integration
-def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
-    dbm_instance['dbm'] = True
-    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
-    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
-    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    dd_run_check(check)
-
-    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    found = False
-    for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
-        if "collection_errors" in schema_event:
-            if schema_event["collection_errors"][0]["error_type"] == "truncated" and re.fullmatch(
-                expected_pattern, schema_event["collection_errors"][0]["message"]
-            ):
-                found = True
-    assert found
 
 
 @pytest.mark.unit

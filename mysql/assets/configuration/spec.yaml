@@ -490,8 +490,8 @@ files:
                 fleet_configurable: false
               - name: max_execution_time
                 description: |
-                  Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
-                  Capped by `collect_schemas.collection_interval`
+                  Set the execution time limit for each schema collection query (in seconds). Defaults to 60 seconds.
+                  Set to 0 to run the queries without a timeout.
                 value:
                   type: number
                   example: 60
@@ -522,8 +522,8 @@ files:
                 fleet_configurable: false
               - name: max_execution_time
                 description: |
-                  Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
-                  Capped by `schemas_collection.collection_interval`
+                  Set the execution time limit for each schema collection query (in seconds). Defaults to 60 seconds.
+                  Set to 0 to run the queries without a timeout.
                 value:
                   type: number
                   example: 60
