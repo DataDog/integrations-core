@@ -30,7 +30,140 @@
     "layout": { "x": 0, "y": 0, "width": 12, "height": 2 }
   }
 ] }, "layout": { "x": 0, "y": 0, "width": 12, "height": 2 } },
-    { "id": 2000, "definition": { "title": "Health at a glance", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 2, "width": 12, "height": 3 } },
+    { "id": 2000, "definition": { "title": "Health at a glance", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [
+  {
+    "id": 2001,
+    "definition": {
+      "title": "System state (-1 Hung / 0 OK / 1 Warn / 2 Alert)",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 0,
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.system.state{$env,$host}", "aggregator": "last" } ],
+        "formulas": [ { "formula": "query1" } ],
+        "conditional_formats": [
+          { "comparator": "<", "value": 0, "palette": "white_on_red" },
+          { "comparator": "==", "value": 0, "palette": "white_on_green" },
+          { "comparator": ">", "value": 0, "palette": "white_on_yellow" }
+        ]
+      } ]
+    },
+    "layout": { "x": 0, "y": 0, "width": 3, "height": 1 }
+  },
+  {
+    "id": 2002,
+    "definition": {
+      "title": "New alerts posted",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 0,
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.system.alerts_new{$env,$host}", "aggregator": "last" } ],
+        "formulas": [ { "formula": "query1" } ],
+        "conditional_formats": [
+          { "comparator": ">", "value": 0, "palette": "white_on_red" },
+          { "comparator": "<=", "value": 0, "palette": "white_on_green" }
+        ]
+      } ]
+    },
+    "layout": { "x": 3, "y": 0, "width": 3, "height": 1 }
+  },
+  {
+    "id": 2003,
+    "definition": {
+      "title": "License used (per instance)",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 1, "custom_unit": "%",
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.license.percent_used{$env,$host}", "aggregator": "last" } ],
+        "formulas": [ { "formula": "query1" } ],
+        "conditional_formats": [
+          { "comparator": ">=", "value": 90, "palette": "white_on_red" },
+          { "comparator": ">=", "value": 75, "palette": "white_on_yellow" },
+          { "comparator": "<", "value": 75, "palette": "white_on_green" }
+        ]
+      } ]
+    },
+    "layout": { "x": 6, "y": 0, "width": 3, "height": 1 }
+  },
+  {
+    "id": 2004,
+    "definition": {
+      "title": "Cache efficiency",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 1,
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.cache_efficiency{$env,$host}", "aggregator": "avg" } ],
+        "formulas": [ { "formula": "query1" } ]
+      } ]
+    },
+    "layout": { "x": 9, "y": 0, "width": 3, "height": 1 }
+  },
+  {
+    "id": 2005,
+    "definition": {
+      "title": "Mirror status (2 Primary / 3 Backup / 5 Transition / 8 Stopped / 9 Crashed)",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 0,
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.mirror.status{$env,$host}", "aggregator": "last" } ],
+        "formulas": [ { "formula": "query1" } ],
+        "conditional_formats": [
+          { "comparator": ">=", "value": 8, "palette": "white_on_red" },
+          { "comparator": ">=", "value": 5, "palette": "white_on_yellow" },
+          { "comparator": "<", "value": 5, "palette": "white_on_green" }
+        ]
+      } ]
+    },
+    "layout": { "x": 0, "y": 1, "width": 3, "height": 1 }
+  },
+  {
+    "id": 2006,
+    "definition": {
+      "title": "Journal free space",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 0,
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "min:intersystems_iris.jrn.free_space{$env,$host}", "aggregator": "last" } ],
+        "formulas": [ { "formula": "query1" } ]
+      } ]
+    },
+    "layout": { "x": 3, "y": 1, "width": 3, "height": 1 }
+  },
+  {
+    "id": 2007,
+    "definition": {
+      "title": "Lock table % full (proxy: smh Lock_Table)",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 1, "custom_unit": "%",
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.smh.percent_full{$env,$host,id:Lock_Table}", "aggregator": "last" } ],
+        "formulas": [ { "formula": "query1" } ],
+        "conditional_formats": [
+          { "comparator": ">=", "value": 85, "palette": "white_on_red" },
+          { "comparator": ">=", "value": 70, "palette": "white_on_yellow" },
+          { "comparator": "<", "value": 70, "palette": "white_on_green" }
+        ]
+      } ]
+    },
+    "layout": { "x": 6, "y": 1, "width": 3, "height": 1 }
+  },
+  {
+    "id": 2008,
+    "definition": {
+      "title": "Write daemon (0 active / 1 suspended)",
+      "title_size": "16", "title_align": "left", "type": "query_value", "autoscale": true, "precision": 0,
+      "requests": [ {
+        "response_format": "scalar",
+        "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.wd.suspended{$env,$host}", "aggregator": "last" } ],
+        "formulas": [ { "formula": "query1" } ],
+        "conditional_formats": [
+          { "comparator": ">", "value": 0, "palette": "white_on_red" },
+          { "comparator": "<=", "value": 0, "palette": "white_on_green" }
+        ]
+      } ]
+    },
+    "layout": { "x": 9, "y": 1, "width": 3, "height": 1 }
+  }
+] }, "layout": { "x": 0, "y": 2, "width": 12, "height": 3 } },
     { "id": 3000, "definition": { "title": "Instance health trends", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 5, "width": 12, "height": 10 } },
     { "id": 4000, "definition": { "title": "Mirror (high availability)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 15, "width": 12, "height": 8 } },
     { "id": 5000, "definition": { "title": "ECP (distributed cache)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 23, "width": 12, "height": 4 } },
