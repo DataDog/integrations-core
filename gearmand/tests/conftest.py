@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 
 from .common import CHECK_NAME, HERE, INSTANCE
 
@@ -17,7 +17,7 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     with docker_run(compose_file, sleep=60, mount_logs=True):
-        yield INSTANCE
+        yield INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture

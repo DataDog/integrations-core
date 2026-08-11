@@ -3,13 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+from unittest.mock import Mock
 
 import pytest
+from kubernetes.client.exceptions import ApiException
 
 from datadog_checks.base.stubs import tagger
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kueue import KueueCheck
 from datadog_checks.kueue.check import OTHER_RESOURCE_NAME, RESOURCE_NAME_MAP
+from datadog_checks.kueue.kube_client import KubernetesAPIClient
 from datadog_checks.kueue.metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
 from .common import EXPECTED_METRIC_TAGS, UNIT_METRICS, get_fixture_path
@@ -19,27 +22,27 @@ pytestmark = pytest.mark.unit
 
 def test_mapped_metrics_are_in_metadata():
     mapped_metrics = set()
-    mapped_metrics.update(_metadata_metric_name(metric_name) for metric_name in METRIC_MAP.values())
-    mapped_metrics.update(_metadata_metric_name(metric_name) for metric_name in LOCAL_QUEUE_METRIC_MAP.values())
+    mapped_metrics.update(metadata_metric_name(metric_name) for metric_name in METRIC_MAP.values())
+    mapped_metrics.update(metadata_metric_name(metric_name) for metric_name in LOCAL_QUEUE_METRIC_MAP.values())
 
     resource_names = {OTHER_RESOURCE_NAME, *RESOURCE_NAME_MAP.values()}
     for metric_name in RESOURCE_METRIC_MAP.values():
         mapped_metrics.update(
-            _metadata_metric_name(f'{metric_name}.{resource_name}') for resource_name in resource_names
+            metadata_metric_name(f'{metric_name}.{resource_name}') for resource_name in resource_names
         )
 
-    metadata_metrics = {_base_metric_name(metric) for metric in get_metadata_metrics()}
+    metadata_metrics = {base_metric_name(metric) for metric in get_metadata_metrics()}
     assert mapped_metrics.issubset(metadata_metrics)
 
 
-def _metadata_metric_name(metric_name):
+def metadata_metric_name(metric_name):
     if isinstance(metric_name, dict):
         metric_name = metric_name['name']
 
     return f'kueue.{metric_name}'
 
 
-def _base_metric_name(metric_name):
+def base_metric_name(metric_name):
     for suffix in ('.bucket', '.count', '.sum'):
         if metric_name.endswith(suffix):
             return metric_name[: -len(suffix)]
@@ -52,10 +55,14 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
 
     check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
+    dd_run_check(check)
 
     for metric in UNIT_METRICS:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
+
+    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.other', 'resource:example.com/fpga')
+    assert 'resource:nvidia.com/gpu' not in get_metric_tags(aggregator, 'kueue.cluster_queue.resource_usage.gpu')
 
     for metric, tags in EXPECTED_METRIC_TAGS.items():
         for tag in tags:
@@ -83,7 +90,6 @@ def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_respons
     aggregator.assert_metric_has_tag('kueue.pending_workloads', 'cluster_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.gpu', 'cluster_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.gpu', 'resource_flavor_tag:value')
-    aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'cluster_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'local_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.local_queue.resource_reservation.cpu', 'local_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.local_queue.resource_usage.cpu', 'local_queue_tag:value')
@@ -103,8 +109,8 @@ def test_queue_tagger_tags_are_scoped(dd_run_check, aggregator, instance, mock_h
     check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
-    go_goroutines_tags = _get_metric_tags(aggregator, 'kueue.go.goroutines')
-    local_queue_tags = _get_metric_tags(aggregator, 'kueue.local_queue.pending_workloads')
+    go_goroutines_tags = get_metric_tags(aggregator, 'kueue.go.goroutines')
+    local_queue_tags = get_metric_tags(aggregator, 'kueue.local_queue.pending_workloads')
     assert 'cluster_queue_tag:value' not in go_goroutines_tags
     assert 'local_queue_tag:value' not in local_queue_tags
 
@@ -150,6 +156,23 @@ def test_workload_events_config_can_be_parsed_before_check(instance):
     assert check.collect_workload_events is True
 
 
+@pytest.mark.parametrize(
+    ('namespace', 'method_name'),
+    [
+        (None, 'list_cluster_custom_object'),
+        ('default', 'list_namespaced_custom_object'),
+    ],
+)
+def test_workload_api_version_fallback(namespace, method_name):
+    kube_client = object.__new__(KubernetesAPIClient)
+    kube_client.custom_obj_client = Mock()
+    method = getattr(kube_client.custom_obj_client, method_name)
+    method.side_effect = [ApiException(status=404), {'items': []}]
+
+    assert kube_client.list_workloads(namespace) == []
+    assert [call.kwargs['version'] for call in method.call_args_list] == ['v1beta2', 'v1beta1']
+
+
 class FakeKubernetesAPIClient:
     def __init__(self, *workload_snapshots):
         self.workload_snapshots = list(workload_snapshots)
@@ -186,6 +209,25 @@ def without_admission(workloads):
     return workloads
 
 
+def as_flavor_migration_eviction(workloads):
+    """Rewrite the preemption eviction as Kueue's flavor-migration eviction, whose message looks alike."""
+    workloads = json.loads(json.dumps(workloads))
+    for workload in workloads:
+        conditions = []
+        for condition in workload['status']['conditions']:
+            if condition['type'] in ('Preempted', 'Finished'):
+                continue
+            if condition['type'] == 'Evicted':
+                condition['reason'] = 'FlavorMigration'
+                condition['message'] = (
+                    'Evicted to accommodate a workload (UID: migrating-workload-uid) due to migration to '
+                    'more favorable resource flavor'
+                )
+            conditions.append(condition)
+        workload['status']['conditions'] = conditions
+    return workloads
+
+
 def test_workload_events_suppress_first_poll(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     check = KueueCheck('kueue', {}, [instance])
@@ -194,6 +236,21 @@ def test_workload_events_suppress_first_poll(dd_run_check, aggregator, instance,
     dd_run_check(check)
 
     assert not aggregator.events
+
+
+@pytest.mark.parametrize(
+    ('spec', 'priority_class'),
+    [
+        ({'priorityClassName': 'v1beta1'}, 'v1beta1'),
+        ({'priorityClassName': 'v1beta1', 'priorityClassRef': {'name': 'v1beta2'}}, 'v1beta2'),
+    ],
+)
+def test_workload_event_tags_priority_class(instance, spec, priority_class):
+    check = KueueCheck('kueue', {}, [instance])
+
+    tags = check.workload_event_tags('admitted', {'spec': spec}, None)
+
+    assert f'kueue_workload_priority_class:{priority_class}' in tags
 
 
 def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_http_response):
@@ -308,7 +365,8 @@ def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance
     ]
     aggregator.assert_event(
         'Workload team-a/training-job evicted. Preempted to accommodate a workload '
-        '(UID: preempting-workload-uid) due to prioritization in the ClusterQueue Eviction reason: Preempted. '
+        '(UID: preempting-workload-uid, JobUID: preempting-job-uid) due to prioritization in the ClusterQueue; '
+        'preemptor path: /default; preemptee path: /default Eviction reason: Preempted. '
         'Preemption reason: InClusterQueue.',
         alert_type='warning',
         tags=expected_evicted_tags,
@@ -317,6 +375,32 @@ def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance
         'Workload team-a/training-job finished. Reached expected number of succeeded pods Finished reason: Succeeded.',
         alert_type='info',
     )
+
+
+def test_workload_events_flavor_migration_is_not_tagged_as_preemption(
+    dd_run_check, aggregator, instance, mock_http_response
+):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.reset()
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(
+        load_workloads('admitted'), as_flavor_migration_eviction(load_workloads('evicted'))
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert_event_has_tags(
+        aggregator,
+        'Workload team-a/training-job evicted.',
+        ['kueue_eviction_reason:FlavorMigration'],
+        alert_type='warning',
+    )
+    evicted_event = next(event for event in aggregator.events if 'evicted.' in event['msg_text'])
+    preemption_tags = [
+        tag for tag in evicted_event['tags'] if tag.startswith(('kueue_preempted_by:', 'kueue_preemption_reason:'))
+    ]
+    assert not preemption_tags
 
 
 def test_workload_events_evicted_uses_previous_admission(dd_run_check, aggregator, instance, mock_http_response):
@@ -385,5 +469,5 @@ def assert_event_has_tags(aggregator, msg_text, tags, **kwargs):
     raise AssertionError(f'No event matching {msg_text!r} with tags {tags!r}')
 
 
-def _get_metric_tags(aggregator, metric_name):
+def get_metric_tags(aggregator, metric_name):
     return {tag for metric in aggregator.metrics(metric_name) for tag in metric.tags}

@@ -1,0 +1,46 @@
+{
+  "additional_config_fields": [
+    {
+      "key": "aws_access_key_id",
+      "label": "AWS Access Key ID",
+      "help": "The AWS Access Key ID generated for your CrowdStrike FDR feed.",
+      "required": true,
+      "editable": true,
+      "password": {}
+    },
+    {
+      "key": "aws_secret_key",
+      "label": "AWS Secret Key",
+      "help": "The AWS Secret Key generated for your CrowdStrike FDR feed.",
+      "required": true,
+      "editable": true,
+      "password": {}
+    },
+    {
+      "key": "sqs_queue_url",
+      "label": "SQS Queue URL",
+      "help": "The SQS Queue URL generated for your CrowdStrike FDR feed.",
+      "required": true,
+      "editable": true,
+      "text": {
+        "pattern": "^https://sqs\\.[a-z0-9-]+\\.(?:amazonaws\\.com(?:\\.cn)?|api\\.aws)/\\d{12}/.+$"
+      }
+    },
+    {
+      "key": "s3_bucket",
+      "label": "S3 Bucket",
+      "help": "The S3 bucket CrowdStrike delivers your FDR files to, shown with the feed credentials in the Falcon console.",
+      "required": true,
+      "editable": true,
+      "text": {
+        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "crowdstrike-fdr-logs",
+      "additional_config_fields": []
+    }
+  ]
+}
