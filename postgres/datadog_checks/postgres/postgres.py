@@ -164,7 +164,8 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        # Jobs the configuration does not enable are left as None rather than built and ignored.
+        # Only tests read these; the registry owns the jobs. Remove them once DatabaseCheck
+        # exposes a public job accessor. Jobs the configuration does not enable stay None.
         self.statement_metrics = None
         self.statement_samples = None
         self.metadata_samples = None
