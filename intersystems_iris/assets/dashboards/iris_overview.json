@@ -327,7 +327,42 @@
     "layout": { "x": 4, "y": 3, "width": 8, "height": 3 }
   }
 ] }, "layout": { "x": 0, "y": 15, "width": 12, "height": 8 } },
-    { "id": 5000, "definition": { "title": "ECP (distributed cache)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 23, "width": 12, "height": 4 } },
+    { "id": 5000, "definition": { "title": "ECP (distributed cache)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [
+  {
+    "id": 5001,
+    "definition": {
+      "title": "App-server connections (this instance as client)", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.ecp.conn{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Connections", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "avg:intersystems_iris.ecp.conn_max{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Max connections", "formula": "query2" } ],
+          "style": { "palette": "grey", "line_type": "dashed", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+  },
+  {
+    "id": 5002,
+    "definition": {
+      "title": "Data-server connections (this instance as server)", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.ecps.conn{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Connections", "formula": "query1" } ],
+          "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "avg:intersystems_iris.ecps.conn_max{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Max connections", "formula": "query2" } ],
+          "style": { "palette": "grey", "line_type": "dashed", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+  }
+] }, "layout": { "x": 0, "y": 23, "width": 12, "height": 4 } },
     { "id": 6000, "definition": { "title": "Interoperability", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 27, "width": 12, "height": 15 } },
     { "id": 7000, "definition": { "title": "Logs", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 42, "width": 12, "height": 5 } }
   ]
