@@ -7,12 +7,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
-from datadog_checks.base.checks.openmetrics.metric_limit_issue import (
-    ISSUE_NAME,
-    RESOLVE_AFTER_CLEAN_RUNS,
-    MetricLimitIssueReporter,
-    _issue_id,
-)
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import ISSUE_NAME, MetricLimitIssueReporter, _issue_id
 
 ENDPOINT = 'http://example.test/metrics'
 ISSUE_ID = 'openmetrics-dropped-config:5505571e531f7cf6'
@@ -132,31 +127,25 @@ def test_severity_thresholds(datadog_agent: Any, observed: int, limit: int, seve
     assert issue['severity'] == check.IssueSeverity[severity]
 
 
-def test_resolves_after_consecutive_clean_runs(datadog_agent: Any) -> None:
+def test_resolves_on_first_clean_run(datadog_agent: Any) -> None:
     check = create_check()
     check.observed = 20
     check.run()
 
     check.observed = 5
-    for _ in range(RESOLVE_AFTER_CLEAN_RUNS - 1):
-        check.run()
-    assert datadog_agent._sent_resolved_issues == []
-
     check.run()
-    assert datadog_agent._sent_resolved_issues == [ISSUE_ID]
 
-    check.run()
     assert datadog_agent._sent_resolved_issues == [ISSUE_ID]
 
 
-def test_first_clean_run_unconditionally_resolves(datadog_agent: Any) -> None:
+def test_clean_runs_resolve_idempotently(datadog_agent: Any) -> None:
     check = create_check()
     check.observed = 5
 
     check.run()
     check.run()
 
-    assert datadog_agent._sent_resolved_issues == [ISSUE_ID]
+    assert datadog_agent._sent_resolved_issues == [ISSUE_ID, ISSUE_ID]
 
 
 def test_recurrence_after_resolution_reports_same_id(datadog_agent: Any) -> None:
@@ -165,14 +154,25 @@ def test_recurrence_after_resolution_reports_same_id(datadog_agent: Any) -> None
     check.run()
 
     check.observed = 5
-    for _ in range(RESOLVE_AFTER_CLEAN_RUNS):
-        check.run()
+    check.run()
 
     check.observed = 20
     check.run()
 
     assert [issue['id'] for issue in reported_issues(datadog_agent)] == [ISSUE_ID, ISSUE_ID]
     assert datadog_agent._sent_resolved_issues == [ISSUE_ID]
+
+
+def test_failed_run_does_not_resolve_active_issue(datadog_agent: Any) -> None:
+    check = create_check()
+    check.observed = 20
+    check.run()
+
+    check.check = mock.Mock(side_effect=RuntimeError('scrape failure'))
+    error_report = check.run()
+
+    assert 'scrape failure' in error_report
+    assert datadog_agent._sent_resolved_issues == []
 
 
 def test_issue_id_is_stable_for_the_same_identity() -> None:

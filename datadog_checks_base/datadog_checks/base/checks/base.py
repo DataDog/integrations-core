@@ -1641,12 +1641,6 @@ class AgentCheck(object):
                 else:
                     self.check(instance)
 
-            error_report = ''
-        except Exception as e:
-            message = self.sanitize(str(e))
-            tb = self.sanitize(traceback.format_exc())
-            error_report = json.encode([{'message': message, 'traceback': tb}])
-        finally:
             if self.metric_limiter:
                 try:
                     reached_limit = self.metric_limiter.reached_limit
@@ -1656,6 +1650,13 @@ class AgentCheck(object):
                 except Exception:
                     self.log.debug('Error handling metric limit state', exc_info=True)
 
+            error_report = ''
+        except Exception as e:
+            message = self.sanitize(str(e))
+            tb = self.sanitize(traceback.format_exc())
+            error_report = json.encode([{'message': message, 'traceback': tb}])
+        finally:
+            if self.metric_limiter:
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
                     debug_metrics = self.metric_limiter.get_debug_metrics()
 

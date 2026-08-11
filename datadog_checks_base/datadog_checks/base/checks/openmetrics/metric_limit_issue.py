@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from datadog_checks.base.checks import AgentCheck
 
 REPORT_FLOOR = 10
-RESOLVE_AFTER_CLEAN_RUNS = 3
 SEVERITY_HIGH_RATIO = 0.25
 SEVERITY_MEDIUM_RATIO = 0.05
 
@@ -22,9 +21,6 @@ ISSUE_NAME = 'OpenMetrics Metrics Dropped By Configured Limit'
 @dataclass
 class MetricLimitIssueReporter:
     legacy: bool
-    clean_runs: int = 0
-    store_synchronized: bool = False
-    active: bool = False
 
     def handle(
         self,
@@ -42,7 +38,6 @@ class MetricLimitIssueReporter:
         issue_id = _issue_id(check.hostname, check.name, endpoint, check.instance.get('namespace', ''))
 
         if reached_limit:
-            self.clean_runs = 0
             dropped = max(0, observed_count - limit)
             if dropped < REPORT_FLOOR:
                 return
@@ -71,20 +66,9 @@ class MetricLimitIssueReporter:
                 remediation=_remediation(legacy=self.legacy),
                 tags=[f'integration:{check.name}', 'openmetrics', 'metric-limit'],
             )
-            self.active = True
-            self.store_synchronized = True
             return
 
-        self.clean_runs += 1
-        if not self.store_synchronized:
-            check.resolve_issue(issue_id)
-            self.store_synchronized = True
-            return
-
-        if self.active and self.clean_runs >= RESOLVE_AFTER_CLEAN_RUNS:
-            check.resolve_issue(issue_id)
-            self.active = False
-            self.clean_runs = 0
+        check.resolve_issue(issue_id)
 
 
 def _issue_id(hostname: str, check_name: str, endpoint: str, namespace: object) -> str:
