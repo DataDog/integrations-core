@@ -80,7 +80,7 @@ jobs:
         python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Install Build Deps
-      run: pip install -U build[virtualenv] hatchling
+      run: pip install -U build[virtualenv] "hatchling<1.27"
 
     - name: Build Package
       env:
