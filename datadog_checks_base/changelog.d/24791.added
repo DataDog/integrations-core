@@ -1,1 +1,1 @@
-Add DeltaDetector, ObfuscationLookup and resolve_obfuscations for incremental query metrics collection.
+Add QueryStats, ObfuscationLookup and resolve_obfuscations for incremental query metrics collection.

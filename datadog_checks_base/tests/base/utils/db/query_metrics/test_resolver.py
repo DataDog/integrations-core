@@ -6,9 +6,9 @@
 import logging
 from unittest import mock
 
-from datadog_checks.base.utils.db.obfuscation_lookup import (
+from datadog_checks.base.utils.db.query_metrics import (
     ObfuscationLookup,
-    TextDisposition,
+    TextKind,
     resolve_obfuscations,
 )
 
@@ -17,12 +17,12 @@ INSUFFICIENT_PRIVILEGE = '<insufficient privilege>'
 
 
 def classify(text):
-    """A classifier shaped like the one Postgres will use, covering all three dispositions."""
+    """A classifier shaped like the one Postgres will use, covering all three kinds."""
     if text.startswith('/* DDIGNORE */'):
-        return TextDisposition.IGNORE
+        return TextKind.EXCLUDED
     if text == INSUFFICIENT_PRIVILEGE:
-        return TextDisposition.SKIP
-    return TextDisposition.CACHE
+        return TextKind.UNAVAILABLE
+    return TextKind.STATEMENT
 
 
 class FakeFetcher:
@@ -77,7 +77,7 @@ class TestResolveObfuscations:
         assert result.stats.misses == 0
         assert second.calls == []
 
-    def test_ignored_text_is_fetched_once_then_never_again(self):
+    def test_excluded_text_is_fetched_once_then_never_again(self):
         lookup = make_lookup()
         fetcher = FakeFetcher({1: DDIGNORE, 2: 'SELECT 2'})
 
@@ -91,7 +91,7 @@ class TestResolveObfuscations:
         assert 1 not in result.results
         assert 1 not in second.requested
 
-    def test_skipped_text_is_retried_next_cycle(self):
+    def test_unavailable_text_is_retried_next_cycle(self):
         lookup = make_lookup()
         fetcher = FakeFetcher({1: INSUFFICIENT_PRIVILEGE})
 
@@ -128,7 +128,7 @@ class TestResolveObfuscations:
             return {'query': raw_text, 'metadata': {}}
 
         with mock.patch(
-            'datadog_checks.base.utils.db.obfuscation_lookup.obfuscate_sql_with_metadata',
+            'datadog_checks.base.utils.db.query_metrics.obfuscation.obfuscate_sql_with_metadata',
             side_effect=obfuscate,
         ):
             fetcher = FakeFetcher({1: 'BAD', 2: 'SELECT 2'})
