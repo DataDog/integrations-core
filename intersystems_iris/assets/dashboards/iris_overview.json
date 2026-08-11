@@ -363,7 +363,113 @@
     "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
   }
 ] }, "layout": { "x": 0, "y": 23, "width": 12, "height": 4 } },
-    { "id": 6000, "definition": { "title": "Interoperability", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 27, "width": 12, "height": 15 } },
+    { "id": 6000, "definition": { "title": "Interoperability", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [
+  {
+    "id": 6001,
+    "definition": {
+      "title": "Business hosts — status, staleness, message counts (per interop_host)",
+      "title_size": "16", "title_align": "left", "type": "query_table",
+      "requests": [
+        { "response_format": "scalar", "aggregator": "last",
+          "queries": [
+            { "data_source": "metrics", "name": "status", "query": "max:intersystems_iris.interop.hosts{$env,$host,$production,$interop_host} by {interop_host}", "aggregator": "last" },
+            { "data_source": "metrics", "name": "idle", "query": "max:intersystems_iris.interop.last_activity{$env,$host,$production,$interop_host} by {interop_host}", "aggregator": "last" },
+            { "data_source": "metrics", "name": "count", "query": "sum:intersystems_iris.interop.messages.count{$env,$host,$production,$interop_host} by {interop_host}", "aggregator": "last" },
+            { "data_source": "metrics", "name": "errored", "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production,$interop_host} by {interop_host}", "aggregator": "last" }
+          ],
+          "formulas": [
+            { "alias": "Status", "formula": "status" },
+            { "alias": "Seconds since last activity", "formula": "idle" },
+            { "alias": "Messages", "formula": "count" },
+            { "alias": "Errored", "formula": "errored",
+              "conditional_formats": [ { "comparator": ">", "value": 0, "palette": "white_on_red" } ] }
+          ] }
+      ],
+      "has_search_bar": "auto"
+    },
+    "layout": { "x": 0, "y": 0, "width": 12, "height": 4 }
+  },
+  {
+    "id": 6002,
+    "definition": {
+      "title": "Message throughput (per business host)", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "sum:intersystems_iris.interop.messages.per_sec.count{$env,$host,$production,$interop_host} by {interop_host}" } ],
+          "formulas": [ { "alias": "Messages/sec", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 0, "y": 4, "width": 6, "height": 3 }
+  },
+  {
+    "id": 6003,
+    "definition": {
+      "title": "Errors / aborts / discards / suspends (per production)", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","max","value"], "time": {},
+      "requests": [
+        { "display_type": "bars", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production} by {production}" } ],
+          "formulas": [ { "alias": "Errored", "formula": "query1" } ],
+          "style": { "palette": "warm", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "bars", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "sum:intersystems_iris.interop.messages.aborted{$env,$host,$production} by {production}" } ],
+          "formulas": [ { "alias": "Aborted", "formula": "query2" } ],
+          "style": { "palette": "orange", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "bars", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query3", "query": "sum:intersystems_iris.interop.messages.discarded{$env,$host,$production} by {production}" } ],
+          "formulas": [ { "alias": "Discarded", "formula": "query3" } ],
+          "style": { "palette": "yellow", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "bars", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query4", "query": "sum:intersystems_iris.interop.messages.suspended{$env,$host,$production} by {production}" } ],
+          "formulas": [ { "alias": "Suspended", "formula": "query4" } ],
+          "style": { "palette": "grey", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 6, "y": 4, "width": 6, "height": 3 }
+  },
+  {
+    "id": 6004,
+    "definition": {
+      "title": "Queue depth by production — deepest now", "title_size": "16", "title_align": "left", "type": "toplist",
+      "requests": [
+        { "response_format": "scalar",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {production}", "aggregator": "last" } ],
+          "formulas": [ { "formula": "query1" } ] }
+      ]
+    },
+    "layout": { "x": 0, "y": 7, "width": 6, "height": 3 }
+  },
+  {
+    "id": 6005,
+    "definition": {
+      "title": "Queue depth by production — over time", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {production}" } ],
+          "formulas": [ { "alias": "Queued messages", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 6, "y": 7, "width": 6, "height": 3 }
+  },
+  {
+    "id": 6006,
+    "definition": {
+      "title": "Outbound HTTP/SOAP latency (per business host; appears only with live outbound traffic)", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.interop.http.avg_ttfc{$env,$host,$production,$interop_host} by {interop_host}" } ],
+          "formulas": [ { "alias": "Time to first char", "formula": "query1" } ],
+          "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "avg:intersystems_iris.interop.http.avg_ttlc{$env,$host,$production,$interop_host} by {interop_host}" } ],
+          "formulas": [ { "alias": "Time to last char", "formula": "query2" } ],
+          "style": { "palette": "purple", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 0, "y": 10, "width": 12, "height": 3 }
+  }
+] }, "layout": { "x": 0, "y": 27, "width": 12, "height": 15 } },
     { "id": 7000, "definition": { "title": "Logs", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 42, "width": 12, "height": 5 } }
   ]
 }
