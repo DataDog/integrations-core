@@ -79,12 +79,12 @@ class TestKubeAPIServerMetrics:
         'authenticated_user_requests.count',
     ]
 
-    def test_check(self, dd_run_check, aggregator, mock_http_response):
+    def test_check(self, dd_run_check, aggregator, mock_openmetrics_http, mock_response):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
         NAMESPACE = 'kube_apiserver'
-        mock_http_response(file_path=OM_RESPONSE_FIXTURES)
+        mock_openmetrics_http.get.return_value = mock_response(file_path=OM_RESPONSE_FIXTURES)
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         dd_run_check(check)
 
