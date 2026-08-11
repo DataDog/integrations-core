@@ -35,7 +35,7 @@ class TestQueryStats:
     def test_first_snapshot_has_nothing_to_diff(self):
         stats = self._make_stats()
         delta = stats.diff([self._make_row(101, calls=10, rows=100)])
-        assert delta.rows == []
+        assert delta.derivative_rows == []
         assert delta.changed_keys == set()
 
     def test_second_snapshot_returns_deltas_for_changed_rows(self):
@@ -43,8 +43,8 @@ class TestQueryStats:
         stats.diff([self._make_row(101, calls=10, rows=100)])
 
         delta = stats.diff([self._make_row(101, calls=15, rows=150)])
-        assert len(delta.rows) == 1
-        row = delta.rows[0]
+        assert len(delta.derivative_rows) == 1
+        row = delta.derivative_rows[0]
         assert row['calls'] == 5
         assert row['rows'] == 50
         assert row['queryid'] == 101
@@ -64,14 +64,14 @@ class TestQueryStats:
                 self._make_row(102, calls=25),
             ]
         )
-        assert len(delta.rows) == 1
-        assert delta.rows[0]['queryid'] == 102
+        assert len(delta.derivative_rows) == 1
+        assert delta.derivative_rows[0]['queryid'] == 102
 
     def test_negative_diff_discards_row(self):
         stats = self._make_stats()
         stats.diff([self._make_row(101, calls=10, rows=100)])
         delta = stats.diff([self._make_row(101, calls=5, rows=50)])
-        assert delta.rows == []
+        assert delta.derivative_rows == []
 
     def test_returning_key_is_rebaselined(self):
         """A key that leaves the snapshot loses its baseline, so its counters are not diffed
@@ -81,13 +81,13 @@ class TestQueryStats:
         stats.diff([self._make_row(101, calls=15)])
 
         delta = stats.diff([self._make_row(101, calls=16), self._make_row(102, calls=25)])
-        assert [row['queryid'] for row in delta.rows] == [101]
+        assert [row['queryid'] for row in delta.derivative_rows] == [101]
 
     def test_execution_indicator_required(self):
         stats = self._make_stats()
         stats.diff([self._make_row(101, calls=10, total_exec_time=100.0)])
         delta = stats.diff([self._make_row(101, calls=10, total_exec_time=105.0)])
-        assert delta.rows == []
+        assert delta.derivative_rows == []
 
     def test_new_key_is_not_in_changed_set(self):
         stats = self._make_stats()
@@ -105,16 +105,16 @@ class TestQueryStats:
                 self._make_row(101, calls=7, rows=55),
             ]
         )
-        assert len(delta.rows) == 1
-        assert delta.rows[0]['calls'] == 5
-        assert delta.rows[0]['rows'] == 15
+        assert len(delta.derivative_rows) == 1
+        assert delta.derivative_rows[0]['calls'] == 5
+        assert delta.derivative_rows[0]['rows'] == 15
 
     def test_reset_clears_state(self):
         stats = self._make_stats()
         stats.diff([self._make_row(101, calls=10)])
         stats.reset()
         delta = stats.diff([self._make_row(101, calls=15)])
-        assert delta.rows == []
+        assert delta.derivative_rows == []
 
     def test_collapse_does_not_mutate_input_rows(self):
         stats = self._make_stats()
@@ -132,6 +132,6 @@ class TestQueryStats:
         # Same queryid under two different dbids collapses into one series.
         stats.diff([self._make_row(101, dbid=1, calls=10), self._make_row(101, dbid=2, calls=5)])
         delta = stats.diff([self._make_row(101, dbid=1, calls=12), self._make_row(101, dbid=2, calls=8)])
-        assert len(delta.rows) == 1
-        assert delta.rows[0]['calls'] == 5
+        assert len(delta.derivative_rows) == 1
+        assert delta.derivative_rows[0]['calls'] == 5
         assert delta.changed_keys == {101}

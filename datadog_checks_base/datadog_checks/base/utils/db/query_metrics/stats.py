@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Delta[K: Hashable]:
-    rows: list[dict]
+    derivative_rows: list[dict]
     """Rows whose counters advanced since the previous snapshot, with counter columns replaced by
     their deltas."""
     changed_keys: set[K]
-    """Keys of :attr:`rows`, for resolving statement text only for what actually ran."""
+    """Keys of :attr:`derivative_rows`, for resolving statement text only for what actually ran."""
 
 
 class QueryStats[K: Hashable]:
@@ -54,7 +54,7 @@ class QueryStats[K: Hashable]:
         """Diff *snapshot* against the previous one and remember it for the next call."""
         current = self._collapse(snapshot)
 
-        rows: list[dict] = []
+        derivative_rows: list[dict] = []
         changed_keys: set[K] = set()
 
         available_counters: frozenset[str] | None = None
@@ -88,26 +88,26 @@ class QueryStats[K: Hashable]:
             if has_negative or not has_change:
                 continue
 
-            delta_row = {}
+            derivative = {}
             for col in row:
                 if col in available_counters:
-                    delta_row[col] = row[col] - prev[col]
+                    derivative[col] = row[col] - prev[col]
                 else:
-                    delta_row[col] = row[col]
-            rows.append(delta_row)
+                    derivative[col] = row[col]
+            derivative_rows.append(derivative)
             changed_keys.add(key)
 
         logger.debug(
-            "diff: snapshot=%d prev=%d rows=%d changed=%d",
+            "diff: snapshot=%d prev=%d derivative=%d changed=%d",
             len(current),
             len(self._previous),
-            len(rows),
+            len(derivative_rows),
             len(changed_keys),
         )
 
         self._remember(current)
 
-        return Delta(rows=rows, changed_keys=changed_keys)
+        return Delta(derivative_rows=derivative_rows, changed_keys=changed_keys)
 
     def _collapse(self, snapshot: list[dict]) -> dict[K, dict]:
         """Group rows by key, summing counter columns across rows that share one.
