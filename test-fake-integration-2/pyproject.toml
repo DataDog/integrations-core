@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-test-fake-integration-2"
-description = "Test fake integration 2"
+description = "Test fake integration 2 (placeholder)"
 license = "BSD-3-Clause"
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
