@@ -1,0 +1,8 @@
+cluster.foo.ratelimit.error: 0
+cluster.foo.ratelimit.failure_mode_allowed: 1
+cluster.foo.ratelimit.ok: 2
+cluster.foo.ratelimit.over_limit: 3
+cluster.foo.ratelimit.bar.error: 4
+cluster.foo.ratelimit.bar.failure_mode_allowed: 5
+cluster.foo.ratelimit.bar.ok: 6
+cluster.foo.ratelimit.bar.over_limit: 7

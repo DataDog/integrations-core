@@ -46,7 +46,7 @@ Starting from Agent 7.68.0, the LiteLLM check is included in the [Datadog Agent]
 
 ### Configuration
 
-This integration collects metrics through the Prometheus endpoint exposed by the LiteLLM Proxy. This feature is only available for enterprise users of LiteLLM. By default, the metrics are exposed on the `/metrics` endpoint. If connecting locally, the default port is 4000. For more information, see the [LiteLLM Prometheus documentation][10].
+This integration collects metrics through the Prometheus endpoint exposed by the LiteLLM Proxy. By default, the metrics are exposed on the `/metrics` endpoint. If connecting locally, the default port is 4000. For more information, see the [LiteLLM Prometheus documentation][10].
 
 Note: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `litellm.auth.failed_requests.count` metric might only be exposed after an authentication failed request has occurred.
 
