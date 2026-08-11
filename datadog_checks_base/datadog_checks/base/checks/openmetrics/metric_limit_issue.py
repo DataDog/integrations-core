@@ -68,7 +68,7 @@ class MetricLimitIssueReporter:
                     'dropped_ratio': round(ratio, 4),
                     'limit_is_default': limit == check.DEFAULT_METRIC_LIMIT,
                 },
-                remediation=_remediation(check.name, endpoint, dropped, observed_count, legacy=self.legacy),
+                remediation=_remediation(legacy=self.legacy),
                 tags=[f'integration:{check.name}', 'openmetrics', 'metric-limit'],
             )
             self.active = True
@@ -101,9 +101,7 @@ def _severity(check: AgentCheck, ratio: float) -> int:
     return check.IssueSeverity['LOW']
 
 
-def _remediation(
-    check_name: str, endpoint: str, dropped: int, observed_count: int, *, legacy: bool
-) -> dict[str, str | list[dict[str, int | str]]]:
+def _remediation(*, legacy: bool) -> dict[str, str | list[dict[str, int | str]]]:
     metric_filter_options = '`metrics` / `ignore_metrics`' if legacy else '`metrics` / `exclude_metrics`'
     return {
         'summary': (
@@ -113,41 +111,19 @@ def _remediation(
             {
                 'order': 1,
                 'text': (
-                    f'Confirm the loss is real and current: this issue reports {dropped} of {observed_count} metric '
-                    f'contexts discarded on the most recent run of {check_name} against {endpoint}.'
+                    f'Decide what you actually need. Use {metric_filter_options} on this instance to stop collecting '
+                    'series you do not query, alert on, or keep.'
                 ),
             },
             {
                 'order': 2,
                 'text': (
-                    f'Decide what you actually need. Use {metric_filter_options} on this instance to stop collecting '
-                    'series you do not query, alert on, or keep. This is the only remediation that reduces both data '
-                    'loss and cost.'
+                    'Only then raise `max_returned_metrics` on this instance to a value above the observed count. '
+                    'There is no Agent-wide override.'
                 ),
             },
             {
                 'order': 3,
-                'text': (
-                    'Reduce label cardinality where you can: `exclude_labels`, or dropping high-cardinality labels '
-                    'at the exporter, cuts context count faster than removing whole metrics.'
-                ),
-            },
-            {
-                'order': 4,
-                'text': (
-                    'If the endpoint aggregates several workloads, split it into multiple check instances so each '
-                    'one stays under its own limit.'
-                ),
-            },
-            {
-                'order': 5,
-                'text': (
-                    'Only then raise `max_returned_metrics` on this instance, to a value above the observed count '
-                    'with modest headroom. Set it per instance; there is no Agent-wide override.'
-                ),
-            },
-            {
-                'order': 6,
                 'text': (
                     'Verify: enable `debug_metrics.metric_contexts: true` on the instance to publish '
                     '`datadog.agent.metrics.contexts.total` and `.limit`, and confirm the total stays below the limit '
@@ -155,10 +131,10 @@ def _remediation(
                 ),
             },
             {
-                'order': 7,
+                'order': 4,
                 'text': (
-                    'Check the cost before you leave it: additional contexts are billable custom metrics, and they '
-                    'increase Agent memory and check duration.'
+                    'Check the cost before you leave it: additional contexts are billable custom metrics and increase '
+                    'Agent memory.'
                 ),
             },
         ],

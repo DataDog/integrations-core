@@ -92,7 +92,7 @@ def test_over_limit_run_reports_expected_issue(datadog_agent: Any) -> None:
         'limit_is_default': False,
     }
     assert issue['tags'] == ['integration:openmetrics_test', 'openmetrics', 'metric-limit']
-    assert len(issue['remediation']['steps']) == 7
+    assert len(issue['remediation']['steps']) == 4
 
 
 def test_repeated_over_limit_runs_report_same_id(datadog_agent: Any) -> None:

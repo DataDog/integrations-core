@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.openmetrics import OpenMetricsCheck
 
-ISSUE_ID = 'openmetrics-dropped-config:c0660ae3d1762e2c'
+ISSUE_ID = 'openmetrics-dropped-config:40c8930ce3bf6455'
 ENDPOINT = 'http://localhost:10249/metrics'
 
 
@@ -47,4 +47,4 @@ def test_openmetrics_base_classes_report_metric_limit_issue(
     assert issue['id'] == ISSUE_ID
     assert issue['extra']['observed_contexts'] == 20
     assert issue['extra']['dropped_contexts'] == 15
-    assert filter_option in issue['remediation']['steps'][1]['text']
+    assert filter_option in issue['remediation']['steps'][0]['text']
