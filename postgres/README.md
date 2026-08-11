@@ -78,7 +78,7 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `postgres.d/conf.yaml` file to point to your `host` / `port` and set the masters to monitor. See the [sample postgres.d/conf.yaml][3] for all available configuration options.
+1. In the [`conf.d` directory][31] on your system, edit the `postgres.d/conf.yaml` file to point to your `host` / `port` and set the masters to monitor. See the [sample postgres.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
     init_config:
@@ -184,7 +184,7 @@ PostgreSQL default logging is to `stderr`, and logs do not include detailed info
                                # can be absolute or relative to PGDATA
      log_filename = 'pg.log'   # log file name, can include pattern
      log_statement = 'all'     # log all queries
-     #log_duration = on
+     log_duration = on
      log_line_prefix= '%m [%p] %d %a %u %h %c '
      log_file_mode = 0644
      ## For Windows
@@ -524,3 +524,4 @@ Additional helpful documentation, links, and articles:
 [28]: https://docs.datadoghq.com/database_monitoring/setup_postgres/
 [29]: https://docs.datadoghq.com/database_monitoring/#postgres
 [30]: https://docs.datadoghq.com/integrations/postgres/?tab=host#faq
+[31]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/#agent-configuration-directory
