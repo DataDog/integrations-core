@@ -52,7 +52,7 @@ class PostgresDataObservability(DBMAsyncJob):
             rate_limit=1 / float(collection_interval),
             run_sync=config.data_observability.run_sync,
             enabled=config.data_observability.enabled,
-            dbms="postgres",
+            dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="data-observability",

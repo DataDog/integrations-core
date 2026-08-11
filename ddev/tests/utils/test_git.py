@@ -321,3 +321,35 @@ def test_is_worktree(
         repo.git.is_worktree(repo.path.parent / "wt2", include_root=include_root, only_subpaths=only_subpaths)
         is not only_subpaths
     )
+
+
+def test_worktrees_asks_git_once(repository, mocker):
+    repo = Repository(repository.path.name, str(repository.path))
+    capture = mocker.spy(repo.git, 'capture')
+
+    for path in repository.path.iterdir():
+        repo.git.is_worktree(path)
+
+    assert [call.args for call in capture.call_args_list] == [('worktree', 'list', '--porcelain')]
+
+
+# Both entry points must invalidate: `capture` is what ddev reads through, `run` is what
+# `ddev release port-commit` adds and removes its worktree with.
+@pytest.mark.parametrize('entry_point', ['capture', 'run'])
+def test_worktrees_are_looked_up_again_after_the_set_changes(repository, entry_point):
+    repo = Repository(repository.path.name, str(repository.path))
+    git = getattr(repo.git, entry_point)
+    added = repo.path / f'wt-{entry_point}'
+
+    assert not repo.git.is_worktree(added)
+
+    # Registering the worktree is enough, and checking out this repository exceeds the Windows
+    # path length limit
+    git('worktree', 'add', '--no-checkout', str(added), 'HEAD')
+    try:
+        assert repo.git.is_worktree(added)
+    finally:
+        # `reset_branch` cannot undo this, so the session-scoped clone would keep the worktree
+        git('worktree', 'remove', '--force', str(added))
+
+    assert not repo.git.is_worktree(added)

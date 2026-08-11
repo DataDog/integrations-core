@@ -6,9 +6,11 @@ from __future__ import annotations
 import logging
 import os
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from functools import cached_property
 from typing import TYPE_CHECKING, cast
+
+import click
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
@@ -20,7 +22,23 @@ from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, NoReturn
+    from typing import Any, NoReturn
+
+
+type ExceptionHandler[E: Exception] = Callable[[Application, E], None]
+
+
+class DdevGroup(click.Group):
+    """Root command group that renders registered exceptions through the application."""
+
+    def invoke(self, ctx: click.Context) -> Any:
+        try:
+            return super().invoke(ctx)
+        except Exception as error:
+            app = ctx.obj
+            if isinstance(app, Application) and app.handle_exception(error):
+                ctx.exit(1)
+            raise
 
 
 class AppLoggingHandler(logging.Handler):
@@ -56,6 +74,8 @@ class Application(Terminal):
 
         # TODO: remove this when the old CLI is gone
         self.__config: dict[str, Any] = {}
+
+        self.__exception_handlers: dict[type[Exception], ExceptionHandler[Exception]] = {}
 
     @property
     def config(self) -> RootConfig:
@@ -115,6 +135,22 @@ class Application(Terminal):
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)
+
+    def register_exception_handler[E: Exception](
+        self,
+        exception_type: type[E],
+        handler: ExceptionHandler[E],
+    ) -> None:
+        """Register an internal CLI handler for an exception type."""
+        self.__exception_handlers[exception_type] = cast(ExceptionHandler[Exception], handler)
+
+    def handle_exception(self, error: Exception) -> bool:
+        """Render an exception with its nearest registered type."""
+        for exception_type in type(error).mro():
+            if handler := self.__exception_handlers.get(exception_type):
+                handler(self, error)
+                return True
+        return False
 
     def annotate_error(self, file: str, message: str, line: int = 1) -> None:
         """Emit a GitHub Actions ``error`` workflow annotation; no-op outside CI."""

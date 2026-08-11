@@ -85,6 +85,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
 
     - name: sasl_kerberos_principal
       description: |
@@ -191,6 +192,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: <SSL_FILE_PATH>
 
     # ========================================================================
