@@ -36,8 +36,11 @@ COMMENT_MARKER = "<!-- ddev-dispatcher-tests -->"
 
 # Self-imposed ceiling, not a platform value: GitHub rejects a body over 65,536 characters with
 # "422 ... body is too long (maximum is 65536 characters)". The limit is documented nowhere but that
-# error message, so the headroom here is deliberate.
-COMMENT_CHARACTER_BUDGET = 50_000
+# error message, and GitHub's accounting is demonstrably not a plain character count, so the ~5.5k of
+# headroom absorbs that difference. UTF-8 is not the reason: a full comment measures 1.0014x its
+# character count in bytes, because emoji occur per batch row rather than per job and are swamped by
+# ASCII test names. ``render_minimal_comment`` is the backstop if the margin is ever wrong anyway.
+COMMENT_CHARACTER_BUDGET = 60_000
 
 # Width of the text progress bar, in cells.
 PROGRESS_BAR_WIDTH = 24

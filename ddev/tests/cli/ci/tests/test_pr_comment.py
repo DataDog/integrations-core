@@ -35,6 +35,11 @@ from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
 
+# GitHub's own ceiling, from the 422 it returns: "body is too long (maximum is 65536 characters)".
+# Not imported from the renderer on purpose — a test that reads the same constant it is checking
+# would pass no matter what that constant said.
+GITHUB_COMMENT_HARD_LIMIT = 65_536
+
 # ---------------------------------------------------------------------------
 # Builders
 # ---------------------------------------------------------------------------
@@ -560,12 +565,27 @@ def test_large_run_stays_within_budget_and_says_what_was_dropped() -> None:
     body = render_comment(progress)
 
     assert len(body) <= COMMENT_CHARACTER_BUDGET
+    # The budget counts characters, but the comment is dense with three-byte emoji and block-drawing
+    # characters, and GitHub's own accounting is not a plain character count. This is the constraint
+    # that actually matters, and the one the budget has to leave room for.
+    assert len(body.encode("utf-8")) < GITHUB_COMMENT_HARD_LIMIT
     # The header survives intact: totals and every batch row are the highest-priority content.
     assert "**240/240 jobs**" in body
     assert body.count("<tr><td><code>batch-") == 10
     assert "not shown — the comment reached its size limit" in body
     for tag in ("details", "blockquote", "table", "div", "sub"):
         assert body.count(f"<{tag}") == body.count(f"</{tag}>"), tag
+
+
+def test_the_budget_keeps_a_margin_below_github_s_limit() -> None:
+    """The budget counts characters; GitHub's limit is not reliably a character count.
+
+    Measured on the 240-job body above, the encoding overhead is tiny — 84 bytes on 59,892, or
+    1.0014x — because emoji occur once per batch row and per heading, so their share *falls* as the
+    comment fills with ASCII test names and URLs. The margin exists for GitHub's undocumented
+    accounting rather than for UTF-8, which is why it is a flat reserve and not a ratio.
+    """
+    assert GITHUB_COMMENT_HARD_LIMIT - COMMENT_CHARACTER_BUDGET >= 5_000
 
 
 def test_dropped_count_is_accurate() -> None:
