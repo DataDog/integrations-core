@@ -48,7 +48,7 @@ class MetricLimitIssueReporter:
                     f'contexts per run, but the last collection produced {observed_count}. The Agent submitted {limit} '
                     f'and discarded the remaining {dropped}.'
                 ),
-                category='configuration',
+                category='integration',
                 severity=_severity(check, ratio),
                 extra={
                     'check_name': check.name,

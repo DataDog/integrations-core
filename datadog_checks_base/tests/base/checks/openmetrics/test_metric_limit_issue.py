@@ -76,6 +76,7 @@ def test_over_limit_run_reports_expected_issue(datadog_agent: Any) -> None:
     [issue] = reported_issues(datadog_agent)
     assert issue['id'] == ISSUE_ID
     assert issue['issue_name'] == ISSUE_NAME
+    assert issue['category'] == 'integration'
     assert issue['severity'] == check.IssueSeverity['HIGH']
     assert issue['extra'] == {
         'check_name': 'openmetrics_test',
