@@ -1,0 +1,1 @@
+Fetch AIA intermediate certificates with a fresh credential-free HTTP session over http(s) endpoints only, trying TLS first then plain HTTP, and capping the response size.
