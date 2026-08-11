@@ -320,7 +320,9 @@ class FakeAsyncGitHubClient:
         )
         if isinstance(response, BaseException):
             raise response
-        if isinstance(response, list) and all(isinstance(page, GitHubResponse) for page in response):
+        # An empty list is one empty page, not zero pages: that is what the real client yields for an
+        # empty JSON array, and `all()` over `[]` would otherwise class it as a (vacuous) page list.
+        if response and isinstance(response, list) and all(isinstance(page, GitHubResponse) for page in response):
             pages = response
         else:
             pages = [response]

@@ -1043,10 +1043,9 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path) -
     bodies = [client.calls_to("create_issue_comment")[0].kwargs["body"]]
     bodies += [call.kwargs["body"] for call in client.calls_to("update_issue_comment")]
 
-    # The comment only ever moves forward: revisions increase and so does the completed count.
-    revisions = [int(re.search(r"Revision (\d+)", body).group(1)) for body in bodies]
+    # The comment only ever moves forward: each write reports at least as many finished jobs as the
+    # one before it. The revision itself is not rendered, so the counts are what proves the ordering.
     completed = [int(re.search(r"\*\*(\d+)/\d+ jobs\*\*", body).group(1)) for body in bodies]
-    assert revisions == sorted(revisions)
     assert completed == sorted(completed)
 
     assert completed[0] == 0

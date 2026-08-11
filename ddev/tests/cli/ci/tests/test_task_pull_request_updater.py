@@ -11,6 +11,7 @@ write differently depending on whether it was the final snapshot.
 from __future__ import annotations
 
 import asyncio
+import re
 
 import httpx
 import pytest
@@ -30,6 +31,7 @@ from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
+from ddev.utils.github_errors import GitHubAuthenticationError
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
 from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient
 
@@ -43,10 +45,13 @@ PR_NUMBER = 24817
 # ---------------------------------------------------------------------------
 
 
-def _progress(*, done: bool = False, complete: bool = True) -> DispatcherProgress:
+TOTAL_JOBS = 10
+
+
+def _job(index: int, *, reported: bool) -> JobProgress:
     job = BatchJob(
-        name="redis-py3.12-linux",
-        target="redis",
+        name=f"target-{index}-py3.12-linux",
+        target=f"target-{index}",
         runner="ubuntu-latest",
         environment="py3.12",
         platform=Platform.LINUX,
@@ -65,22 +70,40 @@ def _progress(*, done: bool = False, complete: bool = True) -> DispatcherProgres
                 reports=(),
             ),
         )
-        if complete
+        if reported
         else ()
     )
+    return JobProgress(job=job, attempts=attempts)
+
+
+def _progress(*, done: bool = False, complete: int = TOTAL_JOBS) -> DispatcherProgress:
+    """A snapshot where *complete* of ``TOTAL_JOBS`` jobs have reported.
+
+    The count is what makes one revision's rendered body differ from another's. The comment itself no
+    longer prints the revision — it is internal metadata — so the tests that check which snapshot was
+    written have to look at content the reader actually sees.
+    """
+    finished = complete == TOTAL_JOBS
     batch = BatchProgress(
         batch_id="batch-01",
         run_id=121,
         workflow_url="https://github.com/o/r/actions/runs/121",
-        state=ExecutionState.FINISHED if complete else ExecutionState.PLANNED,
-        status=Status.SUCCESS if complete else None,
-        current_attempt=1 if complete else None,
+        state=ExecutionState.FINISHED if finished else ExecutionState.RUNNING,
+        status=Status.SUCCESS if finished else None,
+        current_attempt=1,
         max_attempts=1,
         retries_remaining=0,
         retrying_jobs=(),
-        jobs_progress=(JobProgress(job=job, attempts=attempts),),
+        jobs_progress=tuple(_job(index, reported=index < complete) for index in range(TOTAL_JOBS)),
     )
     return DispatcherProgress(batches=(batch,), done=done)
+
+
+def _jobs_reported(body: str) -> int:
+    """The completed-job count the comment shows, as a stand-in for which snapshot was rendered."""
+    match = re.search(r"\*\*(\d+)/\d+ jobs\*\*", body)
+    assert match is not None, body
+    return int(match.group(1))
 
 
 def _failing_progress(*, done: bool = False) -> DispatcherProgress:
@@ -136,7 +159,9 @@ def _failing_progress(*, done: bool = False) -> DispatcherProgress:
 
 
 def _update(revision: int, *, done: bool = False) -> UpdatePRComment:
-    return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=_progress(done=done))
+    """Revision N reports N jobs, so a rendered body identifies the snapshot it came from."""
+    complete = TOTAL_JOBS if done else min(revision, TOTAL_JOBS)
+    return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=_progress(done=done, complete=complete))
 
 
 def _failing_update(revision: int, *, done: bool = False) -> UpdatePRComment:
@@ -212,6 +237,47 @@ def test_an_existing_marked_comment_is_reused_instead_of_creating_another() -> N
     assert client.last_call("update_issue_comment").kwargs["comment_id"] == 77
 
 
+def test_a_comment_quoting_ours_is_not_mistaken_for_it() -> None:
+    """Quoting our comment copies the marker into the quote, but that copy is someone else's.
+
+    The quote is prefixed with "> ", so anchoring the match at the start rules it out. Adopting it
+    would mean every edit is refused and the run reports nothing.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response(
+        "list_issue_comments",
+        _comment_page(IssueComment(id=31, body=f"> {COMMENT_MARKER}\n> ## Dispatcher tests\n\nlooks wrong to me")),
+    )
+
+    asyncio.run(_updater(client).process_message(_update(0)))
+
+    assert len(client.calls_to("create_issue_comment")) == 1
+    client.assert_not_called("update_issue_comment")
+
+
+@pytest.mark.parametrize("status", [403, 404])
+def test_a_comment_we_cannot_edit_is_replaced_by_one_we_own(status: int) -> None:
+    """403 means the marker pointed at someone else's comment; 404 means it is gone.
+
+    Neither improves on retry, and retrying until the budget ran out is what used to leave the run
+    reporting nothing at all.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("list_issue_comments", _comment_page(IssueComment(id=77, body=f"{COMMENT_MARKER}\nnot ours")))
+    client.mock_response("update_issue_comment", _http_error(status), once=True)
+    updater = _updater(client)
+
+    asyncio.run(updater.process_message(_update(1)))
+
+    # First it tried to edit the comment it found, then it created its own.
+    assert len(client.calls_to("update_issue_comment")) == 1
+    assert len(client.calls_to("create_issue_comment")) == 1
+
+    # And from then on it edits the comment it created, not the one it could not.
+    asyncio.run(updater.process_message(_update(2)))
+    assert client.last_call("update_issue_comment").kwargs["comment_id"] == DEFAULT_COMMENT_ID
+
+
 def test_an_unmarked_comment_is_not_mistaken_for_ours() -> None:
     client = FakeAsyncGitHubClient()
     client.mock_response("list_issue_comments", _comment_page(IssueComment(id=1, body="Dispatcher tests · passed")))
@@ -251,7 +317,8 @@ def test_a_stale_revision_is_ignored() -> None:
 
     assert len(client.calls_to("update_issue_comment")) == 0
     assert len(client.calls_to("create_issue_comment")) == 1
-    assert "Revision 2" in client.last_call("create_issue_comment").kwargs["body"]
+    # The comment still shows revision 2's snapshot; revision 1 never reached GitHub.
+    assert _jobs_reported(client.last_call("create_issue_comment").kwargs["body"]) == 2
 
 
 def test_a_duplicate_of_the_current_revision_is_ignored() -> None:
@@ -283,7 +350,7 @@ def test_out_of_order_delivery_leaves_the_newest_revision_in_place() -> None:
     asyncio.run(updater.process_message(_update(2)))
     asyncio.run(updater.process_message(_update(1)))
 
-    assert "Revision 3" in client.last_call("update_issue_comment").kwargs["body"]
+    assert _jobs_reported(client.last_call("update_issue_comment").kwargs["body"]) == 3
     assert len(client.calls_to("update_issue_comment")) == 1
 
 
@@ -303,9 +370,9 @@ def test_concurrent_revisions_are_serialized() -> None:
 
     bodies = [client.last_call("create_issue_comment").kwargs["body"]]
     bodies += [call.kwargs["body"] for call in client.calls_to("update_issue_comment")]
-    revisions = [int(body.split("Revision ")[1].split("\n")[0]) for body in bodies]
-    assert revisions == sorted(revisions)
-    assert revisions[-1] == 3
+    reported = [_jobs_reported(body) for body in bodies]
+    assert reported == sorted(reported)
+    assert reported[-1] == 3
 
 
 # ---------------------------------------------------------------------------
@@ -323,7 +390,7 @@ def test_no_pr_number_renders_to_the_log_and_calls_no_api(caplog: pytest.LogCapt
     client.assert_not_called("create_issue_comment")
     client.assert_not_called("update_issue_comment")
     client.assert_not_called("list_issue_comments")
-    assert "Dispatcher tests complete: 1/1 jobs" in caplog.text
+    assert f"Dispatcher tests complete: {TOTAL_JOBS}/{TOTAL_JOBS} jobs" in caplog.text
 
 
 def test_no_pr_number_does_not_fail_the_run_on_the_final_snapshot() -> None:
@@ -381,6 +448,27 @@ def test_exhausted_attempts_on_an_intermediate_revision_do_not_raise() -> None:
     # The revision did not advance, so the next snapshot still gets written.
     asyncio.run(updater.process_message(_update(2)))
     assert len(client.calls_to("create_issue_comment")) == 4
+
+
+@pytest.mark.parametrize("done", [False, True])
+def test_an_authentication_error_propagates_immediately(done: bool) -> None:
+    """A rejected token does not improve on retry, and its message is the fix instruction.
+
+    Retrying it wasted three calls and then replaced it with a generic write failure, which told the
+    operator nothing about the token.
+    """
+    client = FakeAsyncGitHubClient()
+    error = GitHubAuthenticationError(
+        "GitHub rejected the credentials",
+        request=httpx.Request("POST", "https://api.github.com/"),
+        response=httpx.Response(401),
+    )
+    client.mock_response("create_issue_comment", error)
+
+    with pytest.raises(GitHubAuthenticationError, match="rejected the credentials"):
+        asyncio.run(_updater(client).process_message(_update(1, done=done)))
+
+    assert len(client.calls_to("create_issue_comment")) == 1
 
 
 def test_exhausted_attempts_on_the_final_revision_fail_the_run() -> None:

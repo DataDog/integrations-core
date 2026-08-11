@@ -154,7 +154,7 @@ def test_initial_snapshot_reads_as_starting() -> None:
         done=False,
     )
 
-    body = render_comment(progress, revision=0)
+    body = render_comment(progress)
 
     assert body.startswith(COMMENT_MARKER)
     assert "in progress" in body
@@ -167,7 +167,11 @@ def test_initial_snapshot_reads_as_starting() -> None:
     assert "Retried jobs" not in body
 
 
-def test_retrying_snapshot_shows_attempt_and_partial_progress() -> None:
+def test_a_retrying_batch_reads_as_plain_in_progress() -> None:
+    """A rerun is Dispatcher's business, not the reader's: the batch is simply not finished yet.
+
+    The retry is still reported where it is actionable — against the job that was retried.
+    """
     progress = DispatcherProgress(
         batches=(
             batch("batch-01", job(attempt()), job(attempt())),
@@ -185,11 +189,32 @@ def test_retrying_snapshot_shows_attempt_and_partial_progress() -> None:
         done=False,
     )
 
-    body = render_comment(progress, revision=2)
+    body = render_comment(progress)
 
-    assert "🔁 retrying · attempt 2 of 3" in body
+    assert "🔄 in progress" in body
+    # Neither the retry nor the attempt number surfaces at the batch level.
+    assert "retrying" not in body
+    assert "attempt" not in body
+    # But the job that was retried still says so.
     assert "🔁 Retried jobs" in body
     assert "postgres / py3.12 / linux</code> — ✅ passed after 1 retry" in body
+
+
+def test_a_running_batch_and_a_retrying_batch_are_indistinguishable() -> None:
+    """Both are just unfinished work, so they must not render differently."""
+    states = [ExecutionState.RUNNING, ExecutionState.RETRYING]
+    chips = [
+        render_comment(
+            DispatcherProgress(
+                batches=(batch("batch-01", job(), state=state, status=None, current_attempt=2, max_attempts=3),),
+                done=False,
+            )
+        )
+        for state in states
+    ]
+
+    assert chips[0] == chips[1]
+    assert "🔄 in progress" in chips[0]
 
 
 def test_final_snapshot_reads_as_complete_with_failures() -> None:
@@ -206,14 +231,14 @@ def test_final_snapshot_reads_as_complete_with_failures() -> None:
         done=True,
     )
 
-    body = render_comment(progress, revision=3)
+    body = render_comment(progress)
 
     assert "## ❌ Dispatcher tests · failed" in body
     assert "> [!CAUTION]" in body
     assert "**2/2 jobs**" in body
     assert "✅ 1 passed · ❌ 1 failed" in body
     assert "2 failed tests" in body
-    assert "`tests.test_check::test_connection`" in body
+    assert "<code>tests.test_check::test_connection</code>" in body
     assert "Final result" in body
     # Pending is only shown when something is actually outstanding.
     assert "pending" not in body
@@ -222,7 +247,7 @@ def test_final_snapshot_reads_as_complete_with_failures() -> None:
 def test_all_passing_final_snapshot_has_no_alert() -> None:
     progress = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "## ✅ Dispatcher tests · passed" in body
     assert "[!NOTE]" not in body
@@ -248,7 +273,7 @@ def test_progress_signals_agree_with_each_other(done: bool) -> None:
         done=done,
     )
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert ("in progress" in body) is not done
     assert ("[!NOTE]" in body) is not done
@@ -279,7 +304,7 @@ def test_a_retrying_run_with_every_job_reported_still_reads_as_unfinished() -> N
         done=False,
     )
 
-    body = render_comment(progress, revision=2)
+    body = render_comment(progress)
 
     assert "**2/2 jobs**" in body
     assert "1 of 2 batches has not finished yet" in body
@@ -292,14 +317,14 @@ def test_a_retrying_run_with_every_job_reported_still_reads_as_unfinished() -> N
 
 def test_the_bar_only_fills_completely_when_the_run_is_done() -> None:
     finished = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
-    assert "░" not in _progress_bar_of(render_comment(finished, revision=1))
+    assert "░" not in _progress_bar_of(render_comment(finished))
 
 
 def test_unfinished_run_never_claims_completion() -> None:
     """Even with every reported job passing, an unfinished run must not read as passed."""
     progress = DispatcherProgress(batches=(batch("batch-01", job(attempt()), job()),), done=False)
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "Dispatcher tests · passed" not in body
     assert "## 🔄 Dispatcher tests · in progress" in body
@@ -322,7 +347,7 @@ def test_batch_status_is_the_workflow_not_a_roll_up_of_its_jobs() -> None:
         done=True,
     )
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "❌ failed" in body
     assert "✅ passed" not in body.split("### Batches")[1].split("</table>")[0]
@@ -338,7 +363,7 @@ def test_a_finished_batch_with_no_status_says_so_rather_than_guessing() -> None:
         done=True,
     )
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "❔ no status reported" in body
     assert "✅ passed" not in body.split("### Batches")[1].split("</table>")[0]
@@ -346,10 +371,10 @@ def test_a_finished_batch_with_no_status_says_so_rather_than_guessing() -> None:
 
 def test_skipped_is_shown_only_when_non_zero() -> None:
     passing = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
-    assert "skipped" not in render_comment(passing, revision=1)
+    assert "skipped" not in render_comment(passing)
 
     with_skips = DispatcherProgress(batches=(batch("batch-01", job(attempt(Status.SKIPPED))),), done=True)
-    assert "⏭️ 1 skipped" in render_comment(with_skips, revision=1)
+    assert "⏭️ 1 skipped" in render_comment(with_skips)
 
 
 def test_only_the_latest_attempt_counts_toward_totals() -> None:
@@ -359,7 +384,7 @@ def test_only_the_latest_attempt_counts_toward_totals() -> None:
         done=True,
     )
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "**1/1 jobs**" in body
     assert "✅ 1 passed · ❌ 0 failed" in body
@@ -371,10 +396,10 @@ def test_failed_steps_are_listed_when_no_test_failed() -> None:
     failed = job(attempt(Status.FAILURE, failed_steps=("Install deps",)))
     progress = DispatcherProgress(batches=(batch("batch-01", failed, status=Status.FAILURE),), done=True)
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "1 failed step" in body
-    assert "`Install deps`" in body
+    assert "<code>Install deps</code>" in body
 
 
 def test_failed_job_with_no_detail_says_so() -> None:
@@ -383,7 +408,7 @@ def test_failed_job_with_no_detail_says_so() -> None:
         done=True,
     )
 
-    assert "No test-level failure was reported" in render_comment(progress, revision=1)
+    assert "No test-level failure was reported" in render_comment(progress)
 
 
 @pytest.mark.parametrize(
@@ -400,7 +425,7 @@ def test_batch_errors_render_as_unavailable_never_as_success(error: ProgressErro
         done=True,
     )
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "⚠️ Unavailable results" in body
     assert expected in body
@@ -411,7 +436,7 @@ def test_job_level_error_is_reported_against_the_job() -> None:
     unavailable = job(attempt(Status.FAILURE, error=ProgressError.NO_ARTIFACTS))
     progress = DispatcherProgress(batches=(batch("batch-01", unavailable, status=Status.FAILURE),), done=True)
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "redis / py3.12 / linux</code> — no artifacts" in body
 
@@ -439,11 +464,55 @@ def test_test_names_and_steps_are_escaped() -> None:
         done=True,
     )
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     assert "test_foo&lt;bar&gt; &amp; &quot;baz&quot;&lt;/details&gt;" in body
     # The raw closing tag must not appear inside the rendered test name.
     assert body.count("</details>") == 1
+
+
+def test_a_backtick_in_a_test_name_cannot_break_out() -> None:
+    """``html.escape`` leaves backticks alone, so names must not sit in Markdown code spans.
+
+    pytest puts parametrised values straight into the test id, so a backtick is reachable input; in a
+    code span it would close the span early and let the rest of the name render as markup.
+    """
+    name = "test_eval[`ls` && <b>x</b>]"
+    progress = DispatcherProgress(
+        batches=(
+            batch(
+                "batch-01",
+                job(attempt(Status.FAILURE, reports=(failing_report(name),))),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    assert "test_eval[`ls` &amp;&amp; &lt;b&gt;x&lt;/b&gt;]</code>" in body
+    # The name is inside an HTML element, so its backticks are inert rather than span delimiters.
+    assert "- `" not in body
+
+
+def test_failed_steps_are_escaped_too() -> None:
+    """Step names come from the workflow file and get the same treatment as test names."""
+    progress = DispatcherProgress(
+        batches=(
+            batch(
+                "batch-01",
+                job(attempt(Status.FAILURE, failed_steps=("Run `pytest` <hack>",))),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    assert "Run `pytest` &lt;hack&gt;</code>" in body
+    assert "- `" not in body
 
 
 def test_html_tags_are_balanced() -> None:
@@ -461,7 +530,7 @@ def test_html_tags_are_balanced() -> None:
         done=True,
     )
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     for tag in ("details", "blockquote", "table", "tbody", "thead", "div", "sub", "code"):
         assert body.count(f"<{tag}") == body.count(f"</{tag}>"), tag
@@ -488,7 +557,7 @@ def test_large_run_stays_within_budget_and_says_what_was_dropped() -> None:
     )
     progress = DispatcherProgress(batches=batches, done=True)
 
-    body = render_comment(progress, revision=9)
+    body = render_comment(progress)
 
     assert len(body) <= COMMENT_CHARACTER_BUDGET
     # The header survives intact: totals and every batch row are the highest-priority content.
@@ -507,7 +576,7 @@ def test_dropped_count_is_accurate() -> None:
     ]
     progress = DispatcherProgress(batches=(batch("batch-01", *jobs, status=Status.FAILURE),), done=True)
 
-    body = render_comment(progress, revision=1)
+    body = render_comment(progress)
 
     shown = body.count("<details open>")
     match = re.search(r"_(\d+) more failed jobs? not shown", body)
@@ -516,7 +585,7 @@ def test_dropped_count_is_accurate() -> None:
 
 
 def test_empty_snapshot_does_not_crash() -> None:
-    body = render_comment(DispatcherProgress(batches=(), done=True), revision=0)
+    body = render_comment(DispatcherProgress(batches=(), done=True))
 
     assert COMMENT_MARKER in body
     assert "**0/0 jobs**" in body
@@ -535,14 +604,21 @@ def test_minimal_comment_keeps_the_header_and_drops_the_detail() -> None:
         done=True,
     )
 
-    body = render_minimal_comment(progress, revision=4)
+    body = render_minimal_comment(progress)
 
     assert COMMENT_MARKER in body
     assert "**1/1 jobs**" in body
     assert "<table>" in body
-    assert "Revision 4" in body
     assert "Failures" not in body
     assert "test_a" not in body
+
+
+def test_no_internal_metadata_leaks_into_the_comment() -> None:
+    """The reader gets state, not plumbing: the message revision is never rendered."""
+    progress = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
+
+    for body in (render_comment(progress), render_minimal_comment(progress)):
+        assert "evision" not in body
 
 
 def test_summary_line_reports_state_and_counts() -> None:

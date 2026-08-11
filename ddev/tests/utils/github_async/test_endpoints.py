@@ -237,6 +237,7 @@ async def test_list_issue_comments_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert request.url.path == "/repos/owner/repo/issues/7/comments"
+        assert request.url.params["per_page"] == "100"
         # The response body is a bare array, not an object with a wrapper key.
         return json_response([issue_comment_payload(id=1), issue_comment_payload(id=2, body="second")])
 
@@ -266,16 +267,6 @@ async def test_list_issue_comments_follows_link_header() -> None:
     pages = [page async for page in client.list_issue_comments("owner", "repo", 7)]
 
     assert [comment.id for page in pages for comment in page.data] == [1, 2]
-
-
-async def test_list_issue_comments_per_page_forwarded() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        assert request.url.params["per_page"] == "100"
-        return json_response([])
-
-    client = make_client(httpx.MockTransport(handler))
-    async for _ in client.list_issue_comments("owner", "repo", 7):
-        pass
 
 
 async def test_create_pr_review_comment_success_with_position() -> None:

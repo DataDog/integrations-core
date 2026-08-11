@@ -65,15 +65,15 @@ STATUS_CHIP = {
 }
 
 
-def render_comment(progress: DispatcherProgress, *, revision: int) -> str:
+def render_comment(progress: DispatcherProgress) -> str:
     """Render the full comment body for *progress*, trimmed to ``COMMENT_CHARACTER_BUDGET``.
 
-    *revision* is not part of the snapshot by design — it is ordering metadata owned by
-    ``UpdatePRComment`` — and appears only in the footer, so a comment that looks stale can be
-    correlated with the run's logs.
+    The snapshot is the whole input. The message's ``revision`` is deliberately not rendered: it is
+    internal ordering metadata, meaningless to the person reading the pull request, and the gatherer
+    already logs it for diagnosis.
     """
     header = _header(progress)
-    footer = _footer(progress, revision)
+    footer = _footer(progress)
 
     # The header and footer always survive; the detail sections compete for what is left. Two
     # newlines join every block, so each section costs its own length plus that separator.
@@ -89,13 +89,13 @@ def render_comment(progress: DispatcherProgress, *, revision: int) -> str:
     return "\n\n".join([header, *sections, footer])
 
 
-def render_minimal_comment(progress: DispatcherProgress, *, revision: int) -> str:
+def render_minimal_comment(progress: DispatcherProgress) -> str:
     """Render only the header and footer: the fallback when GitHub rejects a body as too long.
 
     Character budgeting is not a proof — GitHub's own accounting is not a plain character count — so
     a terse comment that posts beats a rich one that does not.
     """
-    return "\n\n".join([_header(progress), _footer(progress, revision)])
+    return "\n\n".join([_header(progress), _footer(progress)])
 
 
 def summary_line(progress: DispatcherProgress) -> str:
@@ -224,17 +224,12 @@ def _batch_chip(batch: BatchProgress) -> str:
     if batch.state is ExecutionState.FINISHED:
         chip = STATUS_CHIP.get(batch.status) if batch.status is not None else None
         return chip if chip is not None else "❔ no status reported"
-    if batch.state is ExecutionState.RETRYING:
-        return f"🔁 retrying{_attempt_suffix(batch)}"
-    if batch.state is ExecutionState.RUNNING:
-        return f"🔄 running{_attempt_suffix(batch)}"
+    # Retrying is not called out at the batch level: a rerun is Dispatcher's own business, and from
+    # the reader's side the batch is simply not finished yet. Which jobs were retried, and how often,
+    # is reported per job where it is actionable.
+    if batch.state in (ExecutionState.RUNNING, ExecutionState.RETRYING):
+        return "🔄 in progress"
     return "⏳ queued"
-
-
-def _attempt_suffix(batch: BatchProgress) -> str:
-    if batch.current_attempt is None:
-        return ""
-    return f" · attempt {batch.current_attempt} of {batch.max_attempts}"
 
 
 # ---------------------------------------------------------------------------
@@ -290,12 +285,15 @@ def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress) -> str:
     link = f' &nbsp; <a href="{html.escape(attempt.job_url, quote=True)}">view job</a>' if attempt.job_url else ""
     entry = f"<code> {html.escape(_job_label(job))} </code>{link}"
 
+    # ``<code>`` rather than a Markdown code span: ``html.escape`` does not escape backticks, and a
+    # test id may contain one (pytest puts parametrised values straight into the name). A backtick
+    # inside a span would close it early and let the rest of the name render as markup.
     failed_tests = attempt.failed_tests
     if failed_tests:
-        items = "\n".join(f"- `{html.escape(f'{case.classname}::{case.name}')}`" for case in failed_tests)
+        items = "\n".join(f"- <code>{html.escape(f'{case.classname}::{case.name}')}</code>" for case in failed_tests)
         summary = f"{len(failed_tests)} failed test{'s' if len(failed_tests) > 1 else ''}"
     elif attempt.failed_steps:
-        items = "\n".join(f"- `{html.escape(step)}`" for step in attempt.failed_steps)
+        items = "\n".join(f"- <code>{html.escape(step)}</code>" for step in attempt.failed_steps)
         summary = f"{len(attempt.failed_steps)} failed step{'s' if len(attempt.failed_steps) > 1 else ''}"
     else:
         return f"{entry}\n<sub>No test-level failure was reported for this job.</sub>"
@@ -346,9 +344,9 @@ def _list_section(heading: str, entries: list[str], budget: int, noun: str) -> s
 # ---------------------------------------------------------------------------
 
 
-def _footer(progress: DispatcherProgress, revision: int) -> str:
+def _footer(progress: DispatcherProgress) -> str:
     note = "✅ Final result — Dispatcher has finished." if progress.done else f"⏳ {FOOTER_RUNNING_NOTE}"
-    return f"<sub>\n{note}<br />\nRevision {revision}\n</sub>"
+    return f"<sub>\n{note}\n</sub>"
 
 
 def _jobs(progress: DispatcherProgress) -> Iterator[JobProgress]:

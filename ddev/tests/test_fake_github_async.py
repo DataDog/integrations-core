@@ -248,6 +248,20 @@ async def test_list_issue_comments_defaults_to_no_comments(fake: FakeAsyncGitHub
     assert [comment for page in pages for comment in page.data] == []
 
 
+async def test_list_issue_comments_treats_an_empty_list_as_one_empty_page(fake: FakeAsyncGitHubClient) -> None:
+    """The real client yields one page for an empty JSON array, so the fake must too.
+
+    `all()` over an empty list is vacuously true, which would otherwise class `[]` as a list of zero
+    pages and make the fake yield nothing at all.
+    """
+    fake.mock_response('list_issue_comments', [])
+
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+
+    assert len(pages) == 1
+    assert pages[0].data == []
+
+
 async def test_list_issue_comments_treats_a_bare_list_as_one_page(fake: FakeAsyncGitHubClient) -> None:
     """A page of comments is itself a list, so the usual "a list means pages" rule cannot apply."""
     fake.mock_response('list_issue_comments', [IssueComment(id=1, body='a'), IssueComment(id=2, body='b')])

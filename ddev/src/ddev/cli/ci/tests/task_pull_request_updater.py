@@ -13,6 +13,7 @@ import httpx
 from ddev.cli.ci.tests.pr_comment import COMMENT_MARKER, render_comment, render_minimal_comment, summary_line
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import AsyncProcessor
+from ddev.utils.github_errors import GitHubAuthenticationError
 
 if TYPE_CHECKING:
     from ddev.cli.ci.tests.messages import UpdatePRComment
@@ -21,6 +22,10 @@ if TYPE_CHECKING:
 # GitHub rejects an over-long comment body with this status. It is not transient: resending the same
 # body fails identically, so the only useful response is to send a smaller one.
 BODY_TOO_LONG_STATUS = 422
+
+# Editing the tracked comment can fail because it is not ours to edit (403) or no longer exists
+# (404). Neither improves on retry, but both are recoverable by writing a comment we do own.
+UNUSABLE_COMMENT_STATUSES = (403, 404)
 
 
 @dataclass(frozen=True)
@@ -44,8 +49,16 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     no retries, and calls no GitHub API beyond the single comment it owns. It renders the newest
     snapshot and ignores stale revisions, so the comment can never regress.
 
-    The comment is found or created once, by ``COMMENT_MARKER``, so a re-run of Dispatcher on the
-    same pull request edits the existing comment instead of adding another.
+    The comment is found or created once, by ``COMMENT_MARKER``, so a later Dispatcher run on the
+    same pull request edits the existing comment instead of adding another. The marker identifies the
+    comment but does not prove we own it — anyone can paste it, and quoting our comment copies it —
+    so an edit that GitHub refuses is treated as "not our comment" and recovered from, rather than
+    trusted and retried.
+
+    Ordering is guaranteed within one Dispatcher execution, which the design assumes is the only one
+    running: "One active Dispatcher execution per PR is a hard precondition enforced by workflow
+    concurrency." Two concurrent executions would each keep their own revision counter and could
+    still fight over the comment; coordinating them is deliberately out of scope.
 
     This is a terminal consumer: it emits no further messages.
     """
@@ -55,6 +68,9 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         self._client = client
         self._options = options
         self._comment_id: int | None = None
+        # Comments GitHub refused to let us edit. Forgetting the id alone is not enough: the marker
+        # lookup would find the same comment again on the next attempt and retry the same refusal.
+        self._unusable_comment_ids: set[int] = set()
         # Revisions start at 0 (the initial plan), so nothing can have been rendered yet.
         self._latest_revision = -1
         self._lock = asyncio.Lock()
@@ -62,7 +78,7 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
 
     async def process_message(self, message: UpdatePRComment) -> None:
         # Rendering is pure, so it happens outside the lock.
-        body = render_comment(message.progress, revision=message.revision)
+        body = render_comment(message.progress)
         log_extra = {"revision": message.revision, "done": message.progress.done}
 
         pr_number = self._options.pr_number
@@ -92,10 +108,18 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         for attempt in range(1, self._options.max_write_attempts + 1):
             try:
                 await self._submit(pr_number, body)
+            except GitHubAuthenticationError:
+                # A rejected token does not improve on retry, and the client's message is the only
+                # thing that says what to fix. Swallowing it would report a write problem instead.
+                self._logger.error("PR comment write refused by GitHub authentication", extra=log_extra)
+                raise
             except httpx.HTTPError as error:
                 if _is_body_too_long(error):
                     # Not transient: the same body would be rejected again.
                     return await self._write_minimal(pr_number, message, log_extra)
+                if self._forget_unusable_comment(error, log_extra):
+                    # The next attempt creates a comment we own, rather than re-editing one we do not.
+                    continue
                 self._logger.warning(
                     "PR comment write failed (attempt %s of %s): %s",
                     attempt,
@@ -118,7 +142,9 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         """Retry once with a header-and-footer-only body after GitHub rejected the full one."""
         self._logger.warning("PR comment body rejected as too long; retrying without detail", extra=log_extra)
         try:
-            await self._submit(pr_number, render_minimal_comment(message.progress, revision=message.revision))
+            await self._submit(pr_number, render_minimal_comment(message.progress))
+        except GitHubAuthenticationError:
+            raise
         except httpx.HTTPError as error:
             self._logger.error("Minimal PR comment write also failed: %s", error, extra=log_extra)
             if message.progress.done:
@@ -143,11 +169,36 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
 
         async for page in self._client.list_issue_comments(self._options.owner, self._options.repo, pr_number):
             for comment in page.data:
-                # Only Dispatcher writes the marker, so matching it is enough to prove authorship.
-                if COMMENT_MARKER in comment.body:
+                # Only at the start: quoting our comment copies the marker into the quote, and that
+                # copy belongs to whoever wrote the reply. A quote is prefixed with "> ", so anchoring
+                # here rules it out. It still does not prove ownership — see the 403 recovery.
+                if comment.body.startswith(COMMENT_MARKER) and comment.id not in self._unusable_comment_ids:
                     self._comment_id = comment.id
                     return comment.id
         return None
+
+    def _forget_unusable_comment(self, error: httpx.HTTPError, log_extra: dict[str, object]) -> bool:
+        """Drop the tracked comment when GitHub says we may not edit it, or it is gone.
+
+        Returns whether anything was forgotten, meaning the next attempt should create instead. The
+        marker only identifies a comment; a reviewer can paste it, so the comment it points at may
+        belong to someone else. Without this the updater would retry that edit until it gave up, and
+        the run would report nothing at all.
+        """
+        if self._comment_id is None or not isinstance(error, httpx.HTTPStatusError):
+            return False
+        if error.response.status_code not in UNUSABLE_COMMENT_STATUSES:
+            return False
+
+        self._logger.warning(
+            "Cannot edit comment %s (%s); creating a new one",
+            self._comment_id,
+            error.response.status_code,
+            extra=log_extra,
+        )
+        self._unusable_comment_ids.add(self._comment_id)
+        self._comment_id = None
+        return True
 
 
 def _is_body_too_long(error: httpx.HTTPError) -> bool:

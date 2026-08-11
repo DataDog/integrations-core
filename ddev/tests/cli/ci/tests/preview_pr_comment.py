@@ -4,9 +4,14 @@
 """Renders the three comment scenarios to files, for eyeballing the real thing on GitHub.
 
 Unit tests cannot tell you that a ``<details>`` sits wrong inside a ``<blockquote>`` or that the
-progress bar wraps on a narrow screen, so the layout has to be looked at at least once per change:
+progress bar wraps on a narrow screen, so the layout has to be looked at at least once per change.
 
-    python ddev/tests/cli/ci/tests/preview_pr_comment.py /tmp/dispatcher-preview
+Run it as a module from the ``ddev`` directory — it imports the scenario builders from the renderer's
+test module, which only resolves with the ``ddev`` root on ``sys.path``. Running the file by path
+puts its own directory there instead, and the import fails::
+
+    cd ddev
+    hatch run python -m tests.cli.ci.tests.preview_pr_comment /tmp/dispatcher-preview
     gh pr comment <SCRATCH_PR> --body-file /tmp/dispatcher-preview/02-retrying.md
 
 Not a test: it is named ``preview_`` so pytest does not collect it.
@@ -88,13 +93,9 @@ def final() -> DispatcherProgress:
 
 def main(destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
-    for name, progress, revision in (
-        ("01-initial", initial(), 0),
-        ("02-retrying", retrying(), 2),
-        ("03-final", final(), 3),
-    ):
+    for name, progress in (("01-initial", initial()), ("02-retrying", retrying()), ("03-final", final())):
         path = destination / f"{name}.md"
-        path.write_text(render_comment(progress, revision=revision), encoding="utf-8")
+        path.write_text(render_comment(progress), encoding="utf-8")
         print(f"{path} ({path.stat().st_size} bytes)")
 
 
