@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from datadog_checks.base.checks import AgentCheck
 
-REPORT_FLOOR = 10
 SEVERITY_HIGH_RATIO = 0.25
 SEVERITY_MEDIUM_RATIO = 0.05
 
@@ -39,9 +38,6 @@ class MetricLimitIssueReporter:
 
         if reached_limit:
             dropped = max(0, observed_count - limit)
-            if dropped < REPORT_FLOOR:
-                return
-
             ratio = dropped / observed_count
             check.report_issue(
                 id=issue_id,

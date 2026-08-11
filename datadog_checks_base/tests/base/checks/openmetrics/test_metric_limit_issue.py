@@ -100,13 +100,15 @@ def test_repeated_over_limit_runs_report_same_id(datadog_agent: Any) -> None:
     assert [issue['id'] for issue in reported_issues(datadog_agent)] == [ISSUE_ID, ISSUE_ID]
 
 
-def test_dropped_below_report_floor_does_not_report(datadog_agent: Any) -> None:
-    check = create_check()
-    check.observed = 14
+def test_one_dropped_metric_reports_low_severity(datadog_agent: Any) -> None:
+    check = create_check(limit=100)
+    check.observed = 101
 
     check.run()
 
-    assert reported_issues(datadog_agent) == []
+    [issue] = reported_issues(datadog_agent)
+    assert issue['severity'] == check.IssueSeverity['LOW']
+    assert issue['extra']['dropped_contexts'] == 1
 
 
 @pytest.mark.parametrize(
