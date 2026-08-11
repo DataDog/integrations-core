@@ -184,12 +184,14 @@ class KafkaClient:
                 continue
             results.append((tp.topic, tp.partition, partition_offset))
         if negative:
-            # A Kafka offset is never negative, so the client library mangled this one: it narrows
+            # A Kafka offset is never negative, so the client library mangled these: it narrows
             # ListOffsets results through a C long, which is 32 bits wide on Windows x64.
             # https://github.com/confluentinc/confluent-kafka-python/issues/1696
             self.log.warning(
-                "Discarding %s negative offset(s), so broker offset and lag will be missing for those partitions: %s",
+                "Discarding %d/%d negative offset(s): broker_offset and consumer_lag will be "
+                "missing for those partitions (up to 5 shown): %s",
                 len(negative),
+                len(request),
                 negative[:5],
             )
         return results

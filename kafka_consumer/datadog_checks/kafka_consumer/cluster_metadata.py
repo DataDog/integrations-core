@@ -488,6 +488,7 @@ class ClusterMetadataCollector:
 
         result = {}
         errors = 0
+        negative = []
         try:
             futures = self.client.kafka_client.list_offsets(
                 requests,
@@ -507,17 +508,8 @@ class ClusterMetadataCollector:
                             e,
                         )
                     continue
-                # A Kafka offset is never negative, so the client library mangled this one.
-                # https://github.com/confluentinc/confluent-kafka-python/issues/1696
                 if offset < 0:
-                    errors += 1
-                    if errors <= 3:
-                        self.log.debug(
-                            "Discarding negative earliest offset %s for %s:%s",
-                            offset,
-                            tp.topic,
-                            tp.partition,
-                        )
+                    negative.append((tp.topic, tp.partition, offset))
                     continue
                 result[(tp.topic, tp.partition)] = offset
         except Exception as e:
@@ -533,6 +525,18 @@ class ClusterMetadataCollector:
                 "earliest-dependent metrics will be skipped for those partitions",
                 errors,
                 len(requests),
+            )
+        if negative:
+            # A Kafka offset is never negative, so the client library mangled these: it narrows
+            # ListOffsets results through a C long, which is 32 bits wide on Windows x64.
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1696
+            self.log.warning(
+                "Discarding %d/%d negative earliest offset(s): partition.beginning_offset and "
+                "partition.size will be missing for those partitions, and topic.size for their "
+                "entire topic (up to 5 shown): %s",
+                len(negative),
+                len(requests),
+                negative[:5],
             )
         return result
 
