@@ -117,10 +117,7 @@ def _remediation(*, legacy: bool) -> dict[str, str | list[dict[str, int | str]]]
             },
             {
                 'order': 2,
-                'text': (
-                    'Only then raise `max_returned_metrics` on this instance to a value above the observed count. '
-                    'There is no Agent-wide override.'
-                ),
+                'text': 'Only then raise `max_returned_metrics` on this instance to a value above the observed count.',
             },
             {
                 'order': 3,
