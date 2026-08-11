@@ -111,6 +111,39 @@ class TestObfuscationLookup:
         hits, _ = lk.lookup({(2, 1, 1)})
         assert (2, 1, 1) in hits
 
+    def test_retain_reclaims_orphaned_results(self):
+        """Dropping the key mapping alone would leave the obfuscated text it named behind."""
+        lk = self._make_lookup()
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        lk.retain({(2, 1, 1)})
+        assert lk.key_map_size == 1
+        assert lk.signature_map_size == 1
+
+    def test_retain_reclaims_results_orphaned_by_lru_trimming(self):
+        """A key also leaves by trimming, so the result sweep cannot be conditional on retain."""
+        lk = self._make_lookup(maxsize=2)
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        # Two keys now share 'SELECT 2', so adding the third trims (1, 1, 1) off the key map
+        # without pushing the result map past maxsize.
+        lk.populate({(3, 1, 1): 'SELECT 2'})
+        assert lk.key_map_size == 2
+        assert lk.signature_map_size == 2
+
+        assert lk.retain({(2, 1, 1), (3, 1, 1)}) == 0
+        assert lk.signature_map_size == 1
+
+    def test_retained_result_is_not_displaced_by_an_orphan(self):
+        """An orphan left in the result map would evict a live statement once the map fills."""
+        lk = self._make_lookup(maxsize=2)
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        # Make the soon-to-be orphan the most recently used of the two.
+        lk.lookup({(1, 1, 1)})
+        lk.retain({(2, 1, 1)})
+        lk.populate({(3, 1, 1): 'SELECT 3'})
+
+        hits, _ = lk.lookup({(2, 1, 1)})
+        assert (2, 1, 1) in hits
+
     def test_lookup_updates_lru_order(self):
         lk = self._make_lookup(maxsize=2)
         lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2'})

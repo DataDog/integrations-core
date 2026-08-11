@@ -38,8 +38,8 @@ class ObfuscationLookup[K: Hashable]:
     The cache does not decide what is non-cacheable; :meth:`mark_ignored` is driven by
     :func:`~.resolver.resolve_obfuscations`, which owns that policy. The cache owns only storage
     and lifecycle. All three tiers are LRU-bounded by ``maxsize``, and :meth:`retain` drops the
-    keys that have left the source table so entries do not sit at that bound long after the
-    statements they describe.
+    keys that have left the source table, along with any result no live key still names, so entries
+    do not sit at that bound long after the statements they describe.
     """
 
     def __init__(self, maxsize: int, obfuscate_options: str, log_unobfuscated_queries: bool = False):
@@ -195,17 +195,33 @@ class ObfuscationLookup[K: Hashable]:
         This reclaims memory rather than protecting correctness. Because a key determines its
         text, an entry that outlives its key is unreachable rather than wrong. It does need to run
         on every collection, including quiet ones, or the cache sits at ``maxsize`` indefinitely.
+
+        Both tiers are pruned, and a result goes once no live key names it. The results are what
+        hold the obfuscated text, so pruning the key mappings alone would reclaim nothing worth
+        reclaiming; and because only an overflow evicts a result, any left stranded accumulate
+        until the tier is full however small the live set is, and then displace the results of
+        statements that are still live but have not run recently.
         """
         stale = (self._key_to_sig.keys() | self._ignored_keys.keys()) - live_keys
         for key in stale:
             self._key_to_sig.pop(key, None)
             self._ignored_keys.pop(key, None)
-        if stale:
+
+        # Results are shared by every key with the same signature, so one is reclaimable only once
+        # no live key names it. Keys also leave by LRU trimming, so this sweeps on every call
+        # rather than only when retain itself dropped one.
+        orphaned = self._sig_to_result.keys() - set(self._key_to_sig.values())
+        for signature in orphaned:
+            del self._sig_to_result[signature]
+
+        if stale or orphaned:
             logger.debug(
-                "retain: live=%d dropped=%d key_map=%d ignored_map=%d",
+                "retain: live=%d dropped=%d orphaned=%d key_map=%d sig_map=%d ignored_map=%d",
                 len(live_keys),
                 len(stale),
+                len(orphaned),
                 len(self._key_to_sig),
+                len(self._sig_to_result),
                 len(self._ignored_keys),
             )
         return len(stale)
