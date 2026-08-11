@@ -1,1 +1,23 @@
-Please build an out-of-the-box dashboard for your integration following our best practices here: https://datadoghq.dev/integrations-core/guidelines/dashboards/#best-practices
+{
+  "title": "InterSystems IRIS - Overview",
+  "description": "Overview of InterSystems IRIS instance health, high availability (mirroring), distributed cache (ECP), interoperability, and logs. Mirror, ECP, and outbound HTTP widgets show \"No data\" on deployments that do not use those features.",
+  "author_name": "Datadog",
+  "layout_type": "ordered",
+  "reflow_type": "fixed",
+  "notify_list": [],
+  "template_variables": [
+    { "name": "env", "prefix": "env", "available_values": [], "default": "*" },
+    { "name": "host", "prefix": "host", "available_values": [], "default": "*" },
+    { "name": "production", "prefix": "production", "available_values": [], "default": "*" },
+    { "name": "interop_host", "prefix": "interop_host", "available_values": [], "default": "*" }
+  ],
+  "widgets": [
+    { "id": 1000, "definition": { "title": "About", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 0, "width": 12, "height": 2 } },
+    { "id": 2000, "definition": { "title": "Health at a glance", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 2, "width": 12, "height": 3 } },
+    { "id": 3000, "definition": { "title": "Instance health trends", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 5, "width": 12, "height": 10 } },
+    { "id": 4000, "definition": { "title": "Mirror (high availability)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 15, "width": 12, "height": 8 } },
+    { "id": 5000, "definition": { "title": "ECP (distributed cache)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 23, "width": 12, "height": 4 } },
+    { "id": 6000, "definition": { "title": "Interoperability", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 27, "width": 12, "height": 15 } },
+    { "id": 7000, "definition": { "title": "Logs", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 42, "width": 12, "height": 5 } }
+  ]
+}
