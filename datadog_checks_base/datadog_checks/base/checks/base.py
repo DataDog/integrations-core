@@ -1662,17 +1662,17 @@ class AgentCheck(object):
                     for metric_name, value in debug_metrics:
                         self.gauge(metric_name, value, tags=tags, raw=True)
 
-                self.metric_limiter.reset()
-
                 try:
                     self._on_metric_limit_state(reached_limit, observed, limit)
                 except Exception:
                     self.log.debug('Error handling metric limit state', exc_info=True)
+                finally:
+                    self.metric_limiter.reset()
 
         return error_report
 
     def _on_metric_limit_state(self, reached_limit: bool, observed: int, limit: int) -> None:
-        """Called once per run for checks with an active metric limiter, after the limiter is reset."""
+        """Called once per run for checks with an active metric limiter."""
 
     def run_check_initializations(self):
         while self.check_initializations:
