@@ -6,6 +6,11 @@ name: Build Placeholder PyPI Packages
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - sarah/test-notify-pypi
+    paths:
+      - "*/pyproject.toml"
   schedule:
     # At 3AM UTC
     # Running this every night strikes a good balance between claiming names fast without spamming PyPI with requests.
