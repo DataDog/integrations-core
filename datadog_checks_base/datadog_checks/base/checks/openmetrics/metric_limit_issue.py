@@ -31,7 +31,7 @@ class MetricLimitIssueReporter:
         check: AgentCheck,
         endpoint: str | None,
         reached_limit: bool,
-        observed: int,
+        observed_count: int,
         limit: int,
     ) -> None:
         """Report or resolve an OpenMetrics configured-limit issue for one check run."""
@@ -43,21 +43,19 @@ class MetricLimitIssueReporter:
 
         if reached_limit:
             self.clean_runs = 0
-            dropped = max(0, observed - limit)
+            dropped = max(0, observed_count - limit)
             if dropped < REPORT_FLOOR:
                 return
 
-            ratio = dropped / observed
+            ratio = dropped / observed_count
             check.report_issue(
                 id=issue_id,
                 issue_name=ISSUE_NAME,
-                title=f'Dropping {dropped} of {observed} metrics from {endpoint}',
+                title=f'Dropping {dropped} of {observed_count} metrics from {endpoint}',
                 description=(
                     f'The {check.name} check collecting {endpoint} is configured to submit at most {limit} metric '
-                    f'contexts per run, but the last collection produced {observed}. The Agent submitted {limit} and '
-                    f'discarded the remaining {dropped}. Because the order of collection can change between runs, the '
-                    'discarded metrics are not always the same ones, so dashboards and monitors built on this endpoint '
-                    'may show intermittent gaps rather than a consistently missing set of metrics.'
+                    f'contexts per run, but the last collection produced {observed_count}. The Agent submitted {limit} '
+                    f'and discarded the remaining {dropped}.'
                 ),
                 category='configuration',
                 severity=_severity(check, ratio),
@@ -65,12 +63,12 @@ class MetricLimitIssueReporter:
                     'check_name': check.name,
                     'endpoint': endpoint,
                     'effective_limit': limit,
-                    'observed_contexts': observed,
+                    'observed_contexts': observed_count,
                     'dropped_contexts': dropped,
                     'dropped_ratio': round(ratio, 4),
                     'limit_is_default': limit == check.DEFAULT_METRIC_LIMIT,
                 },
-                remediation=_remediation(check.name, endpoint, dropped, observed, legacy=self.legacy),
+                remediation=_remediation(check.name, endpoint, dropped, observed_count, legacy=self.legacy),
                 tags=[f'integration:{check.name}', 'openmetrics', 'metric-limit'],
             )
             self.active = True
@@ -104,7 +102,7 @@ def _severity(check: AgentCheck, ratio: float) -> int:
 
 
 def _remediation(
-    check_name: str, endpoint: str, dropped: int, observed: int, *, legacy: bool
+    check_name: str, endpoint: str, dropped: int, observed_count: int, *, legacy: bool
 ) -> dict[str, str | list[dict[str, int | str]]]:
     metric_filter_options = '`metrics` / `ignore_metrics`' if legacy else '`metrics` / `exclude_metrics`'
     return {
@@ -115,7 +113,7 @@ def _remediation(
             {
                 'order': 1,
                 'text': (
-                    f'Confirm the loss is real and current: this issue reports {dropped} of {observed} metric '
+                    f'Confirm the loss is real and current: this issue reports {dropped} of {observed_count} metric '
                     f'contexts discarded on the most recent run of {check_name} against {endpoint}.'
                 ),
             },

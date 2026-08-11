@@ -98,12 +98,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
 
-    def _on_metric_limit_state(self, reached_limit: bool, observed: int, limit: int) -> None:
+    def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
         self.metric_limit_issue_reporter.handle(
             self,
             self.instance.get('openmetrics_endpoint'),
             reached_limit,
-            observed,
+            observed_count,
             limit,
         )
 
