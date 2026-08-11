@@ -189,6 +189,22 @@ def test_multiple_queries_same_dbname_share_one_connection(aggregator):
     assert len(status_metrics) == 2
 
 
+def test_dbname_grouping_is_case_insensitive(aggregator):
+    """SQL Server dbnames are case-insensitive; queries configured with differently-cased
+    dbnames for the same database must still share one connection, not open a duplicate."""
+    queries = [
+        {**deepcopy(BASE_QUERY), 'dbname': 'App_DB'},
+        {**deepcopy(MULTI_QUERIES[1]), 'dbname': 'app_db'},
+    ]
+
+    with patch.object(SQLServer, 'event_platform_event'):
+        _, _, _, open_calls = _setup_and_run(queries=queries)
+
+    assert len(open_calls) == 1
+    status_metrics = aggregator.metrics('dd.sqlserver.data_observability.query_executions')
+    assert len(status_metrics) == 2
+
+
 # ── Error handling ────────────────────────────────────────────────────────────
 
 

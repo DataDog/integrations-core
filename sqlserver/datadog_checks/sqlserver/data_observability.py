@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from datadog_checks.base.utils.serialization import json
 import math
 import time
 from collections.abc import Iterable
@@ -12,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from datadog_checks.base.utils.cron import CronScheduler
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.serialization import json
 
 from .connection import split_sqlserver_host_port
 from .connection_errors import SQLConnectionError
@@ -160,7 +160,7 @@ class SqlServerDataObservability(DBMAsyncJob):
             return 1433
 
     def _execute_single_query(self, cursor: Any, query_spec: Query) -> dict[str, Any]:
-        """Execute a query, catching pyodbc.Error per-query so the loop continues."""
+        """Execute a query, catching expected DB exceptions per-query so the loop continues."""
         monitor_id = query_spec.monitor_id
         start = time.time()
         try:
@@ -242,24 +242,20 @@ class SqlServerDataObservability(DBMAsyncJob):
             raw=True,
         )
 
-    def _run_due_query(self, due: DueQuery, base_tags: list[str]) -> None:
-        """Run one due query on the group's already-open connection.
-
-        Raises an expected DB exception (caught by the caller) if the shared connection
-        died mid-group; a fresh cursor is created per query so a per-query
-        set_command_timeout takes effect for every execute (pyodbc/adodbapi both copy the
-        connection timeout onto the command/cursor at creation time, not at execute time).
-        """
+    def _run_due_query(self, due: DueQuery, base_tags: list[str], conn_dbname: str) -> None:
+        """Run one due query using a fresh cursor on the group's shared connection."""
         q = due.query
         tags = base_tags + [f'monitor_id:{q.monitor_id}']
         now_at_fire_start = time.time()
 
+        # pyodbc/adodbapi bind the timeout to the cursor/command at creation time, not at
+        # execute() time, so this must run before get_cursor() creates the fresh cursor below.
         timeout_s = max(1, math.ceil(q.query_timeout / 1000)) if q.query_timeout else self._check.connection.timeout
-        self._check.connection.set_command_timeout(CONN_KEY_PREFIX, timeout_s, db_name=q.dbname)
+        self._check.connection.set_command_timeout(CONN_KEY_PREFIX, timeout_s, db_name=conn_dbname)
 
         cursor = self._check.connection.get_cursor(
             self._check.connection.DEFAULT_DB_KEY,
-            db_name=q.dbname,
+            db_name=conn_dbname,
             key_prefix=CONN_KEY_PREFIX,
         )
         try:
@@ -339,26 +335,31 @@ class SqlServerDataObservability(DBMAsyncJob):
         base_tags = self._build_base_tags()
 
         # Group by dbname so queries against the same database share one physical
-        # connection instead of opening/closing a new one per query.
+        # connection instead of opening/closing a new one per query. SQL Server
+        # treats dbname case-insensitively, so group on casefold() to avoid opening
+        # duplicate connections for differently-cased configs of the same database —
+        # but use one consistent casing (the group's first query) for the actual
+        # connection/cursor lookups, since those are case-sensitive dict keys.
         queries_by_dbname: dict[str, list[DueQuery]] = {}
         for due in due_queries:
-            queries_by_dbname.setdefault(due.query.dbname, []).append(due)
+            queries_by_dbname.setdefault(due.query.dbname.casefold(), []).append(due)
 
-        for dbname, group in queries_by_dbname.items():
+        for group in queries_by_dbname.values():
+            conn_dbname = group[0].query.dbname
             try:
                 with self._check.connection._open_managed_db_connections(
                     self._check.connection.DEFAULT_DB_KEY,
-                    db_name=dbname,
+                    db_name=conn_dbname,
                     key_prefix=CONN_KEY_PREFIX,
                 ):
                     for due in group:
                         try:
-                            self._run_due_query(due, base_tags)
+                            self._run_due_query(due, base_tags, conn_dbname)
                         except tuple(_EXPECTED_DB_EXCEPTIONS) as e:
                             self._log.warning(
                                 "Failed to execute monitor_id=%d on db_name=%s; will retry next poll: %s",
                                 due.query.monitor_id,
-                                dbname,
+                                conn_dbname,
                                 e,
                             )
                             self._queue_for_retry(due, base_tags)
@@ -367,7 +368,7 @@ class SqlServerDataObservability(DBMAsyncJob):
                 # group ran, so all of them are safe to retry next poll.
                 self._log.warning(
                     "Failed to open connection for db_name=%s; will retry %d quer%s next poll: %s",
-                    dbname,
+                    conn_dbname,
                     len(group),
                     "y" if len(group) == 1 else "ies",
                     e,
