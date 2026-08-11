@@ -1,4 +1,4 @@
-FROM nginx:1.20.2
+FROM nginx:1.26.3
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -15,11 +15,12 @@ RUN apt-get update -y -qq && apt-get install -y --no-install-recommends \
   git
 
 RUN cd /usr/src && mkdir nginx \
-  && curl -kfSL https://nginx.org/download/nginx-1.20.2.tar.gz -o nginx.tar.gz \
+  && curl -kfSL https://nginx.org/download/nginx-1.26.3.tar.gz -o nginx.tar.gz \
   && tar -xzf nginx.tar.gz -C nginx --strip-components=1
 
 RUN cd /usr/src/nginx \
-  && git clone http://github.com/stnoonan/spnego-http-auth-nginx-module.git
+  && git clone http://github.com/stnoonan/spnego-http-auth-nginx-module.git \
+  && git -C spnego-http-auth-nginx-module checkout 7fa3864a86d5
 
 RUN cd /usr/src/nginx \
   && ./configure --with-compat --add-dynamic-module=spnego-http-auth-nginx-module \

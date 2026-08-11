@@ -1,0 +1,5 @@
+# HELP gotk_resource_info The current state of a Flux custom resource (kube-state-metrics).
+# TYPE gotk_resource_info gauge
+gotk_resource_info{customresource_group="source.toolkit.fluxcd.io",customresource_kind="GitRepository",customresource_version="v1",exported_namespace="flux-system",name="flux-system",ready="True",suspended="false"} 1
+gotk_resource_info{customresource_group="helm.toolkit.fluxcd.io",customresource_kind="HelmRelease",customresource_version="v2",exported_namespace="default",name="podinfo",ready="False",suspended="false"} 1
+gotk_resource_info{customresource_group="kustomize.toolkit.fluxcd.io",customresource_kind="Kustomization",customresource_version="v1",exported_namespace="flux-system",name="flux-system",ready="True",suspended="true"} 1

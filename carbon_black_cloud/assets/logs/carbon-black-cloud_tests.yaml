@@ -151,8 +151,8 @@ tests:
       version: "2.1.0"
       watchlists:
        -
-        name: "Bruce Test Historical Data (Watchlist)"
         id: "OtUjDxuzRbSLwqkZG7SRzw"
+        name: "Bruce Test Historical Data (Watchlist)"
       workflow:
         change_timestamp: "2025-05-22T05:05:06.513Z"
         changed_by: "ALERT_CREATION"
@@ -413,8 +413,8 @@ tests:
       version: "2.1.0"
       watchlists:
        -
-        name: "AMSI Threat Intelligence"
         id: "Ci7w5B4URg6HN60hatQMQ"
+        name: "AMSI Threat Intelligence"
       workflow:
         change_timestamp: "2025-05-22T06:29:08.472Z"
         changed_by: "test@example.com"
@@ -927,8 +927,8 @@ tests:
       status: "Info"
       watchlists:
        -
-        name: "Carbon Black Endpoint Visibility"
         id: "kGpe3dkAS8iblKpeM9Xg"
+        name: "Carbon Black Endpoint Visibility"
     message: |-
       {
         "schema" : 1,

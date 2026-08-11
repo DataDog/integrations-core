@@ -2,8 +2,15 @@
 
 ## Overview
 
-This check monitors [Flink][1]. Datadog collects Flink metrics through Flink's
-[Datadog HTTP Reporter][2], which uses [Datadog's HTTP API][3].
+This check monitors [Flink][1]. Metrics can be collected in one of two ways:
+
+- **Agent-side collection** via Flink's [Prometheus reporter][15], scraped by
+  the Datadog Agent over OpenMetrics. The Datadog API key lives in the Agent,
+  so no secret needs to be set on the Flink side - well suited to
+  Kubernetes/GitOps deployments.
+- **Push collection** via Flink's [Datadog HTTP Reporter][2], where Flink
+  pushes metrics directly to [Datadog's HTTP API][3]. This requires the
+  Datadog API key to be set in Flink's configuration.
 
 **Minimum Agent version:** 7.17.2
 
@@ -16,7 +23,44 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-#### Metric collection
+#### Metric collection - OpenMetrics (recommended for Kubernetes)
+
+1. Configure the [Prometheus reporter][15] in Flink. In your
+   `<FLINK_HOME>/conf/flink-conf.yaml`:
+
+   ```yaml
+   metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+   metrics.reporter.prom.port: 9249
+   ```
+
+   Unlike the Datadog HTTP Reporter, the Prometheus reporter ignores
+   `metrics.scope.*` overrides -- it uses Flink's internal scope names
+   directly. No extra Flink configuration is required for this
+   integration to recognize the metrics.
+
+2. Edit `flink.d/conf.yaml` (in the Agent's `conf.d/` directory) and set
+   `openmetrics_endpoint` to point at the reporter:
+
+   ```yaml
+   instances:
+     - openmetrics_endpoint: http://<FLINK_HOST>:9249/metrics
+   ```
+
+   In Kubernetes, configure this via Autodiscovery pod annotations:
+
+   ```yaml
+   ad.datadoghq.com/jobmanager.checks: |
+     {
+       "flink": {
+         "init_config": {},
+         "instances": [{"openmetrics_endpoint": "http://%%host%%:9249/metrics"}]
+       }
+     }
+   ```
+
+3. Restart Flink and the Agent.
+
+#### Metric collection - Datadog HTTP Reporter (legacy)
 
 <!-- partial
 {{< site-region region="gov,gov2" >}}
@@ -153,3 +197,4 @@ Need help? Contact [Datadog support][12].
 [11]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [12]: https://docs.datadoghq.com/help/
 [13]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/
+[15]: https://nightlies.apache.org/flink/flink-docs-stable/docs/deployment/metric_reporters/#prometheus

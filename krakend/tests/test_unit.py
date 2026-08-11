@@ -10,6 +10,7 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.krakend import KrakendCheck
+from datadog_checks.krakend.check import RENAME_LABELS_MAP
 from tests.helpers import get_metrics_from_metadata
 from tests.types import InstanceBuilder
 
@@ -55,9 +56,10 @@ def test_check_filters_metrics_config(
     prefixed_metrics: dict[str, list] = {expected_prefix: [] for expected_prefix in expected_prefixes}
 
     for expected_prefix in expected_prefixes:
-        prefixed_metrics[expected_prefix].extend(
-            [metric for metric in final_config["metrics"][0] if metric.startswith(expected_prefix)]
-        )
+        for metrics_dict in final_config["metrics"]:
+            prefixed_metrics[expected_prefix].extend(
+                [metric for metric in metrics_dict if metric.startswith(expected_prefix)]
+            )
 
     errors = []
     for expected_prefix in expected_prefixes:
@@ -113,6 +115,84 @@ def test_check_filters_metrics(aggregator: AggregatorStub, expected_metrics: lis
 def test_labels_renaming(ready_check: KrakendCheck, aggregator: AggregatorStub, metric: str, tag: str):
     # All metrics should include the value from target_info with the appropriate tags renamed
     aggregator.assert_metric_has_tag(metric, tag)
+
+
+@pytest.mark.parametrize(
+    "go_metrics, expected_rename_labels",
+    [
+        (
+            True,
+            {
+                "service_version": "krakend.service_version",
+                "service_name": "krakend.service_name",
+                "version": "go_version",
+            },
+        ),
+        (
+            False,
+            {"service_version": "krakend.service_version", "service_name": "krakend.service_name"},
+        ),
+    ],
+    ids=["go_metrics_enabled", "go_metrics_disabled"],
+)
+def test_default_rename_labels(
+    check: KrakendCheck,
+    instance: InstanceBuilder,
+    go_metrics: bool,
+    expected_rename_labels: dict[str, str],
+):
+    final_config = check.get_config_with_defaults(instance(go_metrics=go_metrics))
+
+    assert final_config["rename_labels"] == expected_rename_labels
+
+
+@pytest.mark.parametrize(
+    "instance_rename_labels, expected_rename_labels",
+    [
+        (
+            {"pod": "pod_name"},
+            {
+                "service_version": "krakend.service_version",
+                "service_name": "krakend.service_name",
+                "version": "go_version",
+                "pod": "pod_name",
+            },
+        ),
+        (
+            {"service_name": "gateway"},
+            {
+                "service_version": "krakend.service_version",
+                "service_name": "gateway",
+                "version": "go_version",
+            },
+        ),
+    ],
+    ids=["extra_label", "overrides_a_default"],
+)
+def test_instance_rename_labels_merge_with_defaults(
+    check: KrakendCheck,
+    instance: InstanceBuilder,
+    instance_rename_labels: dict[str, str],
+    expected_rename_labels: dict[str, str],
+):
+    instance_config = instance() | {"rename_labels": instance_rename_labels}
+
+    final_config = check.get_config_with_defaults(instance_config)
+
+    assert final_config["rename_labels"] == expected_rename_labels
+
+
+def test_instance_rename_labels_are_not_mutated(check: KrakendCheck, instance: InstanceBuilder):
+    instance_rename_labels = {"pod": "pod_name"}
+    instance_config = instance() | {"rename_labels": instance_rename_labels}
+
+    check.get_config_with_defaults(instance_config)
+
+    assert instance_rename_labels == {"pod": "pod_name"}
+    assert RENAME_LABELS_MAP == {
+        "service_version": "krakend.service_version",
+        "service_name": "krakend.service_name",
+    }
 
 
 def test_service_check_emitted(ready_check: KrakendCheck, aggregator: AggregatorStub):

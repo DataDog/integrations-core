@@ -1,0 +1,35 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "text": {},
+      "key": "client_id",
+      "label": "Client ID",
+      "help": "Trellix Client ID.",
+      "editable": true,
+      "required": true
+    },
+    {
+      "password": {},
+      "key": "client_secret",
+      "label": "Client Secret",
+      "help": "Trellix Client Secret.",
+      "editable": true,
+      "required": true
+    },
+    {
+      "password": {},
+      "key": "api_key",
+      "label": "API Key",
+      "help": "Trellix API Key.",
+      "editable": true,
+      "required": true
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "trellix-endpoint-security-logs",
+      "additional_config_fields": []
+    }
+  ]
+}

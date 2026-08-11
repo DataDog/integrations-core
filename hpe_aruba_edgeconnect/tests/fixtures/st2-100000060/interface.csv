@@ -1,0 +1,6 @@
+ifname,traftype,bytes_tx,bytes_rx,pkts_tx,pkts_rx,ohead_bytes_tx,ohead_bytes_rx,ohead_pkts_tx,ohead_pkts_rx,fwdrops_bytes_tx,fwdrops_bytes_rx,fwdrops_pkts_tx,fwdrops_pkts_rx,max_bw_tx,max_bw_rx
+wan1,optimized traffic,15616,30768,58,113,15616,30768,58,113,0,0,0,0,0,0
+wan1,all traffic,15616,30768,58,113,15616,30768,58,113,0,0,0,0,100000,100000
+wan0,optimized traffic,13120,26848,40,86,13120,26848,40,86,0,0,0,0,0,0
+wan0,pass-through-unshaped,79920,41760,360,180,0,0,0,0,0,0,0,0,100000,100000
+wan0,all traffic,93040,68608,400,266,13120,26848,40,86,0,0,0,0,100000,100000

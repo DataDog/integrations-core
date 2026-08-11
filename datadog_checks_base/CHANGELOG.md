@@ -2,6 +2,81 @@
 
 <!-- towncrier release notes start -->
 
+## 38.0.0 / 2026-08-05
+
+***Changed***:
+
+* Patch prometheus_client to restore v0.21.1 parsing behavior to fix a performance regression introduced in v0.22.0, with up to ~40% improvement in check execution time for parsing-heavy workloads. This drops support for UTF-8 metric names, quoted dotted label names (OpenMetrics 2.0), and structural characters ({, }, =, ,) inside quoted label values. Set ``patch_prometheus_client`` to ``false`` in ``datadog.yaml`` to disable. ([#24651](https://github.com/DataDog/integrations-core/pull/24651))
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Add an async job registry to `DatabaseCheck` so DBM integrations can register `DBMAsyncJob`s additively and run, cancel, or shut them all down through a single entry point (`register_async_job`, `run_async_jobs`, `cancel_async_jobs`, `shutdown_async_jobs`), along with a `DBMAsyncJob.shutdown()` hook for releasing lifetime-scoped resources on unschedule. ([#24442](https://github.com/DataDog/integrations-core/pull/24442))
+* Add a discovery helper for selecting service ports by name. ([#24555](https://github.com/DataDog/integrations-core/pull/24555))
+* Allow disabling fallback ports for configuration discovery candidates. ([#24706](https://github.com/DataDog/integrations-core/pull/24706))
+
+***Fixed***:
+
+* Bracket IPv6-literal hosts in discovery URL templates. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
+## 37.42.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add a `DBMS` class attribute to `DatabaseCheck` so integrations can declare their DBM platform identifier explicitly. The `dbms` property now returns `DBMS` when set and only falls back to the deprecated class-name derivation (with a warning) when it is not. ([#24297](https://github.com/DataDog/integrations-core/pull/24297))
+
+## 37.41.0 / 2026-06-30
+
+***Added***:
+
+* Lazy load the validation package (core, security, utils) on import of datadog_checks.checks. ([#23936](https://github.com/DataDog/integrations-core/pull/23936))
+* Add configuration discovery runtime (Service/Port types, candidate_ports, probing harness, and discovery entry points). ([#23963](https://github.com/DataDog/integrations-core/pull/23963))
+* Add ``include_internal`` and ``include_db`` options to ``TagManager.get_tags`` so DBM checks can exclude internal resource tags (``dd.internal.*``) and the per-database ``db`` tag from tag views that should not carry them. ([#23976](https://github.com/DataDog/integrations-core/pull/23976))
+* Add report_issue and resolve_issue for Agent Health reporting from integrations. ([#24016](https://github.com/DataDog/integrations-core/pull/24016))
+* Implement the ``agent_hostname`` property on the ``DatabaseCheck`` base class. ([#24243](https://github.com/DataDog/integrations-core/pull/24243))
+* Implement the `DatabaseCheck.tags` property backed by a shared `TagManager` so DBM integrations can consolidate tag handling. ([#24244](https://github.com/DataDog/integrations-core/pull/24244))
+* Provide a default `database_identifier` implementation on the `DatabaseCheck` base class that is built (and cached) from the `database_identifier_template` and `database_identifier_params` hooks, so integrations no longer need to reimplement the database identifier templating logic. ([#24250](https://github.com/DataDog/integrations-core/pull/24250))
+
+## 37.40.1 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+* Bump PyJWT to 2.13.0. ([#24074](https://github.com/DataDog/integrations-core/pull/24074))
+
+## 37.40.0 / 2026-06-09
+
+***Added***:
+
+* Add ``AgentCheck.submit_generic_resource`` to submit resource snapshots on the ``genresources`` event-platform track with allow-list field selection. ([#23905](https://github.com/DataDog/integrations-core/pull/23905))
+
+***Fixed***:
+
+* Fix ``resolve_db_host`` treating loopback IP literals (e.g. ``::1``) as DNS resolution failures, which caused database checks to submit metrics with the wrong host tag and miss agent host tags. ([#23849](https://github.com/DataDog/integrations-core/pull/23849))
+
+## 37.39.1 / 2026-06-08
+
+***Fixed***:
+
+* Send each logical database as its own independent schema snapshot, so an error or partial collection for one database does not affect others. ([#23913](https://github.com/DataDog/integrations-core/pull/23913))
+
+## 37.39.0 / 2026-05-29
+
+***Added***:
+
+* Add file-based YAML metrics loading for OpenMetrics V2 checks with composable predicates ([#22750](https://github.com/DataDog/integrations-core/pull/22750))
+* Add ``CronExpression`` and ``CronScheduler`` utilities for cron-style scheduling inside check methods. ([#23741](https://github.com/DataDog/integrations-core/pull/23741))
+
+## 37.38.0 / 2026-05-22 / Agent 7.80.0
+
+***Security***:
+
+* Bump urllib3 to 2.7.0 to address CVE-2026-44431 and CVE-2026-44432. ([#23767](https://github.com/DataDog/integrations-core/pull/23767))
+
 ## 37.37.0 / 2026-05-14
 
 ***Added***:

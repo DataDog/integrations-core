@@ -4,31 +4,30 @@
 import base64
 import json
 import logging
+import marshal
+from collections import defaultdict
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
-from confluent_kafka import TopicPartition
-from google.protobuf import descriptor_pb2
-from google.protobuf.message import DecodeError
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
-from datadog_checks.kafka_consumer.kafka_consumer import (
-    DATA_STREAMS_MESSAGES_CACHE_KEY,
-    _get_interpolated_timestamp,
-    _get_protobuf_message_class,
-    build_avro_schema,
-    build_protobuf_schema,
-    build_schema,
-    deserialize_message,
-    resolve_start_offsets,
-)
 
 pytestmark = [pytest.mark.unit]
 
 
-def fake_consumer_offsets_for_times(partitions, offset=-1):
+def encode_broker_timestamps(cache):
+    """Encode a broker_timestamps dict the way the check persists it (marshal+base64)."""
+    return base64.b64encode(marshal.dumps(cache)).decode('ascii')
+
+
+def written_broker_timestamps(check):
+    """Decode the broker_timestamps blob the check wrote to its persistent cache (marshal+base64)."""
+    return marshal.loads(base64.b64decode(check.write_persistent_cache.call_args[0][1]))
+
+
+def fake_get_partition_offsets(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
 
     return [(t, p, 80) for t, p in partitions]
@@ -55,7 +54,7 @@ def seed_mock_client(cluster_id="cluster_id"):
             ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
         ],
     )
-    client.consumer_offsets_for_times = fake_consumer_offsets_for_times
+    client.get_partition_offsets = fake_get_partition_offsets
     return client
 
 
@@ -450,13 +449,6 @@ def test_when_empty_string_consumer_group_then_skip(kafka_instance):
         assert kafka_consumer_check._get_consumer_groups() == ["my_consumer"]
 
 
-def test_get_interpolated_timestamp():
-    assert _get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150
-    assert _get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
-    assert _get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
-    assert _get_interpolated_timestamp({10: 200}, 15) is None
-
-
 @pytest.mark.parametrize(
     'persistent_cache_contents, instance_overrides, consumer_lag_seconds_count',
     [
@@ -512,884 +504,354 @@ def test_client_init(kafka_instance, check, dd_run_check):
     assert check.client.open_consumer.mock_calls == [mock.call("datadog-agent")]
 
 
-def test_add_broker_timestamps_purges_stale_offsets_on_reset(kafka_instance, check):
-    # When the highwater offset goes backwards (topic recreated / retention
-    # wipe / offset reset), cached (offset, timestamp) pairs with offsets
-    # above the new highwater are stale and must be purged — otherwise they
-    # poison interpolation and pin estimated_consumer_lag to a wall-clock
-    # offset equal to how long ago the reset happened.
-    check = check(kafka_instance)
-    broker_timestamps = {"topic1_0": {1_000_000: 100.0, 999_000: 99.0}}
-    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 170})
+def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check):
+    # When the highwater drops, all cached entries are cleared — including those below the new
+    # highwater that belong to the previous topic generation and would otherwise poison interpolation.
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
 
-    timestamps = broker_timestamps["topic1_0"]
-    assert 1_000_000 not in timestamps
-    assert 999_000 not in timestamps
-    assert 170 in timestamps
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 30)])]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 100)]
+    kafka_consumer_check.client = mock_client
 
+    # Cache has entries below (5, 50) and above (200) the new highwater of 100 — all must be cleared.
+    initial_cache = {"topic1_0": {5: 1.0, 50: 2.0, 200: 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=encode_broker_timestamps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
 
-def test_add_broker_timestamps_evicts_by_oldest_timestamp(kafka_instance, check):
-    # Eviction must drop the entry with the oldest timestamp, not the smallest
-    # offset. Evicting by min(offset) would discard fresh post-reset entries
-    # and keep poisonous ones.
-    kafka_instance['timestamp_history_size'] = 2
-    check = check(kafka_instance)
-    broker_timestamps = {"topic1_0": {500: 50.0, 400: 999.0}}
-    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 600})
+    dd_run_check(kafka_consumer_check)
 
-    timestamps = broker_timestamps["topic1_0"]
-    assert 500 not in timestamps  # oldest by timestamp
-    assert 400 in timestamps
-    assert 600 in timestamps
+    written = written_broker_timestamps(kafka_consumer_check)
+    timestamps = written["topic1_0"]
+    assert len(timestamps) == 1
+    assert 100 in timestamps
 
 
-def test_resolve_start_offsets():
-    highwater_offsets = {
-        ("topic1", 0): 100,
-        ("topic1", 1): 200,
-        ("topic2", 0): 150,
-    }
-    assert resolve_start_offsets(highwater_offsets, "topic1", 0, 80, 10) == [TopicPartition("topic1", 0, 80)]
-    assert resolve_start_offsets(highwater_offsets, "topic2", 0, -1, 10) == [TopicPartition("topic2", 0, 141)]
-    assert sorted(resolve_start_offsets(highwater_offsets, "topic1", -1, -1, 10)) == [
-        TopicPartition("topic1", 0, 81),
-        TopicPartition("topic1", 1, 191),
-    ]
+def test_max_history_scales_with_partition_count(check, kafka_instance):
+    kafka_consumer_check = check(kafka_instance)  # default timestamp_history_size = 1000
+    assert kafka_consumer_check._max_history(0) == 1000
+    assert kafka_consumer_check._max_history(1) == 1000
+    assert kafka_consumer_check._max_history(6000) == 1000  # 6M / 6000 = 1000 (breakeven)
+    assert kafka_consumer_check._max_history(60000) == 100  # 6M / 60000
+    assert kafka_consumer_check._max_history(6_000_000) == 2  # floored at 2
 
 
-class MockedMessage:
-    def __init__(self, value, key=None, offset=0):
-        self.v = value
-        self.k = key
-        self.o = offset
+def test_add_broker_timestamps_caps_total_by_budget(check, kafka_instance, monkeypatch):
+    import datadog_checks.kafka_consumer.kafka_consumer as kc
 
-    def value(self):
-        return self.v
+    monkeypatch.setattr(kc, 'MAX_TIMESTAMP_ENTRIES', 1000)
+    kafka_consumer_check = check(kafka_instance)
+    # 100 partitions against a 1000-entry budget -> per-partition cap of 10.
+    highwater_offsets = {("topic1", p): 500 for p in range(100)}
+    broker_timestamps = defaultdict(dict)
+    broker_timestamps["topic1_0"] = {i: float(i) for i in range(60)}
 
-    def key(self):
-        return self.k
+    kafka_consumer_check._add_broker_timestamps(broker_timestamps, highwater_offsets)
 
-    def partition(self):
-        return 0
+    assert len(broker_timestamps["topic1_0"]) <= 10
 
-    def offset(self):
-        return self.o
 
-
-def test_deserialize_message():
-    message = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}'
-    # schema ID is 350, which is 0x015E in hex.
-    # A magic byte (0x00) is added and the schema ID (4-byte big-endian integer).
-    message_with_schema = (
-        b'\x00\x00\x00\x01\x5e{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}'
-    )
-    key = b'{"name": "Peter Parker"}'
-    assert deserialize_message(MockedMessage(message, key), 'json', '', False, 'json', '', False) == (
-        '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
-        None,
-        '{"name": "Peter Parker"}',
-        None,
-    )
-    assert deserialize_message(MockedMessage(message_with_schema), 'json', '', False, 'json', '', False) == (
-        '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
-        350,
-        '',
-        None,
-    )
-    invalid_json = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"'
-    assert deserialize_message(MockedMessage(invalid_json, key), 'json', '', False, 'json', '', False) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    invalid_utf8 = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"\xff'
-    assert deserialize_message(MockedMessage(invalid_utf8, key), 'json', '', False, 'json', '', False) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    # Test Avro deserialization
-    avro_schema = (
-        '{"type": "record", "name": "Book", "namespace": "com.book", '
-        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-        '{"name": "author", "type": "string"}]}'
-    )
-    avro_message = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
-    parsed_avro_schema = build_schema('avro', avro_schema)
-    assert deserialize_message(
-        MockedMessage(avro_message, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    ) == (
-        '{"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}',
-        None,
-        '{"name": "Peter Parker"}',
-        None,
-    )
-
-    # Test Protobuf deserialization
-    protobuf_schema = (
-        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
-        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
-    )
-    protobuf_message = (
-        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
-        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
-    )
-    parsed_protobuf_schema = build_schema('protobuf', protobuf_schema)
-    assert deserialize_message(
-        MockedMessage(protobuf_message, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    ) == (
-        '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  "author": "Alan Donovan"\n}',
-        None,
-        '{"name": "Peter Parker"}',
-        None,
-    )
-
-    # Test invalid Avro messages
-    # Empty message (returns empty string, not None)
-    assert deserialize_message(MockedMessage(b'', key), 'avro', parsed_avro_schema, False, 'json', '', False) == (
-        '',
-        None,
-        '{"name": "Peter Parker"}',
-        None,
-    )
-
-    # Corrupted message (truncated)
-    corrupted_avro = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language'  # Missing author field
-    assert deserialize_message(
-        MockedMessage(corrupted_avro, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    ) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    # Wrong data type (string instead of long for isbn)
-    wrong_type_avro = b'\x02\x12\x1bThe Go Programming Language\x18Alan Donovan'  # Wrong encoding for isbn
-    assert deserialize_message(
-        MockedMessage(wrong_type_avro, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    ) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    # Random bytes
-    random_avro = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
-    assert deserialize_message(
-        MockedMessage(random_avro, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    ) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    # Completely invalid Avro message (random bytes)
-    invalid_avro = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
-    assert deserialize_message(
-        MockedMessage(invalid_avro, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    ) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    # Avro message with wrong data types (string where long expected)
-    wrong_type_avro = b'\x02\x12\x1bThe Go Programming Language\x18Alan Donovan'  # Wrong encoding for isbn
-    assert deserialize_message(
-        MockedMessage(wrong_type_avro, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    ) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    # Test invalid Protobuf messages
-    # Empty message (returns empty string, not None)
-    assert deserialize_message(
-        MockedMessage(b'', key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    ) == (
-        '',
-        None,
-        '{"name": "Peter Parker"}',
-        None,
-    )
-
-    # Random bytes
-    random_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
-    assert deserialize_message(
-        MockedMessage(random_protobuf, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    ) == (
-        None,
-        None,
-        None,
-        None,
-    )
-
-    # Completely invalid Protobuf message (random bytes)
-    invalid_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
-    assert deserialize_message(
-        MockedMessage(invalid_protobuf, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    ) == (None, None, None, None)
-
-    # Protobuf message with wrong field number (field 99 instead of 1)
-    wrong_field_protobuf = (
-        b'\x99\x01\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1bThe Go Programming Language\x1a\x0cAlan Donovan'
-    )
-    assert deserialize_message(
-        MockedMessage(wrong_field_protobuf, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    ) == (None, None, None, None)
-
-    # Protobuf message with truncated varint
-    truncated_varint_protobuf = b'\x08\xff\xff\xff\xff\xff\xff\xff\xff\xff'  # Incomplete varint
-    assert deserialize_message(
-        MockedMessage(truncated_varint_protobuf, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    ) == (None, None, None, None)
-
-
-def test_strict_avro_validation():
-    """Test that Avro deserialization fails when not all bytes are consumed."""
-    key = b'{"name": "Peter Parker"}'
-
-    # Test case 1: Simple primitive string schema with extra bytes
-    # A primitive string in Avro is encoded as: varint length + UTF-8 bytes
-    # An empty string is just: 0x00 (zero length)
-    # If we have 0x00 followed by extra bytes (e.g., magic byte + 4 bytes + stuff),
-    # the string decoder will read the empty string but leave bytes unconsumed
-    string_schema = '"string"'
-    parsed_string_schema = build_schema('avro', string_schema)
-
-    # Message: 0x00 (empty string) + 0x00 (magic byte) + 4 bytes + some random data
-    # The Avro string decoder will only consume the first 0x00, leaving the rest
-    message_with_extra_bytes = b'\x00\x00\x00\x00\x01\x5e\x12\x34\x56\x78'
-
-    # This should now fail because not all bytes are consumed
-    result = deserialize_message(
-        MockedMessage(message_with_extra_bytes, key), 'avro', parsed_string_schema, False, 'json', '', False
-    )
-    assert result == (None, None, None, None), "Expected deserialization to fail due to unconsumed bytes"
-
-    # Test case 2: Avro message with trailing garbage bytes after valid data
-    avro_schema = (
-        '{"type": "record", "name": "Book", "namespace": "com.book", '
-        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-        '{"name": "author", "type": "string"}]}'
-    )
-    parsed_avro_schema = build_schema('avro', avro_schema)
-
-    # Valid Avro message + trailing garbage
-    valid_avro_message = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
-    message_with_trailing_bytes = valid_avro_message + b'\xff\xfe\xfd\xfc'
-
-    # This should now fail because of the trailing bytes
-    result = deserialize_message(
-        MockedMessage(message_with_trailing_bytes, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    )
-    assert result == (None, None, None, None), "Expected deserialization to fail due to trailing bytes"
-
-    # Test case 3: Simple int schema with extra bytes
-    int_schema = '"int"'
-    parsed_int_schema = build_schema('avro', int_schema)
-
-    # Message: 0x02 (int value 1) + extra bytes
-    message_int_with_extra = b'\x02\xde\xad\xbe\xef'
-
-    result = deserialize_message(
-        MockedMessage(message_int_with_extra, key), 'avro', parsed_int_schema, False, 'json', '', False
-    )
-    assert result == (None, None, None, None), "Expected deserialization to fail due to unconsumed bytes"
-
-    # Test case 4: Verify that valid messages still work
-    valid_string_message = b'\x0aHello'  # Length 5 (encoded as 0x0a = 10/2 = 5) + "Hello"
-    result = deserialize_message(
-        MockedMessage(valid_string_message, key), 'avro', parsed_string_schema, False, 'json', '', False
-    )
-    assert result[0] == '"Hello"', "Expected valid string message to deserialize correctly"
-    assert result[1] is None
-
-    valid_int_message = b'\x02'  # int value 1
-    result = deserialize_message(
-        MockedMessage(valid_int_message, key), 'avro', parsed_int_schema, False, 'json', '', False
-    )
-    assert result[0] == '1', "Expected valid int message to deserialize correctly"
-
-
-def test_strict_protobuf_validation():
-    """Test that Protobuf deserialization fails when not all bytes are consumed."""
-    key = b'{"name": "Peter Parker"}'
-
-    # Build the same Book schema used in other tests
-    protobuf_schema = (
-        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
-        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
-    )
-    parsed_protobuf_schema = build_schema('protobuf', protobuf_schema)
-
-    # Test case 1: Valid Protobuf message with trailing garbage bytes
-    valid_protobuf_message = (
-        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
-        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
-    )
-    message_with_trailing_bytes = valid_protobuf_message + b'\xff\xfe\xfd\xfc'
-
-    # This should now fail because of the trailing bytes
-    result = deserialize_message(
-        MockedMessage(message_with_trailing_bytes, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    )
-    assert result == (None, None, None, None), "Expected deserialization to fail due to trailing bytes"
-
-    # Test case 2: Message with extra fields that aren't in the schema
-    # Protobuf will parse this but leave bytes unconsumed if there are truly extra bytes beyond valid fields
-    # Adding a completely invalid trailing byte sequence
-    message_with_invalid_trailer = valid_protobuf_message + b'\x00\x00\x00\x01\x5e'
-
-    result = deserialize_message(
-        MockedMessage(message_with_invalid_trailer, key),
-        'protobuf',
-        parsed_protobuf_schema,
-        False,
-        'json',
-        '',
-        False,
-    )
-    assert result == (None, None, None, None), "Expected deserialization to fail due to unconsumed bytes"
-
-    # Test case 3: Verify that valid messages still work
-    result = deserialize_message(
-        MockedMessage(valid_protobuf_message, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    )
-    assert result[0] is not None, "Expected valid protobuf message to deserialize correctly"
-    assert 'The Go Programming Language' in result[0]
-
-
-def test_schema_registry_explicit_configuration():
-    """Test that explicit schema registry configuration is enforced."""
-    key = b'{"name": "Peter Parker"}'
-
-    # Test Avro with value_uses_schema_registry=True
-    avro_schema = (
-        '{"type": "record", "name": "Book", "namespace": "com.book", '
-        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-        '{"name": "author", "type": "string"}]}'
-    )
-    parsed_avro_schema = build_schema('avro', avro_schema)
-
-    # Valid Avro message WITHOUT schema registry format
-    avro_message_no_sr = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
-
-    # When uses_schema_registry=False, this should work
-    result = deserialize_message(
-        MockedMessage(avro_message_no_sr, key), 'avro', parsed_avro_schema, False, 'json', '', False
-    )
-    assert result[0] is not None, "Should succeed when uses_schema_registry=False"
-    assert result[1] is None, "Should have no schema ID"
-
-    # When uses_schema_registry=True, this should fail (missing magic byte and schema ID)
-    result = deserialize_message(
-        MockedMessage(avro_message_no_sr, key), 'avro', parsed_avro_schema, True, 'json', '', False
-    )
-    assert result == (None, None, None, None), "Should fail when uses_schema_registry=True"
-
-    # Valid Avro message WITH schema registry format (schema ID 350 = 0x015E)
-    avro_message_with_sr = (
-        b'\x00\x00\x00\x01\x5e\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
-    )
-
-    # When uses_schema_registry=True, this should work
-    result = deserialize_message(
-        MockedMessage(avro_message_with_sr, key), 'avro', parsed_avro_schema, True, 'json', '', False
-    )
-    assert result[0] is not None, "Should succeed when uses_schema_registry=True"
-    assert result[1] == 350, "Should extract schema ID 350"
-    assert 'The Go Programming Language' in result[0]
-
-    # Test with wrong magic byte
-    wrong_magic_byte = b'\x01\x00\x00\x01\x5e\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
-    result = deserialize_message(
-        MockedMessage(wrong_magic_byte, key), 'avro', parsed_avro_schema, True, 'json', '', False
-    )
-    assert result == (None, None, None, None), "Should fail with wrong magic byte"
-
-    # Test with message too short (less than 5 bytes)
-    too_short = b'\x00\x00\x01'
-    result = deserialize_message(MockedMessage(too_short, key), 'avro', parsed_avro_schema, True, 'json', '', False)
-    assert result == (None, None, None, None), "Should fail when message too short for SR format"
-
-    # Test Protobuf with value_uses_schema_registry=True
-    protobuf_schema = (
-        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
-        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
-    )
-    parsed_protobuf_schema = build_schema('protobuf', protobuf_schema)
-
-    # Valid Protobuf message WITHOUT schema registry format
-    protobuf_message_no_sr = (
-        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
-        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
-    )
-
-    # When uses_schema_registry=False, this should work
-    result = deserialize_message(
-        MockedMessage(protobuf_message_no_sr, key), 'protobuf', parsed_protobuf_schema, False, 'json', '', False
-    )
-    assert result[0] is not None, "Protobuf should succeed when uses_schema_registry=False"
-    assert result[1] is None, "Should have no schema ID"
-
-    # When uses_schema_registry=True, this should fail
-    result = deserialize_message(
-        MockedMessage(protobuf_message_no_sr, key), 'protobuf', parsed_protobuf_schema, True, 'json', '', False
-    )
-    assert result == (None, None, None, None), "Protobuf should fail when uses_schema_registry=True but no SR format"
-
-    # Valid Protobuf message WITH schema registry format
-    # Confluent Protobuf wire format:
-    # [magic_byte][schema_id:4bytes][array_length:varint][index:varint][protobuf_payload]
-    protobuf_message_with_sr = (
-        b'\x00\x00\x00\x01\x5e'  # magic byte (0x00) + schema ID 350 (0x0000015e)
-        b'\x01'  # message indices array length = 1
-        b'\x00'  # message index = 0
-        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
-        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
-    )
-
-    # When uses_schema_registry=True, this should work
-    result = deserialize_message(
-        MockedMessage(protobuf_message_with_sr, key),
-        'protobuf',
-        parsed_protobuf_schema,
-        True,
-        'json',
-        '',
-        False,
-    )
-    assert result[0] is not None, "Protobuf should succeed when uses_schema_registry=True with SR format"
-    assert result[1] == 350, "Should extract schema ID 350"
-    assert 'The Go Programming Language' in result[0]
-
-    # Test key_uses_schema_registry=True
-    # When key has no schema registry format but key_uses_schema_registry=True, key decoding should fail
-    # but value should still succeed
-    result = deserialize_message(
-        MockedMessage(avro_message_no_sr, key), 'avro', parsed_avro_schema, False, 'json', '', True
-    )
-    # Value should succeed, but key should fail (returning None for key fields)
-    assert result[0] is not None, "Value should succeed"
-    assert result[2] is None, "Key should fail when key_uses_schema_registry=True but no SR format"
-    assert result[3] is None, "Key schema ID should be None when key fails"
-
-
-def test_protobuf_message_indices_with_schema_registry():
-    """Test Confluent Protobuf wire format with different message indices."""
-    key = b'{"test": "key"}'
-
-    # Schema with multiple message types and nested type
-    # message Book { int64 isbn = 1; string title = 2; }
-    # message Author { string name = 1; int32 age = 2; }
-    # message Library { message Section { string name = 1; } string name = 1; }
-    protobuf_schema = (
-        'CpMBCgxzY2hlbWEucHJvdG8SC2NvbS5leGFtcGxlIh8KBEJvb2sSCgoEaXNibhgBKAMSCwoFdGl0bGUY'
-        'AigJIh8KBkF1dGhvchIKCgRuYW1lGAEoCRIJCgNhZ2UYAigFIiwKB0xpYnJhcnkSCgoEbmFtZRgBKAka'
-        'FQoHU2VjdGlvbhIKCgRuYW1lGAEoCWIGcHJvdG8z'
-    )
-    parsed_schema = build_schema('protobuf', protobuf_schema)
-
-    # Test index [0] - Book message
-    book_payload = bytes.fromhex('08e80712095465737420426f6f6b')
-    book_msg = b'\x00\x00\x00\x01\x5e\x01\x00' + book_payload
-    result = deserialize_message(MockedMessage(book_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
-    assert result[0] and 'Test Book' in result[0]
-
-    # Test index [1] - Author message
-    author_payload = bytes.fromhex('0a0a4a616e6520536d697468101e')
-    author_msg = b'\x00\x00\x00\x01\x5e\x01\x01' + author_payload
-    result = deserialize_message(MockedMessage(author_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
-    assert result[0] and 'Jane Smith' in result[0] and '30' in result[0]
-
-    # Test nested [2, 0] - Library.Section message
-    section_payload = bytes.fromhex('0a0746696374696f6e')
-    section_msg = b'\x00\x00\x00\x01\x5e\x02\x02\x00' + section_payload
-    result = deserialize_message(MockedMessage(section_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
-    assert result[0] and 'Fiction' in result[0]
-
-
-def test_protobuf_empty_message_indices_with_schema_registry():
-    """Test Confluent Protobuf wire format with empty message indices array.
-
-    When message indices array is empty (encoded as varint 0x00), it should
-    default to using the first message type (index 0).
-
-    This test uses real message bytes from a Kafka topic to ensure the
-    deserialization handles the Confluent wire format correctly.
-    """
-    key = b'null'
-
-    # Schema from real Kafka topic - Purchase message
-    # message Purchase { string order_id = 1; string customer_id = 2; int64 order_date = 3;
-    #                    string city = 6; string country = 7; }
-    protobuf_schema = (
-        'CrkDCgxzY2hlbWEucHJvdG8SCHB1cmNoYXNlIpMBCghQdXJjaGFzZRIZCghvcmRlcl9pZBgBIAEoCVIH'
-        'b3JkZXJJZBIfCgtjdXN0b21lcl9pZBgCIAEoCVIKY3VzdG9tZXJJZBIdCgpvcmRlcl9kYXRlGAMgASgD'
-        'UglvcmRlckRhdGUSEgoEY2l0eRgGIAEoCVIEY2l0eRIYCgdjb3VudHJ5GAcgASgJUgdjb3VudHJ5ItIB'
-        'CgpQdXJjaGFzZVYyEiUKDnRyYW5zYWN0aW9uX2lkGAEgASgJUg10cmFuc2FjdGlvbklkEhcKB3VzZXJf'
-        'aWQYAiABKAlSBnVzZXJJZBIcCgl0aW1lc3RhbXAYAyABKANSCXRpbWVzdGFtcBIaCghsb2NhdGlvbhgE'
-        'IAEoCVIIbG9jYXRpb24SFgoGcmVnaW9uGAUgASgJUgZyZWdpb24SFgoGYW1vdW50GAYgASgBUgZhbW91'
-        'bnQSGgoIY3VycmVuY3kYByABKAlSCGN1cnJlbmN5QiwKG2RhdGFkb2cua2Fma2EuZXhhbXBsZS5wcm90'
-        'b0INUHVyY2hhc2VQcm90b2IGcHJvdG8z'
-    )
-    parsed_schema = build_schema('protobuf', protobuf_schema)
-
-    # Real message from Kafka topic "human-orders"
-    # Hex breakdown:
-    #   00 00 00 00 01 - Schema Registry header (magic byte + schema ID 1)
-    #   00             - Empty message indices array (varint 0 = 0 elements)
-    #   0a 05 31 32 33 34 35 ... - Protobuf payload (Purchase message)
-    message_hex = '0000000001000a0531323334351205363738393018f4eae0c4b8333a064d657869636f'
-    message_bytes = bytes.fromhex(message_hex)
-
-    # Test with uses_schema_registry=True (explicit)
-    result = deserialize_message(MockedMessage(message_bytes, key), 'protobuf', parsed_schema, True, 'json', '', False)
-    assert result[0], "Deserialization should succeed"
-    assert '12345' in result[0], "Should contain order_id"
-    assert '67890' in result[0], "Should contain customer_id"
-    assert 'Mexico' in result[0], "Should contain country"
-    assert result[1] == 1, "Should detect schema ID 1"
-
-    # Test with uses_schema_registry=False (fallback mode)
-    result_fallback = deserialize_message(
-        MockedMessage(message_bytes, key), 'protobuf', parsed_schema, False, 'json', '', False
-    )
-    assert result_fallback[0], "Fallback mode should also succeed"
-    assert '12345' in result_fallback[0], "Fallback should contain order_id"
-    assert result_fallback[1] == 1, "Fallback should detect schema ID 1"
-
-
-def mocked_time():
-    return 400
-
-
-@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
 @pytest.mark.parametrize(
-    'messages, value_format, value_schema, persistent_cache_read_content, '
-    'expected_persistent_cache_writes, expected_logs',
+    'timestamp_history_size, initial_cache, highwater_offset, '
+    'highwater_time, consumer_offset, expected_cache_size, expected_lag',
     [
         pytest.param(
-            [
-                MockedMessage(
-                    b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
-                    b'{"name": "Peter Parker"}',
-                    12,
-                ),
-                MockedMessage(
-                    b'{"name": "Bruce Banner", "age": 45, "transaction_amount": 456, "currency": "dollar"}',
-                    b'',
-                    13,
-                ),
-                None,
-            ],
-            'json',
-            '',
-            "config_1_id,config_id_2",
-            [],
-            [],
-            id='Does not retrieve messages a second time',
+            4,
+            {"topic1_0": {10: 1000.0, 20: 2000.0, 30: 3000.0}},
+            40,
+            4000.0,
+            25,
+            2,
+            1500.0,
+            id='consumer interpolated between compacted endpoints',
         ),
         pytest.param(
-            [
-                MockedMessage(
-                    b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
-                    b'{"name": "Peter Parker"}',
-                    12,
-                ),
-                MockedMessage(
-                    b'{"name": "Bruce Banner", "age": 45, "transaction_amount": 456, "currency": "dollar"}',
-                    b'',
-                    13,
-                ),
-                None,
-            ],
-            'json',
-            '',
-            "",
-            ["config_1_id"],
-            [
-                {
-                    'timestamp': 400,
-                    'technology': 'kafka',
-                    'cluster': 'cluster_id',
-                    'config_id': 'config_1_id',
-                    'topic': 'topic1',
-                    'partition': '0',
-                    'offset': '12',
-                    'feature': 'data_streams_messages',
-                    'message_value': '{"name": "Peter Parker", "age": 18, \
-"transaction_amount": 123, "currency": "dollar"}',
-                    'message_key': '{"name": "Peter Parker"}',
-                },
-                {
-                    'timestamp': 400,
-                    'technology': 'kafka',
-                    'cluster': 'cluster_id',
-                    'config_id': 'config_1_id',
-                    'topic': 'topic1',
-                    'partition': '0',
-                    'offset': '13',
-                    'feature': 'data_streams_messages',
-                    'message_value': '{"name": "Bruce Banner", "age": 45, \
-"transaction_amount": 456, "currency": "dollar"}',
-                },
-                {
-                    'timestamp': 400,
-                    'technology': 'kafka',
-                    'cluster': 'cluster_id',
-                    'config_id': 'config_1_id',
-                    'topic': 'topic1',
-                    'message': 'No more messages to retrieve',
-                    'live_messages_error': 'No more messages to retrieve',
-                    'feature': 'data_streams_messages',
-                },
-            ],
-            id='Retrieves messages from Kafka',
-        ),
-        # This is the serialized Protobuf representing:
-        # syntax = "proto3";
-        # package com.book;
-        # message Book {
-        #     int64 isbn = 1;
-        #     string title = 2;
-        #     string author = 3;
-        # }
-        pytest.param(
-            [
-                MockedMessage(
-                    b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e',
-                    b'{"name": "Peter Parker"}',
-                    12,
-                ),
-                None,
-            ],
-            'protobuf',
-            'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2JuEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z',
-            "",
-            ["config_1_id"],
-            [
-                {
-                    'timestamp': 400,
-                    'technology': 'kafka',
-                    'cluster': 'cluster_id',
-                    'config_id': 'config_1_id',
-                    'topic': 'topic1',
-                    'partition': '0',
-                    'offset': '12',
-                    'feature': 'data_streams_messages',
-                    'message_value': (
-                        '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  '
-                        '"author": "Alan Donovan"\n}'
-                    ),
-                    'message_key': '{"name": "Peter Parker"}',
-                },
-                {
-                    'timestamp': 400,
-                    'technology': 'kafka',
-                    'cluster': 'cluster_id',
-                    'config_id': 'config_1_id',
-                    'topic': 'topic1',
-                    'message': 'No more messages to retrieve',
-                    'live_messages_error': 'No more messages to retrieve',
-                    'feature': 'data_streams_messages',
-                },
-            ],
-            id='Retrieves Protobuf messages from Kafka',
+            4,
+            {"topic1_0": {10: 1000.0, 20: 2000.0, 30: 3000.0}},
+            40,
+            4000.0,
+            10,
+            2,
+            3000.0,
+            id='consumer at oldest endpoint, preserved by VW as minimum',
         ),
         pytest.param(
-            [
-                MockedMessage(
-                    b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan',
-                    b'{"name": "Peter Parker"}',
-                    12,
-                ),
-                None,
-            ],
-            'avro',
-            (
-                '{"type": "record", "name": "Book", "namespace": "com.book", '
-                '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-                '{"name": "author", "type": "string"}]}'
-            ),
-            "",
-            ["config_1_id"],
-            [
-                {
-                    'timestamp': 400,
-                    'technology': 'kafka',
-                    'cluster': 'cluster_id',
-                    'config_id': 'config_1_id',
-                    'topic': 'topic1',
-                    'partition': '0',
-                    'offset': '12',
-                    'feature': 'data_streams_messages',
-                    'message_value': (
-                        '{"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}'
-                    ),
-                    'message_key': '{"name": "Peter Parker"}',
-                },
-                {
-                    'timestamp': 400,
-                    'technology': 'kafka',
-                    'cluster': 'cluster_id',
-                    'config_id': 'config_1_id',
-                    'topic': 'topic1',
-                    'message': 'No more messages to retrieve',
-                    'live_messages_error': 'No more messages to retrieve',
-                    'feature': 'data_streams_messages',
-                },
-            ],
-            id='Retrieves Avro messages from Kafka',
+            4,
+            {"topic1_0": {10: 1000.0, 20: 2000.0, 30: 3000.0}},
+            40,
+            4000.0,
+            40,
+            2,
+            0.0,
+            id='consumer at highwater, zero lag, newest endpoint preserved by VW',
+        ),
+        pytest.param(
+            6,
+            {"topic1_0": {10: 1000.0, 20: 2000.0, 30: 3000.0, 40: 4000.0, 50: 5000.0}},
+            60,
+            6000.0,
+            35,
+            3,
+            2500.0,
+            id='larger history size compacts to 3 entries, consumer interpolated correctly',
         ),
     ],
 )
-def test_data_streams_messages(
-    messages,
-    value_format,
-    value_schema,
-    persistent_cache_read_content,
-    expected_persistent_cache_writes,
-    expected_logs,
+def test_check_compacts_timestamps_and_preserves_lag_accuracy(
     kafka_instance,
-    dd_run_check,
     check,
+    dd_run_check,
+    aggregator,
+    timestamp_history_size,
+    initial_cache,
+    highwater_offset,
+    highwater_time,
+    consumer_offset,
+    expected_cache_size,
+    expected_lag,
 ):
-    (
-        kafka_instance.update(
-            {
-                'consumer_groups': {},
-                'monitor_unlisted_consumer_groups': True,
-                'live_messages_configs': [
-                    {
-                        'kafka': {
-                            'cluster': 'cluster_id',
-                            'topic': 'topic1',
-                            'partition': 0,
-                            'start_offset': 0,
-                            'n_messages': 3,
-                            'value_format': value_format,
-                            'value_schema': value_schema,
-                            'key_format': 'json',
-                            'key_schema': '',
-                        },
-                        'id': 'config_1_id',
-                    }
-                ],
-            }
-        ),
-    )
-    mock_client = seed_mock_client(cluster_id="Cluster_id")
-    mock_client.get_next_message.side_effect = messages
+    # Collinear samples (equal spacing in both offset and time) so VW can drop any interior
+    # point without distorting the offset/timestamp curve or the interpolated lag.
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = timestamp_history_size
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, consumer_offset)])]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, highwater_offset)]
+    kafka_consumer_check.client = mock_client
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=encode_broker_timestamps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    with mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', return_value=highwater_time):
+        dd_run_check(kafka_consumer_check)
+
+    written = written_broker_timestamps(kafka_consumer_check)
+    assert len(written["topic1_0"]) == expected_cache_size
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=expected_lag, count=1)
+
+
+def test_check_prunes_timestamps_below_earliest_consumer_offset(kafka_instance, check, dd_run_check):
+    # During check(), _add_broker_timestamps prunes cached entries below the earliest consumer
+    # offset (keeping one anchor), so only relevant samples are retained.
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = 4
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 25)])]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    # Pre-seed the cache with 3 entries. Adding the new highwater at 40 fills the 4-entry
+    # budget and triggers compaction+pruning with the earliest consumer offset (25) as the floor.
+    initial_cache = {"topic1_0": {10: 1.0, 20: 2.0, 30: 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=encode_broker_timestamps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = written_broker_timestamps(kafka_consumer_check)
+    timestamps = written["topic1_0"]
+    assert 10 not in timestamps  # pruned: below the anchor; no consumer will interpolate here
+    assert 20 in timestamps  # anchor: largest sample at/below consumer floor of 25
+    assert 40 in timestamps  # new highwater sample
+
+
+def test_report_lag_in_time_interpolates_consumer_between_samples(kafka_instance, check, aggregator):
+    # A consumer whose offset falls between two cached broker samples is interpolated correctly.
+    kafka_instance['data_streams_enabled'] = True
     check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
     check.client = mock_client
 
-    def mocked_read_persistent_cache(key):
-        if key == DATA_STREAMS_MESSAGES_CACHE_KEY:
-            return persistent_cache_read_content
-        return ""
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 25}}
+    highwater_offsets = {("topic1", 0): 40}
+    broker_timestamps = {"topic1_0": {20: 2000.0, 30: 3000.0, 40: 4000.0}}
 
-    check.read_persistent_cache = mock.Mock(side_effect=mocked_read_persistent_cache)
-    check.write_persistent_cache = mock.Mock()
-    check.send_log = mock.Mock()
-
-    dd_run_check(check)
-
-    for content in expected_persistent_cache_writes:
-        assert mock.call(DATA_STREAMS_MESSAGES_CACHE_KEY, content) in check.write_persistent_cache.mock_calls
-    assert [mock.call(log) for log in expected_logs] == check.send_log.mock_calls
-
-
-def test_build_schema():
-    """Test build_schema function with various valid and invalid schemas."""
-
-    # Test JSON format (should return None)
-    assert build_schema('json', '') is None
-    assert build_schema('json', '{"some": "json"}') is None
-    assert build_schema('json', None) is None
-
-    # Test valid Avro schema
-    valid_avro_schema = (
-        '{"type": "record", "name": "Book", "namespace": "com.book", '
-        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-        '{"name": "author", "type": "string"}]}'
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
     )
-    avro_result = build_schema('avro', valid_avro_schema)
-    assert avro_result is not None
-    assert avro_result['type'] == 'record'
-    assert avro_result['name'] == 'Book'
-    assert avro_result['namespace'] == 'com.book'
 
-    # Test valid Protobuf schema
-    valid_protobuf_schema = (
-        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
-        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
+    # Consumer at 25 interpolates between offset 20 (t=2000) and offset 30 (t=3000) → t=2500.
+    # Producer at highwater=40 (t=4000); lag = 4000 - 2500 = 1500.
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=1500.0, count=1)
+
+
+def test_report_lag_in_time_no_lag_reported_immediately_after_reset(kafka_instance, check, aggregator):
+    # After a partition reset the entire cache is cleared, leaving only the new highwater entry.
+    # A single cached sample is insufficient for interpolation, so no lag is reported.
+    kafka_instance['data_streams_enabled'] = True
+    check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    check.client = mock_client
+
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 25}}
+    highwater_offsets = {("topic1", 0): 40}
+    broker_timestamps = {"topic1_0": {40: 4000.0}}  # only one entry — reset just happened
+
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
     )
-    protobuf_result = build_schema('protobuf', valid_protobuf_schema)
-    message_class = _get_protobuf_message_class(protobuf_result, [0])
-    message_instance = message_class()
-    assert hasattr(message_instance, 'isbn')
-    assert hasattr(message_instance, 'title')
-    assert hasattr(message_instance, 'author')
 
-    # Test unknown format
-    assert build_schema('unknown_format', 'some_schema') is None
+    aggregator.assert_metric("kafka.estimated_consumer_lag", count=0)
 
 
-def test_build_schema_error_cases():
-    """Test build_schema with various error cases and edge cases."""
+def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator):
+    # A consumer behind the low watermark can't read the out-of-retention messages between its
+    # committed offset and the low watermark, so lag-in-time is interpolated from the low watermark.
+    kafka_instance['data_streams_enabled'] = True
+    check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    check.client = mock_client
 
-    # Test Avro error cases
-    # Invalid JSON syntax
-    with pytest.raises(json.JSONDecodeError):
-        build_schema('avro', '{"invalid": json}')
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 5}}
+    highwater_offsets = {("topic1", 0): 100}
+    broker_timestamps = {"topic1_0": {50: 1000.0, 100: 1100.0}}
+    low_watermark_offsets = {("topic1", 0): 50}
 
-    # Valid JSON but incomplete schema (fastavro is permissive)
-    result = build_schema('avro', '{"type": "record"}')  # Missing name and fields
-    assert result is not None
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
+        low_watermark_offsets,
+    )
 
-    # Test Protobuf error cases
-    # Invalid base64 encoding
-    with pytest.raises(base64.binascii.Error):
-        build_schema('protobuf', 'invalid-base64!')
-
-    # Valid base64 but invalid protobuf schema
-    # This is a valid base64 string that doesn't represent a valid FileDescriptorSet
-    with pytest.raises(DecodeError):  # Will be a protobuf DecodeError
-        build_schema('protobuf', 'SGVsbG8gV29ybGQ=')  # "Hello World" in base64
-
-    # Valid base64 but empty schema - should fail when trying to access message types
-    # Create a minimal but empty FileDescriptorSet
-    empty_descriptor = descriptor_pb2.FileDescriptorSet()
-    empty_descriptor_bytes = empty_descriptor.SerializeToString()
-    empty_descriptor_b64 = base64.b64encode(empty_descriptor_bytes).decode('utf-8')
-
-    result = build_schema('protobuf', empty_descriptor_b64)
-    with pytest.raises(IndexError):  # Should fail when trying to access file[0]
-        _get_protobuf_message_class(result, [0])
+    # effective offset = max(5, 50) = 50 -> consumer_timestamp 1000, producer_timestamp 1100, lag 100.
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=100.0, count=1)
 
 
-def test_build_schema_none_handling():
-    """Test that build_schema functions properly handle None values."""
+def test_report_lag_in_time_caps_left_extrapolation_without_low_watermark(kafka_instance, check, aggregator):
+    # With cluster monitoring off there is no low watermark, so the consumer offset is used as-is.
+    # When it predates every cached sample, the lag is still bounded by the left-extrapolation cap
+    # (cache window + LAG_EXTRAPOLATION_LIMIT_SECONDS) rather than growing without limit.
+    kafka_instance['data_streams_enabled'] = True
+    check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    check.client = mock_client
 
-    # Test Avro schema with None - should raise TypeError
-    with pytest.raises(TypeError):
-        build_avro_schema(None)
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 0}}
+    highwater_offsets = {("topic1", 0): 1100}
+    broker_timestamps = {"topic1_0": {1000: 10000.0, 1100: 10100.0}}
 
-    # Test Protobuf schema with None - should raise TypeError or base64.binascii.Error
-    with pytest.raises((TypeError, base64.binascii.Error)):
-        build_protobuf_schema(None)
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
+    )
+
+    # Unclamped extrapolation would give consumer_timestamp 9000 (lag 1100). The cap raises it to
+    # oldest_sample - 600 = 9400, so lag = 10100 - 9400 = 700 (cache window 100 + 600s budget).
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=700.0, count=1)
+
+
+def test_check_prunes_floor_uses_minimum_offset_across_groups(kafka_instance, check, dd_run_check):
+    # The pruning floor for a partition is the minimum committed offset across all consumer groups,
+    # not just one. Using the wrong (higher) floor would prune entries that are still needed.
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = 4
+    kafka_instance['consumer_groups'] = {
+        'group1': {'topic1': [0]},
+        'group2': {'topic1': [0]},
+    }
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    # group1 at offset 25, group2 at offset 5 — correct floor is min(25, 5) = 5.
+    mock_client.list_consumer_group_offsets.return_value = [
+        ("group1", [("topic1", 0, 25)]),
+        ("group2", [("topic1", 0, 5)]),
+    ]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    # With floor=5 (correct min), nothing below 5 exists, so no pruning; VW keeps {10, 40}.
+    # With floor=25 (wrong, single-group), entry 10 would be pruned; VW keeps {20, 40} instead.
+    initial_cache = {"topic1_0": {10: 1.0, 20: 2.0, 30: 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=encode_broker_timestamps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = written_broker_timestamps(kafka_consumer_check)
+    timestamps = written["topic1_0"]
+    assert 10 in timestamps  # floor=5 means nothing below 10 exists, so 10 is the oldest endpoint
+    assert 40 in timestamps
+
+
+def test_check_prunes_anchor_at_floor_boundary(kafka_instance, check, dd_run_check):
+    # The pruning floor uses strict less-than, so an entry whose offset equals the floor is not
+    # counted as "below" — the anchor is the largest entry strictly below the floor.
+    # With floor=30 and cache {10,20,30}: below={10,20}, anchor=20, entry 10 pruned.
+    # (If <= were used instead, anchor would be 30 and entry 20 would be pruned.)
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = 4
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 30)])]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    initial_cache = {"topic1_0": {10: 1.0, 20: 2.0, 30: 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=encode_broker_timestamps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = written_broker_timestamps(kafka_consumer_check)
+    timestamps = written["topic1_0"]
+    assert 10 not in timestamps  # pruned: below the anchor
+    assert 20 in timestamps  # correct anchor (strict-< floor means 30 is not below 30)
+    assert 40 in timestamps  # new highwater
+
+
+def test_check_keeps_sole_entry_below_floor_as_anchor(kafka_instance, check, dd_run_check):
+    # When only one cached entry is below the floor it is the anchor and must be kept —
+    # removing it would leave the consumer with no lower bound for interpolation.
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = 3
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 25)])]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    initial_cache = {"topic1_0": {20: 2.0, 30: 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=encode_broker_timestamps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = written_broker_timestamps(kafka_consumer_check)
+    timestamps = written["topic1_0"]
+    assert 20 in timestamps  # sole entry below floor — kept as the anchor
+    assert 40 in timestamps  # new highwater
 
 
 def test_count_consumer_contexts(check, kafka_instance):
@@ -1571,3 +1033,171 @@ def test_kafka_cluster_id_override(check, kafka_instance, dd_run_check, aggregat
         for metric in aggregator.metrics(metric_name):
             for tag in expected_override_tags:
                 assert tag in metric.tags, f"{tag} not in {metric.tags} for {metric_name}"
+
+
+def _connection_error_events(check_instance):
+    return [
+        json.loads(c[0][0])
+        for c in check_instance.event_platform_event.call_args_list
+        if c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'connection_error'
+    ]
+
+
+def _setup_failing_check(check, kafka_instance, dd_run_check):
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = seed_mock_client()
+    kafka_consumer_check.client.request_metadata_update.side_effect = Exception('broker down')
+    kafka_consumer_check.event_platform_event = mock.Mock()
+    with pytest.raises(Exception, match="Unable to connect to the AdminClient"):
+        dd_run_check(kafka_consumer_check)
+    return kafka_consumer_check
+
+
+def test_connection_error_emits_dsm_event(check, kafka_instance, dd_run_check):
+    """A connection_error event is emitted when request_metadata_update fails and cluster monitoring is on."""
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
+
+    events = _connection_error_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['reason'] == 'broker down'
+    assert events[0]['bootstrap_servers'] == kafka_instance['kafka_connect_str']
+    assert 'collection_timestamp' in events[0]
+
+
+def test_connection_error_includes_cluster_id_override(check, kafka_instance, dd_run_check):
+    """connection_error event uses kafka_cluster_id_override when configured."""
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_instance['kafka_cluster_id_override'] = 'my-cluster'
+    kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
+
+    events = _connection_error_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['kafka_cluster_id'] == 'my-cluster'
+
+
+def test_connection_error_not_emitted_without_cluster_monitoring(check, kafka_instance, dd_run_check):
+    """No connection_error event is emitted when cluster monitoring is disabled."""
+    kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
+    assert not _connection_error_events(kafka_consumer_check)
+
+
+def test_connection_error_sink_failure_does_not_mask_broker_error(check, kafka_instance, dd_run_check):
+    """Sink failure during connection_error emission does not mask the original AdminClient error."""
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = seed_mock_client()
+    kafka_consumer_check.client.request_metadata_update.side_effect = Exception('broker down')
+    kafka_consumer_check.event_platform_event = mock.Mock(side_effect=Exception('intake unavailable'))
+    with pytest.raises(Exception, match="Unable to connect to the AdminClient"):
+        dd_run_check(kafka_consumer_check)
+
+
+def _offset_future(offset):
+    """Build a list_offsets future whose result() returns an object with the given offset."""
+    future = mock.MagicMock()
+    future.result.return_value = mock.MagicMock(offset=offset)
+    return future
+
+
+def _raising_future(exc):
+    """Build a list_offsets future whose result() raises the given exception."""
+    future = mock.MagicMock()
+    future.result.side_effect = exc
+    return future
+
+
+def test_get_partition_offsets_skips_unqueryable_partitions():
+    """A partition whose list_offsets future raises is skipped; healthy partitions are still returned."""
+    from confluent_kafka import KafkaException, TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="healthy_topic", partition=0): _offset_future(100),
+        TopicPartition(topic="bad_topic", partition=0): _raising_future(KafkaException("UNKNOWN_TOPIC_OR_PART")),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("healthy_topic", 0), ("bad_topic", 0)])
+
+    # (a) no exception escaped, (b) the healthy partition's offset is returned,
+    # (c) the unqueryable partition is skipped.
+    assert results == [("healthy_topic", 0, 100)]
+
+
+def test_get_partition_offsets_skips_partition_on_non_kafka_error():
+    """A non-Kafka error on one partition's future is skipped, not propagated, so the loop survives."""
+    from confluent_kafka import TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="healthy_topic", partition=0): _offset_future(100),
+        TopicPartition(topic="bad_topic", partition=0): _raising_future(RuntimeError("unexpected")),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("healthy_topic", 0), ("bad_topic", 0)])
+
+    assert results == [("healthy_topic", 0, 100)]
+
+
+def test_get_partition_offsets_raises_when_list_offsets_request_fails():
+    """A request/broker-level list_offsets failure propagates, aborting highwater collection."""
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.side_effect = RuntimeError("connection dropped")
+
+    with pytest.raises(RuntimeError):
+        client.get_partition_offsets([("topic_a", 0)])
+
+
+def test_get_partition_offsets_empty_partitions_returns_empty_without_request():
+    """No partitions means no list_offsets request is issued and an empty result is returned."""
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = mock.MagicMock()
+
+    results = client.get_partition_offsets([])
+
+    assert results == []
+    assert client._kafka_client.list_offsets.call_count == 0
+
+
+def test_get_partition_offsets_returns_all_healthy_partitions():
+    """When every list_offsets future succeeds, all partition offsets are returned."""
+    from confluent_kafka import IsolationLevel, TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="topic_a", partition=0): _offset_future(42),
+        TopicPartition(topic="topic_b", partition=1): _offset_future(7),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("topic_a", 0), ("topic_b", 1)])
+
+    assert sorted(results) == [("topic_a", 0, 42), ("topic_b", 1, 7)]
+    assert client._kafka_client.list_offsets.call_count == 1
+    # READ_UNCOMMITTED is load-bearing: READ_COMMITTED would return the LSO, not the true high watermark.
+    assert client._kafka_client.list_offsets.call_args.kwargs["isolation_level"] == IsolationLevel.READ_UNCOMMITTED
+    assert client._kafka_client.list_offsets.call_args.kwargs["request_timeout"] == 5

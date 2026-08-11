@@ -122,6 +122,8 @@ Send Prometheus Alertmanager alerts in the event stream. Natively, Alertmanager 
 
     <div class="alert alert-tip">
     Setting <code>send_resolved: true</code> (the default value) enables Alertmanager to send notifications when alerts are resolved in Prometheus. This is particularly important when using the <code>oncall_team</code> parameter to ensure that pages are marked as resolved. Note that resolved notifications may be delayed until the next <code>group_interval</code>.
+    <br><br>
+    Datadog deduplicates and auto-resolves On-Call pages using the event <code>aggregation_key</code>. Firing alerts (<code>alert_type: error</code> or <code>warning</code>) with the same <code>aggregation_key</code> are grouped into a single page; a resolved alert (<code>alert_type: success</code>) with the same key automatically closes it.
     </div>
 
 3. Restart the Prometheus and Alertmanager services.

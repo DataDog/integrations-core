@@ -169,8 +169,6 @@ WORKER_INSTANCE = {
 }
 INSTANCE = MAIN_INSTANCE  # back-compat default for unit tests
 
-E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro']}
-
 
 def get_compose_env_vars() -> dict[str, str]:
     """Variables consumed by ``tests/docker/docker-compose.yaml``'s ``${...}`` placeholders.

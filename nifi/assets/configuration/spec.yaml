@@ -16,12 +16,14 @@ files:
       value:
         type: string
         example: https://localhost:8443/nifi-api
+      fleet_configurable: false
     - name: collect_bulletins
       description: |
         Forward NiFi bulletins (errors, warnings) as Datadog events.
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: bulletin_min_level
       description: |
         Minimum bulletin severity level to forward.
@@ -29,6 +31,7 @@ files:
       value:
         type: string
         example: WARNING
+      fleet_configurable: false
     - name: collect_connection_metrics
       description: |
         Collect per-connection queue metrics.
@@ -36,6 +39,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: collect_processor_metrics
       description: |
         Collect per-processor metrics.
@@ -43,6 +47,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: process_groups
       description: |
         List of process group IDs to monitor. Use "root" for the root group.
@@ -53,6 +58,7 @@ files:
           type: string
         example:
           - root
+      fleet_configurable: false
     - name: max_connections
       description: |
         Maximum number of connections to collect metrics for.
@@ -60,6 +66,7 @@ files:
       value:
         type: integer
         example: 200
+      fleet_configurable: false
     - name: max_processors
       description: |
         Maximum number of processors to collect metrics for.
@@ -67,12 +74,14 @@ files:
       value:
         type: integer
         example: 200
+      fleet_configurable: false
     - name: max_bulletins_per_cycle
       description: |
         Maximum number of bulletins to forward per check run.
       value:
         type: integer
         example: 100
+      fleet_configurable: false
     - template: instances/http
       overrides:
         username.description: |

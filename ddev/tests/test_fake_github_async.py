@@ -9,7 +9,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import PullRequest
+from ddev.utils.github_async.models import Artifact, ArtifactsList, PullRequest
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 
@@ -266,3 +266,54 @@ async def test_calls_are_recorded_regardless_of_response(fake: FakeAsyncGitHubCl
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b', draft=False)
 
     assert len(fake.calls_to('create_pull_request')) == 2
+
+
+# ---------------------------------------------------------------------------
+# list_workflow_run_artifacts (async generator) and download_artifact (no return)
+# ---------------------------------------------------------------------------
+
+
+async def test_list_workflow_run_artifacts_yields_a_single_page(fake: FakeAsyncGitHubClient) -> None:
+    page = ArtifactsList(total_count=1, artifacts=[Artifact(id=1, name='a', expired=False)])
+    fake.mock_response('list_workflow_run_artifacts', page)
+
+    pages = [p async for p in fake.list_workflow_run_artifacts('o', 'r', 123)]
+
+    assert len(pages) == 1
+    assert isinstance(pages[0], GitHubResponse)
+    assert pages[0].data.artifacts[0].id == 1
+    assert fake.calls_to('list_workflow_run_artifacts')[0].kwargs['run_id'] == 123
+
+
+async def test_list_workflow_run_artifacts_yields_multiple_pages(fake: FakeAsyncGitHubClient) -> None:
+    page1 = ArtifactsList(total_count=2, artifacts=[Artifact(id=1, name='a', expired=False)])
+    page2 = ArtifactsList(total_count=2, artifacts=[Artifact(id=2, name='b', expired=False)])
+    fake.mock_response('list_workflow_run_artifacts', [page1, page2])
+
+    ids = [p.data.artifacts[0].id async for p in fake.list_workflow_run_artifacts('o', 'r', 123)]
+
+    assert ids == [1, 2]
+
+
+async def test_list_workflow_run_artifacts_raises_registered_exception(fake: FakeAsyncGitHubClient) -> None:
+    fake.mock_response('list_workflow_run_artifacts', RuntimeError('boom-list'))
+
+    with pytest.raises(RuntimeError, match='boom-list'):
+        [p async for p in fake.list_workflow_run_artifacts('o', 'r', 123)]
+
+
+async def test_download_artifact_returns_none_and_records_call(fake: FakeAsyncGitHubClient) -> None:
+    result = await fake.download_artifact('https://x/1/zip', '/tmp/dest')
+
+    assert result is None
+    call = fake.calls_to('download_artifact')[0]
+    assert call.kwargs['archive_download_url'] == 'https://x/1/zip'
+    assert call.kwargs['dest_path'] == '/tmp/dest'
+
+
+async def test_download_artifact_raises_for_matching_url(fake: FakeAsyncGitHubClient) -> None:
+    fake.mock_response('download_artifact', RuntimeError('boom-download'), archive_download_url='https://x/2/zip')
+
+    await fake.download_artifact('https://x/1/zip', '/tmp/dest')  # non-matching: default no-op
+    with pytest.raises(RuntimeError, match='boom-download'):
+        await fake.download_artifact('https://x/2/zip', '/tmp/dest')

@@ -1,0 +1,75 @@
+{
+  "results": [
+    {
+      "id": "0000000000000026",
+      "code": "20100100",
+      "name": "UNABLE_TO_RECEIVE_MDM_EVENTS",
+      "description": "Unable to receive mdm events from [10.0.1.250] .",
+      "severity": "MAJOR",
+      "original_severity": "MAJOR",
+      "timestamp": "2026-03-24T08:01:09.588Z",
+      "resource_type": "mdms",
+      "domain": "BLOCK",
+      "resource_name": "MDM1",
+      "resource_id": "0710bf1106383a00",
+      "service": "block-events-gw",
+      "details": {
+        "ip": "[10.0.1.250]"
+      },
+      "last_updated": "2026-03-24T08:01:09.588Z",
+      "cleared_timestamp": "0001-01-01T00:00:00Z",
+      "ack_timestamp": "0001-01-01T00:00:00Z",
+      "system_impact": "PowerFlex Block events will not appear in the management therefor risking missing problematic states. ",
+      "repair_flow": "Check the network connection between MDM and M&O, make sure ActiveMQ is running properly on the MDM",
+      "related_events": [
+        {
+          "id": "84d2a76d0c46f9e9",
+          "timestamp": "2026-03-24T08:01:09.588Z",
+          "resulting_severity": "INFORMATION",
+          "lifecycle_change": "RAISED",
+          "description": "Unable to connect to MDM Event bus with IP [10.0.1.250]"
+        }
+      ],
+      "category": "MAINTENANCE",
+      "send_to_srs": true,
+      "sent_to_srs_timestamp": "2026-03-24T08:01:09.588Z",
+      "srs_symptom_id": "PFX00005.0000001",
+      "snmp_code": "block-gateway-config.no-events-from-mdm"
+    },
+    {
+      "id": "0000000000000024",
+      "code": "20300003",
+      "name": "TRIAL_LICENSE_USED",
+      "description": "PowerFlex is using a trial license",
+      "severity": "MINOR",
+      "original_severity": "MINOR",
+      "timestamp": "2026-03-23T21:14:21.64Z",
+      "resource_type": "block-config",
+      "domain": "BLOCK",
+      "resource_name": "System:1fcf40fc60c6520f",
+      "resource_id": "1fcf40fc60c6520f",
+      "service": "block-alerts-server",
+      "details": {
+        "system-id": "1fcf40fc60c6520f"
+      },
+      "last_updated": "2026-03-23T21:14:21.64Z",
+      "cleared_timestamp": "0001-01-01T00:00:00Z",
+      "ack_timestamp": "0001-01-01T00:00:00Z",
+      "repair_flow": "Purchase a license and install it.",
+      "related_events": [
+        {
+          "id": "afb0a6e3e05add68",
+          "timestamp": "2026-03-23T21:14:21.64Z",
+          "resulting_severity": "MINOR",
+          "lifecycle_change": "RAISED",
+          "description": "PowerFlex is using a trial license"
+        }
+      ],
+      "category": "SOFTWARE",
+      "send_to_srs": true,
+      "sent_to_srs_timestamp": "2026-03-23T21:14:21.64Z",
+      "srs_symptom_id": "SIO01.02.0000003",
+      "snmp_code": "System.License.Trial_License_Used"
+    }
+  ]
+}

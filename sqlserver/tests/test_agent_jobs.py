@@ -5,10 +5,12 @@ import datetime
 import logging
 import time
 from copy import copy
+from unittest.mock import Mock
 
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.agent_history import AGENT_HISTORY_QUERY, SqlserverAgentHistory
 
 from .common import (
     CHECK_NAME,
@@ -19,165 +21,6 @@ logger = logging.getLogger(__name__)
 
 pytestmark = [pytest.mark.integration]
 
-
-AGENT_HISTORY_QUERY = """\
-WITH BASE AS (
-    SELECT {history_row_limit_filter}
-        j.name AS job_name,
-        CAST(sjh.job_id AS CHAR(36)) AS job_id,
-        sjh.step_name,
-        sjh.step_id,
-        sjh.instance_id AS step_instance_id,
-        DATEDIFF(SECOND, '19700101',
-            DATEADD(HOUR, sjh.run_time / 10000,
-                DATEADD(MINUTE, (sjh.run_time / 100) % 100,
-                    DATEADD(SECOND, sjh.run_time % 100,
-                        CAST(CAST(sjh.run_date AS CHAR(8)) AS DATETIME)
-                    )
-                )
-            )
-        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60 AS run_epoch_time,
-        (sjh.run_duration / 10000) * 3600
-        + ((sjh.run_duration % 10000) / 100) * 60
-        + (sjh.run_duration % 100) AS run_duration_seconds,
-        CASE sjh.run_status
-            WHEN 0 THEN 'Failed'
-            WHEN 1 THEN 'Succeeded'
-            WHEN 2 THEN 'Retry'
-            WHEN 3 THEN 'Canceled'
-            WHEN 4 THEN 'In Progress'
-            ELSE 'Unknown'
-        END AS step_run_status,
-        sjh.message
-    FROM msdb.dbo.sysjobhistory AS sjh
-    INNER JOIN msdb.dbo.sysjobs AS j ON j.job_id = sjh.job_id
-	ORDER BY step_instance_id DESC
-),
-COMPLETION_CTE AS (
-    SELECT
-        BASE.*,
-        MIN(CASE WHEN BASE.step_id = 0 THEN BASE.step_instance_id END) OVER (
-            PARTITION BY BASE.job_id
-            ORDER BY BASE.step_instance_id
-            ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
-        ) AS completion_instance_id
-    FROM BASE
-),
-HISTORY_ENTRIES AS (
-    SELECT
-        C.*,
-        DATEDIFF(SECOND, '19700101',
-            DATEADD(HOUR, c_sjh.run_time / 10000,
-                DATEADD(MINUTE, (c_sjh.run_time / 100) % 100,
-                    DATEADD(SECOND, c_sjh.run_time % 100,
-                        CAST(CAST(c_sjh.run_date AS CHAR(8)) AS DATETIME)
-                    )
-                )
-            )
-        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60
-        + (c_sjh.run_duration / 10000) * 3600
-        + ((c_sjh.run_duration % 10000) / 100) * 60
-        + (c_sjh.run_duration % 100) AS completion_epoch_time
-    FROM COMPLETION_CTE AS C
-    LEFT JOIN msdb.dbo.sysjobhistory AS c_sjh
-        ON c_sjh.instance_id = C.completion_instance_id
-		WHERE C.completion_instance_id IS NOT NULL
-)
-SELECT
-	job_name,
-	job_id,
-	step_name,
-	step_id,
-	step_instance_id,
-	completion_instance_id,
-	run_epoch_time,
-	run_duration_seconds,
-	step_run_status,
-	message
-FROM HISTORY_ENTRIES
-WHERE
-    completion_epoch_time > {last_collection_time_filter};
-"""
-
-
-FORMATTED_HISTORY_QUERY = """\
-WITH BASE AS (
-    SELECT TOP 10000
-        j.name AS job_name,
-        CAST(sjh.job_id AS CHAR(36)) AS job_id,
-        sjh.step_name,
-        sjh.step_id,
-        sjh.instance_id AS step_instance_id,
-        DATEDIFF(SECOND, '19700101',
-            DATEADD(HOUR, sjh.run_time / 10000,
-                DATEADD(MINUTE, (sjh.run_time / 100) % 100,
-                    DATEADD(SECOND, sjh.run_time % 100,
-                        CAST(CAST(sjh.run_date AS CHAR(8)) AS DATETIME)
-                    )
-                )
-            )
-        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60 AS run_epoch_time,
-        (sjh.run_duration / 10000) * 3600
-        + ((sjh.run_duration % 10000) / 100) * 60
-        + (sjh.run_duration % 100) AS run_duration_seconds,
-        CASE sjh.run_status
-            WHEN 0 THEN 'Failed'
-            WHEN 1 THEN 'Succeeded'
-            WHEN 2 THEN 'Retry'
-            WHEN 3 THEN 'Canceled'
-            WHEN 4 THEN 'In Progress'
-            ELSE 'Unknown'
-        END AS step_run_status,
-        sjh.message
-    FROM msdb.dbo.sysjobhistory AS sjh
-    INNER JOIN msdb.dbo.sysjobs AS j ON j.job_id = sjh.job_id
-	ORDER BY step_instance_id DESC
-),
-COMPLETION_CTE AS (
-    SELECT
-        BASE.*,
-        MIN(CASE WHEN BASE.step_id = 0 THEN BASE.step_instance_id END) OVER (
-            PARTITION BY BASE.job_id
-            ORDER BY BASE.step_instance_id
-            ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
-        ) AS completion_instance_id
-    FROM BASE
-),
-HISTORY_ENTRIES AS (
-    SELECT
-        C.*,
-        DATEDIFF(SECOND, '19700101',
-            DATEADD(HOUR, c_sjh.run_time / 10000,
-                DATEADD(MINUTE, (c_sjh.run_time / 100) % 100,
-                    DATEADD(SECOND, c_sjh.run_time % 100,
-                        CAST(CAST(c_sjh.run_date AS CHAR(8)) AS DATETIME)
-                    )
-                )
-            )
-        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60
-        + (c_sjh.run_duration / 10000) * 3600
-        + ((c_sjh.run_duration % 10000) / 100) * 60
-        + (c_sjh.run_duration % 100) AS completion_epoch_time
-    FROM COMPLETION_CTE AS C
-    LEFT JOIN msdb.dbo.sysjobhistory AS c_sjh
-        ON c_sjh.instance_id = C.completion_instance_id
-		WHERE C.completion_instance_id IS NOT NULL
-)
-SELECT
-	job_name,
-	job_id,
-	step_name,
-	step_id,
-	step_instance_id,
-	completion_instance_id,
-	run_epoch_time,
-	run_duration_seconds,
-	step_run_status,
-	message
-FROM HISTORY_ENTRIES
-WHERE
-    completion_epoch_time > 10000;
-"""
 
 AGENT_ACTIVITY_DURATION_QUERY = """\
     SELECT
@@ -404,14 +247,49 @@ def test_connection_with_agent_history(instance_docker):
 
     with check.connection.open_managed_default_connection(KEY_PREFIX):
         with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-            last_collection_time_filter = "{last_collection_time}".format(last_collection_time=10000)
-            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
-            query = AGENT_HISTORY_QUERY.format(
-                history_row_limit_filter=history_row_limit_filter,
-                last_collection_time_filter=last_collection_time_filter,
-            )
-            cursor.execute(query)
-            assert query == FORMATTED_HISTORY_QUERY
+            cursor.execute(AGENT_HISTORY_QUERY, (10000, 10000))
+
+
+class AgentHistoryCursor:
+    description = [('run_epoch_time',), ('run_duration_seconds',)]
+
+    def __init__(self) -> None:
+        self.executions: list[tuple[str, tuple[int, ...]]] = []
+
+    def execute(self, query: str, params: tuple[int, ...]) -> None:
+        self.executions.append((query, params))
+
+    def fetchall(self) -> list[tuple[int, int]]:
+        return []
+
+
+class AgentHistoryCheck:
+    name = CHECK_NAME
+
+    def __init__(self) -> None:
+        self.log = Mock()
+        self.count = Mock()
+        self.gauge = Mock()
+        self.histogram = Mock()
+
+
+def test_agent_history_query_parameterizes_last_collection_time() -> None:
+    check = AgentHistoryCheck()
+    agent_history = object.__new__(SqlserverAgentHistory)
+    agent_history._check = check
+    agent_history.log = check.log
+    agent_history.history_row_limit = 10000
+    agent_history._last_collection_time = 10000
+    cursor = AgentHistoryCursor()
+
+    agent_history._get_new_agent_job_history(cursor)
+
+    query, params = cursor.executions[0]
+    assert "SELECT TOP (?)" in query
+    assert "completion_epoch_time > ?;" in query
+    assert "SELECT TOP 10000" not in query
+    assert "completion_epoch_time > 10000;" not in query
+    assert params == (10000, 10000)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -466,23 +344,11 @@ def test_history_output(instance_docker, sa_conn):
     check.initialize_connection()
     with check.connection.open_managed_default_connection(KEY_PREFIX):
         with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-            last_collection_time_filter = "{last_collection_time}".format(last_collection_time=now - 1)
-            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
-            query = AGENT_HISTORY_QUERY.format(
-                history_row_limit_filter=history_row_limit_filter,
-                last_collection_time_filter=last_collection_time_filter,
-            )
-            cursor.execute(query)
+            cursor.execute(AGENT_HISTORY_QUERY, (10000, now - 1))
             results = cursor.fetchall()
             assert len(results) == 7, "should have 7 steps associated with completed jobs"
             assert len(results[0]) == 10, "should have 10 columns per step"
-            last_collection_time_filter = "{last_collection_time}".format(last_collection_time=now + 1)
-            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
-            query = AGENT_HISTORY_QUERY.format(
-                history_row_limit_filter=history_row_limit_filter,
-                last_collection_time_filter=last_collection_time_filter,
-            )
-            cursor.execute(query)
+            cursor.execute(AGENT_HISTORY_QUERY, (10000, now + 1))
             results = cursor.fetchall()
             assert len(results) == 4, (
                 "should only have 4 steps associated with completed jobs when filtering with last collection time"

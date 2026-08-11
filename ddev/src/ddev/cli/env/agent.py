@@ -12,14 +12,21 @@ if TYPE_CHECKING:
     from ddev.e2e.agent.interface import AgentInterface
 
 
-def _invoke_check_with_retry(agent: AgentInterface, args: list[str], *, retries: int = 3, backoff: float = 0.5) -> None:
+def _invoke_check_with_retry(
+    agent: AgentInterface,
+    args: list[str],
+    *,
+    env_vars: dict[str, str] | None = None,
+    retries: int = 3,
+    backoff: float = 0.5,
+) -> None:
     """Invoke ``agent check`` with bounded retry to absorb transient autodiscovery-reload races."""
     import subprocess
     import time
 
     for attempt in range(retries + 1):
         try:
-            agent.invoke(args)
+            agent.invoke(args, env_vars=env_vars)
             return
         except subprocess.CalledProcessError:
             if attempt >= retries:
@@ -31,6 +38,29 @@ def _invoke_check_with_retry(agent: AgentInterface, args: list[str], *, retries:
             time.sleep(backoff)
 
 
+def _validate_env_vars(ctx: click.Context, param: click.Parameter, value: tuple[str, ...]) -> dict[str, str] | None:
+    env_vars: dict[str, str] = {}
+    for entry in value:
+        key, sep, env_value = entry.partition('=')
+        if not sep or not key:
+            raise click.BadParameter(f'`{entry}` is not in KEY=VALUE format', ctx=ctx, param=param)
+        env_vars[key] = env_value
+
+    return env_vars or None
+
+
+def _sync_restored_config(app: Application, agent: AgentInterface) -> None:
+    import sys
+
+    original_error = sys.exception()
+    try:
+        agent.sync_config()
+    except Exception as e:
+        if original_error is None:
+            raise
+        app.display_warning(f'Unable to restore the Agent configuration: {e}')
+
+
 @click.command(
     short_help='Invoke the Agent', context_settings={'help_option_names': [], 'ignore_unknown_options': True}
 )
@@ -38,16 +68,31 @@ def _invoke_check_with_retry(agent: AgentInterface, args: list[str], *, retries:
 @click.argument('environment')
 @click.argument('args', required=True, nargs=-1)
 @click.option('--config-file', hidden=True)
+@click.option(
+    '--env',
+    'env_vars',
+    multiple=True,
+    metavar='KEY=VALUE',
+    callback=_validate_env_vars,
+    help='Set an environment variable for this invocation only (may be repeated)',
+)
 @click.pass_obj
-def agent(app: Application, *, intg_name: str, environment: str, args: tuple[str, ...], config_file: str | None):
+def agent(
+    app: Application,
+    *,
+    intg_name: str,
+    environment: str,
+    args: tuple[str, ...],
+    config_file: str | None,
+    env_vars: dict[str, str] | None,
+):
     """
     Invoke the Agent.
     """
     import subprocess
 
-    from ddev.e2e.agent import get_agent_interface
+    from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
-    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EMetadata
     from ddev.utils.fs import Path
 
     integration = app.repo.integrations.get(intg_name)
@@ -57,8 +102,7 @@ def agent(app: Application, *, intg_name: str, environment: str, args: tuple[str
         app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
     metadata = env_data.read_metadata()
-    agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-    agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
+    agent = create_agent_interface(app, integration, environment, metadata, env_data.config_file)
 
     full_args = list(args)
     trigger_run = False
@@ -75,11 +119,13 @@ def agent(app: Application, *, intg_name: str, environment: str, args: tuple[str
     if config_file is None or not trigger_run:
         try:
             if trigger_run:
-                _invoke_check_with_retry(agent, full_args)
+                _invoke_check_with_retry(agent, full_args, env_vars=env_vars)
             else:
-                agent.invoke(full_args)
+                agent.invoke(full_args, env_vars=env_vars)
         except subprocess.CalledProcessError as e:
             app.abort(code=e.returncode)
+        except NotImplementedError as e:
+            app.abort(str(e))
 
         return
 
@@ -90,14 +136,20 @@ def agent(app: Application, *, intg_name: str, environment: str, args: tuple[str
     if not env_data.config_file.is_file():
         try:
             env_data.write_config(config)
-            _invoke_check_with_retry(agent, full_args)
+            _invoke_check_with_retry(agent, full_args, env_vars=env_vars)
+        except NotImplementedError as e:
+            app.abort(str(e))
         finally:
             env_data.config_file.unlink()
+            _sync_restored_config(app, agent)
     else:
         temp_config_file = env_data.config_file.parent / f'{env_data.config_file.name}.bak.example'
         env_data.config_file.replace(temp_config_file)
         try:
             env_data.write_config(config)
-            _invoke_check_with_retry(agent, full_args)
+            _invoke_check_with_retry(agent, full_args, env_vars=env_vars)
+        except NotImplementedError as e:
+            app.abort(str(e))
         finally:
             temp_config_file.replace(env_data.config_file)
+            _sync_restored_config(app, agent)

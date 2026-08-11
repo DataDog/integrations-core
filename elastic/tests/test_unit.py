@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import logging
+from copy import deepcopy
 
 import mock
 import pytest
@@ -11,9 +11,9 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
-from datadog_checks.elastic.metrics import INDEX_STATS_METRICS, stats_for_version
+from datadog_checks.elastic.metrics import INDEX_STATS_METRICS
 
-from .common import URL, get_fixture_path
+from .common import URL
 
 log = logging.getLogger('test_elastic')
 
@@ -123,30 +123,56 @@ def test_aws_auth_no_url(instance, expected_aws_host, expected_aws_service):
         ESCheck('elastic', {}, instances=[instance])
 
 
-def test_get_template_metrics(aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('templates.json'))
+def test_get_template_metrics(aggregator, instance, dd_run_check, mock_es_endpoints):
+    mock_es_endpoints()
     check = ESCheck('elastic', {}, instances=[instance])
 
-    check._get_template_metrics(False, [])
+    dd_run_check(check)
 
     aggregator.assert_metric("elasticsearch.templates.count", value=6)
 
 
-def test_get_template_metrics_raise_exception(aggregator, instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=MockResponse(status_code=403),
-    ):
-        check = ESCheck('elastic', {}, instances=[instance])
-        # Make sure we do not throw an exception and move on
-        check._get_template_metrics(False, [])
+def test_get_template_metrics_raise_exception(aggregator, instance, dd_run_check, mock_es_endpoints):
+    # A failing templates endpoint must not abort the check; the metric is simply not emitted.
+    mock_es_endpoints({'{}/_cat/templates?format=json'.format(URL): [MockResponse(status_code=403)]})
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    dd_run_check(check)
 
     aggregator.assert_metric("elasticsearch.templates.count", count=0)
 
 
-def test_get_value_from_path():
-    value = get_value_from_path({"5": {"b": [0, 1, 2, {"a": ["foo"]}]}}, "5.b.3.a.0")
-    assert value == "foo"
+@pytest.mark.parametrize(
+    'value, path, expected',
+    [
+        pytest.param({"5": {"b": [0, 1, 2, {"a": ["foo"]}]}}, "5.b.3.a.0", "foo", id='nested_path'),
+        pytest.param({"count": 42, "_shards": {}}, "", {"count": 42, "_shards": {}}, id='empty_path_returns_root'),
+        pytest.param({"count": 42, "_shards": {}}, None, {"count": 42, "_shards": {}}, id='none_path_returns_root'),
+    ],
+)
+def test_get_value_from_path(value, path, expected):
+    assert get_value_from_path(value, path) == expected
+
+
+@pytest.mark.parametrize('data_path', ['', None], ids=['empty_data_path', 'omitted_data_path'])
+def test_run_custom_queries_root_data_path(aggregator, instance, dd_run_check, mock_es_endpoints, data_path):
+    # A flat endpoint such as `/my-index/_count` returns `{"count": N, "_shards": {...}}`, so the metric
+    # lives at the response root. Omitting or emptying `data_path` must resolve `value_path` against it.
+    instance = deepcopy(instance)
+    column = {'value_path': 'count', 'name': 'elasticsearch.custom.count', 'type': 'gauge'}
+    custom_query = {'endpoint': '/my-index/_count', 'columns': [column]}
+    if data_path is not None:
+        custom_query['data_path'] = data_path
+    instance['custom_queries'] = [custom_query]
+
+    mock_es_endpoints(
+        {'{}/my-index/_count'.format(URL): [MockResponse(json_data={'count': 42, '_shards': {'total': 5}})]}
+    )
+
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.count', value=42, count=1)
 
 
 def test__get_data_throws_authentication_error(instance):
@@ -230,12 +256,11 @@ def test_collect_template_metrics_returns_valid_result(instance, version, return
     assert check._collect_template_metrics(es_version=version) == return_value
 
 
-def test_v8_process_stats_data(aggregator, instance):
+def test_v8_process_stats_data(aggregator, instance, dd_run_check, mock_es_endpoints):
+    mock_es_endpoints()
     check = ESCheck('elastic', {}, instances=[instance])
-    v8 = [8, 0, 0]
-    with open(get_fixture_path('stats_v8.json')) as f:
-        stats_data = json.load(f)
-        check._process_stats_data(stats_data, stats_for_version(v8), {})
+
+    dd_run_check(check)
 
     aggregator.assert_metric("elasticsearch.breakers.inflight_requests.tripped", metric_type=aggregator.GAUGE)
     aggregator.assert_metric("elasticsearch.breakers.inflight_requests.overhead", metric_type=aggregator.GAUGE)

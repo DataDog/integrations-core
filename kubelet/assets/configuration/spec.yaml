@@ -17,6 +17,7 @@ files:
       value:
         type: string
         example: http://10.8.0.1:10255/metrics/cadvisor
+      fleet_configurable: false
     - name: kubelet_metrics_endpoint
       description: |
         URL of the kubelet metrics prometheus endpoint
@@ -24,6 +25,7 @@ files:
       value:
         type: string
         example: http://10.8.0.1:10255/metrics
+      fleet_configurable: false
     - name: probes_metrics_endpoint
       description: |
         URL of the probe metrics prometheus endpoint
@@ -31,6 +33,7 @@ files:
       value:
         type: string
         example: http://10.8.0.1:10255/metrics/probes
+      fleet_configurable: false
     - name: cadvisor_port
       description: |
         Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
@@ -41,6 +44,7 @@ files:
       value:
         type: integer
         example: 4194
+      fleet_configurable: false
     - name: enabled_rates
       description: |
         Allow list of rate type metrics to collect from cadvisor.
@@ -51,6 +55,7 @@ files:
         example:
         - cpu.*
         - network.*
+      fleet_configurable: false
     - name: enabled_gauges
       description: |
         Allow list of gauge type metrics to collect from cadvisor.
@@ -60,6 +65,7 @@ files:
           type: string
         example:
         - filesystem.*
+      fleet_configurable: false
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.required: false
@@ -93,6 +99,7 @@ files:
         value:
           type: string
           example: http://10.8.0.1:10255/metrics/cadvisor
+        fleet_configurable: false
       - name: kubelet_metrics_endpoint
         description: |
           URL of the kubelet metrics prometheus endpoint
@@ -100,6 +107,7 @@ files:
         value:
           type: string
           example: http://10.8.0.1:10255/metrics
+        fleet_configurable: false
       - name: probes_metrics_endpoint
         description: |
           URL of the probe metrics prometheus endpoint
@@ -107,6 +115,7 @@ files:
         value:
           type: string
           example: http://10.8.0.1:10255/metrics/probes
+        fleet_configurable: false
       - name: cadvisor_port
         description: |
           Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
@@ -117,6 +126,7 @@ files:
         value:
           type: integer
           example: 4194
+        fleet_configurable: false
       - name: enabled_rates
         description: |
           Allow list of rate type metrics to collect from cadvisor.
@@ -127,6 +137,7 @@ files:
           example:
           - cpu.*
           - network.*
+        fleet_configurable: false
       - name: enabled_gauges
         description: |
           Allow list of gauge type metrics to collect from cadvisor.
@@ -136,6 +147,7 @@ files:
             type: string
           example:
           - filesystem.*
+        fleet_configurable: false
       - template: instances/openmetrics_legacy
         overrides:
           prometheus_url.required: false

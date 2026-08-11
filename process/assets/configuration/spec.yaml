@@ -39,6 +39,7 @@ files:
         value:
           type: boolean
           example: true
+        fleet_configurable: false
       - name: procfs_path
         description: |
           Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
@@ -48,6 +49,7 @@ files:
           require_trusted_provider: true
           example: /proc
           display_default: null
+        fleet_configurable: false
       - template: init_config/default
     - template: instances
       options:
@@ -79,6 +81,7 @@ files:
           Note: Exactly one of search_string, pid or pid_file must be specified per instance.
         value:
           type: integer
+        fleet_configurable: false
       - name: pid_file
         description: |
           A Pid file to match.
@@ -93,8 +96,10 @@ files:
           require_trusted_provider: true
       - name: exact_match
         description: |
-          If you want to match your `search_string` on a substring within the list of process names, 
-          set this to true. This is equivalent to running `ps -e` on Linux or `Get-Process` on Windows.
+          Set this to true to match `search_string` against the exact process name, as reported by
+          the operating system's process list (for example, the names shown by `ps -e` on Linux).
+          On Windows, these process names include the file extension, so `search_string` must include
+          it as well (for example, `agent.exe` rather than `agent`).
 
           If you want to match your `search_string` on a substring within the list of process names
           and the command line, set this to false. This is equivalent to running `ps -ef` on Linux or
@@ -132,6 +137,7 @@ files:
           example:
             warning: [<BELOW_VALUE> , <TOP_VALUE>]
             critical: [<BELOW_VALUE> , <TOP_VALUE>]
+        fleet_configurable: false
       - name: collect_children
         description: |
           If true, the check also collects metrics from all child processes of a matched process.
@@ -163,6 +169,7 @@ files:
         value:
           type: integer
           example: 120
+        fleet_configurable: false
       - name: use_oneshot
         description: |
           If set to `true`, the check uses `psutil.Process().oneshot()` to collect and cache process metrics. 
@@ -170,4 +177,5 @@ files:
         value:
           type: boolean
           example: true
+        fleet_configurable: false
       - template: instances/default

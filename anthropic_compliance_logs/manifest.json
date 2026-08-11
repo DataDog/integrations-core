@@ -33,6 +33,16 @@
         "media_type": "image"
       }
     ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/cloud-siem-claude-compliance-api-integration/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://claude.com/blog/compliance-api-security-partners"
+      }
+    ],
     "classifier_tags": [
       "Category::AI/ML",
       "Category::Log Collection",

@@ -1,7 +1,7 @@
 {
     "author_name": "Datadog",
     "title": "Kubernetes Cluster Autoscaler Overview",
-    "description": "This dashboard provides insights into your Kubernetes Cluster Autoscaler.\nYou can use this dashbaord to check the cluster autoscaler state and resource consumption.\nYou can also use it to check for downsacaling and upscaling.",
+    "description": "This dashboard provides insights into your Kubernetes Cluster Autoscaler.\nYou can use this dashboard to check the cluster autoscaler state and resource consumption.\nYou can also use it to check for downscaling and upscaling.",
     "widgets": [
         {
             "id": 3375620455700908,

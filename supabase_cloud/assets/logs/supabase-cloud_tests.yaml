@@ -40,17 +40,17 @@ tests:
           host: "db-olhhkaxwbugmyoapfigo"
           parsed:
            -
-            transaction_id: 0
             backend_type: "not initialized"
+            connection_from: "::1:34635"
             error_severity: "LOG"
             process_id: 2508255
-            connection_from: "::1:34635"
-            sql_state_code: "00000"
             query_id: 0
-            session_start_time: "2026-01-08 12:31:23 UTC"
             session_id: "695fa39b.2645df"
             session_line_num: 1
+            session_start_time: "2026-01-08 12:31:23 UTC"
+            sql_state_code: "00000"
             timestamp: "2026-01-08 12:31:23.990 UTC"
+            transaction_id: 0
         project: "olhhkaxwbugmyoapfigo"
         timestamp: 1767875483990000
       service: "postgres_logs"
@@ -548,21 +548,21 @@ tests:
           host: "db-olhhkaxwbugmyoapfigo"
           parsed:
            -
-            transaction_id: 0
             backend_type: "client backend"
+            command_tag: "authentication"
+            connection_from: "::1:39047"
+            database_name: "postgres"
             error_severity: "LOG"
             process_id: 2508097
-            sql_state_code: "00000"
-            database_name: "postgres"
             query_id: 3396884957797646000
-            user_name: "supabase_admin"
-            session_start_time: "2026-01-08 12:24:12 UTC"
             session_id: "695fa1ec.264541"
             session_line_num: 3
-            command_tag: "authentication"
-            virtual_transaction_id: "43/67688"
-            connection_from: "::1:39047"
+            session_start_time: "2026-01-08 12:24:12 UTC"
+            sql_state_code: "00000"
             timestamp: "2026-01-08 12:24:12.132 UTC"
+            transaction_id: 0
+            user_name: "supabase_admin"
+            virtual_transaction_id: "43/67688"
         project: "olhhkaxwbugmyoapfigo"
         timestamp: 1767875052132000
       service: "postgres_logs"
@@ -652,22 +652,22 @@ tests:
           host: "db-olhhkaxwbugmyoapfigo"
           parsed:
            -
-            transaction_id: 0
+            application_name: "psql"
             backend_type: "client backend"
+            command_tag: "SELECT"
+            connection_from: "2601:140:9700:2530:e902:9d6c:db7e:7d61:50670"
+            database_name: "postgres"
             error_severity: "LOG"
             process_id: 2508445
-            sql_state_code: "00000"
-            database_name: "postgres"
             query_id: 5730846908687305000
-            user_name: "postgres"
-            session_start_time: "2026-01-08 12:42:16 UTC"
             session_id: "695fa628.26469d"
             session_line_num: 14
-            command_tag: "SELECT"
-            virtual_transaction_id: "4/0"
-            application_name: "psql"
-            connection_from: "2601:140:9700:2530:e902:9d6c:db7e:7d61:50670"
+            session_start_time: "2026-01-08 12:42:16 UTC"
+            sql_state_code: "00000"
             timestamp: "2026-01-08 12:42:32.078 UTC"
+            transaction_id: 0
+            user_name: "postgres"
+            virtual_transaction_id: "4/0"
         project: "olhhkaxwbugmyoapfigo"
         timestamp: 1767876152078000
       service: "postgres_logs"

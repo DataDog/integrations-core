@@ -19,6 +19,10 @@ def get_github_token():
     return os.environ.get('DD_GITHUB_TOKEN', '') or os.environ.get('GH_TOKEN', '') or os.environ.get('GITHUB_TOKEN', '')
 
 
+def get_anthropic_api_key():
+    return os.environ.get('DD_ANTHROPIC_API_KEY', '') or os.environ.get('ANTHROPIC_API_KEY', '')
+
+
 class ConfigurationError(Exception):
     def __init__(self, *args, location):
         self.location = location
@@ -71,6 +75,7 @@ class RootConfig(LazilyParsedConfig):
         self._field_pypi = FIELD_TO_PARSE
         self._field_trello = FIELD_TO_PARSE
         self._field_terminal = FIELD_TO_PARSE
+        self._field_ai = FIELD_TO_PARSE
         self._field_upgrade_check = FIELD_TO_PARSE
 
     @property
@@ -330,6 +335,27 @@ class RootConfig(LazilyParsedConfig):
     def terminal(self, value):
         self.raw_data['terminal'] = value
         self._field_terminal = FIELD_TO_PARSE
+
+    @property
+    def ai(self):
+        if self._field_ai is FIELD_TO_PARSE:
+            if 'ai' in self.raw_data:
+                ai = self.raw_data['ai']
+                if not isinstance(ai, dict):
+                    self.raise_error('must be a table')
+
+                self._field_ai = AIConfig(ai, ('ai',))
+            else:
+                ai = {}
+                self.raw_data['ai'] = ai
+                self._field_ai = AIConfig(ai, ('ai',))
+
+        return self._field_ai
+
+    @ai.setter
+    def ai(self, value):
+        self.raw_data['ai'] = value
+        self._field_ai = FIELD_TO_PARSE
 
 
 class RepoConfig(LazilyParsedConfig):
@@ -780,3 +806,53 @@ class StylesConfig(LazilyParsedConfig):
     def spinner(self, value):
         self.raw_data['spinner'] = value
         self._field_spinner = FIELD_TO_PARSE
+
+
+class AIConfig(LazilyParsedConfig):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._field_anthropic_api_key = FIELD_TO_PARSE
+        self._field_flow_dirs = FIELD_TO_PARSE
+
+    @property
+    def anthropic_api_key(self):
+        if self._field_anthropic_api_key is FIELD_TO_PARSE:
+            if 'anthropic_api_key' in self.raw_data:
+                key = self.raw_data['anthropic_api_key']
+                if not isinstance(key, str):
+                    self.raise_error('must be a string')
+
+                self._field_anthropic_api_key = key
+            else:
+                self._field_anthropic_api_key = get_anthropic_api_key()
+
+        return self._field_anthropic_api_key
+
+    @anthropic_api_key.setter
+    def anthropic_api_key(self, value):
+        self.raw_data['anthropic_api_key'] = value
+        self._field_anthropic_api_key = FIELD_TO_PARSE
+
+    @property
+    def flow_dirs(self):
+        if self._field_flow_dirs is FIELD_TO_PARSE:
+            if 'flow_dirs' in self.raw_data:
+                flow_dirs = self.raw_data['flow_dirs']
+                if not isinstance(flow_dirs, list):
+                    self.raise_error('must be an array')
+
+                for i, entry in enumerate(flow_dirs):
+                    if not isinstance(entry, str):
+                        self.raise_error('must be a string', extra_steps=(str(i),))
+
+                self._field_flow_dirs = flow_dirs
+            else:
+                self._field_flow_dirs = self.raw_data['flow_dirs'] = []
+
+        return self._field_flow_dirs
+
+    @flow_dirs.setter
+    def flow_dirs(self, value):
+        self.raw_data['flow_dirs'] = value
+        self._field_flow_dirs = FIELD_TO_PARSE

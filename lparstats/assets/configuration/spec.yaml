@@ -13,6 +13,7 @@ files:
       value:
         type: string
         example: lparstats
+      fleet_configurable: false
     - name: sudo
       description: |
         Run lparstat with sudo. Requires adding dd-agent to the sudoers file:
@@ -24,18 +25,21 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: memory_stats
       description: Collect physical memory and page statistics (lparstat -m).
       required: false
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: page_stats
       description: Include page-level statistics (-pw flag). Requires memory_stats to be true.
       required: false
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: memory_entitlements
       description: |
         Collect per-I/O-memory-pool entitlement stats (lparstat -m -eR).
@@ -44,6 +48,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: hypervisor
       description: |
         Collect hypervisor call statistics (lparstat -H).
@@ -52,10 +57,12 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: spurr_utilization
       description: Collect SPURR physical processor utilization (lparstat -E).
       required: false
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - template: instances/default

@@ -20,7 +20,34 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['tls_ca_cert', 'tls_cert', 'tls_crlfile', 'tls_private_key'])
+SECURE_FIELD_NAMES = frozenset(
+    [
+        'kafka_connect_tls_ca_cert',
+        'kafka_connect_tls_cert',
+        'kafka_connect_tls_key',
+        'sasl_kerberos_keytab',
+        'schema_registry_tls_ca_cert',
+        'schema_registry_tls_cert',
+        'schema_registry_tls_key',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_crlfile',
+        'tls_private_key',
+    ]
+)
+
+
+class KafkaConnectOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    custom_headers: Optional[MappingProxyType[str, str]] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
 
 
 class MetricPatterns(BaseModel):
@@ -79,7 +106,15 @@ class InstanceConfig(BaseModel):
     kafka_client_api_version: Optional[str] = None
     kafka_cluster_id_override: Optional[str] = None
     kafka_configs_refresh_interval: Optional[int] = None
+    kafka_connect_oauth_token_provider: Optional[KafkaConnectOauthTokenProvider] = None
+    kafka_connect_password: Optional[str] = None
     kafka_connect_str: Union[str, tuple[str, ...]]
+    kafka_connect_tls_ca_cert: Optional[str] = None
+    kafka_connect_tls_cert: Optional[str] = None
+    kafka_connect_tls_key: Optional[str] = None
+    kafka_connect_tls_verify: Optional[bool] = None
+    kafka_connect_url: Optional[Union[str, tuple[str, ...]]] = None
+    kafka_connect_username: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     monitor_all_broker_highwatermarks: Optional[bool] = None

@@ -1,1 +1,0 @@
-Modernize the `ddev create -t check` scaffold template to use Python 3.13 idioms.

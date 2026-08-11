@@ -323,8 +323,16 @@ class CreatePullRequestStep(PortStep):
         import httpx
         from pydantic import ValidationError
 
+        from ddev.utils.github_errors import GitHubAuthenticationError
+
         try:
             asyncio.run(self._create_pr())
+        except GitHubAuthenticationError:
+            if self.pr_url:
+                self.app.display_warning(
+                    f'Pull request created at {self.pr_url} but labeling failed. Add the labels manually on the PR.'
+                )
+            raise
         except (httpx.HTTPError, ValidationError) as e:
             if self.pr_url:
                 raise PortStepError(
@@ -410,6 +418,8 @@ def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) ->
     import httpx
     from pydantic import ValidationError
 
+    from ddev.utils.github_errors import GitHubAuthenticationError
+
     if not app.config.github.token:
         app.abort(
             'GitHub token required to resolve a PR reference. Set `github.token`, or pass the '
@@ -420,15 +430,12 @@ def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) ->
     app.display_info(f'Resolving PR #{pr_number} via GitHub...')
     try:
         pr = asyncio.run(_fetch_pr(app.config.github.token, owner, repo, pr_number))
+    except GitHubAuthenticationError:
+        raise
     except httpx.HTTPStatusError as exc:
         status = exc.response.status_code
         if status == 404:
             raise _PRNotFound(str(pr_number)) from exc
-        if status in (401, 403):
-            app.abort(
-                f'GitHub denied the request for PR #{pr_number} (HTTP {status}). '
-                'Check that `github.token` is set and has `repo` scope.'
-            )
         app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')
     except (httpx.HTTPError, ValidationError) as exc:
         app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')
@@ -695,7 +702,7 @@ def resolve_port_plan(
         dry_run=dry_run,
     )
 
-    app.output(_format_plan_summary(plan), stderr=True)
+    app.output(_format_plan_summary(app, plan), stderr=True)
 
     if not dry_run and not click.confirm('Continue?'):
         app.abort('Did not get confirmation, aborting.')
@@ -705,7 +712,6 @@ def resolve_port_plan(
 
 def display_completion_summary(app: Application, plan: PortPlan, *, pr_url: str | None) -> None:
     """Print a panel summarising the port outcome."""
-    text = Text()
     rows: list[tuple[str, str]] = [
         ('Commit', f'{plan.full_sha[:10]} - {plan.clean_subject}'),
         ('Target', plan.target_branch),
@@ -714,17 +720,13 @@ def display_completion_summary(app: Application, plan: PortPlan, *, pr_url: str 
     if pr_url is not None:
         rows.append(('Pull request', pr_url))
 
-    label_width = max(len(label) for label, _ in rows)
-    for i, (label, value) in enumerate(rows):
-        if i:
-            text.append('\n')
-        text.append(f'{label}:'.ljust(label_width + 2), style='bold')
-        text.append(value)
-
-    app.output(Panel(text, title='Backport completed', title_align='left', border_style='cyan'), stderr=True)
+    app.output(
+        Panel(app.labeled_lines(rows), title='Backport completed', title_align='left', border_style='cyan'),
+        stderr=True,
+    )
 
 
-def _format_plan_summary(plan: PortPlan) -> Text:
+def _format_plan_summary(app: Application, plan: PortPlan) -> Text:
     text = Text()
     text.append('Configuration:', style='bold')
 
@@ -739,10 +741,8 @@ def _format_plan_summary(plan: PortPlan) -> Text:
         ('Verify commit', str(plan.verify)),
         ('Dry run', str(plan.dry_run)),
     ]
-    for label, value in rows:
-        text.append('\n  ')
-        text.append(f'{label}:', style='bold')
-        text.append(f' {value}')
+    text.append('\n')
+    text.append_text(app.labeled_lines(rows, indent='  ', align=False))
     return text
 
 
