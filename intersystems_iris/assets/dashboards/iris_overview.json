@@ -164,7 +164,102 @@
     "layout": { "x": 9, "y": 1, "width": 3, "height": 1 }
   }
 ] }, "layout": { "x": 0, "y": 2, "width": 12, "height": 3 } },
-    { "id": 3000, "definition": { "title": "Instance health trends", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 5, "width": 12, "height": 10 } },
+    { "id": 3000, "definition": { "title": "Instance health trends", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [
+  {
+    "id": 3001,
+    "definition": {
+      "title": "CPU", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","min","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.cpu.usage{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "CPU usage", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "avg:intersystems_iris.cpu.pct{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "CPU %", "formula": "query2" } ],
+          "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+  },
+  {
+    "id": 3002,
+    "definition": {
+      "title": "Memory", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","min","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.phys.mem_percent_used{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Physical memory %", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "avg:intersystems_iris.page_space_percent_used{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Page space %", "formula": "query2" } ],
+          "style": { "palette": "warm", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+  },
+  {
+    "id": 3003,
+    "definition": {
+      "title": "License usage (per instance)", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","min","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "max:intersystems_iris.license.percent_used{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "License used %", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+  },
+  {
+    "id": 3004,
+    "definition": {
+      "title": "Cache efficiency", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","min","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.cache_efficiency{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Cache efficiency", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
+  },
+  {
+    "id": 3005,
+    "definition": {
+      "title": "Write daemon activity", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","min","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.wd.cycle_time{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Cycle time", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "avg:intersystems_iris.wd.write_time{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Write time", "formula": "query2" } ],
+          "style": { "palette": "purple", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 0, "y": 6, "width": 6, "height": 3 }
+  },
+  {
+    "id": 3006,
+    "definition": {
+      "title": "Journal activity", "type": "timeseries", "show_legend": true, "legend_layout": "auto", "legend_columns": ["avg","min","max","value"], "time": {},
+      "requests": [
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query1", "query": "avg:intersystems_iris.jrn.block_per_sec{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Blocks/sec", "formula": "query1" } ],
+          "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" } },
+        { "display_type": "line", "response_format": "timeseries",
+          "queries": [ { "data_source": "metrics", "name": "query2", "query": "avg:intersystems_iris.jrn.entry_per_sec{$env,$host} by {host}" } ],
+          "formulas": [ { "alias": "Entries/sec", "formula": "query2" } ],
+          "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" } }
+      ]
+    },
+    "layout": { "x": 6, "y": 6, "width": 6, "height": 3 }
+  }
+] }, "layout": { "x": 0, "y": 5, "width": 12, "height": 10 } },
     { "id": 4000, "definition": { "title": "Mirror (high availability)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 15, "width": 12, "height": 8 } },
     { "id": 5000, "definition": { "title": "ECP (distributed cache)", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 23, "width": 12, "height": 4 } },
     { "id": 6000, "definition": { "title": "Interoperability", "show_title": true, "type": "group", "layout_type": "ordered", "widgets": [] }, "layout": { "x": 0, "y": 27, "width": 12, "height": 15 } },
