@@ -529,13 +529,19 @@ def test_run_after_cancel_returns_immediately(pg_instance):
     ],
 )
 def test_async_job_registry_matches_config(pg_instance, dbm, data_observability_enabled, expected_jobs):
-    """Only the jobs enabled by the instance config are registered with the check."""
+    """Only the jobs enabled by the instance config are built and registered."""
     pg_instance['dbm'] = dbm
     pg_instance['data_observability'] = {'enabled': data_observability_enabled}
 
     check = PostgreSql('postgres', {}, [pg_instance])
 
-    assert list(check._async_job_registry) == expected_jobs
+    registered = check._async_job_registry
+    assert list(registered) == expected_jobs
+    # Each attribute holds the registered job, or None when the config does not enable it.
+    assert check.statement_metrics is registered.get('query-metrics')
+    assert check.statement_samples is registered.get('query-samples')
+    assert check.metadata_samples is registered.get('database-metadata')
+    assert check.data_observability is registered.get('data-observability')
 
 
 def test_initialize_statement_metrics_replaces_registered_job(pg_instance):
@@ -552,6 +558,18 @@ def test_initialize_statement_metrics_replaces_registered_job(pg_instance):
     assert isinstance(check.statement_metrics, PostgresStatementMetricsV2)
     assert check._async_job_registry['query-metrics'] is check.statement_metrics
     assert list(check._async_job_registry) == ['query-metrics', 'query-samples', 'database-metadata']
+
+
+def test_initialize_statement_metrics_noop_without_dbm(pg_instance):
+    """Without DBM there is no query metrics job to build."""
+    pg_instance['dbm'] = False
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.version = VersionInfo(14, 0, 0)
+    check._initialize_statement_metrics()
+
+    assert check.statement_metrics is None
+    assert check._async_job_registry == {}
 
 
 def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):

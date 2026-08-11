@@ -164,11 +164,11 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        # Initialize statement metrics collector before server version is known.
-        self.statement_metrics = PostgresStatementMetrics(self, self._config)
-        self.statement_samples = PostgresStatementSamples(self, self._config)
-        self.metadata_samples = PostgresMetadata(self, self._config)
-        self.data_observability = PostgresDataObservability(self, self._config)
+        # Jobs the configuration does not enable are left as None rather than built and ignored.
+        self.statement_metrics = None
+        self.statement_samples = None
+        self.metadata_samples = None
+        self.data_observability = None
         self._register_async_jobs()
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
@@ -524,15 +524,16 @@ class PostgreSql(DatabaseCheck):
             self.log.debug("cancel() deferred finalize, check is still running")
 
     def _register_async_jobs(self):
-        """Register the async jobs active for this check's configuration."""
+        """Build and register the async jobs enabled by this check's configuration."""
         if self._config.dbm:
-            self.register_async_job(self.statement_metrics)
-            self.register_async_job(self.statement_samples)
-            self.register_async_job(self.metadata_samples)
-        elif self._config.data_observability.enabled:
-            self.register_async_job(self.metadata_samples)
+            # Built before the server version is known; _initialize_statement_metrics replaces it
+            # with the collector that suits the version.
+            self.statement_metrics = self.register_async_job(PostgresStatementMetrics(self, self._config))
+            self.statement_samples = self.register_async_job(PostgresStatementSamples(self, self._config))
+        if self._config.dbm or self._config.data_observability.enabled:
+            self.metadata_samples = self.register_async_job(PostgresMetadata(self, self._config))
         if self._config.data_observability.enabled:
-            self.register_async_job(self.data_observability)
+            self.data_observability = self.register_async_job(PostgresDataObservability(self, self._config))
 
     def _finalize(self):
         """Tear down check state. Must not run while check() is executing."""
@@ -626,6 +627,8 @@ class PostgreSql(DatabaseCheck):
         self.set_metadata('version', self.raw_version)
 
     def _initialize_statement_metrics(self):
+        if not self._config.dbm:
+            return
         custom_pgss_view = self._config.pg_stat_statements_view != 'pg_stat_statements'
         if self._config.query_metrics.incremental_query_metrics and self.version < V10:
             self.log.warning(
@@ -643,14 +646,14 @@ class PostgreSql(DatabaseCheck):
 
         if self._config.query_metrics.incremental_query_metrics and self.version >= V10 and not custom_pgss_view:
             self.log.info("Using incremental query metrics collector")
-            self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
+            collector = PostgresStatementMetricsV2(self, self._config)
         else:
             if not self._config.query_metrics.incremental_query_metrics:
                 self.log.info("Using legacy query metrics collector (full pg_stat_statements load)")
-            self.statement_metrics = PostgresStatementMetrics(self, self._config)
-        # Both collectors register under the same job name, so this replaces the placeholder
-        # instance registered during __init__, before the server version was known.
-        self._register_async_jobs()
+            collector = PostgresStatementMetrics(self, self._config)
+        # Both collectors use the same job name, so registering replaces the instance built in
+        # _register_async_jobs.
+        self.statement_metrics = self.register_async_job(collector)
 
     def initialize_is_aurora(self):
         if self.is_aurora is None:
