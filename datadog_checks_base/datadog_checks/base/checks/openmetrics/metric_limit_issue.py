@@ -82,7 +82,7 @@ def _severity(check: AgentCheck, ratio: float) -> int:
 
 
 def _remediation(*, legacy: bool) -> dict[str, str | list[dict[str, int | str]]]:
-    metric_filter_options = '`metrics` / `ignore_metrics`' if legacy else '`metrics` / `exclude_metrics`'
+    metric_filter_options = 'metrics / ignore_metrics' if legacy else 'metrics / exclude_metrics'
     return {
         'summary': (
             "Reduce what this endpoint sends to Datadog, or raise this instance's metric limit after checking the cost."
@@ -97,13 +97,13 @@ def _remediation(*, legacy: bool) -> dict[str, str | list[dict[str, int | str]]]
             },
             {
                 'order': 2,
-                'text': 'Only then raise `max_returned_metrics` on this instance to a value above the observed count.',
+                'text': 'Only then raise max_returned_metrics on this instance to a value above the observed count.',
             },
             {
                 'order': 3,
                 'text': (
-                    'Verify: enable `debug_metrics.metric_contexts: true` on the instance to publish '
-                    '`datadog.agent.metrics.contexts.total` and `.limit`, and confirm the total stays below the limit '
+                    'Verify: enable debug_metrics.metric_contexts: true on the instance to publish '
+                    'datadog.agent.metrics.contexts.total and .limit, and confirm the total stays below the limit '
                     'at peak. Consider a monitor at 80% of the limit.'
                 ),
             },
