@@ -13,13 +13,13 @@ install-from-source() {
 }
 
 # Rust toolchain, needed to build cryptography from source: it no longer ships macOS x86_64 wheels.
-# rustup and the toolchain go under the prefix so they are kept in the builder cache, and the shims
-# are linked into ${DD_PREFIX_PATH}/bin, which build.py already puts on PATH.
-# To bump: set the versions, then take the hash for each target from
+# Installed under the prefix to keep it in the builder cache, with the shims linked into
+# ${DD_PREFIX_PATH}/bin, which build.py already puts on PATH.
+# RUST_VERSION bumps on its own; the hashes are rustup-init's, so they only change with RUSTUP_VERSION:
 # https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_TARGET}/rustup-init.sha256
 # renovate: datasource=github-releases depName=rust-lang/rust
 RUST_VERSION="1.91.0"
-# renovate: datasource=github-releases depName=rust-lang/rustup
+# renovate: datasource=github-tags depName=rust-lang/rustup
 RUSTUP_VERSION="1.26.0"
 case "$(uname -m)" in
     x86_64)
