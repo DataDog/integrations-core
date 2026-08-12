@@ -164,11 +164,13 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        # Initialize statement metrics collector before server version is known.
-        self.statement_metrics = PostgresStatementMetrics(self, self._config)
-        self.statement_samples = PostgresStatementSamples(self, self._config)
-        self.metadata_samples = PostgresMetadata(self, self._config)
-        self.data_observability = PostgresDataObservability(self, self._config)
+        # Only tests read these; the registry owns the jobs. Remove them once DatabaseCheck
+        # exposes a public job accessor. Jobs the configuration does not enable stay None.
+        self.statement_metrics = None
+        self.statement_samples = None
+        self.metadata_samples = None
+        self.data_observability = None
+        self._register_async_jobs()
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
@@ -510,7 +512,7 @@ class PostgreSql(DatabaseCheck):
         cancel().
         """
         self.log.debug("Marking check as cancelled")
-        self._cancel_async_jobs()
+        self.cancel_async_jobs()
         needs_finalize = False
         with self._cancel_lock:
             self._cancelled = True
@@ -522,31 +524,22 @@ class PostgreSql(DatabaseCheck):
         else:
             self.log.debug("cancel() deferred finalize, check is still running")
 
-    @property
-    def _async_jobs(self):
-        """Return the async jobs active for this check's configuration."""
-        jobs = []
+    def _register_async_jobs(self):
+        """Build and register the async jobs enabled by this check's configuration."""
         if self._config.dbm:
-            jobs.extend([self.statement_metrics, self.statement_samples, self.metadata_samples])
-        elif self._config.data_observability.enabled:
-            jobs.append(self.metadata_samples)
+            # Built before the server version is known; _initialize_statement_metrics replaces it
+            # with the collector that suits the version.
+            self.statement_metrics = self.register_async_job(PostgresStatementMetrics(self, self._config))
+            self.statement_samples = self.register_async_job(PostgresStatementSamples(self, self._config))
+        if self._config.dbm or self._config.data_observability.enabled:
+            self.metadata_samples = self.register_async_job(PostgresMetadata(self, self._config))
         if self._config.data_observability.enabled:
-            jobs.append(self.data_observability)
-        return jobs
-
-    def _cancel_async_jobs(self):
-        """Signal async jobs to stop. Safe to call while check() is running."""
-        for job in self._async_jobs:
-            job.cancel()
+            self.data_observability = self.register_async_job(PostgresDataObservability(self, self._config))
 
     def _finalize(self):
         """Tear down check state. Must not run while check() is executing."""
         self.log.debug("Finalizing check: closing connections and clearing state")
-        for job in self._async_jobs:
-            if job._job_loop_future:
-                job._job_loop_future.result()
-                job._job_loop_future = None
-            job._shutdown()
+        self.shutdown_async_jobs()
         self._clean_state()
         self.check_initializations.clear()
         # TODO: move diagnosis cleanup into AgentCheck.cancel() in the base class
@@ -635,6 +628,8 @@ class PostgreSql(DatabaseCheck):
         self.set_metadata('version', self.raw_version)
 
     def _initialize_statement_metrics(self):
+        if not self._config.dbm:
+            return
         custom_pgss_view = self._config.pg_stat_statements_view != 'pg_stat_statements'
         if self._config.query_metrics.incremental_query_metrics and self.version < V10:
             self.log.warning(
@@ -652,11 +647,14 @@ class PostgreSql(DatabaseCheck):
 
         if self._config.query_metrics.incremental_query_metrics and self.version >= V10 and not custom_pgss_view:
             self.log.info("Using incremental query metrics collector")
-            self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
+            collector = PostgresStatementMetricsV2(self, self._config)
         else:
             if not self._config.query_metrics.incremental_query_metrics:
                 self.log.info("Using legacy query metrics collector (full pg_stat_statements load)")
-            self.statement_metrics = PostgresStatementMetrics(self, self._config)
+            collector = PostgresStatementMetrics(self, self._config)
+        # Both collectors use the same job name, so registering replaces the instance built in
+        # _register_async_jobs.
+        self.statement_metrics = self.register_async_job(collector)
 
     def initialize_is_aurora(self):
         if self.is_aurora is None:
@@ -1242,14 +1240,7 @@ class PostgreSql(DatabaseCheck):
             if not self._config.only_custom_queries:
                 self._collect_stats(tags)
                 if not self._cancelled:
-                    if self._config.dbm:
-                        self.statement_metrics.run_job_loop(tags)
-                        self.statement_samples.run_job_loop(tags)
-                        self.metadata_samples.run_job_loop(tags)
-                    elif self._config.data_observability.enabled:
-                        self.metadata_samples.run_job_loop(tags)
-                    if self._config.data_observability.enabled:
-                        self.data_observability.run_job_loop(tags)
+                    self.run_async_jobs(tags)
                 if self._config.collect_wal_metrics is True:
                     # collect wal metrics for pg < 10 only when explicitly enabled
                     # (requires local filesystem access to the WAL directory)

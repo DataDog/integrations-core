@@ -154,6 +154,8 @@ datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations 
 datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring-agent @DataDog/agent-integrations
 **/base/utils/db/statement_metrics.py               @DataDog/database-monitoring-agent @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/query_metrics/                     @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/query_metrics/         @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/                                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/*.md                                      @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /postgres/manifest.json                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
