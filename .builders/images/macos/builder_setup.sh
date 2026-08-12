@@ -12,6 +12,32 @@ install-from-source() {
     bash "install-from-source.sh" --prefix="${DD_PREFIX_PATH}" "$@"
 }
 
+# Rust toolchain, needed to build cryptography from source now that it only publishes macOS
+# wheels for arm64. The Linux and Windows images use rustup, but its shims resolve the toolchain
+# through RUSTUP_HOME at build time; installing the standalone distribution under the prefix keeps
+# the binaries in the builder cache and on PATH without any extra environment variables.
+RUST_VERSION="1.91.0"
+case "$(uname -m)" in
+    x86_64)
+        RUST_TARGET="x86_64-apple-darwin"
+        RUST_SHA256="b329b458c8074023e5f6934bcd6c0bbef5075ac0090548c3d45a7de82e0c5b0c"
+        ;;
+    arm64)
+        RUST_TARGET="aarch64-apple-darwin"
+        RUST_SHA256="ec42d93940933340ee55e67003699ebe264aa82d7cf0d5ae08100c06b1bfacfa"
+        ;;
+    *)
+        echo "Unsupported architecture for the Rust toolchain: $(uname -m)" >&2
+        exit 1
+        ;;
+esac
+RUST_DIST="rust-${RUST_VERSION}-${RUST_TARGET}"
+curl --retry 5 --fail "https://static.rust-lang.org/dist/${RUST_DIST}.tar.gz" -o "/tmp/${RUST_DIST}.tar.gz"
+echo "${RUST_SHA256}  /tmp/${RUST_DIST}.tar.gz" | sha256sum --check
+tar -C /tmp -xf "/tmp/${RUST_DIST}.tar.gz"
+"/tmp/${RUST_DIST}/install.sh" --prefix="${DD_PREFIX_PATH}" --components="rustc,cargo,rust-std-${RUST_TARGET}"
+rm -rf "/tmp/${RUST_DIST}" "/tmp/${RUST_DIST}.tar.gz"
+
 # mqi
 IBM_MQ_VERSION=9.2.4.0-IBM-MQ-DevToolkit
 curl --retry 5 --fail "https://s3.amazonaws.com/dd-agent-omnibus/ibm-mq-backup/${IBM_MQ_VERSION}-MacX64.pkg" -o /tmp/mq_client.pkg
