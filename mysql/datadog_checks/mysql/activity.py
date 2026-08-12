@@ -7,7 +7,7 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
-from typing import Dict, List  # noqa: F401
+from typing import Any, Dict, List  # noqa: F401
 
 import pymysql
 
@@ -324,8 +324,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         return normalized_rows
 
     @staticmethod
-    def _ended_before(row, event_timer_start):
-        # type: (Dict[str], int | None) -> bool
+    def _ended_before(row: dict[str, Any], event_timer_start: int | None) -> bool:
         """
         Whether the statement in `row` finished before `event_timer_start`, the start of the most
         recent statement seen for the same thread. Such a row is a leftover that
