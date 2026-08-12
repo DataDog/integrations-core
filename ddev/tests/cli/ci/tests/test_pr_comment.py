@@ -260,6 +260,101 @@ def test_all_passing_final_snapshot_has_no_alert() -> None:
     assert "Failures" not in body
 
 
+def test_a_job_missing_its_artifacts_is_not_reported_as_a_pass() -> None:
+    """A job can conclude ``success`` while its artifacts never arrive, so its result is unknown.
+
+    Nothing failed, but the run is not a clean pass either: reporting it as passed would present an
+    unestablished result as a green one, which is the one thing the unavailable section exists to
+    prevent.
+    """
+    unavailable = job(attempt(error=ProgressError.NO_ARTIFACTS))
+    progress = DispatcherProgress(batches=(batch("batch-01", unavailable),), done=True)
+
+    body = render_comment(progress)
+
+    assert "## ⚠️ Dispatcher tests · results incomplete" in body
+    assert "Dispatcher tests · passed" not in body
+    assert "⚠️ Unavailable results" in body
+    # Not a failure: there is no failed job to point at, so a CAUTION would promise a section that
+    # never gets rendered.
+    assert "[!CAUTION]" not in body
+    assert "[!WARNING]" in body
+
+
+def test_incomplete_signals_agree_with_each_other() -> None:
+    """The heading, alert and footer must tell the same story, as they do for an unfinished run."""
+    progress = DispatcherProgress(
+        batches=(batch("batch-01", job(attempt(error=ProgressError.NO_ARTIFACTS))),), done=True
+    )
+
+    body = render_comment(progress)
+
+    assert "results incomplete" in body
+    assert "[!WARNING]" in body
+    assert "unavailable results" in body.rsplit("<sub>", 1)[1]
+    # Still a final answer, so the footer says so rather than reading as still running.
+    assert "Final result" in body
+    assert "updates automatically" not in body
+
+
+def test_a_batch_error_without_a_failed_status_reads_as_incomplete() -> None:
+    """A workflow can conclude successfully and still report nothing to gather.
+
+    That used to render as a failure with an empty failures section, because the batch error was
+    counted as a failure while nothing was there to list.
+    """
+    progress = DispatcherProgress(
+        batches=(batch("batch-01", status=Status.SUCCESS, error=ProgressError.NO_JOB_RESULTS),),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    assert "## ⚠️ Dispatcher tests · results incomplete" in body
+    assert "Dispatcher tests · passed" not in body
+    assert "reported no job results" in body
+    assert "[!CAUTION]" not in body
+
+
+def test_a_real_failure_outranks_an_unavailable_result() -> None:
+    """A failure is the more actionable of the two, so it decides the heading."""
+    progress = DispatcherProgress(
+        batches=(
+            batch(
+                "batch-01",
+                job(attempt(Status.FAILURE, reports=(failing_report("test_connection"),)), target="postgres"),
+                job(attempt(error=ProgressError.NO_ARTIFACTS), target="vault"),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    assert "## ❌ Dispatcher tests · failed" in body
+    assert "results incomplete" not in body
+    assert "[!CAUTION]" in body
+    assert "[!WARNING]" not in body
+    # Both are still reported; only the heading has to choose.
+    assert "❌ Failures" in body
+    assert "⚠️ Unavailable results" in body
+
+
+@pytest.mark.parametrize("count", [1, 2, 3])
+def test_the_unavailable_count_matches_the_section(count: int) -> None:
+    """The alert states a number the reader can check against the list directly below it."""
+    jobs = [job(attempt(error=ProgressError.NO_ARTIFACTS), target=f"target-{index}") for index in range(count)]
+    progress = DispatcherProgress(batches=(batch("batch-01", *jobs),), done=True)
+
+    body = render_comment(progress)
+
+    section = body.split("### ⚠️ Unavailable results")[1]
+    assert section.count("— no artifacts") == count
+    plural = "s" if count > 1 else ""
+    assert f"{count} result{plural} could not be established" in body
+
+
 # ---------------------------------------------------------------------------
 # In-progress signalling
 # ---------------------------------------------------------------------------

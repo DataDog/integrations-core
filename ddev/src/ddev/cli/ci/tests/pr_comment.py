@@ -127,10 +127,13 @@ def _header(progress: DispatcherProgress) -> str:
 
 
 def _heading(progress: DispatcherProgress) -> str:
+    """The run's outcome in one line. A failure outranks an unestablished result, which outranks a pass."""
     if not progress.done:
         return "## 🔄 Dispatcher tests · in progress"
     if _has_failure(progress):
         return "## ❌ Dispatcher tests · failed"
+    if _unavailable_count(progress):
+        return "## ⚠️ Dispatcher tests · results incomplete"
     return "## ✅ Dispatcher tests · passed"
 
 
@@ -140,6 +143,15 @@ def _alert(progress: DispatcherProgress) -> str | None:
         return f"> [!NOTE]\n> **Tests are still running.** {_outstanding(progress)}\n> {FOOTER_RUNNING_NOTE}"
     if _has_failure(progress):
         return "> [!CAUTION]\n> **Dispatcher tests failed.** See the failures below."
+
+    unavailable = _unavailable_count(progress)
+    if unavailable:
+        # Deliberately not a CAUTION: nothing failed, and there is no failures section to send anyone to.
+        plural = "s" if unavailable > 1 else ""
+        return (
+            f"> [!WARNING]\n> **{unavailable} result{plural} could not be established.** Nothing failed, "
+            "but this is not a clean pass.\n> See the unavailable results below."
+        )
     return None
 
 
@@ -306,6 +318,15 @@ def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress) -> str:
 
 def _unavailable(progress: DispatcherProgress, budget: int) -> str | None:
     """Batches and jobs whose result could not be established — never rendered as success."""
+    return _list_section("### ⚠️ Unavailable results", _unavailable_entries(progress), budget, "unavailable result")
+
+
+def _unavailable_entries(progress: DispatcherProgress) -> list[str]:
+    """One bullet per unestablished result.
+
+    The header states how many there are and this renders them, so both read the same list: a count
+    derived separately could disagree with the section printed right below it.
+    """
     entries = [
         f"- <code>{html.escape(batch.batch_id)}</code> — {PROGRESS_ERROR_TEXT[batch.error]}"
         for batch in progress.batches
@@ -316,7 +337,7 @@ def _unavailable(progress: DispatcherProgress, budget: int) -> str | None:
         if attempt is None or attempt.error is None:
             continue
         entries.append(f"- <code>{html.escape(_job_label(job))}</code> — {PROGRESS_ERROR_TEXT[attempt.error]}")
-    return _list_section("### ⚠️ Unavailable results", entries, budget, "unavailable result")
+    return entries
 
 
 def _retried(progress: DispatcherProgress, budget: int) -> str | None:
@@ -348,7 +369,13 @@ def _list_section(heading: str, entries: list[str], budget: int, noun: str) -> s
 
 
 def _footer(progress: DispatcherProgress) -> str:
-    note = "✅ Final result — Dispatcher has finished." if progress.done else f"⏳ {FOOTER_RUNNING_NOTE}"
+    """The last word on whether this is final. A failed run still reads ✅ here: it means "finished"."""
+    if not progress.done:
+        return f"<sub>\n⏳ {FOOTER_RUNNING_NOTE}\n</sub>"
+    if _unavailable_count(progress) and not _has_failure(progress):
+        note = "⚠️ Final result — Dispatcher has finished with unavailable results."
+    else:
+        note = "✅ Final result — Dispatcher has finished."
     return f"<sub>\n{note}\n</sub>"
 
 
@@ -361,14 +388,19 @@ def _is_failed(job: JobProgress) -> bool:
 
 
 def _has_failure(progress: DispatcherProgress) -> bool:
-    """Whether the run has anything to answer for.
+    """Whether the run has a failure to answer for.
 
-    A batch's own ``FAILURE`` status and a batch error both count on their own: a workflow can fail,
-    or its results can be unavailable, without any tracked job reporting a failure.
+    A batch's own ``FAILURE`` status counts on its own: a workflow can fail without any tracked job
+    reporting a failure. An *error* does not count here — a result that could not be established is
+    reported as incomplete instead, so the heading never claims a failure with nothing to show for it.
+    A timeout still reads as a failure, because it fails every job in the batch.
     """
-    return progress.failed > 0 or any(
-        batch.status is Status.FAILURE or batch.error is not None for batch in progress.batches
-    )
+    return progress.failed > 0 or any(batch.status is Status.FAILURE for batch in progress.batches)
+
+
+def _unavailable_count(progress: DispatcherProgress) -> int:
+    """How many results could not be established, batch-level and job-level together."""
+    return len(_unavailable_entries(progress))
 
 
 def _job_label(job: JobProgress) -> str:
