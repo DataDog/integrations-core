@@ -730,6 +730,10 @@ def _mysql_logs_path():
         else:
             return '/var/log/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
+        # The official mariadb image (used for 12.1+/13 RC) logs under /var/log/mysql;
+        # the bitnamilegacy image (<= 12.0) uses its own path.
+        if MYSQL_VERSION_PARSED > parse_version('12.0'):
+            return '/var/log/mysql'
         return '/opt/bitnami/mariadb/logs'
     elif MYSQL_FLAVOR == 'percona':
         return '/var/log/mysql'
@@ -751,6 +755,12 @@ def _mysql_docker_repo():
             # (see compose/mysql-official.yaml).
             return 'mysql'
     elif MYSQL_FLAVOR == 'mariadb':
+        # bitnamilegacy/mariadb only publishes up to 12.0 (and Bitnami's legacy images
+        # are deprecated). For newer majors (12.1+, 13 RC) fall back to the official
+        # `mariadb` image, pinned via MYSQL_IMAGE_TAG. NOTE: the official image uses
+        # different env/replication conventions — see compose/mariadb-official.yaml.
+        if MYSQL_VERSION_PARSED > parse_version('12.0'):
+            return 'mariadb'
         return 'bitnamilegacy/mariadb'
     elif MYSQL_FLAVOR == 'percona':
         return 'percona/percona-server'
