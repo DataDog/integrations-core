@@ -48,7 +48,7 @@ def setup_fluxcd():
         save_state(POD_IP_STATE_PREFIX + controller, get_controller_pod_ip(controller))
 
 
-def get_controller_pod_ip(controller):
+def get_controller_pod_ip(controller: str) -> str:
     result = run_command(
         [
             "kubectl",
