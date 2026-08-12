@@ -276,7 +276,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][15] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][16].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with a [file, configmap, or key-value store][16].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -329,6 +331,31 @@ spec:
   containers:
     - name: mysql
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <MYSQL_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: mysql
+        containerName: mysql
+        initConfig: {}
+        instances:
+          - server: "%%host%%"
+            username: "datadog"
+            password: "<UNIQUEPASSWORD>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][34].
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
@@ -601,3 +628,4 @@ Additional helpful documentation, links, and articles:
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
 [32]: https://docs.datadoghq.com/database_monitoring/setup_mysql/
 [33]: https://docs.datadoghq.com/database_monitoring/#mysql
+[34]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

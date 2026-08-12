@@ -149,13 +149,15 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-To collect metrics, set the following parameters and values in an [Autodiscovery template][14]. You can do this with Kubernetes Annotations (shown below) on your Redis pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][15].
+To collect metrics, set the following parameters and values with one of the Kubernetes Autodiscovery options below. You can also use a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][15].
 
 | Parameter            | Value                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `["redisdb"]`                                                              |
 | `<INIT_CONFIG>`      | `[{}]`                                                                     |
 | `<INSTANCE_CONFIG>`  | `[{"host": "%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]` |
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -215,6 +217,31 @@ spec:
       ports:
         - containerPort: 6379
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <REDIS_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: redisdb
+        containerName: redis
+        initConfig: {}
+        instances:
+          - host: "%%host%%"
+            port: "6379"
+            password: "%%env_REDIS_PASSWORD%%"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][27].
 
 **Note**: 
 - If no user is specified in the configuration, the Redis integration authenticates with the `default` user. The password specified in the configuration therefore applies to `default` user.
@@ -406,3 +433,4 @@ Additional helpful documentation, links, and articles:
 [23]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
 [24]: https://github.com/DataDog/integrations-core/blob/master/redisdb/assets/service_checks.json
 [26]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
+[27]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

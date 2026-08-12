@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 / 2026-08-05
+
+***Changed***:
+
+* Apply the default label renames even when an instance overrides `rename_labels`. ([#24754](https://github.com/DataDog/integrations-core/pull/24754))
+
+***Added***:
+
+* Add process autodiscovery support. ([#24238](https://github.com/DataDog/integrations-core/pull/24238))
+* Collect the `krakend.api.http_client.response_size` metric, which reports backend response sizes from the `Content-Length` header. ([#24752](https://github.com/DataDog/integrations-core/pull/24752))
+
+***Fixed***:
+
+* Migrate the metrics mapping to file-based YAML loading. ([#22751](https://github.com/DataDog/integrations-core/pull/22751))
+* Require `datadog-checks-base>=37.41.0` since config discovery relies on it. ([#24545](https://github.com/DataDog/integrations-core/pull/24545))
+
 ## 1.5.0 / 2026-07-08 / Agent 7.82.0
 
 ***Added***:
