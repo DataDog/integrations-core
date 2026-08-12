@@ -521,6 +521,83 @@ def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instanc
     assert len(cross_database_metrics) == 0
 
 
+def _statement_metrics_check(instance, engine_edition, disable_secondary_tags):
+    instance = copy.deepcopy(instance)
+    instance['dbm'] = True
+    instance['query_metrics'] = {'disable_secondary_tags': disable_secondary_tags}
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
+    return check
+
+
+def _mock_query_stats_cursor():
+    cursor = mock.MagicMock()
+    cursor.description = [('execution_count',), ('total_elapsed_time',), ('total_worker_time',)]
+    return cursor
+
+
+@pytest.mark.parametrize(
+    'engine_edition, disable_secondary_tags, expect_db_name_func, expect_database_name, expect_plan_attributes',
+    [
+        pytest.param(ENGINE_EDITION_SQL_DATABASE, True, True, True, False, id='azure_sql_database_no_secondary_tags'),
+        pytest.param(ENGINE_EDITION_SQL_DATABASE, False, False, True, True, id='azure_sql_database_default'),
+        # Managed Instance is an Azure engine but is not scoped to one database, so it is excluded like self-hosted.
+        pytest.param(ENGINE_EDITION_STANDARD, True, False, False, False, id='self_hosted_no_secondary_tags'),
+        pytest.param(ENGINE_EDITION_STANDARD, False, False, True, True, id='self_hosted_default'),
+        pytest.param(
+            ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
+            True,
+            False,
+            False,
+            False,
+            id='azure_managed_instance_no_secondary_tags',
+        ),
+        pytest.param(
+            ENGINE_EDITION_AZURE_MANAGED_INSTANCE, False, False, True, True, id='azure_managed_instance_default'
+        ),
+    ],
+)
+def test_statement_metrics_query_database_name_column(
+    instance_docker,
+    engine_edition,
+    disable_secondary_tags,
+    expect_db_name_func,
+    expect_database_name,
+    expect_plan_attributes,
+):
+    check = _statement_metrics_check(instance_docker, engine_edition, disable_secondary_tags)
+    query = check.statement_metrics._get_statement_metrics_query_cached(_mock_query_stats_cursor())
+
+    assert ('DB_NAME() as database_name' in query) == expect_db_name_func
+    assert ('as database_name' in query) == expect_database_name
+    assert ('sys.dm_exec_plan_attributes' in query) == expect_plan_attributes
+
+
+@pytest.mark.parametrize(
+    'configured_database, row_database_name, expected',
+    [
+        pytest.param('mydb', 'mydb', True, id='row_matches_configured_database'),
+        pytest.param('mydb', 'MyDb', True, id='row_matches_case_insensitively'),
+        pytest.param('mydb', 'otherdb', False, id='row_from_another_database_excluded'),
+        pytest.param('master', 'mydb', True, id='master_includes_all_rows'),
+        pytest.param(None, 'mydb', True, id='no_configured_database_includes_all_rows'),
+    ],
+)
+def test_azure_sql_database_row_filtering_with_secondary_tags_disabled(
+    instance_docker, configured_database, row_database_name, expected
+):
+    # Supplying database_name makes the Azure SQL Database row filter reachable under this setting for the first time.
+    instance = copy.deepcopy(instance_docker)
+    if configured_database is None:
+        instance.pop('database', None)
+    else:
+        instance['database'] = configured_database
+    check = _statement_metrics_check(instance, ENGINE_EDITION_SQL_DATABASE, True)
+
+    row = {'database_name': row_database_name, 'execution_count': 1}
+    assert check.statement_metrics._should_include_query_metrics_row(row) is expected
+
+
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
     fetchall_results, mock_cursor = _mock_database_list()
     all_dbs = {Database(r.name) for r in fetchall_results}
