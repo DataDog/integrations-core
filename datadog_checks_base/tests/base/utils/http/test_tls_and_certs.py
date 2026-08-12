@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -475,6 +475,18 @@ class TestAIAChasing:
         # ...but only one network fetch happened: the root is self-signed and its subject was already
         # known once the bundle was parsed, so AIA chasing didn't need to look any further for it.
         mock_get.assert_called_once()
+
+    def test_load_x509_certificates_reports_both_failure_reasons(self):
+        """If data is neither valid DER nor PEM, the error should say why each parse attempt failed."""
+        garbage = b'<html><body>404 not found</body></html>'
+
+        with pytest.raises(ValueError) as exc_info:
+            load_x509_certificates(garbage)
+
+        message = str(exc_info.value)
+        assert 'not valid DER' in message
+        assert 'PEM' in message
+        assert repr(garbage[:32]) in message
 
 
 class TestSSLContext:

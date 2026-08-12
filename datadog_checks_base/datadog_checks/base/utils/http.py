@@ -118,8 +118,13 @@ def load_x509_certificates(data: bytes) -> list[Certificate]:
     """
     try:
         return [_http_utils.cryptography_x509_load_certificate(data)]
-    except ValueError:
-        return list(_http_utils.cryptography_x509_load_pem_certificates(data))
+    except ValueError as der_error:
+        try:
+            return list(_http_utils.cryptography_x509_load_pem_certificates(data))
+        except ValueError as pem_error:
+            raise ValueError(
+                f'not valid DER ({der_error}) or PEM ({pem_error}); first 32 bytes: {data[:32]!r}'
+            ) from pem_error
 
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
