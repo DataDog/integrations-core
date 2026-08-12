@@ -249,12 +249,10 @@ def test_trim_set_stmts(query, expected_trimmed_query):
     "query",
     [
         "SELECT * FROM products WHERE id = $1",
-        # a single trailing terminator, optionally followed by whitespace or comments
         "SELECT * FROM products WHERE id = $1;",
         "SELECT * FROM products WHERE id = $1;\n  ",
         "SELECT * FROM products WHERE id = $1; -- explained by the agent",
         "SELECT * FROM products WHERE id = $1; /* trailing */",
-        # semicolons that are not statement separators
         "SELECT * FROM products WHERE name = 'a;b'",
         "SELECT * FROM products WHERE name = 'it''s a;b'",
         "SELECT * FROM products WHERE name = E'it\\'s a;b'",
@@ -286,10 +284,8 @@ def test_is_single_statement_accepts(query):
         "SELECT 1;; ",
         "SELECT * FROM products WHERE id = $1; /* comment */ SELECT 2",
         "SELECT 1; -- comment\nSELECT 2",
-        # a `;` after a region we skipped over is still a separator
         "SELECT 'a;b'; DROP TABLE products",
         "SELECT $$a;b$$; DROP TABLE products",
-        # text we cannot tokenize with certainty is refused rather than guessed at
         "SELECT * FROM products WHERE name = 'unterminated",
         "SELECT * FROM products WHERE name = E'unterminated",
         'SELECT "unterminated FROM products',

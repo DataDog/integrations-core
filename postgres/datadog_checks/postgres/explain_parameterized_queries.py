@@ -146,14 +146,13 @@ class ExplainParameterizedQueries:
         # Returns None on success, or a (DBExplainError, err_msg) tuple when the query can't be prepared because
         # a parameter's type can't be resolved. Other unexpected errors are re-raised.
 
-        # The statement is sampled text that gets interpolated into PREPARE, so a statement separator in it
-        # would run as the monitoring user. Callers are expected to have rejected such statements already;
-        # this guards the sink itself, which is the only place the raw text becomes SQL.
+        # Deliberately redundant with the caller's check: this is the only place the sampled text becomes
+        # SQL, and a statement separator in it would run as the monitoring user.
         if not is_single_statement(statement):
             return DBExplainError.multiple_statements, 'statement does not parse as a single statement'
 
         try:
-            self._execute_query(
+            self._execute_prepare(
                 conn,
                 PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
             )
@@ -257,6 +256,19 @@ class ExplainParameterizedQueries:
                 query_signature,
                 e,
             )
+
+    def _execute_prepare(self, conn, query):
+        # Runs the PREPARE over the extended query protocol, where the server rejects a multi-command string
+        # ("cannot insert multiple commands into a prepared statement") instead of executing every statement
+        # in it as the monitoring user. psycopg only leaves the simple protocol when a query carries
+        # parameters, requests binary results (which the client-side cursors this pool uses reject) or runs
+        # in a pipeline, so a pipeline is the only route available here. It needs libpq 14+; where that isn't
+        # available the single-statement check above is the only guard.
+        if psycopg.capabilities.has_pipeline(check=False):
+            with conn.pipeline():
+                self._execute_query(conn, query)
+        else:
+            self._execute_query(conn, query)
 
     def _execute_query(self, conn, query):
         with conn.cursor() as cursor:

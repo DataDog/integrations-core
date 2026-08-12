@@ -808,9 +808,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "track_activity_query_size={}".format(track_activity_query_size),
             )
 
-        # the sampled text is read back out of pg_stat_activity and sent to the server to be explained, so a
-        # statement separator planted by whoever ran the query would be executed with the monitoring user's
-        # privileges. anything that isn't unambiguously a single statement is not explained.
+        # pg_stat_activity.query is attacker-controllable: whoever ran the query chose its text, and a
+        # statement separator in it would run here with the monitoring user's privileges.
         if not is_single_statement(statement):
             self._log.debug(
                 "Not collecting an execution plan for a statement that does not parse as a single statement: %s",

@@ -102,9 +102,8 @@ def test_explain_parameterized_queries_generic_params(integration_check, dbm_ins
 @requires_over_12
 def test_explain_parameterized_queries_rejects_stacked_statements(integration_check, dbm_instance):
     '''
-    Sampled text comes from pg_stat_activity, so anyone able to run a query on a monitored database can
-    plant a statement separator in it. The agent executes the PREPARE as the monitoring user, so such a
-    statement must never be explained (VULN-92306).
+    VULN-92306: the agent runs the PREPARE as the monitoring user, so a separator planted in
+    pg_stat_activity by whoever ran the query must never reach it.
     '''
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
@@ -127,17 +126,63 @@ def test_explain_parameterized_queries_rejects_stacked_statements(integration_ch
     assert rows == [], "the agent executed the injected statement"
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_12
+def test_prepare_is_rejected_by_the_server_when_the_single_statement_check_is_bypassed(integration_check, dbm_instance):
+    '''
+    The PREPARE goes out over the extended query protocol, where the server refuses a multi-command
+    string. That makes the server, not our tokenizer, the thing standing between sampled text and
+    execution as the monitoring user, so this bypasses the tokenizer to exercise it.
+    '''
+    if not psycopg.capabilities.has_pipeline(check=False):
+        pytest.skip("pipeline mode requires libpq 14+")
+
+    check = integration_check(dbm_instance)
+    check.check(dbm_instance)
+
+    query = "SELECT 1; CREATE TEMP TABLE dd_protocol_marker(x int); --$1"
+    query_signature = compute_sql_signature(query)
+
+    with mock.patch('datadog_checks.postgres.statement_samples.is_single_statement', return_value=True):
+        with mock.patch('datadog_checks.postgres.explain_parameterized_queries.is_single_statement', return_value=True):
+            plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
+                DB_NAME, query, query, query_signature
+            )
+
+    assert plan_dict is None
+    assert explain_err_code == DBExplainError.failed_to_explain_with_prepared_statement
+    assert err == "<class 'psycopg.errors.SyntaxError'>"
+
+    with check.db_pool.get_connection(DB_NAME) as conn:
+        rows = check.statement_samples._explain_parameterized_queries._execute_query_and_fetch_rows(
+            conn, "SELECT 1 FROM pg_class WHERE relname = 'dd_protocol_marker'"
+        )
+    assert rows == [], "the server executed the injected statement"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("has_pipeline", [True, False])
+def test_execute_prepare_uses_a_pipeline_when_libpq_supports_it(integration_check, dbm_instance, has_pipeline):
+    check = integration_check(dbm_instance)
+    epq = check.statement_samples._explain_parameterized_queries
+    conn = mock.MagicMock()
+
+    with mock.patch('psycopg.capabilities.has_pipeline', return_value=has_pipeline):
+        with mock.patch.object(epq, '_execute_query') as mock_execute:
+            epq._execute_prepare(conn, "PREPARE dd_test AS SELECT 1")
+
+    mock_execute.assert_called_once_with(conn, "PREPARE dd_test AS SELECT 1")
+    assert conn.pipeline.called is has_pipeline
+
+
 @pytest.mark.unit
 def test_create_prepared_statement_rejects_stacked_statements(integration_check, dbm_instance):
-    '''
-    _create_prepared_statement is the sink that turns sampled text into SQL, so it rejects a statement
-    that isn't a single statement itself rather than relying on its caller to have done so.
-    '''
     check = integration_check(dbm_instance)
     epq = check.statement_samples._explain_parameterized_queries
 
     query = "SELECT 1; CREATE TEMP TABLE dd_injection_marker(x int); --$1"
-    with mock.patch.object(epq, '_execute_query') as mock_execute:
+    with mock.patch.object(epq, '_execute_prepare') as mock_execute:
         result = epq._create_prepared_statement(None, query, query, "test_sig")
 
     assert result is not None
@@ -343,7 +388,7 @@ def test_create_prepared_statement_exception(integration_check, dbm_instance, ex
     query = "SELECT * FROM pg_settings WHERE name = $1"
     query_signature = compute_sql_signature(query)
     with mock.patch(
-        'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._execute_query',
+        'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._execute_prepare',
         side_effect=exception_class,
     ):
         with pytest.raises(exception_class):
@@ -365,7 +410,7 @@ def test_create_prepared_statement_datatype_mismatch_maps_to_code(integration_ch
     check = integration_check(dbm_instance)
     epq = check.statement_samples._explain_parameterized_queries
 
-    with mock.patch.object(epq, '_execute_query', side_effect=psycopg.errors.DatatypeMismatch("type mismatch")):
+    with mock.patch.object(epq, '_execute_prepare', side_effect=psycopg.errors.DatatypeMismatch("type mismatch")):
         result = epq._create_prepared_statement(
             None,
             "SELECT id FROM t WHERE id = $1",
@@ -385,7 +430,7 @@ def test_create_prepared_statement_ambiguous_function_maps_to_code(integration_c
 
     with mock.patch.object(
         epq,
-        '_execute_query',
+        '_execute_prepare',
         side_effect=psycopg.errors.AmbiguousFunction("function unnest(unknown) is not unique"),
     ):
         result = epq._create_prepared_statement(

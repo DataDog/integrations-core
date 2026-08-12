@@ -277,7 +277,7 @@ class DBExplainError(Enum):
     # not able to access the required function
     database_error = 'database_error'
 
-    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    # datatype mismatch occurs when the return type of the EXPLAIN function is not json
     datatype_mismatch = 'datatype_mismatch'
 
     # this could be the result of a missing EXPLAIN function
@@ -412,17 +412,11 @@ DOLLAR_QUOTE_TAG_PATTERN = re.compile(r'\$([A-Za-z_][A-Za-z0-9_]*)?\$')
 
 
 def is_single_statement(sql: str) -> bool:
-    """Return True only when sql contains exactly one top-level SQL statement.
+    """Return True only when sql holds exactly one top-level statement, optionally ``;``-terminated.
 
-    Sampled statements are read back out of ``pg_stat_activity.query`` and interpolated into a
-    ``PREPARE``, so a semicolon that we mistake for part of a literal becomes SQL injection
-    executed as the monitoring role. This scan is therefore deliberately conservative: it
-    returns False for any input it cannot tokenize unambiguously, such as an unterminated
-    literal or comment, or a backslash inside a plain single-quoted string (whose meaning
-    depends on the server's ``standard_conforming_strings``). Refusing a statement costs one
-    execution plan; mis-tokenizing one costs a security boundary.
-
-    A single trailing semicolon, followed by nothing but whitespace and comments, is accepted.
+    Deliberately conservative: anything it cannot tokenize unambiguously is False. This gates text
+    interpolated into a ``PREPARE`` that the agent runs as the monitoring role, so a missed separator
+    is SQL injection, while a false negative costs only one execution plan.
     """
     i = 0
     n = len(sql)
@@ -436,7 +430,6 @@ def is_single_statement(sql: str) -> bool:
             i += 1
         elif sql.startswith('--', i):
             newline = sql.find('\n', i)
-            # a line comment running to the end of the input is terminated by the end of the input
             i = n if newline == -1 else newline + 1
         elif sql.startswith('/*', i):
             i = skip_block_comment(sql, i)
@@ -466,7 +459,6 @@ def is_single_statement(sql: str) -> bool:
                     return False
                 i = closing + len(match.group(0))
             else:
-                # a parameter marker such as `$1`, or a stray `$`
                 i += 1
         else:
             i += 1
