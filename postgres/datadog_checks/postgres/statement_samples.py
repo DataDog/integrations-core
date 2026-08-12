@@ -40,13 +40,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import (
-    DatabaseConfigurationError,
-    DBExplainError,
-    is_single_statement,
-    trim_leading_set_stmts,
-    warning_with_tags,
-)
+from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
@@ -807,15 +801,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                 DBExplainError.query_truncated,
                 "track_activity_query_size={}".format(track_activity_query_size),
             )
-
-        # pg_stat_activity.query is attacker-controllable: whoever ran the query chose its text, and a
-        # statement separator in it would run here with the monitoring user's privileges.
-        if not is_single_statement(statement):
-            self._log.debug(
-                "Not collecting an execution plan for a statement that does not parse as a single statement: %s",
-                obfuscated_statement,
-            )
-            return None, DBExplainError.multiple_statements, None
 
         db_explain_error, err = self._get_db_explain_setup_state_cached(dbname)
         if db_explain_error is not None:

@@ -10,7 +10,7 @@ import psycopg
 
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DBExplainError, is_single_statement
+from .util import DBExplainError
 from .version_utils import V12
 
 PARAMETERIZED_QUERY_PATTERN = re.compile(r"(?<!')\$(?!'\$')[\d]+(?!')")
@@ -37,6 +37,14 @@ EXPECTED_PARAMETER_TYPE_ERRORS = (
     psycopg.errors.DatatypeMismatch,
     psycopg.errors.AmbiguousFunction,
 )
+
+
+class ExtendedProtocolUnavailable(Exception):
+    """Raised when a sampled statement can't be prepared over the extended query protocol.
+
+    Preparing it over the simple protocol instead would execute every statement in the sampled text, so
+    the query goes unexplained rather than being sent in a way that could run a planted separator.
+    """
 
 
 def agent_check_getter(self):
@@ -83,6 +91,15 @@ class ExplainParameterizedQueries:
         self._check = check
         self._config = config
         self._explain_function = explain_function
+        # Checked once here rather than per statement: it only depends on the libpq this agent was built
+        # against. See _execute_prepare for why a pipeline is required to explain a parameterized query.
+        self._can_use_pipeline = psycopg.capabilities.has_pipeline(check=False)
+        if not self._can_use_pipeline:
+            logger.warning(
+                "Parameterized queries cannot be explained: this build links libpq %s, and pipeline mode "
+                "(libpq 14+) is required to send the prepared statement safely",
+                psycopg.pq.version(),
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def explain_statement(
@@ -145,12 +162,6 @@ class ExplainParameterizedQueries:
     ) -> Optional[Tuple[DBExplainError, str]]:
         # Returns None on success, or a (DBExplainError, err_msg) tuple when the query can't be prepared because
         # a parameter's type can't be resolved. Other unexpected errors are re-raised.
-
-        # Deliberately redundant with the caller's check: this is the only place the sampled text becomes
-        # SQL, and a statement separator in it would run as the monitoring user.
-        if not is_single_statement(statement):
-            return DBExplainError.multiple_statements, 'statement does not parse as a single statement'
-
         try:
             self._execute_prepare(
                 conn,
@@ -258,16 +269,15 @@ class ExplainParameterizedQueries:
             )
 
     def _execute_prepare(self, conn, query):
-        # Runs the PREPARE over the extended query protocol, where the server rejects a multi-command string
-        # ("cannot insert multiple commands into a prepared statement") instead of executing every statement
-        # in it as the monitoring user. psycopg only leaves the simple protocol when a query carries
-        # parameters, requests binary results (which the client-side cursors this pool uses reject) or runs
-        # in a pipeline, so a pipeline is the only route available here. It needs libpq 14+; where that isn't
-        # available the single-statement check above is the only guard.
-        if psycopg.capabilities.has_pipeline(check=False):
-            with conn.pipeline():
-                self._execute_query(conn, query)
-        else:
+        # The PREPARE is the one place sampled query text becomes SQL, so it goes out over the extended query
+        # protocol, where the server rejects a multi-command string ("cannot insert multiple commands into a
+        # prepared statement") rather than executing every statement in it as the monitoring user. psycopg
+        # leaves the simple protocol only for a query with parameters, one requesting binary results (which
+        # the client-side cursors this pool uses refuse) or one inside a pipeline, so a pipeline is the only
+        # route available here.
+        if not self._can_use_pipeline:
+            raise ExtendedProtocolUnavailable("cannot prepare a sampled statement without pipeline support (libpq 14+)")
+        with conn.pipeline():
             self._execute_query(conn, query)
 
     def _execute_query(self, conn, query):
