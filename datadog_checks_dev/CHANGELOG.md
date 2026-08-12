@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 40.0.0 / 2026-08-12
+
+***Changed***:
+
+* Stop declaring `black` as a direct dependency. The `apply_black` calls used to format auto-generated config-model files now go through `ruff format`, using the repo's centralized `[tool.ruff]` configuration. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+
+***Added***:
+
+* Add tooling support for generating configuration discovery files. ([#24126](https://github.com/DataDog/integrations-core/pull/24126))
+* Add process autodiscovery E2E testing helpers. ([#24238](https://github.com/DataDog/integrations-core/pull/24238))
+* Allow config discovery candidates to include literal arrays and mappings. ([#24488](https://github.com/DataDog/integrations-core/pull/24488))
+* Add backend-neutral Agent log retrieval for E2E test diagnostics. ([#24639](https://github.com/DataDog/integrations-core/pull/24639))
+* Validate the format-spec conversion character in discovery candidate templates. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
+***Fixed***:
+
+* Remove obsolete TokuMX-specific validation workarounds. ([#24145](https://github.com/DataDog/integrations-core/pull/24145))
+* Catch `ProcessLookupError` when killing port-forward processes during E2E teardown to handle already-exited processes gracefully. ([#24174](https://github.com/DataDog/integrations-core/pull/24174))
+* Compare license headers against the actual base branch instead of always against ``origin/master``, fixing false validation failures for files that exist on a release branch but were deleted from master. ([#24197](https://github.com/DataDog/integrations-core/pull/24197))
+* Default `COMPOSE_PROJECT_NAME` in `docker_run()` to the check's directory name to avoid Compose project-name collisions between concurrent E2E test runs. ([#24482](https://github.com/DataDog/integrations-core/pull/24482))
+* Fix false-positive discovery-candidate stability failures caused by incorrectly diffing concatenated stdout/stderr container logs. ([#24536](https://github.com/DataDog/integrations-core/pull/24536))
+* Fix test environments that mount logs (``mount_logs``) failing to start on macOS when Docker runs through Colima. ([#24593](https://github.com/DataDog/integrations-core/pull/24593))
+* Use Docker Compose labels to find containers during discovery stability tests without reparsing Compose files. ([#24638](https://github.com/DataDog/integrations-core/pull/24638))
+* Fix a bug where a malformed discovery candidate template crashed ``ddev validate config`` with a raw traceback instead of reporting a validation error. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
 ## 39.0.0 / 2026-06-15
 
 ***Changed***:

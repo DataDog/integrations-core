@@ -392,6 +392,170 @@ def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_
             assert result_rows[index]['processlist_user'] == user
 
 
+def _activity_row(thread_id, event_timer_start, event_timer_end, processlist_user):
+    return {
+        "current_schema": "dog",
+        "processlist_command": "Query",
+        "processlist_user": processlist_user,
+        "sql_text": "something",
+        "event_timer_start": event_timer_start,
+        "event_timer_end": event_timer_end,
+        "thread_id": thread_id,
+    }
+
+
+@pytest.mark.parametrize(
+    "rows,expected_users",
+    [
+        pytest.param(
+            [
+                _activity_row(1748, _older_time(), _old_time(), "older"),
+                _activity_row(1748, _new_time(), _new_time(), "current"),
+            ],
+            ["current"],
+            id="timed_rows_dedupe_to_most_recent",
+        ),
+        pytest.param(
+            [
+                _activity_row(1748, _older_time(), _old_time(), "timed"),
+                _activity_row(1748, None, None, "untimed"),
+            ],
+            ["timed", "untimed"],
+            id="untimed_row_alongside_timed_row",
+        ),
+        pytest.param(
+            [
+                _activity_row(1748, None, None, "bob"),
+                _activity_row(1748, None, None, "bob"),
+            ],
+            ["bob", "bob"],
+            id="all_rows_untimed",
+        ),
+    ],
+)
+def test_normalize_rows_with_null_event_timers(dbm_instance, datadog_agent, rows, expected_users):
+    """
+    Statement timers are NULL when the instrument has `TIMED = NO` in `setup_instruments`, and when
+    no `events_statements_current` row joins to the thread. Rows that cannot be ordered are kept.
+    """
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = "something"
+        result_rows = check._query_activity._normalize_rows(rows)
+        assert [row['processlist_user'] for row in result_rows] == expected_users
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_activity_collection_with_untimed_statements(aggregator, dbm_instance, dd_run_check, root_conn):
+    '''
+    Instruments with `TIMED = NO` in `setup_instruments` produce statement events whose
+    `TIMER_START`, `TIMER_END` and `TIMER_WAIT` are all NULL.
+
+    `events_statements_current` holds a row per nesting level, so a session blocked inside a stored
+    procedure has a row for both the CALL and the statement the procedure is running. Collection has
+    to reconcile two rows for that thread with no timers to order them by.
+    '''
+    check = MySql(CHECK_NAME, {}, instances=[deepcopy(dbm_instance)])
+    procedure = 'testdb.dd_untimed_nested'
+
+    with closing(root_conn.cursor()) as cursor:
+        # Ensure the consumers are enabled — other tests in this session may disable them.
+        cursor.execute(
+            "UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current'"
+        )
+        cursor.execute(
+            "UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name LIKE 'events_statements_%'"
+        )
+        cursor.execute('DROP PROCEDURE IF EXISTS {}'.format(procedure))
+        cursor.execute(
+            'CREATE PROCEDURE {}() SQL SECURITY DEFINER BEGIN SELECT id FROM testdb.users FOR UPDATE; END'.format(
+                procedure
+            )
+        )
+        cursor.execute("GRANT EXECUTE ON PROCEDURE {} TO 'fred'@'%'".format(procedure))
+        # Restoring a blanket TIMED='YES' would enable instruments that ship disabled, so record
+        # exactly which ones to turn back on. This container is shared with every other test.
+        cursor.execute(
+            "SELECT NAME FROM performance_schema.setup_instruments WHERE NAME LIKE 'statement/%' AND TIMED = 'YES'"
+        )
+        previously_timed = [row[0] for row in cursor.fetchall()]
+        cursor.execute("UPDATE performance_schema.setup_instruments SET TIMED='NO' WHERE NAME LIKE 'statement/%'")
+    root_conn.commit()
+
+    # A pymysql connection is not thread safe, so the main thread must not touch bob's connection
+    # until the worker holding it is done with it
+    lock_held = Event()
+
+    def _hold_row_lock(conn):
+        conn.begin()
+        conn.cursor().execute('SELECT id FROM testdb.users FOR UPDATE')
+        lock_held.set()
+
+    def _call_procedure(conn):
+        try:
+            conn.cursor().execute('CALL {}()'.format(procedure))
+        except Exception:
+            # The call is expected to still be blocked when the test tears down
+            pass
+
+    def _wait_for_nested_statements(timeout=20):
+        # Two rows: one for the CALL, one for the statement the procedure is blocked on
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            with closing(root_conn.cursor()) as cursor:
+                cursor.execute(
+                    'SELECT COUNT(*) FROM performance_schema.events_statements_current AS statement '
+                    'JOIN performance_schema.threads AS thread ON thread.thread_id = statement.thread_id '
+                    "WHERE thread.processlist_user = 'fred' AND thread.processlist_command = 'Query'"
+                )
+                if cursor.fetchone()[0] >= 2:
+                    return True
+            time.sleep(0.1)
+        return False
+
+    bob_conn = _get_conn_for_user('bob')
+    fred_conn = _get_conn_for_user('fred')
+    executor = ThreadPoolExecutor(2)
+    try:
+        executor.submit(_hold_row_lock, bob_conn)
+        assert lock_held.wait(timeout=20), "bob should have acquired the row lock"
+
+        executor.submit(_call_procedure, fred_conn)
+        # Waiting on the rows the check is about to read keeps the payload deterministic; a plain
+        # sleep lets a loaded runner reach the check before the procedure is blocked
+        assert _wait_for_nested_statements(), "fred's procedure should be blocked on bob's row lock"
+
+        dd_run_check(check)
+
+        # A failure to order the two untimed rows aborts collection before anything is submitted
+        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        assert dbm_activity, "should have collected at least one activity payload"
+        rows = [row for event in dbm_activity for row in event['mysql_activity']]
+        assert rows, "should have collected at least one activity row"
+        # `_sanitize_row` drops NULL values, so an untimed row carries no event timer keys at all
+        assert any('event_timer_start' not in row for row in rows), (
+            "expected at least one untimed row, got keys: {}".format([sorted(row) for row in rows])
+        )
+    finally:
+        # Only safe once the worker has finished with this connection; committing releases the row
+        # lock so the blocked procedure can return and the executor can drain
+        if lock_held.is_set():
+            bob_conn.commit()
+        executor.shutdown(wait=True)
+        bob_conn.close()
+        fred_conn.close()
+        with closing(root_conn.cursor()) as cursor:
+            if previously_timed:
+                cursor.execute(
+                    "UPDATE performance_schema.setup_instruments SET TIMED='YES' WHERE NAME IN ({})".format(
+                        ', '.join(['%s'] * len(previously_timed))
+                    ),
+                    previously_timed,
+                )
+            cursor.execute('DROP PROCEDURE IF EXISTS {}'.format(procedure))
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):

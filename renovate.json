@@ -40,7 +40,7 @@
   ],
   "packageRules": [
     {
-      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation.",
+      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation. matchFileNames must stay broad enough to cover every composite action: the manager discovers all action.yml files regardless of this rule, so any path it omits yields ungrouped, unlabelled PRs.",
       "matchManagers": [
         "github-actions"
       ],
@@ -49,7 +49,7 @@
       ],
       "matchFileNames": [
         ".github/workflows/**",
-        ".github/actions/tag-job/**"
+        ".github/actions/**"
       ],
       "matchPackageNames": [
         "!dtolnay/rust-toolchain"

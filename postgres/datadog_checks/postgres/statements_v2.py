@@ -134,7 +134,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         )
         self._stat_column_cache: list[str] = []
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._full_statement_text_cache = None
         self._delta_detector = None

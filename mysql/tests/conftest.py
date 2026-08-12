@@ -750,6 +750,10 @@ def _mysql_docker_repo():
             return 'bergerx/mysql-replication'
         elif MYSQL_VERSION.startswith('8') or MYSQL_VERSION == 'latest':
             return 'bitnamilegacy/mysql'
+        elif MYSQL_VERSION.startswith('9'):
+            # bitnamilegacy/mysql is deprecated; use the official `mysql` image for 9+
+            # (see compose/mysql-official.yaml).
+            return 'mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         # bitnamilegacy/mariadb only publishes up to 12.0 (and Bitnami's legacy images
         # are deprecated). For newer majors (12.1+, 13 RC) fall back to the official
