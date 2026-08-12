@@ -1201,3 +1201,24 @@ def test_get_partition_offsets_returns_all_healthy_partitions():
     # READ_UNCOMMITTED is load-bearing: READ_COMMITTED would return the LSO, not the true high watermark.
     assert client._kafka_client.list_offsets.call_args.kwargs["isolation_level"] == IsolationLevel.READ_UNCOMMITTED
     assert client._kafka_client.list_offsets.call_args.kwargs["request_timeout"] == 5
+
+
+def test_get_partition_offsets_drops_negative_offsets():
+    """A Kafka offset is never negative, so such a value is dropped instead of becoming a metric."""
+    from confluent_kafka import TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="healthy_topic", partition=0): _offset_future(100),
+        TopicPartition(topic="wrapped_topic", partition=0): _offset_future(-1533701557),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("healthy_topic", 0), ("wrapped_topic", 0)])
+
+    assert results == [("healthy_topic", 0, 100)]
