@@ -13,6 +13,8 @@ from datadog_checks.base.types import InstanceType
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.intersystems_iris import IrisCheck
 
+from .common import unconditional_metadata_metrics
+
 FIXTURE_PATH = str(Path(__file__).parent / 'fixtures' / 'metrics.txt')
 
 
@@ -28,11 +30,16 @@ def test_check(
     dd_run_check(check)
 
     # The captured fixture was taken with a running interoperability production, so the
-    # `iris_interop_*` block (51 series) is present alongside the base families: metadata.csv
-    # describes exactly the union emitted by this single `api` catalog, so every metric it
-    # declares must be observed and nothing observed may be undeclared.
+    # always-on `iris_interop_*` interface family is present alongside the base families.
+    # Nothing may be submitted that metadata.csv does not declare, and the declared types must
+    # match what the check submits.
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+    # Conversely, every metric the catalog declares for a standalone instance must have been
+    # collected -- this is what catches a metadata.csv entry with no emitter behind it. The
+    # families a single standalone instance cannot emit are documented in `common.py`.
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(),
+        unconditional_metadata_metrics(get_metadata_metrics()),
         check_submission_type=True,
         check_symmetric_inclusion=True,
     )
