@@ -246,6 +246,68 @@ def test_trim_set_stmts(query, expected_trimmed_query):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM products WHERE id = $1",
+        # a single trailing terminator, optionally followed by whitespace or comments
+        "SELECT * FROM products WHERE id = $1;",
+        "SELECT * FROM products WHERE id = $1;\n  ",
+        "SELECT * FROM products WHERE id = $1; -- explained by the agent",
+        "SELECT * FROM products WHERE id = $1; /* trailing */",
+        # semicolons that are not statement separators
+        "SELECT * FROM products WHERE name = 'a;b'",
+        "SELECT * FROM products WHERE name = 'it''s a;b'",
+        "SELECT * FROM products WHERE name = E'it\\'s a;b'",
+        "SELECT $$a;b$$ FROM products WHERE id = $1",
+        "SELECT $body$a;b$body$ FROM products WHERE id = $1",
+        'SELECT "col;name" FROM products WHERE id = $1',
+        'SELECT "quoted""col;name" FROM products WHERE id = $1',
+        "SELECT * FROM products -- filter by id; not name\nWHERE id = $1",
+        "/* trace;id */ SELECT * FROM products WHERE id = $1",
+        "/* outer /* inner; */ still a comment */ SELECT * FROM products WHERE id = $1",
+        # a dollar-quoted body may itself contain a parameter marker
+        "SELECT $$ SELECT $1; $$, $1",
+        "",
+    ],
+)
+def test_is_single_statement_accepts(query):
+    assert util.is_single_statement(query) is True
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query",
+    [
+        # the payload from VULN-92306: the trailing comment supplies the $1 marker that routes the
+        # statement into the prepared-statement explain path
+        "SELECT pg_sleep(6); INSERT INTO atk.loot (customer) SELECT customer FROM public.billing_secrets; --$1",
+        "SELECT * FROM products WHERE id = $1; DROP TABLE products",
+        "SELECT 1; SELECT 2;",
+        "SELECT 1;; ",
+        "SELECT * FROM products WHERE id = $1; /* comment */ SELECT 2",
+        "SELECT 1; -- comment\nSELECT 2",
+        # a `;` after a region we skipped over is still a separator
+        "SELECT 'a;b'; DROP TABLE products",
+        "SELECT $$a;b$$; DROP TABLE products",
+        # text we cannot tokenize with certainty is refused rather than guessed at
+        "SELECT * FROM products WHERE name = 'unterminated",
+        "SELECT * FROM products WHERE name = E'unterminated",
+        'SELECT "unterminated FROM products',
+        "SELECT $$unterminated FROM products",
+        "/* unterminated SELECT * FROM products",
+        "/* outer /* inner */ SELECT * FROM products",
+        # a backslash in a plain string means different things depending on standard_conforming_strings
+        "SELECT * FROM products WHERE name = 'a\\'; DROP TABLE products; --'",
+        # the `E` here belongs to LIKE, so the string is a plain one and the backslash is ambiguous
+        "SELECT * FROM products WHERE name LIKE'a\\'; DROP TABLE products; --'",
+    ],
+)
+def test_is_single_statement_rejects(query):
+    assert util.is_single_statement(query) is False
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     'intervals, expected',
     [
         pytest.param((600, 600, 600, 3600), 600, id='all-multiples-of-min'),
