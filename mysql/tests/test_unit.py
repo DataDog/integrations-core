@@ -516,15 +516,39 @@ def test_database_identifier(template, expected, tags):
     assert check.database_identifier == expected
 
 
-def test__eliminate_duplicate_rows():
-    rows = [
-        {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
-        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
-    ]
-    second_pass = {1: {'event_timer_start': 2001}}
-    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == [
-        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
-    ]
+@pytest.mark.parametrize(
+    'rows,second_pass,expected',
+    [
+        pytest.param(
+            [
+                {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+                {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+            ],
+            {1: {'event_timer_start': 2001}},
+            [{'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'}],
+            id='drops_statement_that_ended_before_the_newest_one_started',
+        ),
+        pytest.param(
+            [
+                {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+                {'thread_id': 1, 'event_timer_start': 2001, 'sql_text': 'SELECT 1'},
+            ],
+            {1: {'event_timer_start': 2001}},
+            [{'thread_id': 1, 'event_timer_start': 2001, 'sql_text': 'SELECT 1'}],
+            id='keeps_row_missing_event_timer_end',
+        ),
+        pytest.param(
+            [{'thread_id': 2, 'sql_text': 'SELECT 2'}],
+            {2: {'event_timer_start': None}},
+            [{'thread_id': 2, 'sql_text': 'SELECT 2'}],
+            id='keeps_row_with_no_timers_at_all',
+        ),
+    ],
+)
+def test__eliminate_duplicate_rows(rows, second_pass, expected):
+    # `_sanitize_row` drops keys whose value is NULL before rows reach `_eliminate_duplicate_rows`,
+    # so rows produced by an instrument with `TIMED = NO` arrive without any event timer at all
+    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == expected
 
 
 @pytest.mark.parametrize(

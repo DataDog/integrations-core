@@ -303,9 +303,10 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         estimated_size = 0
         for row in rows:
             if row["thread_id"] in seen:
-                # `performance_schema.events_statements_current` can contain previous statements
-                # for the same thread. We only want the most recent one.
-                if row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
+                # A thread appears more than once when `performance_schema.events_statements_current`
+                # holds a row per nesting level, and when it still holds a statement the thread has
+                # already finished. Only the finished ones are safe to drop.
+                if self._ended_before(row, seen[row["thread_id"]]["event_timer_start"]):
                     continue
                 else:
                     second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
@@ -323,13 +324,31 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         return normalized_rows
 
     @staticmethod
+    def _ended_before(row, event_timer_start):
+        # type: (Dict[str], int | None) -> bool
+        """
+        Whether the statement in `row` finished before `event_timer_start`, the start of the most
+        recent statement seen for the same thread. Such a row is a leftover that
+        `performance_schema.events_statements_current` still holds for a thread that has moved on.
+
+        Both timers are NULL when the instrument that produced the event has `TIMED = NO` in
+        `setup_instruments`, and when no `events_statements_current` row joins to the thread at all,
+        in which case the SQL text comes from `PROCESSLIST_info` instead. Ordering is undecidable
+        without both timers, so such a row is never dropped: reporting a possibly stale statement is
+        preferable to dropping an active one.
+        """
+        event_timer_end = row.get("event_timer_end")
+        if event_timer_end is None or event_timer_start is None:
+            return False
+        return event_timer_end < event_timer_start
+
+    @staticmethod
     def _eliminate_duplicate_rows(rows, second_pass):
         # type: (List[Dict[str]], Dict[str]) -> List[Dict[str]]
         filtered_rows = []
         for row in rows:
-            if (
-                row["thread_id"] in second_pass
-                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+            if row["thread_id"] in second_pass and MySQLActivity._ended_before(
+                row, second_pass[row["thread_id"]]["event_timer_start"]
             ):
                 continue
             filtered_rows.append(row)
