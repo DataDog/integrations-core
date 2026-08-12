@@ -187,7 +187,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._full_statement_text_cache = None
         self._state = None

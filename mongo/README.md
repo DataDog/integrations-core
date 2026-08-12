@@ -375,7 +375,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configure with a [file, configmap, or key-value store][14].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with a [file, configmap, or key-value store][14].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -427,6 +429,33 @@ spec:
   containers:
     - name: mongo
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <MONGODB_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: mongo
+        containerName: mongo
+        initConfig: {}
+        instances:
+          - hosts:
+              - "%%host%%:%%port%%"
+            username: "datadog"
+            password: "<UNIQUEPASSWORD>"
+            database: "<DATABASE>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][30].
 
 ##### Log collection
 
@@ -615,3 +644,4 @@ Additional helpful documentation, links, and articles:
 [27]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
 [28]: https://docs.datadoghq.com/database_monitoring/setup_mongodb/
 [29]: https://docs.datadoghq.com/database_monitoring/#mongodb
+[30]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
