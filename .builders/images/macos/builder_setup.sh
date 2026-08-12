@@ -12,12 +12,9 @@ install-from-source() {
     bash "install-from-source.sh" --prefix="${DD_PREFIX_PATH}" "$@"
 }
 
-# Rust toolchain, needed to build cryptography from source now that it only publishes macOS
-# wheels for arm64. The Linux and Windows images use rustup, but its shims resolve the toolchain
-# through RUSTUP_HOME at build time; installing the standalone distribution under the prefix keeps
-# the binaries in the builder cache and on PATH without any extra environment variables.
-# Hashes are published next to the archive, at <archive URL>.sha256, and must be
-# refreshed by hand when Renovate bumps the version.
+# Rust toolchain, needed to build cryptography from source: it no longer ships macOS x86_64 wheels.
+# To bump: set RUST_VERSION, then take each hash below from
+# https://static.rust-lang.org/dist/rust-${RUST_VERSION}-${RUST_TARGET}.tar.gz.sha256
 # renovate: datasource=github-releases depName=rust-lang/rust
 RUST_VERSION="1.91.0"
 case "$(uname -m)" in
@@ -128,8 +125,8 @@ VERSION="18.3" \
 SHA256="d95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f" \
 RELATIVE_PATH="postgresql-{{version}}" \
   install-from-source --without-readline --with-openssl --without-icu
-# Add paths to pg_config and to the library
-echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> "$DD_ENV_FILE"
+# pg_config is reached through ${DD_PREFIX_PATH}/bin, which build.py already puts on PATH. Writing PATH
+# to the env file instead would drop the entries build_wheels.py adds later, such as the maturin script.
 
 # zstd for librdkafka compression support
 # Keep version in sync with github.com/DataDog/datadog-agent/deps/repos.MODULE.bazel
