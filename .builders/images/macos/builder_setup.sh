@@ -16,6 +16,9 @@ install-from-source() {
 # wheels for arm64. The Linux and Windows images use rustup, but its shims resolve the toolchain
 # through RUSTUP_HOME at build time; installing the standalone distribution under the prefix keeps
 # the binaries in the builder cache and on PATH without any extra environment variables.
+# Hashes are published next to the archive, at <archive URL>.sha256, and must be
+# refreshed by hand when Renovate bumps the version.
+# renovate: datasource=github-releases depName=rust-lang/rust
 RUST_VERSION="1.91.0"
 case "$(uname -m)" in
     x86_64)
