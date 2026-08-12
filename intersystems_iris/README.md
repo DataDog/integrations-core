@@ -42,17 +42,7 @@ The interoperability metrics (`intersystems_iris.interop.*`) are **not emitted b
 
 2. Ensure a production is running in that namespace. Restart the production after enabling the setting so the sensors begin sampling.
 
-Once both conditions hold, metrics such as `intersystems_iris.interop.hosts`, `.messages`, `.messages.per_sec`, `.queued`, and `.last_activity` appear on the standard `/api/monitor/metrics` endpoint and are collected automatically. They carry `namespace`, `production`, `interop_host`, and `status` tags. (The business-host name is submitted under `interop_host` rather than `host` to avoid colliding with the reporting infrastructure hostname.)
-
-#### Interoperability interface counts (optional)
-
-IRIS also exposes an always-on interface-count family (active/inbound/outbound/web-API interface counts) on a separate endpoint, `/api/monitor/interop/interfaces`. These are not collected by the default configuration. To gather them, add a second instance pointing at that endpoint:
-
-```yaml
-instances:
-  - openmetrics_endpoint: http://%%host%%:52773/api/monitor/metrics
-  - openmetrics_endpoint: http://%%host%%:52773/api/monitor/interop/interfaces
-```
+Once both conditions hold, metrics such as `intersystems_iris.interop.hosts`, `.messages.count`, `.messages.per_sec.count`, `.queued`, and `.last_activity` appear on the standard `/api/monitor/metrics` endpoint and are collected automatically. They carry `namespace`, `production`, `interop_host`, and `status` tags. (The business-host name is submitted under `interop_host` rather than `host` to avoid colliding with the reporting infrastructure hostname.)
 
 #### Conditional metric families
 
