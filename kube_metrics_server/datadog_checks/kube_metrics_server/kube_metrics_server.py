@@ -4,10 +4,8 @@
 
 import re
 
-import requests
-
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPError
 
 KUBE_METRICS_SERVER_NAMESPACE = "kube_metrics_server"
 
@@ -137,7 +135,7 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
             response = http_handler.get(url)
             response.raise_for_status()
             self.service_check(service_check_name, AgentCheck.OK, tags=tags)
-        except requests.exceptions.RequestException as e:
+        except HTTPError as e:
             message = str(e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, message=message, tags=tags)
 
@@ -156,8 +154,6 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
             config['tls_ignore_warning'] = True
             config['tls_verify'] = False
 
-        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
-            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-        )
+        http_handler = self._http_handlers[endpoint] = self.create_http_client(config)
 
         return http_handler

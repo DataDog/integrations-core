@@ -4,9 +4,8 @@
 
 import re
 
-import requests
-
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPError
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 
@@ -111,7 +110,7 @@ class SquidCheck(AgentCheck):
             headers = res.headers
             self.submit_version(headers)
 
-        except requests.exceptions.RequestException as e:
+        except HTTPError as e:
             self.service_check(SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
             self.log.error('There was an error connecting to squid at %s: %s', url, e)
             raise

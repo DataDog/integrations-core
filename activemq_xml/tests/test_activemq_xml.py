@@ -6,6 +6,12 @@ from itertools import product
 import pytest
 
 from datadog_checks.activemq_xml import ActiveMQXML
+from datadog_checks.activemq_xml.activemq_xml import QUEUE_URL
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import CHECK_NAME, CONFIG, GENERAL_METRICS, QUEUE_METRICS, SUBSCRIBER_METRICS, TOPIC_METRICS, URL
@@ -57,3 +63,20 @@ def _test_check(aggregator):
         aggregator.assert_metric(mname, count=1, tags=subscriber_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize('error_cls', [HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError])
+def test_suppress_errors_handles_connection_failures(mock_http, error_cls):
+    check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
+    mock_http.get.side_effect = error_cls('unreachable')
+
+    assert check._fetch_data(URL, QUEUE_URL, suppress_errors=True) is False
+
+
+@pytest.mark.parametrize('error_cls', [HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError])
+def test_connection_failures_propagate_without_suppression(mock_http, error_cls):
+    check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
+    mock_http.get.side_effect = error_cls('unreachable')
+
+    with pytest.raises(error_cls, match='unreachable'):
+        check._fetch_data(URL, QUEUE_URL, suppress_errors=False)

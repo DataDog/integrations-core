@@ -4,9 +4,9 @@
 
 import mock
 import pytest
-from requests.exceptions import HTTPError, RequestException
 
 from datadog_checks.base.errors import CheckException, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPError, HTTPStatusError
 from datadog_checks.cloud_foundry_api import CloudFoundryApiCheck
 
 from .constants import FREEZE_TIME
@@ -191,7 +191,7 @@ def test_scroll_events_errors(_, __, ___, ____, aggregator, instance, events_v3_
     check._http = None  # initialize the _http attribute for mocking
 
     with mock.patch.object(check, "_http") as http_mock:
-        http_mock.get.side_effect = RequestException()
+        http_mock.get.side_effect = HTTPError("error")
         check.scroll_events("", {}, {})
         aggregator.assert_service_check(
             name="cloud_foundry_api.api.can_connect",
@@ -202,7 +202,9 @@ def test_scroll_events_errors(_, __, ___, ____, aggregator, instance, events_v3_
         aggregator.reset()
 
     with mock.patch.object(check, "_http") as http_mock:
-        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
+        http_mock.get.return_value = mock.MagicMock(
+            raise_for_status=mock.MagicMock(side_effect=HTTPStatusError("error"))
+        )
         check.scroll_events("", {}, {})
         aggregator.assert_service_check(
             name="cloud_foundry_api.api.can_connect",
@@ -228,7 +230,7 @@ def test_scroll_events_errors(_, __, ___, ____, aggregator, instance, events_v3_
     with mock.patch.object(check, "_http") as http_mock:
         events_res_p1 = mock.MagicMock()
         events_res_p1.json.return_value = events_v3_p1
-        http_mock.get.side_effect = (events_res_p1, RequestException())
+        http_mock.get.side_effect = (events_res_p1, HTTPError("error"))
         dd_events = check.scroll_events("", {}, {})
         aggregator.assert_service_check(
             name="cloud_foundry_api.api.can_connect",
@@ -284,8 +286,8 @@ def test_get_oauth_token_errors(_, __, ___, aggregator, instance):
     check._http = None  # initialize the _http attribute for mocking
 
     with mock.patch.object(check, "_http") as http_mock:
-        http_mock.get.side_effect = RequestException()
-        with pytest.raises(RequestException):
+        http_mock.get.side_effect = HTTPError("error")
+        with pytest.raises(HTTPError):
             check.get_oauth_token()
         aggregator.assert_service_check(
             name="cloud_foundry_api.uaa.can_authenticate",
@@ -296,8 +298,10 @@ def test_get_oauth_token_errors(_, __, ___, aggregator, instance):
         aggregator.reset()
 
     with mock.patch.object(check, "_http") as http_mock:
-        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
-        with pytest.raises(HTTPError):
+        http_mock.get.return_value = mock.MagicMock(
+            raise_for_status=mock.MagicMock(side_effect=HTTPStatusError("error"))
+        )
+        with pytest.raises(HTTPStatusError):
             check.get_oauth_token()
         aggregator.assert_service_check(
             name="cloud_foundry_api.uaa.can_authenticate",
@@ -350,12 +354,14 @@ def test_discover_api_errors(_, __, instance):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
     check._http = None  # initialize the _http attribute for mocking
 
-    with mock.patch.object(check, "_http") as http_mock, pytest.raises(RequestException):
-        http_mock.get.side_effect = RequestException()
+    with mock.patch.object(check, "_http") as http_mock, pytest.raises(HTTPError):
+        http_mock.get.side_effect = HTTPError("error")
         check.discover_api()
 
-    with mock.patch.object(check, "_http") as http_mock, pytest.raises(HTTPError):
-        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
+    with mock.patch.object(check, "_http") as http_mock, pytest.raises(HTTPStatusError):
+        http_mock.get.return_value = mock.MagicMock(
+            raise_for_status=mock.MagicMock(side_effect=HTTPStatusError("error"))
+        )
         check.discover_api()
 
     with mock.patch.object(check, "_http") as http_mock, pytest.raises(ValueError):
@@ -553,7 +559,7 @@ def test_scroll_api_pages_errors(_, __, ___, aggregator, instance):
     check._http = None
 
     with mock.patch.object(check, "_http") as http_mock:
-        http_mock.get.side_effect = RequestException()
+        http_mock.get.side_effect = HTTPError("error")
         for _ in check.scroll_api_pages("", {}, {}):
             pass
         aggregator.assert_service_check(
@@ -571,7 +577,9 @@ def test_scroll_api_pages_errors(_, __, ___, aggregator, instance):
         aggregator.reset()
 
     with mock.patch.object(check, "_http") as http_mock:
-        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
+        http_mock.get.return_value = mock.MagicMock(
+            raise_for_status=mock.MagicMock(side_effect=HTTPStatusError("error"))
+        )
         for _ in check.scroll_api_pages("", {}, {}):
             pass
         aggregator.assert_service_check(
@@ -696,7 +704,7 @@ def test_get_org_name(http_mock, _, __, ___, instance, org_v2, org_v3):
             headers={"Authorization": "Bearer {}".format(check._oauth_token)},
         )
         # Error
-        http_mock.get.side_effect = RequestException
+        http_mock.get.side_effect = HTTPError("error")
         assert check.get_org_name("id_error") is None
         log_mock.exception.assert_called_once()
 
@@ -734,7 +742,7 @@ def test_get_space_name(http_mock, _, __, ___, instance, space_v2, space_v3):
             headers={"Authorization": "Bearer {}".format(check._oauth_token)},
         )
         # Error
-        http_mock.get.side_effect = RequestException
+        http_mock.get.side_effect = HTTPError("error")
         assert check.get_space_name("id_error") is None
         log_mock.exception.assert_called_once()
 

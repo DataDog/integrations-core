@@ -53,8 +53,8 @@ def openmetrics_payload(example_metrics_registry):
 
 
 @pytest.fixture
-def prometheus_poll_mock(mock_http_response, prometheus_payload):
-    mock_http_response(
+def prometheus_poll_mock(mock_openmetrics_http, mock_response, prometheus_payload):
+    mock_openmetrics_http.get.return_value = mock_response(
         prometheus_payload,
         normalize_content=False,
         headers={'Content-Type': PROMETHEUS_CONTENT_TYPE},
@@ -62,8 +62,8 @@ def prometheus_poll_mock(mock_http_response, prometheus_payload):
 
 
 @pytest.fixture
-def openmetrics_poll_mock(mock_http_response, openmetrics_payload):
-    mock_http_response(
+def openmetrics_poll_mock(mock_openmetrics_http, mock_response, openmetrics_payload):
+    mock_openmetrics_http.get.return_value = mock_response(
         openmetrics_payload,
         normalize_content=False,
         headers={'Content-Type': OPENMETRICS_CONTENT_TYPE},

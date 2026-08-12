@@ -4,8 +4,8 @@
 import copy
 
 import pytest
-from requests.exceptions import ConnectionError
 
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
 from .common import BAD_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_VERSION, HOST, assert_check
@@ -32,7 +32,7 @@ def test_connection_failure(aggregator):
 
     gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], instances=BAD_CONFIG['instances'])
 
-    with pytest.raises(ConnectionError):
+    with pytest.raises(HTTPConnectionError):
         gitlab_runner.check(BAD_CONFIG['instances'][0])
 
     # We should get two failed service checks

@@ -2,32 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import mock
 import pytest
 
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
-from .common import HERE
+from .common import make_mock_metrics
 
 # Constants
 CHECK_NAME = 'kube_scheduler'
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(HERE, 'fixtures', 'metrics_1.29.0.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_1.29.0.txt')
 
 
 @pytest.fixture()
@@ -45,7 +34,7 @@ def mock_leader():
         yield
 
 
-def test_check_metrics_1_29(aggregator, mock_metrics, mock_leader, instance):
+def test_check_metrics_1_29(aggregator, mock_metrics, mock_leader, instance, mock_healthcheck_wrapper):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 

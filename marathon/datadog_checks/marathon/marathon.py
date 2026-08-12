@@ -4,9 +4,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin
 
-import requests
-
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 
 
 class Marathon(AgentCheck):
@@ -88,7 +91,7 @@ class Marathon(AgentCheck):
             token = r.json()['token']
             self.ACS_TOKEN = token
             return token
-        except requests.exceptions.HTTPError:
+        except HTTPStatusError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -114,17 +117,21 @@ class Marathon(AgentCheck):
                 self.refresh_acs_token(acs_url, tags)
                 r = self.http.get(url)
             r.raise_for_status()
-        except requests.exceptions.Timeout:
+        except HTTPTimeoutError:
             # If there's a timeout
+            # options['timeout'] is a bare number unless read_timeout or connect_timeout is configured.
+            configured_timeout = self.http.options['timeout']
+            if isinstance(configured_timeout, tuple):
+                configured_timeout = configured_timeout[0]
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} timed out after {} seconds.".format(url, self.http.options['timeout'][0]),
+                message="{} timed out after {} seconds.".format(url, configured_timeout),
                 tags=["url:{}".format(url)] + tags,
             )
             raise Exception("Timeout when hitting {}".format(url))
 
-        except requests.exceptions.HTTPError:
+        except HTTPStatusError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -133,7 +140,7 @@ class Marathon(AgentCheck):
             )
             raise Exception("Got {} when hitting {}".format(r.status_code, url))
 
-        except requests.exceptions.ConnectionError:
+        except HTTPConnectionError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,

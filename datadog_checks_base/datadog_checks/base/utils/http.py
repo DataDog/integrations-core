@@ -3,12 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
 import socket
 import warnings
 from collections import ChainMap
+from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from urllib.parse import quote, urlparse, urlunparse
@@ -17,8 +19,12 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
+from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
+from requests.structures import CaseInsensitiveDict
 from urllib3.exceptions import InsecureRequestWarning
+from urllib3.exceptions import ReadTimeoutError as Urllib3ReadTimeoutError
 from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
@@ -28,6 +34,26 @@ from datadog_checks.base.utils import _http_utils
 
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .headers import set_header as set_header_value
+
+# Re-export HTTP exceptions for single import location
+from .http_exceptions import (  # noqa: F401
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPError,
+    HTTPInvalidURLError,
+    HTTPReadTimeoutError,
+    HTTPRequestError,
+    HTTPSSLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
+from .http_protocol import (  # noqa: F401
+    HTTPClient,
+    HTTPRequest,
+    HTTPRequestSnapshot,
+    HTTPResponse,
+)
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -197,6 +223,127 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
+def _translate_requests_request(
+    request: requests.Request | requests.PreparedRequest | None,
+) -> HTTPRequestSnapshot | None:
+    if request is None:
+        return None
+
+    return HTTPRequestSnapshot(
+        method=request.method,
+        url=request.url,
+        headers=request.headers or {},
+    )
+
+
+def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[BaseException]) -> type[T]:
+    """Build the raised type: the target exception plus its requests counterparts as extra bases.
+
+    The agnostic tree roots at ``Exception``, so an ``except requests.exceptions.*``,
+    ``except RequestException`` or ``except OSError`` arm written against a released
+    ``datadog_checks_base`` stops matching once a check runs on this client. Those arms live in
+    repositories whose CI never sees this one, and the Agent ships a single ``datadog_checks_base``
+    for all of them, so the major version bump warns nobody. While requests is still the backend,
+    carrying the matching backend classes keeps those arms working at no cost.
+
+    Delete this helper and ``_COMPAT_EXCEPTIONS`` when the backend changes, after a deprecation
+    cycle. ``http_exceptions`` itself stays free of any backend import.
+    """
+    compat = type(agnostic.__name__, (agnostic, *backend), {})
+    compat.__module__ = agnostic.__module__
+    compat.__qualname__ = agnostic.__qualname__
+    compat.__doc__ = agnostic.__doc__
+    return compat
+
+
+# Built once at import. Keyed by the agnostic type so tests and callers can resolve what a given
+# agnostic class is actually raised as.
+_COMPAT_EXCEPTIONS: dict[type[HTTPError], type[HTTPError]] = {
+    HTTPError: _backend_compat_type(HTTPError, requests_exceptions.RequestException),
+    HTTPRequestError: _backend_compat_type(HTTPRequestError, requests_exceptions.RequestException),
+    HTTPStatusError: _backend_compat_type(HTTPStatusError, requests_exceptions.HTTPError),
+    HTTPTimeoutError: _backend_compat_type(HTTPTimeoutError, requests_exceptions.Timeout),
+    HTTPConnectTimeoutError: _backend_compat_type(HTTPConnectTimeoutError, requests_exceptions.ConnectTimeout),
+    # requests split this case, so both bases are needed to preserve the old arms: a header-phase
+    # read timeout was ReadTimeout, a body-phase one was ConnectionError.
+    HTTPReadTimeoutError: _backend_compat_type(
+        HTTPReadTimeoutError, requests_exceptions.ReadTimeout, requests_exceptions.ConnectionError
+    ),
+    HTTPConnectionError: _backend_compat_type(HTTPConnectionError, requests_exceptions.ConnectionError),
+    # The translator collapses all four URL types into one agnostic type, so all four are carried.
+    HTTPInvalidURLError: _backend_compat_type(
+        HTTPInvalidURLError,
+        requests_exceptions.InvalidURL,
+        requests_exceptions.MissingSchema,
+        requests_exceptions.InvalidSchema,
+        requests_exceptions.URLRequired,
+    ),
+    HTTPSSLError: _backend_compat_type(HTTPSSLError, requests_exceptions.SSLError),
+}
+
+# The JSON seam converges on the standard library error, but that class and the backend's own
+# JSONDecodeError are siblings under ValueError, so neither one catches the other. Carrying the
+# backend class as an extra base keeps an arm written against it matching. Where simplejson is
+# installed the backend class derives from it as well, so those arms ride on the same base.
+_COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
+
+
+def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
+    """Translate a requests exception into the library-agnostic equivalent.
+
+    Order is significant. Several requests types subclass others, so the most
+    specific must be tested first.
+
+    The type actually raised is the ``_COMPAT_EXCEPTIONS`` entry for the agnostic class, which is a
+    subclass of it. ``isinstance`` against the agnostic type is unaffected.
+
+    ``response`` is supplied only by the ``raise_for_status`` seam, which passes the
+    agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
+    """
+    message = str(exc) or exc.__class__.__name__
+    request = _translate_requests_request(getattr(exc, 'request', None))
+    if isinstance(
+        exc,
+        (
+            requests_exceptions.InvalidURL,
+            requests_exceptions.MissingSchema,
+            requests_exceptions.InvalidSchema,
+            requests_exceptions.URLRequired,
+        ),
+    ):
+        return _COMPAT_EXCEPTIONS[HTTPInvalidURLError](message, request=request)
+    if isinstance(exc, requests_exceptions.SSLError):
+        return _COMPAT_EXCEPTIONS[HTTPSSLError](message, request=request)
+    if isinstance(exc, requests_exceptions.ConnectTimeout):
+        return _COMPAT_EXCEPTIONS[HTTPConnectTimeoutError](message, request=request)
+    if isinstance(exc, requests_exceptions.ReadTimeout):
+        return _COMPAT_EXCEPTIONS[HTTPReadTimeoutError](message, request=request)
+    if isinstance(exc, requests_exceptions.Timeout):
+        return _COMPAT_EXCEPTIONS[HTTPTimeoutError](message, request=request)
+    if isinstance(exc, requests_exceptions.ConnectionError) and any(
+        isinstance(cause, Urllib3ReadTimeoutError) for cause in (exc.__context__, exc.args[0] if exc.args else None)
+    ):
+        return _COMPAT_EXCEPTIONS[HTTPReadTimeoutError](message, request=request)
+    if isinstance(exc, requests_exceptions.ConnectionError):
+        return _COMPAT_EXCEPTIONS[HTTPConnectionError](message, request=request)
+    if isinstance(exc, requests_exceptions.ContentDecodingError):
+        return _COMPAT_EXCEPTIONS[HTTPRequestError](message, request=request)
+    if isinstance(exc, requests_exceptions.HTTPError):
+        return _COMPAT_EXCEPTIONS[HTTPStatusError](message, request=request, response=response)
+    if isinstance(exc, requests_exceptions.RequestException):
+        return _COMPAT_EXCEPTIONS[HTTPRequestError](message, request=request)
+    return _COMPAT_EXCEPTIONS[HTTPError](message)
+
+
+@contextmanager
+def _translate_http_errors() -> Iterator[None]:
+    """Re-raise requests exceptions as their library-agnostic equivalents."""
+    try:
+        yield
+    except requests_exceptions.RequestException as exc:
+        raise _translate_requests_exception(exc) from exc
+
+
 class ResponseWrapper(ObjectProxy):
     def __init__(self, response, default_chunk_size):
         super(ResponseWrapper, self).__init__(response)
@@ -204,25 +351,85 @@ class ResponseWrapper(ObjectProxy):
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
 
+    def raise_for_status(self):
+        try:
+            self.__wrapped__.raise_for_status()
+        except requests_exceptions.HTTPError as exc:
+            raise _translate_requests_exception(exc, response=self) from exc
+
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+        with _translate_http_errors():
+            yield from self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+        with _translate_http_errors():
+            yield from self.__wrapped__.iter_lines(
+                chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
+            )
+
+    def __iter__(self):
+        # requests.Response.__iter__ delegates to the raw iter_content, so route direct iteration
+        # through the translating override instead of the wrapt-forwarded raw one.
+        return self.iter_content(128)
+
+    @property
+    def content(self):
+        with _translate_http_errors():
+            return self.__wrapped__.content
+
+    @property
+    def text(self):
+        with _translate_http_errors():
+            return self.__wrapped__.text
+
+    def json(self, **kwargs):
+        # The decode error is raised after the translating block rather than inside it. The compat
+        # type carries the backend's JSONDecodeError as a base, so the translator would otherwise
+        # read it as a transport failure and convert it to HTTPRequestError.
+        decode_error = None
+        with _translate_http_errors():
+            try:
+                return self.__wrapped__.json(**kwargs)
+            except requests_exceptions.JSONDecodeError as exc:
+                decode_error = exc
+
+        raise _COMPAT_JSON_DECODE_ERROR(decode_error.msg, decode_error.doc, decode_error.pos) from decode_error
+
+    def get_peer_cert(self, binary_form=False):
+        raw = getattr(self.__wrapped__, 'raw', None)
+        connection = getattr(raw, 'connection', None)
+        sock = getattr(connection, 'sock', None)
+        # sock is None once the connection is released, and a bare (non-TLS) socket has no getpeercert,
+        # so a plain http:// request lands here. Either way there is no peer certificate to report.
+        getpeercert = getattr(sock, 'getpeercert', None)
+        if getpeercert is None:
+            return None
+        return getpeercert(binary_form=binary_form)
+
+    @property
+    def history(self):
+        # Wrap redirect responses so history items satisfy the protocol too, never leaking a raw backend object.
+        return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
 
     def __enter__(self):
         return self
 
 
+def suppress_default_auth(request):
+    """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
+    return request
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        '_trust_env',
         '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
@@ -414,6 +621,11 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
+        # Whether to trust environment configuration (proxies, auth, CA bundles).
+        # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
+        # value so the reported state matches it.
+        self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
+
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
@@ -433,6 +645,64 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    @property
+    def trust_env(self) -> bool:
+        """Whether the client trusts environment config (proxies, auth, CA bundles)."""
+        return self._trust_env
+
+    @trust_env.setter
+    def trust_env(self, value: bool) -> None:
+        self._trust_env = value
+        if self._session is not None:
+            self._session.trust_env = value
+
+    def close(self) -> None:
+        """Close any open connections. Idempotent; the client stays usable and lazily rebuilds a default
+        session on the next request. An injected session is not restored after being closed."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Look up a cookie by name on the persistent session, returning its value, or default if absent or ambiguous.
+
+        Only cookies retained on the persistent session are visible. Requests made without persistence
+        (the default unless persist_connections is set or persist=True is passed) use a throwaway session
+        whose cookies are discarded, so a cookie set by such a request is not found here.
+        """
+        try:
+            return self.session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
+
+    def should_bypass_proxy(self, url: str) -> bool:
+        """Whether url should bypass any configured proxy under the client's no_proxy rules."""
+        return should_bypass_proxy(url, self.no_proxy_uris or [])
+
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Look up a request header by name. Lookup is case-insensitive.
+
+        The header mapping is an ordinary dict, so it can hold the same header under several
+        spellings. Requests collapses those into a CaseInsensitiveDict per request, where the last
+        spelling wins, so the last match is the value that actually reaches the wire. Returning the
+        first match instead would report a value that is never sent, and a caller negotiating over a
+        seeded default would read the default, conclude the header is unset, and overwrite the value
+        the user configured under the other spelling.
+        """
+        found = default
+        for key, value in self.options['headers'].items():
+            if key.lower() == name.lower():
+                found = value
+        return found
+
+    def set_header(self, name: str, value: str) -> None:
+        set_header_value(self.options['headers'], name, value)
+
+    def disable_auth(self) -> None:
+        """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
+        # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
+        self.options['auth'] = suppress_default_auth
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -466,21 +736,25 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
-        new_options = ChainMap(options, self.options)
-
-        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.debug('An unverified HTTPS request is being made to %s', url)
-
         extra_headers = options.pop('extra_headers', None)
-        if extra_headers is not None:
-            new_options['headers'] = new_options['headers'].copy()
-            new_options['headers'].update(extra_headers)
+        explicit_headers = options.get('headers')
 
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
         self.handle_auth_token(method=method, url=url, default_options=self.options)
+
+        new_options = ChainMap(options, self.options)
+        request_headers = CaseInsensitiveDict(
+            explicit_headers if explicit_headers is not None else self.options['headers']
+        )
+        if extra_headers is not None:
+            request_headers.update(extra_headers)
+        new_options['headers'] = request_headers
+
+        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
+            self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -498,6 +772,12 @@ class RequestsWrapper(object):
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                    retry_headers = CaseInsensitiveDict(
+                        explicit_headers if explicit_headers is not None else self.options['headers']
+                    )
+                    if extra_headers is not None:
+                        retry_headers.update(extra_headers)
+                    new_options['headers'] = retry_headers
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
@@ -505,22 +785,23 @@ class RequestsWrapper(object):
             return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
-        try:
-            response = request_method(url, **new_options)
-        except SSLError as e:
-            # fetch the intermediate certs
-            parsed_url = urlparse(url)
-            hostname = parsed_url.hostname
-            port = parsed_url.port
-            certs = self.fetch_intermediate_certs(hostname, port)
-            if not certs:
-                raise e
-            session = self.session if persist else self._create_session()
-            if parsed_url.scheme == "https":
-                self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
-            request_method = getattr(session, method)
-            response = request_method(url, **new_options)
-        return response
+        with _translate_http_errors():
+            try:
+                response = request_method(url, **new_options)
+            except SSLError as e:
+                # fetch the intermediate certs
+                parsed_url = urlparse(url)
+                hostname = parsed_url.hostname
+                port = parsed_url.port
+                certs = self.fetch_intermediate_certs(hostname, port)
+                if not certs:
+                    raise e
+                session = self.session if persist else self._create_session()
+                if parsed_url.scheme == "https":
+                    self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
+                request_method = getattr(session, method)
+                response = request_method(url, **new_options)
+            return response
 
     def fetch_intermediate_certs(self, hostname, port=443):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
@@ -608,6 +889,7 @@ class RequestsWrapper(object):
         # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
+        session.trust_env = self._trust_env
         return session
 
     @property
@@ -620,7 +902,8 @@ class RequestsWrapper(object):
 
     def handle_auth_token(self, **request):
         if self.auth_token_handler is not None:
-            self.auth_token_handler.poll(**request)
+            with _translate_http_errors():
+                self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
         try:
@@ -630,13 +913,28 @@ class RequestsWrapper(object):
             # before _session was ever defined (since __del__ executes even if __init__ fails).
             pass
 
+    def apply_tls_to_requests_session(self, session: requests.Session) -> None:
+        """Apply this wrapper's TLS configuration to a requests session it does not own.
+
+        For third-party libraries that build their own requests transport and accept only verify and
+        cert, which cannot express tls_validate_hostname, tls_ciphers, tls_private_key_password or
+        tls_intermediate_ca_certs. Those live on the SSLContext, so the adapter carrying it has to be
+        mounted on the foreign session for them to take effect.
+        """
+        # A dedicated adapter, never one from the cache. Closing a requests session closes every
+        # adapter mounted on it, and the owner of a foreign session decides when that happens, so a
+        # shared adapter would let it drop the connection pool this client's own requests run on.
+        session.mount('https://', self._create_https_adapter(self.tls_config))
+
     def _mount_https_adapter(self, session, tls_config):
         # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)
-        if tls_config_key in self._https_adapters:
-            session.mount('https://', self._https_adapters[tls_config_key])
-            return
+        if tls_config_key not in self._https_adapters:
+            self._https_adapters[tls_config_key] = self._create_https_adapter(tls_config)
 
+        session.mount('https://', self._https_adapters[tls_config_key])
+
+    def _create_https_adapter(self, tls_config):
         context = create_ssl_context(tls_config)
         # Enables HostHeaderSSLAdapter if needed
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
@@ -654,13 +952,16 @@ class RequestsWrapper(object):
                         self, connections, maxsize, block=block, **pool_kwargs
                     )
 
-            https_adapter = SSLContextHostHeaderAdapter(context)
-        else:
-            https_adapter = _SSLContextAdapter(context)
+            return SSLContextHostHeaderAdapter(context)
 
-        # Cache the adapter for reuse
-        self._https_adapters[tls_config_key] = https_adapter
-        session.mount('https://', https_adapter)
+        return _SSLContextAdapter(context)
+
+
+def create_http_client(
+    instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
+) -> HTTPClient:
+    """Build the agnostic HTTP client from explicit config, confining the concrete backend to one place."""
+    return RequestsWrapper(instance or {}, init_config, remapper, logger)
 
 
 @contextmanager

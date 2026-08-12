@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
-from unittest.mock import MagicMock
 
 import pytest
-from requests.exceptions import ConnectionError, HTTPError
 
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 from datadog_checks.dell_powerflex import DellPowerflexCheck
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
@@ -60,22 +60,17 @@ def assert_bwc_metrics(aggregator, bwc_metrics, tags, value=0):
         aggregator.assert_metric(f'{metric_prefix}.num_occured', value=value, tags=tags)
 
 
-def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
-    mocker.patch('requests.Session.post', side_effect=ConnectionError('connection refused'))
+def test_can_connect_down(dd_run_check, aggregator, instance, mock_http):
+    mock_http.post.side_effect = HTTPConnectionError('connection refused')
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=0, tags=BASE_TAGS)
 
 
-def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, mocker, caplog):
-    mocker.patch(
-        'requests.Session.post',
-        return_value=MagicMock(
-            raise_for_status=MagicMock(),
-            json=MagicMock(return_value={'error': 'unauthorized_client'}),
-            status_code=200,
-        ),
+def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, mock_http, caplog):
+    mock_http.post.side_effect = lambda *a, **k: MockHTTPResponse(
+        json_data={'error': 'unauthorized_client'}, status_code=200
     )
     caplog.set_level(logging.WARNING)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
@@ -85,8 +80,8 @@ def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, 
     assert 'Auth response missing access_token' in caplog.text
 
 
-def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mocker, caplog):
-    mocker.patch('requests.Session.get', side_effect=HTTPError(response=MagicMock(status_code=500)))
+def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mock_http, caplog):
+    mock_http.get.side_effect = HTTPStatusError('500 Server Error', response=MockHTTPResponse(status_code=500))
 
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     caplog.set_level(logging.WARNING)
@@ -96,27 +91,23 @@ def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mocker, 
     assert 'Could not connect to PowerFlex Gateway' in caplog.text
 
 
-def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
-    mocker.patch('requests.Session.get', return_value=MagicMock(raise_for_status=MagicMock()))
+def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mock_http):
+    mock_http.get.side_effect = lambda *a, **k: MockHTTPResponse(json_data={}, status_code=200)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=BASE_TAGS)
 
 
-def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mocker):
+def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mock_http):
     instance = {'powerflex_gateway_url': DEFAULT_GATEWAY_URL}
-    mocker.patch(
-        'requests.Session.get',
-        side_effect=lambda url, *args, **kwargs: MagicMock(
-            json=MagicMock(return_value=mock_http_call(url)), status_code=200
-        ),
+    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(
+        json_data=mock_http_call(url), status_code=200
     )
-    mock_post = mocker.patch('requests.Session.post')
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
-    mock_post.assert_not_called()
+    mock_http.post.assert_not_called()
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', at_least=1)
     aggregator.assert_metric('dell_powerflex.system.count', at_least=1)

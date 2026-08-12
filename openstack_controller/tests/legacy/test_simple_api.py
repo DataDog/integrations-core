@@ -8,9 +8,9 @@ import os
 
 import mock
 import pytest
-import requests
 import simplejson as json
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.openstack_controller.legacy.api import ApiFactory, Authenticator, Credential, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import (
     AuthenticationNeeded,
@@ -177,7 +177,7 @@ PROJECTS_RESPONSE = [
 PROJECT_RESPONSE = [{"domain_id": "1111", "id": "3333", "name": "name 1"}]
 
 
-def test_from_config(requests_wrapper):
+def test_from_config(mock_http):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -188,7 +188,7 @@ def test_from_config(requests_wrapper):
             'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
             return_value=PROJECTS_RESPONSE,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], mock_http)
             assert isinstance(cred, Credential)
             assert cred.auth_token == "fake_token"
             assert cred.name == "name 2"
@@ -198,7 +198,7 @@ def test_from_config(requests_wrapper):
             assert cred.neutron_endpoint == "http://10.0.2.15:9292"
 
 
-def test_from_config_with_admin(requests_wrapper):
+def test_from_config_with_admin(mock_http):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     del mock_http_response['token']['roles']
     mock_http_response['token']['roles'] = [
@@ -214,7 +214,7 @@ def test_from_config_with_admin(requests_wrapper):
             'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
             return_value=PROJECTS_RESPONSE,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], mock_http)
             assert isinstance(cred, Credential)
             assert cred.auth_token == "fake_token"
             assert cred.name == "name 1"
@@ -224,7 +224,7 @@ def test_from_config_with_admin(requests_wrapper):
             assert cred.neutron_endpoint == "http://10.0.2.15:9292"
 
 
-def test_from_config_with_missing_name(requests_wrapper):
+def test_from_config_with_missing_name(mock_http):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -238,11 +238,11 @@ def test_from_config_with_missing_name(requests_wrapper):
             'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
             return_value=project_response_without_name,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], mock_http)
             assert cred is None
 
 
-def test_from_config_with_missing_id(requests_wrapper):
+def test_from_config_with_missing_id(mock_http):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -256,7 +256,7 @@ def test_from_config_with_missing_id(requests_wrapper):
             'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
             return_value=project_response_without_name,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], mock_http)
             assert cred is None
 
 
@@ -288,13 +288,13 @@ def get_os_hypervisor_uptime_post_v2_53_response(url, params=None, timeout=None)
     )
 
 
-def test_get_os_hypervisor_uptime(aggregator, requests_wrapper):
+def test_get_os_hypervisor_uptime(aggregator, mock_http):
     hypervisor_mock = mock.MagicMock(id=1)
     with mock.patch(
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=get_os_hypervisor_uptime_pre_v2_52_response,
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert (
             api.get_os_hypervisor_uptime(hypervisor_mock)
             == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
@@ -304,7 +304,7 @@ def test_get_os_hypervisor_uptime(aggregator, requests_wrapper):
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=get_os_hypervisor_uptime_post_v2_53_response,
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert (
             api.get_os_hypervisor_uptime(hypervisor_mock)
             == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
@@ -336,11 +336,11 @@ def get_os_aggregates_response(url, params=None, timeout=None):
     )
 
 
-def test_get_os_aggregates(aggregator, requests_wrapper):
+def test_get_os_aggregates(aggregator, mock_http):
     with mock.patch(
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request', side_effect=get_os_aggregates_response
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
 
         aggregates = api.get_os_aggregates()
 
@@ -457,19 +457,19 @@ def get_os_hypervisors_detail_post_v2_53_response(url, params=None, timeout=None
     )
 
 
-def test_get_os_hypervisors_detail(aggregator, requests_wrapper):
+def test_get_os_hypervisors_detail(aggregator, mock_http):
     with mock.patch(
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=get_os_hypervisors_detail_post_v2_33_response,
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert api.get_os_hypervisors_detail() == common.EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE
 
     with mock.patch(
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=get_os_hypervisors_detail_post_v2_53_response,
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert api.get_os_hypervisors_detail() == [
             {
                 "cpu_info": {
@@ -601,12 +601,12 @@ def get_servers_detail_post_v2_63_response(url, params=None, timeout=None):
     )
 
 
-def test_get_servers_detail(aggregator, requests_wrapper):
+def test_get_servers_detail(aggregator, mock_http):
     with mock.patch(
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=get_servers_detail_post_v2_63_response,
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert api.get_servers_detail(None) == [
             {
                 "OS-DCF:diskConfig": "AUTO",
@@ -692,21 +692,21 @@ def test_get_servers_detail(aggregator, requests_wrapper):
         ]
 
 
-def test__get_paginated_list(requests_wrapper):
+def test__get_paginated_list(mock_http):
     log = mock.MagicMock()
 
     instance = copy.deepcopy(common.MOCK_CONFIG["instances"][0])
     instance["paginated_limit"] = 4
 
     with mock.patch("datadog_checks.openstack_controller.legacy.api.SimpleApi.connect"):
-        api = ApiFactory.create(log, instance, requests_wrapper)
+        api = ApiFactory.create(log, instance, mock_http)
     with mock.patch(
         "datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request",
         side_effect=[
             # First call: 3 exceptions -> failure
-            requests.exceptions.HTTPError,
-            requests.exceptions.HTTPError,
-            requests.exceptions.HTTPError,
+            HTTPStatusError("mocked HTTP error"),
+            HTTPStatusError("mocked HTTP error"),
+            HTTPStatusError("mocked HTTP error"),
         ],
     ):
         # First call
@@ -733,7 +733,7 @@ def test__get_paginated_list(requests_wrapper):
         "datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request",
         side_effect=[
             # Third call: 1 exception, limit is divided once by 2
-            requests.exceptions.HTTPError,
+            HTTPStatusError("mocked HTTP error"),
             {"obj": [{"id": 0}, {"id": 1}], "obj_links": "test"},
             {"obj": [{"id": 2}, {"id": 3}], "obj_links": "test"},
             {"obj": [{"id": 4}]},
@@ -760,33 +760,33 @@ def test__get_paginated_list(requests_wrapper):
             api._get_paginated_list("url", "obj", {})
 
 
-def test__make_request_failure(requests_wrapper):
+def test__make_request_failure(mock_http):
     log = mock.MagicMock()
 
     instance = copy.deepcopy(common.MOCK_CONFIG["instances"][0])
     instance["paginated_limit"] = 4
 
     with mock.patch("datadog_checks.openstack_controller.legacy.api.SimpleApi.connect"):
-        api = ApiFactory.create(log, instance, requests_wrapper)
+        api = ApiFactory.create(log, instance, mock_http)
 
     response_mock = mock.MagicMock()
-    with mock.patch("datadog_checks.openstack_controller.legacy.api.requests.Session.get", return_value=response_mock):
-        response_mock.raise_for_status.side_effect = requests.exceptions.HTTPError
-        response_mock.status_code = 401
-        with pytest.raises(AuthenticationNeeded):
-            api._make_request("", {})
+    mock_http.get.return_value = response_mock
+    response_mock.raise_for_status.side_effect = HTTPStatusError("mocked HTTP error")
+    response_mock.status_code = 401
+    with pytest.raises(AuthenticationNeeded):
+        api._make_request("", {})
 
-        response_mock.status_code = 409
-        with pytest.raises(InstancePowerOffFailure):
-            api._make_request("", {})
+    response_mock.status_code = 409
+    with pytest.raises(InstancePowerOffFailure):
+        api._make_request("", {})
 
-        response_mock.status_code = 500
-        with pytest.raises(requests.exceptions.HTTPError):
-            api._make_request("", {})
+    response_mock.status_code = 500
+    with pytest.raises(HTTPStatusError):
+        api._make_request("", {})
 
-        response_mock.raise_for_status.side_effect = Exception
-        with pytest.raises(Exception):
-            api._make_request("", {})
+    response_mock.raise_for_status.side_effect = Exception
+    with pytest.raises(Exception):
+        api._make_request("", {})
 
 
 def get_server_diagnostics_post_v2_48_response(url, params=None, timeout=None):
@@ -862,12 +862,12 @@ def get_server_diagnostics_post_v2_1_response(url, params=None, timeout=None):
     )
 
 
-def test_get_server_diagnostics(aggregator, requests_wrapper):
+def test_get_server_diagnostics(aggregator, mock_http):
     with mock.patch(
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=get_server_diagnostics_post_v2_48_response,
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert api.get_server_diagnostics(None) == {
             "config_drive": True,
             "cpu_details": [{"id": 0, "time": 17300000000, "utilisation": 15}],
@@ -910,7 +910,7 @@ def test_get_server_diagnostics(aggregator, requests_wrapper):
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=get_server_diagnostics_post_v2_1_response,
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert api.get_server_diagnostics(None) == {
             "cpu0_time": 17300000000,
             "memory": 524288,
@@ -1015,10 +1015,10 @@ def get_network_quotas_response():
     )
 
 
-def test_get_project_limits(aggregator, requests_wrapper):
+def test_get_project_limits(aggregator, mock_http):
     with mock.patch(
         'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request',
         side_effect=[get_project_limits_response(), get_network_quotas_response()],
     ):
-        api = SimpleApi(None, None, requests_wrapper)
+        api = SimpleApi(None, None, mock_http)
         assert api.get_project_limits(None) == common.EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE

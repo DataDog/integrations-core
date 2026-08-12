@@ -189,7 +189,7 @@ def test_ensure_listener_gives_the_listener_its_own_http_session():
 
     http = listener_cls.call_args.kwargs["http"]
     assert http is not None
-    assert http is not check.http  # a dedicated RequestsWrapper, not the check's shared session
+    assert http is not check.http  # a dedicated HTTP client, not the check's shared client
 
 
 def test_ensure_listener_passes_the_configured_read_timeout():
@@ -343,7 +343,7 @@ def test_stream_once_reports_data_received_even_when_the_connection_then_errors(
     assert got_data is True  # data arrived before the drop; _stream_once caught the error and reported it
 
 
-def test_stream_once_inherits_wrapper_auth_when_no_token():
+def test_stream_once_inherits_http_client_auth_when_no_token():
     check = build_check(genresources_stream_applications_enabled=True, genresources_auth_token=None)
     collector = check._resource_collector
 
@@ -372,7 +372,7 @@ def test_stream_once_inherits_wrapper_auth_when_no_token():
     listener._stream_once()
 
     kwargs = http.get.call_args.kwargs
-    assert "headers" not in kwargs  # must not clobber the wrapper's configured auth
+    assert "headers" not in kwargs  # must not clobber the HTTP client's configured auth
     assert (
         "extra_headers" not in kwargs
     )  # omit entirely -- even empty extra_headers would drop the inherited auth_token

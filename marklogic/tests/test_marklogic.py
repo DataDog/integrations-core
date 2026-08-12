@@ -9,6 +9,12 @@ import pytest
 from packaging import version
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+    HTTPStatusError,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
 
@@ -104,6 +110,19 @@ def test_check_with_filters(aggregator):
     aggregator.assert_no_duplicate_all()
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.parametrize(
+    'error_type', [HTTPStatusError, HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError]
+)
+def test_check_connection_failure(aggregator, error_type):
+    check = MarklogicCheck('marklogic', {}, [INSTANCE])
+
+    with mock.patch.object(check.api, 'get_resources', side_effect=error_type('request failed')):
+        with pytest.raises(error_type):
+            check.check(INSTANCE)
+
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.CRITICAL, tags=COMMON_TAGS, count=1)
 
 
 @pytest.mark.integration

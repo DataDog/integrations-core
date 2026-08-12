@@ -6,14 +6,14 @@ import os
 from pathlib import Path
 from urllib.parse import urlparse
 
-import mock
 import pytest
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.dev.fs import get_here
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import find_free_port
 
 from .common import DEFAULT_GATEWAY_URL
@@ -100,31 +100,23 @@ def mock_http_call(mock_responses):
         data = mock_responses(url, file=file, **kwargs)
         if data is not None:
             return data
-        resp = requests.models.Response()
-        resp.status_code = 404
-        resp.reason = "Not Found"
-        resp.url = url
-        raise requests.exceptions.HTTPError(response=resp)
+        raise HTTPStatusError('404 Not Found', response=MockHTTPResponse(status_code=404))
 
     yield call
 
 
 @pytest.fixture
-def mock_auth(monkeypatch):
+def mock_auth(mock_http):
     def post(url, *args, **kwargs):
-        token_response = {'access_token': 'fake-token', 'expires_in': 300}
-        mock_json = mock.MagicMock(return_value=token_response)
-        return mock.MagicMock(json=mock_json, status_code=200)
+        return MockHTTPResponse(json_data={'access_token': 'fake-token', 'expires_in': 300}, status_code=200)
 
-    monkeypatch.setattr('requests.Session.post', mock.MagicMock(side_effect=post))
+    mock_http.post.side_effect = post
 
 
 @pytest.fixture
-def mock_http_get(monkeypatch, mock_http_call, mock_auth):
+def mock_http_get(mock_http, mock_http_call, mock_auth):
     def get(url, *args, **kwargs):
-        mock_json = mock.MagicMock(return_value=mock_http_call(url, **kwargs))
-        return mock.MagicMock(json=mock_json, status_code=200)
+        return MockHTTPResponse(json_data=mock_http_call(url, **kwargs), status_code=200)
 
-    mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.Session.get', mock_get)
-    return mock_get
+    mock_http.get.side_effect = get
+    return mock_http

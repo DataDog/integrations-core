@@ -15,6 +15,7 @@ import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http_exceptions import HTTPSSLError, HTTPTimeoutError
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -90,6 +91,56 @@ class TestAttribute:
         assert check.http == check._http
         assert isinstance(check.http, RequestsWrapper)
 
+    def test_factory_default_returns_requests_wrapper(self):
+        check = AgentCheck('test', {}, [{}])
+
+        assert isinstance(check.create_http_client(), RequestsWrapper)
+
+    def test_factory_override_swaps_client(self):
+        sentinel = object()
+
+        class CustomCheck(AgentCheck):
+            def create_http_client(self, instance=None):
+                return sentinel
+
+        check = CustomCheck('test', {}, [{}])
+        assert check.http is sentinel
+
+    def test_factory_default_uses_instance_config(self):
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        assert check.create_http_client().options['timeout'] == (7.0, 7.0)
+
+    def test_factory_instance_override(self):
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        client = check.create_http_client({'timeout': 42})
+
+        assert client.options['timeout'] == (42.0, 42.0)
+
+    def test_factory_empty_instance_override_is_honored(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        # {} is an explicit override, distinct from None, so self.instance's timeout must not leak in.
+        empty_default = create_http_client({}, {}).options['timeout']
+        assert check.create_http_client({}).options['timeout'] == empty_default
+
+    def test_module_factory_builds_from_given_config(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        client = create_http_client({'timeout': 24.5}, {})
+
+        assert client.options['timeout'] == (24.5, 24.5)
+
+    def test_module_factory_applies_remapper(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        client = create_http_client({'prometheus_timeout': 9}, {}, {'prometheus_timeout': {'name': 'timeout'}})
+
+        assert client.options['timeout'] == (9, 9)
+
 
 class TestTLSCiphers:
     @pytest.mark.parametrize(
@@ -151,7 +202,7 @@ class TestTLSCiphers:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
         assert http.session.verify == cert_path  # The session attribute instantiates the SSLContext
-        with pytest.raises(requests.exceptions.SSLError):
+        with pytest.raises(HTTPSSLError):
             http.get(url)
 
     def test_http_failure_with_ssl_defaults(self, openssl_https_server):
@@ -168,7 +219,7 @@ class TestTLSCiphers:
         # Mock SSL set_ciphers to disable it and use the default ciphers
         with mock.patch.object(ssl.SSLContext, 'set_ciphers'):
             http = RequestsWrapper(instance, init_config)
-            with pytest.raises(requests.exceptions.SSLError):
+            with pytest.raises(HTTPSSLError):
                 http.get(url)
 
 
@@ -268,7 +319,7 @@ class TestSession:
 
         Here we test two things:
         - We pass the timemout option correctly to the requests library.
-        - We let the requests.exceptions.Timeout bubble up from the requests library.
+        - The timeout surfaces as the agnostic HTTPTimeoutError.
 
         We trust requests to respect the timeout so we mock its response.
         """
@@ -277,7 +328,7 @@ class TestSession:
         mock_session.get.side_effect = requests.exceptions.Timeout()
         http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08}, session=mock_session)
 
-        with pytest.raises(requests.exceptions.Timeout):
+        with pytest.raises(HTTPTimeoutError):
             http.get('https://foobar.com')
 
         assert 'timeout' in mock_session.get.call_args.kwargs, mock_session.get.call_args.kwargs

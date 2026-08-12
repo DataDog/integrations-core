@@ -5,10 +5,9 @@
 from copy import deepcopy
 from urllib.parse import urlparse
 
-import requests
-
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
 from .metrics import METRICS_LIST
 
@@ -52,8 +51,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         try:
             self.process(scraper_config)
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, tags=custom_tags)
-        except requests.exceptions.ConnectionError as e:
-            # Unable to connect to the metrics endpoint
+        except (HTTPConnectionError, HTTPTimeoutError) as e:
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
@@ -135,7 +133,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
             else:
                 r.raise_for_status()
 
-        except requests.exceptions.Timeout:
+        except HTTPTimeoutError:
             # If there's a timeout
             self.service_check(
                 self.MASTER_SERVICE_CHECK_NAME,

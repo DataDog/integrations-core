@@ -5,9 +5,13 @@
 
 from datetime import datetime
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPInvalidURLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 from datadog_checks.nutanix.activity_monitor import ActivityMonitor
 from datadog_checks.nutanix.config_models import ConfigMixin
 from datadog_checks.nutanix.infrastructure_monitor import InfrastructureMonitor
@@ -172,7 +176,7 @@ class NutanixCheck(AgentCheck, ConfigMixin):
             response.raise_for_status()
             self.gauge("health.up", 1, tags=self.base_tags)
             return True
-        except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
+        except (HTTPStatusError, HTTPInvalidURLError, HTTPConnectionError, HTTPTimeoutError) as e:
             self.log.error("[PC:%s:%s] Failed to connect: %s", self.pc_ip, self.pc_port, str(e))
         except Exception:
             self.log.exception("[PC:%s:%s] Unexpected connection error", self.pc_ip, self.pc_port)

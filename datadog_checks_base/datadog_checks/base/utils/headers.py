@@ -1,16 +1,24 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import MutableMapping
+
 from datadog_checks.base.agent import datadog_agent
+
+# Values seeded by get_default_headers(). They express no preference of their own, so a caller that
+# negotiates a more specific value treats a header still holding its seeded default as unset. Comparing
+# against these instead of only against None is what keeps that check from silently never firing.
+DEFAULT_ACCEPT = '*/*'
+DEFAULT_ACCEPT_ENCODING = 'gzip, deflate'
 
 
 def _get_common_headers():
     return {  # Required by the HTTP spec. If missing, some websites may return junk (eg 404 responses).
-        'Accept': '*/*',
+        'Accept': DEFAULT_ACCEPT,
         # Allow websites to send compressed responses.
         # (In theory, not including this header allows servers to send anything, but in practice servers are
         # typically conservative and send plain text, i.e. uncompressed responses.)
-        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Encoding': DEFAULT_ACCEPT_ENCODING,
         # NOTE: we don't include a 'Connection' header. This is equivalent to using the spec-specific default
         # behavior, i.e. 'keep-alive' for HTTP/1.1, and 'close' for HTTP/1.0.
     }
@@ -22,6 +30,18 @@ def get_default_headers():
     headers = {'User-Agent': 'Datadog Agent/{}'.format(datadog_agent.get_version() or '0.0.0')}
     headers.update(_get_common_headers())
     return headers
+
+
+def set_header(headers: MutableMapping[str, str], name: str, value: str) -> None:
+    matching_names = [header_name for header_name in headers if header_name.lower() == name.lower()]
+    if not matching_names:
+        headers[name] = value
+        return
+
+    retained_name = matching_names[0]
+    headers[retained_name] = value
+    for duplicate_name in matching_names[1:]:
+        del headers[duplicate_name]
 
 
 def update_headers(headers, extra_headers):

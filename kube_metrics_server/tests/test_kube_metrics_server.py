@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 from datadog_checks.kube_metrics_server import KubeMetricsServerCheck
+
+from .common import make_mock_metrics
 
 instance = {
     'prometheus_url': 'https://localhost:443/metrics',
@@ -23,20 +23,11 @@ NAMESPACE = 'kube_metrics_server'
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics.txt')
 
 
-def test_check_metrics(aggregator, mock_metrics):
+def test_check_metrics(aggregator, mock_metrics, mock_healthcheck_wrapper):
     c = KubeMetricsServerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -63,26 +54,49 @@ def test_check_metrics(aggregator, mock_metrics):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check_ok(monkeypatch):
+@pytest.mark.parametrize(
+    'side_effect, expected_status, extra_kwargs',
+    [
+        (None, AgentCheck.OK, {}),
+        (HTTPStatusError('health check failed'), AgentCheck.CRITICAL, {'message': 'health check failed'}),
+        (HTTPConnectionError('connection refused'), AgentCheck.CRITICAL, {'message': 'connection refused'}),
+    ],
+    ids=['ok', 'http_error', 'http_connection_error'],
+)
+def test_service_check(monkeypatch, side_effect, expected_status, extra_kwargs):
     instance_tags = []
-
     check = KubeMetricsServerCheck(CHECK_NAME, {}, [instance])
-
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-    calls = [
-        mock.call(NAMESPACE + '.up', AgentCheck.OK, tags=instance_tags),
-        mock.call(NAMESPACE + '.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
-    ]
+    healthcheck_url = check.instance['health_url']
+    handler = mock.MagicMock()
+    handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
+    check._http_handlers[healthcheck_url] = handler
 
-    # successful health check
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
-        check._perform_service_check(instance)
+    check._perform_service_check(instance)
 
-    # failed health check
-    raise_error = mock.Mock()
-    raise_error.side_effect = requests.HTTPError('health check failed')
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
-        check._perform_service_check(instance)
+    check.service_check.assert_called_with(NAMESPACE + '.up', expected_status, tags=instance_tags, **extra_kwargs)
 
-    check.service_check.assert_has_calls(calls)
+
+@pytest.mark.parametrize(
+    ('instance_overrides', 'expected_verify', 'expected_ignore_warning'),
+    [
+        pytest.param({}, False, True, id='no ca cert'),
+        pytest.param({'ssl_ca_cert': '/etc/ca.crt'}, '/etc/ca.crt', False, id='ca cert configured'),
+    ],
+)
+def test_healthcheck_client_carries_instance_tls_config(instance_overrides, expected_verify, expected_ignore_warning):
+    """The healthcheck builds its own client, so the instance TLS settings have to reach it.
+
+    With no CA certificate configured it falls back to an unverified connection with the warning
+    suppressed, which is what an endpoint serving a self-signed certificate depends on.
+    """
+    check = KubeMetricsServerCheck(CHECK_NAME, {}, [{**instance, **instance_overrides}])
+    health_url = check.instance['health_url']
+
+    handler = check._healthcheck_http_handler(check.instance, health_url)
+
+    assert handler.options['verify'] == expected_verify
+    assert handler.ignore_tls_warning is expected_ignore_warning
+    # Cached per endpoint, so repeated healthchecks reuse one client rather than building each time.
+    assert check._healthcheck_http_handler(check.instance, health_url) is handler

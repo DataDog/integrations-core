@@ -124,8 +124,8 @@ def test_extract_index_tags(instance, test_input, expected_tags):
     assert eval(str(test_output)) == expected_tags
 
 
-def test_unit(dd_run_check, check, instance, mocker, aggregator):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_unit(dd_run_check, check, instance, mock_http, aggregator):
+    mock_http.get.side_effect = mock_http_responses
 
     dd_run_check(check(instance))
 
@@ -140,8 +140,8 @@ def test_unit(dd_run_check, check, instance, mocker, aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggregator):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_unit_query_metrics(dd_run_check, check, instance_query, mock_http, aggregator):
+    mock_http.get.side_effect = mock_http_responses
 
     dd_run_check(check(instance_query))
 

@@ -6,6 +6,13 @@ import logging
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPInvalidURLError,
+    HTTPReadTimeoutError,
+    HTTPRequestError,
+    HTTPSSLError,
+    HTTPStatusError,
+)
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
 
@@ -155,25 +162,26 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance, mocker):
+def test_consul_request(aggregator, instance, mocker, mock_http, mock_response):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     mocker.patch("datadog_checks.base.utils.serialization.json.loads")
-    with mock.patch("datadog_checks.consul.consul.requests.Session.get") as mock_requests_get:
-        consul_check.consul_request("foo")
-        url = "{}/{}".format(instance["url"], "foo")
-        aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
+    mock_http.get.return_value = mock_response()
 
-        aggregator.reset()
-        mock_requests_get.side_effect = Exception("message")
-        with pytest.raises(Exception):
-            consul_check.consul_request("foo")
-        aggregator.assert_service_check(
-            "consul.can_connect",
-            ConsulCheck.CRITICAL,
-            tags=["url:{}".format(url)],
-            count=1,
-            message="Consul request to {} failed: message".format(url),
-        )
+    consul_check.consul_request("foo")
+    url = "{}/{}".format(instance["url"], "foo")
+    aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
+
+    aggregator.reset()
+    mock_http.get.side_effect = Exception("message")
+    with pytest.raises(Exception):
+        consul_check.consul_request("foo")
+    aggregator.assert_service_check(
+        "consul.can_connect",
+        ConsulCheck.CRITICAL,
+        tags=["url:{}".format(url)],
+        count=1,
+        message="Consul request to {} failed: message".format(url),
+    )
 
 
 def test_service_checks(aggregator):
@@ -681,29 +689,16 @@ def test_network_latency_node_name(
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, mocker):
+def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
-    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
-    with mock.patch('datadog_checks.base.utils.http.requests.Session') as session:
-        mock_session = mock.MagicMock()
-        session.return_value = mock_session
-        mock_session.get.return_value = mock.MagicMock(status_code=200)
-
-        check.check(None)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        mock_session.get.assert_called_with('/v1/status/leader', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        # The header mapping is compared whole, because the "new config" case pins that an
+        # instance-level headers mapping replaces the seeded defaults instead of adding to them. That
+        # shows up as the absence of User-Agent, Accept and Accept-Encoding, which only an exact
+        # comparison can see.
+        assert check.http.options[key] == value
 
 
 def test_health_checks_cache_defaults():
@@ -742,3 +737,71 @@ def test_health_checks_cache_eviction_re_emits_failure_event(aggregator):
 
     failure_events = [e for e in aggregator.events if e['event_type'] == 'consul.check_failed']
     assert len(failure_events) == 2
+
+
+def test_prometheus_endpoint_invalid_url_does_not_abort_check(aggregator, caplog):
+    """A malformed URL must be swallowed here, not abort check() at its first statement."""
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(side_effect=HTTPInvalidURLError('No scheme supplied'))
+    caplog.set_level(logging.WARNING)
+
+    consul_check.check(None)
+
+    assert 'does not support the prometheus endpoint' in caplog.text
+    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
+
+
+def test_prometheus_endpoint_malformed_header_does_not_abort_check(aggregator, caplog):
+    """A server-sent malformed header must be swallowed here, not abort check() at its first statement.
+
+    urllib3 raises InvalidHeader for a multi-valued Content-Length and requests re-raises it as
+    its own InvalidHeader, which subclasses ValueError. The agnostic translator has no equivalent
+    subtype and collapses it into a bare HTTPRequestError.
+    """
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(
+        side_effect=HTTPRequestError('Content-Length contained multiple unmatching values')
+    )
+    caplog.set_level(logging.WARNING)
+
+    consul_check.check(None)
+
+    assert 'does not support the prometheus endpoint' in caplog.text
+    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
+
+
+@pytest.mark.parametrize(
+    'exception',
+    [
+        pytest.param(HTTPReadTimeoutError('read timed out'), id='read_timeout'),
+        pytest.param(HTTPSSLError('certificate verify failed'), id='ssl'),
+    ],
+)
+def test_prometheus_endpoint_transport_failures_still_abort_check(exception):
+    """Transport failures say nothing about the Consul version, so they must not be swallowed.
+
+    They are HTTPRequestError subclasses, so the arm that catches malformed responses has to let
+    them back out rather than reporting an unsupported prometheus endpoint.
+    """
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(side_effect=exception)
+
+    with pytest.raises(type(exception)):
+        consul_check.check(None)
+
+
+def test_prometheus_endpoint_status_error_without_response_is_surfaced(aggregator):
+    """The auth-token seam drops the raw response, so the guard must re-raise, not fail on None."""
+    config = dict(consul_mocks.MOCK_CONFIG, use_prometheus_endpoint=True)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.process = mock.Mock(side_effect=HTTPStatusError('403 Client Error'))
+
+    with pytest.raises(HTTPStatusError):
+        consul_check.check(None)

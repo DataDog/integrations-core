@@ -5,13 +5,13 @@
 
 from __future__ import division
 
+import json
 import re
 import time
 from urllib.parse import urljoin
 
-import requests
-
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPError, HTTPStatusError
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
     COUCHBASE_STATS_PATH,
@@ -232,7 +232,7 @@ class Couchbase(AgentCheck):
             # No overall stats? bail out now
             if overall_stats is None:
                 raise Exception("No data returned from couchbase endpoint: {}".format(url))
-        except requests.exceptions.HTTPError as e:
+        except HTTPStatusError as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
@@ -266,7 +266,7 @@ class Couchbase(AgentCheck):
 
                 try:
                     bucket_stats = self._get_stats(url)
-                except requests.exceptions.HTTPError:
+                except HTTPStatusError:
                     url_backup = '{}/pools/nodes/buckets/{}/stats'.format(self._server, bucket_name)
                     bucket_stats = self._get_stats(url_backup)
 
@@ -304,7 +304,7 @@ class Couchbase(AgentCheck):
                 # Should only be 1 rebalance
                 break
 
-        except requests.exceptions.HTTPError:
+        except HTTPStatusError:
             self.log.error("Error accessing the endpoint %s", tasks_url)
 
         return couchbase
@@ -316,7 +316,7 @@ class Couchbase(AgentCheck):
             url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
             try:
                 query_data = self._get_stats(url)
-            except requests.exceptions.RequestException:
+            except (HTTPError, json.JSONDecodeError):
                 self.log.error(
                     "Error accessing the endpoint %s, make sure you're running at least "
                     "couchbase 4.5 to collect the query monitoring metrics",
@@ -329,7 +329,7 @@ class Couchbase(AgentCheck):
         url = '{}{}'.format(self._sync_gateway_url, SG_METRICS_PATH)
         try:
             data = self._get_stats(url).get('syncgateway', {})
-        except requests.exceptions.RequestException as e:
+        except (HTTPError, json.JSONDecodeError) as e:
             msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % (url, str(e))
             self.log.debug(msg)
             self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, self._tags)
@@ -418,7 +418,7 @@ class Couchbase(AgentCheck):
         url = urljoin(self._index_stats_url, INDEX_STATS_METRICS_PATH)
         try:
             data = self._get_stats(url)
-        except requests.exceptions.RequestException as e:
+        except (HTTPError, json.JSONDecodeError) as e:
             msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
             self.log.warning(msg)
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)

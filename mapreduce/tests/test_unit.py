@@ -2,6 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import pytest
+
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
@@ -21,6 +25,8 @@ from .common import (
     MR_AUTH_CONFIG,
     MR_CONFIG,
     RM_URI,
+    TEST_PASSWORD,
+    TEST_USERNAME,
 )
 
 
@@ -90,26 +96,25 @@ def test_check(aggregator, dd_run_check, mocked_request):
     aggregator.assert_all_metrics_covered()
 
 
-def test_auth(aggregator, dd_run_check, mocked_auth_request):
-    """
-    Test that we get all the metrics we're supposed to get
-    """
-    instance = MR_AUTH_CONFIG['instances'][0]
-
-    # Instantiate the check
+def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check, mock_http):
+    """The URL is the only per-endpoint discriminator, so a non-JSON body must still name it."""
+    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(content='<html>not json</html>')
+    instance = MR_CONFIG['instances'][0]
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
-    # Run the check once
-    dd_run_check(mapreduce)
+    # `dd_run_check` re-raises the check's traceback as a plain Exception.
+    with pytest.raises(Exception, match='JSONDecodeError'):
+        dd_run_check(mapreduce)
 
-    # Check the service tests
-    service_check_tags = ["url:{}".format(RM_URI)] + CUSTOM_TAGS
-    aggregator.assert_service_check(
-        MapReduceCheck.YARN_SERVICE_CHECK, status=MapReduceCheck.OK, tags=service_check_tags, count=1
-    )
-    aggregator.assert_service_check(
-        MapReduceCheck.MAPREDUCE_SERVICE_CHECK, status=MapReduceCheck.OK, tags=service_check_tags, count=1
-    )
+    message = aggregator.service_checks(MapReduceCheck.YARN_SERVICE_CHECK)[0].message
+    assert message.startswith('JSON Parse failed: {}'.format(RM_URI))
+
+
+def test_auth():
+    instance = MR_AUTH_CONFIG['instances'][0]
+    mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
+
+    assert mapreduce.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
 
 
 def test_disable_legacy_cluster_tag(aggregator, dd_run_check, mocked_request):
@@ -167,3 +172,24 @@ def test_disable_legacy_cluster_tag(aggregator, dd_run_check, mocked_request):
             tags=attributes["tags"] + expected_tags,
             count=1,
         )
+
+
+def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
+    """A server-sent malformed header must still emit mapreduce.resource_manager.can_connect.
+
+    A multi-valued Content-Length makes the backend reject the response header. The translator has
+    no more specific agnostic subtype for that, so it arrives as a bare HTTPRequestError and the
+    last arm has to name that type.
+    """
+    message = 'Content-Length contained multiple unmatching values'
+    mock_http.get.side_effect = HTTPRequestError(message)
+    instance = MR_CONFIG['instances'][0]
+    mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
+
+    with pytest.raises(Exception, match=message):
+        dd_run_check(mapreduce)
+
+    aggregator.assert_service_check(MapReduceCheck.YARN_SERVICE_CHECK, status=MapReduceCheck.CRITICAL, count=1)
+    # The last arm reports the bare error text, unlike the status/connection arm above it, which
+    # prefixes "Request failed". Pin the exact message so the arm cannot drift.
+    assert aggregator.service_checks(MapReduceCheck.YARN_SERVICE_CHECK)[0].message == message

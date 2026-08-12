@@ -3,13 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+from json import JSONDecodeError as StdJSONDecodeError
 from urllib.parse import urljoin
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import compute_percent
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPInvalidURLError,
+    HTTPRequestError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 
 
 class HDFSNameNode(AgentCheck):
@@ -156,19 +163,19 @@ class HDFSNameNode(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
 
-        except Timeout as e:
+        except HTTPTimeoutError as e:
             self.service_check(
                 self.JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags, message="Request timeout: {}, {}".format(url, e)
             )
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError) as e:
+        except (HTTPStatusError, HTTPInvalidURLError, HTTPConnectionError) as e:
             self.service_check(
                 self.JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags, message="Request failed: {}, {}".format(url, e)
             )
             raise
 
-        except JSONDecodeError as e:
+        except (JSONDecodeError, StdJSONDecodeError) as e:
             self.service_check(
                 self.JMX_SERVICE_CHECK,
                 AgentCheck.CRITICAL,
@@ -177,7 +184,9 @@ class HDFSNameNode(AgentCheck):
             )
             raise
 
-        except ValueError as e:
+        # HTTPRequestError is the translator's fallthrough type, so it carries the malformed-header
+        # and malformed-body failures that have no more specific agnostic equivalent.
+        except (ValueError, HTTPRequestError) as e:
             self.service_check(self.JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags, message=str(e))
             raise
 

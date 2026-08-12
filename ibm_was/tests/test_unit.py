@@ -5,9 +5,13 @@ import os
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPConnectTimeoutError,
+    HTTPReadTimeoutError,
+)
 from datadog_checks.ibm_was import IbmWasCheck
 
 from . import common
@@ -86,10 +90,22 @@ def test_critical_service_check(instance, check, aggregator):
     instance['servlet_url'] = 'http://localhost:5678/wasPerfTool/servlet/perfservlet'
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
 
-    with pytest.raises(requests.ConnectionError):
+    with pytest.raises(HTTPConnectionError):
         check = check(instance)
         check.check(instance)
 
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+
+
+@pytest.mark.parametrize('error_cls', [HTTPConnectTimeoutError, HTTPReadTimeoutError])
+def test_make_request_catches_timeouts(instance, check, aggregator, mock_http, error_cls):
+    mock_http.get.side_effect = error_cls('timed out')
+    check = check(instance)
+
+    with pytest.raises(error_cls, match='timed out'):
+        check.make_request()
+
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
 
 

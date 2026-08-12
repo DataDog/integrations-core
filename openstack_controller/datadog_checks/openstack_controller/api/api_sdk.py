@@ -45,15 +45,15 @@ class ApiSdk(Api):
     def _add_microversion_headers(self):
         if self.config.nova_microversion:
             self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
-            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
+            self.http.set_header('X-OpenStack-Nova-API-Version', self.config.nova_microversion)
 
         if self.config.ironic_microversion:
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
-            self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
+            self.http.set_header('X-OpenStack-Ironic-API-Version', self.config.ironic_microversion)
 
         if self.config.cinder_microversion:
             self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
-            self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
+            self.http.set_header('OpenStack-API-Version', self.config.cinder_microversion)
 
     def auth_url(self):
         return self.cloud_config.get_auth_args().get('auth_url')
@@ -64,6 +64,40 @@ class ApiSdk(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
+    def _keystone_proxies(self):
+        """Proxy URLs keyed by scheme, for the transport keystoneauth builds.
+
+        Probes a neutral host rather than a catalog endpoint: requests applies no_proxy only to
+        environment proxies, so a shared transport cannot express per-host bypass, and anchoring the
+        lookup on one endpoint would apply that endpoint's rules to every other one.
+        """
+        proxies = self.http.options.get('proxies') or {}
+        http_proxy = None if self.http.should_bypass_proxy('http://example.com') else proxies.get('http')
+        https_proxy = None if self.http.should_bypass_proxy('https://example.com') else proxies.get('https')
+        if http_proxy is None and https_proxy is None:
+            return {}
+        return {'http': http_proxy or '', 'https': https_proxy or ''}
+
+    def _build_keystone_session(self, auth):
+        # keystoneauth builds its own transport; mirror the TLS config and headers from our HTTP
+        # client instead of handing it the requests session.
+        keystone_session = session.Session(
+            auth=auth,
+            verify=self.http.options['verify'],
+            cert=self.http.options['cert'],
+            additional_headers=self.http.options['headers'],
+        )
+        # verify and cert cannot express the TLS options that live on the SSLContext, so hand the
+        # transport to the HTTP client and let it apply the full TLS configuration.
+        self.http.apply_tls_to_requests_session(keystone_session.session)
+        # keystoneauth1 takes no proxy or auth argument, so its transport is the only place they can
+        # go. Every auth type, including NTLM and Kerberos, resolves to one handler the HTTP client
+        # keeps under auth, and a transport carrying none of its own lets requests fall back to
+        # .netrc instead.
+        keystone_session.session.proxies = self._keystone_proxies()
+        keystone_session.session.auth = self.http.options['auth']
+        return keystone_session
+
     def authorize_user(self):
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
@@ -71,14 +105,14 @@ class ApiSdk(Api):
             password=self.cloud_config.get_auth_args().get('password'),
             user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
         )
-        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        keystone_session = self._build_keystone_session(v3_auth)
         self.connection = connection.Connection(
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )
         self._access = self.connection.session.auth.get_access(self.connection.session)
         self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
         self.connection.authorize()
-        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+        self.http.set_header('X-Auth-Token', self.connection.session.auth.get_token(self.connection.session))
 
     def authorize_system(self):
         v3_auth = v3.Password(
@@ -88,14 +122,14 @@ class ApiSdk(Api):
             user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
             system_scope="all",
         )
-        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        keystone_session = self._build_keystone_session(v3_auth)
         self.connection = connection.Connection(
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )
         self._access = self.connection.session.auth.get_access(self.connection.session)
         self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
         self.connection.authorize()
-        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+        self.http.set_header('X-Auth-Token', self.connection.session.auth.get_token(self.connection.session))
 
     def authorize_project(self, project_id):
         v3_auth = v3.Password(
@@ -106,14 +140,14 @@ class ApiSdk(Api):
             project_id=project_id,
             project_domain_name=self.cloud_config.get_auth_args().get('project_domain_name', DEFAULT_DOMAIN_ID),
         )
-        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        keystone_session = self._build_keystone_session(v3_auth)
         self.connection = connection.Connection(
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )
         self._access = self.connection.session.auth.get_access(self.connection.session)
         self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
         self.connection.authorize()
-        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+        self.http.set_header('X-Auth-Token', self.connection.session.auth.get_token(self.connection.session))
 
     def get_response_time(self, endpoint_types, remove_project_id=True, is_heat=False):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
