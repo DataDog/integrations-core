@@ -13,6 +13,7 @@ import pytest
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
+from datadog_checks.mysql.util import supports_explain_json_format_version
 from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
@@ -934,3 +935,31 @@ class TestReplicaReplicationStatusParameterized:
         for call in mock_cursor.execute.call_args_list:
             query_str = call[0][0]
             assert channel not in query_str
+
+
+class TestSupportsExplainJsonFormatVersion:
+    """The explain_json_format_version variable only exists on MySQL/Percona 8.3.0 and above."""
+
+    @pytest.mark.parametrize(
+        'raw_version,version_comment,expected',
+        [
+            pytest.param('5.7.30', 'MySQL Community Server', False, id='mysql_5_7'),
+            pytest.param('8.0.36', 'MySQL Community Server', False, id='mysql_8_0'),
+            pytest.param('8.2.0', 'MySQL Community Server', False, id='mysql_8_2'),
+            pytest.param('8.3.0', 'MySQL Community Server', True, id='mysql_8_3'),
+            pytest.param('8.4.0', 'MySQL Community Server', True, id='mysql_8_4'),
+            pytest.param('9.7.2', 'MySQL Community Server', True, id='mysql_9_7'),
+            pytest.param('8.0.42', 'Percona Server (GPL)', False, id='percona_8_0'),
+            pytest.param('8.4.0', 'Percona Server (GPL)', True, id='percona_8_4'),
+            # MariaDB never has the variable, even though its version numbers sort above 8.3.0
+            pytest.param('10.11.0-MariaDB', 'MariaDB', False, id='mariadb_10_11'),
+            pytest.param('11.4.0-MariaDB', 'MariaDB', False, id='mariadb_11_4'),
+        ],
+    )
+    def test_supported_versions(self, raw_version, version_comment, expected):
+        version = parse_version(raw_version, version_comment)
+        assert supports_explain_json_format_version(version) is expected
+
+    def test_unknown_version(self):
+        """The variable cannot be set safely before the server version has been detected."""
+        assert supports_explain_json_format_version(None) is False

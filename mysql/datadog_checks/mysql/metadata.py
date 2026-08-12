@@ -102,7 +102,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if not self._db:
             conn_args = self._connection_args_provider()
-            self._db = connect_with_session_variables(**conn_args)
+            self._db = connect_with_session_variables(mysql_version=self._check.version, **conn_args)
             if self._uses_managed_auth:
                 self._db_created_at = time.time()
         else:
