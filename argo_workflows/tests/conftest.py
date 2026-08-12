@@ -25,8 +25,7 @@ def setup_argo_wf():
     # run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
 
     # This only runs once, when the Kind cluster is created, so the resolved pod IP is cached here
-    # rather than re-resolved by `dd_environment` on every invocation (e.g. `ddev env stop`, which
-    # runs in a fresh process after the cluster has already been torn down).
+    # rather than re-resolved by `dd_environment` on every invocation.
     save_state(CONTROLLER_IP_STATE, get_workflow_controller_pod_ip())
 
 
