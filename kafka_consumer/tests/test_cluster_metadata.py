@@ -5,6 +5,7 @@
 
 import hashlib
 import json
+import logging
 import time
 from unittest import mock
 
@@ -1188,6 +1189,39 @@ def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
 
     saved = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
     assert saved['expire_at'] == expire_at
+
+
+def test_fetch_earliest_offsets_drops_negative_offsets(check, caplog):
+    """A negative earliest offset is discarded instead of being reported as a log-start offset."""
+    caplog.set_level(logging.WARNING)
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+    }
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+
+    def negative_offset_for_partition_1(requests, **_kwargs):
+        futures = {}
+        for tp in requests:
+            future = mock.MagicMock()
+            future.result.return_value = mock.MagicMock(offset=10 if tp.partition == 0 else -1533701557)
+            futures[tp] = future
+        return futures
+
+    mock_kafka_client.kafka_client.list_offsets.side_effect = negative_offset_for_partition_1
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    _wire_cache(kafka_consumer_check)
+
+    result = kafka_consumer_check.metadata_collector.fetch_earliest_offsets({'test-topic': [0, 1]})
+
+    assert result == {('test-topic', 0): 10}
+    # A mangled offset is not a failed fetch, so it must not be reported as one: that would send
+    # an operator after broker connectivity instead of the client library's 32-bit narrowing.
+    assert "Failed to fetch earliest offset" not in caplog.text
+    assert "Discarding 1/2 negative earliest offset(s)" in caplog.text
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
