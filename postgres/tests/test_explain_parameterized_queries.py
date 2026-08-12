@@ -120,7 +120,9 @@ def test_stacked_statements_are_rejected_by_the_server(integration_check, dbm_in
 
     assert plan_dict is None
     assert explain_err_code == DBExplainError.failed_to_explain_with_prepared_statement
-    assert err == "<class 'psycopg.errors.SyntaxError'>"
+    if check.statement_samples._explain_parameterized_queries._can_use_pipeline:
+        # the server refused it; on a build without pipeline support we never sent it in the first place
+        assert err == "<class 'psycopg.errors.SyntaxError'>"
 
     with check.db_pool.get_connection(DB_NAME) as conn:
         rows = check.statement_samples._explain_parameterized_queries._execute_query_and_fetch_rows(
@@ -133,6 +135,8 @@ def test_stacked_statements_are_rejected_by_the_server(integration_check, dbm_in
 def test_execute_prepare_uses_a_pipeline(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     epq = check.statement_samples._explain_parameterized_queries
+    # set explicitly so the test asserts the pipeline branch rather than whatever libpq this machine links
+    epq._can_use_pipeline = True
     conn = mock.MagicMock()
 
     with mock.patch.object(epq, '_execute_query') as mock_execute:
