@@ -38,6 +38,8 @@ def dbm_instance(pg_instance):
     "query,expected_explain_err_code",
     [
         ("SELECT * FROM pg_settings WHERE name = $1", DBExplainError.explained_with_prepared_statement),
+        # a single trailing statement terminator is legitimate and must still be explained
+        ("SELECT * FROM pg_settings WHERE name = $1;", DBExplainError.explained_with_prepared_statement),
         (
             "SELECT * FROM pg_settings WHERE name = $1 AND "
             "context = (SELECT context FROM pg_settings WHERE vartype = $2) AND source = $3",
@@ -93,6 +95,54 @@ def test_explain_parameterized_queries_generic_params(integration_check, dbm_ins
         assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
             conn, query_signature
         )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_12
+def test_explain_parameterized_queries_rejects_stacked_statements(integration_check, dbm_instance):
+    '''
+    Sampled text comes from pg_stat_activity, so anyone able to run a query on a monitored database can
+    plant a statement separator in it. The agent executes the PREPARE as the monitoring user, so such a
+    statement must never be explained (VULN-92306).
+    '''
+    check = integration_check(dbm_instance)
+    check.check(dbm_instance)
+
+    # the trailing comment supplies the $1 marker that routes the statement into the prepared statement path
+    query = "SELECT 1; CREATE TEMP TABLE dd_injection_marker(x int); --$1"
+    query_signature = compute_sql_signature(query)
+
+    plan_dict, explain_err_code, _ = check.statement_samples._run_and_track_explain(
+        DB_NAME, query, query, query_signature
+    )
+
+    assert plan_dict is None
+    assert explain_err_code == DBExplainError.multiple_statements
+
+    with check.db_pool.get_connection(DB_NAME) as conn:
+        rows = check.statement_samples._explain_parameterized_queries._execute_query_and_fetch_rows(
+            conn, "SELECT 1 FROM pg_class WHERE relname = 'dd_injection_marker'"
+        )
+    assert rows == [], "the agent executed the injected statement"
+
+
+@pytest.mark.unit
+def test_create_prepared_statement_rejects_stacked_statements(integration_check, dbm_instance):
+    '''
+    _create_prepared_statement is the sink that turns sampled text into SQL, so it rejects a statement
+    that isn't a single statement itself rather than relying on its caller to have done so.
+    '''
+    check = integration_check(dbm_instance)
+    epq = check.statement_samples._explain_parameterized_queries
+
+    query = "SELECT 1; CREATE TEMP TABLE dd_injection_marker(x int); --$1"
+    with mock.patch.object(epq, '_execute_query') as mock_execute:
+        result = epq._create_prepared_statement(None, query, query, "test_sig")
+
+    assert result is not None
+    assert result[0] == DBExplainError.multiple_statements
+    mock_execute.assert_not_called()
 
 
 @pytest.mark.integration

@@ -10,7 +10,7 @@ import psycopg
 
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DBExplainError
+from .util import DBExplainError, is_single_statement
 from .version_utils import V12
 
 PARAMETERIZED_QUERY_PATTERN = re.compile(r"(?<!')\$(?!'\$')[\d]+(?!')")
@@ -145,6 +145,13 @@ class ExplainParameterizedQueries:
     ) -> Optional[Tuple[DBExplainError, str]]:
         # Returns None on success, or a (DBExplainError, err_msg) tuple when the query can't be prepared because
         # a parameter's type can't be resolved. Other unexpected errors are re-raised.
+
+        # The statement is sampled text that gets interpolated into PREPARE, so a statement separator in it
+        # would run as the monitoring user. Callers are expected to have rejected such statements already;
+        # this guards the sink itself, which is the only place the raw text becomes SQL.
+        if not is_single_statement(statement):
+            return DBExplainError.multiple_statements, 'statement does not parse as a single statement'
+
         try:
             self._execute_query(
                 conn,

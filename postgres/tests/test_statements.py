@@ -581,10 +581,12 @@ def test_successful_explain(
             None,
         ),
         (
+            # a statement holding more than one statement is rejected before any explain is attempted, so
+            # no run_explain error is emitted for it
             "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
-            "error:explain-database_error-<class 'psycopg.errors.InvalidCursorDefinition'>",
+            "error:explain-multiple_statements",
             None,
-            1,
+            0,
             None,
         ),
     ],
