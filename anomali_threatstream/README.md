@@ -8,29 +8,29 @@ This integration collects the following indicator types:
 - Domain
 - SHA256
 
-Integrate Anomali ThreatStream with Datadog to enhance your security logs with threat intelligence, enabling analysis of matched IOCs through pre-built dashboards. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate Anomali ThreatStream with Datadog to enhance your security logs with threat intelligence, enabling analysis of matched Indicators of Compromise (IOCs) through pre-built dashboards. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
-### Obtaining Anomali ThreatStream API Credentials and Domain
+### Obtaining Anomali ThreatStream API credentials and domain
 
 1. Log in to the Anomali ThreatStream instance.
 2. Navigate to **Settings** > **My profile**.
-3. Under Account Information, click **Reveal** next to the **API Key** and copy it. Also, copy your **Email**.
+3. Under **Account Information**, click **Reveal** next to the **API Key** and copy it. Also, copy your **Email**.
 4. Identify your Anomali ThreatStream Domain using the URL of your Anomali ThreatStream instance.
-   - For example, if your Anomali ThreatStream instance URL is `https://ui.threatstream.com/` then your Anomali ThreatStream Domain is `ui.threatstream.com`.
+   - For example, if your Anomali ThreatStream instance URL is `https://ui.threatstream.com/`, then your Anomali ThreatStream domain is `ui.threatstream.com`.
 
 ### Connect your Anomali ThreatStream account to Datadog
 
 1. Provide the following details:
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
-   | Domain | Your Anomali ThreatStream Domain. |
+   | Domain | Your Anomali ThreatStream domain. |
    | Email | Email address associated with your ThreatStream account. |
    | API Key | API key of your Anomali ThreatStream account. |
-   | Collect IPv4 IOCs | Enable to collect IPv4 IOCs. The default value is true. |
-   | Collect Domain IOCs | Enable to collect Domain IOCs. The default value is true. |
-   | Collect SHA256 IOCs | Enable to collect SHA256 IOCs. The default value is true. |
+   | Collect IPv4 IOCs | Enable to collect IPv4 IOCs. The default value is `true`. |
+   | Collect Domain IOCs | Enable to collect Domain IOCs. The default value is `true`. |
+   | Collect SHA256 IOCs | Enable to collect SHA256 IOCs. The default value is `true`. |
 2. Click **Save**.
 
 ## Troubleshooting
