@@ -59,6 +59,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          # Pin to master so the locally installed ddev always has `--from-pr`. Under
+          # `pull_request_target` the default ref is the PR's base branch, which for a PR merged into
+          # an older release branch would install a ddev lacking this command.
+          ref: master
           # Full history reaches the merged commit and every release branch; octo-sts token authenticates the push.
           fetch-depth: 0
           token: ${{ steps.octo-sts.outputs.token }}
