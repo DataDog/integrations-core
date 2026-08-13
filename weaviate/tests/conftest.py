@@ -8,10 +8,8 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev._env import get_state, save_state
-from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
-from datadog_checks.weaviate.check import DEFAULT_LIVENESS_ENDPOINT
 
 from .common import BATCH_OBJECTS, USE_AUTH
 
@@ -42,8 +40,6 @@ def setup_weaviate():
     # is torn down, so the pod IP is cached here via `save_state`/`get_state` rather than looked up live.
     save_state(POD_IP_STATE, get_weaviate_pod_ip())
 
-    # Sometimes the API endpoint isn't ready when the cluster is ready. Wait for it before seeding data.
-    WaitFor(weaviate_ready, wait=2, attempts=150)()
     make_weaviate_request()
 
 
@@ -57,35 +53,6 @@ def get_weaviate_pod_ip() -> str:
     if len(pods) != 1 or not pods[0].get('status', {}).get('podIP'):
         raise RuntimeError(f'Expected one ready Weaviate pod, found {len(pods)}')
     return pods[0]['status']['podIP']
-
-
-def weaviate_ready() -> bool:
-    # The host cannot reach the cluster directly, so check readiness from a temporary pod.
-    endpoint = f'{WEAVIATE_API_ENDPOINT}{DEFAULT_LIVENESS_ENDPOINT}'
-    result = run_command(
-        [
-            'kubectl',
-            'run',
-            'weaviate-readiness',
-            '--namespace',
-            NAMESPACE,
-            '--image=busybox:1.36.1',
-            '--restart=Never',
-            '--attach',
-            '--rm',
-            '--quiet',
-            '--',
-            'wget',
-            '-q',
-            '-T',
-            '2',
-            '-O',
-            '/dev/null',
-            endpoint,
-        ],
-        capture='both',
-    )
-    return result.code == 0
 
 
 def make_weaviate_request():
