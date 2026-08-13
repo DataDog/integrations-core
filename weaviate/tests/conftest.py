@@ -24,16 +24,21 @@ POD_IP_STATE = 'weaviate_pod_ip'
 
 
 def setup_weaviate():
-    run_command(['kubectl', 'create', 'ns', 'weaviate'])
+    run_command(['kubectl', 'create', 'ns', 'weaviate'], check=True)
 
     if USE_AUTH:
-        run_command(['kubectl', 'apply', '-f', opj(HERE, 'kind', 'weaviate_auth.yaml'), '-n', 'weaviate'])
+        run_command(['kubectl', 'apply', '-f', opj(HERE, 'kind', 'weaviate_auth.yaml'), '-n', 'weaviate'], check=True)
     else:
-        run_command(['kubectl', 'apply', '-f', opj(HERE, 'kind', 'weaviate_install.yaml'), '-n', 'weaviate'])
+        run_command(
+            ['kubectl', 'apply', '-f', opj(HERE, 'kind', 'weaviate_install.yaml'), '-n', 'weaviate'], check=True
+        )
 
     # Tries to ensure that the Kubernetes resources are deployed and ready before we do anything else
-    run_command(['kubectl', 'rollout', 'status', 'statefulset/weaviate', '-n', 'weaviate'])
-    run_command(['kubectl', 'wait', 'pods', '--all', '-n', 'weaviate', '--for=condition=Ready', '--timeout=600s'])
+    run_command(['kubectl', 'rollout', 'status', 'statefulset/weaviate', '-n', 'weaviate'], check=True)
+    run_command(
+        ['kubectl', 'wait', 'pods', '--all', '-n', 'weaviate', '--for=condition=Ready', '--timeout=600s'],
+        check=True,
+    )
 
     # `setup_weaviate` only runs once, on the initial `ddev env start`. Later invocations of the
     # `dd_environment` fixture (e.g. during `ddev env stop`) run in a fresh process after the cluster
