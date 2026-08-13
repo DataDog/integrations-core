@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": true,
   "enabledManagers": [
     "github-actions",
     "custom.regex"
@@ -41,7 +42,7 @@
   ],
   "packageRules": [
     {
-      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation.",
+      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation. matchFileNames must stay broad enough to cover every composite action: the manager discovers all action.yml files regardless of this rule, so any path it omits yields ungrouped, unlabelled PRs.",
       "matchManagers": [
         "github-actions"
       ],
@@ -50,7 +51,7 @@
       ],
       "matchFileNames": [
         ".github/workflows/**",
-        ".github/actions/tag-job/**"
+        ".github/actions/**"
       ],
       "matchPackageNames": [
         "!dtolnay/rust-toolchain"
@@ -161,6 +162,7 @@
       "minimumReleaseAge": "7 days"
     },
     {
+      "description": "Neither ghcr.io nor registry.ddbuild.io return release timestamps, and Renovate treats a missing timestamp as never having aged. Without timestamp-optional these updates sit with a permanently pending renovate/stability-days check.",
       "matchManagers": [
         "custom.regex"
       ],
@@ -175,7 +177,8 @@
         "renovate/docker-images",
         "qa/skip-qa"
       ],
-      "minimumReleaseAge": "7 days"
+      "minimumReleaseAge": "7 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
     }
   ]
 }

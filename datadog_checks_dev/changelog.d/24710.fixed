@@ -1,1 +1,0 @@
-Fix a bug where a malformed discovery candidate template crashed ``ddev validate config`` with a raw traceback instead of reporting a validation error.
