@@ -2,6 +2,20 @@ name: Vault
 fleet_configurable: true
 files:
 - name: vault.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 8200
+      candidates:
+      - use_openmetrics: "true"
+        api_url: "http://{service.host}:{port.number}/v1"
+        no_token: "true"
+      - use_openmetrics: "true"
+        api_url: "http://{service.host}:{port.number}/v1"
+      - api_url: "http://{service.host}:{port.number}/v1"
+        no_token: "true"
+      - api_url: "http://{service.host}:{port.number}/v1"
   options:
   - template: init_config
     options:
@@ -86,3 +100,10 @@ files:
       path: /var/log/vault.log
       source: vault
       service: <SERVICE_NAME>
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - vault
+  - template: auto_conf/discovery
