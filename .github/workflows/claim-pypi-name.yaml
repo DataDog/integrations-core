@@ -48,6 +48,9 @@ jobs:
           status=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/${pkg}/json")
           if [ "$status" = "404" ]; then
             packages+=("\"${pkg}\"")
+          elif [ "$status" != "200" ]; then
+            echo "PyPI returned unexpected HTTP status ${status} for package ${pkg}. Please re-run this job." >&2
+            exit 1
           fi
         done
         echo "packages=[$(IFS=,; echo "${packages[*]}")]" >> "$GITHUB_OUTPUT"
