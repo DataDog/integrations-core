@@ -33,7 +33,7 @@ prometheus-client==0.25.0
 protobuf==7.35.1
 psutil==6.0.0
 psycopg[c,pool]==3.3.4
-pyasn1==0.6.3
+pyasn1==0.6.4
 pydantic==2.13.4
 pyjwt==2.13.0
 pymongo[srv]==4.8.0; python_version >= '3.9'
@@ -66,4 +66,5 @@ supervisor==4.3.0
 tuf==4.0.0
 urllib3==2.7.0
 vertica-python==1.4.0
+voltdbclient==15.3.0
 wrapt==2.2.2

@@ -18,6 +18,7 @@ from ddev.cli.ci.tests.messages import (
     UpdatePRComment,
     WorkflowStatus,
 )
+from ddev.cli.ci.tests.progress import DispatcherProgress
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models import WorkflowJob
 
@@ -136,10 +137,12 @@ def test_workflow_status_label() -> None:
     assert _workflow("b4", 4, 3, 0, 1, []).status == Status.SUCCESS
 
 
-def test_update_pr_comment_aggregates() -> None:
-    b1 = _workflow("b1", 1, 4, 0, 0, [_job("postgres", Status.SUCCESS)] * 4)
-    b2 = _workflow("b2", 2, 3, 1, 0, [_job("mysql", Status.FAILURE)] + [_job("disk", Status.SUCCESS)] * 3)
-    b3 = _workflow("b3", 3, 3, 0, 1, [_job("consul", Status.SKIPPED)] + [_job("nginx", Status.SUCCESS)] * 3)
-    update = UpdatePRComment(id="m1", revision=3, done=True, workflows=[b1, b2, b3])
+def test_update_pr_comment_carries_only_the_revision_and_the_snapshot() -> None:
+    # Ordering metadata plus the aggregate: no second copy of the counts or the done flag.
+    progress = DispatcherProgress(batches=(), done=False)
+    update = UpdatePRComment(id="m1", revision=0, progress=progress)
 
-    assert (update.passed, update.failed, update.skipped, update.complete) == (10, 1, 1, 12)
+    assert (update.id, update.revision) == ("m1", 0)
+    assert update.progress is progress
+    assert not hasattr(update, "workflows")
+    assert not hasattr(update, "done")
