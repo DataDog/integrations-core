@@ -519,6 +519,21 @@ def test_run_after_cancel_returns_immediately(pg_instance):
     assert result == ''
 
 
+def test_finalize_runs_once_across_repeated_cancels(pg_instance):
+    """Verify that teardown is idempotent."""
+    check = PostgreSql('postgres', {}, [pg_instance])
+    conn = mock.MagicMock()
+    check._db = conn
+
+    with mock.patch.object(check.db_pool, 'close_all', wraps=check.db_pool.close_all) as close_all:
+        check.cancel()
+        check.cancel()
+        check._finalize()
+
+    conn.close.assert_called_once()
+    close_all.assert_called_once()
+
+
 @pytest.mark.parametrize(
     'dbm, data_observability_enabled, expected_jobs',
     [
