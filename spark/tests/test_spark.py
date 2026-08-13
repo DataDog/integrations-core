@@ -1779,7 +1779,7 @@ def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, mock_http):
 
 @pytest.mark.unit
 def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog, mock_http):
-    """requests raised a body-phase read timeout as a ConnectionError, so it was suppression-eligible."""
+    """The agnostic type makes both header- and body-phase read timeouts suppression-eligible."""
     mock_http.get.side_effect = HTTPReadTimeoutError("Read timed out")
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
