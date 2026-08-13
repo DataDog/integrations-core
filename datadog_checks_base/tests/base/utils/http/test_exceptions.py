@@ -13,6 +13,7 @@ from datadog_checks.base.utils.http import (
     _COMPAT_EXCEPTIONS,
     RequestsWrapper,
     ResponseWrapper,
+    _backend_compat_type,
     _translate_requests_exception,
 )
 from datadog_checks.base.utils.http_exceptions import (
@@ -187,6 +188,16 @@ def test_compat_bases_do_not_leak_into_the_agnostic_tree():
         # Tracebacks and reprs must be indistinguishable from the agnostic class.
         assert compat.__name__ == agnostic.__name__
         assert compat.__module__ == agnostic.__module__
+
+
+def test_backend_compat_type_supports_backend_subclassing_agnostic():
+    class BackendSubclass(json.JSONDecodeError):
+        pass
+
+    compat = _backend_compat_type(json.JSONDecodeError, BackendSubclass)
+
+    assert issubclass(compat, json.JSONDecodeError)
+    assert issubclass(compat, BackendSubclass)
 
 
 def requests_exception_types():

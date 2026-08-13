@@ -271,7 +271,13 @@ def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[Bas
     Delete this helper and ``_COMPAT_EXCEPTIONS`` when the backend changes, after a deprecation
     cycle. ``http_exceptions`` itself stays free of any backend import.
     """
-    compat = type(agnostic.__name__, (agnostic, *backend), {})
+    bases = tuple(dict.fromkeys((agnostic, *backend)))
+    # A backend type may already derive from the agnostic type. Keep the child as the direct base so
+    # both exception arms still match without creating an invalid parent-before-child MRO.
+    most_derived_bases = tuple(
+        base for base in bases if not any(base is not candidate and issubclass(candidate, base) for candidate in bases)
+    )
+    compat = type(agnostic.__name__, most_derived_bases, {})
     compat.__module__ = agnostic.__module__
     compat.__qualname__ = agnostic.__qualname__
     compat.__doc__ = agnostic.__doc__
