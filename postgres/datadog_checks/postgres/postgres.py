@@ -541,7 +541,6 @@ class PostgreSql(DatabaseCheck):
         """Tear down check state. Runs at most once, and never while check() is executing."""
         with self._cancel_lock:
             if self._finalized:
-                self.log.debug("Check already finalized, nothing to tear down")
                 return
             self._finalized = True
         self.log.debug("Finalizing check: closing connections and clearing state")
