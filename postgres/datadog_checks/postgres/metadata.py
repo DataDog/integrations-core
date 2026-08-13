@@ -137,7 +137,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._tags_no_db = None
         self.tags = None
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._schema_collector = None
         self._column_statistics_collector = None

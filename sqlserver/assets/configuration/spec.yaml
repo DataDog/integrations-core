@@ -606,8 +606,11 @@ files:
             example: true
         - name: disable_secondary_tags
           description: |
-            Disable the secondary tags on query aggregate metrics, such as `user` and `database`. This is an optimization
-            for certain database workloads which result in long metric collection times.
+            Drop the `user` and `database` aggregate dimensions from query metrics. Resolving them requires extra
+            `sys.dm_exec_plan_attributes` lookups and joins, so removing them is an optimization for database
+            workloads which result in long metric collection times. Query metrics lose the `db` tag as a result.
+            Azure SQL Database is the exception: the check connects to a single database there, so the database is
+            still reported from the connection itself, which adds no aggregate dimension and no collection cost.
           value:
             type: boolean
             example: false

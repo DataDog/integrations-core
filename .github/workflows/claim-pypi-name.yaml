@@ -95,7 +95,7 @@ jobs:
         mv pkg_placeholder/dist/* dist/
 
     - name: Push Python artifacts to PyPI
-      uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+      uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
       with:
         # We don't mind invalid metadata, we only want to claim the package name.
         verify-metadata: false

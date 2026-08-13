@@ -1,0 +1,1 @@
+`release port-commit` gains a `--from-pr <number>` mode that backports a merged PR to every `backport/<base>` label on it (deriving the commit and target branches from the PR and skipping bases already backported), and now resets `.deps/` alongside `.in-toto` so regenerated dependency lockfiles are taken from the target branch.
