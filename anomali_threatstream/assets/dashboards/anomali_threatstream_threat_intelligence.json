@@ -26,7 +26,7 @@
             "id": 1000222222222222,
             "definition": {
                 "type": "note",
-                "content": "[Anomali ThreatStream](https://www.anomali.com/products/threatstream) is a threat intelligence platform (TIP) that automates the collection, curation, and analysis of threat data from global, open-source, and premium feeds.\n\nThis dashboard provides comprehensive visibility into IOCs detected by **Anomali ThreatStream** enrichment, including detection trends, geographic analysis for IP-based indicators, and correlated Cloud SIEM Security Signals.\n\nFor setup and configuration, see the [Anomali ThreatStream Datadog Integration Documentation](https://docs.datadoghq.com/integrations/anomali_threatstream/).\n\n**Quick Start**: Use the template variables above to filter by IOC type (SHA256, IP, Domain) and service.",
+                "content": "[Anomali ThreatStream](https://www.anomali.com/products/threatstream) is a threat intelligence platform (TIP) that automates the collection, curation, and analysis of threat data from global, open-source, and premium feeds.\n\nThis dashboard provides comprehensive visibility into IOCs detected by **Anomali ThreatStream** enrichment, including detection trends, geographic analysis for IP-based indicators, and correlated Cloud SIEM Security Signals.\n\nFor setup and configuration, see the [Anomali ThreatStream Datadog Integration Documentation](https://docs.datadoghq.com/integrations/anomali_threatstream/).\n\n**Quick Start**: Use the template variables above to filter by IOC type and service.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
