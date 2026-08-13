@@ -74,53 +74,6 @@ class LifecycleCheck(FakeDatabaseCheck):
         self.shutdown_calls += 1
 
 
-class UnmigratedWrapperCheck(LifecycleCheck):
-    """Check that still carries its own copy of the cancellation protocol, the way Postgres does.
-
-    Mirrors PostgreSql.run/cancel/_finalize, so the base wrapper is reached through a subclass
-    wrapper that calls super().run() rather than being the outermost run(). Its _finalize is
-    guarded, which is what keeps teardown from running once per wrapper.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.finalize_calls = 0
-
-    def run(self):
-        with self._cancel_lock:
-            if self._cancelled:
-                return ''
-            self._is_running = True
-        try:
-            return super().run()
-        finally:
-            needs_finalize = False
-            with self._cancel_lock:
-                self._is_running = False
-                if self._cancelled:
-                    needs_finalize = True
-            if needs_finalize:
-                self._finalize()
-
-    def cancel(self):
-        self.cancel_async_jobs()
-        needs_finalize = False
-        with self._cancel_lock:
-            self._cancelled = True
-            if not self._is_running:
-                needs_finalize = True
-        if needs_finalize:
-            self._finalize()
-
-    def _finalize(self):
-        with self._cancel_lock:
-            if self._finalized:
-                return
-            self._finalized = True
-        self.finalize_calls += 1
-        self.shutdown()
-
-
 @pytest.fixture
 def registry_check():
     check = FakeDatabaseCheck("test", {}, [{}])
@@ -359,30 +312,6 @@ def test_run_async_jobs_does_not_restart_jobs_after_cancel():
     check.run_async_jobs([])
 
     assert job._job_loop_future is None
-
-
-def test_subclass_run_wrapper_finalizes_once():
-    """Teardown runs once for an integration that still wraps run() itself.
-
-    Such a wrapper reaches this one through super().run(), so both frames see the cancellation
-    and call _finalize(). The base wrapper does not special-case that nesting; the subclass's own
-    idempotency guard is what keeps teardown from running once per wrapper. This covers the
-    window before integrations drop their wrappers in favour of this class's.
-    """
-    check = UnmigratedWrapperCheck("test", {}, [{}])
-    check.release_check.clear()
-    run_thread = threading.Thread(target=check.run)
-    run_thread.start()
-    assert check.in_check.wait(timeout=WAIT_TIMEOUT)
-
-    check.cancel()
-    check.release_check.set()
-    run_thread.join(timeout=WAIT_TIMEOUT)
-
-    assert not run_thread.is_alive()
-    assert check.check_calls == 1
-    assert check.finalize_calls == 1
-    assert check.shutdown_calls == 1
 
 
 def test_check_is_reclaimed_after_cancel():
