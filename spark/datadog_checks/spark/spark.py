@@ -677,8 +677,9 @@ class SparkCheck(AgentCheck):
                 response.raise_for_status()
 
         except HTTPTimeoutError as e:
-            # requests raised a body-phase read timeout as a ConnectionError, so it reached the
-            # suppression path below. Only read timeouts qualify: a connect timeout always alerted.
+            # The agnostic exception tree intentionally treats header- and body-phase read timeouts alike.
+            # This widens the old requests behavior: either phase may now be suppressed for terminal pods.
+            # Connect timeouts remain ineligible and always alert.
             if isinstance(e, HTTPReadTimeoutError) and self._should_suppress_connection_error(e, tags):
                 return None
 
