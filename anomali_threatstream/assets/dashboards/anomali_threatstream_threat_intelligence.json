@@ -1865,11 +1865,6 @@
         {
             "name": "ioc_type",
             "prefix": "@threat_intel.indicators_matched",
-            "available_values": [
-                "SHA256",
-                "IP",
-                "Domain"
-            ],
             "default": "*"
         },
         {
