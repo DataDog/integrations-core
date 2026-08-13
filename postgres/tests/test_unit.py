@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import gc
+import logging
 import weakref
 
 import mock
@@ -517,6 +518,42 @@ def test_run_after_cancel_returns_immediately(pg_instance):
         result = check.run()
 
     assert result == ''
+
+
+def test_finalize_runs_once_across_repeated_cancels(pg_instance):
+    """Verify that teardown is idempotent.
+
+    The check is cancelled more than once in practice: run_one_check() cancels, and the
+    integration_check fixture cancels again on teardown. Re-running teardown re-closes
+    connections and re-tears down the async jobs for no benefit.
+    """
+    check = PostgreSql('postgres', {}, [pg_instance])
+    conn = mock.MagicMock()
+    check._db = conn
+
+    with mock.patch.object(check.db_pool, 'close_all', wraps=check.db_pool.close_all) as close_all:
+        check.cancel()
+        check.cancel()
+        check._finalize()
+
+    conn.close.assert_called_once()
+    close_all.assert_called_once()
+
+
+def test_finalize_logs_after_dropping_the_check_reference(pg_instance, caplog):
+    """Verify that _finalize() can log after nulling log.check.
+
+    CheckLoggingAdapter.process reads back through log.check on every call for checks whose
+    check_id was never resolved, so nulling it before the last log line raises AttributeError
+    once debug logging is enabled.
+    """
+    caplog.set_level(logging.DEBUG)
+    check = PostgreSql('postgres', {}, [pg_instance])
+    assert not check.check_id, "test only exercises the hazard while check_id is unresolved"
+
+    check._finalize()
+
+    assert check.log.check is None
 
 
 @pytest.mark.parametrize(

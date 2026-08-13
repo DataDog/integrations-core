@@ -199,6 +199,7 @@ class PostgreSql(DatabaseCheck):
         self._cancel_lock = threading.Lock()
         self._is_running = False
         self._cancelled = False
+        self._finalized = False
 
     def database_monitoring_column_statistics(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-column-statistics")
@@ -537,19 +538,26 @@ class PostgreSql(DatabaseCheck):
             self.data_observability = self.register_async_job(PostgresDataObservability(self, self._config))
 
     def _finalize(self):
-        """Tear down check state. Must not run while check() is executing."""
+        """Tear down check state. Runs at most once, and never while check() is executing."""
+        with self._cancel_lock:
+            if self._finalized:
+                self.log.debug("Check already finalized, nothing to tear down")
+                return
+            self._finalized = True
         self.log.debug("Finalizing check: closing connections and clearing state")
         self.shutdown_async_jobs()
         self._clean_state()
         self.check_initializations.clear()
         # TODO: move diagnosis cleanup into AgentCheck.cancel() in the base class
         self._diagnosis = None
-        self.log.check = None
         self._query_manager = None
         self.health = None
         self._close_db()
         self._close_db_pool()
         self.log.debug("Check cleanup complete")
+        # Must come last: the logging adapter reads back through this attribute for checks whose
+        # check_id was never resolved, so anything logged after this would fail.
+        self.log.check = None
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
