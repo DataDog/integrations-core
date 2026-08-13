@@ -873,6 +873,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `identities.0.id` to `ocsf.src_endpoint.uid`
+              sources:
+                - identities.0.id
+              sourceType: attribute
+              target: ocsf.src_endpoint.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `externalip` to `ocsf.proxy_endpoint.ip`
               sources:
                 - externalip
