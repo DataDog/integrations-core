@@ -13,14 +13,15 @@ def generated_instances(service: Service) -> list[dict]:
     return [config['instances'][0] for config in Vault.generate_configs(service)]
 
 
-def test_generates_one_candidate_per_mode_and_token_strategy() -> None:
-    # Order matters: discovery accepts the first candidate whose real check run collects a
-    # metric. Both `no_token=True` candidates actually attempt a metrics scrape (the check only
-    # skips scraping when neither a token nor `no_token` is configured, see
-    # `VaultCheckV2.metric_collection_enabled`), so they must be tried, in either mode, before
-    # either `no_token=False` candidate — those never scrape at all and would trivially "succeed"
-    # on the always-unauthenticated leader/health metrics alone, permanently starving out a
-    # `no_token` candidate that could have collected the full metric set.
+def test_generates_one_candidate_per_mode() -> None:
+    # Only `no_token=True` candidates are generated. A candidate without `no_token` and without a
+    # configured `client_token`/`client_token_path` never attempts a metrics scrape at all (see
+    # `VaultCheckV2.metric_collection_enabled` and the equivalent legacy-check gating), so it would
+    # only ever emit the always-unauthenticated leader/health metrics and never the real metric
+    # set. Discovery accepts the first candidate whose check run collects at least one metric with
+    # no error, so such a health-only candidate would trivially "succeed" and get locked in
+    # permanently — a degraded config masquerading as a working one. We never synthesize a token,
+    # so the only way to guarantee a real metrics scrape is `no_token=True`.
     service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
 
     instances = generated_instances(service)
@@ -28,9 +29,21 @@ def test_generates_one_candidate_per_mode_and_token_strategy() -> None:
     assert [(instance.get('use_openmetrics'), instance.get('no_token')) for instance in instances] == [
         (True, True),
         (False, True),
-        (True, False),
-        (False, False),
     ]
+
+
+def test_all_candidates_enable_metric_collection() -> None:
+    # Every generated candidate must be able to reach Vault's real metrics scrape, not just the
+    # always-unauthenticated leader/health endpoints. `no_token=True` is the only signal discovery
+    # can produce on its own; a `client_token`/`client_token_path` can only come from the user.
+    service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
+
+    instances = generated_instances(service)
+
+    assert all(
+        instance.get('no_token') is True or instance.get('client_token') or instance.get('client_token_path')
+        for instance in instances
+    )
 
 
 def test_all_candidates_target_the_same_api_url() -> None:
