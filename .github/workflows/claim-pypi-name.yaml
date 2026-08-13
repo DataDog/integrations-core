@@ -58,7 +58,7 @@ jobs:
     if: needs.find-new-integrations.outputs.packages != '[]'
     runs-on: ubuntu-latest
 
-    environment: typo-squatting-release
+    environment: publish-pypi
 
     permissions:
       id-token: write
