@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 # against the last commit. They differ only when the working tree reverts something the branch
 # committed, in which case the first reports nothing and the second still reports the file. Asking
 # both keeps such a file selected. Narrow this to a single comparison with `IntegrationRegistry.comparing`.
-DEFAULT_COMPARISONS = (Comparison(base='origin/master'), Comparison(base='HEAD'))
+DEFAULT_COMPARISONS = (Comparison(), Comparison(base='HEAD'))
 
 
 GIT_REMOTE_PATTERNS = (

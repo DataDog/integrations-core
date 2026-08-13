@@ -56,11 +56,14 @@ class ChangedFile:
         return (self.path,)
 
 
+DEFAULT_COMPARISON_BASE = 'origin/master'
+
+
 @dataclass(frozen=True)
 class Comparison:
     """The two points `GitRepository.changed_files` compares."""
 
-    base: str = 'origin/master'
+    base: str = DEFAULT_COMPARISON_BASE
     head: str | None = None  # None compares against the working tree
 
 
@@ -255,7 +258,7 @@ class GitRepository:
         # We force because, in very rare cases, we move tags
         self.capture('fetch', '--all', '--tags', '--force')
 
-    def changed_files(self, base: str = 'origin/master', head: str | None = None) -> list[ChangedFile]:
+    def changed_files(self, base: str = DEFAULT_COMPARISON_BASE, head: str | None = None) -> list[ChangedFile]:
         """Return the files that changed between two points, deepest path first.
 
         The comparison starts where the two points diverged, so changes made on `base` since then
@@ -324,10 +327,11 @@ class GitRepository:
 
         Warnings are skipped because `capture` folds stderr into stdout, so an ambiguous refname
         prints one ahead of the sha. The result is fed to other commands as a ref, where a warning
-        line would be taken for a commit.
+        line would be taken for a commit. Output that is nothing but warnings falls back to the
+        first line, which is all git can be said to have reported.
         """
-        output = self.capture('merge-base', ref_a, ref_b)
-        return next(line for line in output.splitlines() if not is_git_warning_line(line))
+        lines = self.capture('merge-base', ref_a, ref_b).splitlines()
+        return next((line for line in lines if not is_git_warning_line(line)), lines[0])
 
     @staticmethod
     def __sort_changed_files(changed_files):
