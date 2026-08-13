@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "creation_policy": {
+    "allow_external_submission": true,
+    "allow_internal_submission": true
+  }
+}
