@@ -320,7 +320,14 @@ class GitRepository:
             self.__worktree_paths = None
 
     def merge_base(self, ref_a: str, ref_b: str | None = "HEAD") -> str:
-        return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
+        """Return the commit where two refs diverged.
+
+        Warnings are skipped because `capture` folds stderr into stdout, so an ambiguous refname
+        prints one ahead of the sha. The result is fed to other commands as a ref, where a warning
+        line would be taken for a commit.
+        """
+        output = self.capture('merge-base', ref_a, ref_b)
+        return next(line for line in output.splitlines() if not is_git_warning_line(line))
 
     @staticmethod
     def __sort_changed_files(changed_files):

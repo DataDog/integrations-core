@@ -261,46 +261,6 @@ class TestIntegrationsIteration:
 
         assert [integration.name for integration in integrations] == ["tekton"]
 
-    def test_integrations_iteration_changed_includes_a_rename_source(self, repository):
-        # Moving a file between integrations changes both: the source lost it and the destination
-        # gained it, so both must be selected.
-        repo = Repository(repository.path.name, str(repository.path))
-
-        # The file has to already exist on the comparison base, otherwise the diff reports a plain
-        # addition rather than a rename.
-        repo.git.capture('mv', 'tekton/README.md', 'nginx/moved_from_tekton.md')
-        repo.git.capture('commit', '-m', 'move a file to another integration')
-
-        integrations = list(repo.integrations.iter(['changed']))
-
-        assert sorted(integration.name for integration in integrations) == ['nginx', 'tekton']
-
-    def test_integrations_iteration_changed_keeps_a_committed_change_reverted_in_the_working_tree(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        readme = repo.path / 'tekton' / 'README.md'
-        original_content = readme.read_text()
-        readme.write_text(f'{original_content}\ncommitted change\n')
-        repo.git.capture('add', 'tekton/README.md')
-        repo.git.capture('commit', '-m', 'change a file')
-
-        # Nothing differs from the merge base any more, but the branch still changes the file
-        readme.write_text(original_content)
-
-        integrations = list(repo.integrations.iter(['changed']))
-
-        assert [integration.name for integration in integrations] == ['tekton']
-
-    def test_integrations_iteration_changed_against_head_ignores_committed_changes(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        (repo.path / 'tekton' / 'foo.txt').touch()
-        repo.git.capture('add', 'tekton/foo.txt')
-        repo.git.capture('commit', '-m', 'add a file')
-
-        assert list(repo.integrations.comparing(base='HEAD').iter(['changed'])) == []
-        assert [integration.name for integration in repo.integrations.iter(['changed'])] == ['tekton']
-
     @pytest.mark.parametrize(
         "method_name, integration_filter",
         iter_test_params,
@@ -318,6 +278,49 @@ class TestIntegrationsIteration:
         assert list(iter_method(selection)) == integrations
 
 
+def test_iter_changed_includes_a_rename_source(repository):
+    # Moving a file between integrations changes both: the source lost it and the destination
+    # gained it, so both must be selected.
+    repo = Repository(repository.path.name, str(repository.path))
+
+    # The file has to already exist on the comparison base, otherwise the diff reports a plain
+    # addition rather than a rename.
+    repo.git.capture('mv', 'tekton/README.md', 'nginx/moved_from_tekton.md')
+    repo.git.capture('commit', '-m', 'move a file to another integration')
+
+    integrations = list(repo.integrations.iter(['changed']))
+
+    assert sorted(integration.name for integration in integrations) == ['nginx', 'tekton']
+
+
+def test_iter_changed_keeps_a_committed_change_reverted_in_the_working_tree(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    readme = repo.path / 'tekton' / 'README.md'
+    original_content = readme.read_text()
+    readme.write_text(f'{original_content}\ncommitted change\n')
+    repo.git.capture('add', 'tekton/README.md')
+    repo.git.capture('commit', '-m', 'change a file')
+
+    # Nothing differs from the merge base any more, but the branch still changes the file
+    readme.write_text(original_content)
+
+    integrations = list(repo.integrations.iter(['changed']))
+
+    assert [integration.name for integration in integrations] == ['tekton']
+
+
+def test_iter_changed_against_head_ignores_committed_changes(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    (repo.path / 'tekton' / 'foo.txt').touch()
+    repo.git.capture('add', 'tekton/foo.txt')
+    repo.git.capture('commit', '-m', 'add a file')
+
+    assert list(repo.integrations.comparing(base='HEAD').iter(['changed'])) == []
+    assert [integration.name for integration in repo.integrations.iter(['changed'])] == ['tekton']
+
+
 def test_iter_changed_code_selects_both_sides_of_a_rename(repository):
     repo = Repository(repository.path.name, str(repository.path))
 
@@ -332,8 +335,11 @@ def test_iter_changed_code_selects_both_sides_of_a_rename(repository):
 def test_iter_changed_code_ignores_files_that_need_no_entry(repository):
     repo = Repository(repository.path.name, str(repository.path))
 
-    (repo.path / 'tekton' / 'tests' / 'test_unit.py').touch()
+    # The file is already tracked, so it has to be written to for git to report it at all
+    target = repo.path / 'tekton' / 'tests' / 'test_unit.py'
+    target.write_text(f'{target.read_text()}\n# change\n')
 
+    assert 'tekton/tests/test_unit.py' in repo.integrations.changed_paths
     assert list(repo.integrations.iter_changed_code()) == []
 
 

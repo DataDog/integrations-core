@@ -342,6 +342,20 @@ def test_fetch_tags(repository, mocker):
     ]
 
 
+def test_merge_base_skips_warning_lines(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+    head = repo.git.capture('rev-parse', 'HEAD').strip()
+
+    # A branch and a tag of the same name make git print `warning: refname 'ambiguous' is
+    # ambiguous.` ahead of the sha, and `capture` folds it into the output
+    repo.git.capture('branch', 'ambiguous')
+    repo.git.capture('tag', 'ambiguous')
+    try:
+        assert repo.git.merge_base('ambiguous') == head
+    finally:
+        repo.git.capture('branch', '--delete', 'ambiguous')
+
+
 def test_get_merge_base(repository):
     repo = Repository(repository.path.name, str(repository.path))
     base_commit = repo.git.latest_commit()
