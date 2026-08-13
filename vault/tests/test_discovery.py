@@ -15,16 +15,20 @@ def generated_instances(service: Service) -> list[dict]:
 
 def test_generates_one_candidate_per_mode_and_token_strategy() -> None:
     # Order matters: discovery accepts the first candidate whose real check run collects a
-    # metric, so the richest (full OpenMetrics scrape) candidates must be tried before the
-    # safe fallbacks that only ever hit the always-unauthenticated leader/health endpoints.
+    # metric. Both `no_token=True` candidates actually attempt a metrics scrape (the check only
+    # skips scraping when neither a token nor `no_token` is configured, see
+    # `VaultCheckV2.metric_collection_enabled`), so they must be tried, in either mode, before
+    # either `no_token=False` candidate — those never scrape at all and would trivially "succeed"
+    # on the always-unauthenticated leader/health metrics alone, permanently starving out a
+    # `no_token` candidate that could have collected the full metric set.
     service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
 
     instances = generated_instances(service)
 
     assert [(instance.get('use_openmetrics'), instance.get('no_token')) for instance in instances] == [
         (True, True),
-        (True, False),
         (False, True),
+        (True, False),
         (False, False),
     ]
 
