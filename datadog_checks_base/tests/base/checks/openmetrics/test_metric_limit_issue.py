@@ -7,7 +7,12 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
-from datadog_checks.base.checks.openmetrics.metric_limit_issue import ISSUE_NAME, MetricLimitIssueReporter, _issue_id
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import (
+    ISSUE_NAME,
+    ISSUE_TYPE,
+    MetricLimitIssueReporter,
+    _issue_id,
+)
 
 ENDPOINT = 'http://example.test/metrics'
 ISSUE_ID = 'openmetrics-dropped-config:5505571e531f7cf6'
@@ -76,6 +81,7 @@ def test_over_limit_run_reports_expected_issue(datadog_agent: Any) -> None:
     [issue] = reported_issues(datadog_agent)
     assert issue['id'] == ISSUE_ID
     assert issue['issue_name'] == ISSUE_NAME
+    assert issue['issue_type'] == ISSUE_TYPE
     assert issue['category'] == 'integration'
     assert issue['severity'] == check.IssueSeverity['HIGH']
     assert issue['extra'] == {

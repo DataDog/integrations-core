@@ -15,6 +15,7 @@ SEVERITY_HIGH_RATIO = 0.25
 SEVERITY_MEDIUM_RATIO = 0.05
 
 ISSUE_NAME = 'OpenMetrics Metrics Dropped By Configured Limit'
+ISSUE_TYPE = 'openmetrics_dropped_config'
 
 
 @dataclass
@@ -42,6 +43,7 @@ class MetricLimitIssueReporter:
             check.report_issue(
                 id=issue_id,
                 issue_name=ISSUE_NAME,
+                issue_type=ISSUE_TYPE,
                 title=f'Dropping {dropped} of {observed_count} metrics from {endpoint}',
                 description=(
                     f'The {check.name} check collecting {endpoint} is configured to submit at most {limit} metric '
