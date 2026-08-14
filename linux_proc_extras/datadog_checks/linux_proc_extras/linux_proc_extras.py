@@ -81,7 +81,7 @@ class MoreUnixCheck(AgentCheck):
             entropy = entropy_info.readline()
             self.gauge('system.entropy.available', float(entropy), tags=self.tags)
 
-    def get_fips_info(self):
+    def get_fips_info(self) -> None:
         fips_path = self.proc_path_map['fips_info']
         try:
             with open(fips_path, 'r') as fips_info:
