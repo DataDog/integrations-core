@@ -1011,6 +1011,8 @@ def run_backport_from_pr(
         options=options,
     )
     _display_backport_summary(app, pr_number, results)
+    if not options.dry_run:
+        _comment_on_backport_failures(app, pr_number, results)
     return all(result.status is not BackportStatus.FAILED for result in results)
 
 
@@ -1106,3 +1108,48 @@ def _display_backport_summary(app: Application, pr_number: int, results: list[Ba
         ),
         stderr=True,
     )
+
+
+def _comment_on_backport_failures(app: Application, pr_number: int, results: list[BackportResult]) -> None:
+    """Post a comment on the source PR when one or more bases failed to backport.
+
+    The pre-`--from-pr` automation commented on the merged PR when a backport failed; without this a
+    failure is only visible as a red workflow run, never on the PR the developer merged. Posting is
+    best-effort: a comment failure must not mask the backport failure it is reporting, so any error
+    here is warned, not raised.
+    """
+    failures = [result for result in results if result.status is BackportStatus.FAILED]
+    if not failures:
+        return
+    token = app.config.github.token
+    if not token:
+        app.display_warning(f'No GitHub token configured; skipping backport-failure comment on PR #{pr_number}.')
+        return
+
+    owner, repo = resolve_owner_repo(app)
+    lines = [f'⚠️ Automatic backport of this PR failed for {len(failures)} target branch(es):', '']
+    for result in failures:
+        reason = f': {result.detail}' if result.detail else ''
+        lines.append(
+            f'- `{result.base}`{reason} — retry manually with '
+            f'`ddev release port-commit PR-{pr_number} --target-branch {result.base}`.'
+        )
+    body = '\n'.join(lines)
+
+    try:
+        _post_issue_comment(token, owner, repo, pr_number, body)
+    except Exception as e:  # noqa: BLE001 - best-effort comment; never mask the backport result
+        app.display_warning(f'Could not post backport-failure comment on PR #{pr_number}: {e}')
+
+
+def _post_issue_comment(token: str, owner: str, repo: str, issue_number: int, body: str) -> None:
+    """Create a comment on the given issue or pull request."""
+    import asyncio
+
+    from ddev.utils.github_async import async_github_client
+
+    async def _post() -> None:
+        async with async_github_client(token=token) as client:
+            await client.create_issue_comment(owner=owner, repo=repo, issue_number=issue_number, body=body)
+
+    asyncio.run(_post())

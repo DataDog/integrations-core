@@ -46,6 +46,7 @@ from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
+    IssueComment,
     Label,
     PullRequest,
     WorkflowDispatchResult,
@@ -84,6 +85,10 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             headers={},
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        'create_issue_comment': lambda: GitHubResponse(
+            data=IssueComment(id=1, body='', html_url='https://github.com/test/repo/issues/1#issuecomment-1'),
+            headers={},
+        ),
         # Default to "PR not found" so tests that don't care about PR lookup auto-fall-through
         # to commit resolution. Tests that need a specific PR register their own mock_response.
         'get_pull_request': lambda: httpx.HTTPStatusError(
@@ -281,6 +286,23 @@ class FakeAsyncGitHubClient:
             repo=repo,
             issue_number=issue_number,
             labels=labels,
+            timeout=timeout,
+        )
+
+    async def create_issue_comment(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
+        return self._call(
+            'create_issue_comment',
+            owner=owner,
+            repo=repo,
+            issue_number=issue_number,
+            body=body,
             timeout=timeout,
         )
 

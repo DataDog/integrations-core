@@ -1159,6 +1159,55 @@ def test_command_from_pr_aggregates_failures_and_continues(
     assert bases == ['7.62.x', '7.61.x']
 
 
+def test_command_from_pr_comments_on_source_pr_when_a_base_fails(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A failed base posts a comment on the merged PR so the failure is visible off the workflow run."""
+    import httpx
+
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500)),
+        base='7.62.x',
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    comment_calls = fake_async_github.calls_to('create_issue_comment')
+    assert len(comment_calls) == 1
+    comment_call = comment_calls[0]
+    assert comment_call.kwargs['issue_number'] == 23703
+    body = comment_call.kwargs['body']
+    assert '7.62.x' in body
+    assert 'retry manually' in body
+    # Only the failed base is named; the base that ported cleanly is not mentioned.
+    assert '7.61.x' not in body
+
+
+def test_command_from_pr_does_not_comment_when_all_bases_succeed(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """The happy path leaves no comment on the source PR."""
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 0, result.output
+    fake_async_github.assert_not_called('create_issue_comment')
+
+
 def test_command_from_pr_summary_reports_every_status(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
