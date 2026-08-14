@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.56.0",
+        "integration": "Dynamo",
+        "check": "dynamo.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Dynamo OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Dynamo OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

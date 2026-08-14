@@ -1,0 +1,202 @@
+# HELP dynamo_frontend_requests_total frontend.requests.count
+# TYPE dynamo_frontend_requests_total counter
+dynamo_frontend_requests_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_requests_started_total frontend.requests_started.count
+# TYPE dynamo_frontend_requests_started_total counter
+dynamo_frontend_requests_started_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_queued_requests frontend.queued_requests
+# TYPE dynamo_frontend_queued_requests gauge
+dynamo_frontend_queued_requests{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_inflight_requests frontend.inflight_requests
+# TYPE dynamo_frontend_inflight_requests gauge
+dynamo_frontend_inflight_requests{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_active_requests frontend.active_requests
+# TYPE dynamo_frontend_active_requests gauge
+dynamo_frontend_active_requests{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_disconnected_clients frontend.disconnected_clients
+# TYPE dynamo_frontend_disconnected_clients gauge
+dynamo_frontend_disconnected_clients{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_request_duration_seconds frontend.request_duration.seconds
+# TYPE dynamo_frontend_request_duration_seconds histogram
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.05"} 6
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.1"} 9
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.25"} 12
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.5"} 15
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1.0"} 18
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2.5"} 21
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5.0"} 24
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10.0"} 27
+dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
+dynamo_frontend_request_duration_seconds_count{model="meta-llama/Llama-3-8B-Instruct"} 30
+dynamo_frontend_request_duration_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
+# HELP dynamo_frontend_input_sequence_tokens frontend.input_sequence_tokens
+# TYPE dynamo_frontend_input_sequence_tokens gauge
+dynamo_frontend_input_sequence_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_output_sequence_tokens frontend.output_sequence_tokens
+# TYPE dynamo_frontend_output_sequence_tokens gauge
+dynamo_frontend_output_sequence_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_output_tokens_total frontend.output_tokens.count
+# TYPE dynamo_frontend_output_tokens_total counter
+dynamo_frontend_output_tokens_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_time_to_first_token_seconds frontend.time_to_first_token.seconds
+# TYPE dynamo_frontend_time_to_first_token_seconds histogram
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.05"} 6
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.1"} 9
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.25"} 12
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.5"} 15
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1.0"} 18
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2.5"} 21
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5.0"} 24
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10.0"} 27
+dynamo_frontend_time_to_first_token_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
+dynamo_frontend_time_to_first_token_seconds_count{model="meta-llama/Llama-3-8B-Instruct"} 30
+dynamo_frontend_time_to_first_token_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
+# HELP dynamo_frontend_inter_token_latency_seconds frontend.inter_token_latency.seconds
+# TYPE dynamo_frontend_inter_token_latency_seconds histogram
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.05"} 6
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.1"} 9
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.25"} 12
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.5"} 15
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1.0"} 18
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2.5"} 21
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5.0"} 24
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10.0"} 27
+dynamo_frontend_inter_token_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
+dynamo_frontend_inter_token_latency_seconds_count{model="meta-llama/Llama-3-8B-Instruct"} 30
+dynamo_frontend_inter_token_latency_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
+# HELP dynamo_frontend_embedding_latency_seconds frontend.embedding_latency.seconds
+# TYPE dynamo_frontend_embedding_latency_seconds histogram
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.05"} 6
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.1"} 9
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.25"} 12
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.5"} 15
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1.0"} 18
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2.5"} 21
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5.0"} 24
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10.0"} 27
+dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
+dynamo_frontend_embedding_latency_seconds_count{model="meta-llama/Llama-3-8B-Instruct"} 30
+dynamo_frontend_embedding_latency_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
+# HELP dynamo_frontend_tokenizer_latency_ms frontend.tokenizer_latency_ms
+# TYPE dynamo_frontend_tokenizer_latency_ms gauge
+dynamo_frontend_tokenizer_latency_ms{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_cached_tokens frontend.cached_tokens
+# TYPE dynamo_frontend_cached_tokens gauge
+dynamo_frontend_cached_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_kv_hit_rate frontend.kv_hit_rate
+# TYPE dynamo_frontend_kv_hit_rate gauge
+dynamo_frontend_kv_hit_rate{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_kv_transfer_estimated_latency_seconds frontend.kv_transfer_estimated_latency.seconds
+# TYPE dynamo_frontend_kv_transfer_estimated_latency_seconds histogram
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.05"} 6
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.1"} 9
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.25"} 12
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.5"} 15
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1.0"} 18
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2.5"} 21
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5.0"} 24
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10.0"} 27
+dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
+dynamo_frontend_kv_transfer_estimated_latency_seconds_count{model="meta-llama/Llama-3-8B-Instruct"} 30
+dynamo_frontend_kv_transfer_estimated_latency_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
+# HELP dynamo_frontend_shared_cache_hit_rate frontend.shared_cache_hit_rate
+# TYPE dynamo_frontend_shared_cache_hit_rate gauge
+dynamo_frontend_shared_cache_hit_rate{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_shared_cache_beyond_blocks frontend.shared_cache_beyond_blocks
+# TYPE dynamo_frontend_shared_cache_beyond_blocks gauge
+dynamo_frontend_shared_cache_beyond_blocks{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_non_max_overlap_selections_total frontend.non_max_overlap_selections.count
+# TYPE dynamo_frontend_non_max_overlap_selections_total counter
+dynamo_frontend_non_max_overlap_selections_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_overlap_blocks_lost frontend.overlap_blocks_lost
+# TYPE dynamo_frontend_overlap_blocks_lost gauge
+dynamo_frontend_overlap_blocks_lost{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_images_per_request frontend.images_per_request
+# TYPE dynamo_frontend_images_per_request gauge
+dynamo_frontend_images_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_videos_per_request frontend.videos_per_request
+# TYPE dynamo_frontend_videos_per_request gauge
+dynamo_frontend_videos_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_audio_per_request frontend.audio_per_request
+# TYPE dynamo_frontend_audio_per_request gauge
+dynamo_frontend_audio_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_image_tokens_per_request frontend.image_tokens_per_request
+# TYPE dynamo_frontend_image_tokens_per_request gauge
+dynamo_frontend_image_tokens_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_model_total_kv_blocks frontend.model.total_kv_blocks
+# TYPE dynamo_frontend_model_total_kv_blocks gauge
+dynamo_frontend_model_total_kv_blocks{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_model_max_num_seqs frontend.model.max_num_seqs
+# TYPE dynamo_frontend_model_max_num_seqs gauge
+dynamo_frontend_model_max_num_seqs{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_model_max_num_batched_tokens frontend.model.max_num_batched_tokens
+# TYPE dynamo_frontend_model_max_num_batched_tokens gauge
+dynamo_frontend_model_max_num_batched_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_model_context_length frontend.model.context_length
+# TYPE dynamo_frontend_model_context_length gauge
+dynamo_frontend_model_context_length{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_model_kv_cache_block_size frontend.model.kv_cache_block_size
+# TYPE dynamo_frontend_model_kv_cache_block_size gauge
+dynamo_frontend_model_kv_cache_block_size{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_model_migration_limit frontend.model.migration_limit
+# TYPE dynamo_frontend_model_migration_limit gauge
+dynamo_frontend_model_migration_limit{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_model_migration_total frontend.model.migration.count
+# TYPE dynamo_frontend_model_migration_total counter
+dynamo_frontend_model_migration_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_model_migration_max_seq_len_exceeded_total frontend.model.migration_max_seq_len_exceeded.count
+# TYPE dynamo_frontend_model_migration_max_seq_len_exceeded_total counter
+dynamo_frontend_model_migration_max_seq_len_exceeded_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_model_cancellation_total frontend.model.cancellation.count
+# TYPE dynamo_frontend_model_cancellation_total counter
+dynamo_frontend_model_cancellation_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_model_rejection_total frontend.model.rejection.count
+# TYPE dynamo_frontend_model_rejection_total counter
+dynamo_frontend_model_rejection_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_worker_active_decode_blocks frontend.worker.active_decode_blocks
+# TYPE dynamo_frontend_worker_active_decode_blocks gauge
+dynamo_frontend_worker_active_decode_blocks{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_worker_active_prefill_tokens frontend.worker.active_prefill_tokens
+# TYPE dynamo_frontend_worker_active_prefill_tokens gauge
+dynamo_frontend_worker_active_prefill_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_worker_last_time_to_first_token_seconds frontend.worker.last_time_to_first_token_seconds
+# TYPE dynamo_frontend_worker_last_time_to_first_token_seconds gauge
+dynamo_frontend_worker_last_time_to_first_token_seconds{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_worker_last_input_sequence_tokens frontend.worker.last_input_sequence_tokens
+# TYPE dynamo_frontend_worker_last_input_sequence_tokens gauge
+dynamo_frontend_worker_last_input_sequence_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_worker_last_inter_token_latency_seconds frontend.worker.last_inter_token_latency_seconds
+# TYPE dynamo_frontend_worker_last_inter_token_latency_seconds gauge
+dynamo_frontend_worker_last_inter_token_latency_seconds{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_router_queue_pending_requests frontend.router_queue_pending_requests
+# TYPE dynamo_frontend_router_queue_pending_requests gauge
+dynamo_frontend_router_queue_pending_requests{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_lora_replica_factor frontend.lora.replica_factor
+# TYPE dynamo_frontend_lora_replica_factor gauge
+dynamo_frontend_lora_replica_factor{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_lora_is_active frontend.lora.is_active
+# TYPE dynamo_frontend_lora_is_active gauge
+dynamo_frontend_lora_is_active{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_lora_estimated_load frontend.lora.estimated_load
+# TYPE dynamo_frontend_lora_estimated_load gauge
+dynamo_frontend_lora_estimated_load{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_lora_raw_arrival_count frontend.lora.raw_arrival_count
+# TYPE dynamo_frontend_lora_raw_arrival_count gauge
+dynamo_frontend_lora_raw_arrival_count{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_lora_active_requests frontend.lora.active_requests
+# TYPE dynamo_frontend_lora_active_requests gauge
+dynamo_frontend_lora_active_requests{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_lora_churn_loads_total frontend.lora.churn_loads.count
+# TYPE dynamo_frontend_lora_churn_loads_total counter
+dynamo_frontend_lora_churn_loads_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_lora_churn_unloads_total frontend.lora.churn_unloads.count
+# TYPE dynamo_frontend_lora_churn_unloads_total counter
+dynamo_frontend_lora_churn_unloads_total{model="meta-llama/Llama-3-8B-Instruct"} 42
+# HELP dynamo_frontend_lora_overflow_count frontend.lora.overflow_count
+# TYPE dynamo_frontend_lora_overflow_count gauge
+dynamo_frontend_lora_overflow_count{model="meta-llama/Llama-3-8B-Instruct"} 3.14
