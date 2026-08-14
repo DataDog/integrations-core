@@ -1,0 +1,1 @@
+Stop retaining deobfuscated SQL text on query metrics rows after obfuscation, which held a second copy of every collected statement through metrics, full query text, and plan collection.
