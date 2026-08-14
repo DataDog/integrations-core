@@ -118,6 +118,12 @@ class Fabric:
                         interface_metadata.extend(eth_metadata)
                 except (exceptions.APIConnectionException, exceptions.APIParsingException):
                     pass
+            elif self.ndm_enabled():
+                try:
+                    cphys_metadata = self.process_cphys(node_attrs)
+                    interface_metadata.extend(cphys_metadata)
+                except (exceptions.APIConnectionException, exceptions.APIParsingException):
+                    pass
             self.log.info("finished processing node %s", node_id)
         return device_metadata, interface_metadata
 
@@ -156,6 +162,35 @@ class Fabric:
             stats = e.get('l1PhysIf', {}).get('children', [])
             self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
         self.log.info("finished processing ethernet ports for %s", node['id'])
+        return interfaces
+
+    def process_cphys(self, node):
+        """
+        Collect interface metadata for an APIC controller from cnwPhysIf
+        """
+        self.log.info("processing controller ethernet ports for %s", node.get('id'))
+        device_hostname = node.get('name', '')
+        pod_id = helpers.get_pod_from_dn(node['dn'])
+        cphys_list = self.api.get_cphys_list(pod_id, node['id'])
+        interfaces = []
+        for c in cphys_list:
+            interface_metadata = ndm.create_controller_interface_metadata(
+                c, node.get('address', ''), self.namespace, device_hostname
+            )
+            interfaces.append(interface_metadata)
+            tags = self.tagger.get_fabric_tags(c, 'cnwPhysIf')
+            tags.extend(ndm.common_tags(node.get('address', ''), device_hostname, self.namespace))
+            device_id = '{}:{}'.format(self.namespace, node.get('address', ''))
+            tags.append('{}:{}'.format(DEVICE_TAGS_PREFIX, device_id))
+            tags.append(
+                "{}:{}".format(
+                    INTERFACE_TAGS_PREFIX,
+                    ndm.get_interface_dd_id(interface_metadata.device_id, interface_metadata.raw_id),
+                ),
+            )
+            tags.append('interface:{}'.format(interface_metadata.name))
+            self.submit_interface_status_metric(interface_metadata.status, tags, device_hostname)
+        self.log.info("finished processing controller ethernet ports for %s", node['id'])
         return interfaces
 
     def submit_fabric_metric(self, stats, tags, obj_type, hostname=None):

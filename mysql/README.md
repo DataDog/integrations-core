@@ -12,7 +12,7 @@ Supported versions:
 
 | Distribution | Versions          |
 |--------------|-------------------|
-| MySQL        | 5.6, 5.7, 8.0, 8.4 |
+| MySQL        | 5.6, 5.7, 8.0, 8.4, 9.7 |
 | MariaDB      | 10.5, 10.6, 10.11, 11.4 |
 | Percona      | 8.0, 8.4          |
 
