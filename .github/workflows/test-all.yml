@@ -689,6 +689,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j7f33498:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: cisco_catalyst_center
+      target: cisco_catalyst_center
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   jafd4d40:
     uses: ./.github/workflows/test-target.yml
     with:

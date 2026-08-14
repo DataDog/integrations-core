@@ -1,0 +1,235 @@
+name: Cisco Catalyst Center
+fleet_configurable: true
+files:
+- name: cisco_catalyst_center.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: catalyst_center_host
+      fleet_configurable: true
+      required: true
+      description: |
+        Hostname or IP address of the Cisco Catalyst Center appliance. Do not include a scheme;
+        HTTPS is always used.
+      value:
+        type: string
+        example: catalyst-center.example.com
+
+    - name: catalyst_center_username
+      fleet_configurable: true
+      required: true
+      description: |
+        Username of a Catalyst Center account with API access. The OBSERVER role is sufficient,
+        since the check only issues read requests.
+      value:
+        type: string
+
+    - name: catalyst_center_password
+      fleet_configurable: true
+      required: true
+      secret: true
+      description: Password for the Catalyst Center account.
+      value:
+        type: string
+
+    - name: namespace
+      fleet_configurable: true
+      description: |
+        Namespace to use for NDM device metadata. This must match the namespace configured on the
+        SNMP check polling the same devices. If the two differ, Catalyst Center and SNMP resolve to
+        different NDM devices and the telemetry does not merge.
+      value:
+        type: string
+        example: default
+        default: default
+
+    - name: token_refresh_buffer_seconds
+      fleet_configurable: true
+      description: |
+        How long before expiry the authentication token is refreshed. Catalyst Center tokens live
+        for one hour.
+      value:
+        type: integer
+        minimum: 30
+        default: 300
+        example: 300
+
+    - name: collect_interfaces
+      fleet_configurable: true
+      description: |
+        Set to `false` to skip port and interface health.
+      value:
+        type: boolean
+        example: true
+        default: true
+
+    - name: collect_interface_statistics
+      fleet_configurable: true
+      description: |
+        Set to `false` to skip interface throughput, error and discard rates. These come from a
+        separate `statistics` view on the interfaces endpoint, so disabling this removes one
+        paginated call per collection cycle. This is the first thing to turn off if the appliance
+        starts returning HTTP 429.
+      value:
+        type: boolean
+        example: true
+        default: true
+
+    - name: collect_interface_poe
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect per-port PoE state and power draw. Off by default because it
+        costs an additional paginated call and every field is empty on hardware without PoE.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: collect_stacks
+      fleet_configurable: true
+      description: |
+        Set to `false` to skip switch stack membership and member health. This is the only
+        per-device request the check makes, issued once per stackable switch.
+      value:
+        type: boolean
+        example: true
+        default: true
+
+    - name: collect_site_health
+      fleet_configurable: true
+      description: |
+        Set to `false` to skip per-site rollups. This endpoint returns at most 20 sites per page,
+        so a large hierarchy costs proportionally more requests than the other collectors.
+      value:
+        type: boolean
+        example: true
+        default: true
+
+    - name: collect_client_experience
+      fleet_configurable: true
+      description: |
+        Set to `false` to skip client signal quality and onboarding timings. Catalyst Center
+        performs the aggregation, so this costs one request and emits per SSID and band rather
+        than per client — client MAC addresses never appear in tags.
+      value:
+        type: boolean
+        example: true
+        default: true
+
+    - name: l3_topology_types
+      fleet_configurable: true
+      description: |
+        Which layer 3 routing graphs to size, one request each. Only used when `collect_topology`
+        is enabled.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - ospf
+        default:
+          - ospf
+
+    - name: collect_topology
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect the CDP/LLDP-derived physical topology and the size of the site
+        hierarchy. The topology endpoint is not paginated, so a large fabric returns every link in
+        a single response.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: collect_sda_fabric
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect Cisco SD-Access fabric health, virtual network health, and a count
+        of devices by fabric role. Only useful on deployments running SD-Access.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: collect_assurance_issues
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect counts of open assurance issues by severity, priority, category
+        and status.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: collect_application_health
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect per-application health and traffic. This endpoint requires a site
+        to be named on every request, so it costs one request per site and its cost grows with the
+        size of the hierarchy.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: collect_security
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect rogue access point and aWIPS wireless intrusion counts. Both are
+        wireless-edge features and report nothing on a wired-only deployment.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: collect_wireless
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect access point and radio metrics. Disabled by default: the mapping is
+        derived from Cisco's published API schema but has not yet been validated against a live
+        controller, so the field names are trusted while the values are not.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: max_pages
+      fleet_configurable: true
+      description: |
+        Maximum number of pages to request from any single paginated endpoint in one collection
+        cycle. Acts as a safety valve against runaway pagination.
+      value:
+        type: integer
+        minimum: 1
+        default: 1000
+        example: 1000
+
+    - template: instances/http
+      overrides:
+        persist_connections.value.default: true
+        persist_connections.value.example: true
+        persist_connections.description: |
+          Connections are always persisted so that connection pooling is used across the several
+          endpoints polled each cycle.
+    - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 60
+        min_collection_interval.value.display_default: 60
+        min_collection_interval.description: |
+          Changes the collection interval of the check. For more information, see
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
+          The default is 60 seconds. Catalyst Center recomputes assurance health on roughly a
+          five-minute cycle, so more frequent runs do not yield fresher health scores.
+
+    - name: send_ndm_metadata
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, and
+        topology) to be sent.
+      value:
+        type: boolean
+        example: false
+        default: false

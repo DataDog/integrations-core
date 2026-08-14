@@ -59,6 +59,7 @@ control_m = "control_m."
 nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
+cisco_catalyst_center = "cisco_catalyst_center."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -277,4 +278,5 @@ control_m = ["linux", "windows", "mac_os"]
 nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
+cisco_catalyst_center = ["linux", "windows", "mac_os"]
 
