@@ -1236,6 +1236,44 @@ def test_normalize_queries_procedure_name_fallback(
         assert not result_row.get('procedure_text')
 
 
+@pytest.mark.unit
+def test_normalize_queries_drops_deobfuscated_text(instance_docker, datadog_agent):
+    """Normalized rows expose only the obfuscated statement. Retaining `statement_text` would keep a
+    second copy of every statement alive through derivative metrics, FQT, and plan collection, and
+    would expose deobfuscated SQL to any consumer that does not route through the metrics payload."""
+    instance_docker['dbm'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    deobfuscated_text = "SELECT * FROM ϑings WHERE id = 42"
+    obfuscated_text = "SELECT * FROM ϑings WHERE id = ?"
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps(
+            {
+                'query': obfuscated_text,
+                'metadata': {'tables_csv': 'ϑings', 'commands': ['SELECT'], 'comments': []},
+            }
+        )
+
+    row = {
+        'statement_text': deobfuscated_text,
+        'text': None,
+        'query_hash': b'\x01\x02\x03\x04',
+        'query_plan_hash': b'\x05\x06\x07\x08',
+        'plan_handle': b'\x09\x0a\x0b\x0c',
+        'execution_count': 1,
+        'total_worker_time': 100,
+    }
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result = check.statement_metrics._normalize_queries([row])
+
+    assert len(result) == 1
+    assert 'statement_text' not in result[0]
+    assert result[0]['text'] == obfuscated_text
+
+
 @pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

@@ -487,6 +487,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
 
+            # Drop the deobfuscated text now that it has been obfuscated into `text`. Nothing downstream
+            # reads it, and keeping it would hold a second copy of every statement alive through
+            # derivative metrics, FQT, and plan collection.
+            del row['statement_text']
+
             normalized_rows.append(row)
         return normalized_rows
 
