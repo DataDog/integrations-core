@@ -189,6 +189,10 @@ class ResourceStatisticsSubscription(Subscription):
                     tags = resource.parse_tags(resource_tags, metric_data)
 
                     for metric, value in metric_data.items():
+                        # ACE can emit a malformed entry with an empty key instead of `name`.
+                        if not metric:
+                            continue
+
                         resource.submit(self.check, metric, value, tags)
 
 
