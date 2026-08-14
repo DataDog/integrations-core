@@ -43,6 +43,19 @@ COMPOSE_FOLDER = "compose"
 TZ="UTC"
 PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
 
+# Benchmarks run against synthetic result sets and need no database, so this env only exists to make
+# `ddev test -b sqlserver` available. Standard `ddev test` runs skip benchmark environments.
+# The version variables are set because the shared test helpers read them at import time; the values
+# are arbitrary since no server is contacted.
+[envs.bench.env-vars]
+ODBCSYSINI = "{root}{/}tests{/}odbc"
+COMPOSE_FOLDER = "compose"
+TZ="UTC"
+PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
+SQLSERVER_YEAR = "2022"
+SQLSERVER_MAJOR_VERSION = "16"
+SQLSERVER_ENGINE_EDITION = "express"
+
 [envs.default.overrides]
 env.GITHUB_ACTIONS.e2e-env = { value = false, if = ["true"], platform = ["windows"] }
 platform.windows.env-vars = [

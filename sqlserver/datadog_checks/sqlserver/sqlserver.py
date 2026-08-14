@@ -701,15 +701,19 @@ class SQLServer(DatabaseCheck):
         self.instance_metrics = metrics_to_collect
         self.log.debug("metrics to collect %s", metrics_to_collect)
 
-        # create an organized grouping of metric names to their metric classes
+        # create an organized grouping of metric names to their metric classes. Build it up locally and swap it in
+        # at the end so a rebuild drops names that are no longer collected without ever leaving this mapping out of
+        # sync with `instance_metrics`.
+        per_type_metrics = defaultdict(set)
         for m in metrics_to_collect:
             cls = m.__class__.__name__
             name = m.sql_name or m.column
             self.log.debug("Adding metric class %s named %s", cls, name)
 
-            self.instance_per_type_metrics[cls].add(name)
+            per_type_metrics[cls].add(name)
             if m.base_name:
-                self.instance_per_type_metrics[cls].add(m.base_name)
+                per_type_metrics[cls].add(m.base_name)
+        self.instance_per_type_metrics = per_type_metrics
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
@@ -783,6 +787,10 @@ class SQLServer(DatabaseCheck):
                         )
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
+            else:
+                # Counters that need no base counter can be cached right away. Base-requiring counters are only
+                # cached once their base is resolved, so a transient lookup failure is retried instead of pinned.
+                self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
 
         return sql_counter_type, base_name
 
