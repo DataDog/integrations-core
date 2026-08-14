@@ -1,0 +1,1 @@
+Bump ddtrace to 4.12.2 to remediate CVE-2026-50271 (W3C baggage header DoS).
