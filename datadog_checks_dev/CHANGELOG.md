@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 40.0.1 / 2026-08-13
+
+***Fixed***:
+
+* Require Twine 7 for uploading distributions using core metadata 2.5. ([#24853](https://github.com/DataDog/integrations-core/pull/24853))
+
 ## 40.0.0 / 2026-08-12
 
 ***Changed***:

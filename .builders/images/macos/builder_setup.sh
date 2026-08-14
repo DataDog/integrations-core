@@ -12,6 +12,40 @@ install-from-source() {
     bash "install-from-source.sh" --prefix="${DD_PREFIX_PATH}" "$@"
 }
 
+# Rust toolchain, needed to build cryptography from source: it no longer ships macOS x86_64 wheels.
+# Installed under the prefix to keep it in the builder cache, with the shims linked into
+# ${DD_PREFIX_PATH}/bin, which build.py already puts on PATH.
+# RUST_VERSION bumps on its own; the hashes are rustup-init's, so they only change with RUSTUP_VERSION:
+# https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_TARGET}/rustup-init.sha256
+# renovate: datasource=github-releases depName=rust-lang/rust
+RUST_VERSION="1.91.0"
+# renovate: datasource=github-tags depName=rust-lang/rustup
+RUSTUP_VERSION="1.26.0"
+case "$(uname -m)" in
+    x86_64)
+        RUST_TARGET="x86_64-apple-darwin"
+        RUSTUP_SHA256="f6d1a9fac1a0d0802d87c254f02369a79973bc8c55aa0016d34af4fcdbd67822"
+        ;;
+    arm64)
+        RUST_TARGET="aarch64-apple-darwin"
+        RUSTUP_SHA256="ed299a8fe762dc28161a99a03cf62836977524ad557ad70e13882d2f375d3983"
+        ;;
+    *)
+        echo "Unsupported architecture for the Rust toolchain: $(uname -m)" >&2
+        exit 1
+        ;;
+esac
+export RUSTUP_HOME="${DD_PREFIX_PATH}/rustup" CARGO_HOME="${DD_PREFIX_PATH}/cargo"
+curl --retry 5 --fail "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_TARGET}/rustup-init" -o /tmp/rustup-init
+echo "${RUSTUP_SHA256}  /tmp/rustup-init" | sha256sum --check
+chmod +x /tmp/rustup-init
+/tmp/rustup-init -y --no-modify-path --profile minimal --default-toolchain "${RUST_VERSION}"
+# The shims are copies of the rustup binary we just verified, so they carry the same hash
+echo "${RUSTUP_SHA256}  ${CARGO_HOME}/bin/rustc" | sha256sum --check
+rm /tmp/rustup-init
+mkdir -p "${DD_PREFIX_PATH}/bin"
+ln -sf "${CARGO_HOME}"/bin/* "${DD_PREFIX_PATH}/bin/"
+
 # mqi
 IBM_MQ_VERSION=9.2.4.0-IBM-MQ-DevToolkit
 curl --retry 5 --fail "https://s3.amazonaws.com/dd-agent-omnibus/ibm-mq-backup/${IBM_MQ_VERSION}-MacX64.pkg" -o /tmp/mq_client.pkg
@@ -99,8 +133,8 @@ VERSION="18.3" \
 SHA256="d95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f" \
 RELATIVE_PATH="postgresql-{{version}}" \
   install-from-source --without-readline --with-openssl --without-icu
-# Add paths to pg_config and to the library
-echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> "$DD_ENV_FILE"
+# pg_config is reached through ${DD_PREFIX_PATH}/bin, which build.py already puts on PATH. Writing PATH
+# to the env file instead would drop the entries build_wheels.py adds later, such as the maturin script.
 
 # zstd for librdkafka compression support
 # Keep version in sync with github.com/DataDog/datadog-agent/deps/repos.MODULE.bazel
