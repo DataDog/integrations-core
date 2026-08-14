@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from datadog_checks.base.checks.openmetrics.metric_limit_issue import ISSUE_NAME, ISSUE_TYPE
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import ISSUE_NAME
 from datadog_checks.openmetrics import OpenMetricsCheck
 
 ISSUE_ID = 'openmetrics-dropped-config:40c8930ce3bf6455'
@@ -47,7 +47,7 @@ def test_openmetrics_base_classes_report_metric_limit_issue(
     [issue] = datadog_agent._sent_reported_issues['openmetrics']
     assert issue['id'] == ISSUE_ID
     assert issue['issue_name'] == ISSUE_NAME
-    assert issue['issue_type'] == ISSUE_TYPE
+    assert issue['issue_type'] == 'openmetrics_metrics_dropped_by_configured_limit'
     assert issue['extra']['observed_contexts'] == 20
     assert issue['extra']['dropped_contexts'] == 15
     assert filter_option in issue['remediation']['steps'][0]['text']

@@ -15,7 +15,7 @@ SEVERITY_HIGH_RATIO = 0.25
 SEVERITY_MEDIUM_RATIO = 0.05
 
 ISSUE_NAME = 'OpenMetrics Metrics Dropped By Configured Limit'
-ISSUE_TYPE = 'openmetrics_dropped_config'
+ISSUE_TYPE = 'openmetrics_metrics_dropped_by_configured_limit'
 
 
 @dataclass

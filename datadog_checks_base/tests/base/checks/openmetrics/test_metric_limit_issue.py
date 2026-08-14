@@ -9,7 +9,6 @@ import pytest
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import (
     ISSUE_NAME,
-    ISSUE_TYPE,
     MetricLimitIssueReporter,
     _issue_id,
 )
@@ -81,7 +80,7 @@ def test_over_limit_run_reports_expected_issue(datadog_agent: Any) -> None:
     [issue] = reported_issues(datadog_agent)
     assert issue['id'] == ISSUE_ID
     assert issue['issue_name'] == ISSUE_NAME
-    assert issue['issue_type'] == ISSUE_TYPE
+    assert issue['issue_type'] == 'openmetrics_metrics_dropped_by_configured_limit'
     assert issue['category'] == 'integration'
     assert issue['severity'] == check.IssueSeverity['HIGH']
     assert issue['extra'] == {
