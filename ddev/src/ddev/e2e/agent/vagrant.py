@@ -57,6 +57,8 @@ def disable_integration_before_install(config_file: Path):
 
 
 class VagrantAgent(AgentInterface):
+    build_config_key = 'vagrant'
+    supports_ci = False
     VM_HOST_IP = "172.30.1.5"
 
     def __init__(

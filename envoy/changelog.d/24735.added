@@ -1,1 +1,0 @@
-Tag ``cluster.ratelimit`` counters with ``stat_prefix`` so global rate limit filters configured with a stat prefix are collected instead of dropped as an unknown tag.
