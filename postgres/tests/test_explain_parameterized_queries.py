@@ -102,11 +102,6 @@ def test_explain_parameterized_queries_generic_params(integration_check, dbm_ins
 @pytest.mark.usefixtures("dd_environment")
 @requires_over_12
 def test_stacked_statements_are_rejected_by_the_server(integration_check, dbm_instance):
-    '''
-    VULN-92306: sampled text comes from pg_stat_activity, so whoever ran the query chose it, and the agent
-    runs the PREPARE as the monitoring user. The extended query protocol is what stops a planted separator
-    from executing, so this asserts the server refuses it and that nothing ran.
-    '''
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
 
