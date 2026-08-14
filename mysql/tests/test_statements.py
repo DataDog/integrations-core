@@ -645,17 +645,18 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
-    if aurora_replication_role:
-        expected_tags.add("replication_role:" + aurora_replication_role)
-
     with (
         mock.patch.object(
             mysql_check, '_get_aurora_replication_role', passthrough=True
         ) as m_get_aurora_replication_role,
+        mock.patch(
+            'datadog_checks.mysql.global_variables.GlobalVariables.is_aurora', new_callable=mock.PropertyMock
+        ) as m_is_aurora,
     ):
         m_get_aurora_replication_role.return_value = None
+        m_is_aurora.return_value = False
         if aurora_replication_role:
+            m_is_aurora.return_value = True
             m_get_aurora_replication_role.return_value = aurora_replication_role
 
         logger.debug("running first check")
@@ -675,6 +676,12 @@ def test_statement_samples_collect(
         logger.debug("running second check")
         mysql_check.check(dbm_instance)
         logger.debug("done second check")
+
+    # server_uuid and cluster_uuid are only known once the check has run, so build the expected tags afterwards
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
+    expected_tags.add('dd.internal.resource:database_instance:stubbed.hostname')
+    if aurora_replication_role:
+        expected_tags.add("replication_role:" + aurora_replication_role)
 
     events = aggregator.get_event_platform_events("dbm-samples")
 
@@ -707,7 +714,7 @@ def test_statement_samples_collect(
     elif not schema and explain_strategy == 'PROCEDURE':
         # if there is no default schema then we cannot use the non-fully-qualified procedure strategy
         assert not with_plans, "should not have collected any plans"
-    elif not expected_statement_truncated:
+    elif expected_statement_truncated == StatementTruncationState.not_truncated.value:
         event = with_plans[0]
         assert 'query_block' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
         assert set(event['ddtags'].split(',')) == expected_tags
