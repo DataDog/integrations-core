@@ -31,6 +31,11 @@ def test_check(aggregator, check):
         with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
             check.get_stat_info()
 
+    with open(os.path.join(common.FIXTURE_DIR, "fips_enabled")) as f:
+        m = mock_open(read_data=f.read())
+        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
+            check.get_fips_info()
+
     with open(os.path.join(common.FIXTURE_DIR, "process_stats")) as f:
         with patch(
             'datadog_checks.linux_proc_extras.linux_proc_extras.get_subprocess_output', return_value=(f.read(), "", 0)
@@ -52,3 +57,43 @@ def test_check(aggregator, check):
             aggregator.assert_metric("system.linux.irq", value=None, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_fips_path_uses_procfs_prefix(check):
+    check.set_paths()
+
+    assert check.proc_path_map['fips_info'] == '/proc/sys/crypto/fips_enabled'
+
+
+@pytest.mark.parametrize('content, expected_value', [('1\n', 1.0), ('0\n', 0.0)])
+def test_fips_info(aggregator, check, content, expected_value):
+    m = mock_open(read_data=content)
+    with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
+        check.get_fips_info()
+
+    m.assert_called_once_with(check.proc_path_map['fips_info'], 'r')
+    aggregator.assert_metric('system.crypto.fips_enabled', value=expected_value, count=1, tags=[common.EXPECTED_TAG])
+    aggregator.assert_all_metrics_covered()
+
+
+def test_fips_info_missing_file(aggregator, check):
+    with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', side_effect=FileNotFoundError):
+        check.get_fips_info()
+
+    aggregator.assert_metric('system.crypto.fips_enabled', value=0.0, count=1, tags=[common.EXPECTED_TAG])
+    aggregator.assert_all_metrics_covered()
+
+
+def test_fips_info_unreadable(aggregator, check):
+    with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', side_effect=PermissionError):
+        check.get_fips_info()
+
+    aggregator.assert_metric('system.crypto.fips_enabled', count=0)
+
+
+def test_fips_info_unparseable(aggregator, check):
+    m = mock_open(read_data='not a number\n')
+    with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
+        check.get_fips_info()
+
+    aggregator.assert_metric('system.crypto.fips_enabled', count=0)
