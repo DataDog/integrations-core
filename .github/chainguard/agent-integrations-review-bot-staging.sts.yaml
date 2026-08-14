@@ -1,0 +1,31 @@
+# Trust policy for the agent_integrations_review_bot Rapid Slack review bot (staging)
+#
+# Grants a scoped, ephemeral token to the review bot's Kubernetes pod so it can
+# (1) shallow-clone this repo for the review skill, and (2) post PR review comments
+# via `gh api repos/.../pulls/<n>/reviews`. The bot never posts an APPROVE review --
+# that is enforced in application code (publisher.py::clamp_review_type in dd-source),
+# not by this policy's permission scope.
+#
+# Naming convention:
+#   Repo-local policy (per octo-sts): only DataDog/integrations-core can grant this
+#   identity access, and it's implicitly scoped to this repo -- no `repositories:`
+#   list needed.
+#
+# Identity: rapid-agent-integrations/agent-integrations-review-bot k8s service
+# account, staging datacenter (us1.staging.dog). Authenticates via the sycamore
+# (Ticino) OIDC issuer, not GitHub Actions.
+#
+# Staging only for now; a follow-up policy will add prod once staging is verified
+# end-to-end.
+
+issuer: https://ticino.identity.local-cluster.local-dc.fabric.dog:8443/v1/issuer/sycamore
+subject: "rapid-agent-integrations.agent-integrations-review-bot@kubernetes.us1.staging.dog"
+
+claim_pattern:
+  email: "rapid-agent-integrations\\.agent-integrations-review-bot@kubernetes\\.us1\\.staging\\.dog"
+  name: "rapid-agent-integrations-agent-integrations-review-bot"
+
+permissions:
+  contents: read
+  metadata: read
+  pull_requests: write
