@@ -34,6 +34,15 @@ sudo cp -Rf "${DD_PREFIX_PATH}/mqm" /opt
 echo "WITH_XML2_CONFIG=${DD_PREFIX_PATH}/bin/xml2-config" >> $DD_ENV_FILE
 echo "WITH_XSLT_CONFIG=${DD_PREFIX_PATH}/bin/xslt-config" >> $DD_ENV_FILE
 
+# Point the openssl crate, used by cryptography, at the OpenSSL we build instead of the system one.
+# This runs on every build, unlike the builder setup, which is skipped when the cache is warm.
+echo "OPENSSL_LIB_DIR=${DD_PREFIX_PATH}/lib" >> $DD_ENV_FILE
+echo "OPENSSL_INCLUDE_DIR=${DD_PREFIX_PATH}/include" >> $DD_ENV_FILE
+
+# The rustup shims resolve the toolchain through these, so they are needed on cache hits too
+echo "RUSTUP_HOME=${DD_PREFIX_PATH}/rustup" >> $DD_ENV_FILE
+echo "CARGO_HOME=${DD_PREFIX_PATH}/cargo" >> $DD_ENV_FILE
+
 # Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that
 # (see https://stackoverflow.com/a/61551944)
 pip_no_binary=${always_build[@]+"${always_build[@]}"}
