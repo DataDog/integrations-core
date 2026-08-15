@@ -239,6 +239,29 @@ def test_fetch_intermediate_certs(aggregator, instance_remote_fetch_intermediate
     aggregator.assert_all_metrics_covered()
 
 
+def test_fetch_intermediate_certs_arms_client_cert(instance_remote_fetch_intermediate_certs_mtls):
+    """Intermediate cert discovery must present the configured client cert and ciphers.
+
+    The socket is opened with tls_verify forced off, but the rest of the TLS
+    configuration still has to reach the SSL context, otherwise mTLS handshakes
+    fail silently against servers that require a client certificate.
+    """
+    c = TLSCheck('tls', {}, [instance_remote_fetch_intermediate_certs_mtls])
+
+    with (
+        patch.object(c, 'create_connection', return_value=MagicMock()),
+        patch('ssl.SSLContext.wrap_socket', return_value=MagicMock()),
+        patch('ssl.SSLContext.load_cert_chain') as load_cert_chain,
+        patch('ssl.SSLContext.set_ciphers') as set_ciphers,
+    ):
+        c.checker.fetch_intermediate_certs()
+
+    load_cert_chain.assert_called_once_with(
+        '/etc/certs/client.pem', keyfile='/etc/certs/client.key', password='hunter2'
+    )
+    set_ciphers.assert_called_once_with('ECDHE-RSA-AES256-GCM-SHA384')
+
+
 def test_cert_send_cert_duration(aggregator, instance_remote_send_cert_duration):
     c = TLSCheck('tls', {}, [instance_remote_send_cert_duration])
     c.check(None)

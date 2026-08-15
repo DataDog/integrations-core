@@ -3,8 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-from requests import ConnectionError
 
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.riak import Riak
 
 from . import common
@@ -34,7 +34,7 @@ def test_bad_config(aggregator, instance):
     instance.update({"url": "http://localhost:5985"})
     check = Riak('riak', {}, [instance])
 
-    with pytest.raises(ConnectionError):
+    with pytest.raises(HTTPConnectionError):
         check.check(instance)
 
     sc_tags = ['my_tag', 'url:http://localhost:5985']
