@@ -157,6 +157,7 @@ def test_collect_survives_malformed_resource_identifier(instance, global_tags):
     mock_config.max_message_length = 65536
 
     check = IbmAceCheck('ibm_ace', {}, [instance])
+    check.log = MagicMock()
     check.gauge = MagicMock()
     check.count = MagicMock()
     check.service_check = MagicMock()
@@ -191,3 +192,11 @@ def test_collect_survives_malformed_resource_identifier(instance, global_tags):
     malformed_calls = [c for c in submitted if 'jdbc_provider:jdbc_DataSourceB' in c.kwargs['tags']]
     assert malformed_calls
     assert not any(tag.startswith('group:') for c in malformed_calls for tag in c.kwargs['tags'])
+
+    # The fixture has two malformed entries; each is logged at debug level when skipped.
+    debug_calls = check.log.debug.call_args_list
+    assert len(debug_calls) == 2
+    for call in debug_calls:
+        _, resource_name, value, _ = call.args
+        assert resource_name == 'JDBCConnectionPools'
+        assert value == 'summary0'

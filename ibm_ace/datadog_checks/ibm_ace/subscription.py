@@ -191,6 +191,13 @@ class ResourceStatisticsSubscription(Subscription):
                     for metric, value in metric_data.items():
                         # ACE can emit a malformed entry with an empty key instead of `name`.
                         if not metric:
+                            self.check.log.debug(
+                                'Skipping resourceIdentifier entry with malformed key for resource %s: '
+                                'value=%r, tags=%s',
+                                resource_data['name'],
+                                value,
+                                tags,
+                            )
                             continue
 
                         resource.submit(self.check, metric, value, tags)
