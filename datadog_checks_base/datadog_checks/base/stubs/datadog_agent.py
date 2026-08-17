@@ -182,6 +182,192 @@ class DatadogAgentStub(object):
     def resolve_issue(self, issue_id):
         self._sent_resolved_issues.append(issue_id)
 
+    def parse_prometheus_metrics(self, raw_text, content_type):
+        from io import StringIO
+
+        from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+
+        media_type = content_type.split(';')[0] if content_type else ''
+        parse_fn = parse_openmetrics if media_type == 'application/openmetrics-text' else parse_prometheus
+
+        families = []
+        for family in parse_fn(StringIO(raw_text)):
+            samples = []
+            for sample in family.samples:
+                labels = dict(sample.labels)
+                labels['__name__'] = sample.name
+                samples.append({'labels': labels, 'value': sample.value, 'timestamp': sample.timestamp})
+            families.append({'name': family.name, 'type': family.type.upper(), 'samples': samples})
+        return json.encode(families)
+
+    def process_prometheus_metrics(self, raw_text, config, content_type=''):
+        """Parse and process Prometheus/OpenMetrics text with label/tag processing.
+
+        Mirrors the Go ProcessMetricsToJSON function. Returns a JSON-encoded ProcessResult
+        object with a 'families' field.
+
+        When share_labels is configured, all source-metric labels are collected from the
+        whole payload first (batch mode), then applied to every family regardless of order.
+        """
+        from io import StringIO
+        from math import isinf, isnan
+
+        from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+
+        if not raw_text:
+            return json.encode({'families': []})
+
+        cfg = json.decode(config)
+        media_type = content_type.split(';')[0] if content_type else ''
+        parse_fn = parse_openmetrics if media_type == 'application/openmetrics-text' else parse_prometheus
+
+        raw_metric_prefix = cfg.get('raw_metric_prefix', '')
+        exclude_metrics = set(cfg.get('exclude_metrics', []))
+        exclude_pats = cfg.get('exclude_metrics_patterns', [])
+        exclude_re = re.compile('|'.join(exclude_pats)) if exclude_pats else None
+        exclude_labels_set = set(cfg.get('exclude_labels', []))
+        include_labels_set = set(cfg.get('include_labels', []))
+        rename_labels_map = cfg.get('rename_labels', {})
+        hostname_label = cfg.get('hostname_label', '')
+        hostname_format = cfg.get('hostname_format', '')
+        static_tags = list(cfg.get('static_tags', []))
+        share_cfg = cfg.get('share_labels', {})
+
+        exclude_by_labels = {}
+        for lbl, pats in cfg.get('exclude_metrics_by_labels', {}).items():
+            exclude_by_labels[lbl] = re.compile('|'.join(pats)) if pats else None
+
+        # Parse and normalize family names.
+        parsed = []
+        for fam in parse_fn(StringIO(raw_text)):
+            name = fam.name
+            ftype = fam.type.upper()
+            if ftype == 'COUNTER':
+                for sfx in ('_total', '_created'):
+                    if name.endswith(sfx):
+                        name = name[: -len(sfx)]
+                        break
+            if raw_metric_prefix and name.startswith(raw_metric_prefix):
+                name = name[len(raw_metric_prefix) :]
+            parsed.append((name, ftype, fam.samples))
+
+        # Batch mode: collect all source-metric labels from the whole payload first.
+        unconditional, conditional = self._collect_shared_labels_batch(parsed, share_cfg)
+
+        result = []
+        for name, ftype, samples in parsed:
+            if name in exclude_metrics:
+                continue
+            if exclude_re and exclude_re.search(name):
+                continue
+
+            ft_lower = ftype.lower()
+            processed_samples = []
+            for s in samples:
+                if isnan(s.value) or isinf(s.value):
+                    continue
+
+                labels = dict(s.labels)
+                labels['__name__'] = s.name
+
+                # Apply shared labels (setdefault: existing labels take priority).
+                for k, v in unconditional.items():
+                    labels.setdefault(k, v)
+                for ms, shared in conditional:
+                    if ms <= frozenset(labels.items()):
+                        for k, v in shared.items():
+                            labels.setdefault(k, v)
+
+                # Normalize histogram/summary labels.
+                if ft_lower == 'histogram' and 'le' in labels:
+                    labels['upper_bound'] = self._canonicalize_numeric(labels.pop('le'))
+                elif ft_lower == 'summary' and 'quantile' in labels:
+                    labels['quantile'] = self._canonicalize_numeric(labels['quantile'])
+
+                # Check exclude by labels.
+                skip = False
+                for lbl, pat in exclude_by_labels.items():
+                    val = labels.get(lbl)
+                    if val is None:
+                        continue
+                    if pat is None or pat.search(val):
+                        skip = True
+                        break
+                if skip:
+                    continue
+
+                # Build tags.
+                tags = []
+                for lk, lv in labels.items():
+                    if lk == '__name__':
+                        continue
+                    if lk in exclude_labels_set:
+                        continue
+                    if include_labels_set and lk not in include_labels_set:
+                        continue
+                    tags.append(f'{rename_labels_map.get(lk, lk)}:{lv}')
+                tags.extend(static_tags)
+
+                # Extract hostname.
+                hn = ''
+                if hostname_label and hostname_label in labels:
+                    hn = labels[hostname_label]
+                    if hostname_format:
+                        hn = hostname_format.replace('<HOSTNAME>', hn, 1)
+
+                sample_name = labels.get('__name__', name)
+                out_labels = {k: v for k, v in labels.items() if k != '__name__'}
+                processed_samples.append({
+                    'sample_name': sample_name,
+                    'value': s.value,
+                    'tags': tags,
+                    'hostname': hn,
+                    'labels': out_labels,
+                })
+
+            if processed_samples:
+                result.append({'name': name, 'type': ftype, 'samples': processed_samples})
+
+        return json.encode({'families': result})
+
+    @staticmethod
+    def _collect_shared_labels_batch(parsed, share_cfg):
+        """Collect all shared labels from source metrics in a single batch pass."""
+        unconditional: dict = {}
+        conditional: list = []
+        for name, _ftype, samples in parsed:
+            sl = share_cfg.get(name)
+            if sl is None:
+                continue
+            match_keys = set(sl.get('match', []))
+            label_keys = set(sl.get('labels', []))
+            all_labels = not label_keys
+            allowed_vals = {float(v) for v in sl.get('values', [])}
+            any_val = not allowed_vals
+            for s in samples:
+                if not any_val and s.value not in allowed_vals:
+                    continue
+                if match_keys:
+                    ms = frozenset((k, v) for k, v in s.labels.items() if k in match_keys)
+                    shared = {k: v for k, v in s.labels.items() if all_labels or k in label_keys}
+                    conditional.append((ms, shared))
+                else:
+                    for k, v in s.labels.items():
+                        if all_labels or k in label_keys:
+                            unconditional[k] = v
+        return unconditional, conditional
+
+    @staticmethod
+    def _canonicalize_numeric(s):
+        """Match Python's canonicalize_numeric_label: str(float(label) or 0)."""
+        try:
+            f = float(s)
+            return str(f or 0)
+        except (ValueError, OverflowError):
+            return s
+
 
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()
