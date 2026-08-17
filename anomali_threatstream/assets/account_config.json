@@ -1,0 +1,64 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "key": "api_domain",
+      "label": "Domain",
+      "editable": true,
+      "required": true,
+      "domain": {
+        "pattern": "^(?:[a-zA-Z0-9-]+\\.)*threatstream\\.com$"
+      }
+    },
+    {
+      "key": "email",
+      "label": "Email",
+      "editable": true,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "api_key",
+      "label": "API Key",
+      "editable": true,
+      "required": true,
+      "password": {}
+    },
+    {
+      "key": "domain",
+      "label": "Collect Domain Indicators (Threat Intel Feed)",
+      "help": "Enrich logs with Anomali ThreatStream domain indicators data",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "ip_address",
+      "label": "Collect IP Address Indicators (Threat Intel Feed)",
+      "help": "Enrich logs with Anomali ThreatStream ip address indicators data",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "sha256",
+      "label": "Collect hash SHA256 Indicators (Threat Intel Feed)",
+      "help": "Enrich logs with Anomali ThreatStream hash SHA256 indicators data",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "anomali-threatstream-threat-intel-feed",
+      "additional_config_fields": []
+    }
+  ]
+}
