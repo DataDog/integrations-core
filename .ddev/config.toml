@@ -220,6 +220,8 @@ exclude = [
     'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
     'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
                     # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
+    'redis',        # 8.1.0 adds 788K on disk, over the Agent per-PR gate. Bumped in stages
+                    # instead, see #24817. Unpin once we reach 8.1.0.
 
 ]
 
