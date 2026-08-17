@@ -327,13 +327,13 @@ def request_wheel(
     app: Application, url: str, wheels_storage: WheelsStorageTier, head: bool = False
 ) -> requests.Response:
     """
-    Requests a wheel, trying each storage tier in turn and returning the first that serves it.
+    Fetches a wheel by trying each storage tier in order, returning the first successful response.
 
-    A tier is treated as "doesn't have this wheel" on a 404 (not found) or a 403 (the dev/stable S3
-    buckets return 403, not 404, for a key that doesn't exist, since the caller isn't authorized to
-    list the bucket). Any other status is raised immediately rather than masked by trying the next
-    tier. The error message lists every tier that was tried, since the raised URL alone doesn't show
-    that a fallback was attempted.
+    Both 404 and 403 are treated as "not found" and trigger a fallback to the next tier, since the
+    dev/stable S3 buckets return 403 instead of 404 for a missing key when the caller can't list the
+    bucket. Any other error status aborts immediately instead of retrying. If every tier fails, the
+    raised error lists all tried tiers, since the URL alone wouldn't reveal that a fallback was
+    attempted.
     """
     candidates = wheel_url_candidates(url, wheels_storage)
     tried: list[str] = []
