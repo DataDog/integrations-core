@@ -223,10 +223,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     # in the instance config for the sub-collector, do not override it.
     # Use the post-validation args so changes from apply_validated_defaults (e.g. removal of
     # 'postgres' when collect_default_database is true) are respected.
-    ignore_dbs = args.get('ignore_databases') or []
-
-    _propagate_exclude_databases(instance, args, 'collect_schemas', ignore_dbs)
-    _propagate_exclude_databases(instance, args, 'collect_column_statistics', ignore_dbs)
+    if 'ignore_databases' in instance:
+        ignore_dbs = args.get('ignore_databases') or []
+        _propagate_exclude_databases(instance, args, 'collect_schemas', ignore_dbs)
+        _propagate_exclude_databases(instance, args, 'collect_column_statistics', ignore_dbs)
 
     apply_deprecation_warnings(instance, validation_result)
 
