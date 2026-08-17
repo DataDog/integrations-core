@@ -11,14 +11,18 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ddev.cli.release.port_commit_workflow import (
+    BackportResult,
+    BackportStatus,
     CherryPickStep,
     CommitStep,
     CreatePullRequestStep,
+    PortOptions,
     PortStep,
     PortStepError,
     PreserveGeneratedFilesStep,
     SetupWorktreeStep,
     TeardownWorktreeStep,
+    _build_backport_failure_comment,
     build_pr_body,
     derive_backport_bases,
     is_reset_to_target,
@@ -1254,6 +1258,37 @@ def test_command_from_pr_comment_fences_multiline_conflict_detail(
     retry_line = next(line for line in body.splitlines() if line.startswith('- `7.62.x`'))
     assert 'ddev release port-commit --from-pr 23703' in retry_line
     assert 'first.py' not in retry_line
+
+
+def test_build_backport_failure_comment_formats_body() -> None:
+    """The comment builder is pure, so its Markdown can be asserted without the CLI or a GitHub client."""
+    options = PortOptions(
+        branch_prefix='backport',
+        branch_suffix=None,
+        pr_labels='backport,bot',
+        no_pr=False,
+        draft=False,
+        verify=False,
+        dry_run=False,
+    )
+    failures = [
+        BackportResult(
+            base='7.62.x', status=BackportStatus.FAILED, detail='conflict in foo/a.py\nconflict in bar/b.py'
+        ),
+        BackportResult(base='7.61.x', status=BackportStatus.FAILED, detail=None),
+    ]
+
+    body = _build_backport_failure_comment(23703, failures, options)
+
+    assert body.startswith('⚠️ Automatic backport of this PR failed for 2 target branch(es):')
+    # Each failed base gets a retry command echoing the run's own flags.
+    assert (
+        '- `7.62.x` — retry manually with `ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
+        '--branch-prefix backport --pr-labels backport,bot`.'
+    ) in body
+    assert '--target-branch 7.61.x' in body
+    # Multi-line detail is fenced; a base without detail adds no fence of its own.
+    assert '  ```\n  conflict in foo/a.py\n  conflict in bar/b.py\n  ```' in body
 
 
 def test_command_from_pr_comment_failure_does_not_mask_backport_result(

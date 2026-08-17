@@ -1131,6 +1131,19 @@ def _comment_on_backport_failures(
         return
 
     owner, repo = resolve_owner_repo(app)
+    body = _build_backport_failure_comment(pr_number, failures, options)
+    try:
+        _post_issue_comment(token, owner, repo, pr_number, body)
+    except Exception as e:  # noqa: BLE001 - best-effort comment; never mask the backport result
+        app.display_warning(f'Could not post backport-failure comment on PR #{pr_number}: {e}')
+
+
+def _build_backport_failure_comment(pr_number: int, failures: list[BackportResult], options: PortOptions) -> str:
+    """Render the Markdown body listing each failed base and a copy-paste retry command.
+
+    Pure presentation: no I/O, so the formatting can be unit-tested against a `list[BackportResult]`
+    and a `PortOptions` directly.
+    """
     lines = [f'⚠️ Automatic backport of this PR failed for {len(failures)} target branch(es):', '']
     for result in failures:
         # Echo the flags this run actually used — `options` is the source of truth for the branch pushed
@@ -1146,12 +1159,7 @@ def _comment_on_backport_failures(
         # into the bullet and bury the retry command.
         if result.detail:
             lines.extend(['', '  ```', *(f'  {line}' for line in result.detail.splitlines()), '  ```', ''])
-    body = '\n'.join(lines)
-
-    try:
-        _post_issue_comment(token, owner, repo, pr_number, body)
-    except Exception as e:  # noqa: BLE001 - best-effort comment; never mask the backport result
-        app.display_warning(f'Could not post backport-failure comment on PR #{pr_number}: {e}')
+    return '\n'.join(lines)
 
 
 def _post_issue_comment(token: str, owner: str, repo: str, issue_number: int, body: str) -> None:
