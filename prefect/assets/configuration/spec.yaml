@@ -160,4 +160,7 @@ files:
       value.example:
       - prefect
   - template: auto_conf/discovery
+    overrides:
+      discovery.example:
+        metrics_prefix: prefect.server
 
