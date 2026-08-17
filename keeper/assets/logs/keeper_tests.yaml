@@ -41,7 +41,7 @@ tests:
       audit_event: ext_share_added
       ocsf:
         severity: Informational
-        activity_name: Create
+        activity_name: Share
         metadata:
           product:
             name: Keeper
@@ -53,11 +53,10 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 10.10.10.10
         status_id: 1
         class_uid: 6001
-        activity_id: 1
+        activity_id: 8
         time: 1749643454772
         severity_id: 1
         class_name: Web Resources Activity
@@ -67,6 +66,8 @@ tests:
             name: ext_share_added
         http_request:
           user_agent: Web App.17.2.2
+        dst_endpoint:
+          hostname: keepersecurity.com
       username: xakemaukubri-2168@company.com
     message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"Dm_l4bk34Rj62ef-XUPv3g\",\"audit_event\":\"ext_share_added\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"Web App.17.2.2\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
     service: "share"
@@ -119,8 +120,6 @@ tests:
           version: 1.5.0
         category_uid: 6
         category_name: Application Activity
-        src_endpoint:
-          hostname: keepersecurity.com
         status_id: 1
         class_uid: 6001
         activity_id: 4
@@ -133,6 +132,8 @@ tests:
             name: ext_share_expired
         http_request:
           user_agent: Server.0.0.0
+        dst_endpoint:
+          hostname: keepersecurity.com
       username: xakemaukubri-2168@company.com
     message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"Dm_l4bk34Rj62ef-XUPv3g\",\"audit_event\":\"ext_share_expired\",\"category\":\"share\",\"client_version\":\"Server.0.0.0\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
     service: "share"
@@ -192,7 +193,6 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 10.10.10.10
         status_id: 1
         class_uid: 6001
@@ -206,6 +206,8 @@ tests:
             name: ext_share_access
         http_request:
           user_agent: SecretsManager/JS.16.6.2
+        dst_endpoint:
+          hostname: keepersecurity.com
       username: graucakafamme-1489@company.com
     message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_access\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"SecretsManager/JS.16.6.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
     service: "share"
@@ -265,7 +267,6 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 10.10.10.10
         status_id: 1
         class_uid: 6001
@@ -279,6 +280,8 @@ tests:
             name: ext_share_connected
         http_request:
           user_agent: SecretsManager/JS.16.6.2
+        dst_endpoint:
+          hostname: keepersecurity.com
       username: graucakafamme-1489@company.com
     message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_connected\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"SecretsManager/JS.16.6.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
     service: "share"
@@ -338,7 +341,6 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 10.10.10.10
         status_id: 1
         class_uid: 6001
@@ -352,6 +354,8 @@ tests:
             name: ext_share_removed
         http_request:
           user_agent: Web App.17.2.2
+        dst_endpoint:
+          hostname: keepersecurity.com
       username: graucakafamme-1489@company.com
     message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_removed\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"Web App.17.2.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
     service: "share"
@@ -415,11 +419,7 @@ tests:
         category_uid: 3
         category_name: Identity & Access Management
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 10.10.10.10
-        resources:
-          - uid: '1119925607333893'
-            type: Role
         actor:
           user:
             email_addr: xakemaukubri-2168@company.com
@@ -499,11 +499,7 @@ tests:
         category_uid: 3
         category_name: Identity & Access Management
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 10.10.10.10
-        resources:
-          - uid: 261822/1124516927373322
-            type: Role
         actor:
           user:
             email_addr: graucakafamme-1489@company.com
@@ -583,7 +579,6 @@ tests:
         category_uid: 3
         category_name: Identity & Access Management
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 10.10.10.10
         actor:
           user:
@@ -597,18 +592,18 @@ tests:
         class_name: Entity Management
         status: Success
         entity_result:
-          type_id: 99
-          type: Vault
+          type_id: 2
+          type: User
           user:
             email_addr: zigedducrouqua-5815@company.com
             name: zigedducrouqua-5815@company.com
         entity:
-          type_id: 99
-          type: Vault
+          type_id: 2
+          type: User
           user:
-            uid: '20365479'
             email_addr: feuddinemeiyi-3706@company.com
             name: feuddinemeiyi-3706@company.com
+          name: vault_transferred
       username: graucakafamme-1489@company.com
     message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"vault_transferred\",\"from_username\":20365479,\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"to_username\":\"zigedducrouqua-5815@company.com\",\"email\":\"feuddinemeiyi-3706@company.com\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
     service: "security"
@@ -665,20 +660,21 @@ tests:
           user:
             email_addr: user1@example.com
             name: user1@example.com
-        status_id: 1
+        status_id: 2
         class_uid: 6003
         activity_id: 99
         time: 1749643454772
         severity_id: 1
         class_name: API Activity
-        status: Success
+        status: Failure
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         api:
           service:
             name: rotation
           operation: record_rotation_scheduled_fail
+        dst_endpoint:
+          hostname: keepersecurity.com
       usr:
         email: user1@example.com
       service: rotation
@@ -748,10 +744,11 @@ tests:
           - uid: App2003AbCdEfGhIjKlMn
             name: compliance_report_downloaded
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         http_request:
           user_agent: Web App.17.2.2
+        dst_endpoint:
+          hostname: keepersecurity.com
       usr:
         email: user1@example.com
       service: reporting
@@ -819,11 +816,6 @@ tests:
         time: 1749643454772
         severity_id: 4
         class_name: Detection Finding
-        device:
-          hostname: keepersecurity.com
-          type_id: 99
-          ip: 192.0.2.10
-          type: Other
         status: New
         is_alert: true
         risk_level: High
@@ -886,7 +878,6 @@ tests:
         category_uid: 3
         category_name: Identity & Access Management
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         actor:
           user:
@@ -962,7 +953,6 @@ tests:
         category_uid: 3
         category_name: Identity & Access Management
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         actor:
           user:
@@ -1040,7 +1030,6 @@ tests:
         category_uid: 3
         category_name: Identity & Access Management
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         actor:
           user:
@@ -1131,12 +1120,13 @@ tests:
         class_name: API Activity
         status: Success
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         api:
           service:
             name: enterprise
           operation: enterprise_2fa_disabled_by_admin
+        dst_endpoint:
+          hostname: keepersecurity.com
       usr:
         email: user1@example.com
       service: enterprise
@@ -1194,7 +1184,6 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         status_id: 1
         class_uid: 6001
@@ -1207,6 +1196,8 @@ tests:
         status: Success
         web_resources:
           - name: fast_fill
+        dst_endpoint:
+          hostname: keepersecurity.com
       usr:
         email: user1@example.com
       service: web
@@ -1252,9 +1243,6 @@ tests:
       hostname: keepersecurity.com
       audit_event: ssh_agent_started
       ocsf:
-        app:
-          name: ssh-agent
-          version: Web App.17.2.2
         severity: Informational
         activity_name: Start
         metadata:
@@ -1274,6 +1262,8 @@ tests:
         severity_id: 1
         class_name: Application Lifecycle
         status: Success
+        app:
+          name: ssh_agent
       usr:
         email: user1@example.com
       service: ssh-agent
@@ -1332,7 +1322,6 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
         actor:
           user:
@@ -1349,6 +1338,8 @@ tests:
         severity_id: 1
         class_name: API Activity
         status: Success
+        dst_endpoint:
+          hostname: keepersecurity.com
       usr:
         email: user1@example.com
       service: secrets-manager
@@ -1410,24 +1401,21 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.10
-        actor:
-          user:
-            email_addr: user1@example.com
-            name: user1@example.com
         status_id: 1
-        class_uid: 6005
-        activity_id: 6
+        class_uid: 6001
+        activity_id: 1
         time: 1749643454772
         dst_endpoint:
           hostname: keepersecurity.com
         severity_id: 1
-        class_name: Datastore Activity
-        table:
-          uid: Rec6005AbCdEfGhIjKlMn
-          name: Rec6005AbCdEfGhIjKlMn
+        class_name: Web Resources Activity
         status: Success
+        web_resources:
+          - uid: Rec6005AbCdEfGhIjKlMn
+            name: record_add
+        http_request:
+          user_agent: Web App.17.2.2
       usr:
         email: user1@example.com
       service: record
@@ -1485,9 +1473,9 @@ tests:
         category_uid: 6
         category_name: Application Activity
         scan:
-          type_id: 99
+          type_id: 1
           name: Discovery Job
-          type: Other
+          type: Manual
         status_id: 1
         class_uid: 6007
         activity_id: 1
@@ -1563,11 +1551,6 @@ tests:
         time: 1749643200000
         severity_id: 5
         class_name: Detection Finding
-        device:
-          hostname: keepersecurity.com
-          type_id: 99
-          ip: 192.0.2.10
-          type: Other
         risk_level_id: 4
         status: New
       usr:
@@ -1629,24 +1612,21 @@ tests:
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
-          hostname: keepersecurity.com
           ip: 192.0.2.11
-        actor:
-          user:
-            email_addr: bob@example.com
-            name: bob@example.com
         status_id: 1
-        class_uid: 6005
-        activity_id: 1
+        class_uid: 6001
+        activity_id: 2
         time: 1749643260000
         dst_endpoint:
           hostname: keepersecurity.com
         severity_id: 1
-        class_name: Datastore Activity
-        table:
-          uid: RECatt0000000000000001
-          name: RECatt0000000000000001
+        class_name: Web Resources Activity
         status: Success
+        web_resources:
+          - uid: RECatt0000000000000001
+            name: file_attachment_downloaded
+        http_request:
+          user_agent: Web App.17.2.2
       usr:
         email: bob@example.com
       service: vault
@@ -1693,9 +1673,6 @@ tests:
       hostname: keepersecurity.com
       audit_event: pam_gateway_online
       ocsf:
-        app:
-          name: pam
-          version: Web App.17.2.2
         severity: Informational
         activity_name: Start
         metadata:
@@ -1715,6 +1692,8 @@ tests:
         severity_id: 1
         class_name: Application Lifecycle
         status: Success
+        app:
+          name: pam_gateway
       usr:
         email: carol@example.com
       service: pam
@@ -1782,3 +1761,227 @@ tests:
     tags:
       - source:LOGS_SOURCE
     timestamp: 1749643380000
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "role",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "role_created",
+        "role_id" : "1119925607333893",
+        "remote_address" : "192.0.2.10",
+        "category" : "role",
+        "client_version" : "EMConsole.17.3.0",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "admin@example.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"role_created\",\"role_id\":\"1119925607333893\",\"remote_address\":\"192.0.2.10\",\"category\":\"role\",\"client_version\":\"EMConsole.17.3.0\",\"enterprise_id\":260753,\"username\":\"admin@example.com\"}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      audit_event: "role_created"
+      client_version: "EMConsole.17.3.0"
+      enterprise_id: 260753
+      evt:
+        category: "role"
+        name: "role_created"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.10"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          user:
+            email_addr: "admin@example.com"
+            name: "admin@example.com"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          name: "role_created"
+          policy:
+            uid: "1119925607333893"
+          type: "Policy"
+          type_id: 5
+        metadata:
+          event_code: "role_created"
+          product:
+            name: "Keeper"
+            vendor_name: "Keeper Security"
+            version: "EMConsole.17.3.0"
+          tenant_uid: "260753"
+          version: "1.5.0"
+        severity: "Medium"
+        severity_id: 3
+        src_endpoint:
+          ip: "192.0.2.10"
+        status: "Success"
+        status_id: 1
+        time: 1749643454772
+      remote_address: "192.0.2.10"
+      role_id: "1119925607333893"
+      service: "role"
+      source: "keeper"
+      timestamp: 1749643454772
+      username: "admin@example.com"
+      usr:
+        email: "admin@example.com"
+    message: '<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {"audit_event":"role_created","role_id":"1119925607333893","remote_address":"192.0.2.10","category":"role","client_version":"EMConsole.17.3.0","enterprise_id":260753,"username":"admin@example.com"}'
+    service: "role"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "device_approved",
+        "remote_address" : "192.0.2.10",
+        "category" : "security",
+        "client_version" : "Web App.17.2.2",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "admin@example.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"device_approved\",\"remote_address\":\"192.0.2.10\",\"category\":\"security\",\"client_version\":\"Web App.17.2.2\",\"enterprise_id\":260753,\"username\":\"admin@example.com\"}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      audit_event: "device_approved"
+      client_version: "Web App.17.2.2"
+      enterprise_id: 260753
+      evt:
+        category: "security"
+        name: "device_approved"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.10"
+      ocsf:
+        activity_id: 3
+        activity_name: "Update"
+        actor:
+          user:
+            email_addr: "admin@example.com"
+            name: "admin@example.com"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          name: "device_approved"
+          type: "Device"
+          type_id: 1
+        metadata:
+          event_code: "device_approved"
+          product:
+            name: "Keeper"
+            vendor_name: "Keeper Security"
+            version: "Web App.17.2.2"
+          tenant_uid: "260753"
+          version: "1.5.0"
+        severity: "Medium"
+        severity_id: 3
+        src_endpoint:
+          ip: "192.0.2.10"
+        status: "Success"
+        status_id: 1
+        time: 1749643454772
+      remote_address: "192.0.2.10"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      username: "admin@example.com"
+      usr:
+        email: "admin@example.com"
+    message: '<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {"audit_event":"device_approved","remote_address":"192.0.2.10","category":"security","client_version":"Web App.17.2.2","enterprise_id":260753,"username":"admin@example.com"}'
+    service: "security"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "login",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "login_failure",
+        "remote_address" : "192.0.2.10",
+        "category" : "login",
+        "client_version" : "Web App.17.2.2",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "user1@example.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"login_failure\",\"remote_address\":\"192.0.2.10\",\"category\":\"login\",\"client_version\":\"Web App.17.2.2\",\"enterprise_id\":260753,\"username\":\"user1@example.com\"}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      audit_event: "login_failure"
+      client_version: "Web App.17.2.2"
+      enterprise_id: 260753
+      evt:
+        category: "login"
+        name: "login_failure"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.10"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            email_addr: "user1@example.com"
+            name: "user1@example.com"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        dst_endpoint:
+          hostname: "keepersecurity.com"
+        metadata:
+          event_code: "login_failure"
+          product:
+            name: "Keeper"
+            vendor_name: "Keeper Security"
+            version: "Web App.17.2.2"
+          tenant_uid: "260753"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.10"
+        status: "Failure"
+        status_id: 2
+        time: 1749643454772
+        user:
+          email_addr: "user1@example.com"
+          name: "user1@example.com"
+      remote_address: "192.0.2.10"
+      service: "login"
+      source: "keeper"
+      timestamp: 1749643454772
+      username: "user1@example.com"
+      usr:
+        email: "user1@example.com"
+    message: '<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {"audit_event":"login_failure","remote_address":"192.0.2.10","category":"login","client_version":"Web App.17.2.2","enterprise_id":260753,"username":"user1@example.com"}'
+    service: "login"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
