@@ -32,6 +32,7 @@ jobs:
 
       - name: Get Datadog credentials
         id: dd-sts
+        if: github.event_name == 'push'
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
           policy: integrations-core-api-key
