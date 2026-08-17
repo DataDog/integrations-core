@@ -1129,11 +1129,18 @@ def _comment_on_backport_failures(app: Application, pr_number: int, results: lis
     owner, repo = resolve_owner_repo(app)
     lines = [f'⚠️ Automatic backport of this PR failed for {len(failures)} target branch(es):', '']
     for result in failures:
-        reason = f': {result.detail}' if result.detail else ''
-        lines.append(
-            f'- `{result.base}`{reason} — retry manually with '
-            f'`ddev release port-commit PR-{pr_number} --target-branch {result.base}`.'
+        # Mirror the flags the workflow itself passes (see .github/workflows/backport-pr.yml) so a manual
+        # retry produces the same `backport/…` head branch and labels. A retry with the CLI defaults would
+        # land on a `port/…` branch that the head-keyed idempotency check can't see, risking a duplicate.
+        retry = (
+            f'ddev release port-commit --from-pr {pr_number} --target-branch {result.base} '
+            f'--branch-prefix backport --pr-labels backport,bot'
         )
+        lines.append(f'- `{result.base}` — retry manually with `{retry}`.')
+        # `detail` is often a multi-line cherry-pick-conflict listing; fence it so it doesn't collapse
+        # into the bullet and bury the retry command.
+        if result.detail:
+            lines.extend(['', '  ```', *(f'  {line}' for line in result.detail.splitlines()), '  ```', ''])
     body = '\n'.join(lines)
 
     try:
@@ -1146,10 +1153,11 @@ def _post_issue_comment(token: str, owner: str, repo: str, issue_number: int, bo
     """Create a comment on the given issue or pull request."""
     import asyncio
 
+    asyncio.run(_create_issue_comment(token, owner, repo, issue_number, body))
+
+
+async def _create_issue_comment(token: str, owner: str, repo: str, issue_number: int, body: str) -> None:
     from ddev.utils.github_async import async_github_client
 
-    async def _post() -> None:
-        async with async_github_client(token=token) as client:
-            await client.create_issue_comment(owner=owner, repo=repo, issue_number=issue_number, body=body)
-
-    asyncio.run(_post())
+    async with async_github_client(token=token) as client:
+        await client.create_issue_comment(owner=owner, repo=repo, issue_number=issue_number, body=body)

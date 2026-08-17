@@ -1186,7 +1186,12 @@ def test_command_from_pr_comments_on_source_pr_when_a_base_fails(
     assert comment_call.kwargs['issue_number'] == 23703
     body = comment_call.kwargs['body']
     assert '7.62.x' in body
-    assert 'retry manually' in body
+    # The retry command mirrors the flags the workflow passes, so a manual retry reproduces the same
+    # backport branch/labels instead of the CLI defaults.
+    assert (
+        'ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
+        '--branch-prefix backport --pr-labels backport,bot'
+    ) in body
     # Only the failed base is named; the base that ported cleanly is not mentioned.
     assert '7.61.x' not in body
 
@@ -1206,6 +1211,35 @@ def test_command_from_pr_does_not_comment_when_all_bases_succeed(
 
     assert result.exit_code == 0, result.output
     fake_async_github.assert_not_called('create_issue_comment')
+
+
+def test_command_from_pr_comment_failure_does_not_mask_backport_result(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A failure posting the comment is warned, not raised — the backport result still stands."""
+    import httpx
+
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500)),
+        base='7.62.x',
+    )
+    fake_async_github.mock_response(
+        'create_issue_comment',
+        httpx.HTTPStatusError('nope', request=httpx.Request('POST', 'https://x'), response=httpx.Response(403)),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not post backport-failure comment' in result.output
+    assert 'One or more backports failed' in result.output
 
 
 def test_command_from_pr_summary_reports_every_status(
