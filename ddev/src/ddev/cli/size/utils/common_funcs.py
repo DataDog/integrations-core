@@ -70,7 +70,7 @@ class CLIParameters(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
-    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
+    wheels_storage: WheelsStorageTier  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class CLIParametersTimeline(TypedDict):
@@ -80,7 +80,7 @@ class CLIParametersTimeline(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
-    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
+    wheels_storage: WheelsStorageTier  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
@@ -303,12 +303,12 @@ WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
 WHEELS_STORAGE_TIERS: tuple[WheelsStorageTier, ...] = get_args(WheelsStorageTier)
 
 
-def resolve_wheel_url(url: str, wheels_storage: str) -> str:
+def resolve_wheel_url(url: str, wheels_storage: WheelsStorageTier) -> str:
     """Substitute the wheels storage tier into a lockfile URL."""
     return url.replace(WHEELS_STORAGE_PLACEHOLDER, wheels_storage)
 
 
-def wheel_url_candidates(url: str, wheels_storage: str) -> list[str]:
+def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[str]:
     """
     Returns the URL resolved against the preferred tier first, then the remaining tiers.
 
@@ -323,13 +323,17 @@ def wheel_url_candidates(url: str, wheels_storage: str) -> list[str]:
     return [resolve_wheel_url(url, tier) for tier in tiers]
 
 
-def request_wheel(app: Application, url: str, wheels_storage: str, head: bool = False) -> requests.Response:
+def request_wheel(
+    app: Application, url: str, wheels_storage: WheelsStorageTier, head: bool = False
+) -> requests.Response:
     """
     Requests a wheel, trying each storage tier in turn and returning the first that serves it.
 
-    Raises the final HTTPError if no tier has the wheel; anything other than a missing wheel is
-    raised immediately rather than masked by trying the next tier. The error message lists every
-    tier that was tried, since the raised URL alone doesn't show that a fallback was attempted.
+    A tier is treated as "doesn't have this wheel" on a 404 (not found) or a 403 (the dev/stable S3
+    buckets return 403, not 404, for a key that doesn't exist, since the caller isn't authorized to
+    list the bucket). Any other status is raised immediately rather than masked by trying the next
+    tier. The error message lists every tier that was tried, since the raised URL alone doesn't show
+    that a fallback was attempted.
     """
     candidates = wheel_url_candidates(url, wheels_storage)
     tried: list[str] = []
@@ -352,7 +356,12 @@ def request_wheel(app: Application, url: str, wheels_storage: str, head: bool = 
 
 
 def get_dependencies(
-    app: Application, repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str
+    app: Application,
+    repo_path: str | Path,
+    platform: str,
+    version: str,
+    compressed: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
@@ -406,7 +415,7 @@ def get_dependencies_sizes(
     download_urls: list[str],
     versions: list[str],
     compressed: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
 ) -> list[FileDataEntry]:
     """
     Calculates the sizes of dependencies, either compressed or uncompressed.

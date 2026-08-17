@@ -1,10 +1,12 @@
 import io
 import json
 import os
+import re
 import zipfile
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
+import requests
 
 from ddev.cli.size.utils.common_funcs import (
     _matches_gitignore,
@@ -174,15 +176,20 @@ def test_get_dependencies_sizes():
     mock_response.content = zip_content
     mock_response.__enter__.return_value = mock_response
     mock_response.__exit__.return_value = None
-    with patch("requests.get", return_value=mock_response):
+    with patch("requests.get", return_value=mock_response) as mock_get:
         file_data = get_dependencies_sizes(
             MagicMock(),
             ["dependency1"],
-            ["https://example.com/dependency1/dependency1-1.1.1-.whl"],
+            ["https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl"],
             ["1.1.1"],
             True,
             "dev",
         )
+
+    # The storage tier placeholder must be resolved against the tier passed in, not left as-is.
+    mock_get.assert_called_once_with(
+        "https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True
+    )
 
     assert file_data == [
         {
@@ -406,8 +413,6 @@ PLACEHOLDER_URL = "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/built/dep1
 
 
 def make_wheel_response(status_code):
-    import requests
-
     response = MagicMock()
     response.status_code = status_code
     if status_code >= 400:
@@ -434,22 +439,9 @@ def test_wheel_url_candidates_without_placeholder_is_not_duplicated():
     assert wheel_url_candidates(url, "dev") == [url]
 
 
-def test_request_wheel_falls_back_to_the_other_tier():
-    missing = make_wheel_response(404)
-    found = make_wheel_response(200)
-
-    with patch("requests.get", side_effect=[missing, found]) as mock_get:
-        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
-
-    assert [call.args[0] for call in mock_get.call_args_list] == [
-        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
-        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
-    ]
-    missing.close.assert_called_once()
-
-
-def test_request_wheel_falls_back_on_403():
-    missing = make_wheel_response(403)
+@pytest.mark.parametrize("missing_status_code", [404, 403], ids=["not_found", "forbidden"])
+def test_request_wheel_falls_back_to_the_other_tier(missing_status_code):
+    missing = make_wheel_response(missing_status_code)
     found = make_wheel_response(200)
 
     with patch("requests.get", side_effect=[missing, found]) as mock_get:
@@ -463,16 +455,18 @@ def test_request_wheel_falls_back_on_403():
 
 
 def test_request_wheel_raises_when_no_tier_has_the_wheel():
-    import requests
-
     with patch("requests.get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
-        with pytest.raises(requests.HTTPError):
+        with pytest.raises(
+            requests.HTTPError,
+            match=re.escape(
+                "Tried: https://example.com/dev/built/dep1/dep1-1.1.1-.whl (404), "
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl (404)"
+            ),
+        ):
             request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
 
 def test_request_wheel_does_not_retry_on_a_non_missing_error():
-    import requests
-
     with patch("requests.get", side_effect=[make_wheel_response(500), make_wheel_response(200)]) as mock_get:
         with pytest.raises(requests.HTTPError):
             request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.common_params import WheelsStorageTier, common_params
 from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ def status(
     compressed: bool,
     format: list[str],
     show_gui: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
     to_dd_org: str | None,
     to_dd_key: str | None,
     commit: str | None,

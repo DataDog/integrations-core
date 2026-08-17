@@ -45,7 +45,7 @@ def common_params(func: Callable) -> Callable:
         compressed: bool,
         format: list[str],
         show_gui: bool,
-        wheels_storage: str,
+        wheels_storage: WheelsStorageTier,
         *args,
         **kwargs,
     ):

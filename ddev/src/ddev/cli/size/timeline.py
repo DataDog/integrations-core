@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.common_params import WheelsStorageTier, common_params
 
 from .utils.common_funcs import (
     CommitEntry,
@@ -71,7 +71,7 @@ def timeline(
     compressed: bool,
     format: Optional[list[str]],
     show_gui: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
 ) -> None:
     """
     Show the size evolution of a module (integration or dependency) over time.
@@ -499,7 +499,7 @@ def get_dependencies(
     author: str,
     message: str,
     compressed: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
 ) -> Optional[CommitEntry]:
     """
     Returns the size and metadata of a dependency for a given commit and platform.
@@ -570,7 +570,7 @@ def get_dependency_size(
     author: str,
     message: str,
     compressed: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
 ) -> CommitEntry:
     """
     Calculates the size of a dependency wheel at a given commit.

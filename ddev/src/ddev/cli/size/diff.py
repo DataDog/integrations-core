@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.common_params import WheelsStorageTier, common_params
 
 from .utils.common_funcs import (
     CLIParameters,
@@ -49,7 +49,7 @@ def diff(
     compressed: bool,
     format: list[str],
     show_gui: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -189,7 +189,7 @@ def get_repo_info(
     first_commit: str,
     second_commit: str,
     compressed: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
     progress: Progress,
 ) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
     with progress:
