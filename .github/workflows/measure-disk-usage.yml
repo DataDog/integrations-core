@@ -63,9 +63,9 @@ jobs:
           SHA: ${{ steps.ctx.outputs.sha }}
           SEND: ${{ steps.ctx.outputs.send }}
         run: |
-          args=(-v size status --commit "$SHA" --format json)
+          args=(-v size status --format json)
           if [ "$SEND" = "true" ]; then
-            args+=(--to-dd-key "$DD_API_KEY")
+            args+=(--commit "$SHA" --to-dd-key "$DD_API_KEY")
           fi
           ddev "${args[@]}"
 
@@ -75,9 +75,9 @@ jobs:
           SHA: ${{ steps.ctx.outputs.sha }}
           SEND: ${{ steps.ctx.outputs.send }}
         run: |
-          args=(-v size status --commit "$SHA" --format json --compressed)
+          args=(-v size status --format json --compressed)
           if [ "$SEND" = "true" ]; then
-            args+=(--to-dd-key "$DD_API_KEY")
+            args+=(--commit "$SHA" --to-dd-key "$DD_API_KEY")
           fi
           ddev "${args[@]}"
 
