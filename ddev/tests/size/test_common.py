@@ -187,9 +187,7 @@ def test_get_dependencies_sizes():
         )
 
     # The storage tier placeholder must be resolved against the tier passed in, not left as-is.
-    mock_get.assert_called_once_with(
-        "https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True
-    )
+    mock_get.assert_called_once_with("https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True)
 
     assert file_data == [
         {
