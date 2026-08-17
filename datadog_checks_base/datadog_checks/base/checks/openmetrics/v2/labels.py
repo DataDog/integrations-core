@@ -89,12 +89,20 @@ class LabelAggregator:
                 yield from metrics
             else:
                 metric_config, target_info_metric = self.copy_configs()
+                cached_metrics = []
 
+                # Buffer only until every configured source has been found, so tagging doesn't depend on
+                # where it appears relative to the metrics it tags, without buffering the whole payload.
                 for metric in metrics:
                     self.process_metric(metric, metric_config, target_info_metric)
-                    yield metric
+                    cached_metrics.append(metric)
+
+                    if not (metric_config or target_info_metric):
+                        break
 
                 self.shared_labels_cached = True
+                yield from cached_metrics
+                yield from metrics
         else:
             try:
                 metric_config, target_info_metric = self.copy_configs()
