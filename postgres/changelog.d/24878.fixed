@@ -1,0 +1,1 @@
+Propagate ``ignore_databases`` to ``collect_schemas`` and ``collect_column_statistics``.
