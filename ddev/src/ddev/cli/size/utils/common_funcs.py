@@ -429,11 +429,7 @@ def get_dependencies_sizes(
                 f.write(wheel_data)
             if compressed:
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
-                    size = sum(
-                        zinfo.compress_size
-                        for zinfo in zip_ref.infolist()
-                        if not is_excluded_from_wheel(zinfo.filename)
-                    )
+                    size = sum(zinfo.compress_size for zinfo in zip_ref.infolist())
             else:
                 extract_path = Path(tmpdir) / "extracted"
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
@@ -441,14 +437,8 @@ def get_dependencies_sizes(
 
                 size = 0
                 for dirpath, _, filenames in os.walk(extract_path):
-                    rel_dir = os.path.relpath(dirpath, extract_path)
-                    if is_excluded_from_wheel(rel_dir):
-                        continue
                     for name in filenames:
                         file_path = os.path.join(dirpath, name)
-                        rel_file = os.path.relpath(file_path, extract_path)
-                        if is_excluded_from_wheel(rel_file):
-                            continue
                         size += os.path.getsize(file_path)
 
         file_data.append(
@@ -462,63 +452,6 @@ def get_dependencies_sizes(
         )
 
     return file_data
-
-
-def is_excluded_from_wheel(path: str) -> bool:
-    """
-    These files are excluded from the wheel in the agent build:
-    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
-    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
-    the wheels still include them.
-    """
-    excluded_test_paths = [
-        os.path.normpath(path)
-        for path in [
-            "idlelib/idle_test",
-            "bs4/tests",
-            "Cryptodome/SelfTest",
-            "gssapi/tests",
-            "keystoneauth1/tests",
-            "openstack/tests",
-            "os_service_types/tests",
-            "pbr/tests",
-            "pkg_resources/tests",
-            "psutil/tests",
-            "securesystemslib/_vendor/ed25519/test_data",
-            "setuptools/_distutils/tests",
-            "setuptools/tests",
-            "simplejson/tests",
-            "stevedore/tests",
-            "supervisor/tests",
-            "test",  # cm-client
-            "vertica_python/tests",
-            "websocket/tests",
-        ]
-    ]
-
-    type_annot_libraries = [
-        "krb5",
-        "Cryptodome",
-        "ddtrace",
-        "pyVmomi",
-        "gssapi",
-    ]
-    rel_path = Path(path).as_posix()
-
-    # Test folders
-    for test_folder in excluded_test_paths:
-        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
-            return True
-
-    # Python type annotations
-    path_parts = Path(rel_path).parts
-    if path_parts:
-        dependency_name = path_parts[0]
-        if dependency_name in type_annot_libraries:
-            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
-                return True
-
-    return False
 
 
 def format_modules(
