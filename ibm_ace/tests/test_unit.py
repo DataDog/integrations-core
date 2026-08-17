@@ -144,10 +144,13 @@ def test_parse_tags_without_name():
     assert tags == ['mq_server:x', 'jdbc_provider:Oracle']
 
 
-def test_collect_survives_malformed_resource_identifier(instance, global_tags):
+def test_collect_survives_malformed_resource_identifier(instance, global_tags, caplog):
     # ACE 12.0.9 payload where repeated `resourceIdentifier` entries
     # have their `name` key replaced with an empty string. Must not crash.
+    import logging
     from unittest.mock import MagicMock, PropertyMock, patch
+
+    caplog.set_level(logging.DEBUG)
 
     fixture_path = os.path.join(HERE, 'fixtures', 'resource_statistics_malformed_jdbc.json')
     with open(fixture_path, 'rb') as f:
@@ -157,7 +160,6 @@ def test_collect_survives_malformed_resource_identifier(instance, global_tags):
     mock_config.max_message_length = 65536
 
     check = IbmAceCheck('ibm_ace', {}, [instance])
-    check.log = MagicMock()
     check.gauge = MagicMock()
     check.count = MagicMock()
     check.service_check = MagicMock()
@@ -194,9 +196,9 @@ def test_collect_survives_malformed_resource_identifier(instance, global_tags):
     assert not any(tag.startswith('group:') for c in malformed_calls for tag in c.kwargs['tags'])
 
     # The fixture has two malformed entries; each is logged at debug level when skipped.
-    debug_calls = check.log.debug.call_args_list
-    assert len(debug_calls) == 2
-    for call in debug_calls:
-        _, resource_name, value, _ = call.args
-        assert resource_name == 'JDBCConnectionPools'
-        assert value == 'summary0'
+    skip_lines = [r for r in caplog.records if 'Skipping resourceIdentifier entry with malformed key' in r.message]
+    assert len(skip_lines) == 2
+    for record in skip_lines:
+        assert record.levelname == 'DEBUG'
+        assert 'JDBCConnectionPools' in record.message
+        assert "value='summary0'" in record.message
