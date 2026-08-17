@@ -4,10 +4,10 @@ aws-requests-auth==0.4.3
 azure-identity==1.25.3
 beautifulsoup4==4.15.0
 binary==1.0.2
-boto3==1.43.67
-botocore==1.43.67
+boto3==1.43.72
+botocore==1.43.72
 cachetools==7.1.7
-clickhouse-connect==1.6.0
+clickhouse-connect==1.7.1
 cm-client==45.0.4
 confluent-kafka==2.13.2
 cryptography==50.0.0
@@ -26,7 +26,7 @@ lz4==4.4.5
 mmh3==5.2.1
 oauthlib==3.3.1
 openstacksdk==4.18.0
-orjson==3.11.9
+orjson==3.12.0
 packaging==26.3
 paramiko==5.0.0
 prometheus-client==0.26.0
