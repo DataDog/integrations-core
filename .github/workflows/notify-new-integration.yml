@@ -15,6 +15,7 @@ jobs:
   notify:
     name: Notify Slack on new integration check
     runs-on: ubuntu-latest
+    environment: publish-pypi
     permissions:
       contents: read
     steps:
