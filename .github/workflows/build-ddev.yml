@@ -193,7 +193,7 @@ jobs:
     # picks up the fix from https://github.com/pypa/hatch/pull/2196 and now
     # *requires* virtualenv>=21, so they must be bumped together.
     - name: Install Hatch
-      run: uv pip install --system "hatch==1.17.1" "virtualenv==21.7.0"
+      run: uv pip install --system "hatch==1.17.1" "virtualenv==21.7.1"
 
     - name: Install Hatch environment collector plugin
       run: uv pip install --system -e . --no-deps
@@ -908,7 +908,7 @@ jobs:
     # workflow file name, environment and repository the request is comming from to
     # provide the valid JWT token.
     - name: Push Python artifacts to PyPI
-      uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+      uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
       with:
         skip-existing: true
 

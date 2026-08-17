@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.6.0 / 2026-07-08
+## 6.7.0 / 2026-08-05
+
+***Added***:
+
+* Tag ``cluster.ratelimit`` counters with ``stat_prefix`` so global rate limit filters configured with a stat prefix are collected instead of dropped as an unknown tag. ([#24735](https://github.com/DataDog/integrations-core/pull/24735))
+
+## 6.6.0 / 2026-07-08 / Agent 7.82.0
 
 ***Added***:
 

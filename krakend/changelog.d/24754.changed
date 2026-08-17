@@ -1,1 +1,0 @@
-Apply the default label renames even when an instance overrides `rename_labels`.
