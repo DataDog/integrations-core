@@ -44,21 +44,9 @@ jobs:
           NAME: ${{ steps.detect.outputs.name }}
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
         run: |
-          message=$(cat <<MSGEOF
-          New integration merged to master: ${NAME}
-          Commit: ${COMMIT_URL}
-
-          A PyPI admin must fill the pending publisher form at https://pypi.org/manage/account/publishing/:
-          - PyPI Project Name: ${NAME}
-          - Owner: DataDog
-          - Repository name: integrations-core
-          - Workflow name: claim-pypi-name.yaml
-          - Environment name: publish-pypi
-
-          Please react to this message once completed.
-          Ask #agent-integrations if you have any questions.
-          MSGEOF
-          )
           curl -sf -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
-            -d "$(jq -n --arg text "$message" '{text: $text}')"
+            -d "$(jq -n \
+              --arg name "$NAME" \
+              --arg commit_url "$COMMIT_URL" \
+              '{name: $name, commit_url: $commit_url}')"
