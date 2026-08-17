@@ -495,7 +495,15 @@ pipeline:
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "*"
+                    query: "@ocsf.metadata.event_code:bw_record_resolved"
+                  name: Resolved
+                  id: 4
+                - filter:
+                    query: "@ocsf.metadata.event_code:bw_record_ignored"
+                  name: Suppressed
+                  id: 3
+                - filter:
+                    query: "@ocsf.metadata.event_code:*"
                   name: New
                   id: 1
               targets:

@@ -1985,3 +1985,221 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "bw_record_resolved",
+        "record_uid" : "Rec2004ResolvedAbCd",
+        "remote_address" : "192.0.2.10",
+        "category" : "security",
+        "client_version" : "Web App.17.2.2",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "user1@example.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"bw_record_resolved\",\"record_uid\":\"Rec2004ResolvedAbCd\",\"remote_address\":\"192.0.2.10\",\"category\":\"security\",\"client_version\":\"Web App.17.2.2\",\"enterprise_id\":260753,\"username\":\"user1@example.com\"}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      audit_event: "bw_record_resolved"
+      client_version: "Web App.17.2.2"
+      enterprise_id: 260753
+      evt:
+        category: "security"
+        name: "bw_record_resolved"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.10"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        finding_info:
+          title: "bw_record_resolved"
+          uid: "Rec2004ResolvedAbCd"
+        is_alert: true
+        metadata:
+          event_code: "bw_record_resolved"
+          product:
+            name: "Keeper"
+            vendor_name: "Keeper Security"
+            version: "Web App.17.2.2"
+          tenant_uid: "260753"
+          version: "1.5.0"
+        risk_level: "Info"
+        risk_level_id: 0
+        severity: "Low"
+        severity_id: 2
+        status: "Resolved"
+        status_id: 4
+        time: 1749643454772
+      record_uid: "Rec2004ResolvedAbCd"
+      remote_address: "192.0.2.10"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      username: "user1@example.com"
+      usr:
+        email: "user1@example.com"
+    message: '<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {"audit_event":"bw_record_resolved","record_uid":"Rec2004ResolvedAbCd","remote_address":"192.0.2.10","category":"security","client_version":"Web App.17.2.2","enterprise_id":260753,"username":"user1@example.com"}'
+    service: "security"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "bw_record_ignored",
+        "record_uid" : "Rec2004IgnoredEfGh",
+        "remote_address" : "192.0.2.10",
+        "category" : "security",
+        "client_version" : "Web App.17.2.2",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "user1@example.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"bw_record_ignored\",\"record_uid\":\"Rec2004IgnoredEfGh\",\"remote_address\":\"192.0.2.10\",\"category\":\"security\",\"client_version\":\"Web App.17.2.2\",\"enterprise_id\":260753,\"username\":\"user1@example.com\"}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      audit_event: "bw_record_ignored"
+      client_version: "Web App.17.2.2"
+      enterprise_id: 260753
+      evt:
+        category: "security"
+        name: "bw_record_ignored"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.10"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        finding_info:
+          title: "bw_record_ignored"
+          uid: "Rec2004IgnoredEfGh"
+        is_alert: true
+        metadata:
+          event_code: "bw_record_ignored"
+          product:
+            name: "Keeper"
+            vendor_name: "Keeper Security"
+            version: "Web App.17.2.2"
+          tenant_uid: "260753"
+          version: "1.5.0"
+        risk_level: "Info"
+        risk_level_id: 0
+        severity: "Informational"
+        severity_id: 1
+        status: "Suppressed"
+        status_id: 3
+        time: 1749643454772
+      record_uid: "Rec2004IgnoredEfGh"
+      remote_address: "192.0.2.10"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      username: "user1@example.com"
+      usr:
+        email: "user1@example.com"
+    message: '<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {"audit_event":"bw_record_ignored","record_uid":"Rec2004IgnoredEfGh","remote_address":"192.0.2.10","category":"security","client_version":"Web App.17.2.2","enterprise_id":260753,"username":"user1@example.com"}'
+    service: "security"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "set_two_factor_on",
+        "remote_address" : "192.0.2.10",
+        "category" : "security",
+        "client_version" : "Web App.17.2.2",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "to_username" : "user1@example.com",
+        "username" : "user1@example.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"set_two_factor_on\",\"remote_address\":\"192.0.2.10\",\"category\":\"security\",\"client_version\":\"Web App.17.2.2\",\"enterprise_id\":260753,\"to_username\":\"user1@example.com\",\"username\":\"user1@example.com\"}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      audit_event: "set_two_factor_on"
+      client_version: "Web App.17.2.2"
+      enterprise_id: 260753
+      evt:
+        category: "security"
+        name: "set_two_factor_on"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.10"
+      ocsf:
+        activity_id: 10
+        activity_name: "MFA Factor Enable"
+        actor:
+          user:
+            email_addr: "user1@example.com"
+            name: "user1@example.com"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        metadata:
+          event_code: "set_two_factor_on"
+          product:
+            name: "Keeper"
+            vendor_name: "Keeper Security"
+            version: "Web App.17.2.2"
+          tenant_uid: "260753"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.10"
+        status: "Success"
+        status_id: 1
+        time: 1749643454772
+        user:
+          email_addr: "user1@example.com"
+          name: "user1@example.com"
+          type: "User"
+          type_id: 1
+      remote_address: "192.0.2.10"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      to_username: "user1@example.com"
+      username: "user1@example.com"
+      usr:
+        email: "user1@example.com"
+    message: '<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {"audit_event":"set_two_factor_on","remote_address":"192.0.2.10","category":"security","client_version":"Web App.17.2.2","enterprise_id":260753,"to_username":"user1@example.com","username":"user1@example.com"}'
+    service: "security"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
