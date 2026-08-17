@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import pytest
 
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
 from ddev.e2e.agent_images import UnknownPythonVersion
 from ddev.utils.platform import PlatformName
@@ -54,8 +55,13 @@ def test_unresolvable_agent_image_is_ignored_when_the_job_runs_no_e2e():
 def test_unresolvable_agent_image_fails_planning_for_an_e2e_job():
     units = [make_unit(environment=env("py3.10", python_version="3.10", e2e=True))]
 
-    with pytest.raises(UnknownPythonVersion, match="3.10"):
+    # Reported as a planning failure naming the job, since the Agent-image error alone says only
+    # that some 3.10 was asked for
+    with pytest.raises(PlanningError, match="needs an E2E Agent image") as failure:
         expand_batch_jobs(units)
+
+    assert units[0].name in str(failure.value)
+    assert isinstance(failure.value.__cause__, UnknownPythonVersion)
 
 
 def test_runner_labels_and_platform_are_preserved():

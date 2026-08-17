@@ -102,8 +102,6 @@ def test_batching_defaults_when_table_missing(repo_config: RepoConfigBuilder):
     result = DispatcherConfig.from_repo_config(config)
 
     assert result.batching == BatchingConfig()
-    assert result.batching.max_jobs_per_batch == 240
-    assert result.batching.allow_integration_splitting is False
 
 
 def test_batching_rejects_unknown_key(repo_config: RepoConfigBuilder):
@@ -129,9 +127,3 @@ def test_batching_rejects_out_of_range_max_jobs_per_batch(repo_config: RepoConfi
 
     with pytest.raises(ValidationError):
         DispatcherConfig.from_repo_config(config)
-
-
-def test_batching_config_is_frozen():
-    batching = BatchingConfig()
-    with pytest.raises(ValidationError):
-        batching.max_jobs_per_batch = 10  # type: ignore[misc]

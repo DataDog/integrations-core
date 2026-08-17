@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar, NamedTuple, Protocol
 
@@ -15,6 +14,8 @@ from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.utils.platform import PlatformName
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
     from ddev.integration.core import Integration
 
 
@@ -25,6 +26,9 @@ class PlatformSpec(NamedTuple):
     image: str
 
 
+# Kept in sync by hand with `ci_matrix.PLATFORMS`, which CI still uses and which cannot import from
+# here because it has to run standalone. A runner image changed in one place and not the other makes
+# the two plans disagree.
 PLATFORMS: dict[PlatformName, PlatformSpec] = {
     PlatformName.LINUX: PlatformSpec("Linux", "ubuntu-22.04"),
     PlatformName.WINDOWS: PlatformSpec("Windows", "windows-2022"),
@@ -108,7 +112,7 @@ def parse_platform_name(value: str, *, target: str) -> PlatformName:
         return PlatformName(value.lower())
     except ValueError:
         supported = ", ".join(sorted(PLATFORMS))
-        raise ValueError(f"Unsupported platform for `{target}`: {value} (expected one of {supported})") from None
+        raise PlanningError(f"Unsupported platform for `{target}`: {value} (expected one of {supported})") from None
 
 
 def resolve_platforms(
@@ -117,17 +121,26 @@ def resolve_platforms(
     *,
     target: str,
 ) -> list[PlatformName]:
-    """Resolve the platforms a target runs on, from CI overrides then its supported OS list."""
+    """Resolve the platforms a target runs on, from CI overrides then its supported OS list.
+
+    Only the override is parsed strictly. It is hand-written configuration, so a name we do not
+    recognize is a mistake worth failing on, and a repeated one would plan two identically named
+    jobs.
+    """
     if platform_override:
-        return [parse_platform_name(value, target=target) for value in platform_override]
+        platforms = [parse_platform_name(value, target=target) for value in platform_override]
+        if len(set(platforms)) != len(platforms):
+            raise PlanningError(f"Duplicate platform in the CI `platforms` override for `{target}`")
+        return platforms
 
-    platform_ids = [parse_platform_name(value, target=target) for value in supported_os]
-    # Only a Windows-exclusive target runs on Windows by default. Anything else runs on Linux
-    # alone, and extra platforms are opt-in through the CI `platforms` override handled above.
-    if platform_ids != [PlatformName.WINDOWS]:
-        platform_ids = [PlatformName.LINUX]
+    # `manifest.json` advertises platforms ddev has no runner for, such as AIX, so the supported OS
+    # list only decides Windows-exclusivity rather than being parsed. Only a Windows-exclusive
+    # target runs on Windows by default; anything else runs on Linux alone, and extra platforms are
+    # opt-in through the CI `platforms` override handled above.
+    if [value.lower() for value in supported_os] == [str(PlatformName.WINDOWS)]:
+        return [PlatformName.WINDOWS]
 
-    return platform_ids
+    return [PlatformName.LINUX]
 
 
 def group_environments_by_platform(
@@ -144,7 +157,7 @@ def _display_order_key(target: str) -> tuple[int, str]:
     return DISPLAY_ORDER_OVERRIDE.get(target, len(DISPLAY_ORDER_OVERRIDE)), target
 
 
-def expand_test_units(targets: Sequence[TargetDefinition], *, default_python_version: str) -> list[TestUnit]:
+def expand_test_units(targets: Sequence[TargetDefinition]) -> list[TestUnit]:
     """Expand targets into deterministically ordered test units, one per resolved environment.
 
     A platform whose environments are all constrained elsewhere gets no units, which is the

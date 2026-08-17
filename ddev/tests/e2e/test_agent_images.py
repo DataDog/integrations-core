@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.e2e.agent.docker import _normalize_agent_image_name
+from ddev.e2e.agent.image import normalize_agent_image_name
 from ddev.e2e.agent_images import (
     AGENT_IMAGES_BY_PYTHON,
     UnknownPythonVersion,
@@ -75,8 +75,8 @@ def test_images_survive_ddev_jmx_normalization(platform):
     for python_version in AGENT_IMAGES_BY_PYTHON:
         image = get_agent_image(python_version, platform)
 
-        assert _normalize_agent_image_name(image, 3, False) == image
-        assert _normalize_agent_image_name(image, 3, True) == f'{image}-jmx'
+        assert normalize_agent_image_name(image, 3, False) == image
+        assert normalize_agent_image_name(image, 3, True) == f'{image}-jmx'
 
 
 @pytest.mark.parametrize(

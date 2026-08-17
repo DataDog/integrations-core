@@ -7,8 +7,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.messages import BatchJob
-from ddev.e2e.agent_images import get_agent_image
+from ddev.e2e.agent_images import AgentImageError, get_agent_image
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -47,12 +48,24 @@ def expand_batch_jobs(
                 python_version=environment.python_version,
                 unit_tests=environment.test_available,
                 e2e_tests=environment.e2e_available,
-                agent_image=(
-                    agent_image_resolver(environment.python_version, unit.platform)
-                    if environment.e2e_available
-                    else None
-                ),
+                agent_image=_resolve_agent_image(unit, agent_image_resolver),
             )
         )
 
     return jobs
+
+
+def _resolve_agent_image(unit: TestUnit, resolver: AgentImageResolver) -> str | None:
+    """Resolve one unit's Agent image, reporting a failure as a planning failure.
+
+    The resolver raises its own Agent-image exceptions, which say nothing about which job asked.
+    They are translated here rather than at their source so `ddev.e2e` stays independent of the
+    planner.
+    """
+    if not unit.environment.e2e_available:
+        return None
+
+    try:
+        return resolver(unit.environment.python_version, unit.platform)
+    except AgentImageError as e:
+        raise PlanningError(f"{unit.name!r} needs an E2E Agent image but none resolves: {e}") from e

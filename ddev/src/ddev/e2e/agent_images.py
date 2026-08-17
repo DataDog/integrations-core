@@ -27,11 +27,15 @@ PYTHON_VERSION_PATTERN = re.compile(r'^\d+\.\d+$')
 IMAGE_REFERENCE_PATTERN = re.compile(r'^(?P<host>[^/]+)/(?P<repository>.+):(?P<tag>[^:]+)$')
 
 
-class UnknownPythonVersion(Exception):
+class AgentImageError(Exception):
+    """Raised when no Agent image can be named for what was asked."""
+
+
+class UnknownPythonVersion(AgentImageError):
     """Raised when no Agent release line embeds the requested Python version."""
 
 
-class UnsupportedAgentPlatform(Exception):
+class UnsupportedAgentPlatform(AgentImageError):
     """Raised when no Agent Docker image is published for the requested platform."""
 
 

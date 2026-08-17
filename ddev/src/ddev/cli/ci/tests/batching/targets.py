@@ -6,14 +6,14 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from ddev.utils.git import ChangedFile
-
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator, Sequence
+
     from ddev.repo.core import IntegrationRegistry
+    from ddev.utils.git import ChangedFile
 
 NON_TESTABLE_FILES = frozenset({"auto_conf.yaml"})
 

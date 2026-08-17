@@ -123,12 +123,6 @@ def test_repository_wide_rule_still_fires_alongside_a_dependency_bump():
     assert list(rule(changed, facts("postgres", "datadog_checks_base"))) == ["datadog_checks_base", "postgres"]
 
 
-def test_repository_wide_rule_ignores_a_dependency_bump_on_its_own():
-    rule = RepositoryWideRule(is_core=True)
-
-    assert list(rule([modified("agent_requirements.in")], facts("postgres", "datadog_checks_base"))) == []
-
-
 @pytest.mark.parametrize(
     "path",
     [
@@ -152,12 +146,17 @@ def test_repository_wide_rule_triggers_full_set_for_ddev_test_planning_paths(pat
     assert list(rule(changed, facts("postgres", "mysql", "ddev"))) == ["ddev", "mysql", "postgres"]
 
 
-def test_repository_wide_rule_ignores_unrelated_ddev_tooling():
-    # An unrelated ddev command is not a test-planning path, so it does not trigger the full set.
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("ddev/src/ddev/cli/port_commit.py", id="unrelated-ddev-command"),
+        pytest.param("agent_requirements.in", id="dependency-bump"),
+    ],
+)
+def test_repository_wide_rule_ignores_paths_that_do_not_govern_testing(path):
     rule = RepositoryWideRule(is_core=True)
-    changed = [modified("ddev/src/ddev/cli/port_commit.py")]
 
-    assert list(rule(changed, facts("postgres", "mysql", "ddev"))) == []
+    assert list(rule([modified(path)], facts("postgres", "mysql", "ddev"))) == []
 
 
 def test_find_affected_targets_unrelated_ddev_command_selects_only_ddev():

@@ -49,7 +49,6 @@ def build_test_units(
     changed_files: Sequence[ChangedFile],
     *,
     environment_provider: EnvironmentProvider,
-    default_python_version: str,
     rules: Sequence[TargetRule] | None = None,
 ) -> list[TestUnit]:
     """Turn changed files into the complete, deterministic list of test units.
@@ -88,7 +87,7 @@ def build_test_units(
             )
         )
 
-    return expand_test_units(definitions, default_python_version=default_python_version)
+    return expand_test_units(definitions)
 
 
 def build_test_batches(
@@ -97,7 +96,6 @@ def build_test_batches(
     *,
     environment_provider: EnvironmentProvider,
     config: BatchingConfig,
-    default_python_version: str,
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
 ) -> list[TestBatch]:
@@ -110,7 +108,6 @@ def build_test_batches(
         repo,
         changed_files,
         environment_provider=environment_provider,
-        default_python_version=default_python_version,
         rules=rules,
     )
     jobs = expand_batch_jobs(units)

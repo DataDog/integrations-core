@@ -164,8 +164,8 @@ class WorkflowStatus:
 class TestBatch(BaseMessage):
     """Dispatched to trigger a matrix of test jobs.
 
-    ``batch_id`` is the logical batch identity (e.g. ``batch-01``): assigned during planning, stable
-    across workflow attempts, and distinct from ``BaseMessage.id``, which identifies one message.
+    The `batch_id` is the logical batch identity (e.g. `batch-01`): assigned during planning, stable
+    across workflow attempts, and distinct from `BaseMessage.id`, which identifies one message.
     """
 
     # Logical batch identity (`batch-01`) that downstream processors correlate on. Distinct from

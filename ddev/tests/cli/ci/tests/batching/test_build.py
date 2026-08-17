@@ -84,9 +84,7 @@ def test_build_end_to_end_direct_and_broad_overlap():
         modified("datadog_checks_base/datadog_checks/base/utils/foo.py"),
     ]
 
-    units = build_test_units(
-        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-    )
+    units = build_test_units(repo, changed, environment_provider=provider)
 
     # Broad rule adds the full eligible set; direct rule adds postgres; deduped and then ordered
     # by the display-order override (datadog_checks_base first, then alphabetical).
@@ -103,9 +101,7 @@ def test_build_warns_about_a_target_with_no_testable_environment(caplog):
     changed = [modified("ddev/src/ddev/foo.py")]
 
     with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.build"):
-        units = build_test_units(
-            repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-        )
+        units = build_test_units(repo, changed, environment_provider=provider)
 
     # The target is dropped rather than planned with an invented environment.
     assert units == []
@@ -120,9 +116,7 @@ def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_e
     changed = [modified("disk/tests/test_a.py")]
 
     with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.units"):
-        units = build_test_units(
-            repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-        )
+        units = build_test_units(repo, changed, environment_provider=provider)
 
     assert [unit.platform for unit in units] == [PlatformName.LINUX]
     assert "disk runs on windows but no environment tests it" in caplog.text
@@ -136,9 +130,7 @@ def test_build_excludes_target_via_ci_override():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "hyperv": [env("py3.11")]})
     changed = [modified("postgres/tests/test_a.py"), modified("hyperv/tests/test_b.py")]
 
-    units = build_test_units(
-        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-    )
+    units = build_test_units(repo, changed, environment_provider=provider)
 
     assert {u.target for u in units} == {"postgres"}
 
@@ -153,9 +145,7 @@ def test_build_applies_platform_and_runner_overrides():
     )
     changed = [modified("sqlserver/tests/test_a.py")]
 
-    units = build_test_units(
-        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-    )
+    units = build_test_units(repo, changed, environment_provider=provider)
 
     assert [(u.platform, u.runner_labels) for u in units] == [
         (PlatformName.WINDOWS, ("windows-2022",)),
@@ -279,7 +269,6 @@ def test_build_batches_end_to_end_split_defaults():
         changed,
         environment_provider=provider,
         config=BatchingConfig(),
-        default_python_version=DEFAULT_PYTHON_VERSION,
     )
 
     assert len(batches) == 1
@@ -304,7 +293,6 @@ def test_build_batches_empty_input_returns_no_batches():
             changed,
             environment_provider=provider,
             config=BatchingConfig(),
-            default_python_version=DEFAULT_PYTHON_VERSION,
         )
         == []
     )
@@ -325,7 +313,6 @@ def test_build_batches_rejects_invalid_injected_strategy():
             changed,
             environment_provider=provider,
             config=BatchingConfig(),
-            default_python_version=DEFAULT_PYTHON_VERSION,
             strategy=dropping_strategy,
         )
 
@@ -348,11 +335,23 @@ def test_build_reads_supported_platforms_from_the_manifest():
     provider = FakeEnvironmentProvider({"hyperv": [env("py3.13", PlatformName.WINDOWS)]})
     changed = [modified("hyperv/tests/test_a.py")]
 
-    units = build_test_units(
-        repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-    )
+    units = build_test_units(repo, changed, environment_provider=provider)
 
     assert [u.platform for u in units] == [PlatformName.WINDOWS]
+
+
+def test_build_ignores_manifest_platforms_ddev_cannot_test():
+    # `ibm_mq` and friends advertise AIX. It has no runner, so it must be ignored rather than
+    # failing the plan for every target the run selected.
+    repo = FakeRepo(
+        [FakeIntegration("ibm_mq", classifier_tags=["Supported OS::Linux", "Supported OS::AIX"])],
+    )
+    provider = FakeEnvironmentProvider({"ibm_mq": [env("py3.13")]})
+    changed = [modified("ibm_mq/tests/test_a.py")]
+
+    units = build_test_units(repo, changed, environment_provider=provider)
+
+    assert [u.platform for u in units] == [PlatformName.LINUX]
 
 
 def test_build_only_expands_the_whole_repository_for_the_core_repo():
@@ -363,12 +362,7 @@ def test_build_only_expands_the_whole_repository_for_the_core_repo():
     changed = [modified("datadog_checks_base/datadog_checks/base/utils/foo.py")]
 
     def targets(repo):
-        return {
-            u.target
-            for u in build_test_units(
-                repo, changed, environment_provider=provider, default_python_version=DEFAULT_PYTHON_VERSION
-            )
-        }
+        return {u.target for u in build_test_units(repo, changed, environment_provider=provider)}
 
     assert targets(FakeRepo(integrations)) == {"postgres", "datadog_checks_base"}
     assert targets(FakeRepo(integrations, name="extras")) == {"datadog_checks_base"}

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import functools
 import logging
 
 import pytest
@@ -17,9 +16,7 @@ from ddev.cli.ci.tests.batching.units import (
     resolve_platforms,
 )
 from ddev.utils.platform import PlatformName
-from tests.cli.ci.tests.helpers import DEFAULT_PYTHON_VERSION, env
-
-expand = functools.partial(expand_test_units, default_python_version=DEFAULT_PYTHON_VERSION)
+from tests.cli.ci.tests.helpers import env
 
 
 @pytest.mark.parametrize(
@@ -40,6 +37,10 @@ def test_normalize_job_name(raw, expected):
         pytest.param([], ["Windows"], [PlatformName.WINDOWS], id="windows-exclusive"),
         pytest.param([], ["Linux", "Windows"], [PlatformName.LINUX], id="multi-os-defaults-linux"),
         pytest.param([], [], [PlatformName.LINUX], id="no-info-defaults-linux"),
+        # `manifest.json` carries platforms ddev has no runner for. They must not reach the parser,
+        # because a target that also runs on Linux would otherwise fail the whole plan.
+        pytest.param([], ["Linux", "Windows", "macOS", "AIX"], [PlatformName.LINUX], id="untestable-os-ignored"),
+        pytest.param([], ["AIX"], [PlatformName.LINUX], id="only-untestable-os-defaults-linux"),
     ],
 )
 def test_resolve_platforms(platform_override, supported_os, expected):
@@ -47,15 +48,21 @@ def test_resolve_platforms(platform_override, supported_os, expected):
 
 
 @pytest.mark.parametrize("value", ["solaris", "Windows Server"])
-def test_resolve_platforms_rejects_an_unknown_platform(value):
-    with pytest.raises(ValueError, match="Unsupported platform for `postgres`"):
+def test_resolve_platforms_rejects_an_unknown_platform_in_the_override(value):
+    with pytest.raises(PlanningError, match="Unsupported platform for `postgres`"):
         resolve_platforms([value], [], target="postgres")
+
+
+def test_resolve_platforms_rejects_a_repeated_platform_in_the_override():
+    # Two identically named units would otherwise reach the strategy and fail as duplicate job names
+    with pytest.raises(PlanningError, match="Duplicate platform in the CI `platforms` override"):
+        resolve_platforms(["linux", "linux"], [], target="postgres")
 
 
 def test_expand_gives_each_environment_its_own_unit():
     targets = [TargetDefinition("postgres", environments=(env("py3.11", e2e=True), env("py3.12", e2e=True)))]
 
-    assert expand(targets) == [
+    assert expand_test_units(targets) == [
         TestUnit(
             target="postgres",
             name="postgres (py3.11)",
@@ -81,14 +88,19 @@ def test_expand_preserves_environment_order():
         ),
     ]
 
-    assert [u.environment.name for u in expand(targets)] == ["py3.11-9", "py3.11-10", "py3.12-9", "py3.12-10"]
+    assert [u.environment.name for u in expand_test_units(targets)] == [
+        "py3.11-9",
+        "py3.11-10",
+        "py3.12-9",
+        "py3.12-10",
+    ]
 
 
 def test_expand_rejects_a_target_with_no_environments():
     # Definitions are only built for targets that resolved at least one environment, so reaching
     # expansion without any means the plan is already inconsistent.
     with pytest.raises(PlanningError, match="reached unit expansion with no environments"):
-        expand([TargetDefinition("postgres")])
+        expand_test_units([TargetDefinition("postgres")])
 
 
 def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers(caplog):
@@ -99,14 +111,14 @@ def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers(cap
     )
 
     with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.units"):
-        units = expand([target])
+        units = expand_test_units([target])
 
     assert [unit.platform for unit in units] == [PlatformName.LINUX]
     assert "sqlserver runs on windows but no environment tests it" in caplog.text
 
 
 def test_expand_environment_named_after_its_target_does_not_repeat_in_the_name():
-    units = expand([TargetDefinition("postgres", environments=(env("postgres"),))])
+    units = expand_test_units([TargetDefinition("postgres", environments=(env("postgres"),))])
 
     assert units[0].name == "postgres"
 
@@ -114,11 +126,11 @@ def test_expand_environment_named_after_its_target_does_not_repeat_in_the_name()
 def test_expand_carries_the_environment_python_version():
     targets = [TargetDefinition("postgres", environments=(env("py3.11", python_version="3.11"),))]
 
-    assert expand(targets)[0].environment.python_version == "3.11"
+    assert expand_test_units(targets)[0].environment.python_version == "3.11"
 
 
 def test_expand_multi_label_runner_is_a_single_selection():
-    units = expand(
+    units = expand_test_units(
         [TargetDefinition("postgres", runners={"linux": ["label-a", "label-b"]}, environments=(env("postgres"),))]
     )
 
@@ -126,7 +138,7 @@ def test_expand_multi_label_runner_is_a_single_selection():
 
 
 def test_expand_platform_override_adds_platform_suffix():
-    units = expand(
+    units = expand_test_units(
         [
             TargetDefinition(
                 "postgres",
@@ -145,13 +157,15 @@ def test_expand_platform_override_adds_platform_suffix():
 def test_expand_uses_injected_resolved_display_name():
     # The display name is resolved upstream (from ddev's Integration.display_name) and injected;
     # this package does not reproduce the override/manifest precedence.
-    units = expand([TargetDefinition("postgres", display_name="Resolved Name", environments=(env("postgres"),))])
+    units = expand_test_units(
+        [TargetDefinition("postgres", display_name="Resolved Name", environments=(env("postgres"),))]
+    )
 
     assert units[0].name == "Resolved Name"
 
 
 def test_expand_display_name_falls_back_to_target_name():
-    assert expand([TargetDefinition("postgres", environments=(env("postgres"),))])[0].name == "postgres"
+    assert expand_test_units([TargetDefinition("postgres", environments=(env("postgres"),))])[0].name == "postgres"
 
 
 def test_expand_respects_display_order_override():
@@ -161,13 +175,13 @@ def test_expand_respects_display_order_override():
         TargetDefinition("datadog_checks_base", environments=(env("datadog_checks_base"),)),
     ]
 
-    assert [u.target for u in expand(targets)] == ["ddev", "datadog_checks_base", "postgres"]
+    assert [u.target for u in expand_test_units(targets)] == ["ddev", "datadog_checks_base", "postgres"]
 
 
 def test_expand_e2e_availability_is_per_environment():
     targets = [TargetDefinition("postgres", environments=(env("py3.11", e2e=True), env("py3.12", e2e=False)))]
 
-    assert [(u.environment.name, u.environment.e2e_available) for u in expand(targets)] == [
+    assert [(u.environment.name, u.environment.e2e_available) for u in expand_test_units(targets)] == [
         ("py3.11", True),
         ("py3.12", False),
     ]
@@ -186,7 +200,7 @@ def test_expand_e2e_availability_is_platform_specific():
         ),
     ]
 
-    assert [(u.platform, u.environment.name, u.environment.e2e_available) for u in expand(targets)] == [
+    assert [(u.platform, u.environment.name, u.environment.e2e_available) for u in expand_test_units(targets)] == [
         (PlatformName.LINUX, "py3.11-linux", True),
         (PlatformName.WINDOWS, "py3.11-windows", False),
     ]
@@ -204,7 +218,10 @@ def test_expand_carries_unit_only_and_e2e_only_facets():
         ),
     ]
 
-    facets = [(u.environment.name, u.environment.test_available, u.environment.e2e_available) for u in expand(targets)]
+    facets = [
+        (u.environment.name, u.environment.test_available, u.environment.e2e_available)
+        for u in expand_test_units(targets)
+    ]
     assert facets == [
         ("py3.11", True, False),
         ("py3.11-e2e", False, True),

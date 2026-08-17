@@ -39,7 +39,7 @@ def test_empty_input_returns_no_groups():
             210,
             [200, 200],
             [{"postgres"}, {"mysql"}],
-            id="fitting-integrations-never-share-a-batch",
+            id="integration-larger-than-the-remainder-starts-a-new-batch",
         ),
         pytest.param(
             [("postgres", 100), ("mysql", 150)],

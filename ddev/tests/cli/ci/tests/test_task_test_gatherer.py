@@ -326,14 +326,9 @@ def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "postgres-job", junit=JUNIT_PASSING, e2e=True)
 
-    combined_job = BatchJob(
-        name="postgres (py3.13)",
+    combined_job = make_job(
+        "postgres (py3.13)",
         target="postgres",
-        runner_labels=("ubuntu-latest",),
-        environment="py3.13",
-        platform=PlatformName.LINUX,
-        python_version="3.13",
-        unit_tests=True,
         e2e_tests=True,
         agent_image="registry.datadoghq.com/agent-dev:master-py3",
     )

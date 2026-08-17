@@ -1,1 +1,1 @@
-Add deterministic Dispatcher test batch planning, with each job carrying the Python version it runs under and the Agent image its E2E tests run against.
+Add deterministic Dispatcher test batch planning, with each job carrying the Python version it runs under and the Agent image its E2E tests run against. The internal ``max_jobs_per_batch`` option moves from ``[dispatcher]`` to ``[dispatcher.batching]``.
