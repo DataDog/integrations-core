@@ -14,6 +14,7 @@ jobs:
   notify:
     name: Notify Slack on new integration check
     runs-on: ubuntu-latest
+    environment: publish-pypi
     permissions:
       contents: read
     steps:
@@ -42,11 +43,11 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.NEW_INTEGRATION_SLACK_WEBHOOK_URL }}
           NAME: ${{ steps.detect.outputs.name }}
-          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          COMMIT: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
         run: |
           curl -sf -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d "$(jq -n \
               --arg name "$NAME" \
-              --arg commit_url "$COMMIT_URL" \
-              '{name: $name, commit_url: $commit_url}')"
+              --arg commit "$COMMIT" \
+              '{name: $name, commit: $commit}')"
