@@ -709,3 +709,73 @@ def test_do_query_both_schedule_and_interval_parsed(mock_check, minimal_instance
     query = config.data_observability.queries[0]
     assert query.schedule == '0 * * * *'
     assert query.interval_seconds == 3600
+
+
+def test_ignore_databases_propagates_to_collect_schemas(mock_check, minimal_instance):
+    instance = minimal_instance
+    instance['ignore_databases'] = ['secret_db', 'other_db']
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    cfg, result = build_config(check=mock_check)
+    assert result.valid
+    assert cfg.collect_schemas.exclude_databases == tuple(['secret_db', 'other_db'])
+
+
+def test_explicit_collect_schemas_exclude_preserved(mock_check, minimal_instance):
+    instance = minimal_instance
+    instance['ignore_databases'] = ['secret_db']
+    instance['collect_schemas'] = {'exclude_databases': []}  # explicit empty list
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    cfg, result = build_config(check=mock_check)
+    assert result.valid
+    # The user explicitly provided an empty exclude list; preserve it.
+    assert cfg.collect_schemas.exclude_databases == tuple([])
+
+
+def test_collect_column_statistics_propagates_too(mock_check, minimal_instance):
+    instance = minimal_instance
+    instance['ignore_databases'] = ['secret_db']
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    cfg, result = build_config(check=mock_check)
+    assert result.valid
+    assert cfg.collect_column_statistics.exclude_databases == tuple(['secret_db'])
+
+
+def test_empty_ignore_databases_propagates_empty_list(mock_check, minimal_instance):
+    """When ignore_databases is explicitly empty, propagate it to sub-collectors."""
+    instance = minimal_instance
+    instance['ignore_databases'] = []
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    cfg, result = build_config(check=mock_check)
+    assert result.valid
+    assert cfg.collect_schemas.exclude_databases == tuple([])
+    assert cfg.collect_column_statistics.exclude_databases == tuple([])
+
+
+def test_non_dict_collect_schemas_propagates_ignore_databases(mock_check, minimal_instance):
+    """When collect_schemas is not a dict, still propagate ignore_databases."""
+    instance = minimal_instance
+    instance['ignore_databases'] = ['secret_db']
+    instance['collect_schemas'] = None  # Non-dict value
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    cfg, result = build_config(check=mock_check)
+    assert result.valid
+    assert cfg.collect_schemas.exclude_databases == tuple(['secret_db'])
+
+
+def test_ignore_databases_propagation_with_collect_default_database(mock_check, minimal_instance):
+    """When collect_default_database is True, 'postgres' is removed from ignore_databases and not excluded in sub-collectors."""
+    instance = minimal_instance
+    instance['ignore_databases'] = ['postgres', 'secret_db']
+    instance['collect_default_database'] = True
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    cfg, result = build_config(check=mock_check)
+    assert result.valid
+    # 'postgres' should be removed from exclude_databases, but 'secret_db' should still be there
+    assert 'postgres' not in cfg.collect_schemas.exclude_databases
+    assert 'secret_db' in cfg.collect_schemas.exclude_databases

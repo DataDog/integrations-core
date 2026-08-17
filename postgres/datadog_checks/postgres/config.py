@@ -158,11 +158,11 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             },
             "collect_schemas": {
                 **dict_defaults.instance_collect_schemas().model_dump(),
-                **(instance.get('collect_schemas', {})),
+                **_get_dict_config(instance, 'collect_schemas'),
             },
             "collect_column_statistics": {
                 **dict_defaults.instance_collect_column_statistics().model_dump(),
-                **(instance.get('collect_column_statistics', {})),
+                **_get_dict_config(instance, 'collect_column_statistics'),
             },
             # Cloud
             "aws": {
@@ -217,6 +217,17 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
 
     # Apply various validations and fallbacks
     apply_validated_defaults(args, instance, validation_result)
+
+    # Propagate top-level `ignore_databases` into DBM sub-collectors by default.
+    # Preserve explicit user intent: if the user explicitly provided 'exclude_databases'
+    # in the instance config for the sub-collector, do not override it.
+    # Use the post-validation args so changes from apply_validated_defaults (e.g. removal of
+    # 'postgres' when collect_default_database is true) are respected.
+    ignore_dbs = args.get('ignore_databases') or []
+
+    _propagate_exclude_databases(instance, args, 'collect_schemas', ignore_dbs)
+    _propagate_exclude_databases(instance, args, 'collect_column_statistics', ignore_dbs)
+
     apply_deprecation_warnings(instance, validation_result)
 
     # Check user provided value because the default configuration would trigger this warning
@@ -448,7 +459,8 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
         'collect_column_statistics',
     ]
     for feature in dbm_required:
-        if instance.get(feature, {}).get('enabled') and not config.dbm:
+        feature_cfg = instance.get(feature)
+        if isinstance(feature_cfg, dict) and feature_cfg.get('enabled') and not config.dbm:
             validation_result.add_warning(f'The `{feature}` feature requires the `dbm` option to be enabled.')
 
 
@@ -550,3 +562,16 @@ def safefloat(value: any) -> float:
         return f
     except Exception:
         return 0.0
+
+
+def _get_dict_config(instance: dict, key: str) -> dict:
+    """Get config dict, treating non-dict values as empty dict."""
+    value = instance.get(key)
+    return value if isinstance(value, dict) else {}
+
+
+def _propagate_exclude_databases(instance: dict, args: dict, collector_name: str, ignore_dbs: list[str]) -> None:
+    """Propagate ignore_databases to a sub-collector if not explicitly configured."""
+    user_cfg = instance.get(collector_name)
+    if not isinstance(user_cfg, dict) or 'exclude_databases' not in user_cfg:
+        args[collector_name]['exclude_databases'] = ignore_dbs
