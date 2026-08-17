@@ -1012,7 +1012,7 @@ def run_backport_from_pr(
     )
     _display_backport_summary(app, pr_number, results)
     if not options.dry_run:
-        _comment_on_backport_failures(app, pr_number, results)
+        _comment_on_backport_failures(app, pr_number, results, options)
     return all(result.status is not BackportStatus.FAILED for result in results)
 
 
@@ -1110,7 +1110,9 @@ def _display_backport_summary(app: Application, pr_number: int, results: list[Ba
     )
 
 
-def _comment_on_backport_failures(app: Application, pr_number: int, results: list[BackportResult]) -> None:
+def _comment_on_backport_failures(
+    app: Application, pr_number: int, results: list[BackportResult], options: PortOptions
+) -> None:
     """Post a comment on the source PR when one or more bases failed to backport.
 
     The pre-`--from-pr` automation commented on the merged PR when a backport failed; without this a
@@ -1123,18 +1125,21 @@ def _comment_on_backport_failures(app: Application, pr_number: int, results: lis
         return
     token = app.config.github.token
     if not token:
+        # Unreachable today: every caller reaches here via _resolve_pr, which aborts on a falsy token.
+        # Kept as insurance in case a future caller invokes this helper without that guarantee.
         app.display_warning(f'No GitHub token configured; skipping backport-failure comment on PR #{pr_number}.')
         return
 
     owner, repo = resolve_owner_repo(app)
     lines = [f'⚠️ Automatic backport of this PR failed for {len(failures)} target branch(es):', '']
     for result in failures:
-        # Mirror the flags the workflow itself passes (see .github/workflows/backport-pr.yml) so a manual
-        # retry produces the same `backport/…` head branch and labels. A retry with the CLI defaults would
-        # land on a `port/…` branch that the head-keyed idempotency check can't see, risking a duplicate.
+        # Echo the flags this run actually used — `options` is the source of truth for the branch pushed
+        # (`{user}/{branch_prefix}-…`) and labels applied — so the retry reproduces the same head branch.
+        # `_backport_pr_exists` keys on `head={owner}:{branch}`, so this only prevents a duplicate when the
+        # retry runs under the same GitHub user as the failed run.
         retry = (
             f'ddev release port-commit --from-pr {pr_number} --target-branch {result.base} '
-            f'--branch-prefix backport --pr-labels backport,bot'
+            f'--branch-prefix {options.branch_prefix} --pr-labels {options.pr_labels}'
         )
         lines.append(f'- `{result.base}` — retry manually with `{retry}`.')
         # `detail` is often a multi-line cherry-pick-conflict listing; fence it so it doesn't collapse

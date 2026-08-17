@@ -1177,7 +1177,9 @@ def test_command_from_pr_comments_on_source_pr_when_a_base_fails(
     )
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
-    result = ddev('release', 'port-commit', '--from-pr', '23703')
+    result = ddev(
+        'release', 'port-commit', '--from-pr', '23703', '--branch-prefix', 'backport', '--pr-labels', 'backport,bot'
+    )
 
     assert result.exit_code == 1, result.output
     comment_calls = fake_async_github.calls_to('create_issue_comment')
@@ -1186,8 +1188,8 @@ def test_command_from_pr_comments_on_source_pr_when_a_base_fails(
     assert comment_call.kwargs['issue_number'] == 23703
     body = comment_call.kwargs['body']
     assert '7.62.x' in body
-    # The retry command mirrors the flags the workflow passes, so a manual retry reproduces the same
-    # backport branch/labels instead of the CLI defaults.
+    # The retry command echoes the flags this run used, so a manual retry reproduces the same
+    # backport branch/labels rather than the CLI defaults.
     assert (
         'ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
         '--branch-prefix backport --pr-labels backport,bot'
@@ -1211,6 +1213,47 @@ def test_command_from_pr_does_not_comment_when_all_bases_succeed(
 
     assert result.exit_code == 0, result.output
     fake_async_github.assert_not_called('create_issue_comment')
+
+
+def test_command_from_pr_comment_fences_multiline_conflict_detail(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A multi-line cherry-pick conflict detail is fenced so it doesn't fold into the bullet and bury the retry."""
+    run_mock = _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+
+    # Fail the cherry-pick so CherryPickStep inspects conflicts and raises a multi-line detail listing.
+    def run_side_effect(*args):
+        if args[:2] == ('cherry-pick', '--no-commit'):
+            raise OSError('cherry-pick conflict')
+        return None
+
+    run_mock.side_effect = run_side_effect
+
+    # Report two non-resettable conflicting files; delegate the resolvability queries to their real answers.
+    capture_mock = mocker.patch('ddev.utils.git.GitRepository.capture')
+    capture_mock.side_effect = lambda *args: {
+        ('rev-parse', '--verify', f'{FULL_SHA_FOR_TESTS}^{{commit}}'): FULL_SHA_FOR_TESTS + '\n',
+        ('rev-list', '--parents', '-n1', FULL_SHA_FOR_TESTS): f'{FULL_SHA_FOR_TESTS} parent_sha\n',
+        ('diff', '--name-only', '--diff-filter=U'): 'foo/first.py\nbar/second.py\n',
+    }.get(args, '')
+
+    fake_async_github.mock_response('get_pull_request', _merged_pr(number=23703, backport_bases=['7.62.x']))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    comment_calls = fake_async_github.calls_to('create_issue_comment')
+    assert len(comment_calls) == 1
+    body = comment_calls[0].kwargs['body']
+    # The conflict listing is fenced and both files survive intact.
+    assert '\n  ```\n' in body
+    assert 'foo/first.py' in body
+    assert 'bar/second.py' in body
+    # The retry command stays on its own bullet line, not folded into the multi-line detail.
+    retry_line = next(line for line in body.splitlines() if line.startswith('- `7.62.x`'))
+    assert 'ddev release port-commit --from-pr 23703' in retry_line
+    assert 'first.py' not in retry_line
 
 
 def test_command_from_pr_comment_failure_does_not_mask_backport_result(
