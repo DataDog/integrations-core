@@ -65,7 +65,9 @@ def mock_size_status():
         patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["fake_dep.whl"]),
         patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.size.utils.common_funcs.send_metrics_to_dd") as mock_send_metrics_to_dd,
     ):
+        mock_app.send_metrics_to_dd = mock_send_metrics_to_dd
         yield mock_app
 
 
@@ -76,7 +78,7 @@ def mock_size_status():
         ["--compressed"],
         ["--format", "csv,markdown,json,png"],
         ["--show-gui"],
-        ["--commit", "1234567890"],
+        ["--commit", "1234567890", "--to-dd-org", "test-org"],
         ["--platform", "linux-aarch64", "--python", "3.12"],
         ["--platform", "linux-aarch64", "--python", "3.12", "--compressed"],
         ["--platform", "linux-aarch64", "--python", "3.12", "--format", "csv,markdown,json,png"],
@@ -100,6 +102,12 @@ def test_status(ddev, mock_size_status, args):
     result = ddev(*command)
     assert result.exit_code == 0
 
+    if "--commit" in args:
+        mock_size_status.send_metrics_to_dd.assert_called_once()
+        assert mock_size_status.send_metrics_to_dd.call_args.args[1] == "1234567890"
+    else:
+        mock_size_status.send_metrics_to_dd.assert_not_called()
+
 
 @pytest.mark.parametrize(
     (
@@ -114,7 +122,7 @@ def test_status(ddev, mock_size_status, args):
     [
         # Valid cases
         ("linux-x86_64", "3.12", ["csv"], None, None, None, False),
-        ("macos-x86_64", "3.12", [], None, None, "1234567890", False),
+        ("macos-x86_64", "3.12", [], "test-org", None, "1234567890", False),
         # Invalid platform
         ("invalid-platform", "3.12", [], None, None, None, True),
         # Invalid version
@@ -123,6 +131,8 @@ def test_status(ddev, mock_size_status, args):
         ("linux-x86_64", "3.12", ["invalid-format"], None, None, None, True),
         # Missing commit for Datadog metrics
         ("linux-x86_64", "3.12", [], "test-org", None, None, True),
+        # Commit without a Datadog target
+        ("linux-x86_64", "3.12", [], None, None, "1234567890", True),
         # Both to_dd_org and to_dd_key
         (
             "linux-x86_64",
@@ -151,6 +161,7 @@ def test_status(ddev, mock_size_status, args):
         "invalid_version",
         "invalid_format",
         "to_dd_without_commit",
+        "commit_without_to_dd",
         "to_dd_org_and_to_dd_key",
         "multiple_errors",
     ],

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import logging
 import os
 import re
 import shutil
@@ -14,17 +15,20 @@ import zipfile
 import zlib
 from datetime import date
 from types import TracebackType
-from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
 
 import requests
 import squarify
 from datadog import api, initialize
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.common_params import WheelsStorageTier
 from ddev.utils.fs import Path
 from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -299,7 +303,7 @@ def extract_version_from_about_py(path: str) -> str:
 
 
 WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
-WHEELS_STORAGE_TIERS = ("dev", "stable")
+WHEELS_STORAGE_TIERS: tuple[WheelsStorageTier, ...] = get_args(WheelsStorageTier)
 
 
 def resolve_wheel_url(url: str, wheels_storage: str) -> str:
@@ -327,18 +331,23 @@ def request_wheel(url: str, wheels_storage: str, head: bool = False) -> requests
     Requests a wheel, trying each storage tier in turn and returning the first that serves it.
 
     Raises the final HTTPError if no tier has the wheel; anything other than a missing wheel is
-    raised immediately rather than masked by trying the next tier.
+    raised immediately rather than masked by trying the next tier. The error message lists every
+    tier that was tried, since the raised URL alone doesn't show that a fallback was attempted.
     """
     candidates = wheel_url_candidates(url, wheels_storage)
+    tried: list[str] = []
     for index, candidate in enumerate(candidates):
         response = requests.head(candidate) if head else requests.get(candidate, stream=True)
         try:
             response.raise_for_status()
-        except requests.HTTPError:
+        except requests.HTTPError as e:
             response.close()
+            tried.append(f"{candidate} ({response.status_code})")
             is_last = index == len(candidates) - 1
             if is_last or response.status_code not in (403, 404):
-                raise
+                logger.debug("Wheel request failed for all tried tiers: %s", ", ".join(tried))
+                raise requests.HTTPError(f"{e}. Tried: {', '.join(tried)}", response=response) from e
+            logger.debug("Wheel not found at %s, falling back to the next tier", candidate)
             continue
         return response
 

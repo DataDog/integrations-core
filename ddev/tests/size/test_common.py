@@ -145,14 +145,18 @@ def test_matches_gitignore(path, patterns, expected):
 
 
 def test_get_dependencies_list():
-    file_content = "dependency1 @ https://example.com/dependency1/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2/dependency2-1.1.1-.whl"
+    file_content = (
+        "dependency1 @ https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl\n"
+        "dependency2 @ https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency2/dependency2-1.1.1-.whl"
+    )
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
         deps, urls, versions = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
+    # The storage tier placeholder is left unresolved here; it's resolved later when the wheel is requested.
     assert urls == [
-        "https://example.com/dependency1/dependency1-1.1.1-.whl",
-        "https://example.com/dependency2/dependency2-1.1.1-.whl",
+        "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl",
+        "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency2/dependency2-1.1.1-.whl",
     ]
     assert versions == ["1.1.1", "1.1.1"]
 
@@ -436,6 +440,21 @@ def test_request_wheel_falls_back_to_the_other_tier():
         "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
         "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
     ]
+    missing.close.assert_called_once()
+
+
+def test_request_wheel_falls_back_on_403():
+    missing = make_wheel_response(403)
+    found = make_wheel_response(200)
+
+    with patch("requests.get", side_effect=[missing, found]) as mock_get:
+        assert request_wheel(PLACEHOLDER_URL, "dev") is found
+
+    assert [call.args[0] for call in mock_get.call_args_list] == [
+        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+    ]
+    missing.close.assert_called_once()
 
 
 def test_request_wheel_raises_when_no_tier_has_the_wheel():

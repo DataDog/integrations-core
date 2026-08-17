@@ -129,6 +129,9 @@ def validate_parameters(
     if (to_dd_org or to_dd_key) and not commit:
         errors.append("In order to send metrics to Datadog, you need to provide a commit hash")
 
+    if commit and not (to_dd_org or to_dd_key):
+        errors.append("--commit has no effect without --to-dd-org or --to-dd-key")
+
     if errors:
         app.abort("\n".join(errors))
 
