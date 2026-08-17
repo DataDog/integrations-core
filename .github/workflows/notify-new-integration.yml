@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - sarah/test-workflow-trigger
     paths:
       - "*/pyproject.toml"
 
