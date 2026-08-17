@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import fnmatch
 import json
-import logging
 import os
 import re
 import shutil
@@ -27,8 +26,6 @@ from ddev.utils.fs import Path
 from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
-
-logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -326,7 +323,7 @@ def wheel_url_candidates(url: str, wheels_storage: str) -> list[str]:
     return [resolve_wheel_url(url, tier) for tier in tiers]
 
 
-def request_wheel(url: str, wheels_storage: str, head: bool = False) -> requests.Response:
+def request_wheel(app: Application, url: str, wheels_storage: str, head: bool = False) -> requests.Response:
     """
     Requests a wheel, trying each storage tier in turn and returning the first that serves it.
 
@@ -345,9 +342,9 @@ def request_wheel(url: str, wheels_storage: str, head: bool = False) -> requests
             tried.append(f"{candidate} ({response.status_code})")
             is_last = index == len(candidates) - 1
             if is_last or response.status_code not in (403, 404):
-                logger.debug("Wheel request failed for all tried tiers: %s", ", ".join(tried))
+                app.display_debug(f"Wheel request failed for all tried tiers: {', '.join(tried)}")
                 raise requests.HTTPError(f"{e}. Tried: {', '.join(tried)}", response=response) from e
-            logger.debug("Wheel not found at %s, falling back to the next tier", candidate)
+            app.display_debug(f"Wheel not found at {candidate}, falling back to the next tier")
             continue
         return response
 
@@ -355,7 +352,7 @@ def request_wheel(url: str, wheels_storage: str, head: bool = False) -> requests
 
 
 def get_dependencies(
-    repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str
+    app: Application, repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str
 ) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
@@ -368,7 +365,7 @@ def get_dependencies(
 
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
             deps, download_urls, versions = get_dependencies_list(file_path)
-            return get_dependencies_sizes(deps, download_urls, versions, compressed, wheels_storage)
+            return get_dependencies_sizes(app, deps, download_urls, versions, compressed, wheels_storage)
     return []
 
 
@@ -404,7 +401,12 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
 
 
 def get_dependencies_sizes(
-    deps: list[str], download_urls: list[str], versions: list[str], compressed: bool, wheels_storage: str
+    app: Application,
+    deps: list[str],
+    download_urls: list[str],
+    versions: list[str],
+    compressed: bool,
+    wheels_storage: str,
 ) -> list[FileDataEntry]:
     """
     Calculates the sizes of dependencies, either compressed or uncompressed.
@@ -418,7 +420,7 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        with request_wheel(url, wheels_storage) as response:
+        with request_wheel(app, url, wheels_storage) as response:
             wheel_data = response.content
 
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -176,7 +176,12 @@ def test_get_dependencies_sizes():
     mock_response.__exit__.return_value = None
     with patch("requests.get", return_value=mock_response):
         file_data = get_dependencies_sizes(
-            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True, "dev"
+            MagicMock(),
+            ["dependency1"],
+            ["https://example.com/dependency1/dependency1-1.1.1-.whl"],
+            ["1.1.1"],
+            True,
+            "dev",
         )
 
     assert file_data == [
@@ -434,7 +439,7 @@ def test_request_wheel_falls_back_to_the_other_tier():
     found = make_wheel_response(200)
 
     with patch("requests.get", side_effect=[missing, found]) as mock_get:
-        assert request_wheel(PLACEHOLDER_URL, "dev") is found
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
 
     assert [call.args[0] for call in mock_get.call_args_list] == [
         "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
@@ -448,7 +453,7 @@ def test_request_wheel_falls_back_on_403():
     found = make_wheel_response(200)
 
     with patch("requests.get", side_effect=[missing, found]) as mock_get:
-        assert request_wheel(PLACEHOLDER_URL, "dev") is found
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
 
     assert [call.args[0] for call in mock_get.call_args_list] == [
         "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
@@ -462,7 +467,7 @@ def test_request_wheel_raises_when_no_tier_has_the_wheel():
 
     with patch("requests.get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
         with pytest.raises(requests.HTTPError):
-            request_wheel(PLACEHOLDER_URL, "dev")
+            request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
 
 def test_request_wheel_does_not_retry_on_a_non_missing_error():
@@ -470,7 +475,7 @@ def test_request_wheel_does_not_retry_on_a_non_missing_error():
 
     with patch("requests.get", side_effect=[make_wheel_response(500), make_wheel_response(200)]) as mock_get:
         with pytest.raises(requests.HTTPError):
-            request_wheel(PLACEHOLDER_URL, "dev")
+            request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
     assert mock_get.call_count == 1
 
@@ -479,6 +484,6 @@ def test_request_wheel_uses_head_when_requested():
     found = make_wheel_response(200)
 
     with patch("requests.head", return_value=found) as mock_head:
-        assert request_wheel(PLACEHOLDER_URL, "stable", head=True) is found
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True) is found
 
     mock_head.assert_called_once_with("https://example.com/stable/built/dep1/dep1-1.1.1-.whl")

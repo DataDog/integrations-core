@@ -135,6 +135,7 @@ def diff_mode(
     progress: Progress,
 ) -> list[FileDataEntryPlatformVersion]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
+        params["app"],
         gitRepo,
         params["platform"],
         params["version"],
@@ -181,6 +182,7 @@ def diff_mode(
 
 
 def get_repo_info(
+    app: Application,
     gitRepo: GitRepo,
     platform: str,
     version: str,
@@ -215,13 +217,13 @@ def get_repo_info(
         task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
         gitRepo.checkout_commit(first_commit)
         files_b = get_files(repo, compressed, version)
-        dependencies_b = get_dependencies(repo, platform, version, compressed, wheels_storage)
+        dependencies_b = get_dependencies(app, repo, platform, version, compressed, wheels_storage)
         progress.remove_task(task)
 
         task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
         gitRepo.checkout_commit(second_commit)
         files_a = get_files(repo, compressed, version)
-        dependencies_a = get_dependencies(repo, platform, version, compressed, wheels_storage)
+        dependencies_a = get_dependencies(app, repo, platform, version, compressed, wheels_storage)
         progress.remove_task(task)
 
     return files_b, dependencies_b, files_a, dependencies_a

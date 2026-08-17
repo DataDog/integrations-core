@@ -124,6 +124,7 @@ def test_get_dependency_size():
     mock_response = make_mock_response("45678")
     with patch("ddev.cli.size.timeline.request_wheel", return_value=mock_response):
         info = get_dependency_size(
+            MagicMock(),
             "https://example.com/dep1/dep1-1.1.1-.whl",
             "1.1.1",
             "abc1234",
@@ -156,6 +157,7 @@ def test_get_compressed_dependencies():
         patch("ddev.cli.size.timeline.request_wheel", return_value=make_mock_response("12345")),
     ):
         result = get_dependencies(
+            MagicMock(),
             "fake_repo",
             "dep1",
             "linux-x86_64",

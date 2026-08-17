@@ -1,1 +1,0 @@
-Fall back to the other wheels storage tier when the preferred one (set via `--wheels-storage`) does not have a wheel.

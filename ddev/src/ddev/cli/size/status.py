@@ -150,7 +150,12 @@ def status_mode(
     with params["app"].status("Calculating sizes..."):
         params["app"].display_debug(f"Getting dependencies from lockfiles for {params['platform']} {params['version']}")
         modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
-            repo_path, params["platform"], params["version"], params["compressed"], params["wheels_storage"]
+            params["app"],
+            repo_path,
+            params["platform"],
+            params["version"],
+            params["compressed"],
+            params["wheels_storage"],
         )
 
     formatted_modules = format_modules(modules, params["platform"], params["version"])

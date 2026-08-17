@@ -1,1 +1,1 @@
-Remove the `--dependency-sizes` option and GitHub artifact fetching from `ddev size status`.
+Remove the `--dependency-sizes` option and GitHub artifact fetching from `ddev size status`. Fall back to the other wheels storage tier when the preferred one (set via `--wheels-storage`) does not have a wheel.

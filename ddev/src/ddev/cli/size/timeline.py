@@ -384,6 +384,7 @@ def process_commits(
         date, message, commit = format_commit_data(date_str, message, commit, params["first_commit"])
         if params["type"] == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
             result = get_dependencies(
+                params["app"],
                 repo,
                 params["module"],
                 params["platform"],
@@ -489,6 +490,7 @@ def get_files(
 
 
 def get_dependencies(
+    app: Application,
     repo_path: str,
     module: str,
     platform: str,
@@ -524,7 +526,7 @@ def get_dependencies(
             download_url, dep_version = get_dependency_data(file_path, module)
             return (
                 get_dependency_size(
-                    download_url, dep_version, commit, date, author, message, compressed, wheels_storage
+                    app, download_url, dep_version, commit, date, author, message, compressed, wheels_storage
                 )
                 if download_url and dep_version is not None
                 else None
@@ -560,6 +562,7 @@ def get_dependency_data(file_path: str, module: str) -> tuple[Optional[str], Opt
 
 
 def get_dependency_size(
+    app: Application,
     download_url: str,
     version: str,
     commit: str,
@@ -585,13 +588,13 @@ def get_dependency_size(
         A CommitEntry with size and metadata for the given dependency and commit.
     """
     if compressed:
-        response = request_wheel(download_url, wheels_storage, head=True)
+        response = request_wheel(app, download_url, wheels_storage, head=True)
         size_str = response.headers.get("Content-Length")
         if size_str is None:
             raise ValueError(f"Missing size for commit {commit}")
         size = int(size_str)
     else:
-        with request_wheel(download_url, wheels_storage) as response:
+        with request_wheel(app, download_url, wheels_storage) as response:
             wheel_data = response.content
 
         with tempfile.TemporaryDirectory() as tmpdir:
