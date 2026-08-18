@@ -449,3 +449,65 @@ class KueueOpenMetricsScraper(OpenMetricsScraper):
             tags.extend(tagger.tag(f'{KUEUE_RESOURCE_FLAVOR_ENTITY_PREFIX}{flavor}', tagger.ORCHESTRATOR) or [])
 
         return tags
+
+
+# TEMPORARY size-diff verification padding line 0001 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0002 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0003 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0004 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0005 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0006 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0007 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0008 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0009 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0010 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0011 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0012 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0013 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0014 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0015 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0016 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0017 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0018 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0019 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0020 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0021 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0022 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0023 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0024 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0025 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0026 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0027 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0028 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0029 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0030 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0031 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0032 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0033 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0034 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0035 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0036 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0037 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0038 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0039 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0040 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0041 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0042 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0043 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0044 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0045 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0046 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0047 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0048 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0049 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0050 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0051 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0052 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0053 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0054 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0055 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0056 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0057 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0058 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0059 - remove before marking this PR ready.
+# TEMPORARY size-diff verification padding line 0060 - remove before marking this PR ready.
