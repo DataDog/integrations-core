@@ -387,12 +387,6 @@ class SqlserverActivity(DBMAsyncJob):
             row['is_proc'] = bool(row.get('procedure_name'))
             has_proc_context = row['is_proc'] or is_statement_proc(row.get('text', ''))[0]
             if row.get('text'):
-                # statement_text is sliced out of the full batch text using SQL Server's own
-                # statement_start_offset/statement_end_offset, which excludes any comment that
-                # precedes the statement (e.g. a sqlcommenter-style /*dddbs=...*/ tag used for
-                # DBM<>APM correlation). row['text'] holds the untouched batch text, so it's the
-                # only place a leading comment can still be recovered from - re-obfuscate it for
-                # comments on every row, not just when the statement is a stored procedure call.
                 try:
                     full_text_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
