@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Iterator
 
 import pytest
 
@@ -155,6 +155,15 @@ def respond_sequence(client: CatalystCenterClient):
         return client.http.requests
 
     return _respond_sequence
+
+
+@pytest.fixture(scope='session')
+def dd_environment() -> Iterator[None]:
+    # There are no E2E tests: Catalyst Center has no public container image, so there is nothing
+    # to stand up. The fixture still has to exist -- CI runs `ddev env test` for every
+    # integration, and the pytest plugin exits with NO E2E FIXTURE AVAILABLE when it is missing,
+    # which fails the job. A no-op yield is the same thing guarddog, litellm and mac_audit_logs do.
+    yield
 
 
 @pytest.fixture
