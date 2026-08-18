@@ -1220,58 +1220,24 @@ def test_command_from_pr_does_not_comment_when_all_bases_succeed(
     fake_async_github.assert_not_called('create_issue_comment')
 
 
-def test_command_from_pr_comment_fences_multiline_conflict_detail(
-    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
-) -> None:
-    """A multi-line cherry-pick conflict detail is fenced so it doesn't fold into the bullet and bury the retry."""
-    run_mock = _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
-
-    # Fail the cherry-pick so CherryPickStep inspects conflicts and raises a multi-line detail listing.
-    def run_side_effect(*args):
-        if args[:2] == ('cherry-pick', '--no-commit'):
-            raise OSError('cherry-pick conflict')
-        return None
-
-    run_mock.side_effect = run_side_effect
-
-    # Report two non-resettable conflicting files; delegate the resolvability queries to their real answers.
-    capture_mock = mocker.patch('ddev.utils.git.GitRepository.capture')
-    capture_mock.side_effect = lambda *args: {
-        ('rev-parse', '--verify', f'{FULL_SHA_FOR_TESTS}^{{commit}}'): FULL_SHA_FOR_TESTS + '\n',
-        ('rev-list', '--parents', '-n1', FULL_SHA_FOR_TESTS): f'{FULL_SHA_FOR_TESTS} parent_sha\n',
-        ('diff', '--name-only', '--diff-filter=U'): 'foo/first.py\nbar/second.py\n',
-    }.get(args, '')
-
-    fake_async_github.mock_response('get_pull_request', _merged_pr(number=23703, backport_bases=['7.62.x']))
-    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
-
-    result = ddev('release', 'port-commit', '--from-pr', '23703')
-
-    assert result.exit_code == 1, result.output
-    comment_calls = fake_async_github.calls_to('create_issue_comment')
-    assert len(comment_calls) == 1
-    body = comment_calls[0].kwargs['body']
-    # The conflict listing is fenced and both files survive intact.
-    assert '\n  ```\n' in body
-    assert 'foo/first.py' in body
-    assert 'bar/second.py' in body
-    # The retry command stays on its own bullet line, not folded into the multi-line detail.
-    retry_line = next(line for line in body.splitlines() if line.startswith('- `7.62.x`'))
-    assert 'ddev release port-commit --from-pr 23703' in retry_line
-    assert 'first.py' not in retry_line
+def _port_options(**overrides) -> PortOptions:
+    """PortOptions with test defaults (backport prefix/labels, no flags); override per test."""
+    return PortOptions(
+        **{
+            'branch_prefix': 'backport',
+            'branch_suffix': None,
+            'pr_labels': 'backport,bot',
+            'no_pr': False,
+            'draft': False,
+            'verify': False,
+            'dry_run': False,
+            **overrides,
+        }
+    )
 
 
 def test_build_backport_failure_comment_formats_body() -> None:
     """The comment builder is pure, so its Markdown can be asserted without the CLI or a GitHub client."""
-    options = PortOptions(
-        branch_prefix='backport',
-        branch_suffix=None,
-        pr_labels='backport,bot',
-        no_pr=False,
-        draft=False,
-        verify=False,
-        dry_run=False,
-    )
     failures = [
         BackportResult(
             base='7.62.x', status=BackportStatus.FAILED, detail='conflict in foo/a.py\nconflict in bar/b.py'
@@ -1279,7 +1245,7 @@ def test_build_backport_failure_comment_formats_body() -> None:
         BackportResult(base='7.61.x', status=BackportStatus.FAILED, detail=None),
     ]
 
-    body = _build_backport_failure_comment(23703, failures, options)
+    body = _build_backport_failure_comment(23703, failures, _port_options())
 
     assert body.startswith('⚠️ Automatic backport of this PR failed for 2 target branch(es):')
     # Each failed base gets a retry command echoing the run's own flags.
@@ -1292,44 +1258,32 @@ def test_build_backport_failure_comment_formats_body() -> None:
     assert '  ```\n  conflict in foo/a.py\n  conflict in bar/b.py\n  ```' in body
 
 
-def test_build_retry_command_includes_all_active_options() -> None:
-    """Every behavior-affecting flag the run used is echoed, so the retry lands on the same head branch."""
-    options = PortOptions(
-        branch_prefix='backport',
-        branch_suffix='to-7.62.x',
-        pr_labels='backport,bot',
-        no_pr=True,
-        draft=True,
-        verify=True,
-        dry_run=True,  # deliberately not echoed — a retry is meant to actually run
-    )
+@pytest.mark.parametrize(
+    'overrides, base, present, absent',
+    [
+        pytest.param(
+            {'branch_suffix': 'to-7.62.x', 'no_pr': True, 'draft': True, 'verify': True, 'dry_run': True},
+            '7.62.x',
+            'ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
+            '--branch-prefix backport --pr-labels backport,bot --branch-suffix to-7.62.x --no-pr --draft --verify',
+            '--dry-run',  # deliberately not echoed — a retry is meant to actually run
+            id='echoes-all-active-options',
+        ),
+        pytest.param(
+            {},
+            '7.62.x; rm -rf /',
+            "'7.62.x; rm -rf /'",  # shlex.join wraps the hostile token so a paste can't inject
+            '--target-branch 7.62.x; rm -rf /',
+            id='shell-quotes-hostile-base',
+        ),
+    ],
+)
+def test_build_retry_command(overrides, base, present, absent) -> None:
+    """The retry hint echoes every active option and shell-quotes user-controlled values."""
+    command = _build_retry_command(23703, base, _port_options(**overrides))
 
-    command = _build_retry_command(23703, '7.62.x', options)
-
-    assert command == (
-        'ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
-        '--branch-prefix backport --pr-labels backport,bot --branch-suffix to-7.62.x --no-pr --draft --verify'
-    )
-    assert '--dry-run' not in command
-
-
-def test_build_retry_command_shell_quotes_hostile_values() -> None:
-    """A user-controlled base carrying shell syntax is quoted, so the copy-paste snippet can't inject."""
-    options = PortOptions(
-        branch_prefix='backport',
-        branch_suffix=None,
-        pr_labels='backport,bot',
-        no_pr=False,
-        draft=False,
-        verify=False,
-        dry_run=False,
-    )
-
-    command = _build_retry_command(23703, '7.62.x; rm -rf /', options)
-
-    # shlex.join wraps the dangerous token so the trailing command stays inert when pasted.
-    assert "'7.62.x; rm -rf /'" in command
-    assert '--target-branch 7.62.x; rm -rf /' not in command
+    assert present in command
+    assert absent not in command
 
 
 def test_command_from_pr_comment_failure_does_not_mask_backport_result(

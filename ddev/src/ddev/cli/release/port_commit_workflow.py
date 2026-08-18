@@ -1113,12 +1113,10 @@ def _display_backport_summary(app: Application, pr_number: int, results: list[Ba
 def _comment_on_backport_failures(
     app: Application, pr_number: int, results: list[BackportResult], options: PortOptions
 ) -> None:
-    """Post a comment on the source PR when one or more bases failed to backport.
+    """Post a best-effort comment on the source PR listing the bases that failed to backport.
 
-    The pre-`--from-pr` automation commented on the merged PR when a backport failed; without this a
-    failure is only visible as a red workflow run, never on the PR the developer merged. Posting is
-    best-effort: a comment failure must not mask the backport failure it is reporting, so any error
-    here is warned, not raised.
+    Without it, a failure is only visible as a red workflow run. A comment failure is warned, not
+    raised, so it never masks the backport result it reports.
     """
     failures = [result for result in results if result.status is BackportStatus.FAILED]
     if not failures:
@@ -1139,11 +1137,7 @@ def _comment_on_backport_failures(
 
 
 def _build_backport_failure_comment(pr_number: int, failures: list[BackportResult], options: PortOptions) -> str:
-    """Render the Markdown body listing each failed base and a copy-paste retry command.
-
-    Pure presentation: no I/O, so the formatting can be unit-tested against a `list[BackportResult]`
-    and a `PortOptions` directly.
-    """
+    """Render the Markdown body: one bullet per failed base with a copy-paste retry command. Pure, no I/O."""
     lines = [f'⚠️ Automatic backport of this PR failed for {len(failures)} target branch(es):', '']
     for result in failures:
         retry = _build_retry_command(pr_number, result.base, options)
@@ -1156,18 +1150,11 @@ def _build_backport_failure_comment(pr_number: int, failures: list[BackportResul
 
 
 def _build_retry_command(pr_number: int, base: str, options: PortOptions) -> str:
-    """Return a shell-safe `ddev release port-commit` invocation that reproduces the failed run.
+    """Return a shell-safe `ddev release port-commit` that reproduces the failed run.
 
-    Echoes every behavior-affecting option this run used — not just prefix/labels — so the retry lands
-    on the same head branch and honors the same hooks. This matters because `_backport_pr_exists` keys on
-    `head={owner}:{branch}` (built from `branch_prefix`/`branch_suffix`): dropping `--branch-suffix` would
-    point the idempotency check at a different branch and risk a duplicate PR, and dropping `--verify` would
-    skip the commit hooks that may have caused the original failure. The duplicate-avoidance guarantee still
-    only holds when the retry runs under the same GitHub user. `dry_run` is deliberately omitted — a retry
-    is meant to actually run.
-
-    Values are joined with `shlex.join` so a hostile base (labels are user-controlled, e.g.
-    `backport/7.62.x; rm -rf /`) can't inject shell commands into the copy-paste snippet.
+    Echoes every behavior-affecting option (not just prefix/labels) so the retry lands on the same head
+    branch and runs the same hooks; `shlex.join` quotes user-controlled values so a hostile base can't
+    inject shell commands. `dry_run` is omitted — a retry should actually run.
     """
     import shlex
 
