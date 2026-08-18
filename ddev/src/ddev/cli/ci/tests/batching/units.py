@@ -70,14 +70,19 @@ class ResolvedEnvironment:
     `platform.*` overrides against the machine it runs on, so `platform.windows.e2e-env = false`
     (ibm_mq, ibm_ace, network, sqlserver) is invisible when planning on Linux, and it resolves
     `env.*` overrides against the ambient environment, so azure_iot_edge's E2E availability depends
-    on a secret the planner does not have. Neither is knowable from one host. The per-target tooling
-    configuration that replaces `.ddev/config.toml` is where each environment will declare this
+    on a secret the planner does not have. Neither is knowable from one host. Note the `env.*` case
+    fails toward reporting no E2E work, so it drops coverage rather than wasting compute once
+    anything gates on these flags. The per-integration tooling configuration that replaces
+    `manifest.json` and `.ddev/config.toml` is where each environment will declare this
     deterministically, and that is what these flags should be driven from.
     """
 
     name: str
     platform: PlatformName
     python_version: str  # `major.minor`, picks both the runner Python and the E2E Agent image
+    # TODO(manifest): drive these from the per-integration tooling configuration planned to replace
+    # `manifest.json`, which can declare them per platform deterministically, and split unit and
+    # E2E work into separate jobs once it can.
     test_available: bool = True  # ddev's `test_env`
     e2e_available: bool = False  # ddev's `e2e_env`
 
