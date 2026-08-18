@@ -559,7 +559,14 @@ def save_markdown(
     lines.append(f"# {title}")
     lines.append("")
 
-    for (platform, version), group in grouped_modules.items():
+    # Sorted because the platforms come from a set, so insertion order varies between runs. Two
+    # exports of the same data would otherwise list their sections in different orders, which makes
+    # the compressed and uncompressed reports of one commit awkward to read side by side.
+    def section_key(item: tuple[tuple[object, object], list]) -> tuple[str, str]:
+        (platform, version), _ = item
+        return str(platform), str(version)
+
+    for (platform, version), group in sorted(grouped_modules.items(), key=section_key):
         if platform and version:
             label = f"{platform}, Python {version}"
         elif platform:

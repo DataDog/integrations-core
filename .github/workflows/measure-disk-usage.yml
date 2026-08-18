@@ -141,8 +141,10 @@ jobs:
         run: |
           # ddev size diff exports a file only when something actually changed size, so a missing
           # one means this pull request is size-neutral for that measurement.
+          # <strong> rather than markdown emphasis: GitHub does not reliably parse markdown inside a
+          # raw <summary> tag.
           section() {
-            printf '<details>\n<summary>%s</summary>\n\n' "$1"
+            printf '<details>\n<summary><strong>%s</strong></summary>\n\n' "$1"
             if [ -f "$2" ]; then
               # Skip the export's own "# Diff" heading; the summary above already says what this is.
               tail -n +3 "$2"

@@ -484,6 +484,30 @@ def test_save_markdown_one_section_per_platform_and_version():
     assert "Python_Version" not in written_content
 
 
+def test_save_markdown_orders_sections_deterministically():
+    # Platforms reach save_markdown from a set, so without sorting two exports of the same data can
+    # order their sections differently and become hard to compare.
+    platforms = ["windows-x86_64", "linux-aarch64", "macos-x86_64", "linux-x86_64", "macos-aarch64"]
+    modules = [
+        {
+            "Name": "module1",
+            "Size_Bytes": 100,
+            "Size": "100 B",
+            "Type": "Integration",
+            "Platform": platform,
+            "Python_Version": "3.13",
+        }
+        for platform in platforms
+    ]
+
+    mock_file = mock_open()
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_markdown(MagicMock(), "Diff", modules, "output.md", section_total="delta")
+
+    written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
+    assert re.findall(r"<summary>(\S+), Python", written_content) == sorted(platforms)
+
+
 @pytest.mark.parametrize(
     "file_content, expected_version",
     [
