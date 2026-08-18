@@ -28,6 +28,7 @@ class DatabaseCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._agent_hostname = None
+        self._agent_version = None
         self._database_identifier = None
         self._dbms_fallback_warning_logged = False
         self.tag_manager = TagManager()
@@ -164,6 +165,12 @@ class DatabaseCheck(AgentCheck):
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+
+    @property
+    def agent_version(self) -> str:
+        if self._agent_version is None:
+            self._agent_version = datadog_agent.get_version()
+        return self._agent_version
 
     @property
     def dbms(self) -> str:
