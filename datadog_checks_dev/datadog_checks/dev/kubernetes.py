@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ipaddress
 import json
 import logging
 import os
@@ -11,6 +12,27 @@ from typing import Any
 
 from .docker import CONTAINER_STABILITY_LOG_PATTERNS
 from .subprocess import run_command
+
+
+def _is_ipv6_literal(host: str) -> bool:
+    try:
+        return isinstance(ipaddress.ip_address(host), ipaddress.IPv6Address)
+    except ValueError:
+        return False
+
+
+class _Host(str):
+    """A host that brackets IPv6 literals for URL templates.
+
+    Mirrors ``datadog_checks.base.utils.discovery.Host``; duplicated here rather than imported
+    since ``datadog_checks_base`` is not a dependency of ``datadog_checks_dev``.
+    """
+
+    def __format__(self, format_spec: str) -> str:
+        plain = str(self)  # plain copy: f'[{self}]' would recurse through __format__
+        if not format_spec and _is_ipv6_literal(plain):
+            return f'[{plain}]'
+        return super().__format__(format_spec)
 
 
 def assert_all_discovery_candidates_stable_kubernetes(
@@ -164,7 +186,7 @@ def _build_service_from_pod(
         if not service_id:
             raise AssertionError(f'Container {container["name"]!r} has no runtime ID')
 
-    return SimpleNamespace(id=service_id, host=host, ports=ports)
+    return SimpleNamespace(id=service_id, host=_Host(host), ports=ports)
 
 
 def _assert_pod_stable(initial: Mapping[str, Any], current: Mapping[str, Any], candidate_index: int) -> None:

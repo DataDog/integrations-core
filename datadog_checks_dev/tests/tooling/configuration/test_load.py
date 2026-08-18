@@ -408,7 +408,63 @@ def test_discovery_rejects_non_string_port_names():
     )
     spec.load()
 
-    assert 'test, test.yaml, discovery, strategy #1: Attribute `port_names` must be an array of strings' in spec.errors
+    assert (
+        'test, test.yaml, discovery, strategy #1: Attribute `port_names` must be a non-empty array of non-empty strings'
+        in spec.errors
+    )
+
+
+def test_discovery_rejects_empty_port_names():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_named_ports
+              port_names: []
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1: Attribute `port_names` must be a non-empty array of non-empty strings'
+        in spec.errors
+    )
+
+
+def test_discovery_rejects_blank_port_names():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_named_ports
+              port_names:
+              - ''
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1: Attribute `port_names` must be a non-empty array of non-empty strings'
+        in spec.errors
+    )
 
 
 def test_discovery_unsupported_strategy():

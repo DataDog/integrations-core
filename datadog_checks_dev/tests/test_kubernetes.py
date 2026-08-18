@@ -212,6 +212,17 @@ def test_service_uses_only_target_container_and_preserves_named_ports():
     ]
 
 
+def test_build_service_from_pod_brackets_ipv6_host_for_url_templates():
+    pod = _pod()
+    pod['status']['podIP'] = 'fd00::1'
+
+    service = kubernetes._build_service_from_pod(pod, 'svc')
+
+    assert '{}'.format(service.host) == '[fd00::1]'
+    assert 'http://{}:9090/metrics'.format(service.host) == 'http://[fd00::1]:9090/metrics'
+    assert '{!s}'.format(service.host) == 'fd00::1'
+
+
 def test_termination_without_reason_is_detected():
     initial = _pod()
     current = copy.deepcopy(initial)
