@@ -23,6 +23,7 @@ from ddev.cli.release.port_commit_workflow import (
     SetupWorktreeStep,
     TeardownWorktreeStep,
     _build_backport_failure_comment,
+    _build_retry_command,
     build_pr_body,
     derive_backport_bases,
     is_reset_to_target,
@@ -1289,6 +1290,46 @@ def test_build_backport_failure_comment_formats_body() -> None:
     assert '--target-branch 7.61.x' in body
     # Multi-line detail is fenced; a base without detail adds no fence of its own.
     assert '  ```\n  conflict in foo/a.py\n  conflict in bar/b.py\n  ```' in body
+
+
+def test_build_retry_command_includes_all_active_options() -> None:
+    """Every behavior-affecting flag the run used is echoed, so the retry lands on the same head branch."""
+    options = PortOptions(
+        branch_prefix='backport',
+        branch_suffix='to-7.62.x',
+        pr_labels='backport,bot',
+        no_pr=True,
+        draft=True,
+        verify=True,
+        dry_run=True,  # deliberately not echoed — a retry is meant to actually run
+    )
+
+    command = _build_retry_command(23703, '7.62.x', options)
+
+    assert command == (
+        'ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
+        '--branch-prefix backport --pr-labels backport,bot --branch-suffix to-7.62.x --no-pr --draft --verify'
+    )
+    assert '--dry-run' not in command
+
+
+def test_build_retry_command_shell_quotes_hostile_values() -> None:
+    """A user-controlled base carrying shell syntax is quoted, so the copy-paste snippet can't inject."""
+    options = PortOptions(
+        branch_prefix='backport',
+        branch_suffix=None,
+        pr_labels='backport,bot',
+        no_pr=False,
+        draft=False,
+        verify=False,
+        dry_run=False,
+    )
+
+    command = _build_retry_command(23703, '7.62.x; rm -rf /', options)
+
+    # shlex.join wraps the dangerous token so the trailing command stays inert when pasted.
+    assert "'7.62.x; rm -rf /'" in command
+    assert '--target-branch 7.62.x; rm -rf /' not in command
 
 
 def test_command_from_pr_comment_failure_does_not_mask_backport_result(

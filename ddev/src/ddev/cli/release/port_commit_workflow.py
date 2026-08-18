@@ -1146,20 +1146,53 @@ def _build_backport_failure_comment(pr_number: int, failures: list[BackportResul
     """
     lines = [f'⚠️ Automatic backport of this PR failed for {len(failures)} target branch(es):', '']
     for result in failures:
-        # Echo the flags this run actually used — `options` is the source of truth for the branch pushed
-        # (`{user}/{branch_prefix}-…`) and labels applied — so the retry reproduces the same head branch.
-        # `_backport_pr_exists` keys on `head={owner}:{branch}`, so this only prevents a duplicate when the
-        # retry runs under the same GitHub user as the failed run.
-        retry = (
-            f'ddev release port-commit --from-pr {pr_number} --target-branch {result.base} '
-            f'--branch-prefix {options.branch_prefix} --pr-labels {options.pr_labels}'
-        )
+        retry = _build_retry_command(pr_number, result.base, options)
         lines.append(f'- `{result.base}` — retry manually with `{retry}`.')
         # `detail` is often a multi-line cherry-pick-conflict listing; fence it so it doesn't collapse
         # into the bullet and bury the retry command.
         if result.detail:
             lines.extend(['', '  ```', *(f'  {line}' for line in result.detail.splitlines()), '  ```', ''])
     return '\n'.join(lines)
+
+
+def _build_retry_command(pr_number: int, base: str, options: PortOptions) -> str:
+    """Return a shell-safe `ddev release port-commit` invocation that reproduces the failed run.
+
+    Echoes every behavior-affecting option this run used — not just prefix/labels — so the retry lands
+    on the same head branch and honors the same hooks. This matters because `_backport_pr_exists` keys on
+    `head={owner}:{branch}` (built from `branch_prefix`/`branch_suffix`): dropping `--branch-suffix` would
+    point the idempotency check at a different branch and risk a duplicate PR, and dropping `--verify` would
+    skip the commit hooks that may have caused the original failure. The duplicate-avoidance guarantee still
+    only holds when the retry runs under the same GitHub user. `dry_run` is deliberately omitted — a retry
+    is meant to actually run.
+
+    Values are joined with `shlex.join` so a hostile base (labels are user-controlled, e.g.
+    `backport/7.62.x; rm -rf /`) can't inject shell commands into the copy-paste snippet.
+    """
+    import shlex
+
+    argv = [
+        'ddev',
+        'release',
+        'port-commit',
+        '--from-pr',
+        str(pr_number),
+        '--target-branch',
+        base,
+        '--branch-prefix',
+        options.branch_prefix,
+        '--pr-labels',
+        options.pr_labels,
+    ]
+    if options.branch_suffix is not None:
+        argv += ['--branch-suffix', options.branch_suffix]
+    if options.no_pr:
+        argv.append('--no-pr')
+    if options.draft:
+        argv.append('--draft')
+    if options.verify:
+        argv.append('--verify')
+    return shlex.join(argv)
 
 
 def _post_issue_comment(token: str, owner: str, repo: str, issue_number: int, body: str) -> None:
