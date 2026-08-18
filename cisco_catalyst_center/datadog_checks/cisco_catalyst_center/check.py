@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import time
+from functools import partial
 from typing import Any, Callable
 
 from datadog_checks.base import AgentCheck
@@ -189,9 +190,11 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             healthy &= self._run('topology', lambda: collect_topology(self, self.client, base_tags=base_tags))
             healthy &= self._run('site topology', lambda: collect_site_topology(self, self.client, base_tags=base_tags))
             for topology_type in self._option('l3_topology_types', ['ospf']):
+                # partial rather than a lambda: it binds topology_type eagerly, so the loop
+                # variable cannot be rebound before _run invokes the collector.
                 healthy &= self._run(
                     f'L3 topology ({topology_type})',
-                    lambda t=topology_type: collect_l3_topology(self, self.client, t, base_tags=base_tags),
+                    partial(collect_l3_topology, self, self.client, topology_type, base_tags=base_tags),
                 )
 
         if self._option('collect_sda_fabric', False):
