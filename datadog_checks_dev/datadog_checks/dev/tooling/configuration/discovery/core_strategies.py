@@ -21,3 +21,18 @@ def from_ports(stanza: dict[str, Any]) -> list[str]:
         f'    for port in candidate_ports(service, {port_hints!r}):',
         "        ctx = {'port': port}",
     ]
+
+
+@strategy(
+    'from_named_ports',
+    provides=('port',),
+    inputs={'port_names': Input('array[string]')},
+    runtime_imports=('from datadog_checks.base.utils.discovery import candidate_ports_by_name',),
+)
+def from_named_ports(stanza: dict[str, Any]) -> list[str]:
+    """Open a loop over explicitly named service ports and bind a `ctx` exposing the current `port`."""
+    port_names = stanza['port_names']
+    return [
+        f'    for port in candidate_ports_by_name(service, {port_names!r}):',
+        "        ctx = {'port': port}",
+    ]
