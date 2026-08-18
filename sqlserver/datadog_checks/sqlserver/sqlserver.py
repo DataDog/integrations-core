@@ -997,31 +997,7 @@ class SQLServer(DatabaseCheck):
         if self.autodiscover_databases(cursor) or not self.instance_metrics:
             self._make_metric_list_to_collect(self._config.custom_metrics)
 
-        instance_results = {}
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
-        # Execute the `fetch_all` operations first to minimize the database calls
-        for cls, metric_names in self.instance_per_type_metrics.items():
-            if not metric_names:
-                instance_results[cls] = None, None
-            else:
-                try:
-                    db_names = [d.name for d in self.databases] or [
-                        self.instance.get("database", self.connection.DEFAULT_DATABASE)
-                    ]
-                    metric_cls = getattr(metrics, cls)
-                    with tracked_query(self, operation=metric_cls.OPERATION_NAME):
-                        rows, cols = metric_cls.fetch_all_values(
-                            cursor,
-                            list(metric_names),
-                            self.log,
-                            databases=db_names,
-                            engine_edition=engine_edition,
-                        )
-                except Exception as e:
-                    self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
-                    rows, cols = None, None
-
-                instance_results[cls] = rows, cols
+        instance_results = self._fetch_instance_results(cursor)
 
         for metric in self.instance_metrics:
             key = metric.__class__.__name__
@@ -1034,6 +1010,54 @@ class SQLServer(DatabaseCheck):
                         metric.fetch_metric(rows, cols, self.sqlserver_incr_fraction_metric_previous_values)
                     else:
                         metric.fetch_metric(rows, cols)
+
+    def _fetch_instance_results(self, cursor):
+        """Run the `fetch_all` of every metric class in use, keyed by class name.
+
+        Executing them up front keeps the number of database calls down, and the performance counter classes
+        share one call between them because they all read the same snapshot of a table that is expensive to
+        scan however few rows are wanted from it.
+        """
+        instance_results = {}
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+        perf_counter_classes = []
+        perf_counter_names = set()
+
+        for cls, metric_names in self.instance_per_type_metrics.items():
+            if not metric_names:
+                instance_results[cls] = None, None
+            elif issubclass(getattr(metrics, cls), metrics.SqlPerfCounterMetric):
+                perf_counter_classes.append(cls)
+                perf_counter_names.update(metric_names)
+            else:
+                instance_results[cls] = self._fetch_all_values(cursor, cls, metric_names, engine_edition)
+
+        if perf_counter_classes:
+            perf_counter_results = self._fetch_all_values(
+                cursor, metrics.SqlPerfCounterMetric.__name__, perf_counter_names, engine_edition
+            )
+            for cls in perf_counter_classes:
+                instance_results[cls] = perf_counter_results
+
+        return instance_results
+
+    def _fetch_all_values(self, cursor, cls, metric_names, engine_edition):
+        try:
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get("database", self.connection.DEFAULT_DATABASE)
+            ]
+            metric_cls = getattr(metrics, cls)
+            with tracked_query(self, operation=metric_cls.OPERATION_NAME):
+                return metric_cls.fetch_all_values(
+                    cursor,
+                    list(metric_names),
+                    self.log,
+                    databases=db_names,
+                    engine_edition=engine_edition,
+                )
+        except Exception as e:
+            self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
+            return None, None
 
     def collect_metrics(self):
         """Fetch the metrics from all the associated database tables."""
