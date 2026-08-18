@@ -393,6 +393,30 @@ def test_get_cursor(instance_docker):
         check.connection.get_cursor('foo')
 
 
+def test_stored_procedure_check_closes_connection_on_error(instance_docker):
+    instance = copy.copy(instance_docker)
+    instance['stored_procedure'] = 'fake_proc'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+
+    mock_cursor = mock.MagicMock()
+    mock_cursor.execute.side_effect = Exception("proc failed")
+    mock_cursor.callproc.side_effect = Exception("proc failed")
+
+    with (
+        mock.patch.object(check.connection, 'open_db_connections') as open_db,
+        mock.patch.object(check.connection, 'close_db_connections') as close_db,
+        mock.patch.object(check.connection, 'get_cursor', return_value=mock_cursor),
+        mock.patch.object(check.connection, 'close_cursor') as close_cursor,
+    ):
+        with pytest.raises(Exception, match="proc failed"):
+            check.do_stored_procedure_check()
+
+    open_db.assert_called_once()
+    close_db.assert_called_once()
+    close_cursor.assert_called_once_with(mock_cursor)
+
+
 def test_missing_db(instance_docker, dd_run_check):
     instance = copy.copy(instance_docker)
     instance['ignore_missing_database'] = False
