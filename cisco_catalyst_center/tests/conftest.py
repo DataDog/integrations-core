@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterator
+from typing import Any
 
 import pytest
 
@@ -155,13 +155,6 @@ def respond_sequence(client: CatalystCenterClient):
         return client.http.requests
 
     return _respond_sequence
-
-
-@pytest.fixture(scope='session')
-def dd_environment() -> Iterator[None]:
-    # No containerised environment yet. Catalyst Center has no public image; the E2E story is a
-    # small fake server, which lands with the first release rather than the proof of concept.
-    yield
 
 
 @pytest.fixture
