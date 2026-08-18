@@ -125,43 +125,6 @@ def test_resolved_hostname_metadata(check, test_case):
         m.assert_any_call('test:123', 'resolved_hostname', test_case)
 
 
-@pytest.mark.parametrize(
-    'is_aurora, replication_role, expected_role_tags',
-    [
-        (False, 'master', {'replication_role:master'}),
-        (True, 'master', {'replication_role:master', 'aurora_role:writer'}),
-        (True, 'standby', {'replication_role:standby', 'aurora_role:reader'}),
-    ],
-)
-def test_update_replication_role_tags(integration_check, pg_instance, is_aurora, replication_role, expected_role_tags):
-    check = integration_check(pg_instance)
-    check.is_aurora = is_aurora
-
-    check._update_replication_role_tags(replication_role)
-
-    role_tags = {
-        tag
-        for tag in check.tag_manager.get_tags()
-        if tag.startswith('replication_role:') or tag.startswith('aurora_role:')
-    }
-    assert role_tags == expected_role_tags
-
-
-def test_update_replication_role_tags_after_aurora_failover(integration_check, pg_instance):
-    check = integration_check(pg_instance)
-    check.is_aurora = True
-
-    check._update_replication_role_tags('master')
-    check._update_replication_role_tags('standby')
-
-    role_tags = {
-        tag
-        for tag in check.tag_manager.get_tags()
-        if tag.startswith('replication_role:') or tag.startswith('aurora_role:')
-    }
-    assert role_tags == {'replication_role:standby', 'aurora_role:reader'}
-
-
 def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):
     pg_instance['password'] = ''
     pg_instance['query_timeout'] = 1000

@@ -792,7 +792,6 @@ class PostgreSql(DatabaseCheck):
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.log.debug("Disabling replication metrics")
-            self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
         except psycopg.errors.UndefinedFunction as e:
             log_func(e)
