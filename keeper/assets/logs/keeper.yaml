@@ -58,6 +58,7 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -73,6 +74,7 @@ facets:
     name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Class
@@ -83,16 +85,19 @@ facets:
     name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Type ID
     path: ocsf.type_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Status
@@ -103,6 +108,7 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Event Code
@@ -593,7 +599,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `to_username` or `username` to `ocsf.user.email_addr`
+              name: "Map `to_username`, `username` to `ocsf.user.email_addr`"
               sources:
                 - to_username
                 - username
@@ -601,7 +607,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `to_username` or `username` to `ocsf.user.name`
+              name: "Map `to_username`, `username` to `ocsf.user.name`"
               sources:
                 - to_username
                 - username
@@ -836,10 +842,6 @@ pipeline:
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
-              fallback:
-                values:
-                  ocsf.status: Success
-                  ocsf.status_id: "1"
           schema:
             schemaType: ocsf
             version: 1.5.0
@@ -984,10 +986,6 @@ pipeline:
               targets:
                 name: ocsf.entity.type
                 id: ocsf.entity.type_id
-              fallback:
-                values:
-                  ocsf.entity.type: User
-                  ocsf.entity.type_id: "2"
             - type: schema-category-mapper
               name: ocsf.entity_result.type_id
               categories:
@@ -1153,7 +1151,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `to_username` or `username` to `ocsf.user.email_addr`
+              name: "Map `to_username`, `username` to `ocsf.user.email_addr`"
               sources:
                 - to_username
                 - username
@@ -1161,7 +1159,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `to_username` or `username` to `ocsf.user.name`
+              name: "Map `to_username`, `username` to `ocsf.user.name`"
               sources:
                 - to_username
                 - username
