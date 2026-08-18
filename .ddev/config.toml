@@ -207,7 +207,6 @@ nginx_ingress_controller = "nginx-ingress-controller"
 
 [overrides.dep.updates]
 exclude = [
-    'pyasn1',          # https://github.com/pyasn1/pyasn1/issues/52
     'pysnmp',          # Breaking snmp tests
     'aerospike',       # v8+ breaks agent build.
     'confluent-kafka',
