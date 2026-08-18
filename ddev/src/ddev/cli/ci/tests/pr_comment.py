@@ -58,6 +58,14 @@ PROGRESS_ERROR_TEXT = {
     ProgressError.NO_ARTIFACTS: "no artifacts were downloaded for this job",
 }
 
+# Prepended to the run summary when the pull-request comment could not be written. The run summary is
+# then the only place the result exists, so it says so rather than looking like the intended surface.
+RUN_SUMMARY_COMMENT_FAILED_NOTE = (
+    "> [!WARNING]\n"
+    "> **The pull request comment could not be updated.** This summary is the full report.\n"
+    "> See the workflow logs for why the comment write failed."
+)
+
 # Said in both the alert and the footer, so a reader who skips one still learns the comment is live.
 FOOTER_RUNNING_NOTE = "This comment updates automatically as each batch finishes."
 
@@ -99,6 +107,22 @@ def render_minimal_comment(progress: DispatcherProgress) -> str:
     a terse comment that posts beats a rich one that does not.
     """
     return "\n\n".join([_header(progress), _footer(progress)])
+
+
+def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
+    """Turn a rendered comment *body* into the report written to the GitHub Actions run summary.
+
+    The same report, on a different surface — deliberately not a second renderer, so the run page and
+    the pull request can never disagree. Two differences only: the marker goes, because it exists
+    solely so the updater can find its comment and a run summary is never looked up; and a failed
+    comment write is announced, because the reader arrived from the run page and would otherwise have
+    no way to know a comment was attempted at all.
+    """
+    report = body.removeprefix(COMMENT_MARKER).lstrip("\n")
+    if not pr_comment_failed:
+        return report
+
+    return f"{RUN_SUMMARY_COMMENT_FAILED_NOTE}\n\n{report}"
 
 
 def summary_line(progress: DispatcherProgress) -> str:

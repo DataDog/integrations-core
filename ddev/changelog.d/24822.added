@@ -1,1 +1,1 @@
-Add the Dispatcher pull-request updater task, which renders each progress snapshot into one PR comment.
+Add the Dispatcher pull-request updater task, which renders each progress snapshot into one PR comment and publishes the final report to the GitHub Actions run summary.

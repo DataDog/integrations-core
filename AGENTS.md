@@ -35,6 +35,8 @@ Add type hints to new functions and methods. Use modern syntax: prefer `str | No
 
 Type simple generators as `Iterator[T]`. Use `Generator[YieldType, SendType, ReturnType]` when sent or returned values are part of their behavior.
 
+Omit `-> None`. It is the only return annotation that tells a reader nothing they could not already see, and on the many small procedures in this codebase it is pure noise. Existing code is not being retrofitted, so expect to see both forms.
+
 #### Refactoring Existing Code
 
 When refactoring existing code, add or update type hints when they support the change, but avoid unrelated annotation-only churn. More broadly, keep diffs focused on the task at hand rather than using a refactor to rename or otherwise clean up unrelated code.

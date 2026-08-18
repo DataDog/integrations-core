@@ -10,22 +10,37 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from ddev.cli.ci.tests.pr_comment import COMMENT_MARKER, render_comment, render_minimal_comment, summary_line
-from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.cli.ci.tests.pr_comment import (
+    COMMENT_MARKER,
+    render_comment,
+    render_minimal_comment,
+    render_run_summary,
+    summary_line,
+)
 from ddev.event_bus.orchestrator import AsyncProcessor
-from ddev.utils.github_errors import GitHubAuthenticationError
+from ddev.utils.github_actions import write_step_summary
 
 if TYPE_CHECKING:
     from ddev.cli.ci.tests.messages import UpdatePRComment
     from ddev.utils.github_async import AsyncGitHubClient
 
-# GitHub rejects an over-long comment body with this status. It is not transient: resending the same
-# body fails identically, so the only useful response is to send a smaller one.
-BODY_TOO_LONG_STATUS = 422
+# GitHub answers an over-long comment body with this status, but also every other validation failure
+# and a body it judges to be spam. Which one it is shows only in the response body.
+VALIDATION_FAILED_STATUS = 422
+
+# What GitHub's over-long-body validation says: "body is too long (maximum is 65536 characters)".
+# Matched as a substring because the documented error shape only guarantees `code: "custom"` with a
+# free-text `message` — there is no stable error code for this case to key off.
+BODY_TOO_LONG_MESSAGE = "too long"
 
 # Editing the tracked comment can fail because it is not ours to edit (403) or no longer exists
 # (404). Neither improves on retry, but both are recoverable by writing a comment we do own.
 UNUSABLE_COMMENT_STATUSES = (403, 404)
+
+# Enough passes for the two things a failed write can change about the next one: shrinking the body
+# once, and giving up on a comment we may not edit. The second can repeat, because the comment we
+# create to replace the first can itself be refused, so the cap is what stops that becoming a loop.
+MAX_WRITE_PASSES = 4
 
 
 @dataclass(frozen=True)
@@ -33,21 +48,31 @@ class PullRequestUpdaterOptions:
     """Configuration for a ``TaskPullRequestUpdater``.
 
     ``pr_number`` is ``None`` for the runs that have no pull request to comment on — a push to
-    ``master``, the nightly schedule, and merge-queue runs. Those still render, to the log.
+    ``master``, the nightly schedule, and merge-queue runs. Those report to the run summary only.
     """
 
     owner: str
     repo: str
     pr_number: int | None
-    max_write_attempts: int = 3
 
 
 class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
-    """Projects ``DispatcherProgress`` snapshots onto one pull-request comment.
+    """Projects ``DispatcherProgress`` snapshots onto one pull-request comment and the run summary.
 
     A serialized, stateless projection: it consumes no runner messages, merges no deltas, computes
     no retries, and calls no GitHub API beyond the single comment it owns. It renders the newest
-    snapshot and ignores stale revisions, so the comment can never regress.
+    snapshot and ignores stale revisions, so neither surface can regress.
+
+    Two destinations for one report. The pull-request comment is optional — there is no pull request
+    on a ``master`` push, the nightly schedule, or a merge-queue run — while the run summary is
+    written on every run once the last batch finishes, so opening the workflow always shows the final
+    result. ``latest_body`` keeps the newest rendered report for the caller to persist as a workflow
+    output.
+
+    Because the run summary always reports, **failing to write the comment never fails the run**. A
+    reporting problem is logged, recorded, and announced at the top of the run summary; it does not
+    cost anyone the test results. Transient failures are not retried here either: retrying is the
+    GitHub client's job, so that one retry strategy covers every caller.
 
     The comment is found or created once, by ``COMMENT_MARKER``, so a later Dispatcher run on the
     same pull request edits the existing comment instead of adding another. The marker identifies the
@@ -63,7 +88,7 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     This is a terminal consumer: it emits no further messages.
     """
 
-    def __init__(self, name: str, client: AsyncGitHubClient, options: PullRequestUpdaterOptions) -> None:
+    def __init__(self, name: str, client: AsyncGitHubClient, options: PullRequestUpdaterOptions):
         super().__init__(name)
         self._client = client
         self._options = options
@@ -73,22 +98,33 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         self._unusable_comment_ids: set[int] = set()
         # Revisions start at 0 (the initial plan), so nothing can have been rendered yet.
         self._latest_revision = -1
+        self._latest_body: str | None = None
+        self._pr_comment_failed = False
         self._lock = asyncio.Lock()
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
-    async def process_message(self, message: UpdatePRComment) -> None:
+    @property
+    def latest_body(self) -> str | None:
+        """The newest report rendered, or ``None`` if no snapshot has arrived yet.
+
+        Retained whether or not it reached GitHub, so the caller can persist it as a workflow output
+        for later steps to publish. For a run with no pull request this is the only report there is.
+        """
+        return self._latest_body
+
+    @property
+    def pr_comment_failed(self) -> bool:
+        """Whether the newest report failed to reach its pull-request comment."""
+        return self._pr_comment_failed
+
+    async def process_message(self, message: UpdatePRComment):
         # Rendering is pure, so it happens outside the lock.
         body = render_comment(message.progress)
         log_extra = {"revision": message.revision, "done": message.progress.done}
 
-        pr_number = self._options.pr_number
-        if pr_number is None:
-            self._logger.info("No pull request to update: %s", summary_line(message.progress), extra=log_extra)
-            return
-
-        # The lock spans revision validation and the write, and the revision advances only after the
-        # write lands. Batches finish concurrently, so without this a slow early revision could
-        # overwrite a later one and make the comment go backwards.
+        # The lock spans revision validation, the write and the retained report, all of which may
+        # only move forwards. Batches finish concurrently, so without this a slow early revision
+        # could overwrite a later one and make the report go backwards.
         async with self._lock:
             if message.revision <= self._latest_revision:
                 self._logger.info(
@@ -96,88 +132,72 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
                 )
                 return
 
-            if await self._write(pr_number, message, body, log_extra):
-                self._latest_revision = message.revision
+            pr_number = self._options.pr_number
+            if pr_number is None:
+                self._logger.info("No pull request to update: %s", summary_line(message.progress), extra=log_extra)
+            else:
+                self._pr_comment_failed = not await self._write(pr_number, message, body, log_extra)
+
+            # Retained even when the write failed: this is the newest report we have, and the run
+            # summary below is about to report it regardless. The revision advances with it, so a
+            # later snapshot cannot be overtaken by an earlier one that is still in flight.
+            self._latest_body = body
+            self._latest_revision = message.revision
+
+            if message.progress.done:
+                self._write_run_summary(body, log_extra)
+
+    def _write_run_summary(self, body: str, log_extra: dict[str, object]):
+        """Publish the final report to the run's job summary, the panel shown on the run page.
+
+        Every run reports here, so a run with no pull request still has a result to open, and one
+        whose comment could not be written still has somewhere that says so. A no-op outside GitHub
+        Actions, and never a reason to fail: ``write_step_summary`` swallows an unwritable file.
+        """
+        write_step_summary(render_run_summary(body, pr_comment_failed=self._pr_comment_failed))
+        self._logger.info("Run summary written", extra={**log_extra, "pr_comment_failed": self._pr_comment_failed})
 
     async def _write(self, pr_number: int, message: UpdatePRComment, body: str, log_extra: dict[str, object]) -> bool:
-        """Write *body* to the comment, retrying transient failures. Returns whether it landed.
+        """Write *body* to the comment. Returns whether it landed.
 
-        Losing an intermediate revision is acceptable — the next complete snapshot supersedes it —
-        but losing the final one means the run reported nothing, which fails the command.
+        Not a retry loop — a failure that a further pass cannot change stops immediately. Each pass
+        continues only after changing what the next one will do: shrinking a body GitHub called too
+        long, or forgetting a comment GitHub will not let us edit so the next pass creates our own.
+
+        Losing the write does not fail the run. The report is retained and the run summary reports it
+        with a note saying the comment could not be updated.
         """
-        for attempt in range(1, self._options.max_write_attempts + 1):
+        shrunk = False
+        for _ in range(MAX_WRITE_PASSES):
             try:
                 await self._submit(pr_number, body)
-            except GitHubAuthenticationError as error:
-                # The client maps every 403 to this error, including the one GitHub returns for a
-                # comment we may not edit, so that case is offered to the recovery below before being
-                # read as a credentials problem. A 401, or a 403 with no comment to forget, is not
-                # recovered from and falls through.
-                if self._forget_unusable_comment(error, log_extra):
-                    continue
-                # A rejected token does not improve on retry, and the client's message is the only
-                # thing that says what to fix. Swallowing it would report a write problem instead.
-                self._logger.error("PR comment write refused by GitHub authentication", extra=log_extra)
-                raise
             except httpx.HTTPError as error:
-                if _is_body_too_long(error):
-                    # Not transient: the same body would be rejected again.
-                    return await self._write_minimal(pr_number, message, log_extra)
-                if self._forget_unusable_comment(error, log_extra):
-                    # The next attempt creates a comment we own, rather than re-editing one we do not.
+                if not shrunk and _is_body_too_long(error):
+                    # Not transient: the same body would be rejected identically. Drop the detail
+                    # that made it long. Once only — a minimal body has nothing left to drop.
+                    self._logger.warning(
+                        "PR comment body rejected as too long; retrying without detail", extra=log_extra
+                    )
+                    body = render_minimal_comment(message.progress)
+                    shrunk = True
                     continue
-                self._logger.warning(
-                    "PR comment write failed (attempt %s of %s): %s",
-                    attempt,
-                    self._options.max_write_attempts,
-                    error,
-                    extra=log_extra,
-                )
+                if self._forget_unusable_comment(error, log_extra):
+                    # The next pass creates a comment we own, rather than re-editing one we do not.
+                    continue
+                self._logger.error("PR comment write failed: %s", error, extra=log_extra)
+                return False
             else:
-                self._logger.info("PR comment written", extra={**log_extra, "comment_id": self._comment_id})
+                self._logger.info(
+                    "PR comment written", extra={**log_extra, "comment_id": self._comment_id, "minimal": shrunk}
+                )
                 return True
 
-        if message.progress.done:
-            raise FatalProcessingError(
-                f"Could not write the final Dispatcher PR comment after {self._options.max_write_attempts} attempts"
-            )
-        self._logger.error("Giving up on this revision; the next snapshot supersedes it", extra=log_extra)
+        # Every pass was refused the comment it targeted, including ones we had just created, so
+        # there is nothing left to recover to.
+        self._logger.error("PR comment write found no comment it may edit", extra=log_extra)
         return False
 
-    async def _write_minimal(self, pr_number: int, message: UpdatePRComment, log_extra: dict[str, object]) -> bool:
-        """Retry with a header-and-footer-only body after GitHub rejected the full one.
-
-        Recovers from an unusable comment the same way ``_write`` does. This is the run's last chance
-        to report anything, so giving up on a comment we were never allowed to edit is the worst place
-        to stop. One recovery is enough: the retry writes a comment we just created ourselves, so it
-        cannot be refused for not being ours a second time.
-
-        The body is already minimal, so a further rejection has nothing left to drop.
-        """
-        self._logger.warning("PR comment body rejected as too long; retrying without detail", extra=log_extra)
-        body = render_minimal_comment(message.progress)
-        for _ in range(2):
-            try:
-                await self._submit(pr_number, body)
-            except GitHubAuthenticationError as error:
-                if self._forget_unusable_comment(error, log_extra):
-                    continue
-                self._logger.error("Minimal PR comment write refused by GitHub authentication", extra=log_extra)
-                raise
-            except httpx.HTTPError as error:
-                if self._forget_unusable_comment(error, log_extra):
-                    continue
-                self._logger.error("Minimal PR comment write also failed: %s", error, extra=log_extra)
-                return _give_up_on_minimal(message, error)
-            else:
-                return True
-
-        # Both passes were refused the comment they targeted, the second being one we had just
-        # created, so there is nothing further to recover to.
-        self._logger.error("Minimal PR comment write found no comment it may edit", extra=log_extra)
-        return _give_up_on_minimal(message, None)
-
-    async def _submit(self, pr_number: int, body: str) -> None:
+    async def _submit(self, pr_number: int, body: str):
         """Create the comment on first use, then edit that same comment for every later revision."""
         comment_id = await self._resolve_comment_id(pr_number)
         if comment_id is not None:
@@ -226,13 +246,30 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         return True
 
 
-def _give_up_on_minimal(message: UpdatePRComment, error: httpx.HTTPError | None) -> bool:
-    """Fail the run if the snapshot was final, else report the revision as lost to the caller."""
-    if message.progress.done:
-        raise FatalProcessingError("Could not write the final Dispatcher PR comment") from error
-    return False
-
-
 def _is_body_too_long(error: httpx.HTTPError) -> bool:
-    """Whether *error* is GitHub rejecting the comment body for exceeding its length limit."""
-    return isinstance(error, httpx.HTTPStatusError) and error.response.status_code == BODY_TOO_LONG_STATUS
+    """Whether *error* is GitHub rejecting the comment body for exceeding its length limit.
+
+    The status does not say on its own. GitHub documents 422 on these endpoints as validation failed
+    *or* spammed, so reading every 422 as "too long" would answer an unrelated rejection by resending
+    a shorter body, and hide the real cause behind a fallback that cannot fix it.
+
+    A response body that cannot be read is treated as too long. That is the safer guess: being wrong
+    costs one request, whereas the other way round spends the run's last chance to report on a body
+    we already know GitHub will not take.
+    """
+    if not isinstance(error, httpx.HTTPStatusError) or error.response.status_code != VALIDATION_FAILED_STATUS:
+        return False
+
+    try:
+        payload = error.response.json()
+    except ValueError:
+        return True
+    if not isinstance(payload, dict):
+        return True
+
+    # The top-level message is the generic "Validation Failed"; the specific one is per-error. Both
+    # are read because only one of them is documented to exist.
+    messages = [payload.get("message")]
+    if isinstance(entries := payload.get("errors"), list):
+        messages.extend(entry.get("message") for entry in entries if isinstance(entry, dict))
+    return any(BODY_TOO_LONG_MESSAGE in message.lower() for message in messages if isinstance(message, str))

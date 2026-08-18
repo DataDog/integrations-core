@@ -21,6 +21,7 @@ from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     render_comment,
     render_minimal_comment,
+    render_run_summary,
     summary_line,
 )
 from ddev.cli.ci.tests.progress import (
@@ -740,3 +741,78 @@ def test_summary_line_reports_state_and_counts() -> None:
     progress = DispatcherProgress(batches=(batch("batch-01", job(attempt()), job()),), done=False)
 
     assert summary_line(progress) == "Dispatcher tests in progress: 1/2 jobs, 1 passed, 0 failed, 0 skipped"
+
+
+# ---------------------------------------------------------------------------
+# Run summary
+# ---------------------------------------------------------------------------
+
+
+def test_the_run_summary_is_the_comment_without_the_marker() -> None:
+    """The same report, on a surface that has nothing to find it by.
+
+    The marker exists only so the updater can locate its comment. A run summary is written once and
+    never looked up, so carrying the marker there would say nothing and would put it somewhere the
+    updater's ownership rules do not apply.
+    """
+    progress = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
+    body = render_comment(progress)
+
+    summary = render_run_summary(body, pr_comment_failed=False)
+
+    assert not summary.startswith(COMMENT_MARKER)
+    assert COMMENT_MARKER not in summary
+    assert summary == body.removeprefix(COMMENT_MARKER).lstrip("\n")
+
+
+def test_a_clean_run_summary_adds_nothing_of_its_own() -> None:
+    progress = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
+
+    summary = render_run_summary(render_comment(progress), pr_comment_failed=False)
+
+    assert "[!WARNING]" not in summary
+    assert "could not be updated" not in summary
+    assert summary.startswith("## ")
+
+
+def test_a_failed_comment_write_is_announced_above_the_report() -> None:
+    """The reader arrives from the run page with no idea a comment was attempted."""
+    progress = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
+
+    summary = render_run_summary(render_comment(progress), pr_comment_failed=True)
+
+    assert summary.startswith("> [!WARNING]")
+    # The note precedes the heading, so it is read before the result it qualifies.
+    assert summary.index("[!WARNING]") < summary.index("## ")
+    assert "pull request comment could not be updated" in summary
+    # The report itself is untouched below the note.
+    assert summary.endswith(render_comment(progress).removeprefix(COMMENT_MARKER).lstrip("\n"))
+
+
+def test_the_run_summary_preserves_a_report_that_reports_failures() -> None:
+    """Whatever the comment would have said, the summary says — this is not a second renderer."""
+    failing = job(attempt(Status.FAILURE, reports=(failing_report("test_boom"),)))
+    progress = DispatcherProgress(batches=(batch("batch-01", failing, status=Status.FAILURE),), done=True)
+
+    summary = render_run_summary(render_comment(progress), pr_comment_failed=True)
+
+    assert "Dispatcher tests · failed" in summary
+    assert "test_boom" in summary
+    assert summary.count("[!WARNING]") == 1
+
+
+def test_a_minimal_report_survives_the_run_summary() -> None:
+    """The fallback body is what gets retained when the full one was rejected, so it must render."""
+    progress = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
+
+    summary = render_run_summary(render_minimal_comment(progress), pr_comment_failed=True)
+
+    assert COMMENT_MARKER not in summary
+    assert "Final result" in summary
+
+
+def test_a_body_without_the_marker_is_passed_through_unharmed() -> None:
+    """Stripping is not allowed to eat the first line of a body that never carried a marker."""
+    summary = render_run_summary("## Some report\n\nbody", pr_comment_failed=False)
+
+    assert summary == "## Some report\n\nbody"
