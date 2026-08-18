@@ -156,6 +156,46 @@ def test_selector_detects_replacement_pod(monkeypatch):
         )
 
 
+def test_container_name_selects_target_container_end_to_end(monkeypatch):
+    pod = _pod()
+    pod['spec']['containers'].append(
+        {
+            'name': 'sidecar',
+            'ports': [{'containerPort': 9000, 'name': 'sidecar-http'}],
+        }
+    )
+    pod['status']['containerStatuses'].append(
+        {'name': 'sidecar', 'containerID': 'containerd://sidecar-id', 'ready': True, 'restartCount': 0}
+    )
+
+    def run_command(command, **kwargs):
+        assert command[:3] == ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
+        if command[3:5] == ['get', 'pod']:
+            return _result(json.dumps(pod))
+        if command[3] == 'logs':
+            return _result('old\n')
+        raise AssertionError(f'Unexpected command: {command}')
+
+    monkeypatch.setattr(kubernetes, 'run_command', run_command)
+    dd_agent_check = Mock()
+    _Check.services = []
+
+    kubernetes.assert_all_discovery_candidates_stable_kubernetes(
+        dd_agent_check,
+        _Check,
+        '/tmp/kubeconfig',
+        namespace='velero',
+        pod_name='velero-123',
+        container_name='velero',
+    )
+
+    service = _Check.services[0]
+    assert [(port.number, port.name) for port in service.ports] == [
+        (8085, 'http-monitoring'),
+        (9999, 'admin'),
+    ]
+
+
 def test_service_uses_only_target_container_and_preserves_named_ports():
     pod = _pod()
     pod['spec']['containers'][0]['ports'].append({'containerPort': 8085, 'name': 'metrics'})
