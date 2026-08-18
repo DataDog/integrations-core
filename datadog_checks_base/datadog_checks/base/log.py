@@ -47,7 +47,9 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         # Cache for performance
         if not self.check_id:
-            self.check_id = self.check.check_id
+            # Ensure check hasn't been dereferenced before we access check_id
+            if self.check is not None:
+                self.check_id = self.check.check_id
             # Default to `unknown` for checks that log during
             # `__init__` and therefore have no `check_id` yet
             self.extra['_check_id'] = self.check_id or 'unknown'
