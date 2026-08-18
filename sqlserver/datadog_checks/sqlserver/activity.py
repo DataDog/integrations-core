@@ -386,28 +386,36 @@ class SqlserverActivity(DBMAsyncJob):
             comments = statement['metadata'].get('comments', [])
             row['is_proc'] = bool(row.get('procedure_name'))
             has_proc_context = row['is_proc'] or is_statement_proc(row.get('text', ''))[0]
-            if has_proc_context and row.get('text'):
+            if row.get('text'):
+                # statement_text is sliced out of the full batch text using SQL Server's own
+                # statement_start_offset/statement_end_offset, which excludes any comment that
+                # precedes the statement (e.g. a sqlcommenter-style /*dddbs=...*/ tag used for
+                # DBM<>APM correlation). row['text'] holds the untouched batch text, so it's the
+                # only place a leading comment can still be recovered from - re-obfuscate it for
+                # comments on every row, not just when the statement is a stored procedure call.
                 try:
-                    procedure_statement = obfuscate_sql_with_metadata(
+                    full_text_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
-                    row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
-                    procedure_comments = procedure_statement['metadata'].get('comments', [])
-                    if procedure_comments:
-                        comments = list(set(comments + procedure_comments))
-                    if not row.get('procedure_name'):
-                        procedures = procedure_statement['metadata'].get('procedures')
-                        if procedures:
-                            row['procedure_name'] = procedures[0].lower()
-                            row['is_proc'] = True
+                    full_text_comments = full_text_statement['metadata'].get('comments', [])
+                    if full_text_comments:
+                        comments = list(set(comments + full_text_comments))
+                    if has_proc_context:
+                        row['procedure_signature'] = compute_sql_signature(full_text_statement['query'])
+                        if not row.get('procedure_name'):
+                            procedures = full_text_statement['metadata'].get('procedures')
+                            if procedures:
+                                row['procedure_name'] = procedures[0].lower()
+                                row['is_proc'] = True
                 except Exception as e:
-                    row['procedure_signature'] = '__procedure_obfuscation_error__'
-                    # if we fail to obfuscate the procedure text,
+                    if has_proc_context:
+                        row['procedure_signature'] = '__procedure_obfuscation_error__'
+                    # if we fail to obfuscate the full text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:
-                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
+                        self.log.warning("Failed to obfuscate query text=[%s] | err=[%s]", repr(row['text']), e)
                     else:
-                        self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
+                        self.log.debug("Failed to obfuscate query text | err=[%s]", e)
             if 'tail_text' in row:
                 tail_statement = obfuscate_sql_with_metadata(
                     row['tail_text'], self._obfuscator_options_for_tail_text, replace_null_character=True

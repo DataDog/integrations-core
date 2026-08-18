@@ -1056,3 +1056,32 @@ def test_sanitize_activity_row(dbm_instance, row):
     row = check.activity._obfuscate_and_sanitize_row(row)
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
+
+
+@pytest.mark.unit
+def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(dbm_instance, datadog_agent):
+    # SQL Server's statement_start_offset/statement_end_offset exclude a comment prepended
+    # to a batch (e.g. sqlcommenter-style /*dddbs=...*/ used for DBM<>APM correlation), so
+    # `statement_text` never contains it. Before the fix, comments were only recovered from
+    # the untouched `text` for stored-procedure rows; this asserts recovery for a plain statement.
+    comment = "/*dddbs='orders-service',dde='prod'*/"
+    row = {
+        'statement_text': "SELECT * FROM orders WHERE customer_id = @P1",
+        'text': f"{comment} SELECT * FROM orders WHERE customer_id = @P1",
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == [comment]
+    assert not row.get('is_proc')
+    assert 'procedure_signature' not in row
