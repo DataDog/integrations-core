@@ -83,7 +83,7 @@ jobs:
         id: dd-sts
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
-          policy: integrations-core
+          policy: integrations-core-release-notifications
       - name: Notify pending release via Datadog workflow
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
