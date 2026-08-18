@@ -1504,13 +1504,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `client_version` to `ocsf.http_request.user_agent`
-              sources:
-                - client_version
-              target: ocsf.http_request.user_agent
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `ocsf.web_resources` to `ocsf.web_resources`
               sources:
                 - ocsf.web_resources

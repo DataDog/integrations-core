@@ -64,8 +64,6 @@ tests:
         web_resources:
           - uid: Dm_l4bk34Rj62ef-XUPv3g
             name: ext_share_added
-        http_request:
-          user_agent: Web App.17.2.2
         dst_endpoint:
           hostname: keepersecurity.com
       username: xakemaukubri-2168@company.com
@@ -130,8 +128,6 @@ tests:
         web_resources:
           - uid: Dm_l4bk34Rj62ef-XUPv3g
             name: ext_share_expired
-        http_request:
-          user_agent: Server.0.0.0
         dst_endpoint:
           hostname: keepersecurity.com
       username: xakemaukubri-2168@company.com
@@ -204,8 +200,6 @@ tests:
         web_resources:
           - uid: L2Dbp4JkF8m-qPgwU1yFwQ
             name: ext_share_access
-        http_request:
-          user_agent: SecretsManager/JS.16.6.2
         dst_endpoint:
           hostname: keepersecurity.com
       username: graucakafamme-1489@company.com
@@ -278,8 +272,6 @@ tests:
         web_resources:
           - uid: L2Dbp4JkF8m-qPgwU1yFwQ
             name: ext_share_connected
-        http_request:
-          user_agent: SecretsManager/JS.16.6.2
         dst_endpoint:
           hostname: keepersecurity.com
       username: graucakafamme-1489@company.com
@@ -352,8 +344,6 @@ tests:
         web_resources:
           - uid: L2Dbp4JkF8m-qPgwU1yFwQ
             name: ext_share_removed
-        http_request:
-          user_agent: Web App.17.2.2
         dst_endpoint:
           hostname: keepersecurity.com
       username: graucakafamme-1489@company.com
@@ -745,8 +735,6 @@ tests:
             name: compliance_report_downloaded
         src_endpoint:
           ip: 192.0.2.10
-        http_request:
-          user_agent: Web App.17.2.2
         dst_endpoint:
           hostname: keepersecurity.com
       usr:
@@ -1188,8 +1176,6 @@ tests:
         status_id: 1
         class_uid: 6001
         activity_id: 2
-        http_request:
-          user_agent: Web App.17.2.2
         time: 1749643454772
         severity_id: 1
         class_name: Web Resources Activity
@@ -1414,8 +1400,6 @@ tests:
         web_resources:
           - uid: Rec6005AbCdEfGhIjKlMn
             name: record_add
-        http_request:
-          user_agent: Web App.17.2.2
       usr:
         email: user1@example.com
       service: record
@@ -1625,8 +1609,6 @@ tests:
         web_resources:
           - uid: RECatt0000000000000001
             name: file_attachment_downloaded
-        http_request:
-          user_agent: Web App.17.2.2
       usr:
         email: bob@example.com
       service: vault
