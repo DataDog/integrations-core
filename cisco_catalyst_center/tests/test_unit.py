@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Callable
 
 import pytest
+
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
