@@ -12,6 +12,7 @@ it without raising and records nothing. That failure is silent and survives code
 from __future__ import annotations
 
 import pytest
+
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 

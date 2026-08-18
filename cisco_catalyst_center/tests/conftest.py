@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Any, Iterator
 
 import pytest
+
 from datadog_checks.base.types import InstanceType
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 

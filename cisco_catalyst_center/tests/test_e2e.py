@@ -5,6 +5,7 @@
 from typing import Any
 
 import pytest
+
 from datadog_checks.base.types import InstanceType
 from datadog_checks.dev.utils import get_metadata_metrics
 
