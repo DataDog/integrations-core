@@ -104,6 +104,11 @@ jobs:
 
   measure-disk-usage-diff:
     name: Measure size difference
+    # Never runs for a fork's pull request. Its GITHUB_TOKEN is read-only, so the comment could not
+    # be posted, and the measurement is too expensive to spend on a report nobody would see. Raising
+    # the token's scope would mean pull_request_target, which runs with secrets against
+    # pull-request-authored code that this workflow installs and executes.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -192,9 +197,10 @@ jobs:
           fi
           ddev "${args[@]}"
 
-      # Skipped for forks, whose pull_request GITHUB_TOKEN is read-only and cannot post comments.
+      # Forks are already excluded at the job level, so this only distinguishes push from
+      # pull_request.
       - name: Comment the size difference on the pull request
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false
+        if: github.event_name == 'pull_request'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
