@@ -43,12 +43,12 @@ class ScriptedHttp:
     #: make any collection whose size is an exact multiple of the page limit paginate endlessly --
     #: which is a defect in the fake, not in the client, since a real appliance answers the
     #: follow-up page with an empty list.
-    EXHAUSTED = {'response': [], 'version': '1.0'}
+    EXHAUSTED: dict[str, Any] = {'response': [], 'version': '1.0'}
 
     #: The analytics endpoints are POST and answer with an object, not a list, and every slot in
     #: it is null rather than empty when there is no data. A single exhaustion payload cannot
     #: stand in for both shapes, so the fake mirrors the one the verb actually returns.
-    EXHAUSTED_OBJECT = {
+    EXHAUSTED_OBJECT: dict[str, Any] = {
         'response': {'attributes': None, 'aggregateAttributes': None, 'groups': None},
         'page': {'limit': 100, 'count': 0},
         'version': '1.0',

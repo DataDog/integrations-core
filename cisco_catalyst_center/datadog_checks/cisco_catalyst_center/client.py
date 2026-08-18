@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import random
 import time
-from typing import Any
+from typing import Any, TypeGuard
 
 from .constants import (
     AUTH_ENDPOINT,
@@ -207,7 +207,7 @@ class CatalystCenterClient:
     # -- envelope handling ------------------------------------------------------------
 
     @staticmethod
-    def _is_error_object(candidate: Any) -> bool:
+    def _is_error_object(candidate: Any) -> TypeGuard[dict[str, Any]]:
         """An error object carries errorCode and nothing a real record would carry.
 
         Matching on the exact key set rather than the presence of ``errorCode`` alone keeps a
