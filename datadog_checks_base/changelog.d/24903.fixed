@@ -1,0 +1,1 @@
+Avoid an ``AttributeError`` when a check logs after the logging adapter's check reference has been released.
