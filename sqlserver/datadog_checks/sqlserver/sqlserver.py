@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from __future__ import division
+from __future__ import annotations, division
 
 import functools
 import time
 from collections import defaultdict
+from collections.abc import Iterable
+from typing import Any
 
 from cachetools import TTLCache
 
@@ -127,6 +129,10 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 KEY_PREFIX = "dbm-sqlserver-"
+
+# What a metric class's `fetch_all_values` hands back: the rows it fetched, in whatever shape that class
+# dispatches from, and their column names. Classes that index their own rows return None for the columns.
+MetricFetchResult = tuple[Any, list[str] | None]
 
 
 class SQLServer(DatabaseCheck):
@@ -1011,7 +1017,7 @@ class SQLServer(DatabaseCheck):
                     else:
                         metric.fetch_metric(rows, cols)
 
-    def _fetch_instance_results(self, cursor):
+    def _fetch_instance_results(self, cursor: Any) -> dict[str, MetricFetchResult]:
         """Run the `fetch_all` of every metric class in use, keyed by class name.
 
         Executing them up front keeps the number of database calls down, and the performance counter classes
@@ -1041,7 +1047,9 @@ class SQLServer(DatabaseCheck):
 
         return instance_results
 
-    def _fetch_all_values(self, cursor, cls, metric_names, engine_edition):
+    def _fetch_all_values(
+        self, cursor: Any, cls: str, metric_names: Iterable[str], engine_edition: str
+    ) -> MetricFetchResult:
         try:
             db_names = [d.name for d in self.databases] or [
                 self.instance.get("database", self.connection.DEFAULT_DATABASE)

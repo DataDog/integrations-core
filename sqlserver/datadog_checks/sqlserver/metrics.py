@@ -9,10 +9,11 @@ DO NOT add new metrics to this module. Instead, use the `database_metrics` modul
 Collection of metric classes for specific SQL Server tables.
 """
 
-from __future__ import division
+from __future__ import annotations, division
 
 from collections import defaultdict
 from functools import partial
+from typing import Any
 
 # Queries
 ALL_INSTANCES = 'ALL'
@@ -86,6 +87,11 @@ class BaseSqlServerMetric(object):
         raise NotImplementedError
 
 
+# A snapshot of sys.dm_os_performance_counters, indexed for lookup by the two columns a metric knows about
+# itself: counter name, then instance name, then the (object name, counter value) of each row underneath.
+PerfCounterIndex = dict[str, dict[str, list[tuple[str, int]]]]
+
+
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-performance-counters-transact-sql
 class SqlPerfCounterMetric(BaseSqlServerMetric):
     """Base class for the metrics read from sys.dm_os_performance_counters.
@@ -101,7 +107,14 @@ class SqlPerfCounterMetric(BaseSqlServerMetric):
     OPERATION_NAME = 'perf_counter_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
+    def fetch_all_values(
+        cls,
+        cursor: Any,
+        counters_list: list[str],
+        logger: Any,
+        databases: list[str] | None = None,
+        engine_edition: str | None = None,
+    ) -> tuple[PerfCounterIndex, None]:
         rows, _ = cls._fetch_generic_values(cursor, counters_list, logger)
         # The name columns are nchar(128), so every value arrives blank-padded. Strip once here and index by
         # counter name and instance name so each metric can look its own rows up directly: with autodiscovery
@@ -112,7 +125,7 @@ class SqlPerfCounterMetric(BaseSqlServerMetric):
             results[counter_name.strip()][instance_name.strip()].append((object_name.strip(), cntr_value))
         return results, None
 
-    def _configured_instance_names(self):
+    def _configured_instance_names(self) -> tuple[str, ...]:
         """The instance names this metric collects from, in precedence order.
 
         The physical database name is a fallback for the logical one and differs from it only on Azure SQL
@@ -190,7 +203,7 @@ class SqlFractionMetric(SqlPerfCounterMetric):
                 self.report_fraction(cntr_value, base_value, metric_tags, previous_values=values_cache)
 
     @staticmethod
-    def _base_value(base_counters, object_name):
+    def _base_value(base_counters: list[tuple[str, int]] | None, object_name: str) -> int | None:
         """The value of the base counter recorded under the same object as the numerator, if there is one."""
         for base_object_name, base_value in base_counters or ():
             if base_object_name == object_name:
