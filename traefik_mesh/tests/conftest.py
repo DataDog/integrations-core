@@ -1,19 +1,21 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
-from contextlib import ExitStack
 from copy import deepcopy
 
 import pytest
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
 opj = os.path.join
+
+PROXY_IP_STATE = 'traefik_mesh_proxy_ip'
 
 
 @pytest.fixture
@@ -44,28 +46,48 @@ def setup_traefik_mesh():
     )
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=90s"])
 
+    # This only runs once, when the Kind cluster is created, so the resolved pod IP is cached here
+    # rather than re-resolved by `dd_environment` on every invocation.
+    save_state(PROXY_IP_STATE, get_traefik_mesh_proxy_pod_ip())
+
+
+def get_traefik_mesh_proxy_pod_ip() -> str:
+    # There is no Service for the Traefik Mesh proxy, so the pod IP is fetched directly.
+    result = run_command(
+        [
+            "kubectl",
+            "get",
+            "pods",
+            "--namespace",
+            "traefik-mesh",
+            "--selector",
+            "app=maesh,component=maesh-mesh,release=traefik-mesh",
+            "--output",
+            "json",
+        ],
+        capture='out',
+        check=True,
+    )
+    pods = json.loads(result.stdout)['items']
+    if len(pods) != 1 or not pods[0].get('status', {}).get('podIP'):
+        raise RuntimeError(f'Expected exactly one traefik-mesh-proxy pod with a pod IP, found {len(pods)}')
+    return pods[0]['status']['podIP']
+
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_traefik_mesh]) as kubeconfig:
-        with ExitStack() as stack:
-            traefik_controller_api_url, traefik_controller_api_port = stack.enter_context(
-                port_forward(kubeconfig, 'traefik-mesh', 9000, 'service', 'traefik-mesh-controller')
-            )
+        proxy_pod_ip = get_state(PROXY_IP_STATE)
+        traefik_proxy_endpoint = f'http://{proxy_pod_ip}:8080/metrics'
+        traefik_controller_api_endpoint = 'http://traefik-mesh-controller.traefik-mesh.svc.cluster.local:9000'
 
-            traefik_proxy_url, traefik_proxy_port = stack.enter_context(
-                port_forward(kubeconfig, 'traefik-mesh', 8080, 'daemonset', 'traefik-mesh-proxy')
-            )
+        instance = {
+            'openmetrics_endpoint': traefik_proxy_endpoint,
+            'traefik_proxy_api_endpoint': traefik_proxy_endpoint,
+            'traefik_controller_api_endpoint': traefik_controller_api_endpoint,
+        }
 
-            traefik_proxy_endpoint = f'http://{traefik_proxy_url}:{traefik_proxy_port}/metrics'
-            traefik_controller_api_endpoint = f'http://{traefik_controller_api_url}:{traefik_controller_api_port}'
+        dd_save_state("traefik_instance", instance)
+        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
 
-            instance = {
-                'openmetrics_endpoint': traefik_proxy_endpoint,
-                'traefik_proxy_api_endpoint': traefik_proxy_endpoint,
-                'traefik_controller_api_endpoint': traefik_controller_api_endpoint,
-            }
-
-            dd_save_state("traefik_instance", instance)
-
-        yield instance
+        yield instance, metadata
