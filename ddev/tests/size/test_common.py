@@ -13,6 +13,7 @@ from ddev.cli.size.utils.common_funcs import (
     check_python_version,
     compress,
     convert_to_human_readable_size,
+    export_format,
     extract_version_from_about_py,
     format_modules,
     get_dependencies_list,
@@ -375,22 +376,112 @@ def test_save_markdown():
     ]
 
     with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
-        save_markdown(mock_app, "Status", modules, "output.md")
+        save_markdown(mock_app, "Status", modules, "output.md", section_total="absolute")
 
     mock_file.assert_called_once_with("output.md", "a", encoding="utf-8")
     handle = mock_file()
 
+    # The Platform column is omitted because the section summary already names the platform, and the
+    # blank line after </summary> is what makes GitHub render the table as markdown.
     expected_writes = (
         "# Status\n\n"
-        "## Platform: linux-x86_64\n\n"
-        "| Name | Size | Type | Platform |\n"
-        "| --- | --- | --- | --- |\n"
-        "| module1 | 2 B | Integration | linux-x86_64 |\n"
-        "| module2 | 4 B | Dependency | linux-x86_64 |\n"
+        "<details>\n"
+        "<summary>linux-x86_64 (579 B)</summary>\n\n"
+        "| Name | Size | Type |\n"
+        "| --- | --- | --- |\n"
+        "| module1 | 2 B | Integration |\n"
+        "| module2 | 4 B | Dependency |\n"
+        "\n</details>\n"
     )
 
     written_content = "".join(call.args[0] for call in handle.write.call_args_list)
     assert written_content == expected_writes
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_title", "expected_total"),
+    [
+        pytest.param("status", "Status", "absolute", id="status"),
+        pytest.param("diff", "Diff", "delta", id="diff"),
+    ],
+)
+def test_export_format_titles_markdown_by_mode(mode, expected_title, expected_total):
+    modules = [
+        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B", "Type": "Integration", "Platform": "linux-x86_64"},
+    ]
+
+    with patch("ddev.cli.size.utils.common_funcs.save_markdown") as mock_save:
+        export_format(MagicMock(), ["markdown"], modules, mode, None, None, False)
+
+    _, title, _, filename = mock_save.call_args.args
+    assert title == expected_title
+    assert filename == f"{mode}_uncompressed.md"
+    assert mock_save.call_args.kwargs["section_total"] == expected_total
+
+
+def test_save_markdown_signs_positive_totals_for_deltas():
+    mock_app = MagicMock()
+    mock_file = mock_open()
+
+    modules = [
+        {"Name": "module1", "Size_Bytes": 1000, "Size": "+1000 B", "Type": "Dependency", "Platform": "linux-x86_64"},
+        {"Name": "module2", "Size_Bytes": -400, "Size": "-400 B", "Type": "Dependency", "Platform": "linux-x86_64"},
+    ]
+
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_markdown(mock_app, "Diff", modules, "output.md", section_total="delta")
+
+    written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
+    assert "<summary>linux-x86_64 (+600 B)</summary>" in written_content
+
+
+def test_save_markdown_leaves_negative_totals_unsigned():
+    mock_app = MagicMock()
+    mock_file = mock_open()
+
+    modules = [
+        {"Name": "module1", "Size_Bytes": -1000, "Size": "-1000 B", "Type": "Dependency", "Platform": "linux-x86_64"},
+    ]
+
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_markdown(mock_app, "Diff", modules, "output.md", section_total="delta")
+
+    written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
+    assert "<summary>linux-x86_64 (-1000 B)</summary>" in written_content
+
+
+def test_save_markdown_one_section_per_platform_and_version():
+    mock_app = MagicMock()
+    mock_file = mock_open()
+
+    modules = [
+        {
+            "Name": "module1",
+            "Size_Bytes": 100,
+            "Size": "100 B",
+            "Type": "Dependency",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.13",
+        },
+        {
+            "Name": "module1",
+            "Size_Bytes": 200,
+            "Size": "200 B",
+            "Type": "Dependency",
+            "Platform": "macos-aarch64",
+            "Python_Version": "3.13",
+        },
+    ]
+
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_markdown(mock_app, "Status", modules, "output.md", section_total="absolute")
+
+    written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
+    assert written_content.count("<details>") == 2
+    assert "<summary>linux-x86_64, Python 3.13 (100 B)</summary>" in written_content
+    assert "<summary>macos-aarch64, Python 3.13 (200 B)</summary>" in written_content
+    # Both keys are in the summary, so neither should remain as a column.
+    assert "Python_Version" not in written_content
 
 
 @pytest.mark.parametrize(

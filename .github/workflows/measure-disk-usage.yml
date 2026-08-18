@@ -19,10 +19,15 @@ jobs:
       contents: read
       # needed for dd-sts
       id-token: write
+      # needed to post the size diff comment on pull requests
+      pull-requests: write
     steps:
+      # On pull_request, github.sha is the ephemeral merge commit of the PR head into the base
+      # branch. Measuring that rather than the head commit is what makes the diff below reflect
+      # the size the repository would have once the PR lands.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -49,7 +54,7 @@ jobs:
       - name: Resolve measurement context
         id: ctx
         env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
           echo "sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "push" ]; then
@@ -57,6 +62,14 @@ jobs:
           else
             echo "send=false" >> "$GITHUB_OUTPUT"
           fi
+          # The commit to diff against. The merge commit's first parent is the base branch commit
+          # GitHub merged the PR head into, so it isolates this PR's own contribution; the current
+          # tip of master would also fold in anything that landed since. On push it is the
+          # predecessor of the pushed commit. Resolved explicitly rather than from
+          # github.event.pull_request.base.sha or github.event.before, neither of which is reliable:
+          # the former can lag the branch the merge was built from, and the latter is all-zeros on a
+          # branch's first push and points at a discarded commit after a force-push.
+          echo "base_sha=$(git rev-parse "${HEAD_SHA}^1")" >> "$GITHUB_OUTPUT"
 
       - name: Measure disk usage (Uncompressed)
         env:
@@ -81,6 +94,87 @@ jobs:
             args+=(--commit "$SHA" --to-dd-key "$DD_API_KEY")
           fi
           ddev "${args[@]}"
+
+      # The diff is supplementary to the absolute sizes measured above: on master it adds the
+      # per-commit deltas, and on a pull request it produces the comment. Neither is worth failing
+      # the workflow over, so both diff steps continue on error and the comment step tolerates a
+      # missing export.
+      - name: Measure disk usage difference (Uncompressed)
+        continue-on-error: true
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          BASE_SHA: ${{ steps.ctx.outputs.base_sha }}
+          SHA: ${{ steps.ctx.outputs.sha }}
+          SEND: ${{ steps.ctx.outputs.send }}
+        run: |
+          args=(-v size diff "$BASE_SHA" "$SHA" --format markdown)
+          if [ "$SEND" = "true" ]; then
+            args+=(--to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
+
+      - name: Measure disk usage difference (Compressed)
+        continue-on-error: true
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          BASE_SHA: ${{ steps.ctx.outputs.base_sha }}
+          SHA: ${{ steps.ctx.outputs.sha }}
+          SEND: ${{ steps.ctx.outputs.send }}
+        run: |
+          args=(-v size diff "$BASE_SHA" "$SHA" --format markdown --compressed)
+          if [ "$SEND" = "true" ]; then
+            args+=(--to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
+
+      # Skipped for forks, whose pull_request GITHUB_TOKEN is read-only and cannot post comments.
+      - name: Comment the size difference on the pull request
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ steps.ctx.outputs.base_sha }}
+          SHA: ${{ steps.ctx.outputs.sha }}
+          # Invisible when rendered, and how the step recognizes its own comment on a later push.
+          COMMENT_MARKER: "<!-- ddev-size-diff-comment -->"
+        run: |
+          # ddev size diff exports a file only when something actually changed size, so a missing
+          # one means this pull request is size-neutral for that measurement.
+          section() {
+            printf '<details>\n<summary>%s</summary>\n\n' "$1"
+            if [ -f "$2" ]; then
+              # Skip the export's own "# Diff" heading; the summary above already says what this is.
+              tail -n +3 "$2"
+            else
+              printf 'No integration or dependency changed size.\n'
+            fi
+            printf '\n</details>\n\n'
+          }
+
+          {
+            # Marker lets the step find this comment again on the next push.
+            printf '%s\n' "$COMMENT_MARKER"
+            printf '## Disk usage change\n\n'
+            printf 'Merge commit `%s` compared against master `%s`.\n\n' "${SHA:0:7}" "${BASE_SHA:0:7}"
+            section 'Uncompressed' diff_uncompressed.md
+            section 'Compressed' diff_compressed.md
+          } > size_diff_comment.md
+
+          # Update this workflow's own previous comment rather than stacking a new one on each push.
+          # --jq runs per page, so restrict to the first match across all of them.
+          comment_id=$(
+            gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
+              --jq '.[] | select(.body | contains($ENV.COMMENT_MARKER)) | .id' \
+              | head -n 1
+          )
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id}" \
+              -F body=@size_diff_comment.md
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+              -F body=@size_diff_comment.md
+          fi
 
       - name: Upload JSON uncompressed sizes artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
