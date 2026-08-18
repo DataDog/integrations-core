@@ -17,7 +17,7 @@ import re
 import httpx
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchJob, Platform, UpdatePRComment
+from ddev.cli.ci.tests.messages import UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import COMMENT_MARKER
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
@@ -33,6 +33,7 @@ from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.github_errors import GitHubAuthenticationError
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
+from tests.cli.ci.tests.helpers import make_job
 from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient
 
 OWNER = "DataDog"
@@ -66,15 +67,7 @@ TOTAL_JOBS = 10
 
 
 def _job(index: int, *, reported: bool) -> JobProgress:
-    job = BatchJob(
-        name=f"target-{index}-py3.12-linux",
-        target=f"target-{index}",
-        runner="ubuntu-latest",
-        environment="py3.12",
-        platform=Platform.LINUX,
-        unit_tests=True,
-        e2e_tests=False,
-    )
+    job = make_job(f"target-{index}-py3.12-linux", target=f"target-{index}", environment="py3.12")
     attempts = (
         (
             JobAttemptProgress(
@@ -125,15 +118,7 @@ def _jobs_reported(body: str) -> int:
 
 def _failing_progress(*, done: bool = False) -> DispatcherProgress:
     """A snapshot with real failure detail, so the full body is bigger than the minimal one."""
-    job = BatchJob(
-        name="redis-py3.12-linux",
-        target="redis",
-        runner="ubuntu-latest",
-        environment="py3.12",
-        platform=Platform.LINUX,
-        unit_tests=True,
-        e2e_tests=False,
-    )
+    job = make_job("redis-py3.12-linux", target="redis", environment="py3.12")
     cases = tuple(
         JUnitTestCase(
             classname="tests.test_check",

@@ -15,7 +15,7 @@ import re
 
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchJob, Platform
+from ddev.cli.ci.tests.messages import BatchJob
 from ddev.cli.ci.tests.pr_comment import (
     COMMENT_CHARACTER_BUDGET,
     COMMENT_MARKER,
@@ -35,6 +35,8 @@ from ddev.cli.ci.tests.progress import (
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
+from ddev.utils.platform import PlatformName
+from tests.cli.ci.tests.helpers import make_job
 
 # GitHub's own ceiling, from the 422 it returns: "body is too long (maximum is 65536 characters)".
 # Not imported from the renderer on purpose — a test that reads the same constant it is checking
@@ -46,16 +48,11 @@ GITHUB_COMMENT_HARD_LIMIT = 65_536
 # ---------------------------------------------------------------------------
 
 
-def batch_job(target: str = "redis", environment: str = "py3.12", platform: Platform = Platform.LINUX) -> BatchJob:
-    return BatchJob(
-        name=f"{target}-{environment}-{platform}",
-        target=target,
-        runner="ubuntu-latest",
-        environment=environment,
-        platform=platform,
-        unit_tests=True,
-        e2e_tests=False,
-    )
+def batch_job(
+    target: str = "redis", environment: str = "py3.12", platform: PlatformName = PlatformName.LINUX
+) -> BatchJob:
+    """A job as the renderer sees it. Only target, environment and platform reach the output."""
+    return make_job(f"{target}-{environment}-{platform}", target=target, environment=environment, platform=platform)
 
 
 def failing_report(*test_names: str) -> JUnitReport:
