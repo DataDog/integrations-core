@@ -135,9 +135,8 @@ class SqlSimpleMetric(SqlPerfCounterMetric):
             for instance_name, counters in counters_by_instance.items():
                 if instance_name == "_Total":
                     continue
+                metric_tags = [*self.tags, '{}:{}'.format(self.tag_by, instance_name)]
                 for _object_name, cntr_value in counters:
-                    metric_tags = list(self.tags)
-                    metric_tags.append('{}:{}'.format(self.tag_by, instance_name))
                     self.report_function(self.metric_name, cntr_value, tags=metric_tags)
             return
 
@@ -171,6 +170,11 @@ class SqlFractionMetric(SqlPerfCounterMetric):
             instance_names = self._configured_instance_names()
 
         for instance_name in instance_names:
+            if self.instance == ALL_INSTANCES:
+                metric_tags = [*self.tags, '{}:{}'.format(self.tag_by, instance_name)]
+            else:
+                metric_tags = list(self.tags)
+
             for object_name, cntr_value in numerators.get(instance_name, ()):
                 if self.object_name and self.object_name != object_name:
                     continue
@@ -183,9 +187,6 @@ class SqlFractionMetric(SqlPerfCounterMetric):
                     )
                     continue
 
-                metric_tags = list(self.tags)
-                if self.instance == ALL_INSTANCES:
-                    metric_tags.append('{}:{}'.format(self.tag_by, instance_name))
                 self.report_fraction(cntr_value, base_value, metric_tags, previous_values=values_cache)
 
     @staticmethod
