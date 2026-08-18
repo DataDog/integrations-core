@@ -20,7 +20,7 @@ ISSUE_TYPE = 'openmetrics_metrics_dropped_by_configured_limit'
 
 @dataclass
 class MetricLimitIssueReporter:
-    legacy: bool
+    metric_filter_config: str
 
     def handle(
         self,
@@ -61,7 +61,7 @@ class MetricLimitIssueReporter:
                     'dropped_ratio': round(ratio, 4),
                     'limit_is_default': limit == check.DEFAULT_METRIC_LIMIT,
                 },
-                remediation=_remediation(legacy=self.legacy),
+                remediation=_remediation(metric_filter_config=self.metric_filter_config),
                 tags=[f'integration:{check.name}', 'openmetrics', 'metric-limit'],
             )
             return
@@ -83,8 +83,7 @@ def _severity(check: AgentCheck, ratio: float) -> int:
     return check.IssueSeverity['LOW']
 
 
-def _remediation(*, legacy: bool) -> dict[str, str | list[dict[str, int | str]]]:
-    metric_filter_options = 'metrics / ignore_metrics' if legacy else 'metrics / exclude_metrics'
+def _remediation(*, metric_filter_config: str) -> dict[str, str | list[dict[str, int | str]]]:
     return {
         'summary': (
             "Reduce what this endpoint sends to Datadog, or raise this instance's metric limit after checking the cost."
@@ -93,7 +92,7 @@ def _remediation(*, legacy: bool) -> dict[str, str | list[dict[str, int | str]]]
             {
                 'order': 1,
                 'text': (
-                    f'Decide what you actually need. Use {metric_filter_options} on this instance to stop collecting '
+                    f'Decide what you actually need. Use {metric_filter_config} on this instance to stop collecting '
                     'series you do not query, alert on, or keep.'
                 ),
             },

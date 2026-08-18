@@ -52,11 +52,11 @@ def reported_issues(datadog_agent: Any) -> list[dict[str, Any]]:
 def test_reporter_is_explicitly_owned_by_openmetrics_base_classes(datadog_agent: Any) -> None:
     check = create_check()
     assert isinstance(check.metric_limit_issue_reporter, MetricLimitIssueReporter)
-    assert check.metric_limit_issue_reporter.legacy is False
+    assert check.metric_limit_issue_reporter.metric_filter_config == 'metrics / exclude_metrics'
 
     legacy_check = OpenMetricsBaseCheck('legacy_openmetrics_test', {}, {})
     assert isinstance(legacy_check.metric_limit_issue_reporter, MetricLimitIssueReporter)
-    assert legacy_check.metric_limit_issue_reporter.legacy is True
+    assert legacy_check.metric_limit_issue_reporter.metric_filter_config == 'metrics / ignore_metrics'
 
     check.observed = 20
     check.run()

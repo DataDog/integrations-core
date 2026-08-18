@@ -64,7 +64,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         When overriding, make sure to call this (the parent's) __init__ first!
         """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
-        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(legacy=False)
+        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
+            metric_filter_config='metrics / exclude_metrics'
+        )
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]

@@ -89,7 +89,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             default_namespace = legacy_kwargs_in_args[1]
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
-        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(legacy=True)
+        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
+            metric_filter_config='metrics / ignore_metrics'
+        )
         self.config_map = {}
         self._http_handlers = {}
         self.default_instances = default_instances
