@@ -1,20 +1,25 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
-from contextlib import ExitStack, contextmanager
+from contextlib import contextmanager
 
 import pytest
 
 from datadog_checks.dev import TempDir, run_command
+from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.fs import path_join
 from datadog_checks.dev.kind import KindLoad, kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 
 from .common import MOCKED_INSTANCE, PORT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CHECK_ROOT = os.path.dirname(HERE)
 KIND_DIR = os.path.join(HERE, 'kind')
+KUBECONFIG_STATE = 'velero_kubeconfig'
+NODE_AGENT_IP_STATE = 'velero_node_agent_ip'
+NODE_AGENT_NAME_STATE = 'velero_node_agent_name'
 
 
 @contextmanager
@@ -56,17 +61,39 @@ def setup_velero():
         ],
         check=True,
     )
+    node_agent = get_node_agent()
+    save_state(NODE_AGENT_IP_STATE, node_agent['status']['podIP'])
+    save_state(NODE_AGENT_NAME_STATE, node_agent['metadata']['name'])
 
 
-def get_instances(velero_host, velero_port, node_agent_host, node_agent_port):
+def get_node_agent():
+    result = run_command(
+        ['kubectl', 'get', 'pods', '--namespace', 'velero', '--output', 'json'],
+        capture='out',
+        check=True,
+    )
+    node_agent_pods = [
+        pod
+        for pod in json.loads(result.stdout)['items']
+        if any(
+            owner.get('kind') == 'DaemonSet' and owner.get('name') == 'node-agent'
+            for owner in pod['metadata'].get('ownerReferences', [])
+        )
+    ]
+    if len(node_agent_pods) != 1 or not node_agent_pods[0].get('status', {}).get('podIP'):
+        raise RuntimeError(f'Expected one ready Velero node-agent pod, found {len(node_agent_pods)}')
+    return node_agent_pods[0]
+
+
+def get_instances(node_agent_ip):
     return {
         'instances': [
             {
-                'openmetrics_endpoint': f"http://{velero_host}:{velero_port}/metrics",
+                'openmetrics_endpoint': f"http://velero.velero.svc.cluster.local:{PORT}/metrics",
                 'tags': ['test:tag'],
             },
             {
-                'openmetrics_endpoint': f"http://{node_agent_host}:{node_agent_port}/metrics",
+                'openmetrics_endpoint': f"http://{node_agent_ip}:{PORT}/metrics",
                 'tags': ['test:tag'],
             },
         ]
@@ -75,28 +102,38 @@ def get_instances(velero_host, velero_port, node_agent_host, node_agent_port):
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    kind_config = os.path.join(KIND_DIR, 'kind-config.yaml')
     custom_kubectl_image_tag = "custom-kubectl:latest"
 
     with TempDir('helm_dir') as helm_dir:
         with kind_run(
             wrappers=[build_and_load_kubectl_image(custom_kubectl_image_tag)],
             conditions=[KindLoad(custom_kubectl_image_tag), setup_velero],
-            kind_config=kind_config,
             env_vars={
                 "HELM_CACHE_HOME": path_join(helm_dir, 'Caches'),
                 "HELM_CONFIG_HOME": path_join(helm_dir, 'Preferences'),
             },
         ) as kubeconfig:
-            with ExitStack() as stack:
-                ip_ports = [
-                    stack.enter_context(port_forward(kubeconfig, 'velero', PORT, ressource, name))
-                    for ressource, name in [('service', 'velero'), ('daemonset', 'node-agent')]
-                ]
+            save_state(KUBECONFIG_STATE, kubeconfig)
+            instances = get_instances(get_state(NODE_AGENT_IP_STATE))
+            metadata = {
+                'agent_type': 'kubernetes',
+                'kubernetes': {
+                    'kubeconfig': kubeconfig,
+                    'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'velero', 'data', 'auto_conf.yaml'),
+                },
+            }
 
-            instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1])
+            yield instances, metadata
 
-            yield instances
+
+@pytest.fixture(scope='session')
+def velero_kubeconfig():
+    return get_state(KUBECONFIG_STATE)
+
+
+@pytest.fixture(scope='session')
+def velero_node_agent_name():
+    return get_state(NODE_AGENT_NAME_STATE)
 
 
 @pytest.fixture
