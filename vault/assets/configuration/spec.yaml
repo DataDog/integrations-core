@@ -13,6 +13,11 @@ files:
         no_token: "true"
       - api_url: "http://{service.host}:{port.number}/v1"
         no_token: "true"
+      - use_openmetrics: "true"
+        api_url: "https://{service.host}:{port.number}/v1"
+        no_token: "true"
+      - api_url: "https://{service.host}:{port.number}/v1"
+        no_token: "true"
   options:
   - template: init_config
     options:
