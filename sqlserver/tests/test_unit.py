@@ -849,7 +849,12 @@ def test_SqlFractionMetric_group_by_instance(caplog):
 
 # sys.dm_os_performance_counters declares the name columns as nchar(128), so every value comes back
 # blank-padded. Pad the fixtures the same way to exercise the stripping.
-def _padded_counter_row(counter_name, instance_name, object_name, cntr_value):
+def _padded_counter_row(
+    counter_name: str,
+    instance_name: str,
+    object_name: str,
+    cntr_value: int,
+) -> tuple[str, str, str, int]:
     return (counter_name.ljust(128), instance_name.ljust(128), object_name.ljust(128), cntr_value)
 
 
