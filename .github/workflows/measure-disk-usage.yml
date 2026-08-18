@@ -12,8 +12,98 @@ env:
   PYTHON_VERSION: "3.13"
   INTEGRATIONS_WHEELS_STORAGE: "dev"
 
+# The absolute sizes and the diff are independent measurements, so they run as two jobs in
+# parallel. Serialising them would delay whichever came second: on a pull request the comment is
+# what a reader is waiting for, and on master the absolute sizes are the primary telemetry.
 jobs:
   measure-disk-usage:
+    name: Measure absolute sizes
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      # needed for dd-sts
+      id-token: write
+    steps:
+      # On pull_request, github.sha is the ephemeral merge commit of the PR head into the base
+      # branch, which is the state the repository would be in once the PR lands.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Get Datadog credentials
+        id: dd-sts
+        if: github.event_name == 'push'
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-core-api-key
+
+      - name: Install ddev
+        uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure ddev
+        run: ddev config override
+
+      - name: Resolve measurement context
+        id: ctx
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          echo "sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "send=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "send=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Measure disk usage (Uncompressed)
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          SHA: ${{ steps.ctx.outputs.sha }}
+          SEND: ${{ steps.ctx.outputs.send }}
+        run: |
+          args=(-v size status --format json)
+          if [ "$SEND" = "true" ]; then
+            args+=(--commit "$SHA" --to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
+
+      - name: Measure disk usage (Compressed)
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          SHA: ${{ steps.ctx.outputs.sha }}
+          SEND: ${{ steps.ctx.outputs.send }}
+        run: |
+          args=(-v size status --format json --compressed)
+          if [ "$SEND" = "true" ]; then
+            args+=(--commit "$SHA" --to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
+
+      - name: Upload JSON uncompressed sizes artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: status_uncompressed.json
+          path: status_uncompressed.json
+          if-no-files-found: error
+
+      - name: Upload JSON compressed sizes artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: status_compressed.json
+          path: status_compressed.json
+          if-no-files-found: error
+
+  measure-disk-usage-diff:
+    name: Measure size difference
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -22,9 +112,6 @@ jobs:
       # needed to post the size diff comment on pull requests
       pull-requests: write
     steps:
-      # On pull_request, github.sha is the ephemeral merge commit of the PR head into the base
-      # branch. Measuring that rather than the head commit is what makes the diff below reflect
-      # the size the repository would have once the PR lands.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.sha }}
@@ -71,35 +158,12 @@ jobs:
           # branch's first push and points at a discarded commit after a force-push.
           echo "base_sha=$(git rev-parse "${HEAD_SHA}^1")" >> "$GITHUB_OUTPUT"
 
-      - name: Measure disk usage (Uncompressed)
-        env:
-          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ steps.ctx.outputs.sha }}
-          SEND: ${{ steps.ctx.outputs.send }}
-        run: |
-          args=(-v size status --format json)
-          if [ "$SEND" = "true" ]; then
-            args+=(--commit "$SHA" --to-dd-key "$DD_API_KEY")
-          fi
-          ddev "${args[@]}"
-
-      - name: Measure disk usage (Compressed)
-        env:
-          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ steps.ctx.outputs.sha }}
-          SEND: ${{ steps.ctx.outputs.send }}
-        run: |
-          args=(-v size status --format json --compressed)
-          if [ "$SEND" = "true" ]; then
-            args+=(--commit "$SHA" --to-dd-key "$DD_API_KEY")
-          fi
-          ddev "${args[@]}"
-
-      # The diff is supplementary to the absolute sizes measured above: on master it adds the
-      # per-commit deltas, and on a pull request it produces the comment. Neither is worth failing
-      # the workflow over, so both diff steps continue on error and the comment step tolerates a
-      # missing export.
+      # The diff is supplementary to the absolute sizes: on master it adds the per-commit deltas,
+      # and on a pull request it produces the comment. Neither is worth failing the workflow over,
+      # so both steps continue on error and the comment reports whichever one did not produce a
+      # measurement.
       - name: Measure disk usage difference (Uncompressed)
+        id: diff-uncompressed
         continue-on-error: true
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
@@ -114,6 +178,7 @@ jobs:
           ddev "${args[@]}"
 
       - name: Measure disk usage difference (Compressed)
+        id: diff-compressed
         continue-on-error: true
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
@@ -136,20 +201,29 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BASE_SHA: ${{ steps.ctx.outputs.base_sha }}
           SHA: ${{ steps.ctx.outputs.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          UNCOMPRESSED_OUTCOME: ${{ steps.diff-uncompressed.outcome }}
+          COMPRESSED_OUTCOME: ${{ steps.diff-compressed.outcome }}
           # Invisible when rendered, and how the step recognizes its own comment on a later push.
           COMMENT_MARKER: "<!-- ddev-size-diff-comment -->"
         run: |
-          # ddev size diff exports a file only when something actually changed size, so a missing
-          # one means this pull request is size-neutral for that measurement.
+          # ddev size diff exports a file only when something changed size, so an absent export
+          # means either a size-neutral pull request or a measurement that never finished. Those
+          # must not read the same: reporting "nothing changed" for a crashed measurement would be
+          # actively misleading, so the step's outcome decides which it was.
           # <strong> rather than markdown emphasis: GitHub does not reliably parse markdown inside a
           # raw <summary> tag.
           section() {
-            printf '<details>\n<summary><strong>%s</strong></summary>\n\n' "$1"
-            if [ -f "$2" ]; then
+            local title=$1 file=$2 outcome=$3
+            printf '<details>\n<summary><strong>%s</strong></summary>\n\n' "$title"
+            if [ -f "$file" ]; then
               # Skip the export's own "# Diff" heading; the summary above already says what this is.
-              tail -n +3 "$2"
-            else
+              tail -n +3 "$file"
+            elif [ "$outcome" = "success" ]; then
               printf 'No integration or dependency changed size.\n'
+            else
+              printf ':warning: The %s measurement failed, so no size difference is available. ' "${title,,}"
+              printf 'See [the workflow run](%s).\n' "$RUN_URL"
             fi
             printf '\n</details>\n\n'
           }
@@ -159,8 +233,8 @@ jobs:
             printf '%s\n' "$COMMENT_MARKER"
             printf '## Disk usage change\n\n'
             printf 'Merge commit `%s` compared against master `%s`.\n\n' "${SHA:0:7}" "${BASE_SHA:0:7}"
-            section 'Uncompressed' diff_uncompressed.md
-            section 'Compressed' diff_compressed.md
+            section 'Uncompressed' diff_uncompressed.md "$UNCOMPRESSED_OUTCOME"
+            section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
           } > size_diff_comment.md
 
           # Update this workflow's own previous comment rather than stacking a new one on each push.
@@ -177,17 +251,3 @@ jobs:
             gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
               -F body=@size_diff_comment.md
           fi
-
-      - name: Upload JSON uncompressed sizes artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: status_uncompressed.json
-          path: status_uncompressed.json
-          if-no-files-found: error
-
-      - name: Upload JSON compressed sizes artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: status_compressed.json
-          path: status_compressed.json
-          if-no-files-found: error
