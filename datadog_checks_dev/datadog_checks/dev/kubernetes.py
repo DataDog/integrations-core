@@ -170,19 +170,21 @@ def _build_service_from_pod(
 def _assert_pod_stable(initial: Mapping[str, Any], current: Mapping[str, Any], candidate_index: int) -> None:
     initial_uid = initial['metadata']['uid']
     current_uid = current['metadata']['uid']
+    initial_pod_status = initial.get('status', {})
+    current_pod_status = current.get('status', {})
     if current_uid != initial_uid:
         raise AssertionError(f'Pod changed while probing candidate #{candidate_index}: {initial_uid} -> {current_uid}')
     if current.get('metadata', {}).get('deletionTimestamp'):
         raise AssertionError(f'Pod is terminating after probing candidate #{candidate_index}')
 
-    phase = current.get('status', {}).get('phase')
+    phase = current_pod_status.get('phase')
     if phase != 'Running':
         raise AssertionError(f'Pod phase is {phase!r} after probing candidate #{candidate_index}')
 
     ready = next(
         (
             condition.get('status') == 'True'
-            for condition in current.get('status', {}).get('conditions', [])
+            for condition in current_pod_status.get('conditions', [])
             if condition.get('type') == 'Ready'
         ),
         False,
@@ -191,8 +193,8 @@ def _assert_pod_stable(initial: Mapping[str, Any], current: Mapping[str, Any], c
         raise AssertionError(f'Pod is not ready after probing candidate #{candidate_index}')
 
     for status_key in ('initContainerStatuses', 'containerStatuses', 'ephemeralContainerStatuses'):
-        initial_statuses = {status['name']: status for status in initial.get('status', {}).get(status_key, [])}
-        current_statuses = {status['name']: status for status in current.get('status', {}).get(status_key, [])}
+        initial_statuses = {status['name']: status for status in initial_pod_status.get(status_key, [])}
+        current_statuses = {status['name']: status for status in current_pod_status.get(status_key, [])}
         if current_statuses.keys() != initial_statuses.keys():
             raise AssertionError(f'Pod containers changed while probing candidate #{candidate_index}')
 
