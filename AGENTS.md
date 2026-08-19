@@ -31,13 +31,13 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 
 #### Generating New Code
 
-When generating python code, always add type hinting to the methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
+Add type hints to new functions and methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
 
-If a method yields a value but does not return anything or accept anything sent to the generator, type it as `Iterator` rather than `Generator`. This makes the method's contract explicit to the caller: something to iterate over, nothing more.
+Type simple generators as `Iterator[T]`. Use `Generator[YieldType, SendType, ReturnType]` when sent or returned values are part of their behavior.
 
 #### Refactoring Existing Code
 
-When refactoring existing code, never add type hints to a method that wasn't already type-hinted, unless explicitly asked to. This is one instance of a broader rule: keep diffs focused on the task at hand. Don't use a refactor as an opportunity to also add type hints, rename things, or otherwise "clean up" code you weren't asked to touch — it obscures the actual change under review and makes the diff harder to reason about.
+When refactoring existing code, add or update type hints when they support the change, but avoid unrelated annotation-only churn. More broadly, keep diffs focused on the task at hand rather than using a refactor to rename or otherwise clean up unrelated code.
 
 #### The Case of AnyStr
 
@@ -57,31 +57,27 @@ This way, `a` and `b` can each be `str` or `bytes`, but can't be mixed with each
 
 ### Naming: Leading Underscores
 
-Most code in this repository is not published as a public library API — it lives behind package boundaries, in integrations, in test suites, or in scripts nobody imports. "Not part of the public API" is the *default* state of almost everything here, so a leading underscore is not how we signal it. **Do not add a leading underscore to a method or variable name unless it matches one of the narrow exceptions below.** This applies everywhere, including test files, fixtures, internal tooling, and one-off scripts — not just files intended for external/public consumption.
+Most code in this repository belongs to applications rather than public libraries, so do not assume that every internal name needs a leading underscore. Use naming that communicates the role and intended scope of each name:
 
-This rule is about the single-leading-underscore privacy convention; it does not apply to dunder methods (`__init__`, `__repr__`, `__enter__`, `__exit__`, `__iter__`, and similar). Those are Python protocol hooks, not a privacy signal — implement them with their required names whenever the protocol calls for them.
+- Do not prefix class names or uppercase module constants with a leading underscore. For example, use `GitRemote` and `GIT_REMOTE_PATTERNS`, not `_GitRemote` and `_GIT_REMOTE_PATTERNS`.
+- A single leading underscore is appropriate for functions, methods, attributes, and module variables that are helpers or implementation state intended only for use within their defining module or class.
+- Do not add a leading underscore to framework callbacks, overridden methods, entry points, fixtures, or names imported and used by other modules.
+- For reusable library code, such as `datadog_checks.base` and `ddev`, consider the documented interface, existing `__all__` declarations, and actual call sites when deciding whether a name is internal.
+- Follow established naming in the surrounding code. Do not rename existing names solely to enforce this guidance.
+- A leading underscore communicates intended scope; it does not enforce privacy. It has no privacy meaning for ordinary local variables, although `_` or `_name` may identify intentionally unused values.
 
-**Methods** — a leading underscore is allowed only:
-
-1. On instance methods of a class, to flag that the method is not part of that class's public API.
-2. On functions in a module that is explicitly designed as a reusable library module, when the function has non-obvious side effects or behavior that its name alone doesn't make clear.
-
-In every other case — module-level/free functions, helpers in test files, functions in scripts, functions in files no one else will ever import — do **not** add a leading underscore, even if the function feels "internal" or "private". Internal is the default; it doesn't need marking.
-
-**Variables** — a leading underscore is allowed only for Pydantic model private attributes (e.g. `_cache: dict = PrivateAttr(default_factory=dict)`). That is the only case. This includes module constants: do not prefix uppercase module constants with a leading underscore (for example `_GIT_REMOTE_PATTERNS`); name them without the underscore instead (`GIT_REMOTE_PATTERNS`). The same applies to class attributes, instance attributes outside Pydantic models, and local variables.
-
-If you're unsure whether something qualifies, it doesn't — leave the underscore off.
+This rule concerns the single-leading-underscore convention. It does not apply to dunder methods (`__init__`, `__repr__`, `__enter__`, `__exit__`, `__iter__`, and similar), which must use their protocol-defined names.
 
 ### Docstrings and Comments
 
-- Use concise one-liner docstrings for most methods; method names should be self-descriptive enough that little else is needed.
-- Multi-line docstrings with Args/Returns are acceptable only for important public interface methods that genuinely need detailed documentation.
-- Avoid verbose docstrings for methods that are internal or not meant for outside callers. Note that "internal"/"private" here is a judgment call about who's expected to call the method — it has nothing to do with the leading-underscore naming rule above. Docstring verbosity and naming are two separate decisions; don't infer one from the other.
-- Prefer self-explanatory code over inline comments. If a comment is genuinely needed, keep it to one line — code clarity should come from descriptive names, not from comments compensating for unclear ones.
+- Use concise docstrings for straightforward behavior.
+- Use longer docstrings when a public or internal interface has a non-obvious contract, constraints, side effects, or error behavior.
+- Prefer self-explanatory code. Add comments to explain non-obvious reasoning, invariants, workarounds, or external constraints.
+- Keep comments concise, but use multiple lines when necessary for clarity.
 
 ### Avoiding Duplication
 
-Extract small, focused helper functions to eliminate duplicated logic rather than repeating code blocks or leaning on comments to explain repetition.
+Extract duplicated logic when it represents the same concept and a shared helper improves clarity or consistency. Do not introduce an abstraction merely because two small code blocks look similar.
 
 ## Configuration Models
 
@@ -90,8 +86,8 @@ Extract small, focused helper functions to eliminate duplicated logic rather tha
 Don't modify files in `**/config_models/*.py` directly. To change those files, edit `assets/configuration/spec.yaml` and then run:
 
 ```shell
-ddev -x validate config -s <INTEGRATION_NAME>
-ddev -x validate models -s <INTEGRATION_NAME>
+ddev validate config -s <INTEGRATION_NAME>
+ddev validate models -s <INTEGRATION_NAME>
 ```
 
 ## Development Workflow
@@ -169,6 +165,23 @@ ddev env test --dev --recreate <INTEGRATION> <ENV>
 
 For E2E tests, `--recreate` performs `docker compose down --volumes` followed by `docker compose up -d --force-recreate`.
 
+### Writing Tests
+
+These rules cover what to test. For how test code itself is organized in `ddev`, see `ddev/tests/AGENTS.md`.
+
+A test must be justified by the code as it stands now. Someone reading the test with no knowledge of how the code got there should be able to see why the assertion matters. This rules out two patterns that keep showing up:
+
+- Tests that only exist because of the development history, such as asserting the code no longer does what an earlier iteration did. There are infinitely many things the code does not do, so picking one is arbitrary. The exception is a regression test for a bug that actually shipped; it asserts the correct observable behavior and references the issue or PR.
+- Tests of language or framework mechanics: that a constructor assigned the attributes passed to it, that a dataclass compares equal, that an enum has the values it was declared with, that a property returns what was just set, that a mock returns what it was configured to return.
+
+What to do instead:
+
+- Test observable behavior at the unit's boundary: given this input or state, what does it return, produce, or change? A test that would still pass after a reimplementation with the same contract is testing behavior; one that breaks is usually testing implementation details.
+- Before adding a test, state in one sentence the bug it would catch and why that bug matters. If that sentence cannot be written, do not add the test.
+- Do not repeat coverage across layers. Edge cases belong at the lowest layer that owns the logic; layers above it cover wiring and integration, so they should have fewer tests, not more.
+- Parameterize variants of the same behavior with `pytest.mark.parametrize` instead of copying near-identical test functions.
+- Prefer a small number of meaningful tests over a high count. Do not pad a suite to look thorough.
+
 ### Linting and Formatting
 
 Always run linting and formatting through `ddev`; never invoke `ruff`, `black`, or `mypy` directly. CI runs them inside `ddev`'s pinned hatch lint environment, and a different locally installed version can report different results — passing locally while failing CI, or the other way around.
@@ -225,6 +238,7 @@ echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics
 These guidelines apply to automated code review (the Codex review bot). They do not relax any requirement above for code you author.
 
 - Do not raise findings for a missing changelog entry. Changelog files are named `<INTEGRATION>/changelog.d/<PR_NUMBER>.<TYPE>`, so they can only be created after the PR number is assigned; their absence when a PR is first opened is expected rather than a defect. The requirement is already enforced by the `check_changelog` job in `.github/workflows/pr-quick-check.yml`.
+- Flag tests that violate [Writing Tests](#writing-tests). For each finding, say which behavior the test fails to verify rather than only naming the pattern.
 - When a PR changes the `metric_type` column in `metadata.csv`, verify that the new type uses the correct in-app (backend) type, not the submission type. The submission-to-backend mapping is defined in `datadog_checks_base/datadog_checks/base/stubs/aggregator.py` (`METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP`). The valid in-app types for `metadata.csv` are `gauge`, `count`, and `rate`. The full mapping is: `gauge` → `gauge`, `rate` → `gauge`, `count` → `count`, `monotonic_count` → `count`, `counter` → `rate`, `histogram` → `rate`, `historate` → `rate`. For example, a metric submitted as a `rate` should appear as `gauge` in `metadata.csv`, and a metric submitted as a `monotonic_count` should appear as `count`.
 
 ## Pull Requests

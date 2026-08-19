@@ -131,7 +131,7 @@ class DatabasesData:
         base_event = {
             "host": None,
             "agent_version": datadog_agent.get_version(),
-            "dbms": "mysql",
+            "dbms": self._check.dbms,
             "kind": "mysql_databases",
             "collection_interval": collection_interval,
             "dbms_version": None,

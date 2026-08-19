@@ -167,7 +167,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             rate_limit=1 / collection_interval,
             run_sync=config.query_samples.run_sync,
             enabled=config.query_samples.enabled or config.query_activity.enabled,
-            dbms="postgres",
+            dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
@@ -231,7 +231,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._time_since_last_activity_event = 0
         self._pg_stat_activity_cols = None
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._explain_parameterized_queries = None
         self._collection_strategy_cache = None

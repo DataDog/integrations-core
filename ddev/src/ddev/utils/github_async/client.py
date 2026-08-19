@@ -10,13 +10,18 @@ import re
 import zipfile
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager, suppress
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Literal, Self, overload
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
+from ddev.utils.github_errors import (
+    GITHUB_AUTHENTICATION_STATUS_CODES,
+    GitHubAuthenticationError,
+    github_secondary_rate_limit_wait,
+)
 from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
 
 from .defaults import default_github_rate_limiter
@@ -180,12 +185,15 @@ class AsyncGitHubClient:
         """Whether *response* is a retryable rate-limit rejection, by GitHub's own discrimination rule.
 
         A 403 is also used for plain permission denials, which waiting cannot fix; retrying one would
-        sleep out a pause (up to a full window) and then fail identically. Only header-confirmed
-        rate-limit responses are retryable.
+        sleep out a pause (up to a full window) and then fail identically. Only responses confirmed
+        by rate-limit headers or GitHub's secondary-limit message are retryable.
         """
         if response.status_code not in (403, 429):
             return False
-        return "retry-after" in response.headers or response.headers.get("x-ratelimit-remaining") == "0"
+        return (
+            github_secondary_rate_limit_wait(response) is not None
+            or response.headers.get("x-ratelimit-remaining") == "0"
+        )
 
     async def _execute_request(
         self,
@@ -203,6 +211,9 @@ class AsyncGitHubClient:
         # exception, so one request's 403 protects every other in-flight and future request in this
         # process.
         snapshot = github_rate_limit_snapshot(response.headers)
+        secondary_rate_limit_wait = github_secondary_rate_limit_wait(response)
+        if secondary_rate_limit_wait is not None:
+            snapshot = replace(snapshot or NULL_SNAPSHOT, retry_after=secondary_rate_limit_wait)
         if snapshot is not None:
             self._rate_limiter.observe(snapshot)
         response.raise_for_status()
@@ -236,8 +247,14 @@ class AsyncGitHubClient:
                     # the action. (Transport errors are never retried, and are not caught here: after
                     # one we cannot know whether the action executed.) Give up on the last attempt or
                     # on a non-rate-limit status, which waiting cannot fix.
-                    if attempt == self._max_rate_limit_retries or not self._is_rate_limit_response(exc.response):
-                        raise
+                    is_rate_limit_response = self._is_rate_limit_response(exc.response)
+                    if is_rate_limit_response:
+                        if attempt == self._max_rate_limit_retries:
+                            raise
+                        continue
+                    if exc.response.status_code in GITHUB_AUTHENTICATION_STATUS_CODES:
+                        raise GitHubAuthenticationError.from_http_status_error(exc) from exc
+                    raise
         raise RuntimeError("unreachable: the retry loop always returns or raises")  # pragma: no cover
 
     async def _paginated_request(
@@ -484,6 +501,45 @@ class AsyncGitHubClient:
         response = await self._request("GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", timeout=timeout)
         return self._parse_response(response, PullRequest)
 
+    async def list_pull_requests(
+        self,
+        owner: str,
+        repo: str,
+        state: Literal["open", "closed", "all"] = "open",
+        head: str | None = None,
+        base: str | None = None,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> GitHubResponse[list[PullRequest]]:
+        """
+        Calls the GitHub API to list pull requests in a repository.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#list-pull-requests
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            state: Filter by pull request state. One of "open", "closed", or "all".
+            head: Filter by head branch in the format "user:ref-name" (or "org:ref-name"). GitHub
+                matches this against the stored head ref, so a closed PR is still returned even after
+                its head branch has been deleted.
+            base: Filter by base branch name.
+            per_page: Number of results per page (max 100). Only the first page is fetched.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[list[PullRequest]]: The validated pull requests on the first result page.
+        """
+        params: dict[str, Any] = {"state": state, "per_page": per_page}
+        if head is not None:
+            params["head"] = head
+        if base is not None:
+            params["base"] = base
+        response = await self._request("GET", f"/repos/{owner}/{repo}/pulls", timeout=timeout, params=params)
+        pulls = [PullRequest.model_validate(item) for item in response.json()]
+        return GitHubResponse[list[PullRequest]].model_validate({"data": pulls, "headers": dict(response.headers)})
+
     async def create_pull_request(
         self,
         owner: str,
@@ -711,6 +767,8 @@ class AsyncGitHubClient:
             redirect_response = await self._request(
                 "GET", archive_download_url, timeout=timeout, follow_redirects=False
             )
+        except GitHubAuthenticationError:
+            raise
         except httpx.HTTPStatusError as exc:
             # httpx.raise_for_status() treats the expected 302 as an error since it isn't a 2xx;
             # recover the response from the exception so the redirect can still be inspected below.

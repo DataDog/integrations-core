@@ -606,13 +606,15 @@ files:
             example: true
         - name: disable_secondary_tags
           description: |
-            Disable the secondary tags on query aggregate metrics, such as `user` and `database`. This is an optimization
-            for certain database workloads which result in long metric collection times.
+            Drop the `user` and `database` aggregate dimensions from query metrics. Resolving them requires extra
+            `sys.dm_exec_plan_attributes` lookups and joins, so removing them is an optimization for database
+            workloads which result in long metric collection times. Query metrics lose the `db` tag as a result.
+            Azure SQL Database is the exception: the check connects to a single database there, so the database is
+            still reported from the connection itself, which adds no aggregate dimension and no collection cost.
           value:
             type: boolean
             example: false
           hidden: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query metric collection interval (in seconds). Each collection involves one or more queries to
@@ -621,14 +623,12 @@ files:
           value:
             type: number
             example: 60
-          fleet_configurable: false
         - name: dm_exec_query_stats_row_limit
           description: |
             Set the maximum number of query stats rows that can be retrieved in a single check run.
           value:
             type: integer
             example: 10000
-          fleet_configurable: false
         - name: samples_per_hour_per_query
           description: |
             Set the rate limit for the number of query sample events that are ingested per hour and per normalized
@@ -636,7 +636,6 @@ files:
           value:
             type: integer
             example: 4
-          fleet_configurable: false
         - name: enforce_collection_interval_deadline
           description: |
             By default, plan collection stops if it is time for the next run of the query metrics & plans loop. This
@@ -647,7 +646,6 @@ files:
             type: boolean
             example: True
           hidden: true
-          fleet_configurable: false
         - name: max_queries
           description: |
             Limit the number of queries sent to the backend.
@@ -658,7 +656,6 @@ files:
             example: 250
             display_default: 250
           hidden: true
-          fleet_configurable: false
         - name: lookback_window
           description: |
             Queries whose last execution completed after the lookback window are excluded from
@@ -668,7 +665,6 @@ files:
             type: integer
             display_default: 2 * collection_interval
             example: 600
-          fleet_configurable: false
         - name: collect_plans
           description: |
             Set to `false` to disable collection of query execution plans while keeping query
@@ -726,7 +722,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the activity collection interval in seconds. Each collection involves querying several
@@ -737,7 +732,6 @@ files:
             type: number
             example: 10
           hidden: true
-          fleet_configurable: false
     - name: stored_procedure_characters_limit
       description: |
         Limit the number of characters of the text of a stored procedure that is collected.
@@ -1382,6 +1376,119 @@ files:
             type: number
             example: 100
           fleet_configurable: false
+    - name: data_observability
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Configure the Data Observability async job, which executes monitoring
+        queries delivered via Remote Configuration.
+      options:
+        - name: enabled
+          fleet_configurable: true
+          description: Enable the Data Observability job.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: collection_interval
+          fleet_configurable: true
+          description: |
+            How often (in seconds) the job wakes up to check which queries are
+            due. Individual queries have their own interval_seconds. This value
+            must be less than or equal to the smallest interval_seconds across
+            all configured queries (i.e. the least common denominator), otherwise
+            queries with short intervals will be delayed.
+          value:
+            type: number
+            example: 10
+            display_default: 10
+        - name: run_sync
+          hidden: true
+          description: Run the job synchronously (for testing).
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: config_id
+          hidden: true
+          description: |
+            Unique identifier of the Remote Configuration payload that populated
+            this data_observability block. Set automatically by the Datadog Agent
+            Go RC handler when it delivers query configuration; do not set this
+            field manually. It is forwarded as-is on every emitted event so that
+            the intake can correlate results back to the originating RC config.
+          value:
+            type: string
+        - name: queries
+          hidden: true
+          description: |
+            List of monitor queries to execute. Populated automatically by the
+            Datadog Agent Go RC handler when Remote Configuration delivers a
+            DO_QUERY_ACTIONS payload; do not set this field manually. Each entry
+            describes one SQL monitoring query along with its scheduling
+            parameters and entity metadata.
+          value:
+            type: array
+            items:
+              type: object
+              required:
+                - monitor_id
+                - dbname
+                - query
+                - entity
+              properties:
+              - name: monitor_id
+                type: integer
+              - name: dbname
+                type: string
+              - name: type
+                type: string
+              - name: query
+                type: string
+              - name: interval_seconds
+                description: |
+                  How often (in seconds) to run this query. Ignored when schedule is set
+                  (see schedule for the precedence rule).
+                type: integer
+              - name: schedule
+                description: |
+                  A standard 5-field cron expression (minute hour dom month dow) specifying
+                  when to run this query. When both schedule and interval_seconds are set,
+                  schedule wins and interval_seconds is ignored. If neither is set, the
+                  query is skipped at runtime with a warning.
+                type: string
+              - name: query_timeout
+                type: integer
+                description: |
+                  Per-query statement timeout in milliseconds. Overrides the
+                  connection-level DEFAULT_COMMAND_TIMEOUT (10 s) for this query.
+                  Converted to seconds (ceil) before being applied. Minimum 1 s.
+              - name: entity
+                type: object
+                required:
+                  - platform
+                  - account
+                  - database
+                  - schema
+                  - table
+                properties:
+                - name: platform
+                  type: string
+                - name: account
+                  type: string
+                - name: database
+                  type: string
+                - name: schema
+                  type: string
+                - name: table
+                  type: string
+              - name: custom_sql_select_fields
+                type: object
+                properties:
+                - name: metric_config_id
+                  type: integer
+                - name: entity_id
+                  type: string
     - template: instances/default
   - template: logs
     example:

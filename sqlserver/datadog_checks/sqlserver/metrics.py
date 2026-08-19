@@ -96,29 +96,27 @@ class SqlSimpleMetric(BaseSqlServerMetric):
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
-        return cls._fetch_generic_values(cursor, counters_list, logger)
+        rows, _ = cls._fetch_generic_values(cursor, counters_list, logger)
+        # The name columns are nchar(128), so every value arrives blank-padded. Strip once here and group by
+        # counter name so each metric only walks its own rows: with autodiscovery both the number of metrics
+        # and the number of rows grow with the database count, making a per-metric scan quadratic.
+        results = defaultdict(list)
+        for counter_name, instance_name, object_name, cntr_value in rows:
+            results[counter_name.strip()].append((instance_name.strip(), object_name.strip(), cntr_value))
+        return results, None
 
-    def fetch_metric(self, rows, columns, values_cache=None):
-        for counter_name_long, instance_name_long, object_name, cntr_value in rows:
-            counter_name = counter_name_long.strip()
-            instance_name = instance_name_long.strip()
-            object_name = object_name.strip()
-            if counter_name.strip() == self.sql_name:
-                matched = False
+    def fetch_metric(self, results, columns, values_cache=None):
+        for instance_name, object_name, cntr_value in results.get(self.sql_name, ()):
+            if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
+                (instance_name == self.instance or instance_name == self.physical_db_name)
+                and (not self.object_name or object_name == self.object_name)
+            ):
                 metric_tags = list(self.tags)
-
-                if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
-                    (instance_name == self.instance or instance_name == self.physical_db_name)
-                    and (not self.object_name or object_name == self.object_name)
-                ):
-                    matched = True
-
-                if matched:
-                    if self.instance == ALL_INSTANCES:
-                        metric_tags.append('{}:{}'.format(self.tag_by, instance_name.strip()))
-                    self.report_function(self.metric_name, cntr_value, tags=metric_tags)
-                    if self.instance != ALL_INSTANCES:
-                        break
+                if self.instance == ALL_INSTANCES:
+                    metric_tags.append('{}:{}'.format(self.tag_by, instance_name))
+                self.report_function(self.metric_name, cntr_value, tags=metric_tags)
+                if self.instance != ALL_INSTANCES:
+                    break
 
 
 class SqlFractionMetric(BaseSqlServerMetric):

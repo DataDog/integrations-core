@@ -27,6 +27,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.data_observability import SqlServerDataObservability
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAgentMetrics,
     SqlserverAoMetrics,
@@ -129,6 +130,8 @@ KEY_PREFIX = "dbm-sqlserver-"
 
 
 class SQLServer(DatabaseCheck):
+    DBMS = "sqlserver"
+
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True
@@ -174,6 +177,7 @@ class SQLServer(DatabaseCheck):
         self.activity = SqlserverActivity(self, self._config)
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
+        self.data_observability = SqlServerDataObservability(self, self._config)
 
         # XE Session Handlers
         self.xe_session_handlers = []
@@ -213,6 +217,7 @@ class SQLServer(DatabaseCheck):
         self.sql_metadata.cancel()
         self.deadlocks.cancel()
         self.agent_history.cancel()
+        self.data_observability.cancel()
 
         # Cancel all XE session handlers
         for handler in self.xe_session_handlers:
@@ -696,15 +701,19 @@ class SQLServer(DatabaseCheck):
         self.instance_metrics = metrics_to_collect
         self.log.debug("metrics to collect %s", metrics_to_collect)
 
-        # create an organized grouping of metric names to their metric classes
+        # create an organized grouping of metric names to their metric classes. Build it up locally and swap it in
+        # at the end so a rebuild drops names that are no longer collected without ever leaving this mapping out of
+        # sync with `instance_metrics`.
+        per_type_metrics = defaultdict(set)
         for m in metrics_to_collect:
             cls = m.__class__.__name__
             name = m.sql_name or m.column
             self.log.debug("Adding metric class %s named %s", cls, name)
 
-            self.instance_per_type_metrics[cls].add(name)
+            per_type_metrics[cls].add(name)
             if m.base_name:
-                self.instance_per_type_metrics[cls].add(m.base_name)
+                per_type_metrics[cls].add(m.base_name)
+        self.instance_per_type_metrics = per_type_metrics
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
@@ -778,6 +787,10 @@ class SQLServer(DatabaseCheck):
                         )
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
+            else:
+                # Counters that need no base counter can be cached right away. Base-requiring counters are only
+                # cached once their base is resolved, so a transient lookup failure is retried instead of pinned.
+                self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
 
         return sql_counter_type, base_name
 
@@ -900,6 +913,9 @@ class SQLServer(DatabaseCheck):
                         handler.run_job_loop(self.tag_manager.get_tags())
                     except Exception as e:
                         self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
+
+            if self._config.data_observability.enabled:
+                self.data_observability.run_job_loop(self.tag_manager.get_tags())
 
         else:
             self.log.debug("Skipping check")
@@ -1068,39 +1084,38 @@ class SQLServer(DatabaseCheck):
         guardSql = self.instance.get("proc_only_if")
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
-            self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
-            cursor = self.connection.get_cursor(self.connection.DEFAULT_DB_KEY)
+            with self.connection.open_managed_default_connection(KEY_PREFIX):
+                with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+                    try:
+                        self.log.debug("Calling Stored Procedure : %s", proc)
+                        if self.connection.connector == "adodbapi":
+                            cursor.callproc(proc)
+                        else:
+                            # pyodbc does not support callproc; use execute instead.
+                            # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
+                            call_proc = "{{CALL {}}}".format(proc)
+                            cursor.execute(call_proc)
 
-            try:
-                self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.connector == "adodbapi":
-                    cursor.callproc(proc)
-                else:
-                    # pyodbc does not support callproc; use execute instead.
-                    # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
-                    call_proc = "{{CALL {}}}".format(proc)
-                    cursor.execute(call_proc)
+                        rows = cursor.fetchall()
+                        self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
 
-                rows = cursor.fetchall()
-                self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
+                        for row in rows:
+                            tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
+                            tags.extend(self.tag_manager.get_tags())
 
-                for row in rows:
-                    tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
-                    tags.extend(self.tag_manager.get_tags())
+                            if row.type.lower() in self.proc_type_mapping:
+                                self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
+                            else:
+                                self.log.warning(
+                                    "%s is not a recognised type from procedure %s, metric %s",
+                                    row.type,
+                                    proc,
+                                    row.metric,
+                                )
 
-                    if row.type.lower() in self.proc_type_mapping:
-                        self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
-                    else:
-                        self.log.warning(
-                            "%s is not a recognised type from procedure %s, metric %s", row.type, proc, row.metric
-                        )
-
-            except Exception as e:
-                self.log.warning("Could not call procedure %s: %s", proc, e)
-                raise e
-
-            self.connection.close_cursor(cursor)
-            self.connection.close_db_connections(self.connection.DEFAULT_DB_KEY)
+                    except Exception as e:
+                        self.log.warning("Could not call procedure %s: %s", proc, e)
+                        raise
         else:
             self.log.info("Skipping call to %s due to only_if", proc)
 
@@ -1109,19 +1124,17 @@ class SQLServer(DatabaseCheck):
         check to see if the guard SQL returns a single column containing 0 or 1
         We return true if 1, else False
         """
-        self.connection.open_db_connections(self.connection.PROC_GUARD_DB_KEY)
-        cursor = self.connection.get_cursor(self.connection.PROC_GUARD_DB_KEY)
-
         should_run = False
-        try:
-            cursor.execute(sql, ())
-            result = cursor.fetchone()
-            should_run = result[0] == 1
-        except Exception as e:
-            self.log.error("Failed to run proc_only_if sql %s : %s", sql, e)
-
-        self.connection.close_cursor(cursor)
-        self.connection.close_db_connections(self.connection.PROC_GUARD_DB_KEY)
+        with self.connection._open_managed_db_connections(self.connection.PROC_GUARD_DB_KEY):
+            with self.connection.get_managed_cursor(
+                key_prefix=None, db_key=self.connection.PROC_GUARD_DB_KEY
+            ) as cursor:
+                try:
+                    cursor.execute(sql, ())
+                    result = cursor.fetchone()
+                    should_run = result[0] == 1
+                except Exception as e:
+                    self.log.error("Failed to run proc_only_if sql %s : %s", sql, e)
         return should_run
 
     def _send_database_instance_metadata(self):
@@ -1132,7 +1145,7 @@ class SQLServer(DatabaseCheck):
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "sqlserver",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 "dbms_version": self.dbms_version,

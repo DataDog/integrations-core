@@ -73,7 +73,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             run_sync=is_affirmative(config.settings_config.get('run_sync', False)),
             enabled=self.enabled,
             min_collection_interval=config.min_collection_interval,
-            dbms="mysql",
+            dbms=check.dbms,
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             job_name="database-metadata",
             shutdown_callback=self._close_db_conn,
@@ -102,7 +102,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if not self._db:
             conn_args = self._connection_args_provider()
-            self._db = connect_with_session_variables(**conn_args)
+            self._db = connect_with_session_variables(mysql_version=self._check.version, **conn_args)
             if self._uses_managed_auth:
                 self._db_created_at = time.time()
         else:
@@ -181,7 +181,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
-            "dbms": "mysql",
+            "dbms": self._check.dbms,
             "kind": "mysql_variables",
             "collection_interval": self.collection_interval,
             'dbms_version': self._check.version.version + '+' + self._check.version.build,

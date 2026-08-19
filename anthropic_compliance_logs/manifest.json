@@ -46,6 +46,7 @@
     "classifier_tags": [
       "Category::AI/ML",
       "Category::Log Collection",
+      "Category::SIEM",
       "Category::Security",
       "Submitted Data Type::Logs",
       "Offering::Integration"

@@ -2,6 +2,41 @@
 
 <!-- towncrier release notes start -->
 
+## 9.0.0 / 2026-08-05
+
+***Changed***:
+
+* Redact Kafka Connect connector configuration with a known-safe allowlist instead of a sensitive-key denylist. Configuration keys not on the allowlist are now hidden in Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Add connector failure trace and tracked topics to Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Emit a `consumer_membership` data-streams-message per consumer group with the Kafka cluster id, group id and current member ids. ([#24601](https://github.com/DataDog/integrations-core/pull/24601))
+
+***Fixed***:
+
+* Reduce cluster-check-runner memory churn by persisting the DSM broker timestamps cache in a compact binary format (marshal) instead of serializing it as JSON on every run. ([#24471](https://github.com/DataDog/integrations-core/pull/24471))
+* Cap the total DSM broker timestamps history per cluster with a memory budget that scales the per-partition depth by partition count, bounding cluster-check-runner memory on large clusters. ([#24508](https://github.com/DataDog/integrations-core/pull/24508))
+
+## 8.1.2 / 2026-07-23 / Agent 7.82.0
+
+***Fixed***:
+
+* Call malloc_trim after each run to return librdkafka's per-arena free memory to the OS and curb agent memory growth. ([#24553](https://github.com/DataDog/integrations-core/pull/24553))
+* Keep the DSM broker_timestamps cache in memory and persist it at most every 5 minutes to reduce per-run allocation churn and memory growth. ([#24554](https://github.com/DataDog/integrations-core/pull/24554))
+
+## 8.1.1 / 2026-07-17
+
+***Fixed***:
+
+* Cache the earliest (log-start) offset used for `kafka.topic.size` and `kafka.partition.size` across collection intervals instead of refetching it from the broker on every run. ([#24515](https://github.com/DataDog/integrations-core/pull/24515))
+* Allow reusing the Kafka AdminClient and Consumer across check runs (via close_admin_client: false) to avoid unbounded agent memory growth from librdkafka thread churn. ([#24552](https://github.com/DataDog/integrations-core/pull/24552))
+
 ## 8.1.0 / 2026-07-08
 
 ***Added***:
