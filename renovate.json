@@ -21,10 +21,11 @@
       "customType": "regex",
       "description": "Track annotated version pins in the builder images.",
       "managerFilePatterns": [
-        "/^\\.builders/images/.+/Dockerfile$/"
+        "/^\\.builders/images/.+/Dockerfile$/",
+        "/^\\.builders/images/.+/builder_setup\\.sh$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)\\s+ENV [A-Z][A-Z0-9_]*=\"(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})\""
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-zA-Z][a-zA-Z0-9._/-]*)\\s+(?:ENV )?[A-Z][A-Z0-9_]*=\"(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})\""
       ]
     },
     {
