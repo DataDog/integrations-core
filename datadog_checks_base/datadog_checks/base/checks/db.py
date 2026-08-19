@@ -175,9 +175,6 @@ class DatabaseCheck(AgentCheck):
         if hasattr(self, '_diagnosis'):
             del self._diagnosis
         self.log.debug("Check cleanup complete")
-        # Must come last: the logging adapter reads back through this attribute for checks whose
-        # check_id was never resolved, so anything logged after this would fail.
-        self.log.check = None
 
     def shutdown(self) -> None:
         """
