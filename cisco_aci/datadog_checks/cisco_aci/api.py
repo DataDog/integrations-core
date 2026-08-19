@@ -287,6 +287,11 @@ class Api:
         response = self.make_request(path)
         return self._parse_response(response)
 
+    def get_cphys_list(self, pod, node):
+        path = '/api/node/class/topology/pod-{}/node-{}/cnwPhysIf.json'.format(pod, node)
+        response = self.make_request(path)
+        return self._parse_response(response)
+
     def get_lldp_adj_eps(self):
         path = '/api/node/class/lldpAdjEp.json'
         response = self.make_request(path)
