@@ -134,6 +134,114 @@ facets:
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: API Operation
+    path: ocsf.api.operation
+    source: log
+  - groups:
+      - OCSF
+    name: API Service Name
+    path: ocsf.api.service.name
+    source: log
+  - groups:
+      - OCSF
+    name: Application Name
+    path: ocsf.app.name
+    source: log
+  - groups:
+      - OCSF
+    name: Dst Endpoint Hostname
+    path: ocsf.dst_endpoint.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Name
+    path: ocsf.entity.name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Policy Unique ID
+    path: ocsf.entity.policy.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Entity User Email Address
+    path: ocsf.entity.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Entity User Name
+    path: ocsf.entity.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Result User Email Address
+    path: ocsf.entity_result.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Result User Name
+    path: ocsf.entity_result.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Title
+    path: ocsf.finding_info.title
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Unique ID
+    path: ocsf.finding_info.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Group Unique ID
+    path: ocsf.group.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Alert
+    path: ocsf.is_alert
+    source: log
+    type: boolean
+  - groups:
+      - OCSF
+    name: Metadata Product Version
+    path: ocsf.metadata.product.version
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Tenant UID
+    path: ocsf.metadata.tenant_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Scan Name
+    path: ocsf.scan.name
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Target Email Address
+    path: ocsf.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Target Name
+    path: ocsf.user.name
+    source: log
 pipeline:
   type: pipeline
   name: Keeper
@@ -1347,14 +1455,6 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:added_to_team"
-                  name: Add User
-                  id: 3
-                - filter:
-                    query: "@ocsf.metadata.event_code:removed_from_team"
-                  name: Remove User
-                  id: 4
-                - filter:
                     query: "@ocsf.metadata.event_code:(team_created OR team_provisioned_by_scim)"
                   name: Create
                   id: 1
@@ -1362,6 +1462,14 @@ pipeline:
                     query: "@ocsf.metadata.event_code:team_deleted"
                   name: Delete
                   id: 2
+                - filter:
+                    query: "@ocsf.metadata.event_code:added_to_team"
+                  name: Add User
+                  id: 3
+                - filter:
+                    query: "@ocsf.metadata.event_code:removed_from_team"
+                  name: Remove User
+                  id: 4
                 - filter:
                     query: "@ocsf.metadata.event_code:*"
                   name: Other
@@ -1950,13 +2058,13 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(app_client_access OR app_client_access_denied OR app_client_connected)"
-                  name: Read
-                  id: 2
-                - filter:
                     query: "@ocsf.metadata.event_code:pam_session_rbi_recording_started"
                   name: Create
                   id: 1
+                - filter:
+                    query: "@ocsf.metadata.event_code:(app_client_access OR app_client_access_denied OR app_client_connected)"
+                  name: Read
+                  id: 2
                 - filter:
                     query: "@ocsf.metadata.event_code:(record_type_updated OR set_custom_email_content)"
                   name: Update
@@ -1999,13 +2107,6 @@ pipeline:
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
-              fallback:
-                values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
-                sources:
-                  ocsf.status:
-                    - audit_event
           schema:
             schemaType: ocsf
             version: 1.5.0
