@@ -14,10 +14,12 @@ from datadog_checks.clickhouse.utils import (
     CLUSTER_MACRO_QUERY,
     CLUSTER_NAME_QUERY,
     CLUSTER_TAG,
+    CONNECT_NODE_QUERY,
     HOSTING_TYPE_TAG,
     SHARED_MERGE_TREE_QUERY,
     HostingType,
     cluster_aware_query,
+    cluster_nodes_query,
 )
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
@@ -621,6 +623,17 @@ def test_cluster_name_is_cached_including_the_absent_case():
     assert check.execute_query_raw.call_count == 2  # one attempt per source, not per access
 
 
+def test_cluster_nodes_query_fans_out_without_failing_on_a_down_node():
+    query = cluster_nodes_query('default')
+
+    assert 'skip_unavailable_shards=1' in query
+    assert "clusterAllReplicas('default', system.one)" in query
+
+
+def test_cluster_nodes_query_fans_out_over_the_named_cluster():
+    assert "clusterAllReplicas('prod_cluster', system.one)" in cluster_nodes_query('prod_cluster')
+
+
 @pytest.mark.parametrize(
     ('cluster_name', 'hosting_type', 'expected'),
     [
@@ -639,6 +652,208 @@ def test_fanout_cluster_name(cluster_name, hosting_type, expected):
             hosting_type_prop.return_value = hosting_type
 
             assert check.fanout_cluster_name == expected
+
+
+def resolve_cluster_nodes(fanout_cluster, nodes_result, connect_node='node-a'):
+    """Run the node fan-out over a fixed cluster, replaying nodes_result."""
+    replayed = {cluster_nodes_query(fanout_cluster): nodes_result} if fanout_cluster else {}
+    check = make_query_replaying_check(replayed)
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = fanout_cluster
+        return check._resolve_cluster_nodes(connect_node)
+
+
+def test_resolve_cluster_nodes_deduplicates_and_sorts():
+    nodes = resolve_cluster_nodes('default', [['node-b'], ['node-a'], ['node-b']])
+
+    assert nodes == ['node-a', 'node-b']
+
+
+def test_resolve_cluster_nodes_uses_the_self_hosted_cluster_name():
+    nodes = resolve_cluster_nodes('prod_cluster', [['node-b'], ['node-a']])
+
+    assert nodes == ['node-a', 'node-b']
+
+
+def test_resolve_cluster_nodes_empty_when_the_fan_out_fails():
+    assert resolve_cluster_nodes('default', Error('Requested cluster not found')) == []
+
+
+def test_resolve_cluster_nodes_reports_the_single_node_when_there_is_no_cluster():
+    """An instance with no cluster reports the one node that answered."""
+    assert resolve_cluster_nodes(None, None) == ['node-a']
+
+
+def test_resolve_cluster_nodes_empty_when_there_is_neither_a_cluster_nor_a_known_node():
+    assert resolve_cluster_nodes(None, None, connect_node=None) == []
+
+
+def test_cluster_topology_metadata():
+    check = make_query_replaying_check(
+        {
+            CONNECT_NODE_QUERY: [['node-a']],
+            cluster_nodes_query('default'): [['node-a'], ['node-b'], ['node-c']],
+        }
+    )
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+            cluster_name.return_value = 'default'
+            fanout.return_value = 'default'
+            metadata = check._cluster_topology_metadata()
+
+    assert metadata == {
+        'cluster_name': 'default',
+        'connect_node': 'node-a',
+        'nodes': ['node-a', 'node-b', 'node-c'],
+    }
+
+
+@pytest.mark.parametrize(
+    ('cluster_name', 'node_result', 'nodes_result', 'expected'),
+    [
+        pytest.param('default', [], [['node-a']], {'cluster_name', 'nodes'}, id='no-connect-node'),
+        pytest.param('default', [['node-a']], Error('boom'), {'cluster_name', 'connect_node'}, id='fan-out-failed'),
+        pytest.param('default', [['node-a']], [], {'cluster_name', 'connect_node'}, id='no-rows'),
+    ],
+)
+def test_cluster_topology_metadata_omits_what_it_cannot_determine(cluster_name, node_result, nodes_result, expected):
+    """An absent key beats a wrong one: a failed probe must not report a cluster with no nodes."""
+    check = make_query_replaying_check(
+        {CONNECT_NODE_QUERY: node_result, cluster_nodes_query(cluster_name): nodes_result}
+    )
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name_prop:
+        with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+            cluster_name_prop.return_value = cluster_name
+            fanout.return_value = cluster_name
+            metadata = check._cluster_topology_metadata()
+
+    assert set(metadata) == expected
+
+
+def test_cluster_topology_metadata_without_a_cluster_reports_the_connected_node():
+    """cluster_name stays absent, but the connected node is still known."""
+    check = make_query_replaying_check({CONNECT_NODE_QUERY: [['node-a']]})
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+            cluster_name.return_value = None
+            fanout.return_value = None
+            metadata = check._cluster_topology_metadata()
+
+    assert metadata == {'connect_node': 'node-a', 'nodes': ['node-a']}
+
+
+VERSION_QUERY = 'SELECT version()'
+
+
+def make_metadata_emitting_check(instance, nodes_result, fanout_cluster='default'):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    def execute(query):
+        if query == VERSION_QUERY:
+            return [['24.8.1.1']]
+        if query == CONNECT_NODE_QUERY:
+            return [['node-a']]
+        if query == cluster_nodes_query(fanout_cluster):
+            if isinstance(nodes_result, Exception):
+                raise nodes_result
+            return nodes_result
+        return []
+
+    check.execute_query_raw = mock.Mock(side_effect=execute)
+    return check
+
+
+def emitted_metadata(aggregator):
+    events = aggregator.get_event_platform_events('dbm-metadata')
+    return next(e for e in events if e['kind'] == 'database_instance')['metadata']
+
+
+@pytest.mark.parametrize('single_endpoint_mode', [True, False], ids=['single-endpoint-mode', 'direct-connection'])
+def test_database_instance_payload_carries_cluster_topology(aggregator, instance, single_endpoint_mode):
+    """Both connection modes report the inventory, so the node list means one thing rather than two."""
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = make_metadata_emitting_check(instance, [['node-b'], ['node-a']])
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = 'default'
+        check._send_database_instance_metadata()
+
+    metadata = emitted_metadata(aggregator)
+
+    assert metadata['cluster_name'] == 'default'
+    assert metadata['connect_node'] == 'node-a'
+    assert metadata['nodes'] == ['node-a', 'node-b']
+    assert set(metadata) == {
+        'dbm',
+        'connection_host',
+        'hosting_type',
+        'single_endpoint_mode',
+        'cluster_name',
+        'connect_node',
+        'nodes',
+    }
+
+
+def test_database_instance_payload_carries_a_self_hosted_cluster_topology(aggregator, instance):
+    """The fan-out follows the name a self-hosted cluster is given in remote_servers."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = make_metadata_emitting_check(instance, [['node-b'], ['node-a']], fanout_cluster='prod_cluster')
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
+            cluster_name.return_value = 'prod_cluster'
+            hosting_type.return_value = HostingType.SELF_HOSTED
+            check._send_database_instance_metadata()
+
+    metadata = emitted_metadata(aggregator)
+
+    assert metadata['cluster_name'] == 'prod_cluster'
+    assert metadata['nodes'] == ['node-a', 'node-b']
+
+
+def test_database_instance_payload_omits_the_topology_when_every_probe_fails(aggregator, instance):
+    """The payload is still emitted, carrying only what does not depend on a query."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.execute_query_raw = mock.Mock(side_effect=Error('Not enough privileges'))
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = 'default'
+        check._send_database_instance_metadata()
+
+    metadata = emitted_metadata(aggregator)
+
+    assert set(metadata) == {'dbm', 'connection_host', 'hosting_type', 'single_endpoint_mode', 'cluster_name'}
+    assert metadata['hosting_type'] == HostingType.UNKNOWN
+
+
+@pytest.mark.parametrize('single_endpoint_mode', [True, False], ids=['single-endpoint-mode', 'direct-connection'])
+def test_database_instance_payload_carries_the_hosting_type(aggregator, instance, single_endpoint_mode):
+    """The hosting type describes the deployment itself, so both connection modes report it."""
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = make_metadata_emitting_check(instance, [['node-a']])
+    with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
+        hosting_type.return_value = HostingType.CLOUD
+        check._send_database_instance_metadata()
+
+    assert emitted_metadata(aggregator)['hosting_type'] == HostingType.CLOUD
+
+
+@pytest.mark.parametrize('single_endpoint_mode', [True, False], ids=['single-endpoint-mode', 'direct-connection'])
+def test_database_instance_payload_carries_the_connection_mode(aggregator, instance, single_endpoint_mode):
+    """The backend needs to know whether the hostName() it sees is one node or a whole cluster."""
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = make_metadata_emitting_check(instance, [['node-a']])
+
+    check._send_database_instance_metadata()
+
+    assert emitted_metadata(aggregator)['single_endpoint_mode'] is single_endpoint_mode
+
+
+def test_database_instance_payload_reports_the_connection_mode_when_unset(aggregator, instance):
+    """The option is optional, so the payload must still carry an explicit boolean."""
+    check = make_metadata_emitting_check(instance, [['node-a']])
+
+    check._send_database_instance_metadata()
+
+    assert emitted_metadata(aggregator)['single_endpoint_mode'] is False
 
 
 def test_check_tags_with_cluster(instance):
