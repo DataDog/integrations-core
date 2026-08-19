@@ -31,6 +31,96 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
+def test_default_config_mapping_merged_with_instance(aggregator, dd_run_check, mock_http_response):
+    """
+    A mapping-valued default is merged with the instance's mapping for the same option, entry by
+    entry. The instance config is layered over the defaults in a `ChainMap`, which resolves keys
+    shallowly, so without the merge an instance that sets `rename_labels` at all would shadow the
+    class default wholesale and silently lose renames the check depends on.
+    """
+
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def get_default_config(self):
+            return {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
+
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes{foo="baz",qux="quux"} 6.396288e+06
+        """
+    )
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test', 'rename_labels': {'qux': 'corge'}}])
+    dd_run_check(check)
+
+    # `bar:baz` is the class default's rename, `corge:quux` the instance's own.
+    aggregator.assert_metric(
+        'test.go_memstats_alloc_bytes',
+        6396288,
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'bar:baz', 'corge:quux'],
+    )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_default_config_mapping_entry_overridden_by_instance(aggregator, dd_run_check, mock_http_response):
+    """
+    Merging mapping-valued defaults must not cost the ability to override one: an instance entry for
+    the same key as a default entry still wins.
+    """
+
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def get_default_config(self):
+            return {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
+
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
+        """
+    )
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test', 'rename_labels': {'foo': 'corge'}}])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'corge:baz']
+    )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_default_config_mapping_not_shared_between_scrapers(aggregator, dd_run_check, mock_http_response):
+    """
+    The merge must not write back into the mapping `get_default_config` returned, or a check with
+    several scraper configs would accumulate every scraper's custom renames into the shared default.
+    """
+    default_renames = {'foo': 'bar'}
+
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def get_default_config(self):
+            return {'metrics': ['.+'], 'rename_labels': default_renames}
+
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
+        """
+    )
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test', 'rename_labels': {'qux': 'corge'}}])
+    dd_run_check(check)
+
+    assert default_renames == {'foo': 'bar'}
+
+
 def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
         """

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections import ChainMap
+from collections.abc import Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -18,8 +19,6 @@ from datadog_checks.base.utils.tracing import traced_class
 from .scraper import OpenMetricsScraper
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from .metrics_mapping import MetricsMapping, _RawMetricsConfig
 
 
@@ -131,10 +130,25 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
         otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
         silently skipped.
+
+        The instance config takes precedence over the defaults, option by option. Mapping-valued
+        options are the exception: they are merged entry by entry rather than replaced wholesale,
+        since a ``ChainMap`` resolves keys shallowly and an instance that sets such an option at all
+        would otherwise shadow the whole class default -- silently dropping entries the check
+        depends on, such as the ``rename_labels`` renames that keep endpoint labels off Datadog's
+        reserved tag keys. The instance's own entries still win on a per-entry basis.
         """
         defaults = dict(self.get_default_config())
         if file_metrics := self._load_file_based_metrics(config):
             defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
+
+        if merged := {
+            option: {**default, **config[option]}
+            for option, default in defaults.items()
+            if isinstance(default, Mapping) and isinstance(config.get(option), Mapping)
+        }:
+            config = {**config, **merged}
+
         return ChainMap(config, defaults)
 
     def get_default_config(self) -> dict:
@@ -143,6 +157,10 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         The returned dict can be mutated by the framework before being wrapped
         in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
         state leakage between check executions.
+
+        Mapping-valued defaults are merged with any mapping the instance configures for the same
+        option, so a user customizing it adds to these defaults instead of replacing them. Defaults
+        of any other type are replaced outright by an instance-level value.
         """
         return {}
 
