@@ -13,34 +13,30 @@ import httpx
 from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     render_comment,
+    render_compact_comment,
     render_minimal_comment,
     render_run_summary,
     summary_line,
 )
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_actions import write_step_summary
+from ddev.utils.github_errors import GitHubBodyTooLongError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ddev.cli.ci.tests.messages import UpdatePRComment
     from ddev.utils.github_async import AsyncGitHubClient
-
-# GitHub answers an over-long comment body with this status, but also every other validation failure
-# and a body it judges to be spam. Which one it is shows only in the response body.
-VALIDATION_FAILED_STATUS = 422
-
-# What GitHub's over-long-body validation says: "body is too long (maximum is 65536 characters)".
-# Matched as a substring because the documented error shape only guarantees `code: "custom"` with a
-# free-text `message` — there is no stable error code for this case to key off.
-BODY_TOO_LONG_MESSAGE = "too long"
 
 # Editing the tracked comment can fail because it is not ours to edit (403) or no longer exists
 # (404). Neither improves on retry, but both are recoverable by writing a comment we do own.
 UNUSABLE_COMMENT_STATUSES = (403, 404)
 
-# Enough passes for the two things a failed write can change about the next one: shrinking the body
-# once, and giving up on a comment we may not edit. The second can repeat, because the comment we
-# create to replace the first can itself be refused, so the cap is what stops that becoming a loop.
-MAX_WRITE_PASSES = 4
+# Enough passes for everything a failed write can change about the next one: two steps down the
+# comment tiers, and giving up on a comment we may not edit. The latter can repeat, because the
+# comment we create to replace the first can itself be refused, so the cap is what stops that
+# becoming a loop. One more than the sum, for the pass that finally lands.
+MAX_WRITE_PASSES = 5
 
 
 @dataclass(frozen=True)
@@ -158,29 +154,44 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         self._logger.info("Run summary written", extra={**log_extra, "pr_comment_failed": self._pr_comment_failed})
 
     async def _write(self, pr_number: int, message: UpdatePRComment, body: str, log_extra: dict[str, object]) -> bool:
-        """Write *body* to the comment. Returns whether it landed.
+        """Write *body* to the comment, stepping down the tiers if it is too long. Did it land?
 
         Not a retry loop — a failure that a further pass cannot change stops immediately. Each pass
-        continues only after changing what the next one will do: shrinking a body GitHub called too
-        long, or forgetting a comment GitHub will not let us edit so the next pass creates our own.
+        continues only after changing what the next one will do: dropping to a smaller tier, or
+        forgetting a comment GitHub will not let us edit so the next pass creates our own.
+
+        The tiers are rendered lazily because shrinking is the exception. Both ways of learning a body
+        is too long arrive as ``GitHubBodyTooLongError``: the client measures it before spending a
+        request, and converts GitHub's own 422 into the same error. So there is one thing to catch and
+        one action to take, and no 422 payload to parse here.
+
+        Worth knowing which of the two actually drives this. The renderer budgets against the same
+        limit the client enforces and truncates itself to fit, so the pre-flight measurement rarely
+        fires. The tiers are really there for GitHub disagreeing -- refusing a body we measured as
+        fitting, because its accounting is undocumented and not something we can reproduce locally.
 
         Losing the write does not fail the run. The report is retained and the run summary reports it
         with a note saying the comment could not be updated.
         """
-        shrunk = False
+        tiers: tuple[Callable[[], str], ...] = (
+            lambda: body,
+            lambda: render_compact_comment(message.progress),
+            lambda: render_minimal_comment(message.progress),
+        )
+        tier, rendered = 0, body
         for _ in range(MAX_WRITE_PASSES):
             try:
-                await self._submit(pr_number, body)
+                await self._submit(pr_number, rendered)
+            except GitHubBodyTooLongError as error:
+                smaller = _next_distinct_tier(tiers, tier, rendered)
+                if smaller is None:
+                    # Unreachable while the last tier drops the per-test detail and budgets the rest.
+                    # Reported rather than asserted, because a wrong assumption here must not crash.
+                    self._logger.error("PR comment too long at every tier: %s", error, extra=log_extra)
+                    return False
+                tier, rendered = smaller
+                self._logger.warning("PR comment body too long (%s); retrying at tier %s", error, tier, extra=log_extra)
             except httpx.HTTPError as error:
-                if not shrunk and _is_body_too_long(error):
-                    # Not transient: the same body would be rejected identically. Drop the detail
-                    # that made it long. Once only — a minimal body has nothing left to drop.
-                    self._logger.warning(
-                        "PR comment body rejected as too long; retrying without detail", extra=log_extra
-                    )
-                    body = render_minimal_comment(message.progress)
-                    shrunk = True
-                    continue
                 if self._forget_unusable_comment(error, log_extra):
                     # The next pass creates a comment we own, rather than re-editing one we do not.
                     continue
@@ -188,7 +199,7 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
                 return False
             else:
                 self._logger.info(
-                    "PR comment written", extra={**log_extra, "comment_id": self._comment_id, "minimal": shrunk}
+                    "PR comment written", extra={**log_extra, "comment_id": self._comment_id, "tier": tier}
                 )
                 return True
 
@@ -246,30 +257,16 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
         return True
 
 
-def _is_body_too_long(error: httpx.HTTPError) -> bool:
-    """Whether *error* is GitHub rejecting the comment body for exceeding its length limit.
+def _next_distinct_tier(tiers: tuple[Callable[[], str], ...], tier: int, current: str) -> tuple[int, str] | None:
+    """The next tier that renders something different from *current*, or ``None`` if none does.
 
-    The status does not say on its own. GitHub documents 422 on these endpoints as validation failed
-    *or* spammed, so reading every 422 as "too long" would answer an unrelated rejection by resending
-    a shorter body, and hide the real cause behind a fallback that cannot fix it.
-
-    A response body that cannot be read is treated as too long. That is the safer guess: being wrong
-    costs one request, whereas the other way round spends the run's last chance to report on a body
-    we already know GitHub will not take.
+    Advancing blindly would waste a pass: a snapshot with no unavailable results and no retried jobs
+    makes the compact tier byte-identical to the full one, and resending a body GitHub has just
+    refused cannot succeed. So the ladder skips a tier that sheds nothing rather than spending a
+    request to discover that.
     """
-    if not isinstance(error, httpx.HTTPStatusError) or error.response.status_code != VALIDATION_FAILED_STATUS:
-        return False
-
-    try:
-        payload = error.response.json()
-    except ValueError:
-        return True
-    if not isinstance(payload, dict):
-        return True
-
-    # The top-level message is the generic "Validation Failed"; the specific one is per-error. Both
-    # are read because only one of them is documented to exist.
-    messages = [payload.get("message")]
-    if isinstance(entries := payload.get("errors"), list):
-        messages.extend(entry.get("message") for entry in entries if isinstance(entry, dict))
-    return any(BODY_TOO_LONG_MESSAGE in message.lower() for message in messages if isinstance(message, str))
+    for index in range(tier + 1, len(tiers)):
+        body = tiers[index]()
+        if body != current:
+            return index, body
+    return None

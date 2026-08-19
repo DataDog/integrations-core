@@ -20,6 +20,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from ddev.utils.github_errors import (
     GITHUB_AUTHENTICATION_STATUS_CODES,
     GitHubAuthenticationError,
+    GitHubBodyTooLongError,
+    github_body_too_long_message,
     github_secondary_rate_limit_wait,
 )
 from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
@@ -41,7 +43,29 @@ from .models import (
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
 
+# GitHub rejects an over-long comment body with "422 ... body is too long (maximum is 65536
+# characters)". That error message is the only evidence for the number: the OpenAPI description for
+# GITHUB_API_VERSION declares no `maxLength` on the body of either comment endpoint, even though it
+# uses `maxLength` freely elsewhere, and the REST documentation states the limit nowhere.
+#
+# Compared against UTF-8 byte length rather than character count. GitHub says characters; byte length
+# is never below character count, so measuring bytes errs only towards refusing a body GitHub might
+# have taken, never towards sending one it will refuse. Callers that must fit a limit should read this
+# constant rather than invent a margin of their own.
+COMMENT_BODY_LIMIT = 65_536
+
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+
+def _ensure_body_fits(body: str):
+    """Refuse a body GitHub would reject for length, before spending a request on it.
+
+    Raises:
+        GitHubBodyTooLongError: If *body* exceeds `COMMENT_BODY_LIMIT` UTF-8 bytes.
+    """
+    size = len(body.encode("utf-8"))
+    if size > COMMENT_BODY_LIMIT:
+        raise GitHubBodyTooLongError.from_measurement(size, limit=COMMENT_BODY_LIMIT)
 
 
 # ---------------------------------------------------------------------------
@@ -462,17 +486,17 @@ class AsyncGitHubClient:
             owner: Repository owner (user or organisation).
             repo: Repository name.
             issue_number: Issue or pull request number.
-            body: Markdown body text of the comment.
+            body: Markdown body text of the comment. At most `COMMENT_BODY_LIMIT` UTF-8 bytes.
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
             GitHubResponse[IssueComment]: The validated comment data and headers.
+
+        Raises:
+            GitHubBodyTooLongError: If `body` is too long, measured here or refused by GitHub.
         """
-        response = await self._request(
-            "POST",
-            f"/repos/{owner}/{repo}/issues/{issue_number}/comments",
-            timeout=timeout,
-            json={"body": body},
+        response = await self._comment_request(
+            "POST", f"/repos/{owner}/{repo}/issues/{issue_number}/comments", body=body, timeout=timeout
         )
         return self._parse_response(response, IssueComment)
 
@@ -494,19 +518,37 @@ class AsyncGitHubClient:
             owner: Repository owner (user or organisation).
             repo: Repository name.
             comment_id: Numeric ID of the comment to update.
-            body: New markdown body text of the comment.
+            body: New markdown body text of the comment. At most `COMMENT_BODY_LIMIT` UTF-8 bytes.
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
             GitHubResponse[IssueComment]: The validated comment data and headers.
+
+        Raises:
+            GitHubBodyTooLongError: If `body` is too long, measured here or refused by GitHub.
         """
-        response = await self._request(
-            "PATCH",
-            f"/repos/{owner}/{repo}/issues/comments/{comment_id}",
-            timeout=timeout,
-            json={"body": body},
+        response = await self._comment_request(
+            "PATCH", f"/repos/{owner}/{repo}/issues/comments/{comment_id}", body=body, timeout=timeout
         )
         return self._parse_response(response, IssueComment)
+
+    async def _comment_request(self, method: str, endpoint: str, *, body: str, timeout: float | None) -> httpx.Response:
+        """Send a comment *body*, enforcing the length limit from both sides.
+
+        Scoped to the comment endpoints rather than applied in `_request`, because a 422 means
+        something else everywhere else: a bodyless validation failure from a check-run call has
+        nothing to do with a body being too long.
+
+        Both halves raise `GitHubBodyTooLongError`, so a caller has one thing to catch and one action
+        to take -- send less -- and never has to read a 422 payload to work that out.
+        """
+        _ensure_body_fits(body)
+        try:
+            return await self._request(method, endpoint, timeout=timeout, json={"body": body})
+        except httpx.HTTPStatusError as exc:
+            if (message := github_body_too_long_message(exc.response)) is not None:
+                raise GitHubBodyTooLongError.from_response(message, limit=COMMENT_BODY_LIMIT) from exc
+            raise
 
     async def list_issue_comments(
         self,

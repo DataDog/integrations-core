@@ -42,7 +42,7 @@ from typing import Any, Literal
 
 import httpx
 
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import COMMENT_BODY_LIMIT, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
@@ -53,6 +53,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
+from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
@@ -61,6 +62,33 @@ DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
 # Id returned by the default `create_issue_comment` / `update_issue_comment` responses. Exported so
 # tests can assert the updater edits the comment it created rather than duplicating the literal.
 DEFAULT_COMMENT_ID = 4242
+
+
+def _ensure_body_fits(body: str):
+    """Mirror the real client's pre-flight length guard.
+
+    The fake stands in for the client at its public boundary, so it has to refuse what the client
+    refuses. Without this, a caller could pass a body the real client would never send and the test
+    would report success.
+    """
+    size = len(body.encode('utf-8'))
+    if size > COMMENT_BODY_LIMIT:
+        raise GitHubBodyTooLongError.from_measurement(size, limit=COMMENT_BODY_LIMIT)
+
+
+def _as_client_would_raise(error: BaseException) -> BaseException:
+    """Convert a mocked HTTP error the way `AsyncGitHubClient._request` would.
+
+    A test that registers a plain 422 is describing what GitHub returns, not what the client raises.
+    The real client turns a too-long 422 into `GitHubBodyTooLongError` before any caller sees it, so
+    the fake does too -- otherwise these tests assert a shape the caller can never receive.
+    """
+    if (
+        isinstance(error, httpx.HTTPStatusError)
+        and (message := github_body_too_long_message(error.response)) is not None
+    ):
+        return GitHubBodyTooLongError.from_response(message, limit=COMMENT_BODY_LIMIT)
+    return error
 
 
 @dataclass
@@ -290,6 +318,7 @@ class FakeAsyncGitHubClient:
         body: str,
         timeout: float | None = None,
     ) -> GitHubResponse[IssueComment]:
+        _ensure_body_fits(body)
         return self._call(
             'create_issue_comment',
             owner=owner,
@@ -307,6 +336,7 @@ class FakeAsyncGitHubClient:
         body: str,
         timeout: float | None = None,
     ) -> GitHubResponse[IssueComment]:
+        _ensure_body_fits(body)
         return self._call(
             'update_issue_comment',
             owner=owner,
@@ -619,7 +649,7 @@ class FakeAsyncGitHubClient:
         self._record(method, **call_kwargs)
         response = self._resolve_response(method, call_kwargs)
         if isinstance(response, BaseException):
-            raise response
+            raise _as_client_would_raise(response)
         if isinstance(response, GitHubResponse):
             return response
         return GitHubResponse.model_validate({'data': response, 'headers': {}})

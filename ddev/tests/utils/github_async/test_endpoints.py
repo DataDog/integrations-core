@@ -30,7 +30,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
-from ddev.utils.github_errors import GitHubAuthenticationError
+from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
 from tests.utils.github_async.helpers import ENDPOINT_CALLS, json_response, make_client
 from tests.utils.github_async.payloads import (
     artifact,
@@ -218,6 +218,136 @@ async def test_create_issue_comment_success() -> None:
     assert result.data.body == "LGTM"
     assert isinstance(result.data.user, GitHubUser)
     assert result.data.user.login == "octocat"
+
+
+# Deliberately a literal rather than `COMMENT_BODY_LIMIT`: a test that reads the same constant the
+# guard reads would pass no matter what that constant said.
+GITHUB_COMMENT_HARD_LIMIT = 65_536
+
+
+def _validation_failed(*messages: str) -> httpx.Response:
+    """A 422 shaped the way GitHub shapes one: generic top-level message, specifics per error.
+
+    `code` is `custom` because that is what GitHub documents for a validation failure with no
+    dedicated code, which is the case for an over-long body.
+    """
+    return json_response(
+        {
+            "message": "Validation Failed",
+            "errors": [
+                {"resource": "IssueComment", "code": "custom", "field": "body", "message": message}
+                for message in messages
+            ],
+        },
+        status_code=422,
+    )
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        pytest.param(lambda client, body: client.create_issue_comment("o", "r", 7, body), id="create"),
+        pytest.param(lambda client, body: client.update_issue_comment("o", "r", 99, body), id="update"),
+    ],
+)
+async def test_an_oversized_comment_body_is_refused_before_the_request(call) -> None:
+    """No point spending a round-trip on a body GitHub is certain to reject."""
+    requested = False
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal requested
+        requested = True
+        return json_response(issue_comment_payload())
+
+    client = make_client(httpx.MockTransport(handler))
+    with pytest.raises(GitHubBodyTooLongError):
+        await call(client, "x" * (GITHUB_COMMENT_HARD_LIMIT + 1))
+
+    assert requested is False
+
+
+async def test_a_comment_body_exactly_at_the_limit_is_sent() -> None:
+    """The guard rejects over the limit, not at it."""
+    body = "x" * GITHUB_COMMENT_HARD_LIMIT
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert json.loads(request.content) == {"body": body}
+        return json_response(issue_comment_payload(body=body), status_code=201)
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.create_issue_comment("o", "r", 7, body)
+    assert result.data.body == body
+
+
+async def test_the_comment_body_limit_is_measured_in_bytes_not_characters() -> None:
+    """GitHub states the limit in characters; bytes is the conservative reading of it.
+
+    A UTF-8 byte length is never below the character count, so measuring bytes can only refuse a body
+    GitHub might have taken -- never send one it will refuse. This body is comfortably under the limit
+    in characters and over it in bytes, so it pins which unit the guard uses.
+    """
+    body = "\u00e9" * (GITHUB_COMMENT_HARD_LIMIT // 2 + 1)  # two bytes each
+    assert len(body) < GITHUB_COMMENT_HARD_LIMIT < len(body.encode("utf-8"))
+
+    client = make_client(httpx.MockTransport(lambda request: json_response(issue_comment_payload())))
+    with pytest.raises(GitHubBodyTooLongError):
+        await client.create_issue_comment("o", "r", 7, body)
+
+
+async def test_githubs_own_too_long_rejection_becomes_the_same_error() -> None:
+    """One type for both sources, so a caller never parses a 422 payload to learn it must send less."""
+    client = make_client(
+        httpx.MockTransport(lambda request: _validation_failed("body is too long (maximum is 65536 characters)"))
+    )
+
+    with pytest.raises(GitHubBodyTooLongError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert "too long" in exc_info.value.github_message
+    assert exc_info.value.size is None  # It was GitHub's measurement, not ours.
+
+
+async def test_a_validation_failure_that_is_not_about_length_stays_an_http_error() -> None:
+    """GitHub documents 422 here as validation failed *or* spammed.
+
+    Sending less cannot fix a spam rejection, so reading every 422 as too long would hide the real
+    cause behind a fallback that was never going to work.
+    """
+    client = make_client(
+        httpx.MockTransport(lambda request: _validation_failed("was flagged as spam and cannot be created"))
+    )
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert not isinstance(exc_info.value, GitHubBodyTooLongError)
+    assert exc_info.value.response.status_code == 422
+
+
+async def test_a_non_validation_status_is_never_read_as_too_long() -> None:
+    """A 500 whose body happens to mention length is a server error, not a length problem."""
+    client = make_client(httpx.MockTransport(lambda request: json_response({"message": "too long"}, status_code=500)))
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert not isinstance(exc_info.value, GitHubBodyTooLongError)
+    assert exc_info.value.response.status_code == 500
+
+
+async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_length() -> None:
+    """Length has already been ruled out by the time GitHub answers.
+
+    The pre-flight guard measured this body and let it through, so an unreadable 422 is more likely to
+    be something sending less cannot fix. Claiming otherwise would spend a request on a useless
+    fallback and bury the real cause -- which is the failure mode the gating was added to avoid.
+    """
+    client = make_client(httpx.MockTransport(lambda request: httpx.Response(422, text="<html>nope</html>")))
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert not isinstance(exc_info.value, GitHubBodyTooLongError)
 
 
 async def test_update_issue_comment_success() -> None:

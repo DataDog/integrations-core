@@ -17,9 +17,9 @@ import pytest
 
 from ddev.cli.ci.tests.messages import BatchJob
 from ddev.cli.ci.tests.pr_comment import (
-    COMMENT_CHARACTER_BUDGET,
     COMMENT_MARKER,
     render_comment,
+    render_compact_comment,
     render_minimal_comment,
     render_run_summary,
     summary_line,
@@ -657,28 +657,16 @@ def test_large_run_stays_within_budget_and_says_what_was_dropped() -> None:
 
     body = render_comment(progress)
 
-    assert len(body) <= COMMENT_CHARACTER_BUDGET
-    # The budget counts characters, but the comment is dense with three-byte emoji and block-drawing
-    # characters, and GitHub's own accounting is not a plain character count. This is the constraint
-    # that actually matters, and the one the budget has to leave room for.
-    assert len(body.encode("utf-8")) < GITHUB_COMMENT_HARD_LIMIT
+    # Bytes, because that is the unit the client's guard measures and therefore the one the budget
+    # targets. The body is dense with three-byte emoji and block-drawing characters, so a character
+    # count would understate it.
+    assert len(body.encode("utf-8")) <= GITHUB_COMMENT_HARD_LIMIT
     # The header survives intact: totals and every batch row are the highest-priority content.
     assert "**240/240 jobs**" in body
     assert body.count("<tr><td><code>batch-") == 10
     assert "not shown — the comment reached its size limit" in body
     for tag in ("details", "blockquote", "table", "div", "sub"):
         assert body.count(f"<{tag}") == body.count(f"</{tag}>"), tag
-
-
-def test_the_budget_keeps_a_margin_below_github_s_limit() -> None:
-    """The budget counts characters; GitHub's limit is not reliably a character count.
-
-    Measured on the 240-job body above, the encoding overhead is tiny — 84 bytes on 59,892, or
-    1.0014x — because emoji occur once per batch row and per heading, so their share *falls* as the
-    comment fills with ASCII test names and URLs. The margin exists for GitHub's undocumented
-    accounting rather than for UTF-8, which is why it is a flat reserve and not a ratio.
-    """
-    assert GITHUB_COMMENT_HARD_LIMIT - COMMENT_CHARACTER_BUDGET >= 5_000
 
 
 def test_dropped_count_is_accurate() -> None:
@@ -717,20 +705,21 @@ def test_minimal_comment_keeps_the_header_and_drops_the_detail() -> None:
         done=True,
     )
 
-    body = render_minimal_comment(progress)
+    compact = render_compact_comment(progress)
 
-    assert COMMENT_MARKER in body
-    assert "**1/1 jobs**" in body
-    assert "<table>" in body
-    assert "Failures" not in body
-    assert "test_a" not in body
+    assert COMMENT_MARKER in compact
+    assert "**1/1 jobs**" in compact
+    assert "<table>" in compact
+    # The failures survive the compact tier with their detail; only the secondary sections go.
+    assert "Failures" in compact
+    assert "test_a" in compact
 
 
 def test_no_internal_metadata_leaks_into_the_comment() -> None:
     """The reader gets state, not plumbing: the message revision is never rendered."""
     progress = DispatcherProgress(batches=(batch("batch-01", job(attempt())),), done=True)
 
-    for body in (render_comment(progress), render_minimal_comment(progress)):
+    for body in (render_comment(progress), render_compact_comment(progress), render_minimal_comment(progress)):
         assert "evision" not in body
 
 
@@ -813,3 +802,103 @@ def test_a_body_without_the_marker_is_passed_through_unharmed() -> None:
     summary = render_run_summary("## Some report\n\nbody", pr_comment_failed=False)
 
     assert summary == "## Some report\n\nbody"
+
+
+# ---------------------------------------------------------------------------
+# The three tiers
+# ---------------------------------------------------------------------------
+
+
+def _worst_case(job_count: int = 60, tests_per_job: int = 200) -> DispatcherProgress:
+    """A finished run where every job failed with a long list of failing tests."""
+    jobs = [
+        job(
+            attempt(Status.FAILURE, reports=(failing_report(*[f"test_number_{n}" for n in range(tests_per_job)]),)),
+            target=f"target-{index}",
+        )
+        for index in range(job_count)
+    ]
+    return DispatcherProgress(batches=(batch("batch-01", *jobs, status=Status.FAILURE),), done=True)
+
+
+def test_each_tier_is_smaller_than_the_one_before() -> None:
+    """The ladder only helps if every step down actually sheds bytes."""
+    progress = _worst_case()
+
+    full = len(render_comment(progress).encode("utf-8"))
+    compact = len(render_compact_comment(progress).encode("utf-8"))
+    minimal = len(render_minimal_comment(progress).encode("utf-8"))
+
+    assert minimal < compact <= full
+
+
+def test_every_tier_fits_the_limit_for_a_worst_case_run() -> None:
+    progress = _worst_case()
+
+    for render in (render_comment, render_compact_comment, render_minimal_comment):
+        assert len(render(progress).encode("utf-8")) <= GITHUB_COMMENT_HARD_LIMIT, render.__name__
+
+
+def test_the_last_tier_names_the_failed_jobs_but_not_the_failed_tests() -> None:
+    """What the tier is for: enough to see which jobs failed and open them, without the test lists."""
+    progress = _worst_case(job_count=1, tests_per_job=3)
+
+    body = render_minimal_comment(progress)
+
+    # The job, its count and its link survive.
+    assert "target-0" in body
+    assert "200 failed tests" not in body
+    assert "3 failed tests" in body
+    assert "view job" in body
+    # The names do not, and neither does the collapsible that held them.
+    assert "test_number_0" not in body
+    assert "<details" not in body
+    # The batching stays: it is the other half of what a reader needs.
+    assert "<table>" in body
+    assert "Failures" in body
+
+
+def test_the_last_tier_barely_grows_with_the_size_of_the_run() -> None:
+    """Dropping the per-test lists is what removes the dominant term.
+
+    A job's failing-test list is the multiplier — 200 names against one summary line — so the last
+    tier grows per failed job rather than per failed test. That is what makes it fit where the others
+    do not.
+    """
+    few = len(render_minimal_comment(_worst_case(job_count=1, tests_per_job=1)).encode("utf-8"))
+    many_tests = len(render_minimal_comment(_worst_case(job_count=1, tests_per_job=500)).encode("utf-8"))
+
+    # Five hundred more failing tests in the same job cost only the width of the count.
+    assert many_tests - few < 20
+
+
+def test_the_secondary_sections_are_what_the_compact_tier_drops() -> None:
+    unavailable = job(attempt(error=ProgressError.NO_ARTIFACTS), target="flaky")
+    retried = job(attempt(Status.FAILURE), attempt(Status.SUCCESS, number=2), target="postgres")
+    progress = DispatcherProgress(batches=(batch("batch-01", unavailable, retried, max_attempts=2),), done=True)
+
+    full = render_comment(progress)
+    compact = render_compact_comment(progress)
+
+    assert "Unavailable results" in full
+    assert "Retried jobs" in full
+    assert "Unavailable results" not in compact
+    assert "Retried jobs" not in compact
+
+
+def test_the_budget_is_measured_in_bytes_not_characters() -> None:
+    """A body of non-ASCII test names must still fit, which a character budget would not guarantee."""
+    jobs = [
+        job(
+            attempt(Status.FAILURE, reports=(failing_report(*[f"test_ünïcödé_{n}_日本語" for n in range(200)]),)),
+            target=f"tärget-{index}",
+        )
+        for index in range(60)
+    ]
+    progress = DispatcherProgress(batches=(batch("batch-01", *jobs, status=Status.FAILURE),), done=True)
+
+    body = render_comment(progress)
+
+    assert len(body.encode("utf-8")) <= GITHUB_COMMENT_HARD_LIMIT
+    # Characters alone would have left room that the bytes do not, which is the bug this rules out.
+    assert len(body) < len(body.encode("utf-8"))

@@ -22,7 +22,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from ddev.cli.ci.tests.pr_comment import render_comment, render_run_summary
+from ddev.cli.ci.tests.pr_comment import (
+    render_comment,
+    render_compact_comment,
+    render_minimal_comment,
+    render_run_summary,
+)
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
 from tests.cli.ci.tests.test_pr_comment import attempt, batch, failing_report, job, planned_batch
@@ -137,6 +142,13 @@ def main(destination: Path) -> None:
     summary = destination / "05-run-summary-comment-failed.md"
     summary.write_text(render_run_summary(render_comment(final()), pr_comment_failed=True), encoding="utf-8")
     print(f"{summary} ({summary.stat().st_size} bytes)")
+
+    # The two fallback tiers, which only render when GitHub refuses the one above them and so are
+    # never seen in a normal run. The failing scenario is the one where they differ.
+    for name, render in (("06-compact", render_compact_comment), ("07-minimal", render_minimal_comment)):
+        path = destination / f"{name}.md"
+        path.write_text(render(final()), encoding="utf-8")
+        print(f"{path} ({path.stat().st_size} bytes)")
 
 
 if __name__ == "__main__":

@@ -56,3 +56,85 @@ class GitHubAuthenticationError(httpx.HTTPStatusError):
             request=error.request,
             response=error.response,
         )
+
+
+# GitHub answers an over-long body with this status, but also every other validation failure and a
+# body it judges to be spam. Which one it is shows only in the response body.
+VALIDATION_FAILED_STATUS = 422
+
+# What GitHub's over-long-body validation says, for example
+# 'body is too long (maximum is 65536 characters)'. Matched as a substring because there is no
+# dedicated error code for it: the documented codes are missing, missing_field, invalid,
+# already_exists, unprocessable and custom, so this arrives as `custom` with the explanation in a
+# free-text message.
+# https://docs.github.com/en/rest/using-the-rest-api/troubleshooting-the-rest-api
+BODY_TOO_LONG_MESSAGE = 'too long'
+
+
+def github_body_too_long_message(response: httpx.Response) -> str | None:
+    """Return GitHub's explanation if *response* is it refusing a body for length, else `None`.
+
+    The status alone does not say. GitHub documents 422 on these endpoints as validation failed *or*
+    spammed, so reading every 422 as 'too long' would answer an unrelated rejection by sending less,
+    which cannot fix it, and would bury the real cause behind a fallback that was never going to work.
+
+    A 422 whose body cannot be read counts as *not* too long. Callers measure the body before
+    sending it, so length has already been ruled out by the time GitHub answers; an unreadable
+    rejection is more likely to be something sending less cannot fix, and claiming otherwise would
+    spend a request on a fallback and bury the real cause.
+    """
+    if response.status_code != VALIDATION_FAILED_STATUS:
+        return None
+
+    try:
+        payload = response.json()
+    except ValueError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+
+    # The top-level message is the generic 'Validation Failed'; the specific one is per-error. Both
+    # are read because only one of them is documented to exist.
+    messages = [payload.get('message')]
+    if isinstance(entries := payload.get('errors'), list):
+        messages.extend(entry.get('message') for entry in entries if isinstance(entry, dict))
+
+    return next(
+        (message for message in messages if isinstance(message, str) and BODY_TOO_LONG_MESSAGE in message.lower()), None
+    )
+
+
+class GitHubBodyTooLongError(ValueError):
+    """A body GitHub will not accept because it is too long.
+
+    Raised from two places on purpose, as one type, so a caller has a single thing to catch and a
+    single action to take -- send less:
+
+    - before the request, when the client measures the body against the endpoint's limit;
+    - after it, when GitHub answers 422 saying the body is too long.
+
+    Deliberately not an `httpx.HTTPStatusError` subclass, unlike `GitHubAuthenticationError`: the
+    pre-request case has no response to carry, and a caller that has to branch on where the
+    rejection came from has gained nothing over parsing the 422 itself. `github_message` holds
+    GitHub's own wording when the server refused it, and is `None` when the client did.
+    """
+
+    def __init__(self, message: str, *, limit: int, size: int | None = None, github_message: str | None = None):
+        super().__init__(message)
+        self.limit = limit
+        self.size = size
+        self.github_message = github_message
+
+    @classmethod
+    def from_response(cls, github_message: str, *, limit: int) -> GitHubBodyTooLongError:
+        """Build the error for a body GitHub itself refused."""
+        return cls(f'GitHub refused the body: {github_message}', limit=limit, github_message=github_message)
+
+    @classmethod
+    def from_measurement(cls, size: int, *, limit: int) -> GitHubBodyTooLongError:
+        """Build the error for a body the client refused before spending a request."""
+        return cls(
+            f'Body is {size} bytes, over the {limit} GitHub accepts; not sent.',
+            limit=limit,
+            size=size,
+        )

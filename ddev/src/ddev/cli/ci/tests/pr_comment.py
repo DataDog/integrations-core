@@ -15,13 +15,15 @@ deliberately absent — those are SVGs on a host we do not publish to — so emo
 from __future__ import annotations
 
 import html
+from functools import partial
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
+from ddev.utils.github_async import COMMENT_BODY_LIMIT
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
     from ddev.cli.ci.tests.progress import (
         BatchProgress,
@@ -30,22 +32,23 @@ if TYPE_CHECKING:
         JobProgress,
     )
 
+    # A tier's section builder: given the snapshot and the bytes left, render the section or nothing.
+    type SectionBuilder = Callable[[DispatcherProgress, int], str | None]
+
 # Hidden first line of every Dispatcher comment. It brands the comment and is how the updater finds
 # an existing one to edit, so nothing else may write it.
 COMMENT_MARKER = "<!-- ddev-dispatcher-tests -->"
 
-# Self-imposed ceiling, not a platform value: GitHub rejects a body over 65,536 characters with
-# "422 ... body is too long (maximum is 65536 characters)". The limit is documented nowhere but that
-# error message, and GitHub's accounting is demonstrably not a plain character count, so the ~5.5k of
-# headroom absorbs that difference. UTF-8 is not the reason: a full comment measures 1.0014x its
-# character count in bytes, because emoji occur per batch row rather than per job and are swamped by
-# ASCII test names. ``render_minimal_comment`` is the backstop if the margin is ever wrong anyway.
-COMMENT_CHARACTER_BUDGET = 60_000
+# Sections are budgeted against the client's own limit, in the same unit the client measures, so the
+# two cannot drift. There is deliberately no margin below it: an unevidenced cushion is what this
+# replaced. Being wrong is handled by the tiers in ``render_compact_comment`` and
+# ``render_minimal_comment`` rather than by guessing low.
 
 # Width of the text progress bar, in cells.
 PROGRESS_BAR_WIDTH = 24
 
-# Blocks are joined by a blank line, so each one costs two characters beyond its own length.
+# Blocks are joined by a blank line, so each one costs two bytes beyond its own length. Newlines are
+# one byte in UTF-8, so this is the same number in either unit.
 SECTION_SEPARATOR = 2
 
 # Room held back in every section for its own "N more not shown" line, so truncating a section can
@@ -76,37 +79,64 @@ STATUS_CHIP = {
 }
 
 
-def render_comment(progress: DispatcherProgress) -> str:
-    """Render the full comment body for *progress*, trimmed to ``COMMENT_CHARACTER_BUDGET``.
+def _size(text: str) -> int:
+    """UTF-8 byte length: the unit the client's guard measures, so the budget measures it too."""
+    return len(text.encode("utf-8"))
 
-    The snapshot is the whole input. The message's ``revision`` is deliberately not rendered: it is
-    internal ordering metadata, meaningless to the person reading the pull request, and the gatherer
-    already logs it for diagnosis.
+
+def render_comment(progress: DispatcherProgress) -> str:
+    """Render the full comment body for *progress*, trimmed to ``COMMENT_BODY_LIMIT`` bytes.
+
+    The first of three tiers. The snapshot is the whole input. The message's ``revision`` is
+    deliberately not rendered: it is internal ordering metadata, meaningless to the person reading the
+    pull request, and the gatherer already logs it for diagnosis.
     """
+    return _render(progress, (partial(_failures, detail=True), _unavailable, _retried))
+
+
+def render_compact_comment(progress: DispatcherProgress) -> str:
+    """Second tier: the failures keep their detail, the secondary sections go.
+
+    Unavailable results and retried jobs are the parts a reader can live without — a retried-job list
+    is one line per retry and can be the largest section in a flaky run — while which tests failed is
+    the reason anyone opens the comment.
+    """
+    return _render(progress, (partial(_failures, detail=True),))
+
+
+def render_minimal_comment(progress: DispatcherProgress) -> str:
+    """Last tier: batches and which jobs failed, without naming the failed tests.
+
+    The per-test lists are the dominant cost — a single job with 40 failing tests renders about 2.1 kB
+    against roughly 150 bytes for its summary line — so dropping them is what makes this fit where the
+    others did not. Everything a reader needs to act is still here: the batch table, the totals, and a
+    line per failed job with its count and a link to the job.
+
+    Every section is still budgeted, so this cannot overflow through the failure list. The one part
+    that is never truncated is the batch table, which costs ~141 bytes per batch and so would need
+    around 464 batches — roughly 111,000 jobs at the 240-per-batch cap — to exhaust the limit on its
+    own. The updater still degrades gracefully rather than assuming that is impossible.
+    """
+    return _render(progress, (partial(_failures, detail=False),))
+
+
+def _render(progress: DispatcherProgress, sections: tuple[SectionBuilder, ...]) -> str:
+    """Assemble a body from the header, whichever *sections* this tier keeps, and the footer."""
     header = _header(progress)
     footer = _footer(progress)
 
     # The header and footer always survive; the detail sections compete for what is left. Two
     # newlines join every block, so each section costs its own length plus that separator.
-    remaining = COMMENT_CHARACTER_BUDGET - len(header) - len(footer) - 4
-    sections = []
-    for build in (_failures, _unavailable, _retried):
+    remaining = COMMENT_BODY_LIMIT - _size(header) - _size(footer) - 4
+    built = []
+    for build in sections:
         section = build(progress, remaining - SECTION_SEPARATOR)
         if section is None:
             continue
-        sections.append(section)
-        remaining -= len(section) + SECTION_SEPARATOR
+        built.append(section)
+        remaining -= _size(section) + SECTION_SEPARATOR
 
-    return "\n\n".join([header, *sections, footer])
-
-
-def render_minimal_comment(progress: DispatcherProgress) -> str:
-    """Render only the header and footer: the fallback when GitHub rejects a body as too long.
-
-    Character budgeting is not a proof — GitHub's own accounting is not a plain character count — so
-    a terse comment that posts beats a rich one that does not.
-    """
-    return "\n\n".join([_header(progress), _footer(progress)])
+    return "\n\n".join([header, *built, footer])
 
 
 def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
@@ -280,7 +310,7 @@ def _pack(entries: list[str], budget: int) -> tuple[list[str], int]:
     """Take entries in order while they fit. Returns what was kept and how many were dropped."""
     kept: list[str] = []
     for index, entry in enumerate(entries):
-        cost = len(entry) + (SECTION_SEPARATOR if kept else 0)
+        cost = _size(entry) + (SECTION_SEPARATOR if kept else 0)
         if cost > budget:
             return kept, len(entries) - index
         kept.append(entry)
@@ -293,13 +323,14 @@ def _overflow_note(dropped: int, noun: str) -> str:
     return f"_{dropped} more {noun}{plural} not shown — the comment reached its size limit._"
 
 
-def _failures(progress: DispatcherProgress, budget: int) -> str | None:
+def _failures(progress: DispatcherProgress, budget: int, *, detail: bool = True) -> str | None:
+    """The failed jobs. With *detail* off, each keeps its count but not the list of failing tests."""
     entries = []
     for job in _jobs(progress):
         attempt = job.latest
         if attempt is None or attempt.status is not Status.FAILURE:
             continue
-        entries.append(_failed_job_entry(job, attempt))
+        entries.append(_failed_job_entry(job, attempt, detail=detail))
     # A batch whose workflow failed without any tracked job failing is a real failure with nothing
     # to list; saying so beats an empty section or a silent omission.
     entries += [
@@ -312,7 +343,7 @@ def _failures(progress: DispatcherProgress, budget: int) -> str | None:
 
     heading = "### ❌ Failures"
     wrapper = "\n\n<blockquote><div>\n\n\n\n</div></blockquote>"
-    kept, dropped = _pack(entries, budget - len(heading) - len(wrapper) - OVERFLOW_RESERVE)
+    kept, dropped = _pack(entries, budget - _size(heading) - _size(wrapper) - OVERFLOW_RESERVE)
     if dropped:
         kept.append(_overflow_note(dropped, "failed job"))
 
@@ -320,7 +351,7 @@ def _failures(progress: DispatcherProgress, budget: int) -> str | None:
     return f"{heading}\n\n<blockquote><div>\n\n{body}\n\n</div></blockquote>"
 
 
-def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress) -> str:
+def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress, *, detail: bool = True) -> str:
     link = f' &nbsp; <a href="{html.escape(attempt.job_url, quote=True)}">view job</a>' if attempt.job_url else ""
     entry = f"<code> {html.escape(_job_label(job))} </code>{link}"
 
@@ -336,6 +367,10 @@ def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress) -> str:
         summary = f"{len(attempt.failed_steps)} failed step{'s' if len(attempt.failed_steps) > 1 else ''}"
     else:
         return f"{entry}\n<sub>No test-level failure was reported for this job.</sub>"
+
+    if not detail:
+        # The count without the names: enough to see the shape of the failure and open the job.
+        return f"{entry}\n<sub>{summary}</sub>"
 
     return f"{entry}\n<details open>\n<summary>{summary}</summary>\n\n{items}\n\n</details>"
 
@@ -381,7 +416,7 @@ def _list_section(heading: str, entries: list[str], budget: int, noun: str) -> s
     """A heading over a bullet list, truncated to *budget* with an explicit note when it is cut."""
     if not entries:
         return None
-    kept, dropped = _pack(entries, budget - len(heading) - SECTION_SEPARATOR - OVERFLOW_RESERVE)
+    kept, dropped = _pack(entries, budget - _size(heading) - SECTION_SEPARATOR - OVERFLOW_RESERVE)
     if dropped:
         kept.append(_overflow_note(dropped, noun))
     return f"{heading}\n\n" + "\n".join(kept)

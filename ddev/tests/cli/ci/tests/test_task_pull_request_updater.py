@@ -13,10 +13,12 @@ from __future__ import annotations
 
 import asyncio
 import re
+from dataclasses import replace
 
 import httpx
 import pytest
 
+from ddev.cli.ci.tests import pr_comment
 from ddev.cli.ci.tests.messages import UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import COMMENT_MARKER
 from ddev.cli.ci.tests.progress import (
@@ -25,13 +27,14 @@ from ddev.cli.ci.tests.progress import (
     ExecutionState,
     JobAttemptProgress,
     JobProgress,
+    ProgressError,
 )
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_pull_request_updater import PullRequestUpdaterOptions, TaskPullRequestUpdater
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
-from ddev.utils.github_errors import GitHubAuthenticationError
+from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
 from tests.cli.ci.tests.helpers import make_job
 from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient
@@ -613,29 +616,47 @@ def test_the_oversized_body_is_not_resent_verbatim() -> None:
     assert calls[0].kwargs["body"] != calls[1].kwargs["body"]
 
 
-def test_a_minimal_body_rejected_again_is_not_shrunk_a_second_time(summary_file) -> None:
-    """There is nothing left to drop, so a second rejection stops rather than looping."""
+def test_the_last_tier_rejected_again_stops_rather_than_looping(summary_file) -> None:
+    """Once the smallest tier is refused there is nothing left to drop, so the ladder ends."""
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", _too_long_error())
+    updater = _updater(client)
+
+    asyncio.run(updater.process_message(_failing_update(1, done=True)))
+
+    # The full body, then the smallest tier. No third attempt, and no loop.
+    assert len(client.calls_to("create_issue_comment")) == 2
+    assert updater.pr_comment_failed
+    assert "pull request comment could not be updated" in summary_file.read_text(encoding="utf-8")
+
+
+def test_a_snapshot_with_nothing_to_drop_is_not_resent(summary_file) -> None:
+    """A passing run has no failures, no unavailable results and no retries to shed.
+
+    Every tier renders the same body, so resending one GitHub has just refused would spend a request
+    to learn nothing. The ladder recognises that and stops at the first rejection.
+    """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error())
     updater = _updater(client)
 
     asyncio.run(updater.process_message(_update(1, done=True)))
 
-    assert len(client.calls_to("create_issue_comment")) == 2
+    assert len(client.calls_to("create_issue_comment")) == 1
     assert updater.pr_comment_failed
     assert "pull request comment could not be updated" in summary_file.read_text(encoding="utf-8")
 
 
-def test_a_failed_minimal_retry_on_an_intermediate_revision_does_not_raise() -> None:
+def test_a_revision_lost_to_length_does_not_block_the_next_one() -> None:
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
     updater = _updater(client)
 
-    asyncio.run(updater.process_message(_update(1)))
+    asyncio.run(updater.process_message(_failing_update(1)))
 
-    # The lost revision does not block the next snapshot, which is written normally.
-    asyncio.run(updater.process_message(_update(2)))
+    # Two passes spent on revision 1, then the next snapshot is written normally.
+    asyncio.run(updater.process_message(_failing_update(2)))
     assert len(client.calls_to("create_issue_comment")) == 3
 
 
@@ -840,7 +861,10 @@ def test_a_lost_write_does_not_hold_the_revision_back() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Telling one 422 from another
+# Reacting to a rejection that shrinking cannot fix
+#
+# Classifying a 422 is the client's job and is tested there. What belongs here is what the updater
+# does with the result: walk the ladder for a length problem, surface anything else.
 # ---------------------------------------------------------------------------
 
 
@@ -873,40 +897,6 @@ def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log(
     assert "too long" not in caplog.text
 
 
-def test_an_unreadable_validation_response_is_treated_as_too_long() -> None:
-    """The safer guess. Being wrong costs one request; the other way costs the only report we had.
-
-    A 422 with no readable body cannot be ruled out as the over-long case, and that case is the only
-    one the updater can do anything about.
-    """
-    client = FakeAsyncGitHubClient()
-    client.mock_response("create_issue_comment", _http_error(422), once=True)
-
-    asyncio.run(_updater(client).process_message(_failing_update(1)))
-
-    calls = client.calls_to("create_issue_comment")
-    assert len(calls) == 2
-    assert len(calls[1].kwargs["body"]) < len(calls[0].kwargs["body"])
-
-
-def test_a_length_message_is_recognised_at_the_top_level_of_the_response() -> None:
-    """Only one of the two message fields is documented to exist, so both are read."""
-    request = httpx.Request("PATCH", "https://api.github.com/")
-    error = httpx.HTTPStatusError(
-        "boom",
-        request=request,
-        response=httpx.Response(
-            422, json={"message": "body is too long (maximum is 65536 characters)"}, request=request
-        ),
-    )
-    client = FakeAsyncGitHubClient()
-    client.mock_response("create_issue_comment", error, once=True)
-
-    asyncio.run(_updater(client).process_message(_failing_update(1)))
-
-    assert len(client.calls_to("create_issue_comment")) == 2
-
-
 def test_a_non_validation_status_is_never_read_as_too_long() -> None:
     """A 500 whose body happens to mention length must not trigger the fallback."""
     request = httpx.Request("PATCH", "https://api.github.com/")
@@ -919,3 +909,118 @@ def test_a_non_validation_status_is_never_read_as_too_long() -> None:
     asyncio.run(_updater(client).process_message(_failing_update(1)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
+
+
+# ---------------------------------------------------------------------------
+# The tier ladder
+# ---------------------------------------------------------------------------
+
+
+def _tiered_update(revision: int, *, done: bool = False) -> UpdatePRComment:
+    """A snapshot with failures *and* an unavailable result, so all three tiers differ."""
+    progress = _failing_progress(done=done)
+    unavailable = JobProgress(
+        job=make_job("mysql-py3.12-linux", target="mysql", environment="py3.12"),
+        attempts=(
+            JobAttemptProgress(
+                attempt=1,
+                job_id=11,
+                status=Status.SUCCESS,
+                conclusion=WorkflowJobConclusion.SUCCESS,
+                failed_steps=(),
+                job_url=None,
+                reports=(),
+                error=ProgressError.NO_ARTIFACTS,
+            ),
+        ),
+    )
+    batch = progress.batches[0]
+    widened = replace(batch, jobs_progress=(*batch.jobs_progress, unavailable))
+    return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=replace(progress, batches=(widened,)))
+
+
+def test_the_ladder_walks_all_three_tiers() -> None:
+    """Full, then compact, then minimal -- each smaller than the last."""
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", _too_long_error(), once=True)
+    client.mock_response("create_issue_comment", _too_long_error(), once=True)
+
+    asyncio.run(_updater(client).process_message(_tiered_update(1, done=True)))
+
+    bodies = [call.kwargs["body"] for call in client.calls_to("create_issue_comment")]
+    assert len(bodies) == 3
+    sizes = [len(body.encode("utf-8")) for body in bodies]
+    assert sizes[2] < sizes[1] < sizes[0]
+    # Tier 2 sheds the secondary sections; tier 3 sheds the per-test detail but keeps the failures.
+    assert "Unavailable results" in bodies[0]
+    assert "Unavailable results" not in bodies[1]
+    assert "test_number_0" in bodies[1]
+    assert "test_number_0" not in bodies[2]
+    assert "Failures" in bodies[2]
+    assert "<table>" in bodies[2]
+
+
+def test_a_too_long_body_never_escapes_the_updater() -> None:
+    """The client raises a ValueError subclass, which the HTTP handler would not have caught.
+
+    That is the whole hazard of moving the guard into the client: a pre-flight raise bypassing the
+    fallback would turn graceful degradation into a failed run.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", _too_long_error())
+
+    for done in (False, True):
+        asyncio.run(_updater(client).process_message(_tiered_update(1, done=done)))
+
+
+def test_the_retained_report_is_the_full_one_even_when_a_smaller_tier_was_sent() -> None:
+    """The run summary's own limit is 1 MiB, so the run page keeps the complete report."""
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", _too_long_error(), once=True)
+    updater = _updater(client)
+
+    asyncio.run(updater.process_message(_tiered_update(1, done=True)))
+
+    assert updater.latest_body is not None
+    assert "test_number_0" in updater.latest_body
+
+
+def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypatch) -> None:
+    """The case the tiers exist for.
+
+    The renderer budgets against the limit and truncates itself, so a body we measured is essentially
+    never too long by our own reckoning. What the tiers protect against is GitHub disagreeing --
+    refusing a body our measurement passed, because its accounting is undocumented and demonstrably
+    not something we can reproduce. Simulated here by a server that accepts only the smallest tier.
+    """
+    message = _tiered_update(1, done=True)
+    tiers = [
+        pr_comment.render_comment(message.progress),
+        pr_comment.render_compact_comment(message.progress),
+        pr_comment.render_minimal_comment(message.progress),
+    ]
+    # Every tier is within our own limit, so nothing here is caught before it is sent.
+    assert all(len(tier.encode("utf-8")) <= pr_comment.COMMENT_BODY_LIMIT for tier in tiers)
+    strict_limit = len(tiers[-1].encode("utf-8"))
+    assert len(tiers[1].encode("utf-8")) > strict_limit, "the middle tier must not already fit"
+
+    client = FakeAsyncGitHubClient()
+    attempted: list[str] = []
+    original = client.create_issue_comment
+
+    async def stricter_github(owner, repo, issue_number, body, timeout=None):
+        attempted.append(body)
+        if len(body.encode("utf-8")) > strict_limit:
+            raise GitHubBodyTooLongError.from_response(
+                "body is too long (maximum is 65536 characters)", limit=pr_comment.COMMENT_BODY_LIMIT
+            )
+        return await original(owner, repo, issue_number, body, timeout)
+
+    monkeypatch.setattr(client, "create_issue_comment", stricter_github)
+    updater = _updater(client)
+
+    asyncio.run(updater.process_message(message))
+
+    # Full refused, compact refused, minimal accepted: the whole ladder, ending on a write.
+    assert attempted == tiers
+    assert not updater.pr_comment_failed
