@@ -1,10 +1,7 @@
 name: Measure Disk Usage
 
-# Triggered by Measure Disk Usage Trigger. workflow_run runs the default-branch copy of this file, so
-# the measured commit cannot alter it, but this job does check that commit out: the Datadog
-# credential is therefore still taken only for push, where the code is master's.
-#
-# head_sha is the commit to measure, and event says whether it came from a push or a pull request.
+# Triggered by Measure Disk Usage Trigger. head_sha is the commit to measure, and event says whether
+# it came from a push or a pull request.
 
 on:
   workflow_run:

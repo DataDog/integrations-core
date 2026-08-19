@@ -1,8 +1,7 @@
 name: Measure Disk Usage Trigger
 
-# Fires Measure Disk Usage, which runs on workflow_run and does the measuring. workflow_run needs an
-# upstream workflow running on the commit itself; this is it, and it does nothing else. The
-# measurement takes the commit and the event from the workflow_run event, so nothing is handed over.
+# Fires Measure Disk Usage, which runs on workflow_run and does the measuring. That workflow takes
+# the commit and the event from the workflow_run event, so nothing is handed over.
 
 on:
   push:
