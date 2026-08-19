@@ -154,6 +154,15 @@ datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations 
 datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring-agent @DataDog/agent-integrations
 **/base/utils/db/statement_metrics.py               @DataDog/database-monitoring-agent @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/query_metrics/                     @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/query_metrics/         @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/checks/db.py                                @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_database_check.py @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/health.py                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/schemas.py                         @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/db/test_schemas.py     @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/sql_commenter.py                   @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_sql_commenter.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/                                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/*.md                                      @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /postgres/manifest.json                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
@@ -807,7 +816,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 /anomali_threatstream/                                               @DataDog/saas-integrations
 /anomali_threatstream/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /anomali_threatstream/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
-/anomali_threatstream/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
 /palo_alto_networks_cortex_xsoar/*.md                                 @DataDog/saas-integrations @DataDog/documentation

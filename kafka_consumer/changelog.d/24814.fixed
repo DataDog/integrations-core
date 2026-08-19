@@ -1,0 +1,1 @@
+Discard broker and log-start offsets that come back negative, instead of reporting a negative ``kafka.broker_offset`` and firing a spurious negative consumer lag event for every partition on every run.

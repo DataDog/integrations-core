@@ -412,6 +412,81 @@ def test_discovery_unknown_placeholder():
     ) in spec.errors
 
 
+def test_discovery_rejects_unknown_conversion() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host!x}"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1, candidate #1, server: Unknown conversion `!x`' in spec.errors
+
+
+def test_discovery_accepts_str_conversion() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host!s}"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert spec.errors == []
+
+
+def test_discovery_rejects_malformed_template() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        "test, test.yaml, discovery, strategy #1, candidate #1, server: Invalid candidate template: "
+        "expected '}' before end of string"
+    ) in spec.errors
+
+
 def test_discovery_rejects_ad_identifiers_field():
     spec = get_spec(
         """

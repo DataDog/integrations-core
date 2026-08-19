@@ -1,0 +1,1 @@
+Manage async job lifecycles through the ``DatabaseCheck`` job registry.

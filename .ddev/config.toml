@@ -207,7 +207,6 @@ nginx_ingress_controller = "nginx-ingress-controller"
 
 [overrides.dep.updates]
 exclude = [
-    'pyasn1',          # https://github.com/pyasn1/pyasn1/issues/52
     'pysnmp',          # Breaking snmp tests
     'aerospike',       # v8+ breaks agent build.
     'confluent-kafka',
@@ -219,6 +218,8 @@ exclude = [
     'pymysql',      # Pinned to below 1.2.0 as requested by DBM while they work on supporting 1.2+
     'foundationdb', # 7+ has a breaking changes
     'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
+    'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
+                    # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
 
 ]
 

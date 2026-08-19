@@ -19,6 +19,7 @@ from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
+    PERF_COUNTER_BULK_COUNT,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_FULL_SERVERNAME,
     STATIC_INFO_INSTANCENAME,
@@ -27,7 +28,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
 )
-from datadog_checks.sqlserver.metrics import SqlFractionMetric
+from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlSimpleMetric
 from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
@@ -392,6 +393,30 @@ def test_get_cursor(instance_docker):
         check.connection.get_cursor('foo')
 
 
+def test_stored_procedure_check_closes_connection_on_error(instance_docker):
+    instance = copy.copy(instance_docker)
+    instance['stored_procedure'] = 'fake_proc'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+
+    mock_cursor = mock.MagicMock()
+    mock_cursor.execute.side_effect = Exception("proc failed")
+    mock_cursor.callproc.side_effect = Exception("proc failed")
+
+    with (
+        mock.patch.object(check.connection, 'open_db_connections') as open_db,
+        mock.patch.object(check.connection, 'close_db_connections') as close_db,
+        mock.patch.object(check.connection, 'get_cursor', return_value=mock_cursor),
+        mock.patch.object(check.connection, 'close_cursor') as close_cursor,
+    ):
+        with pytest.raises(Exception, match="proc failed"):
+            check.do_stored_procedure_check()
+
+    open_db.assert_called_once()
+    close_db.assert_called_once()
+    close_cursor.assert_called_once_with(mock_cursor)
+
+
 def test_missing_db(instance_docker, dd_run_check):
     instance = copy.copy(instance_docker)
     instance['ignore_missing_database'] = False
@@ -519,6 +544,83 @@ def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instanc
         if metric.__class__.TABLE not in ['msdb.dbo.backupset', 'sys.dm_db_file_space_usage']
     ]
     assert len(cross_database_metrics) == 0
+
+
+def _statement_metrics_check(instance, engine_edition, disable_secondary_tags):
+    instance = copy.deepcopy(instance)
+    instance['dbm'] = True
+    instance['query_metrics'] = {'disable_secondary_tags': disable_secondary_tags}
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
+    return check
+
+
+def _mock_query_stats_cursor():
+    cursor = mock.MagicMock()
+    cursor.description = [('execution_count',), ('total_elapsed_time',), ('total_worker_time',)]
+    return cursor
+
+
+@pytest.mark.parametrize(
+    'engine_edition, disable_secondary_tags, expect_db_name_func, expect_database_name, expect_plan_attributes',
+    [
+        pytest.param(ENGINE_EDITION_SQL_DATABASE, True, True, True, False, id='azure_sql_database_no_secondary_tags'),
+        pytest.param(ENGINE_EDITION_SQL_DATABASE, False, False, True, True, id='azure_sql_database_default'),
+        # Managed Instance is an Azure engine but is not scoped to one database, so it is excluded like self-hosted.
+        pytest.param(ENGINE_EDITION_STANDARD, True, False, False, False, id='self_hosted_no_secondary_tags'),
+        pytest.param(ENGINE_EDITION_STANDARD, False, False, True, True, id='self_hosted_default'),
+        pytest.param(
+            ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
+            True,
+            False,
+            False,
+            False,
+            id='azure_managed_instance_no_secondary_tags',
+        ),
+        pytest.param(
+            ENGINE_EDITION_AZURE_MANAGED_INSTANCE, False, False, True, True, id='azure_managed_instance_default'
+        ),
+    ],
+)
+def test_statement_metrics_query_database_name_column(
+    instance_docker,
+    engine_edition,
+    disable_secondary_tags,
+    expect_db_name_func,
+    expect_database_name,
+    expect_plan_attributes,
+):
+    check = _statement_metrics_check(instance_docker, engine_edition, disable_secondary_tags)
+    query = check.statement_metrics._get_statement_metrics_query_cached(_mock_query_stats_cursor())
+
+    assert ('DB_NAME() as database_name' in query) == expect_db_name_func
+    assert ('as database_name' in query) == expect_database_name
+    assert ('sys.dm_exec_plan_attributes' in query) == expect_plan_attributes
+
+
+@pytest.mark.parametrize(
+    'configured_database, row_database_name, expected',
+    [
+        pytest.param('mydb', 'mydb', True, id='row_matches_configured_database'),
+        pytest.param('mydb', 'MyDb', True, id='row_matches_case_insensitively'),
+        pytest.param('mydb', 'otherdb', False, id='row_from_another_database_excluded'),
+        pytest.param('master', 'mydb', True, id='master_includes_all_rows'),
+        pytest.param(None, 'mydb', True, id='no_configured_database_includes_all_rows'),
+    ],
+)
+def test_azure_sql_database_row_filtering_with_secondary_tags_disabled(
+    instance_docker, configured_database, row_database_name, expected
+):
+    # Supplying database_name makes the Azure SQL Database row filter reachable under this setting for the first time.
+    instance = copy.deepcopy(instance_docker)
+    if configured_database is None:
+        instance.pop('database', None)
+    else:
+        instance['database'] = configured_database
+    check = _statement_metrics_check(instance, ENGINE_EDITION_SQL_DATABASE, True)
+
+    row = {'database_name': row_database_name, 'execution_count': 1}
+    assert check.statement_metrics._should_include_query_metrics_row(row) is expected
 
 
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
@@ -767,6 +869,143 @@ def test_SqlFractionMetric_group_by_instance(caplog):
         hostname='stubbed.hostname',
         tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:zoo'],
     )
+
+
+# sys.dm_os_performance_counters declares the name columns as nchar(128), so every value comes back
+# blank-padded. Pad the fixtures the same way to exercise the stripping.
+def _padded_counter_row(
+    counter_name: str,
+    instance_name: str,
+    object_name: str,
+    cntr_value: int,
+) -> tuple[str, str, str, int]:
+    return (counter_name.ljust(128), instance_name.ljust(128), object_name.ljust(128), cntr_value)
+
+
+SIMPLE_METRIC_ROWS = [
+    _padded_counter_row('Processes blocked', '', 'SQLServer:General Statistics', 1),
+    _padded_counter_row('Cache Pages', '_Total', 'SQLServer:Plan Cache', 10),
+    _padded_counter_row('Cache Pages', 'SQL Plans', 'SQLServer:Plan Cache', 11),
+    _padded_counter_row('Cache Pages', 'Object Plans', 'SQLServer:Plan Cache', 12),
+    _padded_counter_row('Transaction Delay', 'tenant_a', 'SQLServer:Database Replica', 20),
+    _padded_counter_row('Transaction Delay', 'tenant_a', 'SQLServer:Databases', 21),
+    _padded_counter_row('Log Flushes/sec', '_Total', 'SQLServer:Databases', 30),
+    _padded_counter_row('Log Flushes/sec', 'tenant_a', 'SQLServer:Databases', 31),
+    _padded_counter_row('Log Flushes/sec', 'physical_a', 'SQLServer:Databases', 32),
+]
+
+SIMPLE_METRIC_TAGS = ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname']
+
+
+@pytest.mark.parametrize(
+    'cfg_overrides, expected',
+    [
+        pytest.param(
+            {'counter_name': 'Processes blocked', 'instance_name': ''},
+            [(1, SIMPLE_METRIC_TAGS)],
+            id='instance level counter',
+        ),
+        pytest.param(
+            {'counter_name': 'Log Flushes/sec', 'instance_name': '_Total'},
+            [(30, SIMPLE_METRIC_TAGS)],
+            id='total instance of a per database counter',
+        ),
+        pytest.param(
+            {'counter_name': 'Log Flushes/sec', 'instance_name': 'tenant_a'},
+            [(31, SIMPLE_METRIC_TAGS)],
+            id='per database counter matched by instance_name',
+        ),
+        pytest.param(
+            {'counter_name': 'Log Flushes/sec', 'instance_name': 'tenant_b', 'physical_db_name': 'physical_a'},
+            [(32, SIMPLE_METRIC_TAGS)],
+            id='per database counter matched by physical_db_name',
+        ),
+        pytest.param(
+            {
+                'counter_name': 'Transaction Delay',
+                'instance_name': 'tenant_a',
+                'object_name': 'SQLServer:Databases',
+            },
+            [(21, SIMPLE_METRIC_TAGS)],
+            id='object_name selects among counters sharing a name',
+        ),
+        pytest.param(
+            {'counter_name': 'Transaction Delay', 'instance_name': 'tenant_a', 'object_name': 'SQLServer:Missing'},
+            [],
+            id='object_name matching nothing submits nothing',
+        ),
+        pytest.param(
+            {'counter_name': 'Cache Pages', 'instance_name': 'ALL', 'tag_by': 'plan_type'},
+            [(11, SIMPLE_METRIC_TAGS + ['plan_type:SQL Plans']), (12, SIMPLE_METRIC_TAGS + ['plan_type:Object Plans'])],
+            id='ALL instances tags each instance and skips _Total',
+        ),
+        pytest.param(
+            {
+                'counter_name': 'Transaction Delay',
+                'instance_name': 'ALL',
+                'tag_by': 'db',
+                'object_name': 'SQLServer:Missing',
+            },
+            [(20, SIMPLE_METRIC_TAGS + ['db:tenant_a']), (21, SIMPLE_METRIC_TAGS + ['db:tenant_a'])],
+            id='ALL instances ignores object_name',
+        ),
+        pytest.param(
+            {'counter_name': 'Not Collected', 'instance_name': ''},
+            [],
+            id='counter absent from the result set submits nothing',
+        ),
+        pytest.param(
+            {'counter_name': 'Log Flushes/sec', 'instance_name': 'tenant_missing'},
+            [],
+            id='instance absent from the result set submits nothing',
+        ),
+    ],
+)
+def test_SqlSimpleMetric_fetch_metric(cfg_overrides, expected):
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = SIMPLE_METRIC_ROWS
+    mock_cursor.description = [('counter_name',), ('instance_name',), ('object_name',), ('cntr_value',)]
+
+    report_function = mock.MagicMock()
+    cfg_instance = {
+        'name': 'sqlserver.test.metric',
+        'tags': list(SIMPLE_METRIC_TAGS),
+        'hostname': 'stubbed.hostname',
+    }
+    cfg_instance.update(cfg_overrides)
+    metric_obj = SqlSimpleMetric(
+        cfg_instance=cfg_instance,
+        base_name=None,
+        report_function=report_function,
+        column=None,
+        logger=mock.MagicMock(),
+    )
+
+    results, columns = SqlSimpleMetric.fetch_all_values(mock_cursor, [cfg_instance['counter_name']], mock.MagicMock())
+    metric_obj.fetch_metric(results, columns)
+
+    assert report_function.call_args_list == [
+        mock.call('sqlserver.test.metric', value, raw=True, hostname='stubbed.hostname', tags=tags)
+        for value, tags in expected
+    ]
+
+
+def test_get_sql_counter_type_caches_counters_without_a_base(instance_docker):
+    """A counter type is immutable for the lifetime of the server, so it should only be queried once.
+
+    Without caching, rebuilding the metric list queries the type of every counter for every
+    autodiscovered database, which is hundreds of round trips on an instance with many databases.
+    """
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchone.return_value = (PERF_COUNTER_BULK_COUNT,)
+    check._connection = mock.MagicMock()
+    check._connection.get_managed_cursor.return_value.__enter__.return_value = mock_cursor
+
+    for _ in range(3):
+        assert check.get_sql_counter_type('Transactions/sec') == (PERF_COUNTER_BULK_COUNT, None)
+
+    assert mock_cursor.execute.call_count == 1
 
 
 def _mock_database_list():
