@@ -43,15 +43,10 @@ from .models import (
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
 
-# GitHub rejects an over-long comment body with "422 ... body is too long (maximum is 65536
-# characters)". That error message is the only evidence for the number: the OpenAPI description for
-# GITHUB_API_VERSION declares no `maxLength` on the body of either comment endpoint, even though it
-# uses `maxLength` freely elsewhere, and the REST documentation states the limit nowhere.
-#
-# Compared against UTF-8 byte length rather than character count. GitHub says characters; byte length
-# is never below character count, so measuring bytes errs only towards refusing a body GitHub might
-# have taken, never towards sending one it will refuse. Callers that must fit a limit should read this
-# constant rather than invent a margin of their own.
+# GitHub's 422 ("body is too long (maximum is 65536 characters)") is the only evidence for this
+# number: neither the OpenAPI description for GITHUB_API_VERSION nor the REST docs state it. Measured
+# in UTF-8 bytes, which is never below the character count GitHub means, so it errs only towards
+# refusing a body GitHub might have taken. Callers should read this rather than invent a margin.
 COMMENT_BODY_LIMIT = 65_536
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
@@ -535,12 +530,9 @@ class AsyncGitHubClient:
     async def _comment_request(self, method: str, endpoint: str, *, body: str, timeout: float | None) -> httpx.Response:
         """Send a comment *body*, enforcing the length limit from both sides.
 
-        Scoped to the comment endpoints rather than applied in `_request`, because a 422 means
-        something else everywhere else: a bodyless validation failure from a check-run call has
-        nothing to do with a body being too long.
-
-        Both halves raise `GitHubBodyTooLongError`, so a caller has one thing to catch and one action
-        to take -- send less -- and never has to read a 422 payload to work that out.
+        Scoped to the comment endpoints rather than `_request`, because a 422 elsewhere has nothing to
+        do with a body being too long. Both halves raise `GitHubBodyTooLongError`, so a caller has one
+        thing to catch and never reads a 422 payload itself.
         """
         _ensure_body_fits(body)
         try:

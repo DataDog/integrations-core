@@ -39,11 +39,6 @@ if TYPE_CHECKING:
 # an existing one to edit, so nothing else may write it.
 COMMENT_MARKER = "<!-- ddev-dispatcher-tests -->"
 
-# Sections are budgeted against the client's own limit, in the same unit the client measures, so the
-# two cannot drift. There is deliberately no margin below it: an unevidenced cushion is what this
-# replaced. Being wrong is handled by the tiers in ``render_compact_comment`` and
-# ``render_minimal_comment`` rather than by guessing low.
-
 # Width of the text progress bar, in cells.
 PROGRESS_BAR_WIDTH = 24
 
@@ -87,9 +82,11 @@ def _size(text: str) -> int:
 def render_comment(progress: DispatcherProgress) -> str:
     """Render the full comment body for *progress*, trimmed to ``COMMENT_BODY_LIMIT`` bytes.
 
-    The first of three tiers. The snapshot is the whole input. The message's ``revision`` is
-    deliberately not rendered: it is internal ordering metadata, meaningless to the person reading the
-    pull request, and the gatherer already logs it for diagnosis.
+    Budgeted in bytes against the client's own limit, so the two cannot drift. Being wrong about
+    GitHub's accounting is handled by the tiers below, not by guessing low.
+
+    The first of three tiers. The message's ``revision`` is deliberately not rendered: it is internal
+    ordering metadata, and the gatherer already logs it.
     """
     return _render(progress, (partial(_failures, detail=True), _unavailable, _retried))
 
@@ -142,11 +139,9 @@ def _render(progress: DispatcherProgress, sections: tuple[SectionBuilder, ...]) 
 def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
     """Turn a rendered comment *body* into the report written to the GitHub Actions run summary.
 
-    The same report, on a different surface — deliberately not a second renderer, so the run page and
-    the pull request can never disagree. Two differences only: the marker goes, because it exists
-    solely so the updater can find its comment and a run summary is never looked up; and a failed
-    comment write is announced, because the reader arrived from the run page and would otherwise have
-    no way to know a comment was attempted at all.
+    Not a second renderer, so the run page and the pull request cannot disagree. Two differences only:
+    the marker goes, since nothing looks a run summary up, and a failed comment write is announced,
+    since a reader who arrived from the run page has no other way to know one was attempted.
     """
     report = body.removeprefix(COMMENT_MARKER).lstrip("\n")
     if not pr_comment_failed:
@@ -293,9 +288,8 @@ def _batch_chip(batch: BatchProgress) -> str:
     if batch.state is ExecutionState.FINISHED:
         chip = STATUS_CHIP.get(batch.status) if batch.status is not None else None
         return chip if chip is not None else "❔ no status reported"
-    # Retrying is not called out at the batch level: a rerun is Dispatcher's own business, and from
-    # the reader's side the batch is simply not finished yet. Which jobs were retried, and how often,
-    # is reported per job where it is actionable.
+    # A rerun is Dispatcher's own business, so at the batch level it is simply unfinished work. Which
+    # jobs were retried is reported per job, where it is actionable.
     if batch.state in (ExecutionState.RUNNING, ExecutionState.RETRYING):
         return "🔄 in progress"
     return "⏳ queued"
@@ -355,9 +349,8 @@ def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress, *, detail: 
     link = f' &nbsp; <a href="{html.escape(attempt.job_url, quote=True)}">view job</a>' if attempt.job_url else ""
     entry = f"<code> {html.escape(_job_label(job))} </code>{link}"
 
-    # ``<code>`` rather than a Markdown code span: ``html.escape`` does not escape backticks, and a
-    # test id may contain one (pytest puts parametrised values straight into the name). A backtick
-    # inside a span would close it early and let the rest of the name render as markup.
+    # ``<code>`` rather than a Markdown code span: ``html.escape`` leaves backticks alone, and a
+    # backtick in a test id would close a span early and let the rest render as markup.
     failed_tests = attempt.failed_tests
     if failed_tests:
         items = "\n".join(f"- <code>{html.escape(f'{case.classname}::{case.name}')}</code>" for case in failed_tests)

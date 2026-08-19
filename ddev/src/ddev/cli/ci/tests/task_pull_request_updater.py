@@ -15,11 +15,9 @@ from ddev.cli.ci.tests.pr_comment import (
     render_comment,
     render_compact_comment,
     render_minimal_comment,
-    render_run_summary,
     summary_line,
 )
 from ddev.event_bus.orchestrator import AsyncProcessor
-from ddev.utils.github_actions import write_step_summary
 from ddev.utils.github_errors import GitHubBodyTooLongError
 
 if TYPE_CHECKING:
@@ -33,9 +31,8 @@ if TYPE_CHECKING:
 UNUSABLE_COMMENT_STATUSES = (403, 404)
 
 # Enough passes for everything a failed write can change about the next one: two steps down the
-# comment tiers, and giving up on a comment we may not edit. The latter can repeat, because the
-# comment we create to replace the first can itself be refused, so the cap is what stops that
-# becoming a loop. One more than the sum, for the pass that finally lands.
+# comment tiers, plus giving up on a comment we may not edit, which can repeat because the
+# replacement can itself be refused. One more than the sum, for the pass that lands.
 MAX_WRITE_PASSES = 5
 
 
@@ -44,7 +41,8 @@ class PullRequestUpdaterOptions:
     """Configuration for a ``TaskPullRequestUpdater``.
 
     ``pr_number`` is ``None`` for the runs that have no pull request to comment on — a push to
-    ``master``, the nightly schedule, and merge-queue runs. Those report to the run summary only.
+    ``master``, the nightly schedule, and merge-queue runs. Those render to the log and to
+    ``latest_body``.
     """
 
     owner: str
@@ -53,33 +51,24 @@ class PullRequestUpdaterOptions:
 
 
 class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
-    """Projects ``DispatcherProgress`` snapshots onto one pull-request comment and the run summary.
+    """Projects ``DispatcherProgress`` snapshots onto one pull-request comment.
 
-    A serialized, stateless projection: it consumes no runner messages, merges no deltas, computes
-    no retries, and calls no GitHub API beyond the single comment it owns. It renders the newest
-    snapshot and ignores stale revisions, so neither surface can regress.
+    A serialized, stateless projection: it consumes no runner messages, merges no deltas, computes no
+    retries, and calls no GitHub API beyond the single comment it owns. It renders the newest snapshot
+    and ignores stale revisions, so the comment cannot regress.
 
-    Two destinations for one report. The pull-request comment is optional — there is no pull request
-    on a ``master`` push, the nightly schedule, or a merge-queue run — while the run summary is
-    written on every run once the last batch finishes, so opening the workflow always shows the final
-    result. ``latest_body`` keeps the newest rendered report for the caller to persist as a workflow
-    output.
+    **Failing to write the comment never fails the run.** A reporting problem is logged and recorded
+    in ``pr_comment_failed``, and the report itself is kept in ``latest_body`` for the orchestrator to
+    publish on shutdown, however the run ends. Transient failures are not retried here: retrying is
+    the GitHub client's job, so one retry strategy covers every caller.
 
-    Because the run summary always reports, **failing to write the comment never fails the run**. A
-    reporting problem is logged, recorded, and announced at the top of the run summary; it does not
-    cost anyone the test results. Transient failures are not retried here either: retrying is the
-    GitHub client's job, so that one retry strategy covers every caller.
+    The comment is found or created once, by ``COMMENT_MARKER``, so a later Dispatcher run on the same
+    pull request edits the existing comment instead of adding another. The marker identifies the
+    comment but does not prove we own it — anyone can paste it, and quoting our comment copies it — so
+    an edit GitHub refuses is treated as "not our comment" and recovered from rather than retried.
 
-    The comment is found or created once, by ``COMMENT_MARKER``, so a later Dispatcher run on the
-    same pull request edits the existing comment instead of adding another. The marker identifies the
-    comment but does not prove we own it — anyone can paste it, and quoting our comment copies it —
-    so an edit that GitHub refuses is treated as "not our comment" and recovered from, rather than
-    trusted and retried.
-
-    Ordering is guaranteed within one Dispatcher execution, which the design assumes is the only one
-    running: "One active Dispatcher execution per PR is a hard precondition enforced by workflow
-    concurrency." Two concurrent executions would each keep their own revision counter and could
-    still fight over the comment; coordinating them is deliberately out of scope.
+    Ordering holds within one Dispatcher execution, which workflow concurrency guarantees is the only
+    one running. Coordinating two concurrent executions is out of scope.
 
     This is a terminal consumer: it emits no further messages.
     """
@@ -103,8 +92,8 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     def latest_body(self) -> str | None:
         """The newest report rendered, or ``None`` if no snapshot has arrived yet.
 
-        Retained whether or not it reached GitHub, so the caller can persist it as a workflow output
-        for later steps to publish. For a run with no pull request this is the only report there is.
+        Retained whether or not it reached GitHub, so the orchestrator can publish it on shutdown. For
+        a run with no pull request this is the only report there is.
         """
         return self._latest_body
 
@@ -134,44 +123,24 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
             else:
                 self._pr_comment_failed = not await self._write(pr_number, message, body, log_extra)
 
-            # Retained even when the write failed: this is the newest report we have, and the run
-            # summary below is about to report it regardless. The revision advances with it, so a
-            # later snapshot cannot be overtaken by an earlier one that is still in flight.
+            # Retained even when the write failed: this is the newest report we have, and losing the
+            # comment must not lose the results. The revision advances with it, so a later snapshot
+            # cannot be overtaken by an earlier one still in flight.
             self._latest_body = body
             self._latest_revision = message.revision
-
-            if message.progress.done:
-                self._write_run_summary(body, log_extra)
-
-    def _write_run_summary(self, body: str, log_extra: dict[str, object]):
-        """Publish the final report to the run's job summary, the panel shown on the run page.
-
-        Every run reports here, so a run with no pull request still has a result to open, and one
-        whose comment could not be written still has somewhere that says so. A no-op outside GitHub
-        Actions, and never a reason to fail: ``write_step_summary`` swallows an unwritable file.
-        """
-        write_step_summary(render_run_summary(body, pr_comment_failed=self._pr_comment_failed))
-        self._logger.info("Run summary written", extra={**log_extra, "pr_comment_failed": self._pr_comment_failed})
 
     async def _write(self, pr_number: int, message: UpdatePRComment, body: str, log_extra: dict[str, object]) -> bool:
         """Write *body* to the comment, stepping down the tiers if it is too long. Did it land?
 
-        Not a retry loop — a failure that a further pass cannot change stops immediately. Each pass
-        continues only after changing what the next one will do: dropping to a smaller tier, or
-        forgetting a comment GitHub will not let us edit so the next pass creates our own.
+        Not a retry loop — a failure a further pass cannot change stops immediately. Each pass
+        continues only after changing what the next one does: a smaller tier, or forgetting a comment
+        GitHub will not let us edit so the next pass creates our own.
 
-        The tiers are rendered lazily because shrinking is the exception. Both ways of learning a body
-        is too long arrive as ``GitHubBodyTooLongError``: the client measures it before spending a
-        request, and converts GitHub's own 422 into the same error. So there is one thing to catch and
-        one action to take, and no 422 payload to parse here.
+        The tiers render lazily because shrinking is the exception. Both ways of learning a body is too
+        long arrive as ``GitHubBodyTooLongError`` — the client's pre-flight measurement and GitHub's own
+        422 — so there is one thing to catch and no payload to parse here.
 
-        Worth knowing which of the two actually drives this. The renderer budgets against the same
-        limit the client enforces and truncates itself to fit, so the pre-flight measurement rarely
-        fires. The tiers are really there for GitHub disagreeing -- refusing a body we measured as
-        fitting, because its accounting is undocumented and not something we can reproduce locally.
-
-        Losing the write does not fail the run. The report is retained and the run summary reports it
-        with a note saying the comment could not be updated.
+        Losing the write does not fail the run; the report is retained either way.
         """
         tiers: tuple[Callable[[], str], ...] = (
             lambda: body,
@@ -236,10 +205,8 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     def _forget_unusable_comment(self, error: httpx.HTTPError, log_extra: dict[str, object]) -> bool:
         """Drop the tracked comment when GitHub says we may not edit it, or it is gone.
 
-        Returns whether anything was forgotten, meaning the next attempt should create instead. The
-        marker only identifies a comment; a reviewer can paste it, so the comment it points at may
-        belong to someone else. Without this the updater would retry that edit until it gave up, and
-        the run would report nothing at all.
+        Returns whether anything was forgotten, meaning the next pass should create instead. The marker
+        only identifies a comment, so the one it points at may belong to whoever pasted it.
         """
         if self._comment_id is None or not isinstance(error, httpx.HTTPStatusError):
             return False
@@ -260,10 +227,9 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
 def _next_distinct_tier(tiers: tuple[Callable[[], str], ...], tier: int, current: str) -> tuple[int, str] | None:
     """The next tier that renders something different from *current*, or ``None`` if none does.
 
-    Advancing blindly would waste a pass: a snapshot with no unavailable results and no retried jobs
-    makes the compact tier byte-identical to the full one, and resending a body GitHub has just
-    refused cannot succeed. So the ladder skips a tier that sheds nothing rather than spending a
-    request to discover that.
+    A snapshot with nothing to shed renders the compact tier byte-identical to the full one, and
+    resending a body GitHub just refused cannot succeed, so the ladder skips it rather than spending a
+    request to find out.
     """
     for index in range(tier + 1, len(tiers)):
         body = tiers[index]()

@@ -35,7 +35,7 @@ Add type hints to new functions and methods. Use modern syntax: prefer `str | No
 
 Type simple generators as `Iterator[T]`. Use `Generator[YieldType, SendType, ReturnType]` when sent or returned values are part of their behavior.
 
-Omit `-> None`. It is the only return annotation that tells a reader nothing they could not already see, and on the many small procedures in this codebase it is pure noise. Existing code is not being retrofitted, so expect to see both forms.
+Omit `-> None` on test functions — the return type of a test carries no information. A method that returns `None` in a `Protocol` or an abstract base class must still annotate it, because `mypy` treats an unannotated method as returning `Any`. Elsewhere either form is fine. Existing code is not being retrofitted, so expect to see both.
 
 #### Refactoring Existing Code
 
