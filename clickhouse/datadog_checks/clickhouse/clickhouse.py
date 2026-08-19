@@ -23,7 +23,17 @@ from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .table_metrics import ClickhouseTableMetrics
-from .utils import ErrorSanitizer, cluster_aware_query
+from .utils import (
+    CLOUD_MODE_QUERY,
+    CLUSTER_MACRO_QUERY,
+    CLUSTER_NAME_QUERY,
+    CLUSTER_TAG,
+    HOSTING_TYPE_TAG,
+    SHARED_MERGE_TREE_QUERY,
+    ErrorSanitizer,
+    HostingType,
+    cluster_aware_query,
+)
 
 try:
     import datadog_agent
@@ -60,6 +70,9 @@ class ClickhouseCheck(DatabaseCheck):
         self._resolved_hostname = None
         self._database_hostname = None
         self._dbms_version = None
+        self._cluster_name = None
+        self._cluster_name_resolved = False
+        self._hosting_type = None
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
@@ -104,15 +117,27 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.statement_metrics = None
 
-        # Initialize query samples (from system.processes - analogous to pg_stat_activity)
-        if self._config.dbm and self._config.query_samples.enabled:
-            self.statement_samples = ClickhouseStatementSamples(self, self._config.query_samples)
+        # Initialize query samples (from system.processes - analogous to pg_stat_activity).
+        # The async insert buffer snapshot collapses into this job (sharing its connection and
+        # loop) instead of running as its own DBMAsyncJob, which would open another concurrent
+        # connection against the check's capped DBM connection pool.
+        if self._config.dbm and (
+            self._config.query_samples.enabled or self._config.collect_pending_async_inserts.enabled
+        ):
+            self.statement_samples = ClickhouseStatementSamples(
+                self, self._config.query_samples, self._config.collect_pending_async_inserts
+            )
         else:
             self.statement_samples = None
 
-        # Initialize query completions (from system.query_log - completed queries)
-        if self._config.dbm and self._config.query_completions.enabled:
-            self.query_completions = ClickhouseQueryCompletions(self, self._config.query_completions)
+        # Initialize query completions (from system.query_log - completed queries).
+        # The async insert flush log collection collapses into this job (shares its connection and loop),
+        # so its config is passed in here rather than run as its own DBMAsyncJob, which would add another
+        # concurrent connection to the check's capped DBM connection pool.
+        if self._config.dbm and (self._config.query_completions.enabled or self._config.collect_async_inserts.enabled):
+            self.query_completions = ClickhouseQueryCompletions(
+                self, self._config.query_completions, self._config.collect_async_inserts
+            )
         else:
             self.query_completions = None
 
@@ -205,14 +230,6 @@ class ClickhouseCheck(DatabaseCheck):
         """Send database instance metadata to the metadata intake."""
         current_time = time()
         if current_time - self._database_instance_last_emitted >= DATABASE_INSTANCE_COLLECTION_INTERVAL:
-            # Get the version for the metadata (and cache it)
-            try:
-                version_result = list(self.execute_query_raw('SELECT version()'))[0][0]
-                self._dbms_version = version_result
-            except Exception as e:
-                self.log.debug("Unable to fetch version for metadata: %s", e)
-                self._dbms_version = "unknown"
-
             # Get tags without db: prefix for metadata
             tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
@@ -226,7 +243,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": DATABASE_INSTANCE_COLLECTION_INTERVAL,
-                "dbms_version": self._dbms_version,
+                "dbms_version": self.dbms_version,
                 "integration_version": __version__,
                 "tags": tags_no_db,
                 "timestamp": current_time * 1000,
@@ -241,12 +258,19 @@ class ClickhouseCheck(DatabaseCheck):
 
     def check(self, _):
         self.connect()
-        self._server_version = self.select_version()
-        if self._query_manager is None or self._query_manager_version != self._server_version:
+        self._dbms_version = self.select_version()
+
+        # Must run before the query manager is built and before the DBM jobs are handed
+        # self.tags below, since both snapshot the tag list.
+        if self.cluster_name:
+            self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
+        self.tag_manager.set_tag(HOSTING_TYPE_TAG, self.hosting_type, replace=True)
+
+        if self._query_manager is None or self._query_manager_version != self.dbms_version:
             self._query_manager = self._build_query_manager()
-            self._query_manager_version = self._server_version
+            self._query_manager_version = self.dbms_version
         self._query_manager.execute()
-        self.set_version_metadata(self._server_version)
+        self.set_version_metadata(self.dbms_version)
 
         # Send database instance metadata
         self._send_database_instance_metadata()
@@ -356,6 +380,71 @@ class ClickhouseCheck(DatabaseCheck):
         if self._database_hostname is None:
             self._database_hostname = resolve_db_host(self._config.server)
         return self._database_hostname
+
+    @property
+    def cluster_name(self) -> str | None:
+        """The cluster this instance belongs to, or None when it cannot be determined.
+
+        Requires a live client, so this resolves on the first check run rather than at
+        init. The "not found" outcome is cached too: a deployment without a cluster
+        should not re-query on every run.
+        """
+        if not self._cluster_name_resolved:
+            self._cluster_name = self._resolve_cluster_name()
+            self._cluster_name_resolved = True
+        return self._cluster_name
+
+    def _resolve_cluster_name(self) -> str | None:
+        for query in (CLUSTER_MACRO_QUERY, CLUSTER_NAME_QUERY):
+            try:
+                rows = self.execute_query_raw(query)
+            except Exception as e:
+                self.log.debug('Unable to resolve cluster name with %r: %s', query, e)
+                continue
+            if rows and rows[0] and rows[0][0]:
+                return str(rows[0][0])
+        # Deliberately no 'default' fallback: an absent tag is better than a wrong one.
+        self.log.debug('No ClickHouse cluster name found; %s tag will not be emitted', CLUSTER_TAG)
+        return None
+
+    @property
+    def hosting_type(self) -> str:
+        """Whether this instance is ClickHouse Cloud or self-hosted, cached after the first check run."""
+        if self._hosting_type is None:
+            self._hosting_type = self._resolve_hosting_type()
+        return self._hosting_type
+
+    def _resolve_hosting_type(self) -> str:
+        """Combine two independent Cloud signals; both must agree to report cloud, either can veto it."""
+        cloud_mode = self._probe_cloud_mode()
+        shared_merge_tree = self._probe_shared_merge_tree()
+        self.log.debug('Hosting type signals: cloud_mode=%s, shared_merge_tree=%s', cloud_mode, shared_merge_tree)
+
+        if cloud_mode is False or shared_merge_tree is False:
+            return HostingType.SELF_HOSTED
+        if cloud_mode and shared_merge_tree:
+            return HostingType.CLOUD
+        return HostingType.UNKNOWN
+
+    def _probe_cloud_mode(self) -> bool | None:
+        """Whether the server reports cloud_mode enabled, or None when the probe failed."""
+        try:
+            rows = self.execute_query_raw(CLOUD_MODE_QUERY)
+            if not rows or not rows[0]:
+                return False
+            return str(rows[0][0]) not in ('', '0')
+        except Exception as e:
+            self.log.debug('Unable to read the cloud_mode setting: %s', e)
+            return None
+
+    def _probe_shared_merge_tree(self) -> bool | None:
+        """Whether the Cloud-only SharedMergeTree engine exists, or None when the probe failed."""
+        try:
+            rows = self.execute_query_raw(SHARED_MERGE_TREE_QUERY)
+            return bool(rows and rows[0] and int(rows[0][0]) > 0)
+        except Exception as e:
+            self.log.debug('Unable to check for the SharedMergeTree engine: %s', e)
+            return None
 
     @property
     def database_identifier_template(self) -> str:
@@ -573,7 +662,7 @@ class ClickhouseCheck(DatabaseCheck):
         if version == 'latest':
             return True
 
-        return utils.parse_version(self._server_version) < utils.parse_version(version)
+        return utils.parse_version(self.dbms_version) < utils.parse_version(version)
 
     def version_ge(self, version: str) -> bool:
         """
@@ -583,4 +672,4 @@ class ClickhouseCheck(DatabaseCheck):
         if version == 'latest':
             return False
 
-        return utils.parse_version(self._server_version) >= utils.parse_version(version)
+        return utils.parse_version(self.dbms_version) >= utils.parse_version(version)
