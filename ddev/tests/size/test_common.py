@@ -536,15 +536,29 @@ def make_wheel_response(status_code):
     return response
 
 
-def test_wheel_url_candidates_prefers_configured_tier():
-    assert wheel_url_candidates(PLACEHOLDER_URL, "dev") == [
-        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
-        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
-    ]
-    assert wheel_url_candidates(PLACEHOLDER_URL, "stable") == [
-        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
-        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
-    ]
+@pytest.mark.parametrize(
+    "wheels_storage, expected",
+    [
+        pytest.param(
+            "dev",
+            [
+                "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+            ],
+            id="dev",
+        ),
+        pytest.param(
+            "stable",
+            [
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+                "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+            ],
+            id="stable",
+        ),
+    ],
+)
+def test_wheel_url_candidates_prefers_configured_tier(wheels_storage, expected):
+    assert wheel_url_candidates(PLACEHOLDER_URL, wheels_storage) == expected
 
 
 def test_wheel_url_candidates_without_placeholder_is_not_duplicated():
