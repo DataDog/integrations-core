@@ -356,9 +356,9 @@ class FakeAsyncGitHubClient:
     ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
         """Async-generator mirror.
 
-        Unlike the other paginated mirrors, one page here is itself a list, so "a list of pages" and
-        "one page" are ambiguous. Register a list of `GitHubResponse` for several pages; anything
-        else — including a bare list of `IssueComment` — is taken as the data of a single page.
+        A page here is itself a list of comments, so pages are always registered explicitly: one
+        `GitHubResponse` for one page, a list of them for several. `tests.cli.ci.tests.helpers`
+        provides `comment_page` for building them.
         """
         self._record(
             'list_issue_comments',
@@ -374,17 +374,9 @@ class FakeAsyncGitHubClient:
         )
         if isinstance(response, BaseException):
             raise response
-        # An empty list is one empty page, not zero pages: that is what the real client yields for an
-        # empty JSON array, and `all()` over `[]` would otherwise class it as a (vacuous) page list.
-        if response and isinstance(response, list) and all(isinstance(page, GitHubResponse) for page in response):
-            pages = response
-        else:
-            pages = [response]
+        pages = response if isinstance(response, list) else [response]
         for page in pages:
-            if isinstance(page, GitHubResponse):
-                yield page
-            else:
-                yield GitHubResponse.model_validate({'data': page, 'headers': {}})
+            yield page
 
     async def add_labels_to_issue(
         self,

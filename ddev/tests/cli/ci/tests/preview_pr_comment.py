@@ -3,18 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Renders every comment and run-summary scenario to files, for eyeballing the real thing on GitHub.
 
-Unit tests cannot tell you that a ``<details>`` sits wrong inside a ``<blockquote>`` or that the
-progress bar wraps on a narrow screen, so the layout has to be looked at at least once per change.
-
-Run it as a module from the ``ddev`` directory — it imports the scenario builders from the renderer's
-test module, which only resolves with the ``ddev`` root on ``sys.path``. Running the file by path
-puts its own directory there instead, and the import fails::
+Unit tests cannot tell you that a ``<details>`` sits wrong inside a ``<blockquote>``, so the layout
+has to be looked at at least once per change. Run as a module from the ``ddev`` directory, which is
+what puts the test helpers on ``sys.path``::
 
     cd ddev
     hatch run python -m tests.cli.ci.tests.preview_pr_comment /tmp/dispatcher-preview
     gh pr comment <SCRATCH_PR> --body-file /tmp/dispatcher-preview/02-retrying.md
 
-Not a test: it is named ``preview_`` so pytest does not collect it.
+Named ``preview_`` so pytest does not collect it.
 """
 
 from __future__ import annotations
@@ -30,7 +27,7 @@ from ddev.cli.ci.tests.pr_comment import (
 )
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
-from tests.cli.ci.tests.test_pr_comment import attempt, batch, failing_report, job, planned_batch
+from tests.cli.ci.tests.helpers import attempt, batch_progress, failing_report, job_progress, planned_batch
 
 RUN_URL = "https://github.com/DataDog/integrations-core/actions/runs"
 
@@ -42,18 +39,18 @@ def initial() -> DispatcherProgress:
 def retrying() -> DispatcherProgress:
     return DispatcherProgress(
         batches=(
-            batch("batch-01", *[job(attempt(), target=f"postgres-{index}") for index in range(4)]),
-            batch(
+            batch_progress("batch-01", *[job_progress(attempt(), target=f"postgres-{index}") for index in range(4)]),
+            batch_progress(
                 "batch-02",
-                *[job(attempt(), target=f"mysql-{index}") for index in range(4)],
+                *[job_progress(attempt(), target=f"mysql-{index}") for index in range(4)],
                 run_id=122,
                 workflow_url=f"{RUN_URL}/122",
             ),
-            batch(
+            batch_progress(
                 "batch-03",
-                job(attempt(Status.FAILURE, reports=(failing_report("test_connection"),)), target="postgres"),
-                job(attempt(Status.FAILURE, failed_steps=("Run E2E tests",)), target="redis"),
-                *[job(attempt(), target=f"ntp-{index}") for index in range(2)],
+                job_progress(attempt(Status.FAILURE, reports=(failing_report("test_connection"),)), target="postgres"),
+                job_progress(attempt(Status.FAILURE, failed_steps=("Run E2E tests",)), target="redis"),
+                *[job_progress(attempt(), target=f"ntp-{index}") for index in range(2)],
                 state=ExecutionState.RETRYING,
                 status=None,
                 current_attempt=2,
@@ -69,19 +66,19 @@ def retrying() -> DispatcherProgress:
 def final() -> DispatcherProgress:
     return DispatcherProgress(
         batches=(
-            batch("batch-01", *[job(attempt(), target=f"postgres-{index}") for index in range(4)]),
-            batch(
+            batch_progress("batch-01", *[job_progress(attempt(), target=f"postgres-{index}") for index in range(4)]),
+            batch_progress(
                 "batch-02",
-                *[job(attempt(), target=f"mysql-{index}") for index in range(4)],
+                *[job_progress(attempt(), target=f"mysql-{index}") for index in range(4)],
                 run_id=122,
                 workflow_url=f"{RUN_URL}/122",
             ),
-            batch(
+            batch_progress(
                 "batch-03",
-                job(attempt(Status.FAILURE), attempt(Status.SUCCESS, number=2), target="postgres"),
-                job(attempt(Status.FAILURE), attempt(Status.FAILURE, number=2), target="redis"),
-                job(attempt(Status.SKIPPED), target="consul"),
-                job(
+                job_progress(attempt(Status.FAILURE), attempt(Status.SUCCESS, number=2), target="postgres"),
+                job_progress(attempt(Status.FAILURE), attempt(Status.FAILURE, number=2), target="redis"),
+                job_progress(attempt(Status.SKIPPED), target="consul"),
+                job_progress(
                     attempt(Status.FAILURE, reports=(failing_report("test_connection", "test_timeout"),)),
                     target="vault",
                 ),
@@ -97,24 +94,20 @@ def final() -> DispatcherProgress:
 
 
 def incomplete() -> DispatcherProgress:
-    """A run whose results could not all be established: nothing failed, but it is not a clean pass.
-
-    The ⚠️ heading, alert and unavailable section only appear here, so without this scenario they were
-    never looked at on GitHub at all.
-    """
+    """Nothing failed, but not a clean pass either: the only scenario with the ⚠️ heading and section."""
     return DispatcherProgress(
         batches=(
-            batch("batch-01", *[job(attempt(), target=f"postgres-{index}") for index in range(3)]),
-            batch(
+            batch_progress("batch-01", *[job_progress(attempt(), target=f"postgres-{index}") for index in range(3)]),
+            batch_progress(
                 "batch-02",
-                job(attempt(error=ProgressError.NO_ARTIFACTS), target="mysql"),
-                job(attempt(), target="redis"),
+                job_progress(attempt(error=ProgressError.NO_ARTIFACTS), target="mysql"),
+                job_progress(attempt(), target="redis"),
                 run_id=122,
                 workflow_url=f"{RUN_URL}/122",
             ),
-            batch(
+            batch_progress(
                 "batch-03",
-                job(attempt(), target="consul"),
+                job_progress(attempt(), target="consul"),
                 error=ProgressError.NO_JOB_RESULTS,
                 run_id=123,
                 workflow_url=f"{RUN_URL}/123",
@@ -124,7 +117,7 @@ def incomplete() -> DispatcherProgress:
     )
 
 
-def main(destination: Path) -> None:
+def main(destination: Path):
     destination.mkdir(parents=True, exist_ok=True)
     scenarios = (
         ("01-initial", initial()),
@@ -137,14 +130,13 @@ def main(destination: Path) -> None:
         path.write_text(render_comment(progress), encoding="utf-8")
         print(f"{path} ({path.stat().st_size} bytes)")
 
-    # The run-summary form of the same report. Rendered from the failing scenario because the note it
-    # prepends only shows up when the comment could not be written, which is the case worth seeing.
+    # The run-summary form, from the failing scenario: the note it prepends only shows up when the
+    # comment could not be written.
     summary = destination / "05-run-summary-comment-failed.md"
     summary.write_text(render_run_summary(render_comment(final()), pr_comment_failed=True), encoding="utf-8")
     print(f"{summary} ({summary.stat().st_size} bytes)")
 
-    # The two fallback tiers, which only render when GitHub refuses the one above them and so are
-    # never seen in a normal run. The failing scenario is the one where they differ.
+    # The two fallback tiers, never seen in a normal run. The failing scenario is where they differ.
     for name, render in (("06-compact", render_compact_comment), ("07-minimal", render_minimal_comment)):
         path = destination / f"{name}.md"
         path.write_text(render(final()), encoding="utf-8")

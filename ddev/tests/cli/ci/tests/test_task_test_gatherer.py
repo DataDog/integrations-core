@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
 import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -38,7 +37,7 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.utils.github_async.models import JobStep, WorkflowJob
 from ddev.utils.junit import TestStatus
 from ddev.utils.platform import PlatformName
-from tests.cli.ci.tests.helpers import drain_queue, make_job
+from tests.cli.ci.tests.helpers import drain_queue, jobs_reported, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------
@@ -163,13 +162,6 @@ def _totals(update: UpdatePRComment) -> tuple[int, int, int, int]:
     """The update's aggregate (passed, failed, skipped, complete) job counts."""
     progress = update.progress
     return (progress.passed, progress.failed, progress.skipped, progress.complete)
-
-
-def _jobs_reported(body: str) -> int:
-    """The completed-job count a rendered comment shows, as a stand-in for the snapshot behind it."""
-    match = re.search(r"\*\*(\d+)/\d+ jobs\*\*", body)
-    assert match is not None, body
-    return int(match.group(1))
 
 
 def _failed_ids(result: JobResult) -> list[str]:
@@ -331,7 +323,7 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path):
     assert (coverage_dir / "ntp_py3.13_windows.xml").is_file()
 
 
-def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path) -> None:
+def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path):
     # One job carries both facets (unit_tests and e2e_tests). Its bundle holds both a unit and an
     # E2E JUnit report plus coverage; the organized outputs are distinguished by filename within
     # the single artifact identity and never overwrite one another.
@@ -1078,7 +1070,7 @@ class _DispatcherBus(EventBusOrchestrator):
         pass
 
 
-def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path) -> None:
+def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     """The contract between the two processors, not each half in isolation.
 
     The gatherer emits ``UpdatePRComment`` and the updater consumes it: one comment created for the
@@ -1114,7 +1106,7 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path) -
 
     # The comment only ever moves forward: each write reports at least as many finished jobs as the
     # one before it. The revision itself is not rendered, so the counts are what proves the ordering.
-    completed = [_jobs_reported(body) for body in bodies]
+    completed = [jobs_reported(body) for body in bodies]
     assert completed == sorted(completed)
 
     assert completed[0] == 0
