@@ -208,18 +208,22 @@ class PostgresSchemaCollector(SchemaCollector):
         query = DATABASE_INFORMATION_QUERY
         params: list[str] = []
 
-        query += regex_exclude_clauses("datname", self._config.exclude_databases)
-        params.extend(self._config.exclude_databases)
+        if self._check._config.dbstrict and not self._check.autodiscovery:            
+            query += f" AND datname = %s" 
+            params.extend([self._check._config.dbname])
+        else:
+            query += regex_exclude_clauses("datname", self._config.exclude_databases)
+            params.extend(self._config.exclude_databases)
 
-        query += regex_include_clause("datname", self._config.include_databases)
-        params.extend(self._config.include_databases)
+            query += regex_include_clause("datname", self._config.include_databases)
+            params.extend(self._config.include_databases)
 
-        # Autodiscovery trumps exclude and include
-        autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
-        if autodiscovery_databases:
-            in_clause = ", ".join(["%s"] * len(autodiscovery_databases))
-            query += f" AND datname IN ({in_clause})"
-            params.extend(autodiscovery_databases)
+            # Autodiscovery trumps exclude and include
+            autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
+            if autodiscovery_databases:
+                in_clause = ", ".join(["%s"] * len(autodiscovery_databases))
+                query += f" AND datname IN ({in_clause})"
+                params.extend(autodiscovery_databases)
 
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
