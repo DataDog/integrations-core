@@ -290,7 +290,7 @@ def test_connect_no_password_uses_empty_string():
 )
 def test_version_lt(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = ch_version
+    check._dbms_version = ch_version
     assert check.version_lt(comparable) == expected
 
 
@@ -307,7 +307,7 @@ def test_version_lt(instance, ch_version, comparable, expected):
 )
 def test_version_ge(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = ch_version
+    check._dbms_version = ch_version
     assert check.version_ge(comparable) == expected
 
 
@@ -439,7 +439,7 @@ def test_get_queries_tags_system_tables_per_node_in_single_endpoint_mode(instanc
         'use_legacy_queries': not use_advanced_queries,
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
 
     cluster_aware = [q for q in check.get_queries() if 'clusterAllReplicas' in q['query']]
 
@@ -463,7 +463,7 @@ def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advan
         'use_legacy_queries': not use_advanced_queries,
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
 
     assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())
 
