@@ -206,12 +206,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Alert
-    path: ocsf.is_alert
-    source: log
-    type: boolean
-  - groups:
-      - OCSF
     name: Metadata Product Version
     path: ocsf.metadata.product.version
     source: log
