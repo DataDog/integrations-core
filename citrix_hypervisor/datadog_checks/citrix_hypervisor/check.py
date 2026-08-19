@@ -125,7 +125,7 @@ class CitrixHypervisorCheck(AgentCheck):
     def open_session(self):
         # type: () -> Dict[str, str]
         try:
-            self.xenserver = ServerProxy(self._base_url)
+            self.xenserver = ServerProxy(self._base_url, context=self.get_tls_context())
         except Exception as e:
             self.log.warning(str(e))
             return {}
