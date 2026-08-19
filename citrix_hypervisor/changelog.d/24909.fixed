@@ -1,0 +1,1 @@
+Apply ``tls_verify`` to the XML-RPC session login, previously only applied to the RRD metrics HTTP client.
