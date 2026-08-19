@@ -386,14 +386,12 @@ class SqlserverActivity(DBMAsyncJob):
             comments = statement['metadata'].get('comments', [])
             row['is_proc'] = bool(row.get('procedure_name'))
             has_proc_context = row['is_proc'] or is_statement_proc(row.get('text', ''))[0]
-            if row.get('text'):
+            if row.get('text') and (has_proc_context or row['text'] != row['statement_text']):
                 try:
                     full_text_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
-                    full_text_comments = full_text_statement['metadata'].get('comments', [])
-                    if full_text_comments:
-                        comments = list(set(comments + full_text_comments))
+                    comments = self._merge_comments(comments, full_text_statement['metadata'])
                     if has_proc_context:
                         row['procedure_signature'] = compute_sql_signature(full_text_statement['query'])
                         if not row.get('procedure_name'):
@@ -414,9 +412,7 @@ class SqlserverActivity(DBMAsyncJob):
                 tail_statement = obfuscate_sql_with_metadata(
                     row['tail_text'], self._obfuscator_options_for_tail_text, replace_null_character=True
                 )
-                appended_comments = tail_statement['metadata'].get('comments', [])
-                if appended_comments:
-                    comments = list(set(comments + appended_comments))
+                comments = self._merge_comments(comments, tail_statement['metadata'])
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
@@ -438,6 +434,11 @@ class SqlserverActivity(DBMAsyncJob):
     @staticmethod
     def _remove_null_vals(row):
         return {key: val for key, val in row.items() if val is not None}
+
+    @staticmethod
+    def _merge_comments(comments, obfuscated_metadata):
+        new_comments = obfuscated_metadata.get('comments', [])
+        return list(dict.fromkeys(comments + new_comments)) if new_comments else comments
 
     @staticmethod
     def _sanitize_row(row, obfuscated_statement=None):
