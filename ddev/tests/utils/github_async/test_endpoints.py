@@ -250,7 +250,7 @@ def _validation_failed(*messages: str) -> httpx.Response:
         pytest.param(lambda client, body: client.update_issue_comment("o", "r", 99, body), id="update"),
     ],
 )
-async def test_an_oversized_comment_body_is_refused_before_the_request(call) -> None:
+async def test_an_oversized_comment_body_is_refused_before_the_request(call):
     """No point spending a round-trip on a body GitHub is certain to reject."""
     requested = False
 
@@ -266,7 +266,7 @@ async def test_an_oversized_comment_body_is_refused_before_the_request(call) -> 
     assert requested is False
 
 
-async def test_a_comment_body_exactly_at_the_limit_is_sent() -> None:
+async def test_a_comment_body_exactly_at_the_limit_is_sent():
     """The guard rejects over the limit, not at it."""
     body = "x" * GITHUB_COMMENT_HARD_LIMIT
 
@@ -279,7 +279,7 @@ async def test_a_comment_body_exactly_at_the_limit_is_sent() -> None:
     assert result.data.body == body
 
 
-async def test_the_comment_body_limit_is_measured_in_bytes_not_characters() -> None:
+async def test_the_comment_body_limit_is_measured_in_bytes_not_characters():
     """GitHub states the limit in characters; bytes is the conservative reading of it.
 
     A UTF-8 byte length is never below the character count, so measuring bytes can only refuse a body
@@ -294,7 +294,7 @@ async def test_the_comment_body_limit_is_measured_in_bytes_not_characters() -> N
         await client.create_issue_comment("o", "r", 7, body)
 
 
-async def test_githubs_own_too_long_rejection_becomes_the_same_error() -> None:
+async def test_githubs_own_too_long_rejection_becomes_the_same_error():
     """One type for both sources, so a caller never parses a 422 payload to learn it must send less."""
     client = make_client(
         httpx.MockTransport(lambda request: _validation_failed("body is too long (maximum is 65536 characters)"))
@@ -307,7 +307,7 @@ async def test_githubs_own_too_long_rejection_becomes_the_same_error() -> None:
     assert exc_info.value.size is None  # It was GitHub's measurement, not ours.
 
 
-async def test_a_validation_failure_that_is_not_about_length_stays_an_http_error() -> None:
+async def test_a_validation_failure_that_is_not_about_length_stays_an_http_error():
     """GitHub documents 422 here as validation failed *or* spammed.
 
     Sending less cannot fix a spam rejection, so reading every 422 as too long would hide the real
@@ -324,7 +324,7 @@ async def test_a_validation_failure_that_is_not_about_length_stays_an_http_error
     assert exc_info.value.response.status_code == 422
 
 
-async def test_a_non_validation_status_is_never_read_as_too_long() -> None:
+async def test_a_non_validation_status_is_never_read_as_too_long():
     """A 500 whose body happens to mention length is a server error, not a length problem."""
     client = make_client(httpx.MockTransport(lambda request: json_response({"message": "too long"}, status_code=500)))
 
@@ -335,7 +335,7 @@ async def test_a_non_validation_status_is_never_read_as_too_long() -> None:
     assert exc_info.value.response.status_code == 500
 
 
-async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_length() -> None:
+async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_length():
     """Length has already been ruled out by the time GitHub answers.
 
     The pre-flight guard measured this body and let it through, so an unreadable 422 is more likely to
@@ -350,7 +350,7 @@ async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_leng
     assert not isinstance(exc_info.value, GitHubBodyTooLongError)
 
 
-async def test_update_issue_comment_success() -> None:
+async def test_update_issue_comment_success():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "PATCH"
         assert request.url.path == "/repos/owner/repo/issues/comments/99"
@@ -363,7 +363,7 @@ async def test_update_issue_comment_success() -> None:
     assert (result.data.id, result.data.body) == (99, "edited")
 
 
-async def test_list_issue_comments_success() -> None:
+async def test_list_issue_comments_success():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert request.url.path == "/repos/owner/repo/issues/7/comments"
@@ -381,7 +381,7 @@ async def test_list_issue_comments_success() -> None:
     assert comments[1].body == "second"
 
 
-async def test_list_issue_comments_follows_link_header() -> None:
+async def test_list_issue_comments_follows_link_header():
     """The updater must see every comment, or it creates a duplicate instead of editing its own."""
     second_page_url = "https://api.github.com/repos/owner/repo/issues/7/comments?page=2"
 
@@ -486,7 +486,7 @@ async def test_get_pull_request_unexpected_state_raises() -> None:
         await client.get_pull_request("o", "r", 5)
 
 
-async def test_list_pull_requests_success() -> None:
+async def test_list_pull_requests_success():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert request.url.path == "/repos/owner/repo/pulls"
@@ -505,13 +505,13 @@ async def test_list_pull_requests_success() -> None:
     assert all(isinstance(pr, PullRequest) for pr in result.data)
 
 
-async def test_list_pull_requests_empty_result() -> None:
+async def test_list_pull_requests_empty_result():
     client = make_client(httpx.MockTransport(lambda r: json_response([])))
     result = await client.list_pull_requests("o", "r")
     assert result.data == []
 
 
-async def test_list_pull_requests_defaults_to_open_and_omits_optional_filters() -> None:
+async def test_list_pull_requests_defaults_to_open_and_omits_optional_filters():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params.get("state") == "open"
         assert "head" not in request.url.params
@@ -522,7 +522,7 @@ async def test_list_pull_requests_defaults_to_open_and_omits_optional_filters() 
     await client.list_pull_requests("o", "r")
 
 
-async def test_list_pull_requests_forwards_base_filter() -> None:
+async def test_list_pull_requests_forwards_base_filter():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params.get("base") == "7.62.x"
         return json_response([pull_request_payload(number=1)])
