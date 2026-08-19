@@ -1,17 +1,10 @@
 name: Measure Disk Usage
 
-# Runs on the completion of Measure Disk Usage Trigger, which exists only to fire this workflow from
-# a commit.
+# Triggered by Measure Disk Usage Trigger. workflow_run runs the default-branch copy of this file, so
+# the measured commit cannot alter it, but this job does check that commit out: the Datadog
+# credential is therefore still taken only for push, where the code is master's.
 #
-# Running on workflow_run means this always executes the version of this file on the default branch,
-# so the commit being measured cannot alter it. That is not the same as the measured code being
-# trusted: this job checks that code out, so the credential is still taken only for push, where the
-# code is master's. A pull request run measures its own branch's code and is left without a key,
-# which is also why it does not send anything.
-#
-# The commit and the triggering event both come from the workflow_run event: head_sha is the head
-# commit on a pull request and the pushed commit on a push, and event distinguishes the two. Nothing
-# has to be handed over from the trigger.
+# head_sha is the commit to measure, and event says whether it came from a push or a pull request.
 
 on:
   workflow_run:
@@ -25,8 +18,8 @@ env:
 
 jobs:
   measure-disk-usage:
-    # Fork pull requests are not measured. The trigger is skipped for them, so no successful run
-    # should reach here, but this job is the one that can hold a credential so it checks too.
+    # Fork pull requests are not measured. Guarded here because this is the job that checks out the
+    # measured code and can hold a credential.
     if: >-
       github.event.workflow_run.conclusion == 'success'
       && github.event.workflow_run.head_repository.fork == false
@@ -36,8 +29,8 @@ jobs:
       # needed for dd-sts
       id-token: write
     steps:
-      # `ddev size status` measures the tree it is run from, so the measured commit is what gets
-      # checked out. On workflow_run the default would be the default branch instead.
+      # ddev size status measures the tree it runs from, so the measured commit is checked out rather
+      # than the default branch.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
