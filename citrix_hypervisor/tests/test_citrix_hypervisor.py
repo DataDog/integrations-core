@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import ssl
 
 import mock
 import pytest
@@ -36,18 +35,18 @@ def test_open_session(instance, side_effect, expected_session, tag):
         assert tag == check._additional_tags
 
 
-def test_open_session_respects_tls_verify(instance):
-    # Regression test: the XML-RPC login used to ignore `tls_verify`, causing
-    # CERTIFICATE_VERIFY_FAILED against self-signed certs even when it was set to False.
-    instance = dict(instance, tls_verify=False)
-    with mock.patch(
-        'datadog_checks.citrix_hypervisor.check.ServerProxy', side_effect=[mocked_xenserver('master')]
-    ) as server_proxy:
-        check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
-        check.open_session()
+def test_open_session_fails_on_self_signed_cert_by_default(tls_xenserver):
+    # Regression test: the XML-RPC login used to ignore `tls_verify`, always using Python's
+    # default verifying SSL context regardless of instance config.
+    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': tls_xenserver}])
 
-        _, kwargs = server_proxy.call_args
-        assert kwargs['context'].verify_mode == ssl.CERT_NONE
+    assert check.open_session() == {}
+
+
+def test_open_session_succeeds_with_tls_verify_false(tls_xenserver):
+    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': tls_xenserver, 'tls_verify': False}])
+
+    assert check.open_session() == SESSION_MASTER
 
 
 @pytest.mark.usefixtures('mock_responses')
