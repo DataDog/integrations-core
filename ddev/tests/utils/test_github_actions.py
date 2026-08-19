@@ -38,17 +38,17 @@ def test_write_step_summary_writes_to_file(tmp_path, monkeypatch):
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
 
     write_step_summary("## Report\nAll good")
-    assert summary_file.read_text() == "## Report\nAll good\n"
+    assert summary_file.read_text(encoding="utf-8") == "## Report\nAll good\n"
 
 
 def test_write_step_summary_appends(tmp_path, monkeypatch):
     summary_file = tmp_path / "summary.md"
-    summary_file.write_text("existing\n")
+    summary_file.write_text("existing\n", encoding="utf-8")
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
 
     write_step_summary("new content")
-    assert "existing\n" in summary_file.read_text()
-    assert "new content\n" in summary_file.read_text()
+    assert "existing\n" in summary_file.read_text(encoding="utf-8")
+    assert "new content\n" in summary_file.read_text(encoding="utf-8")
 
 
 def test_write_step_summary_noop_without_env(monkeypatch):
@@ -60,3 +60,23 @@ def test_write_step_summary_survives_an_unwritable_summary_file(tmp_path, monkey
     """Reporting is never the reason a command fails, so an unusable summary path is swallowed."""
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(tmp_path / "missing-dir" / "summary.md"))
     write_step_summary("should not error")
+
+
+def test_the_step_summary_is_written_as_utf8_whatever_the_locale(tmp_path, monkeypatch):
+    """The Dispatcher report is emoji-dense, so the encoding is part of the contract, not a detail.
+
+    Asserted in bytes, not text: reading it back as text would use the locale encoding, and would
+    therefore agree with whatever was written rather than checking it.
+
+    Honest about its reach — dropping the explicit encoding is invisible on a UTF-8 machine, because
+    there the locale default *is* UTF-8 and the bytes come out identical. This fails where it matters:
+    Windows CI, and any non-UTF-8 locale. Reproduce that locally with
+    ``LC_ALL=C PYTHONUTF8=0 hatch run python -m pytest``.
+    """
+    summary_file = tmp_path / "summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
+
+    write_step_summary("## ✅ passed · ❌ failed")
+
+    # The trailing newline is excluded deliberately: text mode translates it to CRLF on Windows.
+    assert summary_file.read_bytes().startswith("## ✅ passed · ❌ failed".encode())

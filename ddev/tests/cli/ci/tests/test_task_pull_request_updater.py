@@ -574,7 +574,7 @@ def test_a_failed_final_write_reports_to_the_run_summary_instead_of_failing(summ
     asyncio.run(updater.process_message(_update(4, done=True)))
 
     assert updater.pr_comment_failed
-    summary = summary_file.read_text()
+    summary = summary_file.read_text(encoding="utf-8")
     assert summary.startswith("> [!WARNING]")
     assert "pull request comment could not be updated" in summary
     assert "10/10 jobs" in summary
@@ -623,7 +623,7 @@ def test_a_minimal_body_rejected_again_is_not_shrunk_a_second_time(summary_file)
 
     assert len(client.calls_to("create_issue_comment")) == 2
     assert updater.pr_comment_failed
-    assert "pull request comment could not be updated" in summary_file.read_text()
+    assert "pull request comment could not be updated" in summary_file.read_text(encoding="utf-8")
 
 
 def test_a_failed_minimal_retry_on_an_intermediate_revision_does_not_raise() -> None:
@@ -700,7 +700,7 @@ def test_a_minimal_retry_refused_everywhere_is_bounded_and_still_reports(summary
     assert len(client.calls_to("update_issue_comment")) == 2
     assert len(client.calls_to("create_issue_comment")) == 1
     assert updater.pr_comment_failed
-    assert "pull request comment could not be updated" in summary_file.read_text()
+    assert "pull request comment could not be updated" in summary_file.read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -714,7 +714,7 @@ def test_the_final_snapshot_reports_to_the_run_summary(summary_file) -> None:
 
     asyncio.run(_updater(client).process_message(_update(1, done=True)))
 
-    summary = summary_file.read_text()
+    summary = summary_file.read_text(encoding="utf-8")
     assert "Dispatcher tests" in summary
     assert "10/10 jobs" in summary
     assert "Final result" in summary
@@ -744,7 +744,7 @@ def test_a_run_without_a_pull_request_still_reports_to_the_run_summary(summary_f
 
     asyncio.run(_updater(client, pr_number=None).process_message(_update(1, done=True)))
 
-    assert "10/10 jobs" in summary_file.read_text()
+    assert "10/10 jobs" in summary_file.read_text(encoding="utf-8")
     client.assert_not_called("create_issue_comment")
     client.assert_not_called("update_issue_comment")
 
@@ -756,7 +756,7 @@ def test_a_run_without_a_pull_request_is_never_marked_as_a_failed_comment(summar
     asyncio.run(updater.process_message(_update(1, done=True)))
 
     assert not updater.pr_comment_failed
-    assert "could not be updated" not in summary_file.read_text()
+    assert "could not be updated" not in summary_file.read_text(encoding="utf-8")
 
 
 def test_the_run_summary_survives_a_missing_environment(monkeypatch) -> None:
@@ -776,7 +776,7 @@ def test_the_run_summary_is_written_once_for_a_repeated_final_revision(summary_f
     asyncio.run(updater.process_message(_update(1, done=True)))
     asyncio.run(updater.process_message(_update(1, done=True)))
 
-    assert summary_file.read_text().count("Final result") == 1
+    assert summary_file.read_text(encoding="utf-8").count("Final result") == 1
 
 
 # ---------------------------------------------------------------------------
