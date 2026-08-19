@@ -554,9 +554,6 @@ class PostgreSql(DatabaseCheck):
         self._close_db()
         self._close_db_pool()
         self.log.debug("Check cleanup complete")
-        # Must come last: the logging adapter reads back through this attribute for checks whose
-        # check_id was never resolved, so anything logged after this would fail.
-        self.log.check = None
 
     def _clean_state(self):
         self.log.debug("Cleaning state")

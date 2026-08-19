@@ -93,6 +93,20 @@ class MockAgentLogHandler(logging.Handler):
         self.records.append(self.format(record))
 
 
+def test_check_id_is_stamped_on_records_once_the_agent_assigns_it(caplog):
+    """The Agent assigns `check_id` after constructing the check, so records logged before that
+    carry `unknown` and every record after it carries the real id."""
+    caplog.set_level(logging.INFO)
+    check = AgentCheck('test_check_id_stamping', {}, [{}])
+
+    check.log.info("before the id is assigned")
+    check.check_id = 'test:abc123'
+    check.log.info("after the id is assigned")
+
+    stamped = [record._check_id for record in caplog.records if 'the id is assigned' in record.getMessage()]
+    assert stamped == ['unknown', 'test:abc123']
+
+
 @pytest.mark.parametrize('integration_tracing_enabled', [False, True])
 def test_log_trace_context_injection(integration_tracing_enabled):
     def _tracing_enabled():
