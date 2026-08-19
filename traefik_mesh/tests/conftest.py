@@ -8,7 +8,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import get_here
-from datadog_checks.dev._env import get_state, save_state
+from datadog_checks.dev._env import get_state, save_state, set_up_env
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
 
@@ -102,6 +102,9 @@ def get_traefik_mesh_proxy_pod_ip() -> str:
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_traefik_mesh]) as kubeconfig:
         proxy_pod_ip = get_state(PROXY_IP_STATE)
+        if set_up_env() and not proxy_pod_ip:
+            raise RuntimeError(f'No Traefik Mesh proxy pod IP found in the `{PROXY_IP_STATE}` state')
+
         traefik_proxy_endpoint = f'http://{proxy_pod_ip}:8080/metrics'
         traefik_controller_api_endpoint = 'http://traefik-mesh-controller.traefik-mesh.svc.cluster.local:9000'
 
