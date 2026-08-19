@@ -1,0 +1,31 @@
+name: Measure Disk Usage Trigger
+
+# Trigger for Measure Disk Usage, which runs on workflow_run and does the actual measuring.
+#
+# This workflow deliberately does nothing. workflow_run needs an upstream workflow to fire from, and
+# that upstream has to run on the commit itself, which is the one thing Measure Disk Usage cannot do
+# if it is to run the default-branch version of its own file and hold a credential.
+#
+# Everything the measurement needs is already on the workflow_run event: head_sha is the commit
+# (the head commit on a pull request, the pushed commit on a push), and event says which of the two
+# it was. So there is nothing to hand over and no artifact to produce.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  trigger:
+    name: Trigger the disk usage measurement
+    # Fork pull requests are not measured, so this is skipped for them and no workflow_run follows
+    # that Measure Disk Usage would act on.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork == false
+    runs-on: ubuntu-22.04
+    permissions: {}
+    steps:
+      - name: Trigger only
+        run: echo "Measure Disk Usage runs from this workflow's completion."

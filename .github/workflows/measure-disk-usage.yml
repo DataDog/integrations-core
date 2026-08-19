@@ -1,12 +1,23 @@
 name: Measure Disk Usage
 
+# Runs on the completion of Measure Disk Usage Trigger, which exists only to fire this workflow from
+# a commit.
+#
+# Running on workflow_run means this always executes the version of this file on the default branch,
+# so the commit being measured cannot alter it. That is not the same as the measured code being
+# trusted: this job checks that code out, so the credential is still taken only for push, where the
+# code is master's. A pull request run measures its own branch's code and is left without a key,
+# which is also why it does not send anything.
+#
+# The commit and the triggering event both come from the workflow_run event: head_sha is the head
+# commit on a pull request and the pushed commit on a push, and event distinguishes the two. Nothing
+# has to be handed over from the trigger.
+
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_run:
+    workflows:
+      - 'Measure Disk Usage Trigger'
+    types: [completed]
 
 env:
   PYTHON_VERSION: "3.13"
@@ -14,15 +25,22 @@ env:
 
 jobs:
   measure-disk-usage:
+    # Fork pull requests are not measured. The trigger is skipped for them, so no successful run
+    # should reach here, but this job is the one that can hold a credential so it checks too.
+    if: >-
+      github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.head_repository.fork == false
     runs-on: ubuntu-22.04
     permissions:
       contents: read
       # needed for dd-sts
       id-token: write
     steps:
+      # `ddev size status` measures the tree it is run from, so the measured commit is what gets
+      # checked out. On workflow_run the default would be the default branch instead.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -32,7 +50,7 @@ jobs:
 
       - name: Get Datadog credentials
         id: dd-sts
-        if: github.event_name == 'push'
+        if: github.event.workflow_run.event == 'push'
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
           policy: integrations-core-api-key
@@ -46,23 +64,11 @@ jobs:
       - name: Configure ddev
         run: ddev config override
 
-      - name: Resolve measurement context
-        id: ctx
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: |
-          echo "sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "send=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "send=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Measure disk usage (Uncompressed)
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ steps.ctx.outputs.sha }}
-          SEND: ${{ steps.ctx.outputs.send }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          SEND: ${{ github.event.workflow_run.event == 'push' }}
         run: |
           args=(-v size status --format json)
           if [ "$SEND" = "true" ]; then
@@ -73,8 +79,8 @@ jobs:
       - name: Measure disk usage (Compressed)
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ steps.ctx.outputs.sha }}
-          SEND: ${{ steps.ctx.outputs.send }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          SEND: ${{ github.event.workflow_run.event == 'push' }}
         run: |
           args=(-v size status --format json --compressed)
           if [ "$SEND" = "true" ]; then
