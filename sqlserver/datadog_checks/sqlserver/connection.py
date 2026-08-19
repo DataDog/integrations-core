@@ -218,8 +218,8 @@ class Connection(object):
         self.log.debug('Connection initialized.')
 
     @contextmanager
-    def get_managed_cursor(self, key_prefix):
-        cursor = self.get_cursor(self.DEFAULT_DB_KEY, key_prefix=key_prefix)
+    def get_managed_cursor(self, key_prefix, db_key=None):
+        cursor = self.get_cursor(db_key or self.DEFAULT_DB_KEY, key_prefix=key_prefix)
         try:
             yield cursor
         finally:
