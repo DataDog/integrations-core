@@ -535,7 +535,7 @@ class MySql(DatabaseCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = connect_with_session_variables(**connect_args)
+            db = connect_with_session_variables(mysql_version=self.version, **connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
@@ -697,7 +697,7 @@ class MySql(DatabaseCheck):
                 status_metric = status_dict["metric_name"]
                 if status_name in metrics.keys():
                     collected_metric = metrics.get(status_name)[0]
-                    self.log.debug(
+                    self.warning(
                         "Skipping status variable %s for metric %s as it is already collected by %s",
                         status_name,
                         status_metric,

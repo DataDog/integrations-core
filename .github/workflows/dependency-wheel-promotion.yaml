@@ -53,7 +53,7 @@ jobs:
         echo "${HEAD_SHA} is the current head of PR #${PR_NUMBER}."
 
     - name: Checkout trusted code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     - name: Find existing lifecycle comment
       id: find_comment
@@ -80,7 +80,7 @@ jobs:
           > <sub>Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
 
     - name: Checkout PR lockfiles only
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ inputs.head_sha }}
         path: pr
@@ -89,7 +89,7 @@ jobs:
         sparse-checkout-cone-mode: false
 
     - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "3.13"
 
@@ -135,7 +135,7 @@ jobs:
         fi
 
     - name: Set dependency-wheel-promotion status to success
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         HEAD_SHA: ${{ inputs.head_sha }}
       with:
@@ -167,7 +167,7 @@ jobs:
 
     - name: Set dependency-wheel-promotion status to error
       if: failure() && steps.still_head.outputs.value == 'true'
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         HEAD_SHA: ${{ inputs.head_sha }}
       with:
