@@ -206,7 +206,7 @@ class RootConfig(LazilyParsedConfig):
                 self._field_agents = agents
             else:
                 self._field_agents = self.raw_data['agents'] = {
-                    'dev': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
+                    'dev': {'docker': 'datadog/agent-dev:sarah-parser-go-client-py3', 'local': 'latest'},
                     '7': {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'},
                 }
 
