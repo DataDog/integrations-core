@@ -164,6 +164,34 @@ files:
         example: false
         default: false
 
+    - name: collect_events
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect counts of Cisco Catalyst Center assurance events by severity,
+        device family, event type and device. Each cycle polls only the window since the previous
+        one, so an event is counted exactly once.
+
+        Leave this disabled if the same events are already delivered by an Event Management webhook
+        subscription. Both carry the same events, so enabling both counts everything twice.
+
+        Costs four requests per cycle at minimum: the endpoint requires a device family on every
+        request and refuses to mix the four groups it defines.
+      value:
+        type: boolean
+        example: false
+        default: false
+
+    - name: events_initial_lookback_minutes
+      fleet_configurable: true
+      description: |
+        How far back the first collection of assurance events reaches. Only the first cycle after
+        the Agent starts uses this; every cycle after it resumes where the previous one ended.
+      value:
+        type: integer
+        minimum: 1
+        default: 15
+        example: 15
+
     - name: collect_application_health
       fleet_configurable: true
       description: |

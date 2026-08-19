@@ -107,6 +107,25 @@ instances:
     #
     # collect_assurance_issues: false
 
+    ## @param collect_events - boolean - optional - default: false
+    ## Set to `true` to collect counts of Cisco Catalyst Center assurance events by severity,
+    ## device family, event type and device. Each cycle polls only the window since the previous
+    ## one, so an event is counted exactly once.
+    ##
+    ## Leave this disabled if the same events are already delivered by an Event Management webhook
+    ## subscription. Both carry the same events, so enabling both counts everything twice.
+    ##
+    ## Costs four requests per cycle at minimum: the endpoint requires a device family on every
+    ## request and refuses to mix the four groups it defines.
+    #
+    # collect_events: false
+
+    ## @param events_initial_lookback_minutes - integer - optional - default: 15
+    ## How far back the first collection of assurance events reaches. Only the first cycle after
+    ## the Agent starts uses this; every cycle after it resumes where the previous one ended.
+    #
+    # events_initial_lookback_minutes: 15
+
     ## @param collect_application_health - boolean - optional - default: false
     ## Set to `true` to collect per-application health and traffic. This endpoint requires a site
     ## to be named on every request, so it costs one request per site and its cost grows with the

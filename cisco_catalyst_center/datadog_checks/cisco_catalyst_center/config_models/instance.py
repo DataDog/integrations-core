@@ -72,6 +72,7 @@ class InstanceConfig(BaseModel):
     collect_application_health: Optional[bool] = None
     collect_assurance_issues: Optional[bool] = None
     collect_client_experience: Optional[bool] = None
+    collect_events: Optional[bool] = None
     collect_interface_poe: Optional[bool] = None
     collect_interface_statistics: Optional[bool] = None
     collect_interfaces: Optional[bool] = None
@@ -85,6 +86,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
+    events_initial_lookback_minutes: Optional[int] = Field(None, ge=1)
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None

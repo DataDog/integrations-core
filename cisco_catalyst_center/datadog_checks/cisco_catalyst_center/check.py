@@ -18,6 +18,7 @@ from .collectors import (
     collect_client_experience,
     collect_client_health,
     collect_devices,
+    collect_events,
     collect_interfaces,
     collect_l3_topology,
     collect_network_health,
@@ -29,6 +30,7 @@ from .collectors import (
     collect_topology,
 )
 from .config_models import ConfigMixin
+from .constants import EVENT_DEFAULT_LOOKBACK_MINUTES, EVENT_WINDOW_MAX_SECONDS
 from .errors import CatalystApiError
 from .ndm_models import (
     DeviceMetadata,
@@ -48,6 +50,9 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
     def __init__(self, name: str, init_config: InitConfigType, instances: list[InstanceType]) -> None:
         super().__init__(name, init_config, instances)
         self._client: CatalystCenterClient | None = None
+        # End of the last assurance-event window that was collected, in epoch milliseconds. The
+        # check object outlives a single cycle, which is what lets consecutive windows abut.
+        self._events_polled_through: int | None = None
 
     @property
     def client(self) -> CatalystCenterClient:
@@ -73,6 +78,41 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         if self._option('collect_interface_poe', False):
             views.append('poE')
         return tuple(views)
+
+    def _event_window(self) -> tuple[int, int] | None:
+        """The window to poll assurance events for, in epoch milliseconds, or None to skip.
+
+        Windows are consecutive and never overlap: each one begins where the previous one ended, so
+        an event is counted exactly once whatever the collection interval is. Polling a fixed
+        lookback instead would recount every event on every cycle.
+
+        The first cycle has no predecessor and reaches back ``events_initial_lookback_minutes``.
+        After that the start is clamped to the widest window the endpoint accepts, which is what an
+        Agent restarted after a long outage runs into.
+        """
+        now = int(time.time() * 1000)
+        if self._events_polled_through is None:
+            lookback = int(self._option('events_initial_lookback_minutes', EVENT_DEFAULT_LOOKBACK_MINUTES))
+            start = now - lookback * 60 * 1000
+        else:
+            start = self._events_polled_through
+
+        floor = now - EVENT_WINDOW_MAX_SECONDS * 1000
+        if start < floor:
+            self.log.warning(
+                'Assurance events were last collected through %s, further back than the endpoint '
+                'serves in one window; resuming from %s and losing the events in between',
+                start,
+                floor,
+            )
+            start = floor
+
+        if start >= now:
+            # The clock moved backwards, or two cycles landed in the same millisecond. The endpoint
+            # rejects an inverted window, and an empty one has nothing to report.
+            return None
+
+        return start, now
 
     def _run(self, name: str, collector: Callable[[], Any]) -> bool:
         """Run one collector, containing its failure.
@@ -207,6 +247,22 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             healthy &= self._run(
                 'assurance issues', lambda: collect_assurance_issues(self, self.client, base_tags=base_tags)
             )
+
+        if self._option('collect_events', False):
+            window = self._event_window()
+            if window is not None:
+                start_time, end_time = window
+                polled = self._run(
+                    'assurance events',
+                    partial(collect_events, self, self.client, start_time, end_time, base_tags=base_tags),
+                )
+                healthy &= polled
+                if polled:
+                    # Advance only on success, so a cycle that failed outright retries its window
+                    # rather than leaving a hole. A sweep that lost one device-family group still
+                    # counts as success -- collect_events contains that failure itself -- because
+                    # retrying would double-count the groups that did submit.
+                    self._events_polled_through = end_time
 
         if self._option('collect_application_health', False):
             if not sites:

@@ -246,6 +246,20 @@ CLIENT_AGGREGATES: Final[tuple[tuple[str, str, str], ...]] = (
 # are not obtainable this way.
 CLIENT_GROUP_BY_DEFAULT: Final[tuple[str, ...]] = ('ssid', 'band')
 
+# Dimensions the assurance-event breakdown is grouped on, as (record field, tag key).
+#
+# Every one is bounded: `severity` is an integer 0-6, `deviceFamily` is the seven-value enum the
+# endpoint accepts, `name` is drawn from the appliance's event catalog, and device names are
+# bounded by the inventory. The same 69-field record also carries clientMac, ipv4, ipv6, username
+# and bssid, which are per-client and per-session -- they are deliberately absent here, because a
+# tag on any of them turns one event into one series that is never queried again.
+EVENT_BREAKDOWNS: Final[tuple[tuple[str, str], ...]] = (
+    ('severity', 'severity'),
+    ('deviceFamily', 'device_family'),
+    ('name', 'event_name'),
+    ('networkDeviceName', 'device_name'),
+)
+
 # Client-experience metric names, needed by the metadata.csv coupling test since the table
 # above is keyed by (field, function) rather than by metric name.
 CLIENT_AGGREGATE_METRIC_NAMES: Final[frozenset[str]] = frozenset(name for _, _, name in CLIENT_AGGREGATES)
@@ -289,6 +303,8 @@ DERIVED_METRIC_NAMES: Final[frozenset[str]] = frozenset(
         'device.uplink.throughput.tx',
         'topology.l3.link.count',
         'topology.l3.node.count',
+        'event.total.count',
+        'event.count',
     }
 )
 

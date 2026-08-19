@@ -28,6 +28,10 @@ def instance_collect_client_experience():
     return True
 
 
+def instance_collect_events():
+    return False
+
+
 def instance_collect_interface_poe():
     return False
 
@@ -74,6 +78,10 @@ def instance_empty_default_hostname():
 
 def instance_enable_legacy_tags_normalization():
     return True
+
+
+def instance_events_initial_lookback_minutes():
+    return 15
 
 
 def instance_kerberos_auth():

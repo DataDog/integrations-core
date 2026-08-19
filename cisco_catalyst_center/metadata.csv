@@ -73,6 +73,8 @@ cisco_catalyst_center.device.utilization.score,gauge,,,,Utilization health score
 cisco_catalyst_center.device.wan_link.utilization,gauge,,percent,,WAN link utilization for the device.,-1,cisco_catalyst_center,wan link utilization,,device_name
 cisco_catalyst_center.device.wqe_pool,gauge,,,,Work queue element pool size on a wireless controller.,1,cisco_catalyst_center,wqe pool,,device_name
 cisco_catalyst_center.device.wqe_pool.score,gauge,,,,Work queue element pool health score on a wireless controller from 1 to 10.,1,cisco_catalyst_center,wqe pool score,,device_name
+cisco_catalyst_center.event.count,count,,,,Assurance events in the polled window grouped by one dimension.,-1,cisco_catalyst_center,event count,,"severity,device_family,event_name,device_name"
+cisco_catalyst_center.event.total.count,count,,,,Assurance events in the polled window across the whole deployment.,-1,cisco_catalyst_center,event total,,catalyst_center_host
 cisco_catalyst_center.fabric.device.count,gauge,,,,Devices holding a given SD-Access fabric role.,0,cisco_catalyst_center,fabric device count,,fabric_role
 cisco_catalyst_center.fabric.site.connectivity.health,gauge,,percent,,Percentage of fabric site devices with healthy connectivity.,1,cisco_catalyst_center,fabric connectivity,,fabric_site_name
 cisco_catalyst_center.fabric.site.control_plane.health,gauge,,percent,,Percentage of fabric site devices with a healthy control plane.,1,cisco_catalyst_center,fabric control plane,,fabric_site_name
