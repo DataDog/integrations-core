@@ -20,6 +20,12 @@ inputs:
     description: Optional PyPI ddev version specifier, for example ==16.0.0.
     required: false
     default: ""
+  github-token:
+    description: >-
+      Token passed to astral-sh/setup-uv to authenticate its GitHub API calls
+      and avoid unauthenticated rate limits (429s) under high job concurrency.
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -67,12 +73,14 @@ runs:
       continue-on-error: true
       uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
       with:
+        github-token: ${{ inputs.github-token }}
         enable-cache: false
 
     - name: Install uv (retry)
       if: ${{ steps.install-uv.outcome == 'failure' }}
       uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
       with:
+        github-token: ${{ inputs.github-token }}
         enable-cache: false
 
     - name: Restore local ddev cache

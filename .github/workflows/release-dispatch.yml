@@ -112,6 +112,7 @@ jobs:
         with:
           install-mode: pypi
           ddev-version: "==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure ddev
         working-directory: source

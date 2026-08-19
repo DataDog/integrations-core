@@ -273,12 +273,14 @@ jobs:
       with:
         install-mode: local
         cache-profile: local-ddev-base
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
       uses: ./core-temp/.github/actions/setup-ddev
       with:
         install-mode: pypi
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Configure ddev
       run: |-
