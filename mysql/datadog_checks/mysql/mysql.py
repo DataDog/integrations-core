@@ -535,7 +535,7 @@ class MySql(DatabaseCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = connect_with_session_variables(**connect_args)
+            db = connect_with_session_variables(mysql_version=self.version, **connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(

@@ -231,14 +231,6 @@ class ClickhouseCheck(DatabaseCheck):
         """Send database instance metadata to the metadata intake."""
         current_time = time()
         if current_time - self._database_instance_last_emitted >= DATABASE_INSTANCE_COLLECTION_INTERVAL:
-            # Get the version for the metadata (and cache it)
-            try:
-                version_result = list(self.execute_query_raw('SELECT version()'))[0][0]
-                self._dbms_version = version_result
-            except Exception as e:
-                self.log.debug("Unable to fetch version for metadata: %s", e)
-                self._dbms_version = "unknown"
-
             # Get tags without db: prefix for metadata
             tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
@@ -252,7 +244,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": DATABASE_INSTANCE_COLLECTION_INTERVAL,
-                "dbms_version": self._dbms_version,
+                "dbms_version": self.dbms_version,
                 "integration_version": __version__,
                 "tags": tags_no_db,
                 "timestamp": current_time * 1000,
@@ -267,7 +259,7 @@ class ClickhouseCheck(DatabaseCheck):
 
     def check(self, _):
         self.connect()
-        self._server_version = self.select_version()
+        self._dbms_version = self.select_version()
 
         # Must run before the query manager is built and before the DBM jobs are handed
         # self.tags below, since both snapshot the tag list.
@@ -275,11 +267,11 @@ class ClickhouseCheck(DatabaseCheck):
             self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
         self.tag_manager.set_tag(HOSTING_TYPE_TAG, self.hosting_type, replace=True)
 
-        if self._query_manager is None or self._query_manager_version != self._server_version:
+        if self._query_manager is None or self._query_manager_version != self.dbms_version:
             self._query_manager = self._build_query_manager()
-            self._query_manager_version = self._server_version
+            self._query_manager_version = self.dbms_version
         self._query_manager.execute()
-        self.set_version_metadata(self._server_version)
+        self.set_version_metadata(self.dbms_version)
 
         # Send database instance metadata
         self._send_database_instance_metadata()
@@ -684,7 +676,7 @@ class ClickhouseCheck(DatabaseCheck):
         if version == 'latest':
             return True
 
-        return utils.parse_version(self._server_version) < utils.parse_version(version)
+        return utils.parse_version(self.dbms_version) < utils.parse_version(version)
 
     def version_ge(self, version: str) -> bool:
         """
@@ -694,4 +686,4 @@ class ClickhouseCheck(DatabaseCheck):
         if version == 'latest':
             return False
 
-        return utils.parse_version(self._server_version) >= utils.parse_version(version)
+        return utils.parse_version(self.dbms_version) >= utils.parse_version(version)

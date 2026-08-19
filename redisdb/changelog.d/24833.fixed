@@ -1,0 +1,1 @@
+Select the RESP2 protocol explicitly when connecting to Redis so the wire protocol stays the same when the ``redis`` client default flips to RESP3 in newer versions.

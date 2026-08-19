@@ -484,7 +484,7 @@ def test_buffer_collection_interval():
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
     samples = check.statement_samples
     samples._tags = ['test:clickhouse']
 
@@ -529,7 +529,7 @@ def test_buffer_snapshot_skipped_below_min_version(server_version, expect_collec
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = server_version
+    check._dbms_version = server_version
     samples = check.statement_samples
     samples._tags = ['test:clickhouse']
 
@@ -565,7 +565,7 @@ def test_buffer_snapshot_stops_collecting_when_table_missing():
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
     samples = check.statement_samples
     samples._tags = ['test:clickhouse']
 
