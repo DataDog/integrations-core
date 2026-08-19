@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import time
@@ -45,6 +46,9 @@ REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
 )
 
 CopyStreamFormat = Literal['csv', 'binary']
+ResultDeliveryMode = Literal['POC_PUBLIC_CHUNKED_UPLOAD']
+ResultDeliveryFormat = Literal['csv']
+ResultDeliveryCompression = Literal['none']
 CopyStreamEmit = Callable[[str, str, bytes], None]
 
 if TYPE_CHECKING:
@@ -127,6 +131,34 @@ class RemoteQueryCopyLimits(BaseModel):
     timeout_ms: StrictInt = Field(default=30_000, alias='timeoutMs', ge=1)
 
 
+class RemoteQueryResultDelivery(BaseModel):
+    """Validate optional result-delivery upload instructions for the Agent-owned upload transport.
+
+    When present, the integration feeds bounded COPY bytes through the native emit callback to the
+    Agent-owned upload transport. The Python side receives only the sanitized, non-secret session
+    handle: it never receives the upload ``baseUrl``, the scoped upload ``token``, or the Agent
+    API/app keys, and it performs no HTTP upload. The Agent Go side retains those secrets, attaches
+    the API key, and owns endpoint validation, retries, and finalization. Any ``baseUrl``/``token``
+    (or other unknown field) in the request is rejected before pool access. Omitting
+    ``resultDelivery`` keeps the existing inline streaming behavior unchanged.
+    """
+
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    mode: ResultDeliveryMode
+    upload_id: StrictStr = Field(alias='uploadId', min_length=1)
+    chunk_bytes: StrictInt = Field(alias='chunkBytes', ge=1)
+    max_bytes: StrictInt = Field(alias='maxBytes', ge=1)
+    format: ResultDeliveryFormat = 'csv'
+    compression: ResultDeliveryCompression = 'none'
+
+    @model_validator(mode='after')
+    def validate_chunk_within_max(self) -> 'RemoteQueryResultDelivery':
+        if self.chunk_bytes > self.max_bytes:
+            raise ValueError('chunkBytes must not exceed maxBytes')
+        return self
+
+
 class RemoteQueryCopyRequest(BaseModel):
     """Accept only explicit COPY byte-stream export requests."""
 
@@ -137,6 +169,28 @@ class RemoteQueryCopyRequest(BaseModel):
     query: StrictStr = Field(min_length=1)
     format: CopyStreamFormat = 'csv'
     limits: RemoteQueryCopyLimits = Field(default_factory=RemoteQueryCopyLimits)
+    result_delivery: RemoteQueryResultDelivery | None = Field(default=None, alias='resultDelivery')
+
+    @model_validator(mode='after')
+    def validate_format_consistency(self) -> 'RemoteQueryCopyRequest':
+        # When resultDelivery is present, the COPY stream format must match the upload format so the
+        # emitted bytes and the manifest agree. The current contract allows only ``csv`` for upload,
+        # so upload mode is CSV-only; a ``binary`` COPY stream with a ``csv`` upload is rejected.
+        if self.result_delivery is not None and self.format != self.result_delivery.format:
+            raise ValueError('format must match resultDelivery.format when resultDelivery is present')
+        return self
+
+    @model_validator(mode='after')
+    def validate_chunk_within_limits(self) -> 'RemoteQueryCopyRequest':
+        # The upload caps must not widen the caller/backend COPY safety caps. Fail closed so a
+        # backend-injected resultDelivery cannot raise the integration's configured byte ceiling;
+        # equal or smaller upload caps are accepted.
+        if self.result_delivery is not None:
+            if self.result_delivery.chunk_bytes > self.limits.chunk_bytes:
+                raise ValueError('resultDelivery.chunkBytes must not exceed limits.chunkBytes')
+            if self.result_delivery.max_bytes > self.limits.max_bytes:
+                raise ValueError('resultDelivery.maxBytes must not exceed limits.maxBytes')
+        return self
 
 
 @dataclass(frozen=True)
@@ -282,6 +336,48 @@ def _dbname_from_check(check: 'PostgreSql') -> str | None:
     return getattr(config, 'dbname', None)
 
 
+def _started_metadata(request: RemoteQueryCopyRequest) -> dict[str, Any]:
+    result_delivery = request.result_delivery
+    chunk_bytes = result_delivery.chunk_bytes if result_delivery is not None else request.limits.chunk_bytes
+    max_bytes = result_delivery.max_bytes if result_delivery is not None else request.limits.max_bytes
+    metadata: dict[str, Any] = {
+        'status': 'STARTED',
+        'format': request.format,
+        'operation': request.operation,
+        'chunkBytes': chunk_bytes,
+        'maxBytes': max_bytes,
+        'maxRowBytes': request.limits.max_row_bytes,
+    }
+    if result_delivery is not None:
+        metadata['resultDelivery'] = {
+            'mode': result_delivery.mode,
+            'uploadId': result_delivery.upload_id,
+            'chunkBytes': result_delivery.chunk_bytes,
+            'maxBytes': result_delivery.max_bytes,
+            'format': result_delivery.format,
+            'compression': result_delivery.compression,
+        }
+    return metadata
+
+
+def _succeeded_metadata(state: _CopyStreamState, started_at: float, request: RemoteQueryCopyRequest) -> dict[str, Any]:
+    metadata: dict[str, Any] = {'status': 'SUCCEEDED', 'stats': _copy_stream_stats(state, started_at, request.format)}
+    result_delivery = request.result_delivery
+    if result_delivery is not None:
+        # Provisional receipt aligned to the Agent-owned uploadReceipt shape
+        # {mode, uploadId, bucketName, manifestPath, totalBytes, totalRows, chunkCount, sha256}.
+        # Python owns only the fields it can compute from the byte stream; the Agent Go side
+        # enriches it with bucketName, manifestPath, totalRows, and the aggregate sha256 after
+        # it finalizes the upload session.
+        metadata['uploadReceipt'] = {
+            'mode': result_delivery.mode,
+            'uploadId': result_delivery.upload_id,
+            'totalBytes': state.bytes_emitted,
+            'chunkCount': state.chunks_emitted,
+        }
+    return metadata
+
+
 def _iter_copy_stream_events(
     check: 'PostgreSql', request: RemoteQueryCopyRequest, execution_dbname: str, started_at: float
 ) -> Iterator[CopyStreamEvent]:
@@ -302,17 +398,7 @@ def _iter_copy_stream_events(
         )
         return
 
-    yield CopyStreamEvent(
-        'metadata',
-        {
-            'status': 'STARTED',
-            'format': request.format,
-            'operation': request.operation,
-            'chunkBytes': request.limits.chunk_bytes,
-            'maxBytes': request.limits.max_bytes,
-            'maxRowBytes': request.limits.max_row_bytes,
-        },
-    )
+    yield CopyStreamEvent('metadata', _started_metadata(request))
 
     state = _CopyStreamState()
     error: _CopyStreamFailure | None = None
@@ -339,10 +425,7 @@ def _iter_copy_stream_events(
         )
         return
 
-    yield CopyStreamEvent(
-        'final',
-        {'status': 'SUCCEEDED', 'stats': _copy_stream_stats(state, started_at, request.format)},
-    )
+    yield CopyStreamEvent('final', _succeeded_metadata(state, started_at, request))
 
 
 def _copy_stream_data_events(
@@ -353,7 +436,12 @@ def _copy_stream_data_events(
     started_at: float,
 ) -> Iterator[tuple[CopyStreamEvent, _CopyStreamState]]:
     limits = request.limits
-    deadline = started_at + (limits.timeout_ms / 1000)
+    result_delivery = request.result_delivery
+    chunk_bytes = result_delivery.chunk_bytes if result_delivery is not None else limits.chunk_bytes
+    max_bytes = result_delivery.max_bytes if result_delivery is not None else limits.max_bytes
+    max_row_bytes = limits.max_row_bytes
+    timeout_ms = limits.timeout_ms
+    deadline = started_at + (timeout_ms / 1000)
     copy_sql = _copy_stdout_sql(request.query, request.format)
     pending = bytearray()
 
@@ -363,12 +451,12 @@ def _copy_stream_data_events(
             try:
                 cursor.execute('BEGIN READ ONLY')
                 in_transaction = True
-                cursor.execute('SET LOCAL statement_timeout = %s', (limits.timeout_ms,))
+                cursor.execute('SET LOCAL statement_timeout = %s', (timeout_ms,))
                 with cursor.copy(copy_sql) as copy:
                     for block in copy:
                         _raise_if_timed_out(deadline)
                         block_view = memoryview(block)
-                        if len(block_view) > limits.max_row_bytes:
+                        if len(block_view) > max_row_bytes:
                             raise _CopyStreamFailure(
                                 'max_row_bytes_exceeded',
                                 'COPY stream row exceeded maxRowBytes; psycopg exposes COPY data at row granularity.',
@@ -377,29 +465,29 @@ def _copy_stream_data_events(
                         offset = 0
                         while offset < len(block_view):
                             _raise_if_timed_out(deadline)
-                            remaining_allowed = limits.max_bytes - state.bytes_emitted - len(pending)
+                            remaining_allowed = max_bytes - state.bytes_emitted - len(pending)
                             if remaining_allowed <= 0:
                                 raise _CopyStreamFailure('max_bytes_exceeded', 'COPY stream exceeded maxBytes.')
 
-                            remaining_chunk = limits.chunk_bytes - len(pending)
+                            remaining_chunk = chunk_bytes - len(pending)
                             take = min(remaining_chunk, remaining_allowed, len(block_view) - offset)
                             pending.extend(block_view[offset : offset + take])
                             offset += take
 
-                            if len(pending) >= limits.chunk_bytes:
-                                event, state = _copy_data_event(pending, state)
+                            if len(pending) >= chunk_bytes:
+                                event, state = _copy_data_event(pending, state, result_delivery)
                                 pending.clear()
                                 yield event, state
 
-                            if offset < len(block_view) and state.bytes_emitted + len(pending) >= limits.max_bytes:
+                            if offset < len(block_view) and state.bytes_emitted + len(pending) >= max_bytes:
                                 if pending:
-                                    event, state = _copy_data_event(pending, state)
+                                    event, state = _copy_data_event(pending, state, result_delivery)
                                     pending.clear()
                                     yield event, state
                                 raise _CopyStreamFailure('max_bytes_exceeded', 'COPY stream exceeded maxBytes.')
 
                     if pending:
-                        event, state = _copy_data_event(pending, state)
+                        event, state = _copy_data_event(pending, state, result_delivery)
                         pending.clear()
                         yield event, state
             finally:
@@ -443,17 +531,18 @@ def _raise_if_timed_out(deadline: float) -> None:
         raise _CopyStreamFailure('timeout', 'COPY stream exceeded timeoutMs.', retryable=True)
 
 
-def _copy_data_event(data: bytearray, state: _CopyStreamState) -> tuple[CopyStreamEvent, _CopyStreamState]:
+def _copy_data_event(
+    data: bytearray, state: _CopyStreamState, result_delivery: RemoteQueryResultDelivery | None = None
+) -> tuple[CopyStreamEvent, _CopyStreamState]:
     payload = bytes(data)
-    event = CopyStreamEvent(
-        'data',
-        {
-            'sequence': state.sequence,
-            'offset': state.bytes_emitted,
-            'bytes': len(payload),
-        },
-        payload,
-    )
+    metadata: dict[str, Any] = {
+        'sequence': state.sequence,
+        'offset': state.bytes_emitted,
+        'bytes': len(payload),
+    }
+    if result_delivery is not None:
+        metadata['sha256'] = hashlib.sha256(payload).hexdigest()
+    event = CopyStreamEvent('data', metadata, payload)
     next_state = _CopyStreamState(
         sequence=state.sequence + 1,
         chunks_emitted=state.chunks_emitted + 1,

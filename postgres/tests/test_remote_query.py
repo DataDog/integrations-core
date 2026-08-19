@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import hashlib
 import json
 from contextlib import contextmanager
 from types import SimpleNamespace
@@ -18,11 +19,12 @@ from datadog_checks.postgres.remote_query import (
 
 
 class FakePool:
-    def __init__(self, rows=None, description=None, closed=False, copy_blocks=None):
+    def __init__(self, rows=None, description=None, closed=False, copy_blocks=None, copy_error=None):
         self.rows = rows or [(1,)]
         self.description = description or [SimpleNamespace(name='value')]
         self.closed = closed
         self.copy_blocks = copy_blocks or []
+        self.copy_error = copy_error
         self.requested_dbnames = []
         self.closed_copies = 0
         self.cursors = []
@@ -33,28 +35,30 @@ class FakePool:
     @contextmanager
     def get_connection(self, dbname):
         self.requested_dbnames.append(dbname)
-        yield FakeConnection(self.rows, self.description, self.copy_blocks, self)
+        yield FakeConnection(self.rows, self.description, self.copy_blocks, self, self.copy_error)
 
 
 class FakeConnection:
-    def __init__(self, rows, description, copy_blocks, pool):
+    def __init__(self, rows, description, copy_blocks, pool, copy_error=None):
         self.rows = rows
         self.description = description
         self.copy_blocks = copy_blocks
+        self.copy_error = copy_error
         self.pool = pool
 
     @contextmanager
     def cursor(self):
-        cursor = FakeCursor(self.rows, self.description, self.copy_blocks, self.pool)
+        cursor = FakeCursor(self.rows, self.description, self.copy_blocks, self.pool, self.copy_error)
         self.pool.cursors.append(cursor)
         yield cursor
 
 
 class FakeCursor:
-    def __init__(self, rows, description, copy_blocks, pool):
+    def __init__(self, rows, description, copy_blocks, pool, copy_error=None):
         self.rows = rows
         self.description = description
         self.copy_blocks = copy_blocks
+        self.copy_error = copy_error
         self.pool = pool
         self.executed = []
 
@@ -66,13 +70,14 @@ class FakeCursor:
 
     def copy(self, query):
         self.executed.append((query, None))
-        return FakeCopy(self.copy_blocks, self.pool)
+        return FakeCopy(self.copy_blocks, self.pool, self.copy_error)
 
 
 class FakeCopy:
-    def __init__(self, blocks, pool):
+    def __init__(self, blocks, pool, copy_error=None):
         self.blocks = blocks
         self.pool = pool
+        self.copy_error = copy_error
 
     def __enter__(self):
         return self
@@ -81,6 +86,8 @@ class FakeCopy:
         self.pool.closed_copies += 1
 
     def __iter__(self):
+        if self.copy_error is not None:
+            raise self.copy_error
         return iter(self.blocks)
 
 
@@ -118,6 +125,25 @@ def valid_copy_request(host='LOCALHOST.', port=5432, dbname='datadog_test', **ex
 def valid_database_instance_copy_request(database_instance='postgres-dbi', **extra):
     request = valid_copy_request(**extra)
     request['target'] = {'database_instance': database_instance}
+    return request
+
+
+def valid_result_delivery(**extra):
+    result_delivery = {
+        'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+        'uploadId': 'upload-01k',
+        'chunkBytes': 8,
+        'maxBytes': 24,
+        'format': 'csv',
+        'compression': 'none',
+    }
+    result_delivery.update(extra)
+    return result_delivery
+
+
+def valid_upload_copy_request(**extra):
+    request = valid_copy_request(**extra)
+    request['resultDelivery'] = valid_result_delivery()
     return request
 
 
@@ -734,3 +760,297 @@ def test_agent_rpc_stream_copy_closes_copy_when_callback_raises():
     assert [event[0] for event in events] == ['metadata', 'data']
     assert pool.closed_copies == 1
     assert pool.cursors[0].executed[-1] == ('ROLLBACK', None)
+
+
+def test_copy_stream_upload_mode_emits_started_result_delivery_data_sha256_and_receipt():
+    pool = FakePool(copy_blocks=[b'abc', b'defgh', b'ijklmnop', b'qr'])
+    check = block_existing_query_helpers(make_check(pool=pool))
+    request = valid_upload_copy_request()
+
+    events = collect_copy_events(request, check)
+
+    assert events[0].event_type == 'metadata'
+    started = event_metadata(events[0])
+    assert started['status'] == 'STARTED'
+    assert started['resultDelivery']['mode'] == 'POC_PUBLIC_CHUNKED_UPLOAD'
+    assert started['resultDelivery']['uploadId'] == 'upload-01k'
+    assert started['resultDelivery']['chunkBytes'] == 8
+    assert started['resultDelivery']['maxBytes'] == 24
+    assert 'baseUrl' not in started['resultDelivery']
+    assert 'token' not in started['resultDelivery']
+    assert started['chunkBytes'] == 8
+    assert started['maxBytes'] == 24
+    assert started['maxRowBytes'] == 32
+
+    data_events = [event for event in events if event.event_type == 'data']
+    assert [event_metadata(event)['sequence'] for event in data_events] == [0, 1, 2]
+    assert [event_metadata(event)['bytes'] for event in data_events] == [8, 8, 2]
+    for event in data_events:
+        payload = event_payload(event)
+        assert event_metadata(event)['sha256'] == hashlib.sha256(payload).hexdigest()
+        assert len(payload) <= 8
+    assert events[-1].event_type == 'final'
+    assert event_metadata(events[-1])['uploadReceipt'] == {
+        'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+        'uploadId': 'upload-01k',
+        'totalBytes': 18,
+        'chunkCount': 3,
+    }
+    assert event_metadata(events[-1])['stats']['bytesEmitted'] == 18
+    assert event_metadata(events[-1])['stats']['chunksEmitted'] == 3
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_omitted_result_delivery_keeps_inline_streaming_behavior():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    request = valid_copy_request()
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert 'resultDelivery' not in event_metadata(events[0])
+    data_events = [event for event in events if event.event_type == 'data']
+    for event in data_events:
+        assert 'sha256' not in event_metadata(event)
+    assert 'uploadReceipt' not in event_metadata(events[-1])
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+
+
+def test_copy_stream_upload_mode_enforces_result_delivery_max_bytes():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop'])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['maxBytes'] = 10
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    data_events = [event for event in events if event.event_type == 'data']
+    assert [event_payload(event) for event in data_events] == [b'abcdefgh', b'ij']
+    assert sum(event_metadata(event)['bytes'] for event in data_events) == 10
+    assert_failed_event(events, 'max_bytes_exceeded')
+    assert event_metadata(events[-1])['stats']['bytesEmitted'] == 10
+    assert 'uploadReceipt' not in event_metadata(events[-1])
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_enforces_timeout(monkeypatch):
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop'])
+    request = valid_upload_copy_request()
+    request['limits']['timeoutMs'] = 1000
+    values = iter([0.0, 0.0, 0.0] + [10.0] * 50)
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(values))
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    data_events = [event for event in events if event.event_type == 'data']
+    assert [event_payload(event) for event in data_events] == [b'abcdefgh']
+    assert_failed_event(events, 'timeout')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    assert 'uploadReceipt' not in event_metadata(events[-1])
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_rejects_binary_format_mismatch_with_result_delivery():
+    arbitrary_bytes = b'PGCOPY\n\xff\r\n\x00\x00\xff\x80abc\n'
+    pool = FakePool(copy_blocks=[arbitrary_bytes])
+    request = valid_upload_copy_request()
+    request['format'] = 'binary'
+    request['query'] = "SELECT decode('00ff80', 'hex') AS payload"
+    request['resultDelivery']['chunkBytes'] = 1024
+    request['resultDelivery']['maxBytes'] = 4096
+    request['limits'] = {'chunkBytes': 1024, 'maxBytes': 4096, 'maxRowBytes': 4096, 'timeoutMs': 5000}
+
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+
+    assert_failed_event(events, 'invalid_request', 'format must match resultDelivery.format')
+    assert pool.requested_dbnames == []
+
+
+def test_copy_stream_upload_mode_accepts_csv_format_matching_result_delivery():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    request = valid_upload_copy_request()
+    request['format'] = 'csv'
+    request['resultDelivery']['format'] = 'csv'
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert event_metadata(events[0])['format'] == 'csv'
+    assert event_metadata(events[0])['resultDelivery']['format'] == 'csv'
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+
+
+def test_copy_stream_upload_mode_never_buffers_more_than_one_chunk():
+    pool = FakePool(copy_blocks=[b'aaaa', b'bbbb', b'cccc', b'dddd', b'eeee', b'ffff'])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['chunkBytes'] = 4
+    request['resultDelivery']['maxBytes'] = 28
+    request['limits'] = {'chunkBytes': 4, 'maxBytes': 28, 'maxRowBytes': 32, 'timeoutMs': 5000}
+    max_payload = 0
+    in_flight = 0
+
+    def emit(event_type, metadata_json, payload):
+        nonlocal max_payload, in_flight
+        if event_type == 'data':
+            in_flight += 1
+            assert in_flight == 1
+            max_payload = max(max_payload, len(payload))
+            in_flight -= 1
+
+    execute_agent_rpc_stream_copy(json.dumps(request), make_check(pool=pool), emit)
+
+    assert max_payload <= 4
+
+
+def test_copy_stream_upload_mode_emits_stable_sequence_and_sha256_for_idempotent_retry():
+    blocks = [b'abcdefgh', b'ijklmnop', b'qr']
+    request = valid_upload_copy_request()
+    events = collect_copy_events(request, make_check(pool=FakePool(copy_blocks=blocks)))
+    data_events = [event for event in events if event.event_type == 'data']
+    sequences = [event_metadata(event)['sequence'] for event in data_events]
+    assert sequences == list(range(len(data_events)))
+    checksums = [event_metadata(event)['sha256'] for event in data_events]
+
+    replayed = collect_copy_events(request, make_check(pool=FakePool(copy_blocks=blocks)))
+    replayed_data = [event for event in replayed if event.event_type == 'data']
+    assert [event_metadata(event)['sequence'] for event in replayed_data] == sequences
+    assert [event_metadata(event)['sha256'] for event in replayed_data] == checksums
+
+
+def test_copy_stream_upload_mode_emits_query_failed_and_no_receipt_on_copy_failure():
+    pool = FakePool(copy_blocks=[], copy_error=Exception('copy stream broke'))
+    request = valid_upload_copy_request()
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert_failed_event(events, 'query_failed')
+    assert 'uploadReceipt' not in event_metadata(events[-1])
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_rejects_secret_fields_before_pool_access():
+    pool = FakePool(copy_blocks=[b'abcdefgh'])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['baseUrl'] = 'https://dd.datad0g.com/api/intake/its-agent-intake/uploads/upload-01k'
+    request['resultDelivery']['token'] = 'scoped-upload-token'
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert_failed_event(events, 'invalid_request', 'baseUrl')
+    assert 'scoped-upload-token' not in str(events)
+    assert pool.requested_dbnames == []
+
+
+def test_agent_rpc_stream_copy_upload_mode_adapts_to_binary_safe_callback():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    events = []
+
+    execute_agent_rpc_stream_copy(
+        json.dumps(valid_upload_copy_request()), make_check(pool=pool), lambda *event: events.append(event)
+    )
+
+    assert [event[0] for event in events] == ['metadata', 'data', 'data', 'data', 'final']
+    started = json.loads(events[0][1])
+    assert 'baseUrl' not in started['resultDelivery']
+    assert 'token' not in started['resultDelivery']
+    assert json.loads(events[1][1])['sha256'] == hashlib.sha256(events[1][2]).hexdigest()
+    assert events[1][2] == b'abcdefgh'
+    receipt = json.loads(events[-1][1])['uploadReceipt']
+    assert receipt['chunkCount'] == 3
+    assert receipt['totalBytes'] == 18
+
+
+def test_agent_rpc_stream_copy_upload_mode_stops_on_callback_failure_without_retry():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qrstuvwx'])
+    attempted = []
+
+    def emit(event_type, metadata_json, payload):
+        attempted.append((event_type, metadata_json, payload))
+        if event_type == 'data' and json.loads(metadata_json)['sequence'] == 1:
+            raise RuntimeError('upload chunk failed')
+
+    with pytest.raises(RuntimeError, match='upload chunk failed'):
+        execute_agent_rpc_stream_copy(json.dumps(valid_upload_copy_request()), make_check(pool=pool), emit)
+
+    data_attempted = [event for event in attempted if event[0] == 'data']
+    assert [json.loads(event[1])['sequence'] for event in data_attempted] == [0, 1]
+    assert pool.closed_copies == 1
+    assert pool.cursors[0].executed[-1] == ('ROLLBACK', None)
+
+
+@pytest.mark.parametrize(
+    'mutation, expected',
+    [
+        ({'apiKey': 'SECRET_API_KEY'}, 'apiKey'),
+        ({'baseUrl': 'https://dd.datad0g.com/'}, 'baseUrl'),
+        ({'token': 'scoped-upload-token'}, 'token'),
+        ({'mode': 'PRESIGNED_URL'}, 'mode'),
+        ({'format': 'json'}, 'format'),
+        ({'compression': 'gzip'}, 'compression'),
+        ({'chunkBytes': 0}, 'chunkBytes'),
+        ({'maxBytes': 0}, 'maxBytes'),
+        ({'chunkBytes': '8'}, 'chunkBytes'),
+        ({'chunkBytes': 64, 'maxBytes': 32}, 'chunkBytes must not exceed maxBytes'),
+    ],
+)
+def test_copy_stream_upload_mode_rejects_invalid_result_delivery(mutation, expected):
+    request = valid_upload_copy_request()
+    request['resultDelivery'].update(mutation)
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+    assert_failed_event(events, 'invalid_request', expected)
+    assert 'SECRET_API_KEY' not in str(events)
+    assert 'scoped-upload-token' not in str(events)
+
+
+def test_copy_stream_upload_mode_rejects_missing_upload_id():
+    request = valid_upload_copy_request()
+    del request['resultDelivery']['uploadId']
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+    assert_failed_event(events, 'invalid_request', 'uploadId')
+
+
+@pytest.mark.parametrize(
+    'delivery, limits, expected',
+    [
+        (
+            {'chunkBytes': 16},
+            {'chunkBytes': 8, 'maxBytes': 64},
+            'resultDelivery.chunkBytes must not exceed limits.chunkBytes',
+        ),
+        (
+            {'maxBytes': 128},
+            {'chunkBytes': 8, 'maxBytes': 64},
+            'resultDelivery.maxBytes must not exceed limits.maxBytes',
+        ),
+    ],
+)
+def test_copy_stream_upload_mode_rejects_upload_cap_widening(delivery, limits, expected):
+    request = valid_upload_copy_request()
+    request['resultDelivery'].update(delivery)
+    request['limits'].update(limits)
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+    assert_failed_event(events, 'invalid_request', expected)
+
+
+def test_copy_stream_upload_mode_accepts_equal_upload_caps():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['chunkBytes'] = 8
+    request['resultDelivery']['maxBytes'] = 64
+    request['limits'] = {'chunkBytes': 8, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 5000}
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert event_metadata(events[-1])['uploadReceipt']['totalBytes'] == 18
+
+
+def test_copy_stream_upload_mode_enforces_smaller_upload_cap_over_wider_limit():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qrstuvwx'])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['maxBytes'] = 16
+    request['limits'] = {'chunkBytes': 8, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 5000}
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    data_events = [event for event in events if event.event_type == 'data']
+    assert sum(event_metadata(event)['bytes'] for event in data_events) == 16
+    assert_failed_event(events, 'max_bytes_exceeded')
+    assert event_metadata(events[-1])['stats']['bytesEmitted'] == 16
