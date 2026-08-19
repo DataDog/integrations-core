@@ -230,8 +230,6 @@ def test_run_without_cancel_leaves_check_usable():
     assert not check.is_cancelled
     assert check.shutdown_calls == 0
 
-    # The finished run left no in-flight state behind, so a later cancel tears the check down
-    # inline instead of deferring to a run that will never come.
     check.cancel()
     assert check.shutdown_calls == 1
 
@@ -335,8 +333,6 @@ def test_check_is_reclaimed_after_cancel():
     gc.disable()
     try:
         del check
-        # The executor's worker drops the work item holding `job._job_loop` only after its own
-        # run() returns, which can trail `wait_for_completion()` by a few instructions.
         deadline = time.monotonic() + 1
         while ref() is not None and time.monotonic() < deadline:
             time.sleep(0.01)
