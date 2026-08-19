@@ -76,12 +76,26 @@ def batched_lines(line_iter: Iterator[str], target_size: int = 128) -> Iterator[
         yield '\n'.join(batch)
 
 
+_NAN_INF_MAP = {'NaN': float('nan'), '+Inf': float('inf'), '-Inf': float('-inf')}
+
+
+def _decode_value(v: float | str) -> float:
+    """Decode a sample value from the Go parser.
+
+    The Go parser encodes NaN and ±Inf as JSON strings to work around
+    encoding/json's rejection of non-finite floats.
+    """
+    if isinstance(v, str):
+        return _NAN_INF_MAP[v]
+    return v
+
+
 def _json_to_metric(family: dict) -> Metric:
     samples = [
         Sample(
             s['name'],
             s.get('labels') or {},
-            s['value'],
+            _decode_value(s['value']),
             s.get('timestamp'),
             s.get('exemplar'),
         )
