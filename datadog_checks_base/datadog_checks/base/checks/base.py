@@ -288,8 +288,11 @@ class AgentCheck(object):
         self.name = name  # type: str
 
         # Built before `check_id` is assigned below, because its setter forwards the value here.
+        # Held separately from `self.log` because subclasses are free to replace that with a logger
+        # of their own, as `PrometheusScraperMixin` does.
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
-        self.log = CheckLoggingAdapter(logger)
+        self._log_adapter = CheckLoggingAdapter(logger)
+        self.log = self._log_adapter
 
         self.check_id = ''
         self.init_config = init_config  # type: InitConfigType
@@ -482,7 +485,7 @@ class AgentCheck(object):
     def check_id(self, value: str) -> None:
         self._check_id = value
         # The adapter tags every log record with the id, so it needs the value as soon as we have it.
-        self.log.set_check_id(value)
+        self._log_adapter.set_check_id(value)
 
     @property
     def http(self) -> RequestsWrapper:
