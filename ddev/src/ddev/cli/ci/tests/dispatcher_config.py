@@ -15,13 +15,26 @@ if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
 
 
+class BatchingConfig(BaseModel):
+    """Policy for turning discovered test units into batched plans, read from `[dispatcher.batching]`."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    # 240 is GitHub's 256-job matrix cap minus a 16-job setup buffer.
+    max_jobs_per_batch: int = Field(default=240, gt=0, le=240)
+    # Lets an integration with more jobs than one batch holds span several batches.
+    allow_integration_splitting: bool = False
+
+
 class DispatcherConfig(BaseModel):
     """Per-repository Dispatcher configuration."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    max_jobs_per_batch: int = Field(default=240, gt=0, le=240)  # 256 GitHub job cap - 16-job setup buffer; the safe max
     global_timeout_seconds: float = Field(default=10800.0, gt=0)  # 3 hours
+    # Used when Hatch does not declare a Python version.
+    default_python_version: str = Field(default="3.13", pattern=r"^\d+\.\d+$")
+    batching: BatchingConfig = BatchingConfig()
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()
 
     @classmethod
