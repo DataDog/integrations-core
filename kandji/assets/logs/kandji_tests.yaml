@@ -857,17 +857,18 @@ tests:
   -
    sample: |-
     {
-      "occurred_at" : "2025-09-24T10:15:02.113045Z",
-      "target_component" : "remediation",
-      "actor_type" : "device",
-      "target_type" : "device",
-      "action" : "update",
-      "device_name" : "IT's MacBook Air",
-      "event_type" : "update.device.remediation",
-      "event_category" : "endpoint_management",
       "metadata" : {
         "run_details" : [ "Checking for the ability of admins to unlock a user's active session...", "Checking authorizationdb...", "authorizationdb was admin unlock enabled. Updated config.", "Done." ]
       },
+      "actor_type" : "device",
+      "target_type" : "device",
+      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+      "event_category" : "endpoint_management",
+      "occurred_at" : "2025-09-24T10:15:02.113045Z",
+      "target_component" : "remediation",
+      "device_name" : "IT's MacBook Air",
+      "event_type" : "update.device.remediation",
+      "action" : "update",
       "new_state" : {
         "run_time" : "2025-09-24T10:15:01.880000Z",
         "parameter_name" : "Disable the ability to login to another user's active and locked session",
@@ -876,7 +877,6 @@ tests:
           "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
         }
       },
-      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
       "id" : "01K5W2Q8ZR4M7T1N3D6XVB0PKC",
       "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
     }
@@ -943,17 +943,18 @@ tests:
        target_type: "device"
      message: |-
        {
-         "occurred_at" : "2025-09-24T10:15:02.113045Z",
-         "target_component" : "remediation",
-         "actor_type" : "device",
-         "target_type" : "device",
-         "action" : "update",
-         "device_name" : "IT's MacBook Air",
-         "event_type" : "update.device.remediation",
-         "event_category" : "endpoint_management",
          "metadata" : {
            "run_details" : [ "Checking for the ability of admins to unlock a user's active session...", "Checking authorizationdb...", "authorizationdb was admin unlock enabled. Updated config.", "Done." ]
          },
+         "actor_type" : "device",
+         "target_type" : "device",
+         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+         "event_category" : "endpoint_management",
+         "occurred_at" : "2025-09-24T10:15:02.113045Z",
+         "target_component" : "remediation",
+         "device_name" : "IT's MacBook Air",
+         "event_type" : "update.device.remediation",
+         "action" : "update",
          "new_state" : {
            "run_time" : "2025-09-24T10:15:01.880000Z",
            "parameter_name" : "Disable the ability to login to another user's active and locked session",
@@ -962,7 +963,6 @@ tests:
              "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
            }
          },
-         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
          "id" : "01K5W2Q8ZR4M7T1N3D6XVB0PKC",
          "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
        }
@@ -973,26 +973,27 @@ tests:
   -
    sample: |-
     {
-      "occurred_at" : "2025-09-24T09:02:44.512300Z",
-      "target_component" : "first_runs",
-      "actor_type" : "device",
-      "target_type" : "device",
-      "action" : "create",
-      "device_name" : "IT's MacBook Air",
-      "blueprint_name" : "DDS-Test",
-      "event_type" : "create.device.first_runs",
-      "event_category" : "endpoint_management",
       "metadata" : {
         "has_enabled_params" : true
       },
+      "actor_type" : "device",
+      "target_type" : "device",
+      "blueprint_name" : "DDS-Test",
+      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+      "event_category" : "endpoint_management",
+      "occurred_at" : "2025-09-24T09:02:44.512300Z",
+      "target_component" : "first_runs",
+      "device_name" : "IT's MacBook Air",
+      "event_type" : "create.device.first_runs",
+      "action" : "create",
       "new_state" : {
         "blueprint" : {
           "name" : "DDS-Test",
           "id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a"
         },
         "parameter_names" : {
-          "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ],
-          "incompatible" : [ "Enable System Integrity Protection (SIP)" ]
+          "incompatible" : [ "Enable System Integrity Protection (SIP)" ],
+          "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ]
         },
         "counts" : {
           "alerts" : 0,
@@ -1007,7 +1008,6 @@ tests:
           "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
         }
       },
-      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
       "id" : "01K5W0J5MB8E2Q9F4A7HTY3RNZ",
       "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
     }
@@ -1086,26 +1086,27 @@ tests:
        target_type: "device"
      message: |-
        {
-         "occurred_at" : "2025-09-24T09:02:44.512300Z",
-         "target_component" : "first_runs",
-         "actor_type" : "device",
-         "target_type" : "device",
-         "action" : "create",
-         "device_name" : "IT's MacBook Air",
-         "blueprint_name" : "DDS-Test",
-         "event_type" : "create.device.first_runs",
-         "event_category" : "endpoint_management",
          "metadata" : {
            "has_enabled_params" : true
          },
+         "actor_type" : "device",
+         "target_type" : "device",
+         "blueprint_name" : "DDS-Test",
+         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+         "event_category" : "endpoint_management",
+         "occurred_at" : "2025-09-24T09:02:44.512300Z",
+         "target_component" : "first_runs",
+         "device_name" : "IT's MacBook Air",
+         "event_type" : "create.device.first_runs",
+         "action" : "create",
          "new_state" : {
            "blueprint" : {
              "name" : "DDS-Test",
              "id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a"
            },
            "parameter_names" : {
-             "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ],
-             "incompatible" : [ "Enable System Integrity Protection (SIP)" ]
+             "incompatible" : [ "Enable System Integrity Protection (SIP)" ],
+             "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ]
            },
            "counts" : {
              "alerts" : 0,
@@ -1120,7 +1121,6 @@ tests:
              "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
            }
          },
-         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
          "id" : "01K5W0J5MB8E2Q9F4A7HTY3RNZ",
          "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
        }
@@ -1133,17 +1133,17 @@ tests:
     {
       "occurred_at" : "2025-09-24T11:44:19.002001Z",
       "target_component" : "settings",
+      "event_type" : "update.tenant.settings",
       "actor_type" : "user",
       "target_type" : "tenant",
       "action" : "update",
-      "event_type" : "update.tenant.settings",
-      "event_category" : "endpoint_management",
       "new_state" : {
         "name" : "Example Org"
       },
       "target_id" : "9d618261-86dd-4a4f-89bc-147f052878fc",
       "id" : "01K5W4T1XP6C0V8B2S5MJQ7WDE",
-      "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+      "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef",
+      "event_category" : "endpoint_management"
     }
    service: "audit"
    result:
@@ -1179,19 +1179,19 @@ tests:
        {
          "occurred_at" : "2025-09-24T11:44:19.002001Z",
          "target_component" : "settings",
+         "event_type" : "update.tenant.settings",
          "actor_type" : "user",
          "target_type" : "tenant",
          "action" : "update",
-         "event_type" : "update.tenant.settings",
-         "event_category" : "endpoint_management",
          "new_state" : {
            "name" : "Example Org"
          },
          "target_id" : "9d618261-86dd-4a4f-89bc-147f052878fc",
          "id" : "01K5W4T1XP6C0V8B2S5MJQ7WDE",
-         "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+         "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef",
+         "event_category" : "endpoint_management"
        }
      service: "audit"
      tags:
-      - "source:LOGS_SOURCE"
+       - "source:LOGS_SOURCE"
      timestamp: 1758714259002
