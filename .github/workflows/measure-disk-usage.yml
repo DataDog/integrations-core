@@ -1,7 +1,6 @@
 name: Measure Disk Usage
 
-# Triggered by Measure Disk Usage Trigger. head_sha is the commit to measure, and event says whether
-# it came from a push or a pull request.
+# Triggered by Measure Disk Usage Trigger.
 
 on:
   workflow_run:
