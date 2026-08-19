@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from copy import deepcopy
 
 import pytest
 
@@ -16,13 +15,6 @@ HERE = get_here()
 opj = os.path.join
 
 PROXY_IP_STATE = 'traefik_mesh_proxy_ip'
-
-
-@pytest.fixture
-def instance_openmetrics_v2(dd_get_state):
-    openmetrics_v2 = deepcopy(dd_get_state('traefik_instance', default={}))
-    openmetrics_v2['use_openmetrics'] = 'true'
-    return openmetrics_v2
 
 
 def setup_traefik_mesh():
@@ -99,7 +91,7 @@ def get_traefik_mesh_proxy_pod_ip() -> str:
 
 
 @pytest.fixture(scope='session')
-def dd_environment(dd_save_state):
+def dd_environment():
     with kind_run(conditions=[setup_traefik_mesh]) as kubeconfig:
         proxy_pod_ip = get_state(PROXY_IP_STATE)
         if set_up_env() and not proxy_pod_ip:
@@ -115,7 +107,6 @@ def dd_environment(dd_save_state):
             'traefik_controller_api_endpoint': traefik_controller_api_endpoint,
         }
 
-        dd_save_state("traefik_instance", instance)
         metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
 
         yield instance, metadata
