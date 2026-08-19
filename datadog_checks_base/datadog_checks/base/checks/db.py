@@ -136,10 +136,13 @@ class DatabaseCheck(AgentCheck):
         Integrations release their own resources by overriding :meth:`shutdown`, not this method.
         """
         self.log.debug("Marking check as cancelled")
-        self.cancel_async_jobs()
+        # Recording the cancellation first keeps a concurrent `check()` from restarting a loop that
+        # `cancel_async_jobs()` is about to stop, and stops a new run from invalidating the
+        # decision below.
         with self._cancel_lock:
             self._cancelled = True
             needs_finalize = not self._is_running
+        self.cancel_async_jobs()
         if needs_finalize:
             self.log.debug("cancel() finalizing immediately, check is idle")
             self._finalize()
@@ -159,14 +162,27 @@ class DatabaseCheck(AgentCheck):
                 return
             self._finalized = True
         self.log.debug("Finalizing check: stopping async jobs and releasing resources")
-        self.shutdown_async_jobs()
-        self.shutdown()
+        # Teardown gets one attempt, so a failing stage must not skip what follows: the state
+        # clearing below is what lets the check be reclaimed, and on the deferred path an escaping
+        # exception would leave `run()` raising instead of returning an error report. Each stage is
+        # guarded on its own so jobs that fail to stop still cost us nothing else.
+        try:
+            self.shutdown_async_jobs()
+        except Exception:
+            self.log.exception("Error stopping async jobs during teardown; continuing")
+        try:
+            self.shutdown()
+        except Exception:
+            self.log.exception("Error in shutdown() during teardown; continuing")
         # Dropping these breaks the reference cycles that would otherwise keep the check, and
         # everything it holds, from being reclaimed once the Agent lets go of it. The jobs are
         # stopped by this point, so releasing them here is safe.
         self._async_job_registry.clear()
         self.check_initializations.clear()
-        self._diagnosis = None
+        # `del` rather than assigning None: `AgentCheck.diagnosis` rebuilds itself only when the
+        # attribute is absent, so nulling it would leave the property returning None forever.
+        if hasattr(self, '_diagnosis'):
+            del self._diagnosis
         self.log.debug("Check cleanup complete")
         # Must come last: the logging adapter reads back through this attribute for checks whose
         # check_id was never resolved, so anything logged after this would fail.

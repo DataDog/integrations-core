@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import gc
 import threading
+import time
 import weakref
 from concurrent.futures.thread import ThreadPoolExecutor
 from unittest import mock
@@ -224,11 +225,15 @@ def test_run_without_cancel_leaves_check_usable():
 
     assert check.run() == ''
 
-    # An uncancelled run reports no error, leaves no in-flight state, and tears nothing down.
+    # An uncancelled run reports no error, is not treated as cancelled, and tears nothing down.
     assert check.check_calls == 1
-    assert not check._is_running
     assert not check.is_cancelled
     assert check.shutdown_calls == 0
+
+    # The finished run left no in-flight state behind, so a later cancel tears the check down
+    # inline instead of deferring to a run that will never come.
+    check.cancel()
+    assert check.shutdown_calls == 1
 
 
 def test_cancel_when_idle_finalizes_immediately():
@@ -271,7 +276,6 @@ def test_cancel_during_run_defers_finalize_until_run_completes():
     assert not run_thread.is_alive()
     assert run_result == ['']
     assert check.shutdown_calls == 1
-    assert not check._is_running
 
 
 def test_run_after_cancel_skips_the_check():
@@ -331,6 +335,11 @@ def test_check_is_reclaimed_after_cancel():
     gc.disable()
     try:
         del check
+        # The executor's worker drops the work item holding `job._job_loop` only after its own
+        # run() returns, which can trail `wait_for_completion()` by a few instructions.
+        deadline = time.monotonic() + 1
+        while ref() is not None and time.monotonic() < deadline:
+            time.sleep(0.01)
         leaked = ref()
         if leaked is not None:
             referrers = [type(referrer).__name__ for referrer in gc.get_referrers(leaked)]
