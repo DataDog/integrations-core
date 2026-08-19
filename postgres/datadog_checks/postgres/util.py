@@ -277,7 +277,7 @@ class DBExplainError(Enum):
     # not able to access the required function
     database_error = 'database_error'
 
-    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    # datatype mismatch occurs when the return type of the EXPLAIN function is not json
     datatype_mismatch = 'datatype_mismatch'
 
     # this could be the result of a missing EXPLAIN function

@@ -1,0 +1,1 @@
+Add a cancellation lifecycle to ``DatabaseCheck`` so DBM integrations get thread-safe ``cancel()`` handling with a ``shutdown()`` teardown hook.

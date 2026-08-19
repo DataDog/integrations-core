@@ -1,0 +1,1 @@
+Stop the check logging adapter from holding a reference to the check, so a cancelled check is reclaimed without waiting for a garbage collection pass.
