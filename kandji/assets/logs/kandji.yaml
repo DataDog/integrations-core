@@ -194,9 +194,9 @@ facets:
     name: Metadata Event UID
     path: ocsf.metadata.uid
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
-    facetType: range
     name: Event Time
     path: ocsf.time
     source: log
