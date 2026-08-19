@@ -105,12 +105,13 @@ def dd_environment(dd_save_state):
         if set_up_env() and not proxy_pod_ip:
             raise RuntimeError(f'No Traefik Mesh proxy pod IP found in the `{PROXY_IP_STATE}` state')
 
-        traefik_proxy_endpoint = f'http://{proxy_pod_ip}:8080/metrics'
+        traefik_proxy_api_endpoint = f'http://{proxy_pod_ip}:8080'
+        traefik_proxy_metrics_endpoint = f'{traefik_proxy_api_endpoint}/metrics'
         traefik_controller_api_endpoint = 'http://traefik-mesh-controller.traefik-mesh.svc.cluster.local:9000'
 
         instance = {
-            'openmetrics_endpoint': traefik_proxy_endpoint,
-            'traefik_proxy_api_endpoint': traefik_proxy_endpoint,
+            'openmetrics_endpoint': traefik_proxy_metrics_endpoint,
+            'traefik_proxy_api_endpoint': traefik_proxy_api_endpoint,
             'traefik_controller_api_endpoint': traefik_controller_api_endpoint,
         }
 
