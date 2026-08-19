@@ -254,7 +254,7 @@ pipeline:
           sourceType: attribute
           target: usr.email
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Parse Audit Logs with File Detection

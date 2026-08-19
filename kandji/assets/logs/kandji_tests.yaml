@@ -29,6 +29,7 @@ tests:
         first_name: "John"
         last_name: "Carter"
         role: "admin"
+        email: john.carter@crestdata.ai
       occurred_at: "2025-09-23T09:01:37.420577Z"
       target_component: "user"
       target_id: "4b3b6c16-2728-4037-8d4a-342538cad637"
@@ -62,6 +63,7 @@ tests:
           type_id: 2
           name: John Carter
           type: Admin
+          email_addr: john.carter@crestdata.ai
         class_name: Account Change
         status: Success
     message: |-
