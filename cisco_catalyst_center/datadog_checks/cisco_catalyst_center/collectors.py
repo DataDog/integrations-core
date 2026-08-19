@@ -16,10 +16,13 @@ from __future__ import annotations
 from typing import Any
 
 from .constants import (
+    ASSURANCE_EVENTS_ENDPOINT,
     ASSURANCE_ISSUES_ENDPOINT,
     CLIENT_HEALTH_ENDPOINT,
     CLIENTS_SUMMARY_ANALYTICS_ENDPOINT,
     DEVICE_REACHABLE_VALUES,
+    EVENT_DEFAULT_MAX_PAGES,
+    EVENT_DEVICE_FAMILY_GROUPS,
     FABRIC_SITE_HEALTH_ENDPOINT,
     INTERFACES_ENDPOINT,
     L3_TOPOLOGY_ENDPOINT_TEMPLATE,
@@ -47,6 +50,7 @@ from .metrics import (
     DEVICE_INTERFACE_LIST_METRICS,
     DEVICE_METRICS,
     DEVICE_METRICS_DETAILS,
+    EVENT_BREAKDOWNS,
     FABRIC_SITE_METRICS,
     INTERFACE_POE_WATT_METRICS,
     INTERFACE_STATISTICS_METRICS,
@@ -664,18 +668,27 @@ def collect_sda_fabric(
 # -- assurance issues -----------------------------------------------------------------
 
 
+def _group_counts(records: list[dict[str, Any]], field: str) -> dict[str, int]:
+    """Count ``records`` by the value of one field, in sorted key order.
+
+    Records whose value is absent are skipped rather than grouped under a placeholder. Both of
+    Catalyst Center's absent-data conventions for a string count as absent, matching
+    :func:`~.emit.tag`: an empty tag value is never a useful dimension to query on.
+    """
+    counts: dict[str, int] = {}
+    for record in records:
+        value = record.get(field)
+        if value is None or value == '':
+            continue
+        counts[str(value)] = counts.get(str(value), 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def _count_by(
     check: Any, metric_name: str, records: list[dict[str, Any]], field: str, tag_key: str, tags: list[str]
 ) -> None:
     """Emit a per-value breakdown of ``records`` grouped on one field."""
-    counts: dict[str, int] = {}
-    for record in records:
-        value = record.get(field)
-        if value is None:
-            continue
-        counts[str(value)] = counts.get(str(value), 0) + 1
-
-    for value, count in sorted(counts.items()):
+    for value, count in _group_counts(records, field).items():
         check.gauge(metric_name, count, tags=tags + [f'{tag_key}:{value}'])
 
 
@@ -700,6 +713,72 @@ def collect_assurance_issues(check: Any, client: Any, base_tags: list[str] | Non
         ('status', 'status'),
     ):
         _count_by(check, 'issue.count', issues, field, tag_key, tags)
+
+
+# -- assurance events -----------------------------------------------------------------
+
+
+def collect_events(
+    check: Any,
+    client: Any,
+    start_time: int,
+    end_time: int,
+    base_tags: list[str] | None = None,
+) -> None:
+    """Collect assurance events in one time window, as counts by severity, family, type and device.
+
+    The window is supplied rather than derived here so that the caller owns the cursor: consecutive
+    windows must not overlap, or every event is counted more than once. Both bounds are epoch
+    milliseconds.
+
+    Four requests is the floor. ``deviceFamily`` is mandatory, and its values fall into four groups
+    the endpoint refuses to mix, so each group is its own sweep -- see
+    :data:`EVENT_DEVICE_FAMILY_GROUPS`.
+
+    A group that fails is logged and skipped rather than aborting the sweep. That costs one window
+    of that group's events, which is the lesser of two evils: the alternative is to fail the whole
+    collection so the caller retries the window, which would double-count everything the groups
+    before it already submitted.
+
+    ``event.total.count`` comes from the total the appliance reports, not from the records that
+    arrived, so it stays correct when a sweep is cut short by the page budget. The breakdown cannot
+    be -- it is derived from records -- so a truncated sweep is warned about loudly.
+    """
+    tags = base_tags or []
+    window = {'startTime': start_time, 'endTime': end_time}
+
+    for group in EVENT_DEVICE_FAMILY_GROUPS:
+        try:
+            # `deviceFamily` is serialised as a repeated query parameter, which is the only form
+            # the endpoint accepts for more than one family; a comma-separated string is rejected.
+            records, total = client.get_list_with_total(
+                ASSURANCE_EVENTS_ENDPOINT,
+                params={'deviceFamily': list(group), **window},
+                max_pages=EVENT_DEFAULT_MAX_PAGES,
+            )
+        except CatalystApiError:
+            check.log.warning('Could not read assurance events for %s', ', '.join(group), exc_info=True)
+            continue
+
+        # Untagged, and submitted once per group. Counts sharing a name and tag set are summed,
+        # so the four submissions add up to the whole window. The group is an artefact of the
+        # endpoint's parameter rules, not a dimension anyone queries -- `event.count` already
+        # carries the finer-grained `device_family` breakdown.
+        reported = total if total is not None else len(records)
+        check.count('event.total.count', reported, tags=tags)
+
+        if reported > len(records):
+            check.log.warning(
+                'Catalyst Center reports %s assurance events for %s but only %s were read within '
+                'the page budget; the event.count breakdown undercounts this window',
+                reported,
+                ', '.join(group),
+                len(records),
+            )
+
+        for field, tag_key in EVENT_BREAKDOWNS:
+            for value, count in _group_counts(records, field).items():
+                check.count('event.count', count, tags=tags + [f'{tag_key}:{value}'])
 
 
 # -- application visibility -----------------------------------------------------------

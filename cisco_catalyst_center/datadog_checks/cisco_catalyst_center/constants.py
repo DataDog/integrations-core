@@ -81,6 +81,33 @@ TOPOLOGY_LINK_UP_VALUES: Final[frozenset[str]] = frozenset({'up', 'UP', 'Up'})
 # `['Border', 'edge']`, mixing both -- so roles are lower-cased before being tagged.
 FABRIC_ROLE_ENDPOINTS_PAGE_LIMIT: Final = 20
 
+# -- assurance events -----------------------------------------------------------------
+#
+# `deviceFamily` is mandatory (errorCode 2600 without it), and its values fall into four groups
+# that cannot be mixed in one request: asking for `Unified AP` alongside a switch family answers
+# `Device family value is not allowed`. So four calls per cycle is the floor, not a choice.
+# The groups below are the appliance's own, quoted from that error message.
+EVENT_DEVICE_FAMILY_GROUPS: Final[tuple[tuple[str, ...], ...]] = (
+    ('Switches and Hubs', 'Routers', 'Wireless Controller', 'Third Party Device'),
+    ('Unified AP',),
+    ('Wired Client',),
+    ('Wireless Client',),
+)
+
+# A hard appliance limit rather than a default: a wider window answers errorCode 14005,
+# `Difference between startTime and endTime must not be more than 7 days`. The same endpoint also
+# refuses a start earlier than 30 days ago, which this cap makes unreachable.
+EVENT_WINDOW_MAX_SECONDS: Final = 7 * 24 * 60 * 60
+
+# How far back the first cycle reaches, before there is a previous window to continue from.
+# Short on purpose: the point of the first cycle is to start the series, not to backfill.
+EVENT_DEFAULT_LOOKBACK_MINUTES: Final = 15
+
+# A page here holds 20 records, so `max_pages` -- sized for the 500-record endpoints -- would
+# permit 1000 requests per family group against an endpoint whose documented rate limit can be as
+# low as 20/minute. Events get their own, far tighter bound.
+EVENT_DEFAULT_MAX_PAGES: Final = 10
+
 # Keys that make up an error object. Used to tell an error apart from a real record, since both
 # arrive in the `response` slot.
 ERROR_OBJECT_KEYS: Final = frozenset({'detail', 'errorCode', 'message'})

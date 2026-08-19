@@ -284,14 +284,30 @@ class CatalystCenterClient:
 
         return body
 
-    def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
-        """Fetch an endpoint and return the contents of its ``response`` key."""
-        body = self._get_body(path, params)
+    def _payload_of(self, body: Any, path: str) -> Any:
+        """Extract the ``response`` payload from an already-validated body."""
         if isinstance(body, list):
             return body
         if 'response' not in body:
             raise CatalystApiError(f'Catalyst Center returned no response field for {path}')
         return body['response']
+
+    def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
+        """Fetch an endpoint and return the contents of its ``response`` key."""
+        return self._payload_of(self._get_body(path, params), path)
+
+    @staticmethod
+    def _collection_total(body: Any) -> int | None:
+        """The size of the whole matching collection, when the appliance reports one.
+
+        ``page.count`` is the collection total rather than the page size, which makes it the only
+        way to tell a complete sweep from one that stopped early. Endpoints that answer without a
+        ``page`` object report None.
+        """
+        if not isinstance(body, dict):
+            return None
+        total = (body.get('page') or {}).get('count')
+        return total if isinstance(total, int) else None
 
     # -- typed accessors --------------------------------------------------------------
 
@@ -340,35 +356,54 @@ class CatalystCenterClient:
         return body
 
     def get_list(self, path: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-        """Page through a list endpoint and return every record.
+        """Page through a list endpoint and return every record."""
+        return self.get_list_with_total(path, params)[0]
+
+    def get_list_with_total(
+        self, path: str, params: dict[str, Any] | None = None, max_pages: int | None = None
+    ) -> tuple[list[dict[str, Any]], int | None]:
+        """Page through a list endpoint, returning its records and the collection total.
 
         Pagination is 1-based, and the page size is a property of the endpoint rather than
         something a caller chooses, so it is looked up here instead of being an argument.
         Termination is on a short page: ``page.count`` is the collection total, not the page
         size, so terminating on it either truncates or loops forever.
+
+        The total is returned alongside the records because they can legitimately disagree. A
+        sweep that hits ``max_pages`` returns fewer records than the appliance says exist, and a
+        caller counting the records it got would report a number that reads healthy while being
+        arbitrarily low. It is None for endpoints that answer without a ``page`` object.
+
+        ``max_pages`` overrides the instance-wide cap for callers whose endpoint has a much
+        smaller page size, and so a much higher request cost per record.
         """
         limit = ENDPOINT_PAGE_LIMITS.get(path, DEFAULT_PAGE_LIMIT)
+        page_budget = max_pages or self._max_pages
         offset = FIRST_OFFSET
         records: list[dict[str, Any]] = []
+        total: int | None = None
 
-        for _ in range(self._max_pages):
+        for _ in range(page_budget):
             page_params = {**(params or {}), 'limit': limit, 'offset': offset}
-            page = self._get(path, page_params)
+            body = self._get_body(path, page_params)
+            page = self._payload_of(body, path)
             if not isinstance(page, list):
                 raise CatalystApiError(f'Expected a list from {path}, got {type(page).__name__}')
 
+            if total is None:
+                total = self._collection_total(body)
             records.extend(page)
             if len(page) < limit:
-                return records
+                return records, total
             offset += limit
         else:
             self.log.warning(
                 'Stopped paginating %s after max_pages (%s); results are incomplete',
                 path,
-                self._max_pages,
+                page_budget,
             )
 
-        return records
+        return records, total
 
     def get_object(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Fetch a single object, such as a device's stack detail."""
