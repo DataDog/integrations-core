@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from prometheus_client.samples import Sample
+from datadog_checks.base.checks.openmetrics.v2.go_parser import Sample
 
 NEGATIVE_INFINITY = float('-inf')
 
