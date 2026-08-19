@@ -1,6 +1,6 @@
 # Build the info-proxy binary, then ship it on a redis image so the compose
 # healthcheck can use redis-cli against the proxy port.
-FROM golang:1.23-alpine AS build
+FROM golang:1.26-alpine AS build
 WORKDIR /src
 # Stdlib-only module: copying sources is enough, no module download step.
 COPY . .
