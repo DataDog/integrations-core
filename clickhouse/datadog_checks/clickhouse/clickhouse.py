@@ -32,6 +32,7 @@ from .utils import (
     SHARED_MERGE_TREE_QUERY,
     ErrorSanitizer,
     HostingType,
+    cluster_all_replicas,
     cluster_aware_query,
 )
 
@@ -313,11 +314,11 @@ class ClickhouseCheck(DatabaseCheck):
 
     def get_queries(self) -> list[dict]:
         query_list = []
-        single = self._config.single_endpoint_mode
+        cluster = self.fanout_cluster_name if self._config.single_endpoint_mode else None
 
         def pick(query: dict) -> dict:
             """In single endpoint mode, read all replicas and tag each row per node."""
-            return cluster_aware_query(query) if single else query
+            return cluster_aware_query(query, cluster) if cluster else query
 
         if self._config.use_legacy_queries:
             query_list.extend(
@@ -416,6 +417,18 @@ class ClickhouseCheck(DatabaseCheck):
         return None
 
     @property
+    def fanout_cluster_name(self) -> str | None:
+        """The cluster to fan out over with clusterAllReplicas, or None when there is none to use.
+
+        'default' is only guessed when the deployment is not known to be self-hosted, since Cloud
+        always uses that name. A self-hosted cluster is named arbitrarily, so None is returned
+        instead and callers fall back to the local system table.
+        """
+        if self.cluster_name:
+            return self.cluster_name
+        return None if self.hosting_type == HostingType.SELF_HOSTED else 'default'
+
+    @property
     def hosting_type(self) -> str:
         """Whether this instance is ClickHouse Cloud or self-hosted, cached after the first check run."""
         if self._hosting_type is None:
@@ -494,8 +507,11 @@ class ClickhouseCheck(DatabaseCheck):
         """
         Get the appropriate system table reference based on deployment type.
 
-        For single endpoint mode: Returns clusterAllReplicas('default', system.<table>)
+        For single endpoint mode: Returns clusterAllReplicas(<cluster>, system.<table>)
         For direct connection: Returns system.<table>
+
+        A single endpoint mode instance whose cluster cannot be determined also reads the local
+        table, since there is no cluster name to fan out over.
 
         Args:
             table_name: The system table name (e.g., 'query_log', 'processes')
@@ -510,12 +526,10 @@ class ClickhouseCheck(DatabaseCheck):
             "system.query_log"  # Direct connection
         """
         if self._config.single_endpoint_mode:
-            # Single endpoint mode: Use clusterAllReplicas to query all nodes
-            # The cluster name is 'default' for ClickHouse Cloud and most setups
-            return f"clusterAllReplicas('default', system.{table_name})"
-        else:
-            # Direct connection: Query the local system table directly
-            return f"system.{table_name}"
+            cluster = self.fanout_cluster_name
+            if cluster:
+                return cluster_all_replicas(cluster, table_name)
+        return f"system.{table_name}"
 
     def ping_clickhouse(self):
         return self._client.ping()
