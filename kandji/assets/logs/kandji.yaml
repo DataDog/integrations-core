@@ -91,8 +91,13 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Command UID
-    path: ocsf.command_uid
+    name: Compliance Control
+    path: ocsf.compliance.control
+    source: log
+  - groups:
+      - OCSF
+    name: Compliance Standards
+    path: ocsf.compliance.standards
     source: log
   - groups:
       - OCSF
@@ -1043,6 +1048,224 @@ pipeline:
             extensions: []
             profiles: []
     - type: pipeline
+      name: OCSF sub pipeline for class Compliance Finding [2003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:audit @target_type:device @target_component:(remediation OR first_runs OR first_run_remediation)"
+      processors:
+        - type: string-builder-processor
+          name: Add message
+          enabled: true
+          template: "%{target_component}: %{new_state.parameter_name}"
+          target: ocsf.message
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Add compliance standards
+          enabled: true
+          template: "[Kandji Parameters]"
+          target: compliance_standards_str
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `compliance_standards_str` to `ocsf.compliance.standards`
+          enabled: true
+          source: compliance_standards_str
+          samples:
+            - "[Kandji Parameters]"
+          grok:
+            supportRules: ""
+            matchRules: "StandardsToArray %{data:ocsf.compliance.standards:array(\"[]\",\",\")}"
+        - type: grok-parser
+          name: Parse `occurred_at` to `ocsf.time`
+          enabled: true
+          source: occurred_at
+          samples:
+            - "2025-09-23T09:01:37.420577Z"
+          grok:
+            supportRules: ""
+            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+        - type: schema-processor
+          name: Apply OCSF schema for 2003
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.compliance.standards` to `ocsf.compliance.standards`
+              sources:
+                - ocsf.compliance.standards
+              target: ocsf.compliance.standards
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `id` to `ocsf.metadata.uid`
+              sources:
+                - id
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `id` to `ocsf.finding_info.uid`
+              sources:
+                - id
+              target: ocsf.finding_info.uid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `new_state.parameter_name`, `blueprint_name` to `ocsf.finding_info.title`
+              sources:
+                - new_state.parameter_name
+                - blueprint_name
+              target: ocsf.finding_info.title
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `new_state.parameter_name` to `ocsf.compliance.control`
+              sources:
+                - new_state.parameter_name
+              target: ocsf.compliance.control
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `device_name` to `ocsf.device.hostname`
+              sources:
+                - device_name
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `device_name` to `ocsf.device.name`
+              sources:
+                - device_name
+              target: ocsf.device.name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `new_state.device.id` to `ocsf.device.uid`
+              sources:
+                - new_state.device.id
+              target: ocsf.device.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              type: schema-category-mapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@action:create"
+                  name: Create
+                  id: 1
+                - filter:
+                    query: "@action:update"
+                  name: Update
+                  id: 2
+                - filter:
+                    query: "@action:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - action
+              type: schema-category-mapper
+            - name: ocsf.compliance.status_id
+              categories:
+                - filter:
+                    query: "@new_state.counts.incompatible:[1 TO *] OR @target_component:(remediation OR first_run_remediation)"
+                  name: Fail
+                  id: 3
+                - filter:
+                    query: "*"
+                  name: Pass
+                  id: 1
+              targets:
+                name: ocsf.compliance.status
+                id: ocsf.compliance.status_id
+              type: schema-category-mapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@target_component:(remediation OR first_run_remediation)"
+                  name: Resolved
+                  id: 4
+                - filter:
+                    query: "*"
+                  name: New
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@new_state.counts.incompatible:[1 TO *]"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              type: schema-category-mapper
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Compliance Finding
+            classUid: 2003
+            extensions: []
+            profiles: []
+    - type: pipeline
       name: OCSF sub pipeline for class Detection Finding [2004]
       enabled: true
       ocsf:
@@ -1465,11 +1688,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor_type:device"
-                  name: System
-                  id: 3
-                - filter:
-                    query: "@actor_type:kandji"
+                    query: "@actor_type:(device OR kandji)"
                   name: System
                   id: 3
                 - filter:
@@ -1678,11 +1897,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor_type:device"
-                  name: System
-                  id: 3
-                - filter:
-                    query: "@actor_type:kandji"
+                    query: "@actor_type:(device OR kandji)"
                   name: System
                   id: 3
                 - filter:
@@ -1770,7 +1985,7 @@ pipeline:
             - name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@new_state.status:success"
+                    query: "@new_state.status:success OR -@new_state.status:*"
                   name: Success
                   id: 1
                 - filter:
@@ -1781,10 +1996,6 @@ pipeline:
                     query: "@new_state.status:*"
                   name: Other
                   id: 99
-                - filter:
-                    query: "*"
-                  name: Success
-                  id: 1
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
@@ -1815,146 +2026,6 @@ pipeline:
             version: 1.5.0
             className: Entity Management
             classUid: 3004
-            extensions: []
-            profiles: []
-    - type: pipeline
-      name: OCSF sub pipeline for class Remediation Activity [7001]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "service:audit @target_type:device @target_component:(remediation OR first_runs OR first_run_remediation)"
-      processors:
-        - type: string-builder-processor
-          name: Add message
-          enabled: true
-          template: "%{target_component}: %{new_state.parameter_name}"
-          target: ocsf.message
-          replaceMissing: true
-        - type: grok-parser
-          name: Parse `occurred_at` to `ocsf.time`
-          enabled: true
-          source: occurred_at
-          samples:
-            - "2025-09-23T09:01:37.420577Z"
-          grok:
-            supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
-        - type: schema-processor
-          name: Apply OCSF schema for 7001
-          enabled: true
-          mappers:
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              target: ocsf.metadata.product.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              target: ocsf.metadata.product.vendor_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.message` to `ocsf.message`
-              sources:
-                - ocsf.message
-              target: ocsf.message
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.time` to `ocsf.time`
-              sources:
-                - ocsf.time
-              target: ocsf.time
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: integer
-            - type: schema-remapper
-              name: Map `id` to `ocsf.metadata.uid`
-              sources:
-                - id
-              target: ocsf.metadata.uid
-              preserveSource: true
-              overrideOnConflict: false
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `id` to `ocsf.command_uid`
-              sources:
-                - id
-              target: ocsf.command_uid
-              preserveSource: true
-              overrideOnConflict: false
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `device_name` to `ocsf.device.hostname`
-              sources:
-                - device_name
-              target: ocsf.device.hostname
-              preserveSource: true
-              overrideOnConflict: false
-            - type: schema-remapper
-              name: Map `device_name` to `ocsf.device.name`
-              sources:
-                - device_name
-              target: ocsf.device.name
-              preserveSource: true
-              overrideOnConflict: false
-            - type: schema-remapper
-              name: Map `new_state.device.id` to `ocsf.device.uid`
-              sources:
-                - new_state.device.id
-              target: ocsf.device.uid
-              preserveSource: true
-              overrideOnConflict: false
-            - name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-              type: schema-category-mapper
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Harden
-                  id: 4
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              type: schema-category-mapper
-            - name: ocsf.status_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Success
-                  id: 1
-              targets:
-                name: ocsf.status
-                id: ocsf.status_id
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Informational
-                  id: 1
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              type: schema-category-mapper
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Remediation Activity
-            classUid: 7001
             extensions: []
             profiles: []
     - type: pipeline
@@ -2008,6 +2079,27 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
               targetFormat: string
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@action:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - action
+              type: schema-category-mapper
             - name: ocsf.severity_id
               categories:
                 - filter:

@@ -854,3 +854,344 @@ tests:
     tags:
       - "source:LOGS_SOURCE"
     timestamp: 1758740254914
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-24T10:15:02.113045Z",
+      "target_component" : "remediation",
+      "actor_type" : "device",
+      "target_type" : "device",
+      "action" : "update",
+      "device_name" : "IT's MacBook Air",
+      "event_type" : "update.device.remediation",
+      "event_category" : "endpoint_management",
+      "metadata" : {
+        "run_details" : [ "Checking for the ability of admins to unlock a user's active session...", "Checking authorizationdb...", "authorizationdb was admin unlock enabled. Updated config.", "Done." ]
+      },
+      "new_state" : {
+        "run_time" : "2025-09-24T10:15:01.880000Z",
+        "parameter_name" : "Disable the ability to login to another user's active and locked session",
+        "device" : {
+          "name" : "IT's MacBook Air",
+          "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+        }
+      },
+      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+      "id" : "01K5W2Q8ZR4M7T1N3D6XVB0PKC",
+      "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+    }
+   service: "audit"
+   result:
+     custom:
+       action: "update"
+       actor_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       actor_type: "device"
+       compliance_standards_str: "[Kandji Parameters]"
+       device_name: "IT's MacBook Air"
+       event_category: "endpoint_management"
+       event_type: "update.device.remediation"
+       id: "01K5W2Q8ZR4M7T1N3D6XVB0PKC"
+       metadata:
+         run_details:
+           - "Checking for the ability of admins to unlock a user's active session..."
+           - "Checking authorizationdb..."
+           - "authorizationdb was admin unlock enabled. Updated config."
+           - "Done."
+       new_state:
+         device:
+           id: "3a867771-949f-4065-9bc2-e79634af48b1"
+           name: "IT's MacBook Air"
+         parameter_name: "Disable the ability to login to another user's active and locked session"
+         run_time: "2025-09-24T10:15:01.880000Z"
+       occurred_at: "2025-09-24T10:15:02.113045Z"
+       ocsf:
+         activity_id: 2
+         activity_name: "Update"
+         category_name: "Findings"
+         category_uid: 2
+         class_name: "Compliance Finding"
+         class_uid: 2003
+         compliance:
+           control: "Disable the ability to login to another user's active and locked session"
+           standards:
+             - "Kandji Parameters"
+           status: "Fail"
+           status_id: 3
+         device:
+           hostname: "IT's MacBook Air"
+           name: "IT's MacBook Air"
+           type: "Unknown"
+           type_id: 0
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1"
+         finding_info:
+           title: "Disable the ability to login to another user's active and locked session"
+           uid: "01K5W2Q8ZR4M7T1N3D6XVB0PKC"
+         message: "remediation: Disable the ability to login to another user's active and locked session"
+         metadata:
+           product:
+             name: "Kandji"
+             vendor_name: "Kandji"
+           uid: "01K5W2Q8ZR4M7T1N3D6XVB0PKC"
+           version: "1.5.0"
+         severity: "Informational"
+         severity_id: 1
+         status: "Resolved"
+         status_id: 4
+         time: 1758708902113
+       target_component: "remediation"
+       target_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       target_type: "device"
+     message: |-
+       {
+         "occurred_at" : "2025-09-24T10:15:02.113045Z",
+         "target_component" : "remediation",
+         "actor_type" : "device",
+         "target_type" : "device",
+         "action" : "update",
+         "device_name" : "IT's MacBook Air",
+         "event_type" : "update.device.remediation",
+         "event_category" : "endpoint_management",
+         "metadata" : {
+           "run_details" : [ "Checking for the ability of admins to unlock a user's active session...", "Checking authorizationdb...", "authorizationdb was admin unlock enabled. Updated config.", "Done." ]
+         },
+         "new_state" : {
+           "run_time" : "2025-09-24T10:15:01.880000Z",
+           "parameter_name" : "Disable the ability to login to another user's active and locked session",
+           "device" : {
+             "name" : "IT's MacBook Air",
+             "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+           }
+         },
+         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+         "id" : "01K5W2Q8ZR4M7T1N3D6XVB0PKC",
+         "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+       }
+     service: "audit"
+     tags:
+       - "source:LOGS_SOURCE"
+     timestamp: 1758708902113
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-24T09:02:44.512300Z",
+      "target_component" : "first_runs",
+      "actor_type" : "device",
+      "target_type" : "device",
+      "action" : "create",
+      "device_name" : "IT's MacBook Air",
+      "blueprint_name" : "DDS-Test",
+      "event_type" : "create.device.first_runs",
+      "event_category" : "endpoint_management",
+      "metadata" : {
+        "has_enabled_params" : true
+      },
+      "new_state" : {
+        "blueprint" : {
+          "name" : "DDS-Test",
+          "id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a"
+        },
+        "parameter_names" : {
+          "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ],
+          "incompatible" : [ "Enable System Integrity Protection (SIP)" ]
+        },
+        "counts" : {
+          "alerts" : 0,
+          "remediated" : 0,
+          "incompatible" : 1,
+          "passed" : 4,
+          "muted" : 0
+        },
+        "task_datetime" : "2025-09-24T09:02:40.000000Z",
+        "device" : {
+          "name" : "IT's MacBook Air",
+          "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+        }
+      },
+      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+      "id" : "01K5W0J5MB8E2Q9F4A7HTY3RNZ",
+      "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+    }
+   service: "audit"
+   result:
+     custom:
+       action: "create"
+       actor_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       actor_type: "device"
+       blueprint_name: "DDS-Test"
+       compliance_standards_str: "[Kandji Parameters]"
+       device_name: "IT's MacBook Air"
+       event_category: "endpoint_management"
+       event_type: "create.device.first_runs"
+       id: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
+       metadata:
+         has_enabled_params: true
+       new_state:
+         blueprint:
+           id: "41b6cc51-7905-436a-9e33-b1468ceeb08a"
+           name: "DDS-Test"
+         counts:
+           alerts: 0
+           incompatible: 1
+           muted: 0
+           passed: 4
+           remediated: 0
+         device:
+           id: "3a867771-949f-4065-9bc2-e79634af48b1"
+           name: "IT's MacBook Air"
+         parameter_names:
+           incompatible:
+             - "Enable System Integrity Protection (SIP)"
+           passed:
+             - "Disable File Sharing"
+             - "Disable Bluetooth Sharing"
+             - "Application Blocking"
+             - 'Disable the "root" user'
+         task_datetime: "2025-09-24T09:02:40.000000Z"
+       occurred_at: "2025-09-24T09:02:44.512300Z"
+       ocsf:
+         activity_id: 1
+         activity_name: "Create"
+         category_name: "Findings"
+         category_uid: 2
+         class_name: "Compliance Finding"
+         class_uid: 2003
+         compliance:
+           standards:
+             - "Kandji Parameters"
+           status: "Fail"
+           status_id: 3
+         device:
+           hostname: "IT's MacBook Air"
+           name: "IT's MacBook Air"
+           type: "Unknown"
+           type_id: 0
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1"
+         finding_info:
+           title: "DDS-Test"
+           uid: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
+         message: "first_runs: "
+         metadata:
+           product:
+             name: "Kandji"
+             vendor_name: "Kandji"
+           uid: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
+           version: "1.5.0"
+         severity: "Low"
+         severity_id: 2
+         status: "New"
+         status_id: 1
+         time: 1758704564512
+       target_component: "first_runs"
+       target_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       target_type: "device"
+     message: |-
+       {
+         "occurred_at" : "2025-09-24T09:02:44.512300Z",
+         "target_component" : "first_runs",
+         "actor_type" : "device",
+         "target_type" : "device",
+         "action" : "create",
+         "device_name" : "IT's MacBook Air",
+         "blueprint_name" : "DDS-Test",
+         "event_type" : "create.device.first_runs",
+         "event_category" : "endpoint_management",
+         "metadata" : {
+           "has_enabled_params" : true
+         },
+         "new_state" : {
+           "blueprint" : {
+             "name" : "DDS-Test",
+             "id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a"
+           },
+           "parameter_names" : {
+             "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ],
+             "incompatible" : [ "Enable System Integrity Protection (SIP)" ]
+           },
+           "counts" : {
+             "alerts" : 0,
+             "remediated" : 0,
+             "incompatible" : 1,
+             "passed" : 4,
+             "muted" : 0
+           },
+           "task_datetime" : "2025-09-24T09:02:40.000000Z",
+           "device" : {
+             "name" : "IT's MacBook Air",
+             "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+           }
+         },
+         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+         "id" : "01K5W0J5MB8E2Q9F4A7HTY3RNZ",
+         "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+       }
+     service: "audit"
+     tags:
+       - "source:LOGS_SOURCE"
+     timestamp: 1758704564512
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-24T11:44:19.002001Z",
+      "target_component" : "settings",
+      "actor_type" : "user",
+      "target_type" : "tenant",
+      "action" : "update",
+      "event_type" : "update.tenant.settings",
+      "event_category" : "endpoint_management",
+      "new_state" : {
+        "name" : "Example Org"
+      },
+      "target_id" : "9d618261-86dd-4a4f-89bc-147f052878fc",
+      "id" : "01K5W4T1XP6C0V8B2S5MJQ7WDE",
+      "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+    }
+   service: "audit"
+   result:
+     custom:
+       action: "update"
+       actor_id: "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+       actor_type: "user"
+       event_category: "endpoint_management"
+       event_type: "update.tenant.settings"
+       id: "01K5W4T1XP6C0V8B2S5MJQ7WDE"
+       new_state:
+         name: "Example Org"
+       occurred_at: "2025-09-24T11:44:19.002001Z"
+       ocsf:
+         activity_id: 99
+         activity_name: "update"
+         category_uid: 0
+         class_name: "Base Event"
+         class_uid: 0
+         metadata:
+           product:
+             name: "Kandji"
+             vendor_name: "Kandji"
+           uid: "01K5W4T1XP6C0V8B2S5MJQ7WDE"
+           version: "1.5.0"
+         severity: "Informational"
+         severity_id: 1
+         time: 1758714259002
+       target_component: "settings"
+       target_id: "9d618261-86dd-4a4f-89bc-147f052878fc"
+       target_type: "tenant"
+     message: |-
+       {
+         "occurred_at" : "2025-09-24T11:44:19.002001Z",
+         "target_component" : "settings",
+         "actor_type" : "user",
+         "target_type" : "tenant",
+         "action" : "update",
+         "event_type" : "update.tenant.settings",
+         "event_category" : "endpoint_management",
+         "new_state" : {
+           "name" : "Example Org"
+         },
+         "target_id" : "9d618261-86dd-4a4f-89bc-147f052878fc",
+         "id" : "01K5W4T1XP6C0V8B2S5MJQ7WDE",
+         "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+       }
+     service: "audit"
+     tags:
+      - "source:LOGS_SOURCE"
+     timestamp: 1758714259002
