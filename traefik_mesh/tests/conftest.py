@@ -44,7 +44,20 @@ def setup_traefik_mesh():
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "traefik-mesh", "--timeout=90s"]
     )
-    run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=90s"])
+    # The proxy DaemonSet is what the Agent scrapes, and its pod gets an IP as soon as it is scheduled,
+    # before Traefik listens on port 8080, so wait for the rollout to report the pod as ready.
+    run_command(
+        [
+            "kubectl",
+            "rollout",
+            "status",
+            "daemonset/traefik-mesh-proxy",
+            "--namespace",
+            "traefik-mesh",
+            "--timeout=90s",
+        ],
+        check=True,
+    )
 
     # This only runs once, when the Kind cluster is created, so the resolved pod IP is cached here
     # rather than re-resolved by `dd_environment` on every invocation.
