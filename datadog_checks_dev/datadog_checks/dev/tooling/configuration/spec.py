@@ -236,6 +236,9 @@ def _validate_strategy_input(stanza: dict, name: str, input_def: Any, loader: An
     if input_def.type == 'array[int]':
         if not isinstance(value, list) or not all(isinstance(v, int) and not isinstance(v, bool) for v in value):
             loader.errors.append(f'{location}: Attribute `{name}` must be an array of integers')
+    elif input_def.type == 'array[string]':
+        if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+            loader.errors.append(f'{location}: Attribute `{name}` must be an array of strings')
     elif input_def.type == 'integer':
         if not isinstance(value, int) or isinstance(value, bool):
             loader.errors.append(f'{location}: Attribute `{name}` must be an integer')
