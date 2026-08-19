@@ -51,8 +51,10 @@ def setup_traefik_mesh():
         check=True,
     )
 
-    # This only runs once, when the Kind cluster is created, so the resolved pod IP is cached here
-    # rather than re-resolved by `dd_environment` on every invocation.
+    # `setup_traefik_mesh` only runs while the environment is being set up. Later invocations of the
+    # `dd_environment` fixture (e.g. during `ddev env stop`) run in a fresh process, and by then the
+    # cluster may already be gone, so the pod IP is cached here via `save_state`/`get_state` rather
+    # than looked up live.
     save_state(PROXY_IP_STATE, get_traefik_mesh_proxy_pod_ip())
 
 
