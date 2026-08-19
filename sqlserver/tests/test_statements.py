@@ -1236,6 +1236,40 @@ def test_normalize_queries_procedure_name_fallback(
         assert not result_row.get('procedure_text')
 
 
+@pytest.mark.unit
+def test_normalize_queries_recovers_leading_comment_for_non_proc_statement(instance_docker, datadog_agent):
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    comment = "/*dddbs='orders-service',dde='prod'*/"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
+    row = {
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
+        'procedure_name': None,
+        'schema_name': None,
+        'sproc_object_id': None,
+        'query_hash': b'\x01\x02\x03\x04',
+        'query_plan_hash': b'\x05\x06\x07\x08',
+        'plan_handle': b'\x09\x0a\x0b\x0c',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result = check.statement_metrics._normalize_queries([row])
+
+    assert result[0]['dd_comments'] == [comment]
+    assert result[0]['text'] == statement_text
+    assert not result[0]['is_proc']
+    assert 'procedure_signature' not in result[0]
+    assert 'procedure_text' not in result[0]
+
+
 @pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

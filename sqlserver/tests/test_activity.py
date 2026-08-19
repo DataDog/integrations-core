@@ -1060,14 +1060,13 @@ def test_sanitize_activity_row(dbm_instance, row):
 
 @pytest.mark.unit
 def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(dbm_instance, datadog_agent):
-    # SQL Server's statement_start_offset/statement_end_offset exclude a comment prepended
-    # to a batch (e.g. sqlcommenter-style /*dddbs=...*/ used for DBM<>APM correlation), so
-    # `statement_text` never contains it. Before the fix, comments were only recovered from
-    # the untouched `text` for stored-procedure rows; this asserts recovery for a plain statement.
     comment = "/*dddbs='orders-service',dde='prod'*/"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
     row = {
-        'statement_text': "SELECT * FROM orders WHERE customer_id = @P1",
-        'text': f"{comment} SELECT * FROM orders WHERE customer_id = @P1",
+        # sp_executesql includes the RPC parameter declaration and leading comment in the full
+        # batch text, but SQL Server's statement offsets exclude both from statement_text.
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
         'procedure_name': None,
         'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
         'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
