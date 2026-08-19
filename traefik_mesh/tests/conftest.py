@@ -36,8 +36,6 @@ def setup_traefik_mesh():
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "traefik-mesh", "--timeout=90s"]
     )
-    # The proxy DaemonSet is what the Agent scrapes, and its pod gets an IP as soon as it is scheduled,
-    # before Traefik listens on port 8080, so wait for the rollout to report the pod as ready.
     run_command(
         [
             "kubectl",
@@ -59,9 +57,6 @@ def setup_traefik_mesh():
 
 
 def get_traefik_mesh_proxy_pod_ip() -> str:
-    # There is no Service for the Traefik Mesh proxy, so the pod IP is fetched directly. The proxy is a
-    # DaemonSet, so exactly one pod is expected on the single-node cluster `kind_run` creates when no
-    # `kind_config` is passed. A multi-node cluster would need one instance per proxy pod.
     result = run_command(
         [
             "kubectl",
