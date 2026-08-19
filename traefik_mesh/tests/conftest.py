@@ -65,7 +65,9 @@ def setup_traefik_mesh():
 
 
 def get_traefik_mesh_proxy_pod_ip() -> str:
-    # There is no Service for the Traefik Mesh proxy, so the pod IP is fetched directly.
+    # There is no Service for the Traefik Mesh proxy, so the pod IP is fetched directly. The proxy is a
+    # DaemonSet, so exactly one pod is expected on the single-node cluster `kind_run` creates when no
+    # `kind_config` is passed. A multi-node cluster would need one instance per proxy pod.
     result = run_command(
         [
             "kubectl",
@@ -82,9 +84,18 @@ def get_traefik_mesh_proxy_pod_ip() -> str:
         check=True,
     )
     pods = json.loads(result.stdout)['items']
-    if len(pods) != 1 or not pods[0].get('status', {}).get('podIP'):
-        raise RuntimeError(f'Expected exactly one traefik-mesh-proxy pod with a pod IP, found {len(pods)}')
-    return pods[0]['status']['podIP']
+    if len(pods) != 1:
+        pod_names = [pod['metadata']['name'] for pod in pods]
+        raise RuntimeError(f'Expected exactly one traefik-mesh-proxy pod, found {len(pods)}: {pod_names}')
+
+    pod = pods[0]
+    pod_ip = pod.get('status', {}).get('podIP')
+    if not pod_ip:
+        pod_name = pod['metadata']['name']
+        pod_phase = pod.get('status', {}).get('phase')
+        raise RuntimeError(f'The traefik-mesh-proxy pod {pod_name} has no pod IP (phase: {pod_phase})')
+
+    return pod_ip
 
 
 @pytest.fixture(scope='session')
