@@ -176,6 +176,8 @@ instances:
     ## A list of databases to ignore. No metrics or statement samples will be collected for these databases.
     ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
     ## set collect_default_database to false in addition to adding it to this array.
+    ## This setting does not apply to schema collection or autodiscovery; instead use the specific 
+    ## include/exclude settings nested under those configurations.
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
