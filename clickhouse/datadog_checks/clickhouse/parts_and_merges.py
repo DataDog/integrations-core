@@ -282,6 +282,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         return list(self._tags_no_db) if self._tags_no_db else []
 
     def _execute_query(self, query: str) -> list:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         if self._db_client is None:
             self._db_client = self._check.create_dbm_client()
         try:

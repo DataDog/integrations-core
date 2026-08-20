@@ -95,6 +95,8 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             self._db_client = None
 
     def _execute_query(self, query: str) -> list:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         if self._db_client is None:
             self._db_client = self._check.create_dbm_client()
             self._db_client.set_client_setting('max_execution_time', self._collection_interval)

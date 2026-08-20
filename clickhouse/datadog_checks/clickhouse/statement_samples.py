@@ -223,6 +223,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         all nodes in the cluster.
         For self-hosted: Queries only the local node's system.processes.
         """
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
         start_time = time.time()
 
         try:
@@ -383,6 +386,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         For ClickHouse Cloud: Uses clusterAllReplicas to aggregate across all nodes.
         For self-hosted: Aggregates only the local node's connections.
         """
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
         try:
             start_time = time.time()
 
@@ -534,6 +540,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             asynchronous_inserts_table=buffer_table,
             max_samples_per_collection=self._buffer_max_samples_per_collection,
         )
+
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
         try:
             if self._db_client is None:
                 self._db_client = self._check.create_dbm_client()

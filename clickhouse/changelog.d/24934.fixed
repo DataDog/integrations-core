@@ -1,1 +1,2 @@
 Manage the DBM async jobs through the ``DatabaseCheck`` registry.
+Stop the query samples, table metrics, and parts and merges jobs from starting another query once cancelled, so the Agent no longer waits out a client read timeout per remaining query when unscheduling the check.

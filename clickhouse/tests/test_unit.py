@@ -733,6 +733,35 @@ def test_cancel_shuts_down_registered_jobs(instance):
     assert check.query_errors._db_client is None
 
 
+CANCEL_POLLED_QUERY_METHODS = [
+    ('statement_samples', '_get_active_queries', ()),
+    ('statement_samples', '_get_active_connections', ()),
+    ('statement_samples', '_query_buffer_snapshot', ()),
+    ('table_metrics', '_execute_query', ('SELECT 1',)),
+    ('parts_and_merges', '_execute_query', ('SELECT 1',)),
+]
+
+
+@pytest.mark.parametrize('job_attr, method_name, args', CANCEL_POLLED_QUERY_METHODS)
+def test_query_methods_abort_once_cancelled(instance, job_attr, method_name, args):
+    """A cancel that lands mid-tick must not start another query.
+
+    Without the check, a job already inside run_job issues its remaining queries and
+    each one blocks until the client read_timeout elapses, stalling the Agent's
+    unschedule for as many timeouts as the tick has queries left.
+    """
+    instance = {**instance, 'dbm': True, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.create_dbm_client = mock.MagicMock()
+    job = getattr(check, job_attr)
+    job.cancel()
+
+    with pytest.raises(Exception, match='cancelled'):
+        getattr(job, method_name)(*args)
+
+    check.create_dbm_client.assert_not_called()
+
+
 def test_check_gc_after_cancel(instance):
     """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
 
