@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Renders a ``DispatcherProgress`` snapshot into the body of the single Dispatcher PR comment.
 
-Pure functions, branching only on ``ExecutionState``, ``Status`` and ``ProgressError``, so the comment
-is a projection of the aggregate rather than a second source of truth.
+Branches only on ``ExecutionState``, ``Status`` and ``ProgressError``, so the comment is a projection
+of the aggregate rather than a second source of truth. The one exception is the footer, which reads
+the run's own commit and URL from the environment.
 
 Laid out like the Datadog CI Visibility comment. Badge images are deliberately absent — those are SVGs
 on a host we do not publish to — so emoji carry the state.
@@ -18,6 +19,7 @@ from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
+from ddev.utils.github_actions import get_commit_sha, get_workflow_run_url
 from ddev.utils.github_async import COMMENT_BODY_LIMIT
 
 if TYPE_CHECKING:
@@ -423,14 +425,21 @@ def _list_section(heading: str, entries: list[str], budget: int, noun: str) -> s
 
 
 def _footer(progress: DispatcherProgress) -> str:
-    """The last word on whether this is final. A failed run still reads ✅ here: it means "finished"."""
+    """Whether this is the last word, and where the run that produced it lives.
+
+    No status emoji on a finished run: the outcome is the heading's job, and a ✅ here read as "all
+    good" on a run that had failed. What a reader cannot get anywhere else in the comment is which
+    commit was tested and where Dispatcher itself ran, so that is what this says.
+    """
     if not progress.done:
         return f"<sub>\n⏳ {FOOTER_RUNNING_NOTE}\n</sub>"
-    if _unavailable_count(progress) and not _has_failure(progress):
-        note = "⚠️ Final result — Dispatcher has finished with unavailable results."
-    else:
-        note = "✅ Final result — Dispatcher has finished."
-    return f"<sub>\n{note}\n</sub>"
+
+    note = "Dispatcher finished"
+    if sha := get_commit_sha():
+        note += f" on <code>{html.escape(sha)}</code>"
+    if run_url := get_workflow_run_url():
+        note += f" — <a href=\"{html.escape(run_url, quote=True)}\">GitHub Run</a>"
+    return f"<sub>\n{note}.\n</sub>"
 
 
 def _jobs(progress: DispatcherProgress) -> Iterator[JobProgress]:

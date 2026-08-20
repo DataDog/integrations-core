@@ -84,6 +84,14 @@ def get_workflow_run_url() -> str | None:
     return None
 
 
+def get_commit_sha(*, short: bool = True) -> str | None:
+    """The commit this run is testing, or None outside GitHub Actions."""
+    sha = os.environ.get("GITHUB_SHA")
+    if not sha:
+        return None
+    return sha[:7] if short else sha
+
+
 def write_step_summary(content: str) -> None:
     """Append *content* to the run's job summary, the Markdown panel shown on the run page.
 

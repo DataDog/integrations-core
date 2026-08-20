@@ -137,7 +137,7 @@ def test_final_snapshot_reads_as_complete_with_failures():
     assert "✅ 1 passed · ❌ 1 failed" in body
     assert "2 failed tests" in body
     assert "<code>tests.test_check::test_connection</code>" in body
-    assert "Final result" in body
+    assert "Dispatcher finished" in body
     # Pending is only shown when something is actually outstanding.
     assert "pending" not in body
 
@@ -173,7 +173,7 @@ def test_a_job_missing_its_artifacts_is_not_reported_as_a_pass():
 
 
 def test_incomplete_signals_agree_with_each_other():
-    """The heading, alert and footer must tell the same story, as they do for an unfinished run."""
+    """The heading, alert and section must tell the same story, and none of them claim a pass."""
     progress = DispatcherProgress(
         batches=(batch_progress("batch-01", job_progress(attempt(error=ProgressError.NO_ARTIFACTS))),), done=True
     )
@@ -182,9 +182,9 @@ def test_incomplete_signals_agree_with_each_other():
 
     assert "results incomplete" in body
     assert "[!WARNING]" in body
-    assert "unavailable results" in body.rsplit("<sub>", 1)[1]
+    assert "⚠️ Unavailable results" in body
     # Still a final answer, so the footer says so rather than reading as still running.
-    assert "Final result" in body
+    assert "Dispatcher finished" in body
     assert "updates automatically" not in body
 
 
@@ -266,7 +266,7 @@ def test_progress_signals_agree_with_each_other(done: bool):
     assert ("[!NOTE]" in body) is not done
     assert ("pending" in body) is not done
     assert ("updates automatically" in body) is not done
-    assert ("Final result" in body) is done
+    assert ("Dispatcher finished" in body) is done
     # A full bar next to "in progress" is the contradiction that would mislead most.
     assert ("░" in _progress_bar_of(body)) is not done
 
@@ -574,6 +574,38 @@ def test_no_internal_metadata_leaks_into_the_comment():
         assert re.search("revision", body, re.IGNORECASE) is None
 
 
+def test_the_footer_of_a_finished_run_points_at_the_dispatcher_run(monkeypatch):
+    """The one thing the rest of the comment cannot tell you: which commit, and where it ran.
+
+    No status emoji either: a ✅ here read as "all good" on a run whose heading said it had failed.
+    """
+    monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "DataDog/integrations-core")
+    monkeypatch.setenv("GITHUB_RUN_ID", "12345")
+    monkeypatch.setenv("GITHUB_SHA", "abcdef1234567890")
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(attempt(Status.FAILURE)), status=Status.FAILURE),), done=True
+    )
+
+    footer = render_comment(progress).rsplit("<sub>", 1)[1]
+
+    assert "<code>abcdef1</code>" in footer
+    assert '<a href="https://github.com/DataDog/integrations-core/actions/runs/12345">GitHub Run</a>' in footer
+    assert "✅" not in footer
+
+
+def test_the_footer_says_what_it_can_outside_github_actions(monkeypatch):
+    """Nothing to link to locally, so it states the outcome without inventing a URL."""
+    for name in ("GITHUB_SERVER_URL", "GITHUB_REPOSITORY", "GITHUB_RUN_ID", "GITHUB_SHA"):
+        monkeypatch.delenv(name, raising=False)
+    progress = DispatcherProgress(batches=(batch_progress("batch-01", job_progress(attempt())),), done=True)
+
+    footer = render_comment(progress).rsplit("<sub>", 1)[1]
+
+    assert "Dispatcher finished." in footer
+    assert "GitHub Run" not in footer
+
+
 def test_summary_line_reports_state_and_counts():
     progress = DispatcherProgress(
         batches=(batch_progress("batch-01", job_progress(attempt()), job_progress()),), done=False
@@ -647,7 +679,7 @@ def test_a_minimal_report_survives_the_run_summary():
     summary = render_run_summary(render_minimal_comment(progress), pr_comment_failed=True)
 
     assert COMMENT_MARKER not in summary
-    assert "Final result" in summary
+    assert "Dispatcher finished" in summary
 
 
 def test_a_body_without_the_marker_is_passed_through_unharmed():
