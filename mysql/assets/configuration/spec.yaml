@@ -97,10 +97,11 @@ files:
                 fleet_configurable: true
                 description: |
                   How often (in seconds) the job wakes up to check which queries are
-                  due. Individual queries have their own interval_seconds. This value
-                  must be less than or equal to the smallest interval_seconds across
-                  all configured queries (i.e. the least common denominator), otherwise
-                  queries with short intervals will be delayed.
+                  due. Individual queries define when they are due using either
+                  interval_seconds or a cron schedule. Set this value no greater than
+                  the shortest query interval or the shortest gap between scheduled
+                  executions. Longer collection intervals delay queries and can skip
+                  earlier cron ticks when several become due between collection cycles.
                 value:
                   type: number
                   example: 10
