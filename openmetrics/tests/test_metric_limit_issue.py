@@ -51,3 +51,12 @@ def test_openmetrics_base_classes_report_metric_limit_issue(
     assert issue['extra']['observed_contexts'] == 20
     assert issue['extra']['dropped_contexts'] == 15
     assert filter_option in issue['remediation']['steps'][0]['text']
+
+    verify_step = issue['remediation']['steps'][2]['text']
+    # The Fleet UI renders remediation text as plain text, so the config key must
+    # be described as nested (not as a dotted single-line key, which the check does
+    # not parse) and both emitted metric names must be spelled out in full.
+    assert 'debug_metrics.metric_contexts: true' not in verify_step
+    assert 'metric_contexts to true under the debug_metrics section' in verify_step
+    assert 'datadog.agent.metrics.contexts.total' in verify_step
+    assert 'datadog.agent.metrics.contexts.limit' in verify_step

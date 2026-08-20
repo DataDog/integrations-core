@@ -103,9 +103,10 @@ def _remediation(*, metric_filter_config: str) -> dict[str, str | list[dict[str,
             {
                 'order': 3,
                 'text': (
-                    'Verify: enable debug_metrics.metric_contexts: true on the instance to publish '
-                    'datadog.agent.metrics.contexts.total and .limit, and confirm the total stays below the limit '
-                    'at peak. Consider a monitor at 80% of the limit.'
+                    'Verify: on the instance, set metric_contexts to true under the debug_metrics section. '
+                    'This publishes datadog.agent.metrics.contexts.total and '
+                    'datadog.agent.metrics.contexts.limit; confirm the total stays below the limit at peak. '
+                    'Consider a monitor at 80% of the limit.'
                 ),
             },
             {
