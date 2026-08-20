@@ -252,7 +252,7 @@ tests:
           name: SpyDok
         category_name: Findings
         finding_info:
-          uid: 4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB
+          uid: 3a867771-949f-4065-9bc2-e79634af48b9.16777220.558457
           title: SpyDok detected in AppStore
           desc: SpyDok is spyware designed to stealthily collect sensitive information such as login credentials, browsing history, and other personal data. It operates by monitoring user activity, exfiltrating stolen data to remote servers controlled by attackers, and maintaining persistence to evade detection.
         status_id: 1

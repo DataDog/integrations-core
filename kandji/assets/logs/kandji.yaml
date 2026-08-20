@@ -1499,10 +1499,16 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
               targetFormat: string
+            # `target_id` is `<host uuid>.<device>.<inode>`, so it identifies this
+            # file instance on this host and is unique per finding. Deliberately
+            # not `metadata.threat_id`: that value is the file's SHA256 (identical
+            # to new_state.file.hash.sha256), so it is shared by every device the
+            # same malware is found on. The hash stays on ocsf.malware.uid, which
+            # is where an identifier for the malware itself belongs.
             - type: schema-remapper
-              name: Map `metadata.threat_id` to `ocsf.finding_info.uid`
+              name: Map `target_id` to `ocsf.finding_info.uid`
               sources:
-                - metadata.threat_id
+                - target_id
               target: ocsf.finding_info.uid
               preserveSource: true
               overrideOnConflict: false
