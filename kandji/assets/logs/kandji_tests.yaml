@@ -253,6 +253,8 @@ tests:
             uid: 4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB
             name: SpyDok
             provider: Kandji
+            classifications:
+              - Spyware
         category_name: Findings
         finding_info:
           uid: 3a867771-949f-4065-9bc2-e79634af48b9.16777220.558457

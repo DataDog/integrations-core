@@ -806,21 +806,21 @@ pipeline:
             - name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@new_state.vulnerability.severity:Critical"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@new_state.vulnerability.severity:High"
-                  name: High
-                  id: 4
+                    query: "@new_state.vulnerability.severity:Low"
+                  name: Low
+                  id: 2
                 - filter:
                     query: "@new_state.vulnerability.severity:Medium"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@new_state.vulnerability.severity:Low"
-                  name: Low
-                  id: 2
+                    query: "@new_state.vulnerability.severity:High"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@new_state.vulnerability.severity:Critical"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "@new_state.vulnerability.severity:*"
                   name: Other
@@ -1223,21 +1223,21 @@ pipeline:
             - name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@cvss_severity:Critical OR @severity:Critical"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@cvss_severity:High OR @severity:High"
-                  name: High
-                  id: 4
+                    query: "@cvss_severity:Low OR @severity:Low"
+                  name: Low
+                  id: 2
                 - filter:
                     query: "@cvss_severity:Medium OR @severity:Medium"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@cvss_severity:Low OR @severity:Low"
-                  name: Low
-                  id: 2
+                    query: "@cvss_severity:High OR @severity:High"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@cvss_severity:Critical OR @severity:Critical"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "@cvss_severity:* OR @severity:*"
                   name: Other
@@ -1639,6 +1639,55 @@ pipeline:
           operation:
             source: malware_classification_id_num
             target: malware_stage.classification_ids
+            preserveSource: false
+            type: append
+        # `classifications` is the caption array paired with classification_ids:
+        # OCSF defines it as "the list of malware classifications, normalized to
+        # the captions of the classification_id values. In the case of 'Other',
+        # they are defined by the event source." So the vendor's own family name
+        # is written first and the category-processor overwrites it with the
+        # canonical caption when a classification is recognized -- leaving an
+        # unrecognized family to survive as the source-defined value rather than
+        # a literal "Other".
+        #
+        # The branches below MUST stay in the same order as the
+        # classification_ids processor above. These are overlapping keyword
+        # filters, so a description mentioning both "spyware" and "trojan" takes
+        # whichever branch comes first; divergent ordering would pair id 17 with
+        # the caption "Trojan".
+        - type: attribute-remapper
+          name: Map `metadata.threat_family_name` to `malware_classification_str`
+          enabled: true
+          sources:
+            - metadata.threat_family_name
+          sourceType: attribute
+          target: malware_classification_str
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: Add malware classification
+          enabled: true
+          target: malware_classification_str
+          categories:
+            - filter:
+                query: "@metadata.threat_family_name:*spy* OR @metadata.threat_description:*spyware*"
+              name: Spyware
+            - filter:
+                query: "@metadata.threat_family_name:*trojan* OR @metadata.threat_description:*trojan*"
+              name: Trojan
+            - filter:
+                query: "@metadata.threat_family_name:*ransom* OR @metadata.threat_description:*ransomware*"
+              name: Ransomware
+            - filter:
+                query: "@metadata.threat_family_name:*adware* OR @metadata.threat_description:*adware*"
+              name: Adware
+        - type: array-processor
+          name: Move malware classification into classifications array
+          enabled: true
+          operation:
+            source: malware_classification_str
+            target: malware_stage.classifications
             preserveSource: false
             type: append
         # The detected file is evidence of the detection, not an affected
