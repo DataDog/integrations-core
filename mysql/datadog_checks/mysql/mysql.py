@@ -168,6 +168,12 @@ class MySql(DatabaseCheck):
 
         self._submit_initialization_health_event()
 
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime."""
+        self._query_manager = None
+        self._runtime_queries_cached = None
+        self.health = None
+
     def _register_async_jobs(self):
         """Build and register the async jobs enabled by this check's configuration."""
         # Every job requires DBM, and each job's own enabled flag defaults to true, so DBM is

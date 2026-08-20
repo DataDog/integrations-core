@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gc
+import inspect
 import json
 import subprocess
 import time
+import weakref
 
 import mock
 import psutil
@@ -965,28 +968,30 @@ class TestSupportsExplainJsonFormatVersion:
         assert supports_explain_json_format_version(None) is False
 
 
-def test_async_job_registry_holds_every_job():
-    """Every job is registered under its job name, and the attribute holds it."""
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+@pytest.mark.parametrize(
+    'dbm, expected_jobs',
+    [
+        (False, []),
+        (True, ['statement-metrics', 'statement-samples', 'database-metadata', 'query-activity']),
+    ],
+)
+def test_async_job_registry_matches_config(dbm, expected_jobs):
+    """Only the jobs enabled by the instance config are built and registered.
+
+    Every job requires DBM, and each job's own enabled flag defaults to true, so without the
+    DBM gate a non-DBM instance would start collecting.
+    """
+    instance = {'server': 'localhost', 'user': 'datadog', 'dbm': dbm}
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
 
     registered = check._async_job_registry
-    assert sorted(registered) == ['database-metadata', 'query-activity', 'statement-metrics', 'statement-samples']
-    assert check._statement_metrics is registered['statement-metrics']
-    assert check._statement_samples is registered['statement-samples']
-    assert check._query_activity is registered['query-activity']
-    assert check._mysql_metadata is registered['database-metadata']
-
-
-def test_async_job_registry_empty_without_dbm():
-    """Every job requires DBM, and each has its own enabled flag defaulting to true, so the
-    check must gate on DBM or a non-DBM instance would start collecting."""
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-
-    assert check._async_job_registry == {}
-    assert check._statement_metrics is None
-    assert check._statement_samples is None
-    assert check._query_activity is None
-    assert check._mysql_metadata is None
+    assert list(registered) == expected_jobs
+    # Each attribute holds the registered job, or None when the config does not enable it.
+    assert check._statement_metrics is registered.get('statement-metrics')
+    assert check._statement_samples is registered.get('statement-samples')
+    assert check._mysql_metadata is registered.get('database-metadata')
+    assert check._query_activity is registered.get('query-activity')
 
 
 def test_cancel_signals_every_registered_job():
@@ -997,3 +1002,48 @@ def test_cancel_signals_every_registered_job():
     check.cancel()
 
     assert jobs and all(job._cancel_event.is_set() for job in jobs)
+
+
+def test_check_gc_after_cancel():
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': True,
+        'query_samples': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'query_metrics': {'enabled': True, 'run_sync': True, 'collection_interval': 10},
+        'query_activity': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'collect_settings': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+    }
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()
