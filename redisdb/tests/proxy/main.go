@@ -72,6 +72,10 @@ func main() {
 // handle proxies a single client connection to a dedicated backend connection.
 // Keeping one backend connection per client preserves per-connection state such
 // as AUTH and the negotiated RESP protocol version.
+//
+// It assumes a strict one-reply-per-request exchange, which holds for both
+// scrapers. It does not model out-of-band replies (SUBSCRIBE/MONITOR push
+// frames); neither the redisdb check nor the OTel receiver uses them.
 func handle(client net.Conn, cfg config) {
 	defer client.Close()
 
