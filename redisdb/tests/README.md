@@ -94,11 +94,11 @@ Compose override.
 The proxy source lives in `proxy/`; see `proxy/main.go` for the request loop and
 `proxy/resp.go` for the RESP framing.
 
-### Driving full coverage: the `coverage-gen` task
+### Driving full coverage: the `activity-gen` task
 
 The `seed` service primes the fixture once, but most rate and counter metrics
 report zero on an idle instance, and an assertion that compares 0 to 0 proves
-nothing. The `coverage-gen` task (`coverage-gen.sh`) is an opt-in workload
+nothing. The `activity-gen` task (`activity-gen.sh`) is an opt-in workload
 generator that loops over keyspace hits/misses, command variety, eviction,
 expiry, net bytes, blocked clients, forks/RDB, slowlog, and client-side caching,
 so both scrapers see the full metric surface with non-zero values across scrape
@@ -110,9 +110,9 @@ default. Add it alongside the fixture when you want sustained activity:
 ```
 with:
   - redis-full
-  - coverage-gen
+  - activity-gen
 ```
 
-It reads only `DB_HOST`/`DB_PORT`/`REDIS_PASSWORD` (plus optional `COVERAGE_DB`
-and `COVERAGE_DURATION`), so it has no dependency on any scraper and is reusable
+It reads only `DB_HOST`/`DB_PORT`/`REDIS_PASSWORD` (plus optional `ACTIVITY_DB`
+and `ACTIVITY_DURATION`), so it has no dependency on any scraper and is reusable
 by any consumer of the fixture.
