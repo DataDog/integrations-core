@@ -27,12 +27,17 @@ tests:
       evt:
         category: "am-config"
         name: "AM-CONFIG-CHANGE"
+      info:
+        runAs:
+          uid: "dsameuser"
       ocsf:
         activity_id: 3
         activity_name: "Update"
         actor:
           user:
-            uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+            domain: "ou=user,ou=am-config"
+            uid: "b1f39518-5805-427e-b76e-09851154e05a"
+            uid_alt: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Entity Management"
@@ -71,7 +76,7 @@ tests:
       timestamp: "2026-04-02T20:42:46.22957863Z"
       type: "application/json"
       usr:
-        id: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        id: "b1f39518-5805-427e-b76e-09851154e05a"
     message: |-
       {
         "payload" : {
@@ -144,7 +149,8 @@ tests:
         actor:
           user:
             name: "test.user@example.com"
-            uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+            uid: "b1f39518-5805-427e-b76e-09851154e05a"
+            uid_alt: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Authentication"
@@ -167,8 +173,10 @@ tests:
         status_id: 1
         time: 1775756242330
         user:
+          domain: "ou=user,ou=am-config"
           name: "test.user@example.com"
-          uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+          uid: "b1f39518-5805-427e-b76e-09851154e05a"
+          uid_alt: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
       payload:
         _id: "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13752"
         component: "Authentication"
@@ -958,6 +966,7 @@ tests:
         actor:
           user:
             uid: "idm-provisioning"
+            uid_alt: "idm-provisioning"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Account Change"
@@ -975,6 +984,8 @@ tests:
         status: "Success"
         status_id: 1
         time: 1774979977753
+        user:
+          uid: "f3f82414-3d3c-4821-8667-1c6603fd1113"
       payload:
         _id: "6eb31b32-1075-423a-bf30-4d30f36876d0-5675"
         after:
@@ -1155,6 +1166,7 @@ tests:
         actor:
           user:
             uid: "b1f39518-5805-427e-b76e-09851154e05a"
+            uid_alt: "b1f39518-5805-427e-b76e-09851154e05a"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Account Change"
@@ -1172,6 +1184,8 @@ tests:
         status: "Success"
         status_id: 1
         time: 1775162566312
+        user:
+          uid: "b1f39518-5805-427e-b76e-09851154e05a"
       payload:
         _id: "29e47e58-6b07-4873-83c8-6d289410127d-50746"
         after:
@@ -1424,12 +1438,17 @@ tests:
       evt:
         category: "am-config"
         name: "AM-CONFIG-CHANGE"
+      info:
+        runAs:
+          uid: "dsameuser"
       ocsf:
         activity_id: 99
         activity_name: "UNEXPECTED"
         actor:
           user:
-            uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+            uid: "b1f39518-5805-427e-b76e-09851154e05a"
+            domain: "ou=user,ou=am-config"
+            uid_alt: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Entity Management"
@@ -1468,7 +1487,7 @@ tests:
       timestamp: "2026-04-02T17:33:01.131776505Z"
       type: "application/json"
       usr:
-        id: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        id: "b1f39518-5805-427e-b76e-09851154e05a"
     message: |-
       {
         "payload" : {
@@ -1628,3 +1647,257 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1774982841410
+ -
+   sample: |-
+     {
+       "payload": {
+         "_id": "6eb31b32-1075-423a-bf30-4d30f36876d0-5679",
+         "after": {
+           "_id": "6eb31b32-1075-423a-bf30-4d30f36876d0-5677",
+           "_ref": "managed/alpha_usermeta/44961545-d7d6-47e9-a66c-de35f233363d",
+           "_refProperties": {
+             "_id": "6eb31b32-1075-423a-bf30-4d30f36876d0-5677",
+             "_rev": "6eb31b32-1075-423a-bf30-4d30f36876d0-5678"
+           },
+           "_refResourceCollection": "managed/alpha_usermeta",
+           "_refResourceId": "44961545-d7d6-47e9-a66c-de35f233363d",
+           "_rev": "6eb31b32-1075-423a-bf30-4d30f36876d0-5678"
+         },
+         "before": {},
+         "changedFields": [
+           "/_refResourceId",
+           "/_ref",
+           "/_id",
+           "/_refProperties",
+           "/_refResourceCollection"
+         ],
+         "eventName": "relationship_created",
+         "level": "INFO",
+         "message": "Relationship originating from managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113 via the relationship field _meta and referencing managed/alpha_usermeta/44961545-d7d6-47e9-a66c-de35f233363d  was created.",
+         "objectId": "managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113/_meta/6eb31b32-1075-423a-bf30-4d30f36876d0-5677",
+         "operation": "CREATE",
+         "passwordChanged": false,
+         "revision": "6eb31b32-1075-423a-bf30-4d30f36876d0-5678",
+         "runAs": "idm-provisioning",
+         "source": "audit",
+         "status": "SUCCESS",
+         "timestamp": "2026-03-31T17:59:38.062Z",
+         "topic": "activity",
+         "transactionId": "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4",
+         "userId": "idm-provisioning"
+       },
+       "source": "idm-activity",
+       "timestamp": "2026-03-31T17:59:38.065257195Z",
+       "type": "application/json"
+     }
+   result:
+    custom:
+      evt:
+        category: "idm-activity"
+        name: "relationship_created"
+        outcome: "SUCCESS"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          user:
+            uid: "idm-provisioning"
+            uid_alt: "idm-provisioning"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        metadata:
+          correlation_uid: "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4"
+          event_code: "relationship_created"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "6eb31b32-1075-423a-bf30-4d30f36876d0-5679"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1774979978065
+        user:
+          uid: "f3f82414-3d3c-4821-8667-1c6603fd1113"
+      payload:
+        _id: "6eb31b32-1075-423a-bf30-4d30f36876d0-5679"
+        after:
+          _id: "6eb31b32-1075-423a-bf30-4d30f36876d0-5677"
+          _ref: "managed/alpha_usermeta/44961545-d7d6-47e9-a66c-de35f233363d"
+          _refProperties:
+            _id: "6eb31b32-1075-423a-bf30-4d30f36876d0-5677"
+            _rev: "6eb31b32-1075-423a-bf30-4d30f36876d0-5678"
+          _refResourceCollection: "managed/alpha_usermeta"
+          _refResourceId: "44961545-d7d6-47e9-a66c-de35f233363d"
+          _rev: "6eb31b32-1075-423a-bf30-4d30f36876d0-5678"
+        changedFields:
+         - "/_refResourceId"
+         - "/_ref"
+         - "/_id"
+         - "/_refProperties"
+         - "/_refResourceCollection"
+        eventName: "relationship_created"
+        level: "INFO"
+        message: "Relationship originating from managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113 via the relationship field _meta and referencing managed/alpha_usermeta/44961545-d7d6-47e9-a66c-de35f233363d  was created."
+        objectId: "managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113/_meta/6eb31b32-1075-423a-bf30-4d30f36876d0-5677"
+        operation: "CREATE"
+        passwordChanged: false
+        revision: "6eb31b32-1075-423a-bf30-4d30f36876d0-5678"
+        runAs: "idm-provisioning"
+        source: "audit"
+        status: "SUCCESS"
+        timestamp: "2026-03-31T17:59:38.062Z"
+        topic: "activity"
+        transactionId: "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4"
+        userId: "idm-provisioning"
+      source: "idm-activity"
+      timestamp: "2026-03-31T17:59:38.065257195Z"
+      type: "application/json"
+      usr:
+        id: "idm-provisioning"
+    message: |-
+      {
+        "payload" : {
+          "runAs" : "idm-provisioning",
+          "level" : "INFO",
+          "changedFields" : [ "/_refResourceId", "/_ref", "/_id", "/_refProperties", "/_refResourceCollection" ],
+          "source" : "audit",
+          "message" : "Relationship originating from managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113 via the relationship field _meta and referencing managed/alpha_usermeta/44961545-d7d6-47e9-a66c-de35f233363d  was created.",
+          "userId" : "idm-provisioning",
+          "transactionId" : "30a20fd9-fafa-49b7-ad2c-5ac3f72b01ad-request-1/0/4",
+          "revision" : "6eb31b32-1075-423a-bf30-4d30f36876d0-5678",
+          "passwordChanged" : false,
+          "eventName" : "relationship_created",
+          "topic" : "activity",
+          "_id" : "6eb31b32-1075-423a-bf30-4d30f36876d0-5679",
+          "after" : {
+            "_refResourceId" : "44961545-d7d6-47e9-a66c-de35f233363d",
+            "_ref" : "managed/alpha_usermeta/44961545-d7d6-47e9-a66c-de35f233363d",
+            "_rev" : "6eb31b32-1075-423a-bf30-4d30f36876d0-5678",
+            "_id" : "6eb31b32-1075-423a-bf30-4d30f36876d0-5677",
+            "_refProperties" : {
+              "_rev" : "6eb31b32-1075-423a-bf30-4d30f36876d0-5678",
+              "_id" : "6eb31b32-1075-423a-bf30-4d30f36876d0-5677"
+            },
+            "_refResourceCollection" : "managed/alpha_usermeta"
+          },
+          "operation" : "CREATE",
+          "objectId" : "managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113/_meta/6eb31b32-1075-423a-bf30-4d30f36876d0-5677",
+          "status" : "SUCCESS",
+          "timestamp" : "2026-03-31T17:59:38.062Z"
+        },
+        "source" : "idm-activity",
+        "type" : "application/json",
+        "timestamp" : "2026-03-31T17:59:38.065257195Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774979978065
+ -
+   sample: |-
+      {
+        "payload": {
+          "_id": "7b6d5a19-7d91-48da-b600-5a3590d6442f-5476",
+          "eventName": "AM-CONFIG-CHANGE",
+          "level": "INFO",
+          "objectId": "ou=https://idp-saml.ua3.int/simplesaml/saml2/idp/metadata.php,ou=default,ou=OrganizationConfig,ou=1.0,ou=sunFMSAML2MetadataService,ou=services,o=alpha,ou=services,ou=am-config",
+          "operation": "DELETE",
+          "realm": "/alpha",
+          "runAs": "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+          "source": "audit",
+          "timestamp": "2026-04-02T17:41:01.058Z",
+          "topic": "config",
+          "trackingIds": [
+            "7b6d5a19-7d91-48da-b600-5a3590d6442f-2957"
+          ],
+          "transactionId": "6e61516d-1e1d-4434-950d-f9cb3e90cc3b/0",
+          "userId": "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        },
+        "source": "am-config",
+        "timestamp": "2026-04-02T17:41:01.069413354Z",
+        "type": "application/json"
+      }
+   result:
+    custom:
+      evt:
+        category: "am-config"
+        name: "AM-CONFIG-CHANGE"
+      info:
+        runAs:
+          uid: "b1f39518-5805-427e-b76e-09851154e05a"
+      ocsf:
+        activity_id: 4
+        activity_name: "Delete"
+        actor:
+          user:
+            uid: "b1f39518-5805-427e-b76e-09851154e05a"
+            domain: "ou=user,ou=am-config"
+            uid_alt: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          uid: "ou=https://idp-saml.ua3.int/simplesaml/saml2/idp/metadata.php,ou=default,ou=OrganizationConfig,ou=1.0,ou=sunFMSAML2MetadataService,ou=services,o=alpha,ou=services,ou=am-config"
+        metadata:
+          correlation_uid: "6e61516d-1e1d-4434-950d-f9cb3e90cc3b/0"
+          event_code: "AM-CONFIG-CHANGE"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "7b6d5a19-7d91-48da-b600-5a3590d6442f-5476"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "INFO"
+        status_id: 99
+        time: 1775151661069
+      payload:
+        _id: "7b6d5a19-7d91-48da-b600-5a3590d6442f-5476"
+        eventName: "AM-CONFIG-CHANGE"
+        level: "INFO"
+        objectId: "ou=https://idp-saml.ua3.int/simplesaml/saml2/idp/metadata.php,ou=default,ou=OrganizationConfig,ou=1.0,ou=sunFMSAML2MetadataService,ou=services,o=alpha,ou=services,ou=am-config"
+        operation: "DELETE"
+        realm: "/alpha"
+        runAs: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        source: "audit"
+        timestamp: "2026-04-02T17:41:01.058Z"
+        topic: "config"
+        trackingIds:
+         - "7b6d5a19-7d91-48da-b600-5a3590d6442f-2957"
+        transactionId: "6e61516d-1e1d-4434-950d-f9cb3e90cc3b/0"
+        userId: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+      source: "am-config"
+      timestamp: "2026-04-02T17:41:01.069413354Z"
+      type: "application/json"
+      usr:
+        id: "b1f39518-5805-427e-b76e-09851154e05a"
+    message: |-
+      {
+        "payload" : {
+          "runAs" : "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+          "level" : "INFO",
+          "source" : "audit",
+          "userId" : "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+          "transactionId" : "6e61516d-1e1d-4434-950d-f9cb3e90cc3b/0",
+          "eventName" : "AM-CONFIG-CHANGE",
+          "topic" : "config",
+          "realm" : "/alpha",
+          "_id" : "7b6d5a19-7d91-48da-b600-5a3590d6442f-5476",
+          "trackingIds" : [ "7b6d5a19-7d91-48da-b600-5a3590d6442f-2957" ],
+          "operation" : "DELETE",
+          "objectId" : "ou=https://idp-saml.ua3.int/simplesaml/saml2/idp/metadata.php,ou=default,ou=OrganizationConfig,ou=1.0,ou=sunFMSAML2MetadataService,ou=services,o=alpha,ou=services,ou=am-config",
+          "timestamp" : "2026-04-02T17:41:01.058Z"
+        },
+        "source" : "am-config",
+        "type" : "application/json",
+        "timestamp" : "2026-04-02T17:41:01.069413354Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1775151661069

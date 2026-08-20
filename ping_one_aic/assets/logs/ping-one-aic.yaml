@@ -160,13 +160,13 @@ pipeline:
   filter:
     query: source:ping-one-aic
   processors:
-    - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+    - name: Define `timestamp` as the official date of the log
+      type: date-remapper
       enabled: true
       sources:
         - timestamp
-    - type: attribute-remapper
-      name: Map `payload.eventName` to `evt.name`
+    - name: Map `payload.eventName` to `evt.name`
+      type: attribute-remapper
       enabled: true
       sources:
         - payload.eventName
@@ -175,8 +175,8 @@ pipeline:
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
-    - type: array-processor
-      name: Select `info.nodeOutcome` from `payload.entries` array
+    - name: Select `info.nodeOutcome` from `payload.entries` array
+      type: array-processor
       enabled: true
       operation:
         source: payload.entries
@@ -184,9 +184,9 @@ pipeline:
         filter: "info.nodeOutcome:* "
         valueToExtract: info.nodeOutcome
         type: select
-    - type: attribute-remapper
-      name: Map `payload.result`, `payload.status`, `info.nodeOutcome`, `payload.response.status` to
+    - name: Map `payload.result`, `payload.status`, `info.nodeOutcome`, `payload.response.status` to
         `evt.outcome`
+      type: attribute-remapper
       enabled: true
       sources:
         - payload.result
@@ -199,8 +199,8 @@ pipeline:
       targetFormat: string
       preserveSource: true
       overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `source` to `evt.category`
+    - name: Map `source` to `evt.category`
+      type: attribute-remapper
       enabled: true
       sources:
         - source
@@ -209,8 +209,8 @@ pipeline:
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
-    - type: array-processor
-      name: Select `info.ipAddress` from `payload.entries` array
+    - name: Select `info.ipAddress` from `payload.entries` array
+      type: array-processor
       enabled: true
       operation:
         source: payload.entries
@@ -218,8 +218,8 @@ pipeline:
         filter: "info.ipAddress:* "
         valueToExtract: info.ipAddress
         type: select
-    - type: array-processor
-      name: Select `info.nodeType` from `payload.entries` array
+    - name: Select `info.nodeType` from `payload.entries` array
+      type: array-processor
       enabled: true
       operation:
         source: payload.entries
@@ -227,8 +227,8 @@ pipeline:
         filter: "info.nodeType:* "
         valueToExtract: info.nodeType
         type: select
-    - type: array-processor
-      name: Select `info.treeName` from `payload.entries` array
+    - name: Select `info.treeName` from `payload.entries` array
+      type: array-processor
       enabled: true
       operation:
         source: payload.entries
@@ -236,25 +236,81 @@ pipeline:
         filter: "info.treeName:* "
         valueToExtract: info.treeName
         type: select
-    - type: string-builder-processor
-      name: Add `payload.principal[0]` to `info.principal`
+    - name: Parse `info.runAs.uid` from `payload.runAs` if present
+      type: grok-parser
+      enabled: true
+      source: payload.runAs
+      samples:
+        - idm-provisioning
+        - id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config
+        - id=dsameuser,ou=user,ou=am-config
+      grok:
+        supportRules: ""
+        matchRules: |+
+          dn id=%{regex("[^,]+"):info.runAs.uid},%{data}
+          username %{data:info.runAs.uid}
+
+    - name: Parse `info.objectId.uid` from `payload.objectId` for alpha_user
+        references
+      type: grok-parser
+      enabled: true
+      source: payload.objectId
+      samples:
+        - managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113
+        - managed/alpha_user/f3f82414-3d3c-4821-8667-1c6603fd1113/_meta/6eb31b32-1075-423a-bf30-4d30f36876d0-5677
+      grok:
+        supportRules: ""
+        matchRules: |+
+          truncated_user_ref managed/alpha_user/%{uuid:info.objectId.uid}/%{data}
+          managed_user managed/alpha_user/%{uuid:info.objectId.uid}
+    - name: Parse `info.userId.uid` from `payload.userId`
+      type: grok-parser
+      enabled: true
+      source: payload.userId
+      samples:
+        - id=idm-provisioning,ou=agent,o=alpha,ou=services,ou=am-config
+        - anonymous
+        - id=f3f82414-3d3c-4821-8667-1c6603fd1113,ou=user,o=alpha,ou=services,ou=am-config
+        - b1f39518-5805-427e-b76e-09851154e05a
+      grok:
+        supportRules: ""
+        matchRules: |-
+          dn id=%{regex("[^,]+"):info.userId.uid},%{data}
+          any %{data:info.userId.uid}
+    - name: Parse `info.userId.domain` from `payload.userId`
+      type: grok-parser
+      enabled: true
+      source: payload.userId
+      samples:
+        - id=idm-provisioning,ou=agent,o=alpha,ou=services,ou=am-config
+        - anonymous
+        - id=f3f82414-3d3c-4821-8667-1c6603fd1113,ou=user,o=alpha,ou=services,ou=am-config
+        - b1f39518-5805-427e-b76e-09851154e05a
+      grok:
+        supportRules: ""
+        matchRules: |-
+          domain id=%{regex("[^,]+")},%{data:info.userId.domain}
+    - name: Add `payload.principal[0]` to `info.principal`
+      type: string-builder-processor
       enabled: true
       template: "%{payload.principal}"
       target: info.principal
       replaceMissing: false
-    - type: attribute-remapper
-      name: Map `info.principal`, `payload.userId` to `usr.id`
+    - name: Map `info.principal`, `info.userId.uid`, `info.objectId.uid`, `payload.userId` to `usr.id`
+      type: attribute-remapper
       enabled: true
       sources:
         - info.principal
+        - info.userId.uid
+        - info.objectId.uid
         - payload.userId
       sourceType: attribute
       target: usr.id
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `payload.client.ip`, `info.ipAddress` to `network.client.ip`
+    - name: Map `payload.client.ip`, `info.ipAddress` to `network.client.ip`
+      type: attribute-remapper
       enabled: true
       sources:
         - payload.client.ip
@@ -264,15 +320,15 @@ pipeline:
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
-    - type: geo-ip-parser
-      name: GeoIP Parser
+    - name: GeoIP Parser
+      type: geo-ip-parser
       enabled: true
       sources:
         - network.client.ip
       target: network.client.geoip
       ip_processing_behavior: do-nothing
-    - type: status-remapper
-      name: Define `payload.level` as the status of the log
+    - name: Define `payload.level` as the status of the log
+      type: status-remapper
       enabled: true
       sources:
         - payload.level
@@ -284,20 +340,20 @@ pipeline:
       filter:
         query: "*"
       processors:
-        - type: string-builder-processor
-          name: Add product name
+        - name: Add product name
+          type: string-builder-processor
           enabled: true
           template: PingOne Advanced Identity Cloud
           target: ocsf.metadata.product.name
           replaceMissing: false
-        - type: string-builder-processor
-          name: Add product vendor
+        - name: Add product vendor
+          type: string-builder-processor
           enabled: true
           template: Ping Identity
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
-        - type: grok-parser
-          name: Parse timestamp to `ocsf.time`
+        - name: Parse timestamp to `ocsf.time`
+          type: grok-parser
           enabled: true
           source: timestamp
           samples:
@@ -323,9 +379,9 @@ pipeline:
               parsing_time_7 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
 
               parsing_time_8 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-        - type: attribute-remapper
-          name: Map `info.treeName`, `info.nodeType`, `payload.eventName` to
+        - name: Map `info.treeName`, `info.nodeType`, `payload.eventName` to
             `ocsf.metadata.event_code`
+          type: attribute-remapper
           enabled: true
           sources:
             - info.treeName
@@ -336,9 +392,9 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `payload.result`, `payload.status`, `info.nodeOutcome`, `payload.response.status` to
+        - name: Map `payload.result`, `payload.status`, `info.nodeOutcome`, `payload.response.status` to
             `ocsf.status`
+          type: attribute-remapper
           enabled: true
           sources:
             - payload.result
@@ -358,8 +414,8 @@ pipeline:
       filter:
         query: "@source:idm-activity"
       processors:
-        - type: schema-processor
-          name: Apply OCSF schema for 3001
+        - name: Apply OCSF schema for 3001
+          type: schema-processor
           enabled: true
           schema:
             schemaType: ocsf
@@ -370,6 +426,7 @@ pipeline:
             profiles: []
           mappers:
             - name: Map `payload._id` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - payload._id
               sourceType: attribute
@@ -377,8 +434,8 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
-              type: schema-remapper
             - name: ocsf.status_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.status:(true OR TRUE OR SUCCESS OR SUCCESSFUL)"
@@ -402,8 +459,8 @@ pipeline:
                 sources:
                   ocsf.status:
                     - ocsf.status
-              type: schema-category-mapper
             - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - payload.transactionId
               sourceType: attribute
@@ -411,57 +468,57 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               type: schema-remapper
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               target: ocsf.metadata.product.name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+            - name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.event_code
               target: ocsf.metadata.event_code
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.time` to `ocsf.time`
+            - name: Map `ocsf.time` to `ocsf.time`
+              type: schema-remapper
               sources:
                 - ocsf.time
               target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.status` to `ocsf.status`
+            - name: Map `ocsf.status` to `ocsf.status`
+              type: schema-remapper
               sources:
                 - ocsf.status
               target: ocsf.status
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+            - name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.uid
               target: ocsf.metadata.uid
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+            - name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.correlation_uid
               target: ocsf.metadata.correlation_uid
               preserveSource: true
               overrideOnConflict: true
             - name: ocsf.activity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@payload.operation:CREATE @payload.objectId:managed/alpha_user/*"
@@ -499,8 +556,8 @@ pipeline:
                 sources:
                   ocsf.activity_name:
                     - payload.operation
-              type: schema-category-mapper
             - name: ocsf.severity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.activity_id:*"
@@ -509,16 +566,34 @@ pipeline:
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
-              type: schema-category-mapper
-            - name: Map `payload.userId` to `ocsf.actor.user.uid`
+            - name: Map `info.runAs.uid` to `ocsf.actor.user.uid`
+              type: schema-remapper
               sources:
-                - payload.userId
+                - info.runAs.uid
               sourceType: attribute
               target: ocsf.actor.user.uid
               targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+            - name: Map `payload.runAs` to `ocsf.actor.user.uid_alt`
+              type: schema-remapper
+              sources:
+                - payload.runAs
+              sourceType: attribute
+              target: ocsf.actor.user.uid_alt
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `info.objectId.uid`, `info.userId.uid` to `ocsf.user.uid`
               type: schema-remapper
+              sources:
+                - info.objectId.uid
+                - info.userId.uid
+              sourceType: attribute
+              target: ocsf.user.uid
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
     - type: pipeline
       name: OCSF sub pipeline for class Authentication [3002]
       enabled: true
@@ -530,14 +605,14 @@ pipeline:
           DataStoreDecisionNode OR OneTimePasswordCollectorDecisionNode))) OR
           (@source:am-access AND @payload.http.request.path:*authorize)
       processors:
-        - type: string-builder-processor
-          name: Add OCSF service name
+        - name: Add OCSF service name
+          type: string-builder-processor
           enabled: true
           template: Access Management
           target: ocsf.service.name
           replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 3002
+        - name: Apply OCSF schema for 3002
+          type: schema-processor
           enabled: true
           schema:
             schemaType: ocsf
@@ -548,6 +623,7 @@ pipeline:
             profiles: []
           mappers:
             - name: Map `payload._id` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - payload._id
               sourceType: attribute
@@ -555,8 +631,8 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
-              type: schema-remapper
             - name: ocsf.status_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.status:(true OR TRUE OR SUCCESS OR SUCCESSFUL)"
@@ -580,8 +656,8 @@ pipeline:
                 sources:
                   ocsf.status:
                     - ocsf.status
-              type: schema-category-mapper
             - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - payload.transactionId
               sourceType: attribute
@@ -589,57 +665,57 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               type: schema-remapper
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               target: ocsf.metadata.product.name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+            - name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.event_code
               target: ocsf.metadata.event_code
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.time` to `ocsf.time`
+            - name: Map `ocsf.time` to `ocsf.time`
+              type: schema-remapper
               sources:
                 - ocsf.time
               target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.status` to `ocsf.status`
+            - name: Map `ocsf.status` to `ocsf.status`
+              type: schema-remapper
               sources:
                 - ocsf.status
               target: ocsf.status
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+            - name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.uid
               target: ocsf.metadata.uid
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+            - name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.correlation_uid
               target: ocsf.metadata.correlation_uid
               preserveSource: true
               overrideOnConflict: true
             - name: ocsf.activity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.metadata.event_code:(Login OR FRLogin) OR
@@ -668,8 +744,8 @@ pipeline:
                 sources:
                   ocsf.activity_name:
                     - ocsf.metadata.event_code
-              type: schema-category-mapper
             - name: ocsf.severity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.metadata.event_code:*"
@@ -678,8 +754,8 @@ pipeline:
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
-              type: schema-category-mapper
             - name: Map `info.principal` to `ocsf.user.name`
+              type: schema-remapper
               sources:
                 - info.principal
               sourceType: attribute
@@ -687,17 +763,35 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `info.userId.uid` to `ocsf.user.uid`
               type: schema-remapper
-            - name: Map `payload.userId` to `ocsf.user.uid`
               sources:
-                - payload.userId
+                - info.userId.uid
               sourceType: attribute
               target: ocsf.user.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `payload.userId` to `ocsf.user.uid_alt`
               type: schema-remapper
+              sources:
+                - payload.userId
+              sourceType: attribute
+              target: ocsf.user.uid_alt
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - name: Map `info.userId.domain` to `ocsf.user.domain`
+              type: schema-remapper
+              sources:
+                - info.userId.domain
+              sourceType: attribute
+              target: ocsf.user.domain
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
             - name: Map `info.ipAddress` to `ocsf.src_endpoint.ip`
+              type: schema-remapper
               sources:
                 - info.ipAddress
               sourceType: attribute
@@ -705,8 +799,8 @@ pipeline:
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
-              type: schema-remapper
             - name: Map `info.principal` to `ocsf.actor.user.name`
+              type: schema-remapper
               sources:
                 - info.principal
               sourceType: attribute
@@ -714,18 +808,26 @@ pipeline:
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
+            - name: Map `info.userId.uid` to `ocsf.actor.user.uid`
               type: schema-remapper
-            - name: Map `payload.userId` to `ocsf.actor.user.uid`
               sources:
-                - payload.userId
+                - info.userId.uid
               sourceType: attribute
               target: ocsf.actor.user.uid
               targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+            - name: Map `payload.userId` to `ocsf.actor.user.uid_alt`
+              type: schema-remapper
+              sources:
+                - payload.userId
+              sourceType: attribute
+              target: ocsf.actor.user.uid_alt
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `ocsf.service.name` to `ocsf.service.name`
               type: schema-remapper
-            - type: schema-remapper
-              name: Map `ocsf.service.name` to `ocsf.service.name`
               sources:
                 - ocsf.service.name
               target: ocsf.service.name
@@ -739,8 +841,8 @@ pipeline:
       filter:
         query: "@source:am-config @payload.eventName:AM-CONFIG-CHANGE"
       processors:
-        - type: schema-processor
-          name: Apply OCSF schema for 3004
+        - name: Apply OCSF schema for 3004
+          type: schema-processor
           enabled: true
           schema:
             schemaType: ocsf
@@ -751,6 +853,7 @@ pipeline:
             profiles: []
           mappers:
             - name: Map `payload._id` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - payload._id
               sourceType: attribute
@@ -758,8 +861,8 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
-              type: schema-remapper
             - name: ocsf.status_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.status:(true OR TRUE OR SUCCESS OR SUCCESSFUL)"
@@ -783,8 +886,8 @@ pipeline:
                 sources:
                   ocsf.status:
                     - payload.level
-              type: schema-category-mapper
             - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - payload.transactionId
               sourceType: attribute
@@ -792,57 +895,57 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               type: schema-remapper
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               target: ocsf.metadata.product.name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+            - name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.event_code
               target: ocsf.metadata.event_code
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.time` to `ocsf.time`
+            - name: Map `ocsf.time` to `ocsf.time`
+              type: schema-remapper
               sources:
                 - ocsf.time
               target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.status` to `ocsf.status`
+            - name: Map `ocsf.status` to `ocsf.status`
+              type: schema-remapper
               sources:
                 - ocsf.status
               target: ocsf.status
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+            - name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.uid
               target: ocsf.metadata.uid
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+            - name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.correlation_uid
               target: ocsf.metadata.correlation_uid
               preserveSource: true
               overrideOnConflict: true
             - name: ocsf.activity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@payload.operation:CREATE"
@@ -870,8 +973,8 @@ pipeline:
                 sources:
                   ocsf.activity_name:
                     - payload.operation
-              type: schema-category-mapper
             - name: ocsf.severity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.metadata.event_code:*"
@@ -880,17 +983,35 @@ pipeline:
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
-              type: schema-category-mapper
-            - name: Map `payload.userId` to `ocsf.actor.user.uid`
+            - name: Map `info.userId.uid` to `ocsf.actor.user.uid`
+              type: schema-remapper
               sources:
-                - payload.userId
+                - info.userId.uid
               sourceType: attribute
               target: ocsf.actor.user.uid
               targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+            - name: Map `info.userId.domain` to `ocsf.actor.user.domain`
+              type: schema-remapper
+              sources:
+                - info.userId.domain
+              sourceType: attribute
+              target: ocsf.actor.user.domain
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+            - name: Map `payload.userId` to `ocsf.actor.user.uid_alt`
+              type: schema-remapper
+              sources:
+                - payload.userId
+              sourceType: attribute
+              target: ocsf.actor.user.uid_alt
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
-              type: schema-remapper
             - name: Map `payload.objectId` to `ocsf.entity.uid`
+              type: schema-remapper
               sources:
                 - payload.objectId
               sourceType: attribute
@@ -898,7 +1019,6 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
-              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
@@ -907,8 +1027,8 @@ pipeline:
       filter:
         query: "-@ocsf.category_uid:*"
       processors:
-        - type: schema-processor
-          name: Apply OCSF schema for 0
+        - name: Apply OCSF schema for 0
+          type: schema-processor
           enabled: true
           schema:
             schemaType: ocsf
@@ -919,6 +1039,7 @@ pipeline:
             profiles: []
           mappers:
             - name: Map `payload._id` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - payload._id
               sourceType: attribute
@@ -926,8 +1047,8 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
-              type: schema-remapper
             - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - payload.transactionId
               sourceType: attribute
@@ -935,65 +1056,64 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               type: schema-remapper
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               target: ocsf.metadata.product.name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+            - name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.event_code
               target: ocsf.metadata.event_code
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.time` to `ocsf.time`
+            - name: Map `ocsf.time` to `ocsf.time`
+              type: schema-remapper
               sources:
                 - ocsf.time
               target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.status` to `ocsf.status`
+            - name: Map `ocsf.status` to `ocsf.status`
+              type: schema-remapper
               sources:
                 - ocsf.status
               target: ocsf.status
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+            - name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.uid
               target: ocsf.metadata.uid
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+            - name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.correlation_uid
               target: ocsf.metadata.correlation_uid
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              type: schema-remapper
               sources:
                 - ocsf.metadata.original_time
               target: ocsf.metadata.original_time
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-category-mapper
-              name: ocsf.activity_id
+            - name: ocsf.activity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "*"
@@ -1002,8 +1122,8 @@ pipeline:
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-            - type: schema-category-mapper
-              name: ocsf.severity_id
+            - name: ocsf.severity_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "*"
@@ -1013,6 +1133,7 @@ pipeline:
                 name: ocsf.severity
                 id: ocsf.severity_id
             - name: ocsf.status_id
+              type: schema-category-mapper
               categories:
                 - filter:
                     query: "@ocsf.status:(true OR TRUE OR SUCCESS OR SUCCESSFUL)"
@@ -1036,4 +1157,3 @@ pipeline:
                 sources:
                   ocsf.status:
                     - ocsf.status
-              type: schema-category-mapper
