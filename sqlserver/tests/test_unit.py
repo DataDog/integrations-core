@@ -141,12 +141,28 @@ def test_execute_query_raw_collects_multiple_result_sets(instance_docker):
     assert cursor.fetchall.call_count == 2
 
 
-def create_schema_collector(static_info_cache: dict | None = None) -> SQLServerSchemaCollector:
+def create_schema_collector(
+    static_info_cache: dict | None = None, schema_config: dict | None = None
+) -> SQLServerSchemaCollector:
     check = mock.Mock()
-    check._config.schema_config = {}
+    check._config.schema_config = schema_config or {}
     check.log = mock.Mock()
     check.static_info_cache = static_info_cache or {}
     return SQLServerSchemaCollector(check)
+
+
+def test_schema_collector_configures_independent_table_and_view_limits() -> None:
+    collector = create_schema_collector(schema_config={'max_tables': 25})
+    collector._is_2016_or_earlier = False
+
+    query = collector._get_schema_objects_query()
+
+    assert collector._config.max_tables == 25
+    assert collector._config.max_views == 1000
+    assert "SELECT TOP 25" in query
+    assert "SELECT TOP 1000" in query
+    assert "sys.tables" in query
+    assert "sys.views" in query
 
 
 def test_schema_collector_records_database_compatibility_levels() -> None:
@@ -449,6 +465,72 @@ def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -
     assert collector._check.connection.get_managed_cursor.call_args_list == [mock.call(KEY_PREFIX)]
     assert collector._pre_2017_cursor is None
     assert mapped_row["schemas"][0]["tables"][0]["columns"] == [{"name": "id"}]
+
+
+def test_schema_collector_maps_view_metadata() -> None:
+    collector = create_schema_collector()
+    collector._is_2016_or_earlier = False
+    database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+    row = {
+        "schema_name": "test_schema",
+        "schema_id": 1,
+        "owner_name": "dbo",
+        "table_name": "city_names",
+        "table_id": 201,
+        "object_type": "VIEW",
+        "create_date": "2026-08-19T10:15:00",
+        "modify_date": "2026-08-19T11:30:00",
+        "definition": "CREATE VIEW test_schema.city_names AS SELECT id, name FROM test_schema.cities",
+        "columns": '[{"name":"id","data_type":"int","default":"None","nullable":false}]',
+        "indexes": "[]",
+        "foreign_keys": "[]",
+        "partition_count": None,
+    }
+
+    mapped_row = collector._map_row(database, row)
+
+    assert "tables" not in mapped_row["schemas"][0]
+    assert mapped_row["schemas"][0]["views"] == [
+        {
+            "id": "201",
+            "name": "city_names",
+            "create_date": "2026-08-19T10:15:00",
+            "modify_date": "2026-08-19T11:30:00",
+            "definition": "CREATE VIEW test_schema.city_names AS SELECT id, name FROM test_schema.cities",
+            "columns": [{"name": "id", "data_type": "int", "default": "None", "nullable": False}],
+        }
+    ]
+
+
+def test_schema_collector_legacy_view_fetches_only_columns() -> None:
+    collector = create_schema_collector()
+    collector._is_2016_or_earlier = True
+    detail_cursor = mock.Mock()
+    detail_cursor.fetchall_dict.return_value = [
+        {"name": "id", "data_type": "int", "default": "None", "nullable": False}
+    ]
+    collector._pre_2017_cursor = detail_cursor
+    database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+    row = {
+        "schema_name": "test_schema",
+        "schema_id": 1,
+        "owner_name": "dbo",
+        "table_name": "city_names",
+        "table_id": 201,
+        "object_type": "VIEW",
+        "create_date": "2026-08-19T10:15:00",
+        "modify_date": "2026-08-19T11:30:00",
+        "definition": None,
+    }
+
+    mapped_row = collector._map_row(database, row)
+
+    detail_cursor.execute.assert_called_once()
+    assert "201" in detail_cursor.execute.call_args.args[0]
+    assert mapped_row["schemas"][0]["views"][0]["definition"] is None
+    assert mapped_row["schemas"][0]["views"][0]["columns"] == [
+        {"name": "id", "data_type": "int", "default": "None", "nullable": False}
+    ]
 
 
 def test_get_cursor(instance_docker):

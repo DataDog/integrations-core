@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+from datetime import datetime
 from typing import Callable, Optional
 
 import pytest
@@ -137,6 +138,47 @@ def test_collect_schemas(dbm_instance, integration_check):
     collector = SQLServerSchemaCollector(check)
 
     collector.collect_schemas()
+
+
+def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
+    view_name = 'city_names'
+    with sa_conn.cursor() as cursor:
+        cursor.execute('USE {}'.format(SCHEMA_DATABASE))
+        cursor.execute(
+            'CREATE OR ALTER VIEW test_schema.{} AS SELECT id, name, population FROM test_schema.cities'.format(
+                view_name
+            )
+        )
+
+    try:
+        check = integration_check(dbm_instance)
+        collector = SQLServerSchemaCollector(check)
+        collector.collect_schemas()
+
+        views = [
+            view
+            for event in aggregator.get_event_platform_events('dbm-metadata')
+            if event['kind'] == 'sqlserver_databases'
+            for database in event['metadata']
+            if database['name'] == SCHEMA_DATABASE
+            for schema in database['schemas']
+            for view in schema.get('views', [])
+        ]
+        view = next(view for view in views if view['name'] == view_name)
+
+        assert view['id'].isdigit()
+        datetime.fromisoformat(view['create_date'])
+        datetime.fromisoformat(view['modify_date'])
+        assert 'CREATE' in view['definition'].upper()
+        assert view_name in view['definition']
+        assert {column['name'] for column in view['columns']} == {'id', 'name', 'population'}
+        for column in view['columns']:
+            assert {'name', 'data_type', 'nullable'} <= set(column)
+            assert set(column) <= {'name', 'data_type', 'default', 'nullable', 'ordinal_position'}
+    finally:
+        with sa_conn.cursor() as cursor:
+            cursor.execute('USE {}'.format(SCHEMA_DATABASE))
+            cursor.execute('DROP VIEW IF EXISTS test_schema.{}'.format(view_name))
 
 
 # Force pre-2017 behavior for testing that collections don't crash

@@ -839,6 +839,11 @@ instances:
         #
         # max_tables: 300
 
+        ## @param max_views - integer - optional - default: 1000
+        ## Set the maximum number of views to collect. Defaults to 1000.
+        #
+        # max_views: 1000
+
         ## @param max_execution_time - number - optional - default: 10
         ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
         ## Capped by `collect_schemas.collection_interval`
