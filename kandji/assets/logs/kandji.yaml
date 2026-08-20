@@ -842,6 +842,7 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        #`cvss.version` is required and not in the logs, hardcoding it
         - type: string-builder-processor
           name: Add CVSS version
           enabled: true
