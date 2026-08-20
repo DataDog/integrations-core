@@ -174,7 +174,7 @@ def test_the_report_is_written_to_the_run_summary(client, tmp_path, monkeypatch)
     dispatcher.run()
 
     client.assert_not_called("create_issue_comment")
-    report = summary.read_text()
+    report = summary.read_text(encoding="utf-8")
     assert "Dispatcher tests" in report
     # The marker exists to find a comment; nothing looks a run summary up.
     assert COMMENT_MARKER not in report

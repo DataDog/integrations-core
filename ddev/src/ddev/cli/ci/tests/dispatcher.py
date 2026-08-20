@@ -71,6 +71,7 @@ class DispatcherOutcome:
 
     progress: DispatcherProgress
     pr_comment_failed: bool
+    final_report_published: bool
     error: Exception | None = None
 
     @property
@@ -78,11 +79,13 @@ class DispatcherOutcome:
         """Whether every batch reached a non-failing terminal state and the report was published.
 
         A batch that never finished counts as a failure: `progress.done` is false, and a run whose
-        results are unknown must not read as green.
+        results are unknown must not read as green. Publishing the final report is part of that,
+        because a run that stalls after the last batch leaves the reader looking at stale progress.
+        An intermediate comment failure is not, since the next snapshot supersedes it.
         """
         return (
             self.error is None
-            and not self.pr_comment_failed
+            and self.final_report_published
             and self.progress.done
             and all(batch.status is not Status.FAILURE for batch in self.progress.batches)
         )
@@ -140,6 +143,7 @@ class Dispatcher(EventBusOrchestrator):
             self._outcome = DispatcherOutcome(
                 progress=progress,
                 pr_comment_failed=self._updater.pr_comment_failed,
+                final_report_published=self._updater.final_report_published,
                 error=exception,
             )
             self._logger.info(summary_line(progress))
