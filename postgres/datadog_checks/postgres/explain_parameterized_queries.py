@@ -39,6 +39,14 @@ EXPECTED_PARAMETER_TYPE_ERRORS = (
 )
 
 
+class ExtendedProtocolUnavailable(Exception):
+    """Raised when a sampled statement can't be prepared over the extended query protocol.
+
+    Preparing it over the simple protocol instead would execute every statement in the sampled text, so
+    the query goes unexplained rather than being sent in a way that could run a planted separator.
+    """
+
+
 def agent_check_getter(self):
     return self._check
 
@@ -83,6 +91,15 @@ class ExplainParameterizedQueries:
         self._check = check
         self._config = config
         self._explain_function = explain_function
+        # Checked once here rather than per statement: it only depends on the libpq this agent was built
+        # against. See _execute_prepare for why a pipeline is required to explain a parameterized query.
+        self._can_use_pipeline = psycopg.capabilities.has_pipeline(check=False)
+        if not self._can_use_pipeline:
+            logger.warning(
+                "Parameterized queries cannot be explained: this build links libpq %s, and pipeline mode "
+                "(libpq 14+) is required to send the prepared statement safely",
+                psycopg.pq.version(),
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def explain_statement(
@@ -146,7 +163,7 @@ class ExplainParameterizedQueries:
         # Returns None on success, or a (DBExplainError, err_msg) tuple when the query can't be prepared because
         # a parameter's type can't be resolved. Other unexpected errors are re-raised.
         try:
-            self._execute_query(
+            self._execute_prepare(
                 conn,
                 PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
             )
@@ -250,6 +267,18 @@ class ExplainParameterizedQueries:
                 query_signature,
                 e,
             )
+
+    def _execute_prepare(self, conn, query):
+        # The PREPARE is the one place sampled query text becomes SQL, so it goes out over the extended query
+        # protocol, where the server rejects a multi-command string ("cannot insert multiple commands into a
+        # prepared statement") rather than executing every statement in it as the monitoring user. psycopg
+        # leaves the simple protocol only for a query with parameters, one requesting binary results (which
+        # the client-side cursors this pool uses refuse) or one inside a pipeline, so a pipeline is the only
+        # route available here.
+        if not self._can_use_pipeline:
+            raise ExtendedProtocolUnavailable("cannot prepare a sampled statement without pipeline support (libpq 14+)")
+        with conn.pipeline():
+            self._execute_query(conn, query)
 
     def _execute_query(self, conn, query):
         with conn.cursor() as cursor:
