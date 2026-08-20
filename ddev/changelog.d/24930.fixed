@@ -1,1 +1,0 @@
-Remove aiohttp<3.14 pin now that vcrpy 8.2.0+ is compatible with aiohttp 3.14.
