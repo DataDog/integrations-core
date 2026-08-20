@@ -1308,6 +1308,21 @@ pipeline:
           template: "%{new_state.parameter_name}"
           target: ocsf.finding_info.title
           replaceMissing: false
+        # `finding_info.uid` must identify the *finding*, not the event -- the
+        # event id belongs on `metadata.uid`. Iru exposes no per-finding id, so
+        # it is composed the same way as the 2002 Detections uid. A compliance
+        # finding is "this control on this device", so successive evaluations
+        # collapse onto one finding whose status updates over time.
+        # `target_id` is the device UUID on this shape. The two builders are
+        # mutually exclusive: `parameter_name` appears only on remediation events
+        # and `blueprint_name` only on first_runs, so with replaceMissing false
+        # exactly one fires per event.
+        - type: string-builder-processor
+          name: Add finding uid
+          enabled: true
+          template: "%{target_id}-%{new_state.parameter_name}"
+          target: ocsf.finding_info.uid
+          replaceMissing: false
         # An Iru blueprint is the device group a Mac is assigned to. No
         # `blueprint_id` is present on this shape, so only the name is available.
         - type: attribute-remapper
@@ -1333,6 +1348,14 @@ pipeline:
           enabled: true
           template: "Compliance run for blueprint %{blueprint_name}"
           target: ocsf.finding_info.title
+          replaceMissing: false
+        # A first_run is "the compliance state of this device against this
+        # blueprint", which recurs, so the blueprint is the stable discriminator.
+        - type: string-builder-processor
+          name: Add finding uid for blueprint compliance run
+          enabled: true
+          template: "%{target_id}-%{blueprint_name}"
+          target: ocsf.finding_info.uid
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 2003
@@ -1392,13 +1415,12 @@ pipeline:
               overrideOnConflict: false
               targetFormat: string
             - type: schema-remapper
-              name: Map `id` to `ocsf.finding_info.uid`
+              name: Map `ocsf.finding_info.uid` to `ocsf.finding_info.uid`
               sources:
-                - id
+                - ocsf.finding_info.uid
               target: ocsf.finding_info.uid
               preserveSource: true
-              overrideOnConflict: false
-              targetFormat: string
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `ocsf.finding_info.title` to `ocsf.finding_info.title`
               sources:

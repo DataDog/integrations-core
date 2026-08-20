@@ -943,7 +943,7 @@ tests:
            uid: "3a867771-949f-4065-9bc2-e79634af48b1"
          finding_info:
            title: "Disable the ability to login to another user's active and locked session"
-           uid: "01K5W2Q8ZR4M7T1N3D6XVB0PKC"
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1-Disable the ability to login to another user's active and locked session"
          message: "remediation: Disable the ability to login to another user's active and locked session"
          metadata:
            product:
@@ -1090,7 +1090,7 @@ tests:
              - name: DDS-Test
          finding_info:
            title: "Compliance run for blueprint DDS-Test"
-           uid: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1-DDS-Test"
          message: "first_runs: "
          metadata:
            product:
