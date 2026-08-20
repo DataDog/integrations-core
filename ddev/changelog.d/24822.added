@@ -1,1 +1,1 @@
-Add the Dispatcher pull-request updater task, which renders each progress snapshot into one PR comment, falls back to smaller comment tiers when GitHub refuses the body, and publishes the final report to the GitHub Actions run summary.
+Add the Dispatcher run reporter task, which renders each progress snapshot into one PR comment, falls back to smaller comment tiers when GitHub refuses the body, and publishes the final report to the GitHub Actions run summary.

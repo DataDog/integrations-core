@@ -165,7 +165,7 @@ def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
 
 
 # ---------------------------------------------------------------------------
-# Progress snapshots, as the renderer and the pull-request updater see them
+# Progress snapshots, as the renderer and the run reporter see them
 # ---------------------------------------------------------------------------
 
 JOB_URL = "https://github.com/o/r/actions/runs/1/job/9"
