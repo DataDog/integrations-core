@@ -1406,6 +1406,15 @@ pipeline:
               target: ocsf.finding_info.title
               preserveSource: true
               overrideOnConflict: true
+            # Deliberately single-source with no fallback. `parameter_name` is
+            # absent on `first_runs` events, and that is correct: OCSF defines
+            # `control` as one named control ("CIS ... Control 2.1 - Ensure
+            # CloudTrail is enabled in all regions"), whereas a first_run
+            # evaluates many checks at once. Those check names map to
+            # `compliance.requirements` as an array, and `blueprint_name` maps to
+            # `device.groups[]`, so no data is dropped. Do not "fix" this by
+            # joining the check names into a string or by using `blueprint_name`:
+            # a Blueprint is a bundle of checks, not a prescriptive control.
             - type: schema-remapper
               name: Map `new_state.parameter_name` to `ocsf.compliance.control`
               sources:
@@ -1451,16 +1460,27 @@ pipeline:
                 name: ocsf.device.type
                 id: ocsf.device.type_id
               type: schema-category-mapper
+            # A remediation resolves the finding, so the activity is Close (3), not
+            # Update -- matching how 2002 treats `@action:remediate` and matching
+            # this class's own status_id, which already reports Resolved (4) for
+            # these events. The Create/Update branches exclude remediation
+            # explicitly so ascending id order can be preserved; a remediation
+            # arrives as `@action:update`, so without the exclusion it would match
+            # Update (2) first.
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@action:create"
+                    query: "@action:create -@target_component:remediation"
                   name: Create
                   id: 1
                 - filter:
-                    query: "@action:update"
+                    query: "@action:update -@target_component:remediation"
                   name: Update
                   id: 2
+                - filter:
+                    query: "@target_component:remediation"
+                  name: Close
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other

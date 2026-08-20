@@ -925,8 +925,8 @@ tests:
          run_time: "2025-09-24T10:15:01.880000Z"
        occurred_at: "2025-09-24T10:15:02.113045Z"
        ocsf:
-         activity_id: 2
-         activity_name: "Update"
+         activity_id: 3
+         activity_name: "Close"
          category_name: "Findings"
          category_uid: 2
          class_name: "Compliance Finding"
