@@ -1,0 +1,1 @@
+Tag the `password_hashed` option as a secret in the configuration spec.
