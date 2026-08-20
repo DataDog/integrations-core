@@ -1,0 +1,1 @@
+Fixes a duplicate query for Clickhouse server version.

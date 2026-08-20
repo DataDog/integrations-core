@@ -350,30 +350,69 @@ def test_session_idle_in_transaction_time(aggregator, integration_check, pg_inst
     postgres_conn.close()
 
 
-def test_unsupported_replication(aggregator, integration_check, pg_instance):
+def test_feature_not_supported_preserves_aurora_role_after_promotion(aggregator, integration_check, pg_instance):
+    pg_instance['tag_replication_role'] = True
+    pg_instance['database_instance_collection_interval'] = 0
     check = integration_check(pg_instance)
+    check.is_aurora = True
+    check._get_replication_role = mock.MagicMock(side_effect=['standby', 'master'])
     unpatched_fmt = PartialFormatter()
 
     called = []
 
-    def format_with_error(value, **kwargs):
-        if 'pg_is_in_recovery' in value:
+    def format_with_error(value: str, **kwargs: str) -> str:
+        if 'pg_stat_bgwriter' in value and not called:
             called.append(True)
             raise psycopg.errors.FeatureNotSupported("Not available")
         return unpatched_fmt.format(value, **kwargs)
 
-    # This simulate an error in the fmt function, as it's a bit hard to mock psycopg
+    # Simulate an Aurora reader rejecting a metrics query.
     with mock.patch.object(fmt, 'format', passthrough=True) as mock_fmt:
         mock_fmt.side_effect = format_with_error
         check.run()
 
-    # Verify our mocking was called
+        reader_role_tags = {'replication_role:standby', 'aurora_role:reader'}
+        db_count = aggregator.metrics('postgresql.db.count')
+        assert len(db_count) == 1
+        assert {tag for tag in db_count[0].tags if tag.startswith(('replication_role:', 'aurora_role:'))} == (
+            reader_role_tags
+        )
+
+        service_checks = aggregator.service_checks(check.SERVICE_CHECK_NAME)
+        assert len(service_checks) == 1
+        assert {
+            tag for tag in service_checks[0].tags if tag.startswith(('replication_role:', 'aurora_role:'))
+        } == reader_role_tags
+
+        dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+        database_instance = next(event for event in dbm_metadata if event['kind'] == 'database_instance')
+        assert {
+            tag for tag in database_instance['tags'] if tag.startswith(('replication_role:', 'aurora_role:'))
+        } == reader_role_tags
+
+        aggregator.reset()
+        check.run()
+
     assert called == [True]
 
-    expected_tags = _get_expected_tags(check, pg_instance)
-    check_bgw_metrics(aggregator, expected_tags)
+    writer_role_tags = {'replication_role:master', 'aurora_role:writer'}
+    db_count = aggregator.metrics('postgresql.db.count')
+    assert len(db_count) == 1
+    assert {
+        tag for tag in db_count[0].tags if tag.startswith(('replication_role:', 'aurora_role:'))
+    } == writer_role_tags
 
-    check_common_metrics(aggregator, expected_tags=expected_tags)
+    service_checks = aggregator.service_checks(check.SERVICE_CHECK_NAME)
+    assert len(service_checks) == 1
+    assert {
+        tag for tag in service_checks[0].tags if tag.startswith(('replication_role:', 'aurora_role:'))
+    } == writer_role_tags
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    database_instance = next(event for event in dbm_metadata if event['kind'] == 'database_instance')
+    assert {
+        tag for tag in database_instance['tags'] if tag.startswith(('replication_role:', 'aurora_role:'))
+    } == writer_role_tags
 
 
 def test_can_connect_service_check(aggregator, integration_check, pg_instance):
