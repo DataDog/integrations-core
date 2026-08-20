@@ -814,10 +814,11 @@ tests:
             name: Kandji
             vendor_name: Kandji
           version: 1.5.0
+          uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab-com.google.Chrome-CVE-2025-10892
         category_uid: 2
         category_name: Findings
         finding_info:
-          uid: CVE-2025-10892
+          uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab-com.google.Chrome-CVE-2025-10892
           src_url: https://nvd.nist.gov/vuln/detail/CVE-2025-10892
           title: CVE-2025-10892 in Google Chrome
         status_id: 1

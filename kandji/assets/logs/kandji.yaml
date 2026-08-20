@@ -870,6 +870,25 @@ pipeline:
           template: "%{cve_id} in %{name}"
           target: finding_title
           replaceMissing: false
+        # Synthesize a finding identifier. GET /api/v1/vulnerability-management/
+        # detections returns no per-detection id (no id, detection_id or uuid --
+        # confirmed against the vendor's published API collection), so there is
+        # no single field that can serve ocsf.finding_info.uid or
+        # ocsf.metadata.uid. The endpoint returns one row per
+        # (device, application, CVE) across the whole fleet, while the sibling
+        # /vulnerabilities endpoint is the CVE-grouped view -- so cve_id is the
+        # grouping key and repeats across every affected device, which makes it
+        # unusable as a unique finding id on its own. device_id + cve_id is the
+        # essential identity; bundle_id additionally separates the case where one
+        # CVE affects two applications on the same device. replaceMissing must
+        # stay true: with false a single absent field yields no uid at all, and
+        # finding_info.uid is a required attribute.
+        - type: string-builder-processor
+          name: Add finding uid
+          enabled: true
+          template: "%{device_id}-%{bundle_id}-%{cve_id}"
+          target: finding_uid
+          replaceMissing: true
         - type: schema-processor
           name: Apply OCSF schema for 2002
           enabled: true
@@ -911,11 +930,22 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `cve_id` to `ocsf.finding_info.uid`
+              name: Map `finding_uid` to `ocsf.finding_info.uid`
               sources:
-                - cve_id
+                - finding_uid
               target: ocsf.finding_info.uid
               preserveSource: true
+              overrideOnConflict: false
+              targetFormat: string
+            # `finding_uid` is consumed here with preserveSource: false so the
+            # staging attribute does not leak into the log. This must remain the
+            # LAST reader of `finding_uid` in this schema-processor.
+            - type: schema-remapper
+              name: Map `finding_uid` to `ocsf.metadata.uid`
+              sources:
+                - finding_uid
+              target: ocsf.metadata.uid
+              preserveSource: false
               overrideOnConflict: false
               targetFormat: string
             - type: schema-remapper
