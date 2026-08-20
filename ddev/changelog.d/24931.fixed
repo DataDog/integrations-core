@@ -1,0 +1,1 @@
+Rename the Dispatcher pull-request updater task to the run reporter, since it also reports on runs that have no pull request.
