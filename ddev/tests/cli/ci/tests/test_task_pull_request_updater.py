@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for the TaskPullRequestUpdater processor.
 
-The updater owns exactly one comment and must never let it regress, so most of what matters here is
-ordering and idempotence: create once, edit thereafter, reject anything stale. The rest is what it does
-when a write fails, which is to keep the report and never fail the run.
+Mostly ordering and idempotence — create once, edit thereafter, reject anything stale — plus what a
+failed write does, which is to keep the report and never fail the run.
 """
 
 from __future__ import annotations
@@ -149,9 +148,8 @@ def test_the_comment_edited_is_the_one_the_marker_identifies(
 ):
     """A re-run must edit its previous comment rather than add a second one.
 
-    The marker is anchored at the start of the body, which is what rules out a quote: quoting our
-    comment copies the marker, but prefixed with "> ", and that copy belongs to whoever replied.
-    ``expected_comment_id`` of ``None`` means no comment was adoptable, so the updater creates its own.
+    Anchoring the marker at the start of the body is what rules out a quote, since a quote prefixes it
+    with "> ". ``expected_comment_id`` of ``None`` means the updater found nothing to adopt.
     """
     client = FakeAsyncGitHubClient()
     # One page per comment, so the marker is reached by paginating rather than only on the first page.
@@ -217,8 +215,8 @@ def test_neither_the_comment_nor_the_retained_report_goes_backwards(
 ):
     """Batches finish concurrently, so an early revision can arrive after a later one has landed.
 
-    The first delivery creates the comment and every accepted one after it edits, so the edit count is
-    how many deliveries were not rejected as stale.
+    The first delivery creates and every accepted one after it edits, so the edit count is how many were
+    not rejected as stale.
     """
     client = FakeAsyncGitHubClient()
     updater = _updater(client)
@@ -311,8 +309,8 @@ def test_a_transient_failure_is_not_retried_here():
 def test_a_create_that_failed_after_landing_does_not_produce_a_duplicate():
     """The nastiest case: GitHub created the comment, then the response was lost.
 
-    The next revision would post a second comment if it trusted the failure. The marker lookup is what
-    prevents that, because it re-reads the PR and finds the comment the failed call actually created.
+    The marker lookup is what stops the next revision posting a second one, because it re-reads the PR
+    and finds the comment the failed call really did create.
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(502), once=True)
@@ -360,8 +358,7 @@ def test_a_failed_write_keeps_the_report_rather_than_losing_it():
 def test_a_rejected_token_is_reported_without_failing_the_run(caplog: pytest.LogCaptureFixture):
     """A credentials problem is a reporting problem, and reporting never fails the run.
 
-    It is not retried, and its own message is the fix instruction, so that message is what gets logged
-    rather than a generic write failure.
+    Its own message is the fix instruction, so that is what gets logged rather than a generic failure.
     """
     client = FakeAsyncGitHubClient()
     error = GitHubAuthenticationError(
@@ -396,8 +393,8 @@ def test_a_rejected_token_is_not_mistaken_for_a_comment_we_do_not_own():
 def test_a_token_refused_for_every_comment_gives_up_rather_than_looping():
     """A 403 on the comment we just created is not an ownership problem — the token cannot write.
 
-    Recovery forgets the tracked comment once; the create that follows has nothing left to forget, so
-    it stops there instead of forgetting and recreating until the pass cap runs out.
+    Recovery forgets the comment once; the create that follows has nothing left to forget, so it stops
+    rather than recreating until the pass cap runs out.
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("list_issue_comments", comment_page(_marked_comment()))
@@ -456,10 +453,9 @@ def test_the_last_tier_rejected_again_stops_rather_than_looping():
 
 
 def test_a_snapshot_with_nothing_to_drop_is_not_resent():
-    """A passing run has no failures, no unavailable results and no retries to shed.
+    """A passing run has nothing to shed, so every tier renders the same body.
 
-    Every tier renders the same body, so resending one GitHub has just refused would spend a request to
-    learn nothing. The ladder recognises that and stops at the first rejection.
+    Resending one GitHub just refused would spend a request to learn nothing, so the ladder stops.
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error())
@@ -548,8 +544,7 @@ def test_the_newest_report_is_retained_for_the_caller():
 def test_a_lost_write_does_not_hold_the_revision_back():
     """The revision advances with the retained report, not with the write.
 
-    Leaving it behind on a failure would let an earlier revision still in flight overwrite a later one
-    that had already been retained.
+    Otherwise an earlier revision still in flight could overwrite a later one already retained.
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(500), once=True)
@@ -659,10 +654,9 @@ def test_the_ladder_walks_all_three_tiers():
 
 
 def test_a_too_long_body_never_escapes_the_updater():
-    """The client raises a ValueError subclass, which the HTTP handler would not have caught.
+    """The client raises a ValueError subclass, which the HTTP handler would not catch.
 
-    That is the hazard of the guard living in the client: a pre-flight raise bypassing the fallback
-    would turn graceful degradation into a failed run.
+    A pre-flight raise bypassing the fallback would turn graceful degradation into a failed run.
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error())
@@ -684,12 +678,10 @@ def test_the_retained_report_is_the_full_one_even_when_a_smaller_tier_was_sent()
 
 
 def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypatch):
-    """The case the tiers exist for.
+    """The case the tiers exist for: GitHub refusing a body our own measurement passed.
 
-    The renderer budgets against the limit and truncates itself, so a body we measured is essentially
-    never too long by our own reckoning. What the tiers protect against is GitHub refusing a body our
-    measurement passed, because its accounting is undocumented. Simulated here by a server that accepts
-    only the smallest tier.
+    The renderer truncates itself to the limit, so the tiers are really there for GitHub's accounting
+    disagreeing with ours. Simulated by a server that accepts only the smallest tier.
     """
     message = _tiered_update(1, done=True)
     tiers = [

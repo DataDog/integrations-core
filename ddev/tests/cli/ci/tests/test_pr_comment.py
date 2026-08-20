@@ -3,15 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for the PR comment renderer.
 
-The renderer is a pure projection of ``DispatcherProgress``, so these build snapshots by hand and
-assert on the rendered body. What is worth testing is not the exact prose but the reporting rules:
-an unfinished run must be unmistakable, a batch's status comes from the workflow rather than a
-roll-up of its jobs, unavailable results never read as success, and nothing is dropped silently.
+What is worth asserting is not the prose but the reporting rules: an unfinished run must be
+unmistakable, a batch's status comes from the workflow rather than its jobs, unavailable results never
+read as success, and nothing is dropped silently.
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 
 import pytest
 
@@ -156,9 +156,7 @@ def test_all_passing_final_snapshot_has_no_alert():
 def test_a_job_missing_its_artifacts_is_not_reported_as_a_pass():
     """A job can conclude ``success`` while its artifacts never arrive, so its result is unknown.
 
-    Nothing failed, but the run is not a clean pass either: reporting it as passed would present an
-    unestablished result as a green one, which is the one thing the unavailable section exists to
-    prevent.
+    Reporting that as passed would present an unestablished result as a green one.
     """
     unavailable = job_progress(attempt(error=ProgressError.NO_ARTIFACTS))
     progress = DispatcherProgress(batches=(batch_progress("batch-01", unavailable),), done=True)
@@ -256,8 +254,7 @@ def test_the_unavailable_count_matches_the_section(count: int):
 def test_progress_signals_agree_with_each_other(done: bool):
     """The five in-progress signals are redundant on purpose; the bug to catch is one disagreeing.
 
-    An unfinished run that renders like a final one is the worst failure this renderer can have, so the
-    heading, alert, pending count, bar and footer are asserted together rather than one per test.
+    An unfinished run that renders like a final one is the worst failure this renderer can have.
     """
     # Two jobs either way: both reported when the run is done, one still outstanding when it is not.
     jobs = (job_progress(attempt()), job_progress(attempt()) if done else job_progress())
@@ -277,9 +274,8 @@ def test_progress_signals_agree_with_each_other(done: bool):
 def test_a_retrying_run_with_every_job_reported_still_reads_as_unfinished():
     """``complete == total`` on an unfinished run is reachable, not a contradiction.
 
-    Every job in a retrying batch has reported — their latest attempts failed — so a jobs-only
-    progress signal reads as 100%% while the run is far from over. The alert counts batches and the
-    bar refuses to fill, or the comment would contradict its own heading.
+    Every job in a retrying batch has reported, so a jobs-only signal reads as 100%% while the run is far
+    from over. The alert counts batches instead, and the bar refuses to fill.
     """
     progress = DispatcherProgress(
         batches=(
@@ -445,9 +441,8 @@ def test_job_level_error_is_reported_against_the_job():
 def test_names_from_outside_cannot_break_out_of_their_block(raw: str, expected: str, in_a_step: bool):
     """Test output and workflow step names are arbitrary text and get the same treatment.
 
-    They sit in a ``<code>`` element rather than a Markdown code span because ``html.escape`` leaves
-    backticks alone, and pytest puts parametrised values straight into a test id — so a backtick is
-    reachable input that would close a span early and let the rest render as markup.
+    They sit in a ``<code>`` element rather than a code span because ``html.escape`` leaves backticks
+    alone, and a backtick in a test id would close a span early and let the rest render as markup.
     """
     failure = (
         attempt(Status.FAILURE, failed_steps=(raw,))
@@ -717,12 +712,7 @@ def test_the_last_tier_names_the_failed_jobs_but_not_the_failed_tests():
 
 
 def test_the_last_tier_barely_grows_with_the_size_of_the_run():
-    """Dropping the per-test lists is what removes the dominant term.
-
-    A job's failing-test list is the multiplier — 200 names against one summary line — so the last
-    tier grows per failed job rather than per failed test. That is what makes it fit where the others
-    do not.
-    """
+    """The last tier grows per failed job rather than per failed test, which is what makes it fit."""
     few = len(render_minimal_comment(_worst_case(job_count=1, tests_per_job=1)).encode("utf-8"))
     many_tests = len(render_minimal_comment(_worst_case(job_count=1, tests_per_job=500)).encode("utf-8"))
 
@@ -744,6 +734,65 @@ def test_the_secondary_sections_are_what_the_compact_tier_drops():
     assert "Retried jobs" in full
     assert "Unavailable results" not in compact
     assert "Retried jobs" not in compact
+
+
+FALLBACK_TIERS = [
+    pytest.param(render_compact_comment, id="compact"),
+    pytest.param(render_minimal_comment, id="minimal"),
+]
+
+
+@pytest.mark.parametrize("render", FALLBACK_TIERS)
+def test_a_fallback_tier_does_not_point_at_the_section_it_dropped(render: Callable[[DispatcherProgress], str]):
+    """Every tier shares the header, but only the full tier lists the results.
+
+    Pointing at a section the comment does not contain is the bug; the count still has to survive.
+    """
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(attempt(error=ProgressError.NO_ARTIFACTS))),), done=True
+    )
+
+    body = render(progress)
+
+    assert "1 result could not be established" in body
+    assert "See the unavailable results below" not in body
+    assert "Unavailable results" not in body
+
+
+@pytest.mark.parametrize("render", FALLBACK_TIERS)
+def test_a_fallback_tier_still_reports_results_it_could_not_establish(render: Callable[[DispatcherProgress], str]):
+    """A failure takes the alert, so without this the unestablished results vanish from the comment.
+
+    The count has to ride along with the failure, or a fallback body reads as though every result was
+    established.
+    """
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(attempt(Status.FAILURE, reports=(failing_report("test_a"),)), target="redis"),
+                job_progress(attempt(error=ProgressError.NO_ARTIFACTS), target="vault"),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    body = render(progress)
+
+    assert "Dispatcher tests failed" in body
+    assert "1 result could not be established, and is not listed in this comment" in body
+    # The full tier says it differently, because there the reader can be sent to the list itself.
+    assert "not listed in this comment" not in render_comment(progress)
+
+
+def test_the_unavailable_notice_in_a_fallback_agrees_with_its_own_count():
+    """Two unestablished results take a plural verb; one does not."""
+    jobs = [job_progress(attempt(error=ProgressError.NO_ARTIFACTS), target=f"t-{index}") for index in range(2)]
+    jobs.append(job_progress(attempt(Status.FAILURE), target="redis"))
+    progress = DispatcherProgress(batches=(batch_progress("batch-01", *jobs, status=Status.FAILURE),), done=True)
+
+    assert "2 results could not be established, and are not listed in this comment" in render_compact_comment(progress)
 
 
 def test_the_budget_is_measured_in_bytes_not_characters():

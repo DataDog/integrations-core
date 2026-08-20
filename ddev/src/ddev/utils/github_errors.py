@@ -71,9 +71,8 @@ BODY_TOO_LONG_MESSAGE = 'too long'
 def github_body_too_long_message(response: httpx.Response) -> str | None:
     """Return GitHub's explanation if *response* is it refusing a body for length, else `None`.
 
-    Reading every 422 as 'too long' would answer a spam or validation rejection by sending less, which
-    cannot fix it and hides the real cause. An unreadable 422 counts as not too long for the same
-    reason: callers measure the body first, so length is already ruled out.
+    Reading every 422 as 'too long' would answer a spam rejection by sending less, which cannot fix it
+    and hides the real cause. An unreadable 422 counts as not too long for the same reason.
     """
     if response.status_code != VALIDATION_FAILED_STATUS:
         return None
@@ -100,10 +99,8 @@ class GitHubBodyTooLongError(ValueError):
     """A body GitHub will not accept because it is too long.
 
     One type for both raise sites -- the client's pre-request measurement and GitHub's own 422 -- so a
-    caller has a single thing to catch and a single action to take: send less. Not an
-    `httpx.HTTPStatusError` subclass, because the pre-request case has no response to carry.
-    `github_message` holds GitHub's wording when the server refused it, and is `None` when the client
-    did.
+    caller has one thing to catch and one action to take: send less. Not an `httpx.HTTPStatusError`,
+    because the pre-request case has no response to carry; `github_message` is set only by the server.
     """
 
     def __init__(self, message: str, *, limit: int, size: int | None = None, github_message: str | None = None):

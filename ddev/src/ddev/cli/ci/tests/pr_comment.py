@@ -3,13 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Renders a ``DispatcherProgress`` snapshot into the body of the single Dispatcher PR comment.
 
-Pure functions: no I/O, no GitHub models, no state. Everything branches on ``ExecutionState``,
-``Status`` and ``ProgressError``, never on prose, so the comment is a projection of the aggregate
-rather than a second source of truth.
+Pure functions, branching only on ``ExecutionState``, ``Status`` and ``ProgressError``, so the comment
+is a projection of the aggregate rather than a second source of truth.
 
-The layout follows the Datadog CI Visibility PR comment: ``<code>`` chips for identifiers, a table
-for the batch list, ``<details>`` for anything long, and a ``<sub>`` footer. Badge images are
-deliberately absent — those are SVGs on a host we do not publish to — so emoji carry the state.
+Laid out like the Datadog CI Visibility comment. Badge images are deliberately absent — those are SVGs
+on a host we do not publish to — so emoji carry the state.
 """
 
 from __future__ import annotations
@@ -80,46 +78,39 @@ def _size(text: str) -> int:
 
 
 def render_comment(progress: DispatcherProgress) -> str:
-    """Render the full comment body for *progress*, trimmed to ``COMMENT_BODY_LIMIT`` bytes.
+    """First of three tiers, budgeted in bytes against the client's own limit so the two cannot drift.
 
-    Budgeted in bytes against the client's own limit, so the two cannot drift. Being wrong about
-    GitHub's accounting is handled by the tiers below, not by guessing low.
-
-    The first of three tiers. The message's ``revision`` is deliberately not rendered: it is internal
-    ordering metadata, and the gatherer already logs it.
+    The message's ``revision`` is deliberately not rendered: internal ordering metadata, already logged.
     """
-    return _render(progress, (partial(_failures, detail=True), _unavailable, _retried))
+    return _render(progress, (partial(_failures, detail=True), _unavailable, _retried), shows_unavailable=True)
 
 
 def render_compact_comment(progress: DispatcherProgress) -> str:
     """Second tier: the failures keep their detail, the secondary sections go.
 
-    Unavailable results and retried jobs are the parts a reader can live without — a retried-job list
-    is one line per retry and can be the largest section in a flaky run — while which tests failed is
-    the reason anyone opens the comment.
+    Which tests failed is why anyone opens the comment; a retried-job list is one line per retry and can
+    be the largest section in a flaky run.
     """
-    return _render(progress, (partial(_failures, detail=True),))
+    return _render(progress, (partial(_failures, detail=True),), shows_unavailable=False)
 
 
 def render_minimal_comment(progress: DispatcherProgress) -> str:
-    """Last tier: batches and which jobs failed, without naming the failed tests.
+    """Last tier: batches, totals and a line per failed job, without naming the failed tests.
 
-    The per-test lists are the dominant cost — a single job with 40 failing tests renders about 2.1 kB
-    against roughly 150 bytes for its summary line — so dropping them is what makes this fit where the
-    others did not. Everything a reader needs to act is still here: the batch table, the totals, and a
-    line per failed job with its count and a link to the job.
-
-    Every section is still budgeted, so this cannot overflow through the failure list. The one part
-    that is never truncated is the batch table, which costs ~141 bytes per batch and so would need
-    around 464 batches — roughly 111,000 jobs at the 240-per-batch cap — to exhaust the limit on its
-    own. The updater still degrades gracefully rather than assuming that is impossible.
+    The per-test lists are the dominant cost — 2.1 kB for a job with 40 failures against ~150 bytes for
+    its summary line — so dropping them is what makes this fit. Only the batch table is unbudgeted, and
+    it would need ~464 batches to exhaust the limit on its own.
     """
-    return _render(progress, (partial(_failures, detail=False),))
+    return _render(progress, (partial(_failures, detail=False),), shows_unavailable=False)
 
 
-def _render(progress: DispatcherProgress, sections: tuple[SectionBuilder, ...]) -> str:
-    """Assemble a body from the header, whichever *sections* this tier keeps, and the footer."""
-    header = _header(progress)
+def _render(progress: DispatcherProgress, sections: tuple[SectionBuilder, ...], *, shows_unavailable: bool) -> str:
+    """Assemble a body from the header, whichever *sections* this tier keeps, and the footer.
+
+    ``shows_unavailable`` tells the header whether this tier keeps ``_unavailable``, so the alert can
+    neither point at a section that is not here nor stay silent about results it dropped.
+    """
+    header = _header(progress, shows_unavailable=shows_unavailable)
     footer = _footer(progress)
 
     # The header and footer always survive; the detail sections compete for what is left. Two
@@ -164,10 +155,10 @@ def summary_line(progress: DispatcherProgress) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _header(progress: DispatcherProgress) -> str:
+def _header(progress: DispatcherProgress, *, shows_unavailable: bool) -> str:
     """Marker, heading, in-progress alert and totals: the part that must never be truncated."""
     blocks = [COMMENT_MARKER, _heading(progress)]
-    alert = _alert(progress)
+    alert = _alert(progress, shows_unavailable=shows_unavailable)
     if alert is not None:
         blocks.append(alert)
     blocks.append(_totals(progress))
@@ -186,30 +177,41 @@ def _heading(progress: DispatcherProgress) -> str:
     return "## ✅ Dispatcher tests · passed"
 
 
-def _alert(progress: DispatcherProgress) -> str | None:
-    """A native GitHub alert, so an unfinished run cannot be mistaken for a final one at a glance."""
+def _alert(progress: DispatcherProgress, *, shows_unavailable: bool) -> str | None:
+    """A native GitHub alert, so an unfinished run cannot be mistaken for a final one at a glance.
+
+    A fallback tier sheds the section that lists unestablished results, so the alert states the count
+    itself rather than pointing below, and carries it alongside a failure too. Without that, a fallback
+    body would read as though every result was established.
+    """
     if not progress.done:
         return f"> [!NOTE]\n> **Tests are still running.** {_outstanding(progress)}\n> {FOOTER_RUNNING_NOTE}"
-    if _has_failure(progress):
-        return "> [!CAUTION]\n> **Dispatcher tests failed.** See the failures below."
 
     unavailable = _unavailable_count(progress)
+    if _has_failure(progress):
+        alert = "> [!CAUTION]\n> **Dispatcher tests failed.** See the failures below."
+        if unavailable and not shows_unavailable:
+            verb = "are" if unavailable > 1 else "is"
+            return f"{alert}\n> {_unavailable_phrase(unavailable)}, and {verb} not listed in this comment."
+        return alert
+
     if unavailable:
         # Deliberately not a CAUTION: nothing failed, and there is no failures section to send anyone to.
-        plural = "s" if unavailable > 1 else ""
-        return (
-            f"> [!WARNING]\n> **{unavailable} result{plural} could not be established.** Nothing failed, "
-            "but this is not a clean pass.\n> See the unavailable results below."
-        )
+        alert = f"> [!WARNING]\n> **{_unavailable_phrase(unavailable)}.** Nothing failed, but this is not a clean pass."
+        return f"{alert}\n> See the unavailable results below." if shows_unavailable else alert
     return None
 
 
-def _outstanding(progress: DispatcherProgress) -> str:
-    """What is left to do, counted in batches rather than jobs.
+def _unavailable_phrase(count: int) -> str:
+    plural = "s" if count > 1 else ""
+    return f"{count} result{plural} could not be established"
 
-    A retrying batch has every job reported — its latest attempts failed — while the batch itself is
-    still running, so a pending-jobs count alone can read as ``0`` on a run that is far from done.
-    Batches are the unit that actually finishes, so they are what the alert leads with.
+
+def _outstanding(progress: DispatcherProgress) -> str:
+    """What is left to do, counted in batches because they are the unit that actually finishes.
+
+    A retrying batch has every job reported while the batch runs on, so a pending-jobs count alone can
+    read as ``0`` on a run that is far from done.
     """
     unfinished = sum(1 for batch in progress.batches if batch.state is not ExecutionState.FINISHED)
     total = len(progress.batches)
@@ -442,10 +444,9 @@ def _is_failed(job: JobProgress) -> bool:
 def _has_failure(progress: DispatcherProgress) -> bool:
     """Whether the run has a failure to answer for.
 
-    A batch's own ``FAILURE`` status counts on its own: a workflow can fail without any tracked job
-    reporting a failure. An *error* does not count here — a result that could not be established is
-    reported as incomplete instead, so the heading never claims a failure with nothing to show for it.
-    A timeout still reads as a failure, because it fails every job in the batch.
+    A batch's own ``FAILURE`` counts, since a workflow can fail with no tracked job failing. An *error*
+    does not: an unestablished result reads as incomplete, so the heading never claims a failure with
+    nothing to show for it.
     """
     return progress.failed > 0 or any(batch.status is Status.FAILURE for batch in progress.batches)
 

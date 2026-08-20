@@ -44,9 +44,8 @@ GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
 
 # GitHub's 422 ("body is too long (maximum is 65536 characters)") is the only evidence for this
-# number: neither the OpenAPI description for GITHUB_API_VERSION nor the REST docs state it. Measured
-# in UTF-8 bytes, which is never below the character count GitHub means, so it errs only towards
-# refusing a body GitHub might have taken. Callers should read this rather than invent a margin.
+# number; neither the OpenAPI description nor the REST docs state it. Measured in UTF-8 bytes, which is
+# never below the character count GitHub means, so it errs only towards refusing a body it might take.
 COMMENT_BODY_LIMIT = 65_536
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
@@ -530,9 +529,8 @@ class AsyncGitHubClient:
     async def _comment_request(self, method: str, endpoint: str, *, body: str, timeout: float | None) -> httpx.Response:
         """Send a comment *body*, enforcing the length limit from both sides.
 
-        Scoped to the comment endpoints rather than `_request`, because a 422 elsewhere has nothing to
-        do with a body being too long. Both halves raise `GitHubBodyTooLongError`, so a caller has one
-        thing to catch and never reads a 422 payload itself.
+        Scoped to the comment endpoints rather than `_request`, because a 422 elsewhere has nothing to do
+        with length. Both halves raise `GitHubBodyTooLongError`, so a caller has one thing to catch.
         """
         _ensure_body_fits(body)
         try:

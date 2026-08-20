@@ -53,24 +53,16 @@ class PullRequestUpdaterOptions:
 class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     """Projects ``DispatcherProgress`` snapshots onto one pull-request comment.
 
-    A serialized, stateless projection: it consumes no runner messages, merges no deltas, computes no
-    retries, and calls no GitHub API beyond the single comment it owns. It renders the newest snapshot
-    and ignores stale revisions, so the comment cannot regress.
+    A serialized projection that renders the newest snapshot and ignores stale revisions, so the comment
+    cannot regress. Ordering holds within one Dispatcher execution, which workflow concurrency
+    guarantees is the only one running. Terminal consumer: it emits no further messages.
 
-    **Failing to write the comment never fails the run.** A reporting problem is logged and recorded
-    in ``pr_comment_failed``, and the report itself is kept in ``latest_body`` for the orchestrator to
-    publish on shutdown, however the run ends. Transient failures are not retried here: retrying is
-    the GitHub client's job, so one retry strategy covers every caller.
+    **Failing to write the comment never fails the run.** The problem is recorded in
+    ``pr_comment_failed`` and the report kept in ``latest_body``, for the orchestrator to publish.
+    Transient failures are not retried here — that is the GitHub client's job.
 
-    The comment is found or created once, by ``COMMENT_MARKER``, so a later Dispatcher run on the same
-    pull request edits the existing comment instead of adding another. The marker identifies the
-    comment but does not prove we own it — anyone can paste it, and quoting our comment copies it — so
-    an edit GitHub refuses is treated as "not our comment" and recovered from rather than retried.
-
-    Ordering holds within one Dispatcher execution, which workflow concurrency guarantees is the only
-    one running. Coordinating two concurrent executions is out of scope.
-
-    This is a terminal consumer: it emits no further messages.
+    ``COMMENT_MARKER`` finds the comment, so a later run edits it rather than adding another. It does
+    not prove ownership, though, so an edit GitHub refuses means "not our comment".
     """
 
     def __init__(self, name: str, client: AsyncGitHubClient, options: PullRequestUpdaterOptions):
@@ -92,8 +84,7 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     def latest_body(self) -> str | None:
         """The newest report rendered, or ``None`` if no snapshot has arrived yet.
 
-        Retained whether or not it reached GitHub, so the orchestrator can publish it on shutdown. For
-        a run with no pull request this is the only report there is.
+        Retained whether or not it reached GitHub, and the only report a run without a pull request has.
         """
         return self._latest_body
 
@@ -132,15 +123,9 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     async def _write(self, pr_number: int, message: UpdatePRComment, body: str, log_extra: dict[str, object]) -> bool:
         """Write *body* to the comment, stepping down the tiers if it is too long. Did it land?
 
-        Not a retry loop — a failure a further pass cannot change stops immediately. Each pass
-        continues only after changing what the next one does: a smaller tier, or forgetting a comment
-        GitHub will not let us edit so the next pass creates our own.
-
-        The tiers render lazily because shrinking is the exception. Both ways of learning a body is too
-        long arrive as ``GitHubBodyTooLongError`` — the client's pre-flight measurement and GitHub's own
-        422 — so there is one thing to catch and no payload to parse here.
-
-        Losing the write does not fail the run; the report is retained either way.
+        Not a retry loop: a pass continues only after changing what the next one does — a smaller tier,
+        or forgetting a comment GitHub will not let us edit — and stops otherwise. Both ways of learning
+        a body is too long arrive as ``GitHubBodyTooLongError``, so there is one thing to catch.
         """
         tiers: tuple[Callable[[], str], ...] = (
             lambda: body,

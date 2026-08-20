@@ -1,15 +1,13 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Renders every comment and run-summary scenario to files, for eyeballing the real thing on GitHub.
+"""Renders every comment scenario to files, for eyeballing the real thing on GitHub.
 
-Unit tests cannot tell you that a ``<details>`` sits wrong inside a ``<blockquote>``, so the layout
-has to be looked at at least once per change. Run as a module from the ``ddev`` directory, which is
-what puts the test helpers on ``sys.path``::
+Unit tests cannot tell you that a ``<details>`` sits wrong inside a ``<blockquote>``. Run as a module
+from the ``ddev`` directory, which is what puts the test helpers on ``sys.path``::
 
     cd ddev
     hatch run python -m tests.cli.ci.tests.preview_pr_comment /tmp/dispatcher-preview
-    gh pr comment <SCRATCH_PR> --body-file /tmp/dispatcher-preview/02-retrying.md
 
 Named ``preview_`` so pytest does not collect it.
 """
@@ -17,6 +15,7 @@ Named ``preview_`` so pytest does not collect it.
 from __future__ import annotations
 
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 from ddev.cli.ci.tests.pr_comment import (
@@ -117,6 +116,24 @@ def incomplete() -> DispatcherProgress:
     )
 
 
+def mixed() -> DispatcherProgress:
+    """Failures, an unestablished result and retries at once: the only scenario where all tiers differ.
+
+    Also the case the tier-aware alert exists for — the fallbacks shed the unavailable section, so the
+    count has to survive in the alert instead.
+    """
+    batches = final().batches
+    last = batches[-1]
+    widened = replace(
+        last,
+        jobs_progress=(
+            *last.jobs_progress,
+            job_progress(attempt(error=ProgressError.NO_ARTIFACTS), target="mysql"),
+        ),
+    )
+    return DispatcherProgress(batches=(*batches[:-1], widened), done=True)
+
+
 def main(destination: Path):
     destination.mkdir(parents=True, exist_ok=True)
     scenarios = (
@@ -124,6 +141,7 @@ def main(destination: Path):
         ("02-retrying", retrying()),
         ("03-final", final()),
         ("04-incomplete", incomplete()),
+        ("05-mixed", mixed()),
     )
     for name, progress in scenarios:
         path = destination / f"{name}.md"
@@ -132,14 +150,14 @@ def main(destination: Path):
 
     # The run-summary form, from the failing scenario: the note it prepends only shows up when the
     # comment could not be written.
-    summary = destination / "05-run-summary-comment-failed.md"
+    summary = destination / "06-run-summary-comment-failed.md"
     summary.write_text(render_run_summary(render_comment(final()), pr_comment_failed=True), encoding="utf-8")
     print(f"{summary} ({summary.stat().st_size} bytes)")
 
-    # The two fallback tiers, never seen in a normal run. The failing scenario is where they differ.
-    for name, render in (("06-compact", render_compact_comment), ("07-minimal", render_minimal_comment)):
+    # The two fallback tiers, never seen in a normal run, from the scenario where they differ most.
+    for name, render in (("07-compact", render_compact_comment), ("08-minimal", render_minimal_comment)):
         path = destination / f"{name}.md"
-        path.write_text(render(final()), encoding="utf-8")
+        path.write_text(render(mixed()), encoding="utf-8")
         print(f"{path} ({path.stat().st_size} bytes)")
 
 

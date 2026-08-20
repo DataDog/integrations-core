@@ -67,9 +67,7 @@ DEFAULT_COMMENT_ID = 4242
 def _ensure_body_fits(body: str):
     """Mirror the real client's pre-flight length guard.
 
-    The fake stands in for the client at its public boundary, so it has to refuse what the client
-    refuses. Without this, a caller could pass a body the real client would never send and the test
-    would report success.
+    Without it a test could pass a body the real client would never send and still report success.
     """
     size = len(body.encode('utf-8'))
     if size > COMMENT_BODY_LIMIT:
@@ -79,9 +77,8 @@ def _ensure_body_fits(body: str):
 def _as_client_would_raise(error: BaseException) -> BaseException:
     """Convert a mocked HTTP error the way `AsyncGitHubClient._request` would.
 
-    A test that registers a plain 422 is describing what GitHub returns, not what the client raises.
-    The real client turns a too-long 422 into `GitHubBodyTooLongError` before any caller sees it, so
-    the fake does too -- otherwise these tests assert a shape the caller can never receive.
+    A test registering a plain 422 describes what GitHub returns, not what a caller receives, so the
+    fake converts it the same way -- otherwise tests assert a shape no caller can ever see.
     """
     if (
         isinstance(error, httpx.HTTPStatusError)
@@ -356,9 +353,8 @@ class FakeAsyncGitHubClient:
     ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
         """Async-generator mirror.
 
-        A page here is itself a list of comments, so pages are always registered explicitly: one
-        `GitHubResponse` for one page, a list of them for several. `tests.cli.ci.tests.helpers`
-        provides `comment_page` for building them.
+        A page is itself a list of comments, so pages are registered explicitly: one `GitHubResponse`
+        for one page, a list of them for several. See `comment_page` in `tests.cli.ci.tests.helpers`.
         """
         self._record(
             'list_issue_comments',

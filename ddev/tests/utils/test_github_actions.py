@@ -63,15 +63,10 @@ def test_write_step_summary_survives_an_unwritable_summary_file(tmp_path, monkey
 
 
 def test_the_step_summary_is_written_as_utf8_whatever_the_locale(tmp_path, monkeypatch):
-    """The Dispatcher report is emoji-dense, so the encoding is part of the contract, not a detail.
+    """The Dispatcher report is emoji-dense, so the encoding is part of the contract.
 
-    Asserted in bytes, not text: reading it back as text would use the locale encoding, and would
-    therefore agree with whatever was written rather than checking it.
-
-    Honest about its reach — dropping the explicit encoding is invisible on a UTF-8 machine, because
-    there the locale default *is* UTF-8 and the bytes come out identical. This fails where it matters:
-    Windows CI, and any non-UTF-8 locale. Reproduce that locally with
-    ``LC_ALL=C PYTHONUTF8=0 hatch run python -m pytest``.
+    Asserted in bytes, because reading it back as text would use the locale encoding and agree with
+    whatever was written. Only fails where it matters — Windows CI, or ``LC_ALL=C PYTHONUTF8=0``.
     """
     summary_file = tmp_path / "summary.md"
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))

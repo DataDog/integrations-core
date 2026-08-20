@@ -228,8 +228,7 @@ GITHUB_COMMENT_HARD_LIMIT = 65_536
 def _validation_failed(*messages: str) -> httpx.Response:
     """A 422 shaped the way GitHub shapes one: generic top-level message, specifics per error.
 
-    `code` is `custom` because that is what GitHub documents for a validation failure with no
-    dedicated code, which is the case for an over-long body.
+    `code` is `custom`, which is what GitHub documents when there is no dedicated code.
     """
     return json_response(
         {
@@ -282,9 +281,7 @@ async def test_a_comment_body_exactly_at_the_limit_is_sent():
 async def test_the_comment_body_limit_is_measured_in_bytes_not_characters():
     """GitHub states the limit in characters; bytes is the conservative reading of it.
 
-    A UTF-8 byte length is never below the character count, so measuring bytes can only refuse a body
-    GitHub might have taken -- never send one it will refuse. This body is comfortably under the limit
-    in characters and over it in bytes, so it pins which unit the guard uses.
+    This body is under the limit in characters and over it in bytes, so it pins which unit is used.
     """
     body = "\u00e9" * (GITHUB_COMMENT_HARD_LIMIT // 2 + 1)  # two bytes each
     assert len(body) < GITHUB_COMMENT_HARD_LIMIT < len(body.encode("utf-8"))
@@ -308,11 +305,7 @@ async def test_githubs_own_too_long_rejection_becomes_the_same_error():
 
 
 async def test_a_validation_failure_that_is_not_about_length_stays_an_http_error():
-    """GitHub documents 422 here as validation failed *or* spammed.
-
-    Sending less cannot fix a spam rejection, so reading every 422 as too long would hide the real
-    cause behind a fallback that was never going to work.
-    """
+    """GitHub documents 422 here as validation failed *or* spammed, and sending less cannot fix spam."""
     client = make_client(
         httpx.MockTransport(lambda request: _validation_failed("was flagged as spam and cannot be created"))
     )
@@ -336,11 +329,9 @@ async def test_a_non_validation_status_is_never_read_as_too_long():
 
 
 async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_length():
-    """Length has already been ruled out by the time GitHub answers.
+    """The pre-flight guard already measured this body, so an unreadable 422 is not about length.
 
-    The pre-flight guard measured this body and let it through, so an unreadable 422 is more likely to
-    be something sending less cannot fix. Claiming otherwise would spend a request on a useless
-    fallback and bury the real cause -- which is the failure mode the gating was added to avoid.
+    Assuming otherwise would spend a request on a fallback that cannot work and bury the real cause.
     """
     client = make_client(httpx.MockTransport(lambda request: httpx.Response(422, text="<html>nope</html>")))
 
