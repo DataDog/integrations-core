@@ -90,7 +90,7 @@ def _decode_value(v: float | str) -> float:
     return v
 
 
-def _json_to_metric(family: dict) -> Metric:
+def _json_to_metric(family: dict, is_openmetrics: bool = False) -> Metric:
     samples = [
         Sample(
             s['name'],
@@ -104,21 +104,23 @@ def _json_to_metric(family: dict) -> Metric:
     name = family['name']
     metric_type = family.get('type', 'untyped')
     raw_samples = family.get('samples', ())
-    if metric_type == 'counter':
+    # The Python OpenMetrics parser keeps the TYPE-line name as-is (no
+    # ``_total`` stripping), and the Go OpenMetrics parser does the same,
+    # so no normalization is needed for OpenMetrics.  The ``_total``
+    # stripping below only applies to the Prometheus text format, where
+    # the Python parser's ``build_metric`` strips it automatically.
+    if not is_openmetrics and metric_type == 'counter':
         if name.endswith('_total'):
-            # Standard Prometheus convention: `# TYPE foo_total counter`.
-            # The Python prometheus_client parser strips `_total` from the
-            # family name (e.g. `foo_total` → `foo`).  Mirror that so existing
-            # metric maps that key on the suffix-free name continue to match.
+            # Standard Prometheus convention: ``# TYPE foo_total counter``.
+            # Strip ``_total`` so existing metric maps that key on the
+            # suffix-free name continue to match.
             name = name[:-6]
         else:
-            # Non-standard but common: `# TYPE foo counter` with the actual
-            # sample named `foo_total`.  The Python parser fails to associate
-            # the `_total` sample with the declared counter family and instead
-            # yields it as a *separate* family of type ``unknown`` whose name
-            # IS `foo_total`.  Metric maps written against the Python parser
-            # therefore key on `foo_total`, not `foo`.  Reproduce that
-            # behaviour here so those maps continue to work.
+            # Non-standard but common: ``# TYPE foo counter`` with the actual
+            # sample named ``foo_total``.  The Python parser yields this as a
+            # separate ``unknown`` family named ``foo_total``; metric maps
+            # written against that parser therefore key on ``foo_total``.
+            # Reproduce that here so those maps continue to work.
             total_name = name + '_total'
             if any(s.get('name') == total_name for s in raw_samples):
                 name = total_name
@@ -142,18 +144,21 @@ def parse_with_go_parser(content_type: str, line_streamer: Iterator[str]) -> Ite
     any complete metric families parsed so far, and ``finish_prometheus_parser``
     flushes remaining data and releases the handle.
     """
+    media_type = content_type.split(';')[0] if content_type else ''
+    is_openmetrics = media_type == 'application/openmetrics-text'
+
     parser_id = datadog_agent.new_prometheus_parser(content_type)
     try:
         for chunk in batched_lines(line_streamer, target_size=128):
             families_json = datadog_agent.feed_prometheus_parser(parser_id, chunk)
             if families_json:
                 for family in json.loads(families_json):
-                    yield _json_to_metric(family)
+                    yield _json_to_metric(family, is_openmetrics=is_openmetrics)
 
         remaining_json = datadog_agent.finish_prometheus_parser(parser_id)
         if remaining_json:
             for family in json.loads(remaining_json):
-                yield _json_to_metric(family)
+                yield _json_to_metric(family, is_openmetrics=is_openmetrics)
     except GeneratorExit:
         # Generator was closed before finishing; clean up the Go-side parser.
         try:

@@ -293,15 +293,14 @@ class DatadogAgentStub(object):
                     sample['exemplar'] = exemplar
                 samples.append(sample)
             if samples:
-                # The real Go parser preserves the TYPE-line name verbatim
-                # (e.g. "foo_total" from "# TYPE foo_total counter"), whereas
-                # prometheus_client strips "_total" from counter family names
-                # (returning "foo").  Restore the suffix here so the JSON
-                # fed to _json_to_metric matches what the real Go parser
-                # produces, letting _json_to_metric's Pattern-1 stripping
-                # apply consistently in both unit-test and E2E contexts.
+                # The real Go parser preserves the TYPE-line name verbatim.
+                # For Prometheus format, the Python parser strips "_total"
+                # from counter family names (returning "foo" for
+                # "# TYPE foo_total counter"); restore it here so the JSON
+                # matches the Go parser output.  For OpenMetrics format,
+                # neither parser strips the name, so no adjustment is needed.
                 family_name = metric.name
-                if metric.type == 'counter':
+                if not DatadogAgentStub._is_openmetrics(content_type) and metric.type == 'counter':
                     first_sample_name = samples[0]['name']
                     if first_sample_name == family_name + '_total':
                         family_name = first_sample_name
