@@ -1,1 +1,0 @@
-Fix a `KeyError` crash when ACE omits the `name` field on a resource identifier.
