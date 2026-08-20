@@ -132,21 +132,22 @@ class RemoteQueryCopyLimits(BaseModel):
 
 
 class RemoteQueryResultDelivery(BaseModel):
-    """Validate optional result-delivery upload instructions for the Agent-owned upload transport.
+    """Validate optional result-delivery upload instructions for direct upload to its-agent-intake.
 
-    When present, the integration feeds bounded COPY bytes through the native emit callback to the
-    Agent-owned upload transport. The Python side receives only the sanitized, non-secret session
-    handle: it never receives the upload ``baseUrl``, the scoped upload ``token``, or the Agent
-    API/app keys, and it performs no HTTP upload. The Agent Go side retains those secrets, attaches
-    the API key, and owns endpoint validation, retries, and finalization. Any ``baseUrl``/``token``
-    (or other unknown field) in the request is rejected before pool access. Omitting
-    ``resultDelivery`` keeps the existing inline streaming behavior unchanged.
+    When present, the integration uploads bounded COPY bytes directly to its-agent-intake over
+    HTTP. The Agent forwards the intake base URL and scoped upload token here; the integration
+    reads the org API key and POC application key from Agent config via ``datadog_agent.get_config``
+    and attaches them to its own HTTP upload requests. The integration performs the HTTP upload
+    itself; bulk chunk bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action
+    output. Omitting ``resultDelivery`` keeps the existing inline streaming behavior unchanged.
     """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
     mode: ResultDeliveryMode
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
+    base_url: StrictStr = Field(alias='baseUrl', min_length=1)
+    token: StrictStr = Field(alias='token', min_length=1)
     chunk_bytes: StrictInt = Field(alias='chunkBytes', ge=1)
     max_bytes: StrictInt = Field(alias='maxBytes', ge=1)
     format: ResultDeliveryFormat = 'csv'
@@ -249,6 +250,10 @@ def execute_agent_rpc_stream_copy(
                 'invalid_request', 'Invalid remote query request: request_json must be a JSON object.'
             ),
         )
+        return
+
+    if _is_upload_request(request):
+        _execute_upload_stream(request, check, emit)
         return
 
     events = iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check]))
@@ -600,3 +605,231 @@ def _validation_message(error: ValidationError) -> str:
 
 def _validation_location(location: tuple[Any, ...]) -> str:
     return '.'.join(str(part) for part in location)
+
+
+# ---------------------------------------------------------------------------
+# Direct chunked upload to its-agent-intake (POC_PUBLIC_CHUNKED_UPLOAD)
+#
+# When resultDelivery is present, the integration uploads bounded COPY chunks
+# directly to its-agent-intake over HTTP. The Agent forwards the intake base
+# URL and scoped upload token in resultDelivery, and the integration reads the
+# org API key and POC application key from Agent config via datadog_agent.get_config.
+# Bulk chunk bytes never traverse the native emit bridge, AgentSecure, PAR, or
+# AP action output; only the compact final receipt is emitted back.
+
+REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS = 60
+REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER = 'test-drive-its-agent-intake-poc'
+REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive_selector'
+REMOTE_QUERY_UPLOAD_MAX_RETRIES = 4
+REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS = 0.1
+REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
+
+
+@dataclass(frozen=True)
+class _UploadCredentials:
+    base_url: str
+    upload_id: str
+    api_key: str
+    app_key: str
+    token: str
+    test_drive_selector: str | None
+
+
+class _UploadClient(Protocol):
+    def put_chunk(self, creds: _UploadCredentials, index: int, payload: bytes, sha256_hex: str, rows: int) -> None: ...
+
+    def finalize(self, creds: _UploadCredentials) -> Mapping[str, Any]: ...
+
+    def abort(self, creds: _UploadCredentials) -> None: ...
+
+
+class _RequestsUploadClient:
+    """HTTP upload client for its-agent-intake. Imports requests lazily."""
+
+    def __init__(self, timeout_seconds: int = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS) -> None:
+        self._timeout = timeout_seconds
+
+    def _headers(self, creds: _UploadCredentials, content_type: str | None = None) -> dict[str, str]:
+        headers = {
+            'dd-api-key': creds.api_key,
+            'dd-application-key': creds.app_key,
+            'Authorization': 'Bearer ' + creds.token,
+        }
+        if content_type is not None:
+            headers['Content-Type'] = content_type
+        if creds.test_drive_selector:
+            headers[REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER] = creds.test_drive_selector
+        return headers
+
+    def put_chunk(self, creds: _UploadCredentials, index: int, payload: bytes, sha256_hex: str, rows: int) -> None:
+        headers = self._headers(creds, 'application/octet-stream')
+        headers['X-DD-Chunk-SHA256'] = sha256_hex
+        headers['X-DD-Chunk-Bytes'] = str(len(payload))
+        headers['X-DD-Chunk-Rows'] = str(rows)
+        url = '{}/uploads/{}/chunks/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, index)
+        _upload_with_retry('PUT', url, headers, payload)
+
+    def finalize(self, creds: _UploadCredentials) -> Mapping[str, Any]:
+        headers = self._headers(creds, 'application/json')
+        url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
+        _status, body = _upload_with_retry('POST', url, headers, b'{}')
+        return json.loads(body.decode('utf-8'))
+
+    def abort(self, creds: _UploadCredentials) -> None:
+        headers = self._headers(creds, 'application/json')
+        url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
+        try:
+            _upload_with_retry('POST', url, headers, b'{}')
+        except _CopyStreamFailure:
+            LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
+
+
+def _is_transient_upload_status(status: int) -> bool:
+    return status == 408 or status == 429 or status >= 500
+
+
+def _upload_with_retry(method: str, url: str, headers: Mapping[str, str], body: bytes) -> tuple[int, bytes]:
+    import requests  # lazy: only the POC upload path needs it
+
+    backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
+    last_err: Any = None
+    for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
+        try:
+            resp = requests.request(
+                method, url, headers=dict(headers), data=body, timeout=REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS
+            )
+        except requests.exceptions.RequestException as e:
+            last_err = e
+        else:
+            if 200 <= resp.status_code < 300:
+                return resp.status_code, resp.content
+            if not _is_transient_upload_status(resp.status_code):
+                raise _CopyStreamFailure(
+                    'upload_failed', 'upload to its-agent-intake rejected with status {}'.format(resp.status_code)
+                )
+            last_err = 'status {}'.format(resp.status_code)
+        if attempt == REMOTE_QUERY_UPLOAD_MAX_RETRIES:
+            break
+        time.sleep(backoff)
+        backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
+    raise _CopyStreamFailure(
+        'upload_failed',
+        'upload to its-agent-intake failed after {} attempts: {}'.format(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1, last_err),
+        retryable=True,
+    )
+
+
+def _is_upload_request(request: Mapping[str, Any]) -> bool:
+    delivery = request.get('resultDelivery')
+    return isinstance(delivery, Mapping) and delivery.get('mode') == 'POC_PUBLIC_CHUNKED_UPLOAD'
+
+
+def _get_agent_config(key: str) -> str:
+    try:
+        value = datadog_agent.get_config(key)
+    except Exception:
+        LOGGER.debug('Unable to read agent config %s', key, exc_info=True)
+        return ''
+    if value is None:
+        return ''
+    return str(value)
+
+
+def _resolve_upload_credentials(request: Mapping[str, Any]) -> _UploadCredentials:
+    delivery = request.get('resultDelivery') or {}
+    selector = _get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY)
+    return _UploadCredentials(
+        base_url=str(delivery.get('baseUrl') or ''),
+        upload_id=str(delivery.get('uploadId') or ''),
+        api_key=_get_agent_config('api_key'),
+        app_key=_get_agent_config('app_key'),
+        token=str(delivery.get('token') or ''),
+        test_drive_selector=selector or None,
+    )
+
+
+def _default_upload_client() -> _UploadClient:
+    return _RequestsUploadClient()
+
+
+def _count_newlines(payload: bytes) -> int:
+    return payload.count(b'\n')
+
+
+def _intake_receipt_to_camel(resp: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        'mode': resp.get('mode', 'POC_PUBLIC_CHUNKED_UPLOAD'),
+        'uploadId': resp.get('upload_id', ''),
+        'bucketName': resp.get('bucket_name', ''),
+        'manifestPath': resp.get('manifest_key', ''),
+        'totalBytes': resp.get('total_bytes', 0),
+        'totalRows': resp.get('total_rows', 0),
+        'chunkCount': resp.get('chunk_count', 0),
+        'sha256': resp.get('sha256', ''),
+    }
+
+
+def _safe_abort(client: _UploadClient, creds: _UploadCredentials) -> None:
+    if not creds.base_url or not creds.upload_id or not creds.token:
+        return
+    try:
+        client.abort(creds)
+    except Exception:
+        LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
+
+
+def _upload_one_chunk(client: _UploadClient, creds: _UploadCredentials, event: CopyStreamEvent) -> None:
+    metadata = event.metadata
+    client.put_chunk(creds, metadata['sequence'], event.payload, metadata['sha256'], _count_newlines(event.payload))
+
+
+def _finalize_upload(
+    client: _UploadClient, creds: _UploadCredentials, event: CopyStreamEvent, emit: CopyStreamEmit
+) -> None:
+    receipt = _intake_receipt_to_camel(client.finalize(creds))
+    metadata = dict(event.metadata)
+    # The iterator's provisional receipt uses the camelCase key; replace it with the
+    # server-expected snake_case outer key carrying the Agent-shaped camelCase receipt.
+    metadata.pop('uploadReceipt', None)
+    metadata['upload_receipt'] = receipt
+    _emit_copy_event(emit, CopyStreamEvent('final', metadata))
+
+
+def _execute_upload_stream(
+    request: Mapping[str, Any],
+    check: 'PostgreSql',
+    emit: CopyStreamEmit,
+    http_client: _UploadClient | None = None,
+) -> None:
+    """Upload COPY chunks directly to its-agent-intake; emit only metadata/final/error events."""
+    creds = _resolve_upload_credentials(request)
+    if not creds.api_key or not creds.app_key:
+        _emit_copy_event(
+            emit,
+            _stream_failed_event(
+                'credentials_unavailable',
+                'Remote query upload requires api_key and app_key to be configured on the Agent.',
+            ),
+        )
+        return
+    client = http_client if http_client is not None else _default_upload_client()
+    events = iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check]))
+    try:
+        for event in events:
+            if event.event_type == 'data':
+                _upload_one_chunk(client, creds, event)
+            elif event.event_type == 'final':
+                _finalize_upload(client, creds, event, emit)
+            elif event.event_type == 'error':
+                _safe_abort(client, creds)
+                _emit_copy_event(emit, event)
+            else:
+                _emit_copy_event(emit, event)
+    except _CopyStreamFailure as e:
+        _safe_abort(client, creds)
+        _emit_copy_event(emit, _stream_failed_event(e.code, e.message, retryable=e.retryable))
+        events.close()
+    except BaseException:
+        _safe_abort(client, creds)
+        events.close()
+        raise

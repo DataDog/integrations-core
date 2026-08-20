@@ -12,6 +12,7 @@ import pytest
 from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.remote_query import (
     StaticPostgresCheckRegistry,
+    _execute_upload_stream,
     execute_agent_rpc_stream_copy,
     iter_agent_rpc_stream_copy_events,
     normalize_target,
@@ -132,6 +133,8 @@ def valid_result_delivery(**extra):
     result_delivery = {
         'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
         'uploadId': 'upload-01k',
+        'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
+        'token': 'scoped-upload-token',
         'chunkBytes': 8,
         'maxBytes': 24,
         'format': 'csv',
@@ -145,6 +148,51 @@ def valid_upload_copy_request(**extra):
     request = valid_copy_request(**extra)
     request['resultDelivery'] = valid_result_delivery()
     return request
+
+
+class FakeUploadClient:
+    def __init__(self, put_status=200, finalize_resp=None, raise_on_put=None):
+        self.put_calls = []
+        self.finalize_calls = 0
+        self.abort_calls = 0
+        self.put_status = put_status
+        self.raise_on_put = raise_on_put
+        self.finalize_resp = finalize_resp or {
+            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'upload_id': 'upload-01k',
+            'bucket_name': 'rq-bucket',
+            'manifest_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+            'total_bytes': 0,
+            'total_rows': 0,
+            'chunk_count': 0,
+            'sha256': 'aggregate',
+            'format': 'csv',
+            'compression': 'none',
+            'finalized_at': '2026-08-20T00:00:00Z',
+        }
+
+    def put_chunk(self, creds, index, payload, sha256_hex, rows):
+        self.put_calls.append((index, payload, sha256_hex, rows))
+        if self.raise_on_put is not None:
+            raise self.raise_on_put
+
+    def finalize(self, creds):
+        self.finalize_calls += 1
+        return self.finalize_resp
+
+    def abort(self, creds):
+        self.abort_calls += 1
+
+
+def patch_upload_credentials(monkeypatch):
+    def get_config(key):
+        if key == 'api_key':
+            return 'TEST_API_KEY'
+        if key == 'app_key':
+            return 'TEST_APP_KEY'
+        return None
+
+    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
 
 
 class ExplodingRegistry:
@@ -877,26 +925,24 @@ def test_copy_stream_upload_mode_accepts_csv_format_matching_result_delivery():
     assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
 
 
-def test_copy_stream_upload_mode_never_buffers_more_than_one_chunk():
+def test_copy_stream_upload_mode_never_buffers_more_than_one_chunk(monkeypatch):
+    patch_upload_credentials(monkeypatch)
     pool = FakePool(copy_blocks=[b'aaaa', b'bbbb', b'cccc', b'dddd', b'eeee', b'ffff'])
     request = valid_upload_copy_request()
     request['resultDelivery']['chunkBytes'] = 4
     request['resultDelivery']['maxBytes'] = 28
     request['limits'] = {'chunkBytes': 4, 'maxBytes': 28, 'maxRowBytes': 32, 'timeoutMs': 5000}
-    max_payload = 0
-    in_flight = 0
+    fake = FakeUploadClient()
+    events = []
 
-    def emit(event_type, metadata_json, payload):
-        nonlocal max_payload, in_flight
-        if event_type == 'data':
-            in_flight += 1
-            assert in_flight == 1
-            max_payload = max(max_payload, len(payload))
-            in_flight -= 1
+    _execute_upload_stream(request, make_check(pool=pool), lambda *event: events.append(event), http_client=fake)
 
-    execute_agent_rpc_stream_copy(json.dumps(request), make_check(pool=pool), emit)
-
-    assert max_payload <= 4
+    # Bulk data goes directly to the intake via HTTP, not through the emit callback.
+    assert [event[0] for event in events] == ['metadata', 'final']
+    assert all(len(call[1]) <= 4 for call in fake.put_calls)
+    assert sum(len(call[1]) for call in fake.put_calls) == 24
+    assert len(fake.put_calls) == 6
+    assert fake.finalize_calls == 1
 
 
 def test_copy_stream_upload_mode_emits_stable_sequence_and_sha256_for_idempotent_retry():
@@ -925,52 +971,93 @@ def test_copy_stream_upload_mode_emits_query_failed_and_no_receipt_on_copy_failu
     assert pool.closed_copies == 1
 
 
-def test_copy_stream_upload_mode_rejects_secret_fields_before_pool_access():
+def test_copy_stream_upload_mode_accepts_baseurl_and_token():
     pool = FakePool(copy_blocks=[b'abcdefgh'])
     request = valid_upload_copy_request()
-    request['resultDelivery']['baseUrl'] = 'https://dd.datad0g.com/api/intake/its-agent-intake/uploads/upload-01k'
+    request['resultDelivery']['baseUrl'] = 'https://dd.datad0g.com/api/unstable/its-agent-intake'
     request['resultDelivery']['token'] = 'scoped-upload-token'
 
     events = collect_copy_events(request, make_check(pool=pool))
 
-    assert_failed_event(events, 'invalid_request', 'baseUrl')
-    assert 'scoped-upload-token' not in str(events)
-    assert pool.requested_dbnames == []
+    # baseUrl/token are accepted model fields now; the request proceeds to pool access
+    # and the STARTED metadata does not echo them back.
+    assert event_metadata(events[0])['status'] == 'STARTED'
+    assert 'baseUrl' not in event_metadata(events[0])['resultDelivery']
+    assert 'token' not in event_metadata(events[0])['resultDelivery']
+    assert pool.requested_dbnames != []
 
 
-def test_agent_rpc_stream_copy_upload_mode_adapts_to_binary_safe_callback():
+def test_agent_rpc_stream_copy_upload_mode_uploads_chunks_directly(monkeypatch):
+    patch_upload_credentials(monkeypatch)
     pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    fake = FakeUploadClient(
+        finalize_resp={
+            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'upload_id': 'upload-01k',
+            'bucket_name': 'rq-bucket',
+            'manifest_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+            'total_bytes': 18,
+            'total_rows': 0,
+            'chunk_count': 3,
+            'sha256': 'aggregate-sha',
+            'format': 'csv',
+            'compression': 'none',
+            'finalized_at': '2026-08-20T00:00:00Z',
+        }
+    )
     events = []
 
-    execute_agent_rpc_stream_copy(
-        json.dumps(valid_upload_copy_request()), make_check(pool=pool), lambda *event: events.append(event)
+    _execute_upload_stream(
+        valid_upload_copy_request(), make_check(pool=pool), lambda *event: events.append(event), http_client=fake
     )
 
-    assert [event[0] for event in events] == ['metadata', 'data', 'data', 'data', 'final']
+    # Only metadata and final reach the emit callback; bulk data goes directly via HTTP.
+    assert [event[0] for event in events] == ['metadata', 'final']
     started = json.loads(events[0][1])
+    assert started['status'] == 'STARTED'
     assert 'baseUrl' not in started['resultDelivery']
     assert 'token' not in started['resultDelivery']
-    assert json.loads(events[1][1])['sha256'] == hashlib.sha256(events[1][2]).hexdigest()
-    assert events[1][2] == b'abcdefgh'
-    receipt = json.loads(events[-1][1])['uploadReceipt']
-    assert receipt['chunkCount'] == 3
-    assert receipt['totalBytes'] == 18
+
+    # Three chunks uploaded directly, each with its sha256 and byte count.
+    assert len(fake.put_calls) == 3
+    assert [call[0] for call in fake.put_calls] == [0, 1, 2]
+    for _index, payload, sha256_hex, _rows in fake.put_calls:
+        assert sha256_hex == hashlib.sha256(payload).hexdigest()
+    assert fake.finalize_calls == 1
+    assert fake.abort_calls == 0
+
+    # The final receipt is the Agent-shaped camelCase receipt carried under the
+    # server-expected snake_case outer key.
+    receipt = json.loads(events[-1][1])['upload_receipt']
+    assert receipt == {
+        'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+        'uploadId': 'upload-01k',
+        'bucketName': 'rq-bucket',
+        'manifestPath': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+        'totalBytes': 18,
+        'totalRows': 0,
+        'chunkCount': 3,
+        'sha256': 'aggregate-sha',
+    }
 
 
-def test_agent_rpc_stream_copy_upload_mode_stops_on_callback_failure_without_retry():
+def test_copy_stream_upload_mode_stops_on_http_failure_and_aborts(monkeypatch):
+    patch_upload_credentials(monkeypatch)
     pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qrstuvwx'])
-    attempted = []
+    fake = FakeUploadClient(
+        raise_on_put=remote_query._CopyStreamFailure('upload_failed', 'transient exhausted', retryable=True)
+    )
+    events = []
 
-    def emit(event_type, metadata_json, payload):
-        attempted.append((event_type, metadata_json, payload))
-        if event_type == 'data' and json.loads(metadata_json)['sequence'] == 1:
-            raise RuntimeError('upload chunk failed')
+    _execute_upload_stream(
+        valid_upload_copy_request(), make_check(pool=pool), lambda *event: events.append(event), http_client=fake
+    )
 
-    with pytest.raises(RuntimeError, match='upload chunk failed'):
-        execute_agent_rpc_stream_copy(json.dumps(valid_upload_copy_request()), make_check(pool=pool), emit)
-
-    data_attempted = [event for event in attempted if event[0] == 'data']
-    assert [json.loads(event[1])['sequence'] for event in data_attempted] == [0, 1]
+    # The first chunk upload fails; an error event is emitted and the session is aborted.
+    assert len(fake.put_calls) == 1
+    assert fake.abort_calls == 1
+    assert events[-1][0] == 'error'
+    assert json.loads(events[-1][1])['error']['code'] == 'upload_failed'
     assert pool.closed_copies == 1
     assert pool.cursors[0].executed[-1] == ('ROLLBACK', None)
 
@@ -979,8 +1066,8 @@ def test_agent_rpc_stream_copy_upload_mode_stops_on_callback_failure_without_ret
     'mutation, expected',
     [
         ({'apiKey': 'SECRET_API_KEY'}, 'apiKey'),
-        ({'baseUrl': 'https://dd.datad0g.com/'}, 'baseUrl'),
-        ({'token': 'scoped-upload-token'}, 'token'),
+        ({'baseUrl': ''}, 'baseUrl'),
+        ({'token': ''}, 'token'),
         ({'mode': 'PRESIGNED_URL'}, 'mode'),
         ({'format': 'json'}, 'format'),
         ({'compression': 'gzip'}, 'compression'),
