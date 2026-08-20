@@ -1141,3 +1141,257 @@ def test_copy_stream_upload_mode_enforces_smaller_upload_cap_over_wider_limit():
     assert sum(event_metadata(event)['bytes'] for event in data_events) == 16
     assert_failed_event(events, 'max_bytes_exceeded')
     assert event_metadata(events[-1])['stats']['bytesEmitted'] == 16
+
+
+# ---------------------------------------------------------------------------
+# M3/M4 deterministic direct-HTTP upload proof (test-only tooling)
+#
+# These tests drive the real Postgres direct-HTTP upload path
+# (``_execute_upload_stream``) in optional ``resultDelivery`` upload mode with
+# the allowlisted 8 MiB and 32 MiB proof queries. The COPY byte stream is
+# generated incrementally (1 MiB blocks) so no multi-MiB static fixture or full
+# duplicate payload is ever materialized: the bridge pulls one block at a time,
+# matching real psycopg COPY row/block streaming.
+#
+# Real Postgres appends a CSV row terminator (``\n``) to a single-column text
+# row, so ``repeat('x', 8388608)`` would emit 8388609 bytes and miss the exact
+# 8 MiB boundary. To hit exactly 8 MiB (8388608) and 32 MiB (33554432), the
+# fake COPY stream below yields a deterministic RAW byte stream of exactly
+# those byte counts (the CSV ``\n`` terminator is elided); this is documented
+# here and asserted by the total-bytes assertions.
+#
+# Unlike the prior emit-bridge proof, bulk chunk bytes go directly to
+# its-agent-intake over HTTP via an injectable ``_UploadClient`` (a fake here),
+# NOT through the native emit callback. Only metadata/final/error events cross
+# the callback. This proves the integration owns the upload and the Agent is
+# out of the data path.
+# ---------------------------------------------------------------------------
+
+PROOF_MIB = 1024 * 1024
+M3_PROOF_QUERY = "SELECT repeat('x', 8388608) AS payload"  # 8 MiB allowlisted proof query
+M4_PROOF_QUERY = "SELECT repeat('x', 33554432) AS payload"  # 32 MiB allowlisted proof query
+
+
+def incremental_copy_blocks(total_bytes, block_size=PROOF_MIB):
+    """Yield ``block_size`` blocks of ``b'x'`` until ``total_bytes`` are produced.
+
+    Blocks are generated on demand (a generator, not a static list) so the full
+    payload is never materialized as a single fixture; the consumer pulls one
+    block at a time, matching real psycopg COPY row/block streaming.
+    """
+    if total_bytes % block_size != 0:
+        raise ValueError('total_bytes must be a multiple of block_size for an exact raw byte count')
+    for _ in range(total_bytes // block_size):
+        yield b'x' * block_size
+
+
+def incremental_reference_sha256(total_bytes, block_size=PROOF_MIB):
+    """Compute the reference SHA-256 of the raw byte stream one block at a time."""
+    hasher = hashlib.sha256()
+    for _ in range(total_bytes // block_size):
+        hasher.update(b'x' * block_size)
+    return hasher.hexdigest()
+
+
+def mib_upload_request(query, total_bytes, chunk_bytes=PROOF_MIB, upload_max_bytes=None, copy_max_bytes=None):
+    """Build a valid ``resultDelivery`` upload request sized for MiB-scale proof."""
+    upload_cap = upload_max_bytes if upload_max_bytes is not None else total_bytes
+    copy_cap = copy_max_bytes if copy_max_bytes is not None else total_bytes
+    request = valid_upload_copy_request()
+    request['query'] = query
+    request['format'] = 'csv'
+    request['resultDelivery']['format'] = 'csv'
+    request['resultDelivery']['chunkBytes'] = chunk_bytes
+    request['resultDelivery']['maxBytes'] = upload_cap
+    request['limits'] = {
+        'chunkBytes': chunk_bytes,
+        'maxBytes': copy_cap,
+        'maxRowBytes': PROOF_MIB,
+        'timeoutMs': 30000,
+    }
+    return request
+
+
+def run_direct_upload_stream(request, pool, fake, monkeypatch=None):
+    """Drive the real direct-HTTP upload path and collect proof metrics.
+
+    Bulk chunk bytes are hashed and discarded as the fake intake accepts them, so the
+    full multi-MiB payload is never accumulated in memory. Returns the STARTED/FINAL
+    metadata emitted on the callback, plus the fake intake's recorded put/finalize/abort
+    calls, the total uploaded bytes, chunk count, max chunk size, and the incremental
+    SHA-256 of the uploaded chunk bodies.
+    """
+    if monkeypatch is not None:
+        patch_upload_credentials(monkeypatch)
+    started = final = None
+    hasher = hashlib.sha256()
+    total_bytes = 0
+
+    def emit(event_type, metadata_json, payload):
+        nonlocal started, final, total_bytes
+        if event_type == 'metadata':
+            started = json.loads(metadata_json)
+        elif event_type in ('final', 'error'):
+            final = json.loads(metadata_json)
+
+    _execute_upload_stream(request, make_check(pool=pool), emit, http_client=fake)
+
+    for _index, payload, _sha256_hex, _rows in fake.put_calls:
+        hasher.update(payload)
+        total_bytes += len(payload)
+
+    return SimpleNamespace(
+        started=started,
+        final=final,
+        put_calls=fake.put_calls,
+        finalize_calls=fake.finalize_calls,
+        abort_calls=fake.abort_calls,
+        total_bytes=total_bytes,
+        chunk_count=len(fake.put_calls),
+        max_chunk=max((len(c[1]) for c in fake.put_calls), default=0),
+        digest=hasher.hexdigest(),
+    )
+
+
+@pytest.mark.parametrize(
+    'total_mib, query',
+    [
+        (8, M3_PROOF_QUERY),
+        (32, M4_PROOF_QUERY),
+    ],
+)
+def test_copy_stream_upload_mode_uploads_exact_mib_directly_to_intake(total_mib, query, monkeypatch):
+    total_bytes = total_mib * PROOF_MIB
+    request = mib_upload_request(query, total_bytes)
+    pool = FakePool(copy_blocks=incremental_copy_blocks(total_bytes))
+    fake = FakeUploadClient(
+        finalize_resp={
+            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'upload_id': 'upload-01k',
+            'bucket_name': 'rq-bucket',
+            'manifest_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+            'total_bytes': total_bytes,
+            'total_rows': 0,
+            'chunk_count': total_bytes // PROOF_MIB,
+            'sha256': incremental_reference_sha256(total_bytes),
+            'format': 'csv',
+            'compression': 'none',
+            'finalized_at': '2026-08-20T00:00:00Z',
+        }
+    )
+
+    proof = run_direct_upload_stream(request, pool, fake, monkeypatch)
+
+    # Bulk bytes go directly to the intake over HTTP, not through the emit callback.
+    assert proof.chunk_count == total_bytes // PROOF_MIB
+    assert proof.total_bytes == total_bytes
+    assert proof.max_chunk == PROOF_MIB
+    # Each uploaded chunk carries its per-chunk SHA-256 over the raw body.
+    for _index, payload, _sha256_hex, _rows in proof.put_calls:
+        assert _sha256_hex == hashlib.sha256(payload).hexdigest()
+        assert len(payload) == PROOF_MIB
+    # The aggregate SHA-256 of uploaded chunk bodies matches the incremental reference.
+    assert proof.digest == incremental_reference_sha256(total_bytes)
+    # Finalize is called exactly once; no abort on the happy path.
+    assert proof.finalize_calls == 1
+    assert proof.abort_calls == 0
+
+    # Only metadata and final reach the emit callback; no bulk data events cross it.
+    assert proof.started['status'] == 'STARTED'
+    assert proof.started['resultDelivery']['mode'] == 'POC_PUBLIC_CHUNKED_UPLOAD'
+    assert proof.started['resultDelivery']['uploadId'] == 'upload-01k'
+    assert 'baseUrl' not in proof.started['resultDelivery']
+    assert 'token' not in proof.started['resultDelivery']
+    assert proof.final['status'] == 'SUCCEEDED'
+    # The final receipt is the Agent-shaped camelCase receipt under the snake_case outer key.
+    assert proof.final['upload_receipt']['uploadId'] == 'upload-01k'
+    assert proof.final['upload_receipt']['totalBytes'] == total_bytes
+    assert proof.final['upload_receipt']['chunkCount'] == total_bytes // PROOF_MIB
+    assert proof.final['upload_receipt']['sha256'] == incremental_reference_sha256(total_bytes)
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_backpressure_fences_copy_reads_during_http_upload(monkeypatch):
+    total_bytes = 8 * PROOF_MIB
+    total_blocks = total_bytes // PROOF_MIB
+    read_state = {'count': 0}
+
+    def counting_block_stream():
+        for _ in range(total_blocks):
+            read_state['count'] += 1
+            yield b'x' * PROOF_MIB
+
+    request = mib_upload_request(M3_PROOF_QUERY, total_bytes)
+    pool = FakePool(copy_blocks=counting_block_stream())
+    # Record how many COPY blocks have been read at the moment each chunk is uploaded.
+    reads_at_put = []
+
+    class LockstepFakeClient(FakeUploadClient):
+        def put_chunk(self, creds, index, payload, sha256_hex, rows):
+            reads_at_put.append(read_state['count'])
+            super().put_chunk(creds, index, payload, sha256_hex, rows)
+
+    fake = LockstepFakeClient(
+        finalize_resp={
+            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'upload_id': 'upload-01k',
+            'bucket_name': 'rq-bucket',
+            'manifest_key': 'manifest.json',
+            'total_bytes': total_bytes,
+            'total_rows': 0,
+            'chunk_count': total_blocks,
+            'sha256': incremental_reference_sha256(total_bytes),
+            'format': 'csv',
+            'compression': 'none',
+            'finalized_at': '2026-08-20T00:00:00Z',
+        }
+    )
+
+    proof = run_direct_upload_stream(request, pool, fake, monkeypatch)
+
+    # Lockstep backpressure: when chunk i (1-indexed) is uploaded, exactly i blocks have
+    # been read and block i+1 is fenced (not yet read). The full 8 MiB is never buffered
+    # ahead of the HTTP upload.
+    assert reads_at_put == list(range(1, total_blocks + 1))
+    assert read_state['count'] == total_blocks
+    assert proof.chunk_count == total_blocks
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_aborts_on_http_failure_at_mib_scale(monkeypatch):
+    total_bytes = 8 * PROOF_MIB
+    request = mib_upload_request(M3_PROOF_QUERY, total_bytes)
+    pool = FakePool(copy_blocks=incremental_copy_blocks(total_bytes))
+    fake = FakeUploadClient(
+        raise_on_put=remote_query._CopyStreamFailure('upload_failed', 'transient exhausted', retryable=True)
+    )
+
+    proof = run_direct_upload_stream(request, pool, fake, monkeypatch)
+
+    # The first chunk upload fails; the session is aborted and an error event is emitted.
+    assert len(proof.put_calls) == 1
+    assert proof.abort_calls == 1
+    assert proof.final['status'] == 'FAILED'
+    assert proof.final['error']['code'] == 'upload_failed'
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_enforces_max_bytes_at_mib_scale(monkeypatch):
+    total_bytes = 8 * PROOF_MIB
+    upload_cap = 4 * PROOF_MIB
+    # The copy limit is wider than the upload cap; the tighter upload cap must win.
+    request = mib_upload_request(M3_PROOF_QUERY, total_bytes, upload_max_bytes=upload_cap, copy_max_bytes=total_bytes)
+    pool = FakePool(copy_blocks=incremental_copy_blocks(total_bytes))
+    fake = FakeUploadClient()
+
+    proof = run_direct_upload_stream(request, pool, fake, monkeypatch)
+
+    # maxBytes enforced: exactly the upload cap is uploaded, then the stream fails.
+    assert proof.total_bytes == upload_cap
+    assert proof.chunk_count == upload_cap // PROOF_MIB
+    assert proof.max_chunk == PROOF_MIB
+    assert proof.final['status'] == 'FAILED'
+    assert proof.final['error']['code'] == 'max_bytes_exceeded'
+    # No receipt is emitted when the upload cap is exceeded.
+    assert 'upload_receipt' not in proof.final
+    assert pool.closed_copies == 1
