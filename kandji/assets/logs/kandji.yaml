@@ -91,13 +91,13 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Compliance Control
+    name: Compliance Security Control
     path: ocsf.compliance.control
     source: log
   - groups:
       - OCSF
-    name: Compliance Standards
-    path: ocsf.compliance.standards
+    name: Compliance Requirements
+    path: ocsf.compliance.requirements
     source: log
   - groups:
       - OCSF
@@ -136,6 +136,17 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Disposition
+    path: ocsf.disposition
+    source: log
+  - groups:
+      - OCSF
+    name: Disposition ID
+    path: ocsf.disposition_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
     name: Entity Name
     path: ocsf.entity.name
     source: log
@@ -149,6 +160,12 @@ facets:
     name: Finding Information Description
     path: ocsf.finding_info.desc
     source: log
+  - groups:
+      - OCSF
+    name: Finding Information First Seen
+    path: ocsf.finding_info.first_seen_time
+    source: log
+    type: integer
   - groups:
       - OCSF
     name: Finding Information Source URL
@@ -166,14 +183,10 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Malware Name
-    path: ocsf.malware.name
+    name: Alert
+    path: ocsf.is_alert
     source: log
-  - groups:
-      - OCSF
-    name: Malware Unique ID
-    path: ocsf.malware.uid
-    source: log
+    type: boolean
   - groups:
       - OCSF
     name: Message
@@ -199,6 +212,11 @@ facets:
     name: Metadata Event UID
     path: ocsf.metadata.uid
     source: log
+  - groups:
+      - OCSF
+    name: Policy Unique ID
+    path: ocsf.policy.uid
+    source: log
   - facetType: range
     groups:
       - OCSF
@@ -221,6 +239,12 @@ facets:
     name: User Type
     path: ocsf.user.type
     source: log
+  - groups:
+      - OCSF
+    name: User Type ID
+    path: ocsf.user.type_id
+    source: log
+    type: integer
   - groups:
       - OCSF
     name: Target Unique ID
@@ -460,13 +484,13 @@ pipeline:
         - type: string-builder-processor
           name: Add product name
           enabled: true
-          template: "Kandji"
+          template: "Iru"
           target: ocsf.metadata.product.name
           replaceMissing: false
         - type: string-builder-processor
           name: Add product vendor
           enabled: true
-          template: "Kandji"
+          template: "Iru"
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
     - type: pipeline
@@ -485,7 +509,11 @@ pipeline:
             - "2025-09-09T07:47:49.172851Z"
           grok:
             supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+            matchRules: |-
+              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: attribute-remapper
           name: Map `new_state.vulnerability.id` to `vuln_stage.cve.uid`
           enabled: true
@@ -536,6 +564,59 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        # The audit vulnerability stream carries its own CVSS data under
+        # new_state.vulnerability.score, so build cve.cvss[] here too rather than
+        # only in the Detections sub-pipeline. cvss.version is a required
+        # attribute and Iru does not report it, so it is pinned to 3.1 to match
+        # the Detections sub-pipeline.
+        - type: attribute-remapper
+          name: Map `new_state.vulnerability.score.base` to `cvss_stage.base_score`
+          enabled: true
+          sources:
+            - new_state.vulnerability.score.base
+          sourceType: attribute
+          target: cvss_stage.base_score
+          targetType: attribute
+          targetFormat: double
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new_state.vulnerability.severity` to `cvss_stage.severity`
+          enabled: true
+          sources:
+            - new_state.vulnerability.severity
+          sourceType: attribute
+          target: cvss_stage.severity
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add CVSS version
+          enabled: true
+          template: "3.1"
+          target: cvss_stage.version
+          replaceMissing: false
+        - type: array-processor
+          name: Move attributes into cve.cvss array
+          enabled: true
+          operation:
+            source: cvss_stage
+            target: vuln_stage.cve.cvss
+            preserveSource: false
+            type: append
+        # score.exploitability is an EPSS-style probability; cve.epss.score is
+        # its OCSF home (the cvss object has no exploitability attribute).
+        - type: attribute-remapper
+          name: Map `new_state.vulnerability.score.exploitability` to `vuln_stage.cve.epss.score`
+          enabled: true
+          sources:
+            - new_state.vulnerability.score.exploitability
+          sourceType: attribute
+          target: vuln_stage.cve.epss.score
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
         - type: array-processor
           name: Move attributes into vulnerabilities array
           enabled: true
@@ -547,8 +628,8 @@ pipeline:
         - type: string-builder-processor
           name: Add finding title
           enabled: true
-          template: "%{cve_id} in %{file_name}"
-          target: finding_title
+          template: "%{cve_id} identified in %{file_name}"
+          target: ocsf.finding_info.title
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 2002
@@ -600,12 +681,12 @@ pipeline:
               overrideOnConflict: false
               targetFormat: string
             - type: schema-remapper
-              name: Map `finding_title` to `ocsf.finding_info.title`
+              name: Map `ocsf.finding_info.title` to `ocsf.finding_info.title`
               sources:
-                - finding_title
+                - ocsf.finding_info.title
               target: ocsf.finding_info.title
-              preserveSource: false
-              overrideOnConflict: false
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `new_state.vulnerability.description` to `ocsf.finding_info.desc`
               sources:
@@ -772,7 +853,11 @@ pipeline:
             - "2025-09-24T18:57:34.914031Z"
           grok:
             supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+            matchRules: |-
+              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: string-builder-processor
           name: Add device OS name
           enabled: true
@@ -849,6 +934,54 @@ pipeline:
           template: "3.1"
           target: cvss_stage.version
           replaceMissing: false
+        # NVD publication/modification dates for the CVE. Iru emits these with no
+        # zone suffix at all (unlike `detection_datetime`, which is Z-form), so
+        # they get their own patterns; a bare local-time pattern is treated as UTC.
+        - type: grok-parser
+          name: Parse `cve_published_at` to `vuln_stage.cve.created_time`
+          enabled: true
+          source: cve_published_at
+          samples:
+            - "2025-09-24T17:15:39.940000"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              iso_naive_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):vuln_stage.cve.created_time}
+              iso_naive_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.created_time}
+        - type: grok-parser
+          name: Parse `cve_modified_at` to `vuln_stage.cve.modified_time`
+          enabled: true
+          source: cve_modified_at
+          samples:
+            - "2025-09-25T15:55:41.970000"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              iso_naive_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):vuln_stage.cve.modified_time}
+              iso_naive_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.modified_time}
+        # An Iru blueprint is the device group a Mac is assigned to, so it maps to
+        # `device.groups[]` (an array of group objects per the dictionary, despite
+        # device.json's description showing bare strings).
+        - type: attribute-remapper
+          name: Map `blueprint_id` to `group_stage.uid`
+          enabled: true
+          sources:
+            - blueprint_id
+          sourceType: attribute
+          target: group_stage.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `blueprint_name` to `group_stage.name`
+          enabled: true
+          sources:
+            - blueprint_name
+          sourceType: attribute
+          target: group_stage.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
         - type: array-processor
           name: Move attributes into cve.cvss array
           enabled: true
@@ -865,11 +998,19 @@ pipeline:
             target: ocsf.vulnerabilities
             preserveSource: false
             type: append
+        - type: array-processor
+          name: Move attributes into device.groups array
+          enabled: true
+          operation:
+            source: group_stage
+            target: ocsf.device.groups
+            preserveSource: false
+            type: append
         - type: string-builder-processor
           name: Add finding title
           enabled: true
-          template: "%{cve_id} in %{name}"
-          target: finding_title
+          template: "%{cve_id} identified in %{name}"
+          target: ocsf.finding_info.title
           replaceMissing: false
         # Synthesize a finding identifier. GET /api/v1/vulnerability-management/
         # detections returns no per-detection id (no id, detection_id or uuid --
@@ -888,7 +1029,7 @@ pipeline:
           name: Add finding uid
           enabled: true
           template: "%{device_id}-%{bundle_id}-%{cve_id}"
-          target: finding_uid
+          target: ocsf.finding_info.uid
           replaceMissing: true
         - type: schema-processor
           name: Apply OCSF schema for 2002
@@ -924,6 +1065,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `ocsf.device.groups` to `ocsf.device.groups`
+              sources:
+                - ocsf.device.groups
+              target: ocsf.device.groups
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
               sources:
                 - ocsf.device.os.name
@@ -931,31 +1079,28 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `finding_uid` to `ocsf.finding_info.uid`
+              name: Map `ocsf.finding_info.uid` to `ocsf.finding_info.uid`
               sources:
-                - finding_uid
+                - ocsf.finding_info.uid
               target: ocsf.finding_info.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.finding_info.uid
+              target: ocsf.metadata.uid
               preserveSource: true
               overrideOnConflict: false
               targetFormat: string
-            # `finding_uid` is consumed here with preserveSource: false so the
-            # staging attribute does not leak into the log. This must remain the
-            # LAST reader of `finding_uid` in this schema-processor.
             - type: schema-remapper
-              name: Map `finding_uid` to `ocsf.metadata.uid`
+              name: Map `ocsf.finding_info.title` to `ocsf.finding_info.title`
               sources:
-                - finding_uid
-              target: ocsf.metadata.uid
-              preserveSource: false
-              overrideOnConflict: false
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `finding_title` to `ocsf.finding_info.title`
-              sources:
-                - finding_title
+                - ocsf.finding_info.title
               target: ocsf.finding_info.title
-              preserveSource: false
-              overrideOnConflict: false
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `cve_description` to `ocsf.finding_info.desc`
               sources:
@@ -1104,21 +1249,6 @@ pipeline:
           template: "%{target_component}: %{new_state.parameter_name}"
           target: ocsf.message
           replaceMissing: true
-        - type: string-builder-processor
-          name: Add compliance standards
-          enabled: true
-          template: "[Kandji Parameters]"
-          target: compliance_standards_str
-          replaceMissing: false
-        - type: grok-parser
-          name: Parse `compliance_standards_str` to `ocsf.compliance.standards`
-          enabled: true
-          source: compliance_standards_str
-          samples:
-            - "[Kandji Parameters]"
-          grok:
-            supportRules: ""
-            matchRules: "StandardsToArray %{data:ocsf.compliance.standards:array(\"[]\",\",\")}"
         - type: grok-parser
           name: Parse `occurred_at` to `ocsf.time`
           enabled: true
@@ -1127,18 +1257,42 @@ pipeline:
             - "2025-09-23T09:01:37.420577Z"
           grok:
             supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+            matchRules: |-
+              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: string-builder-processor
           name: Add finding title
           enabled: true
           template: "%{new_state.parameter_name}"
-          target: finding_title
+          target: ocsf.finding_info.title
           replaceMissing: false
+        # An Iru blueprint is the device group a Mac is assigned to. No
+        # `blueprint_id` is present on this shape, so only the name is available.
+        - type: attribute-remapper
+          name: Map `blueprint_name` to `group_stage.name`
+          enabled: true
+          sources:
+            - blueprint_name
+          sourceType: attribute
+          target: group_stage.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move attributes into device.groups array
+          enabled: true
+          operation:
+            source: group_stage
+            target: ocsf.device.groups
+            preserveSource: false
+            type: append
         - type: string-builder-processor
           name: Add finding title for blueprint compliance run
           enabled: true
           template: "Compliance run for blueprint %{blueprint_name}"
-          target: finding_title
+          target: ocsf.finding_info.title
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 2003
@@ -1165,13 +1319,22 @@ pipeline:
               target: ocsf.message
               preserveSource: true
               overrideOnConflict: true
+            # first_runs events evaluate a whole blueprint at once, so they carry
+            # parameter_names.* arrays rather than a single parameter_name. Those
+            # check names are compliance requirements, not a control -- a
+            # Blueprint is a bundle of checks, so mapping it to
+            # compliance.control would be wrong. Mapped as a multi-source
+            # fallback (first non-empty list wins) because array-processor
+            # `append` nests arrays instead of concatenating them.
             - type: schema-remapper
-              name: Map `ocsf.compliance.standards` to `ocsf.compliance.standards`
+              name: Map `new_state.parameter_names.passed`, `new_state.parameter_names.remediated`, `new_state.parameter_names.incompatible` to `ocsf.compliance.requirements`
               sources:
-                - ocsf.compliance.standards
-              target: ocsf.compliance.standards
+                - new_state.parameter_names.passed
+                - new_state.parameter_names.remediated
+                - new_state.parameter_names.incompatible
+              target: ocsf.compliance.requirements
               preserveSource: true
-              overrideOnConflict: true
+              overrideOnConflict: false
             - type: schema-remapper
               name: Map `ocsf.time` to `ocsf.time`
               sources:
@@ -1197,12 +1360,12 @@ pipeline:
               overrideOnConflict: false
               targetFormat: string
             - type: schema-remapper
-              name: Map `finding_title` to `ocsf.finding_info.title`
+              name: Map `ocsf.finding_info.title` to `ocsf.finding_info.title`
               sources:
-                - finding_title
+                - ocsf.finding_info.title
               target: ocsf.finding_info.title
-              preserveSource: false
-              overrideOnConflict: false
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `new_state.parameter_name` to `ocsf.compliance.control`
               sources:
@@ -1217,6 +1380,13 @@ pipeline:
               target: ocsf.device.hostname
               preserveSource: true
               overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.device.groups` to `ocsf.device.groups`
+              sources:
+                - ocsf.device.groups
+              target: ocsf.device.groups
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `device_name` to `ocsf.device.name`
               sources:
@@ -1335,7 +1505,11 @@ pipeline:
             - "2025-09-23T07:16:07.444310Z"
           grok:
             supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+            matchRules: |-
+              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: category-processor
           name: Add malware classification id
           enabled: true
@@ -1372,79 +1546,167 @@ pipeline:
           enabled: true
           operation:
             source: malware_classification_id_num
-            target: ocsf.malware.classification_ids
+            target: malware_stage.classification_ids
             preserveSource: false
             type: append
+        # The detected file is evidence of the detection, not an affected
+        # resource: `evidences` has a purpose-built `file` attribute and
+        # `resource_details` does not, and `resources` describes what the
+        # activity affected rather than the artifact that triggered it.
         - type: attribute-remapper
-          name: Map `new_state.file.name` to `resource_stage.name`
+          name: Map `new_state.file.name` to `evidence_stage.file.name`
           enabled: true
           sources:
             - new_state.file.name
           sourceType: attribute
-          target: resource_stage.name
+          target: evidence_stage.file.name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `new_state.file.hash.sha256` to `resource_stage.uid`
-          enabled: true
-          sources:
-            - new_state.file.hash.sha256
-          sourceType: attribute
-          target: resource_stage.uid
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `new_state.file.path` to `resource_stage.data.path`
+          name: Map `new_state.file.path` to `evidence_stage.file.path`
           enabled: true
           sources:
             - new_state.file.path
           sourceType: attribute
-          target: resource_stage.data.path
+          target: evidence_stage.file.path
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        # file.type_id is a required attribute of the file object. Iru only
+        # reports regular files here, so it is set to Regular File (1).
         - type: string-builder-processor
-          name: Add resource type
+          name: Add evidence file type
           enabled: true
-          template: "File"
-          target: resource_stage.type
+          template: "Regular File"
+          target: evidence_stage.file.type
           replaceMissing: false
+        - type: string-builder-processor
+          name: Add evidence file type id
+          enabled: true
+          template: "1"
+          target: evidence_stage.file.type_id_str
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `evidence_stage.file.type_id_str` to `evidence_stage.file.type_id`
+          enabled: true
+          sources:
+            - evidence_stage.file.type_id_str
+          sourceType: attribute
+          target: evidence_stage.file.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: true
         - type: array-processor
-          name: Move attributes into resources array
+          name: Move attributes into evidences array
           enabled: true
           operation:
-            source: resource_stage
-            target: ocsf.resources
+            source: evidence_stage
+            target: ocsf.evidences
             preserveSource: false
             type: append
+        # `malware` is an array of Malware objects (dictionary is_array: true),
+        # so it is staged as an object and appended. Writing ocsf.malware.*
+        # directly produces a bare object, which the local validator does not
+        # currently catch because it no-ops array validation.
         - type: attribute-remapper
-          name: Map `metadata.threat_family_name` to `ocsf.malware.name`
+          name: Map `metadata.threat_family_name` to `malware_stage.name`
           enabled: true
           sources:
             - metadata.threat_family_name
           sourceType: attribute
-          target: ocsf.malware.name
+          target: malware_stage.name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `metadata.threat_id` to `ocsf.malware.uid`
+          name: Map `metadata.threat_id` to `malware_stage.uid`
           enabled: true
           sources:
             - metadata.threat_id
           sourceType: attribute
-          target: ocsf.malware.uid
+          target: malware_stage.uid
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `metadata.classification_source` to `malware_stage.provider`
+          enabled: true
+          sources:
+            - metadata.classification_source
+          sourceType: attribute
+          target: malware_stage.provider
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move attributes into malware array
+          enabled: true
+          operation:
+            source: malware_stage
+            target: ocsf.malware
+            preserveSource: false
+            type: append
         - type: string-builder-processor
           name: Add finding title
           enabled: true
           template: "%{metadata.threat_family_name} detected in %{file_name}"
-          target: finding_title
+          target: ocsf.finding_info.title
           replaceMissing: false
+        # security_control profile: a malware detection is an alertable signal.
+        - type: string-builder-processor
+          name: Add is alert
+          enabled: true
+          template: "true"
+          target: ocsf.is_alert
+          replaceMissing: false
+        # `initial_detection_date` uses an offset-with-colon (+00:00) rather than
+        # the `Z` form used by `occurred_at`, so it needs its own pattern.
+        - type: grok-parser
+          name: Parse `metadata.initial_detection_date` to `ocsf.finding_info.first_seen_time`
+          enabled: true
+          source: metadata.initial_detection_date
+          samples:
+            - "2025-09-23T07:16:07.444310+00:00"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.first_seen_time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.first_seen_time}
+        # `metadata.device.name` is the user-facing display name ("IT’s MacBook Air");
+        # `local_host_name` is the actual host name ("ITs-MacBook-Air-2").
+        - type: attribute-remapper
+          name: Map `metadata.local_host_name` to `ocsf.device.hostname`
+          enabled: true
+          sources:
+            - metadata.local_host_name
+          sourceType: attribute
+          target: ocsf.device.hostname
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        # security_control profile: the Iru library item is the threat-protection
+        # policy that produced the detection.
+        - type: attribute-remapper
+          name: Map `metadata.library_item_id` to `ocsf.policy.uid`
+          enabled: true
+          sources:
+            - metadata.library_item_id
+          sourceType: attribute
+          target: ocsf.policy.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Convert `ocsf.is_alert` to boolean type
+          enabled: true
+          source: ocsf.is_alert
+          samples:
+            - "true"
+          grok:
+            supportRules: ""
+            matchRules: convert_to_boolean %{boolean("true","false"):ocsf.is_alert}
         - type: schema-processor
           name: Apply OCSF schema for 2004
           enabled: true
@@ -1472,24 +1734,10 @@ pipeline:
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
-              name: Map `ocsf.malware.classification_ids` to `ocsf.malware.classification_ids`
+              name: Map `ocsf.malware` to `ocsf.malware`
               sources:
-                - ocsf.malware.classification_ids
-              target: ocsf.malware.classification_ids
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.malware.name` to `ocsf.malware.name`
-              sources:
-                - ocsf.malware.name
-              target: ocsf.malware.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.malware.uid` to `ocsf.malware.uid`
-              sources:
-                - ocsf.malware.uid
-              target: ocsf.malware.uid
+                - ocsf.malware
+              target: ocsf.malware
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -1504,8 +1752,8 @@ pipeline:
             # file instance on this host and is unique per finding. Deliberately
             # not `metadata.threat_id`: that value is the file's SHA256 (identical
             # to new_state.file.hash.sha256), so it is shared by every device the
-            # same malware is found on. The hash stays on ocsf.malware.uid, which
-            # is where an identifier for the malware itself belongs.
+            # same malware is found on. The hash stays on the malware[] entry's
+            # uid, which is where an identifier for the malware itself belongs.
             - type: schema-remapper
               name: Map `target_id` to `ocsf.finding_info.uid`
               sources:
@@ -1514,12 +1762,41 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper
-              name: Map `finding_title` to `ocsf.finding_info.title`
+              name: Map `ocsf.finding_info.title` to `ocsf.finding_info.title`
               sources:
-                - finding_title
+                - ocsf.finding_info.title
               target: ocsf.finding_info.title
-              preserveSource: false
-              overrideOnConflict: false
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.is_alert` to `ocsf.is_alert`
+              sources:
+                - ocsf.is_alert
+              target: ocsf.is_alert
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.first_seen_time` to `ocsf.finding_info.first_seen_time`
+              sources:
+                - ocsf.finding_info.first_seen_time
+              target: ocsf.finding_info.first_seen_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.device.hostname` to `ocsf.device.hostname`
+              sources:
+                - ocsf.device.hostname
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.policy.uid` to `ocsf.policy.uid`
+              sources:
+                - ocsf.policy.uid
+              target: ocsf.policy.uid
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `metadata.threat_description` to `ocsf.finding_info.desc`
               sources:
@@ -1528,10 +1805,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper
-              name: Map `ocsf.resources` to `ocsf.resources`
+              name: Map `ocsf.evidences` to `ocsf.evidences`
               sources:
-                - ocsf.resources
-              target: ocsf.resources
+                - ocsf.evidences
+              target: ocsf.evidences
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -1623,6 +1900,49 @@ pipeline:
                 name: ocsf.status
                 id: ocsf.status_id
               type: schema-category-mapper
+            # security_control profile. Iru's `file_detection` events were absent
+            # from every org we sampled, so the only disposition vocabulary we
+            # have evidence for is the documented audit event: action_taken
+            # "No Action", threat_status "Not Quarantined", file_status
+            # "Detected". Values beyond those fall to Other (99) with the literal
+            # preserved by the fallback, rather than guessing at a vocabulary the
+            # vendor may never emit. `action_id` is left unmapped: its enum is
+            # Allowed/Denied, and "No Action" is neither.
+            #
+            # Order matters: "Not Quarantined" tokenizes to include
+            # `quarantined`, so the Quarantined branch must exclude the negative
+            # phrase explicitly or every un-quarantined threat is misreported as
+            # quarantined.
+            - name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: '@metadata.threat_status:Quarantined -@metadata.threat_status:"Not Quarantined"'
+                  name: Quarantined
+                  id: 3
+                - filter:
+                    query: '@metadata.action_taken:"No Action" OR @metadata.threat_status:"Not Quarantined"'
+                  name: No Action
+                  id: 16
+                - filter:
+                    query: "@metadata.action_taken:* OR @metadata.threat_status:* OR @metadata.file_status:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+              fallback:
+                values:
+                  ocsf.disposition: Other
+                  ocsf.disposition_id: "99"
+                sources:
+                  ocsf.disposition:
+                    - metadata.action_taken
+                    - metadata.threat_status
+              type: schema-category-mapper
             - name: ocsf.severity_id
               categories:
                 - filter:
@@ -1654,7 +1974,8 @@ pipeline:
             className: Detection Finding
             classUid: 2004
             extensions: []
-            profiles: []
+            profiles:
+              - security_control
     - type: pipeline
       name: OCSF sub pipeline for class Account Change [3001]
       enabled: true
@@ -1677,7 +1998,11 @@ pipeline:
             - "2025-09-23T09:01:37.420577Z"
           grok:
             supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+            matchRules: |-
+              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 3001
           enabled: true
@@ -1865,7 +2190,11 @@ pipeline:
             - "2025-09-23T09:01:37.420577Z"
           grok:
             supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+            matchRules: |-
+              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 3004
           enabled: true
@@ -1978,19 +2307,20 @@ pipeline:
                   ocsf.actor.user.type:
                     - actor_type
               type: schema-category-mapper
-            - name: ocsf.entity.type
+            # `Device` is a real managed_entity type_id (1). `library_item` and
+            # `blueprint` have no OCSF equivalent, so they take Other/99 and the
+            # fallback copies Iru's own `target_type` string into the name instead
+            # of inventing a caption -- OCSF requires `type` to be the caption of
+            # `type_id`, so pairing a made-up caption with 99 is invalid.
+            - name: ocsf.entity.type_id
               categories:
                 - filter:
                     query: "@target_type:device"
                   name: Device
-                  id: 99
+                  id: 1
                 - filter:
-                    query: "@target_type:library_item"
-                  name: Library Item
-                  id: 99
-                - filter:
-                    query: "@target_type:blueprint"
-                  name: Blueprint
+                    query: "@target_type:*"
+                  name: Other
                   id: 99
                 - filter:
                     query: "*"
@@ -1999,6 +2329,13 @@ pipeline:
               targets:
                 name: ocsf.entity.type
                 id: ocsf.entity.type_id
+              fallback:
+                values:
+                  ocsf.entity.type: Other
+                  ocsf.entity.type_id: "99"
+                sources:
+                  ocsf.entity.type:
+                    - target_type
               type: schema-category-mapper
             - name: ocsf.activity_id
               categories:
@@ -2103,7 +2440,11 @@ pipeline:
             - "2025-09-23T07:16:07.444310Z"
           grok:
             supportRules: ""
-            matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+            matchRules: |-
+              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 0
           enabled: true

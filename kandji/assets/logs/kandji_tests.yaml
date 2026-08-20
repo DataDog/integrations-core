@@ -43,8 +43,8 @@ tests:
         metadata:
           uid: 01K5TWX6CQ07HFHKSMYQYRDKAB
           product:
-            name: Kandji
-            vendor_name: Kandji
+            name: Iru
+            vendor_name: Iru
           version: 1.5.0
         category_uid: 3
         category_name: Identity & Access Management
@@ -241,20 +241,24 @@ tests:
         metadata:
           uid: 01K5TPW1DEFFM2SYK7HYJ5TPAB
           product:
-            name: Kandji
-            vendor_name: Kandji
+            name: Iru
+            vendor_name: Iru
           version: 1.5.0
+          profiles:
+            - security_control
         category_uid: 2
         malware:
-          classification_ids:
-            - 17
-          uid: 4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB
-          name: SpyDok
+          - classification_ids:
+              - 17
+            uid: 4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB
+            name: SpyDok
+            provider: Kandji
         category_name: Findings
         finding_info:
           uid: 3a867771-949f-4065-9bc2-e79634af48b9.16777220.558457
           title: SpyDok detected in AppStore
           desc: SpyDok is spyware designed to stealthily collect sensitive information such as login credentials, browsing history, and other personal data. It operates by monitoring user activity, exfiltrating stolen data to remote servers controlled by attackers, and maintaining persistence to evade detection.
+          first_seen_time: 1758611767444
         status_id: 1
         class_uid: 2004
         activity_id: 1
@@ -263,7 +267,7 @@ tests:
         class_name: Detection Finding
         device:
           uid: 3a867771-949f-4065-9bc2-e79634af48b1
-          hostname: ITs-MacBook-Air-2.local
+          hostname: ITs-MacBook-Air-2
           os:
             name: Sonoma
             version: 14.7.6
@@ -276,12 +280,17 @@ tests:
           model: MacBook Air
           type: Unknown
         status: New
-        resources:
-          - uid: 4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB
-            data:
+        evidences:
+          - file:
               path: /Users/Shared/AppStore.app/Contents/MacOS/AppStore
-            name: AppStore
-            type: File
+              type_id: 1
+              name: AppStore
+              type: Regular File
+        is_alert: true
+        disposition: No Action
+        policy:
+          uid: d239708c-d890-48de-b5f5-f5b5ecc555ca
+        disposition_id: 16
     message: |-
       {
         "occurred_at" : "2025-09-23T07:16:07.444310Z",
@@ -410,8 +419,8 @@ tests:
         metadata:
           uid: 01K4SVQ3MR2BSPB21TWNWJAJA2
           product:
-            name: Kandji
-            vendor_name: Kandji
+            name: Iru
+            vendor_name: Iru
           version: 1.5.0
         category_uid: 3
         category_name: Identity & Access Management
@@ -429,7 +438,7 @@ tests:
         class_name: Entity Management
         entity:
           uid: 3fce591e-393c-49cc-91f2-f3eb608404dp
-          type_id: 99
+          type_id: 1
           name: No name
           type: Device
         status: Success
@@ -571,14 +580,14 @@ tests:
         metadata:
           uid: 01K4PQ40BTQPZVS52FJXD0GFB3
           product:
-            name: Kandji
-            vendor_name: Kandji
+            name: Iru
+            vendor_name: Iru
           version: 1.5.0
         category_uid: 2
         category_name: Findings
         finding_info:
           uid: e7268916397088438050fdd671054aab
-          title: CVE-2024-44187 in Safari
+          title: CVE-2024-44187 identified in Safari
           desc: A cross-origin issue existed with "iframe" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.
         status_id: 1
         class_uid: 2002
@@ -588,6 +597,12 @@ tests:
             cve:
               uid: CVE-2024-44187
               desc: A cross-origin issue existed with "iframe" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.
+              epss:
+                score: '8.6E-4'
+              cvss:
+                - severity: Medium
+                  base_score: 6.5
+                  version: '3.1'
             vendor_name: Kandji
             desc: A cross-origin issue existed with "iframe" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.
         time: 1757404069172
@@ -711,8 +726,8 @@ tests:
         metadata:
           uid: 01K4PJA0E0EQEC7QRXTH6WAJ12
           product:
-            name: Kandji
-            vendor_name: Kandji
+            name: Iru
+            vendor_name: Iru
           version: 1.5.0
         category_uid: 3
         category_name: Identity & Access Management
@@ -732,7 +747,7 @@ tests:
           uid: 41b6cc51-7905-436a-9e33-b1468ceeb08a
           type_id: 99
           name: DDS-Test
-          type: Blueprint
+          type: blueprint
         status: Success
     message: |-
       {
@@ -811,8 +826,8 @@ tests:
         activity_name: Create
         metadata:
           product:
-            name: Kandji
-            vendor_name: Kandji
+            name: Iru
+            vendor_name: Iru
           version: 1.5.0
           uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab-com.google.Chrome-CVE-2025-10892
         category_uid: 2
@@ -820,7 +835,7 @@ tests:
         finding_info:
           uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab-com.google.Chrome-CVE-2025-10892
           src_url: https://nvd.nist.gov/vuln/detail/CVE-2025-10892
-          title: CVE-2025-10892 in Google Chrome
+          title: CVE-2025-10892 identified in Google Chrome
         status_id: 1
         class_uid: 2002
         activity_id: 1
@@ -831,6 +846,8 @@ tests:
                 - base_score: 8.8
                   version: '3.1'
                   severity: High
+              created_time: 1758734139940
+              modified_time: 1758815741970
             severity: High
         time: 1758740254914
         severity_id: 4
@@ -848,6 +865,9 @@ tests:
             serial_number: C02XMF5VJK7A
           model: MacBook Air (Retina, 13-inch, 2018)
           type: Unknown
+          groups:
+            - uid: 41b6cc51-7905-436a-9e33-b1468ceeb08d
+              name: Blueprint-Test
         status: New
     message: "Integer overflow in V8 in Google Chrome prior to 140.0.7339.207 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: High)"
     service: "detection"
@@ -887,7 +907,6 @@ tests:
        action: "update"
        actor_id: "3a867771-949f-4065-9bc2-e79634af48b1"
        actor_type: "device"
-       compliance_standards_str: "[Kandji Parameters]"
        device_name: "IT's MacBook Air"
        event_category: "endpoint_management"
        event_type: "update.device.remediation"
@@ -914,8 +933,6 @@ tests:
          class_uid: 2003
          compliance:
            control: "Disable the ability to login to another user's active and locked session"
-           standards:
-             - "Kandji Parameters"
            status: "Fail"
            status_id: 3
          device:
@@ -930,8 +947,8 @@ tests:
          message: "remediation: Disable the ability to login to another user's active and locked session"
          metadata:
            product:
-             name: "Kandji"
-             vendor_name: "Kandji"
+             name: "Iru"
+             vendor_name: "Iru"
            uid: "01K5W2Q8ZR4M7T1N3D6XVB0PKC"
            version: "1.5.0"
          severity: "Informational"
@@ -1019,7 +1036,6 @@ tests:
        actor_id: "3a867771-949f-4065-9bc2-e79634af48b1"
        actor_type: "device"
        blueprint_name: "DDS-Test"
-       compliance_standards_str: "[Kandji Parameters]"
        device_name: "IT's MacBook Air"
        event_category: "endpoint_management"
        event_type: "create.device.first_runs"
@@ -1057,24 +1073,29 @@ tests:
          class_name: "Compliance Finding"
          class_uid: 2003
          compliance:
-           standards:
-             - "Kandji Parameters"
            status: "Fail"
            status_id: 3
+           requirements:
+             - Disable File Sharing
+             - Disable Bluetooth Sharing
+             - Application Blocking
+             - Disable the "root" user
          device:
            hostname: "IT's MacBook Air"
            name: "IT's MacBook Air"
            type: "Unknown"
            type_id: 0
            uid: "3a867771-949f-4065-9bc2-e79634af48b1"
+           groups:
+             - name: DDS-Test
          finding_info:
            title: "Compliance run for blueprint DDS-Test"
            uid: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
          message: "first_runs: "
          metadata:
            product:
-             name: "Kandji"
-             vendor_name: "Kandji"
+             name: "Iru"
+             vendor_name: "Iru"
            uid: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
            version: "1.5.0"
          severity: "Low"
@@ -1166,8 +1187,8 @@ tests:
          class_uid: 0
          metadata:
            product:
-             name: "Kandji"
-             vendor_name: "Kandji"
+             name: "Iru"
+             vendor_name: "Iru"
            uid: "01K5W4T1XP6C0V8B2S5MJQ7WDE"
            version: "1.5.0"
          severity: "Informational"
