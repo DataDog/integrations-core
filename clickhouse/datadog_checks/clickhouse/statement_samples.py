@@ -196,6 +196,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
     def shutdown(self) -> None:
         """Close the dedicated client, once the job loop has stopped."""
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         """Close the dedicated database client if it exists."""

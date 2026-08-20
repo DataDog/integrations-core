@@ -400,12 +400,13 @@ def test_collect_all_chunks_share_collection_started_at(check):
 
 
 def test_shutdown_closes_db_client(check):
+    collector = check.metadata._schema_collector
     fake_client = mock.MagicMock()
-    check.metadata._schema_collector._db_client = fake_client
+    collector._db_client = fake_client
 
     check.metadata.shutdown()
 
-    assert check.metadata._schema_collector._db_client is None
+    assert collector._db_client is None
     fake_client.close.assert_called_once()
 
 

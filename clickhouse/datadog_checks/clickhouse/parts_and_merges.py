@@ -268,6 +268,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
 
     def shutdown(self) -> None:
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         if self._db_client:

@@ -42,6 +42,9 @@ class ClickhouseMetadata(DBMAsyncJob):
 
     def shutdown(self) -> None:
         self._schema_collector.close()
+        # The collector holds the check too, so dropping it here releases both.
+        self._schema_collector = None
+        self._check = None
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def run_job(self):

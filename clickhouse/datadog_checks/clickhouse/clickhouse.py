@@ -583,6 +583,8 @@ class ClickhouseCheck(DatabaseCheck):
 
     def shutdown(self) -> None:
         """Close the main client and release the shared connection pool."""
+        self._query_manager = None
+        self.health = None
         if self._client:
             try:
                 self._client.close()
