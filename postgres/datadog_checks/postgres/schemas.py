@@ -208,8 +208,8 @@ class PostgresSchemaCollector(SchemaCollector):
         query = DATABASE_INFORMATION_QUERY
         params: list[str] = []
 
-        if self._check._config.dbstrict and not self._check.autodiscovery:            
-            query += f" AND datname = %s" 
+        if self._check._config.dbstrict and not self._check.autodiscovery:
+            query += " AND datname = %s"
             params.append(self._check._config.dbname)
         else:
             query += regex_exclude_clauses("datname", self._config.exclude_databases)
