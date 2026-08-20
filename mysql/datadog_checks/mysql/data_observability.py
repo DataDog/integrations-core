@@ -30,6 +30,8 @@ MAX_RESULT_ROWS = 10_000
 # Recover cron executions missed during short check restarts.
 CRON_STARTUP_LOOKBACK_SECONDS = 300
 
+DEFAULT_COLLECTION_INTERVAL_SECONDS = 10
+
 DBNAME_PATTERN = re.compile(r'^[A-Za-z0-9_$]+$')
 
 Mode = Literal["cron", "interval"]
@@ -54,12 +56,17 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._check = check
         self._do_config = do_config
         self._last_execution: dict[int, float] = {}
+        # CronScheduler consumes a tick when it reports it. Keep due work here if
+        # the connection fails so the next poll can retry the same execution.
+        self._pending_retries: dict[int, DueQuery] = {}
         self._connection_args_provider = connection_args_provider
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0.0
         self._db: Any = None
 
-        collection_interval = do_config.collection_interval or 10
+        collection_interval = do_config.collection_interval
+        if not collection_interval or collection_interval <= 0:
+            collection_interval = DEFAULT_COLLECTION_INTERVAL_SECONDS
         super().__init__(
             check,
             config_host=config.host,
@@ -148,15 +155,27 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
-            with closing(conn.cursor()) as cursor:
-                cursor.execute(f"USE `{dbname}`")
-                cursor.execute(query_spec.query)
-                if cursor.description is None:
-                    raise pymysql.err.ProgrammingError(
-                        "Query returned no result set — only SELECT statements are supported"
-                    )
-                columns = [description[0] for description in cursor.description]
-                rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
+            timeout_variable = "max_statement_time" if self._check.is_mariadb else "max_execution_time"
+            timeout_value = query_spec.query_timeout / 1000 if self._check.is_mariadb else query_spec.query_timeout
+            with closing(conn.cursor()) as timeout_cursor:
+                timeout_cursor.execute(f"SELECT @@SESSION.{timeout_variable}")
+                previous_timeout = timeout_cursor.fetchone()[0]
+                timeout_cursor.execute(f"SET SESSION {timeout_variable} = %s", (timeout_value,))
+                try:
+                    # SSCursor reads rows as fetchmany() requests them instead of buffering the
+                    # full result in execute(). Closing it drains unread rows before the shared
+                    # connection is reused for another query.
+                    with closing(conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+                        cursor.execute(f"USE `{dbname}`")
+                        cursor.execute(query_spec.query)
+                        if cursor.description is None:
+                            raise pymysql.err.ProgrammingError(
+                                "Query returned no result set — only SELECT statements are supported"
+                            )
+                        columns = [description[0] for description in cursor.description]
+                        rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
+                finally:
+                    timeout_cursor.execute(f"SET SESSION {timeout_variable} = %s", (previous_timeout,))
             duration = time.time() - start
             return {
                 'status': 'success',
@@ -209,20 +228,33 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         }
 
     def run_job(self) -> None:
-        due_queries = self._get_due_queries()
+        # A newly due execution replaces an older pending execution for the same
+        # monitor so an extended outage does not build an unbounded backlog.
+        due_by_monitor_id = dict(self._pending_retries)
+        self._pending_retries = {}
+        due_by_monitor_id.update({due.query.monitor_id: due for due in self._get_due_queries()})
+        due_queries = list(due_by_monitor_id.values())
         if not due_queries:
             self._log.debug("No data observability queries due for execution.")
             return
 
         base_tags = self._build_base_tags()
-        conn = self._get_db_connection()
+        try:
+            conn = self._get_db_connection()
+        except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
+            self._pending_retries.update(due_by_monitor_id)
+            raise
 
-        for due in due_queries:
+        for index, due in enumerate(due_queries):
             query = due.query
             tags = base_tags + [f'monitor_id:{query.monitor_id}']
 
             now_at_fire_start = time.time()
-            result = self._execute_single_query(conn, query)
+            try:
+                result = self._execute_single_query(conn, query)
+            except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
+                self._pending_retries.update({pending.query.monitor_id: pending for pending in due_queries[index:]})
+                raise
             now_at_fire_end = time.time()
             if due.mode == "interval":
                 self._last_execution[query.monitor_id] = now_at_fire_end
