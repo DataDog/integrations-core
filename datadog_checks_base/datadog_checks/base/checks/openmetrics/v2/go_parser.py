@@ -101,9 +101,17 @@ def _json_to_metric(family: dict) -> Metric:
         )
         for s in family.get('samples', ())
     ]
+    name = family['name']
+    metric_type = family.get('type', 'untyped')
+    # The Python prometheus_client text parser strips the `_total` suffix from
+    # counter metric family names (e.g. `foo_total` → family name `foo`).
+    # Mirror that behaviour here so existing metric maps that key on the
+    # suffix-free name continue to match when the Go parser is active.
+    if metric_type == 'counter' and name.endswith('_total'):
+        name = name[:-6]
     return Metric(
-        family['name'],
-        family.get('type', 'untyped'),
+        name,
+        metric_type,
         family.get('help', ''),
         samples,
     )
