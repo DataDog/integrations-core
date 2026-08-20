@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     # Re-exports for type checkers / IDE autocomplete only; do not execute at runtime.
     # The `X as X` aliases mark these as explicit re-exports for linters.
+    from .client import COMMENT_BODY_LIMIT as COMMENT_BODY_LIMIT
     from .client import DEFAULT_BASE_URL as DEFAULT_BASE_URL
     from .client import GITHUB_API_VERSION as GITHUB_API_VERSION
     from .client import AsyncGitHubClient as AsyncGitHubClient
@@ -37,6 +38,7 @@ MODULE_BY_NAME: dict[str, str] = {
     'async_github_client': 'client',
     'GITHUB_API_VERSION': 'client',
     'DEFAULT_BASE_URL': 'client',
+    'COMMENT_BODY_LIMIT': 'client',
     'GitHubResponse': 'client',
     'PaginationData': 'client',
 }
