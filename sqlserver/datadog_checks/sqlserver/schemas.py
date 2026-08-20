@@ -244,7 +244,6 @@ class SQLServerSchemaCollector(SchemaCollector):
                 schema_tables.table_name, schema_tables.table_id, schema_tables.object_type,
                 schema_tables.create_date, schema_tables.modify_date, schema_tables.definition
             FROM schema_tables
-            ORDER BY schema_tables.schema_name, schema_tables.object_type, schema_tables.table_name
             ;
         """
             return query
@@ -261,7 +260,6 @@ class SQLServerSchemaCollector(SchemaCollector):
                     THEN json_query(({FOREIGN_KEY_QUERY} FOR JSON PATH), '$') ELSE json_query('[]') END as foreign_keys
                 , CASE WHEN schema_tables.object_type = 'TABLE' THEN ({PARTITIONS_QUERY}) END as partition_count
             FROM schema_tables
-            ORDER BY schema_tables.schema_name, schema_tables.object_type, schema_tables.table_name
             ;
         """
         return query
