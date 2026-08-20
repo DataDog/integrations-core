@@ -9,6 +9,7 @@ import pytest
 
 from ddev.cli.ci.tests.batching.targets import (
     UNTESTABLE_TARGETS,
+    AllTargetsRule,
     DirectTargetRule,
     RegistryRepositoryFacts,
     RepositoryWideRule,
@@ -264,3 +265,8 @@ def test_registry_repository_facts_eligible_targets_excludes_untestable_and_poli
     )
 
     assert RegistryRepositoryFacts(registry).eligible_targets() == ["postgres"]
+
+
+def test_all_targets_rule_selects_every_eligible_target_without_a_change():
+    """`--all` must not depend on the change set: a run that tests everything has nothing to diff."""
+    assert list(AllTargetsRule()([], facts("postgres", "mysql", "mesos_slave"))) == ["mysql", "postgres"]

@@ -96,7 +96,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             self._progress_by_batch[message.batch_id] = self._finished_batch_progress(planned, message, gathered)
             self._revision += 1
             revision = self._revision
-            done = all(batch.state is ExecutionState.FINISHED for batch in self._progress_by_batch.values())
+            done = self._done()
             self.submit_message(self.build_update_message(message.id, revision, done))
 
         self._logger.info(
@@ -116,6 +116,16 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             self._logger.warning("Duplicate BatchFinished ignored", extra=log_extra)
             return False
         return True
+
+    @property
+    def progress(self) -> DispatcherProgress:
+        """The current aggregate snapshot, for a caller outside the message flow."""
+        with self._lock:
+            return DispatcherProgress(batches=tuple(self._progress_by_batch.values()), done=self._done())
+
+    def _done(self) -> bool:
+        """Whether every batch is terminal. Hold ``self._lock``."""
+        return all(batch.state is ExecutionState.FINISHED for batch in self._progress_by_batch.values())
 
     def build_initial_update(self, message_id: str) -> UpdatePRComment:
         """Revision ``0``: the complete plan, before any batch has been dispatched.

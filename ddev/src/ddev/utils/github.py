@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from functools import cached_property
 from time import time
 from typing import TYPE_CHECKING, overload
@@ -17,6 +18,9 @@ from ddev.utils.github_errors import (
 MAX_SECONDARY_RATE_LIMIT_RETRIES = 2
 MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS = 3600
 
+PULL_REQUEST_NUMBER_PATTERN = re.compile(r'^\d+$')
+PULL_REQUEST_URL_PATTERN = re.compile(r'^https?://github\.com/[^/]+/[^/]+/pull/(\d+)(?:[/?#].*)?$', re.IGNORECASE)
+
 if TYPE_CHECKING:
     from typing import Any, Literal
 
@@ -24,6 +28,20 @@ if TYPE_CHECKING:
 
     from ddev.cli.terminal import BorrowedStatus
     from ddev.repo.core import Repository
+
+
+def parse_pull_request_reference(value: str) -> int | None:
+    """Return the pull-request number in *value*, or None when it is neither shape.
+
+    Accepts a bare number or a GitHub pull-request URL, so a command can take whichever one the
+    user has at hand.
+    """
+    reference = value.strip()
+    if PULL_REQUEST_NUMBER_PATTERN.match(reference):
+        return int(reference)
+
+    match = PULL_REQUEST_URL_PATTERN.match(reference)
+    return int(match.group(1)) if match else None
 
 
 class PullRequest:

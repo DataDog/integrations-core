@@ -34,6 +34,12 @@ class DispatcherConfig(BaseModel):
     global_timeout_seconds: float = Field(default=10800.0, gt=0)  # 3 hours
     # Used when Hatch does not declare a Python version.
     default_python_version: str = Field(default="3.13", pattern=r"^\d+\.\d+$")
+    # The workflow each batch is dispatched to, by file name or numeric id.
+    workflow: str = "test-batch.yml"
+    # The ref the workflow definition is loaded from. Never a pull-request ref: the definition must
+    # come from a reviewed branch even when the code under test does not.
+    workflow_ref: str = "master"
+    poll_interval_seconds: float = Field(default=30.0, gt=0)
     batching: BatchingConfig = BatchingConfig()
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()
 
