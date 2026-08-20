@@ -963,3 +963,37 @@ class TestSupportsExplainJsonFormatVersion:
     def test_unknown_version(self):
         """The variable cannot be set safely before the server version has been detected."""
         assert supports_explain_json_format_version(None) is False
+
+
+def test_async_job_registry_holds_every_job():
+    """Every job is registered under its job name, and the attribute holds it."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+
+    registered = check._async_job_registry
+    assert sorted(registered) == ['database-metadata', 'query-activity', 'statement-metrics', 'statement-samples']
+    assert check._statement_metrics is registered['statement-metrics']
+    assert check._statement_samples is registered['statement-samples']
+    assert check._query_activity is registered['query-activity']
+    assert check._mysql_metadata is registered['database-metadata']
+
+
+def test_async_job_registry_empty_without_dbm():
+    """Every job requires DBM, and each has its own enabled flag defaulting to true, so the
+    check must gate on DBM or a non-DBM instance would start collecting."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    assert check._async_job_registry == {}
+    assert check._statement_metrics is None
+    assert check._statement_samples is None
+    assert check._query_activity is None
+    assert check._mysql_metadata is None
+
+
+def test_cancel_signals_every_registered_job():
+    """cancel() reaches every job through the registry rather than a hand-written fan-out."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+    jobs = list(check._async_job_registry.values())
+
+    check.cancel()
+
+    assert jobs and all(job._cancel_event.is_set() for job in jobs)

@@ -158,9 +158,6 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                                 These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
-    def shut_down(self):
-        self._databases_data.shut_down()
-
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
         settings = []

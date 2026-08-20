@@ -144,9 +144,6 @@ class DatabasesData:
             config.schemas_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
         )
 
-    def shut_down(self):
-        self._data_submitter.submit()
-
     def _cursor_run(self, cursor, query, params=None):
         """Run the query, log it, and emit a metric on database error."""
         try:
