@@ -10,6 +10,7 @@ import json
 import time
 from collections import defaultdict
 from contextlib import closing
+from typing import Any
 
 import pymysql
 
@@ -22,6 +23,7 @@ from datadog_checks.mysql.queries import (
     SQL_FOREIGN_KEYS,
     SQL_PARTITION,
     SQL_TABLES,
+    SQL_VIEWS,
     get_indexes_query,
 )
 
@@ -38,7 +40,8 @@ class SubmitData:
 
         self._columns_count = 0
         self._total_columns_sent = 0
-        self.db_to_tables = {}  # dbname : {"tables" : []}
+        self.db_to_tables = {}  # dbname: list of tables
+        self.db_to_views = {}  # dbname: list of views
         self.db_info = {}  # name to info
         self.any_tables_found = False  # Flag to track for permission issues
 
@@ -55,6 +58,7 @@ class SubmitData:
         self._columns_count = 0
         self.db_info.clear()
         self.db_to_tables.clear()
+        self.db_to_views.clear()
         self.any_tables_found = False
 
     def store_db_infos(self, db_infos):
@@ -67,6 +71,11 @@ class SubmitData:
         known_tables.extend(tables)
         if tables:
             self.any_tables_found = True
+
+    def store_views(self, db_name: str, views: list[dict], columns_count: int) -> None:
+        self._columns_count += columns_count
+        known_views = self.db_to_views.setdefault(db_name, [])
+        known_views.extend(views)
 
     def columns_since_last_submit(self):
         return self._columns_count
@@ -97,18 +106,25 @@ class SubmitData:
         self._submit_to_agent_queue(json_event)
 
     def submit(self):
-        if not self.db_to_tables:
+        if not self.db_to_tables and not self.db_to_views:
             return
         self._total_columns_sent += self._columns_count
         self._columns_count = 0
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
-        for db, tables in self.db_to_tables.items():
+        db_names = list(dict.fromkeys([*self.db_to_tables, *self.db_to_views]))
+        for db in db_names:
             db_info = self.db_info[db]
-            event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
+            metadata = {**db_info}
+            if db in self.db_to_tables:
+                metadata["tables"] = self.db_to_tables[db]
+            if db in self.db_to_views:
+                metadata["views"] = self.db_to_views[db]
+            event["metadata"].append(metadata)
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
         self.db_to_tables.clear()
+        self.db_to_views.clear()
 
 
 def agent_check_getter(self):
@@ -166,21 +182,50 @@ class DatabasesData:
     def _fetch_database_data(self, cursor, start_time, db_name):
         tables = self._get_tables(db_name, cursor)
         for tables_chunk in get_list_chunks(tables, self.TABLES_CHUNK_SIZE):
-            schema_collection_elapsed_time = time.time() - start_time
-            if schema_collection_elapsed_time > self._max_execution_time:
-                self._data_submitter.submit()
-                self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
-                raise StopIteration(
-                    """Schema collection took {}s which is longer than allowed limit of {}s,
-                    stopped while collecting for db - {}""".format(
-                        schema_collection_elapsed_time, self._max_execution_time, db_name
-                    )
-                )
+            self._check_execution_time(start_time, db_name)
             columns_count, tables_info = self._get_tables_data(tables_chunk, db_name, cursor)
             self._data_submitter.store(db_name, tables_info, columns_count)
             if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
                 self._data_submitter.submit()
         self._data_submitter.submit()
+
+        self._check_execution_time(start_time, db_name)
+        try:
+            views = self._get_views(db_name, cursor)
+        except pymysql.DatabaseError as e:
+            error_code = e.args[0] if e.args else None
+            if error_code in (
+                pymysql.constants.ER.TABLEACCESS_DENIED_ERROR,
+                pymysql.constants.ER.SPECIFIC_ACCESS_DENIED_ERROR,
+            ):
+                self._log.warning(
+                    "Unable to collect views for database {} because the user lacks the SHOW VIEW privilege. "
+                    "Table metadata was collected normally.".format(db_name)
+                )
+                return
+            raise
+        self._check_execution_time(start_time, db_name)
+
+        for views_chunk in get_list_chunks(views, self.TABLES_CHUNK_SIZE):
+            self._check_execution_time(start_time, db_name)
+            columns_count, views_info = self._get_views_data(views_chunk, db_name, cursor)
+            self._data_submitter.store_views(db_name, views_info, columns_count)
+            if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
+                self._data_submitter.submit()
+        if views:
+            self._data_submitter.submit()
+
+    def _check_execution_time(self, start_time: float, db_name: str) -> None:
+        schema_collection_elapsed_time = time.time() - start_time
+        if schema_collection_elapsed_time > self._max_execution_time:
+            self._data_submitter.submit()
+            self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
+            raise StopIteration(
+                """Schema collection took {}s which is longer than allowed limit of {}s,
+                stopped while collecting for db - {}""".format(
+                    schema_collection_elapsed_time, self._max_execution_time, db_name
+                )
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_databases_data(self, tags):
@@ -246,6 +291,11 @@ class DatabasesData:
                                                 this is the sum of all subpartitions table_rows.
                             - data_length (int): The data length of the partition in bytes. If partition has
                                                  subpartitions, this is the sum of all subpartitions data_length.
+            - views (list): A list of view dictionaries.
+                - view (dict): A dictionary representing a view.
+                    - name (str): The name of the view.
+                    - definition (str or None): The view definition, when available.
+                    - columns (list): Projected columns using the table column shape.
         """
         self._data_submitter.reset()  # Ensure we start fresh
         self._tags = tags
@@ -311,6 +361,25 @@ class DatabasesData:
         self._cursor_run(cursor, query=SQL_TABLES, params=db_name)
         tables_info = cursor.fetchall()
         return tables_info
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _get_views(self, db_name: str, cursor: Any) -> list[dict]:
+        """Return views and their definitions for a database."""
+        self._cursor_run(cursor, query=SQL_VIEWS, params=db_name)
+        return cursor.fetchall()
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _get_views_data(self, view_list: list[dict], db_name: str, cursor: Any) -> tuple[int, list[dict]]:
+        if not view_list:
+            return 0, []
+
+        view_name_to_view_index = {view["name"]: i for i, view in enumerate(view_list)}
+        view_name_list = [str(view["name"]) for view in view_list]
+        placeholders = ','.join(['%s'] * len(view_name_list))
+        total_columns_number = self._populate_with_columns_data(
+            view_name_to_view_index, view_list, view_name_list, placeholders, db_name, cursor
+        )
+        return total_columns_number, view_list
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):

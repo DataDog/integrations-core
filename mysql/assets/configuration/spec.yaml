@@ -472,7 +472,8 @@ files:
             display_priority: 0
             description: |
               Configure collection of schemas (databases).
-              Only tables and schemas for which the user has been granted SELECT privileges are collected.
+              Only tables, views, and schemas for which the user has been granted SELECT privileges are collected.
+              Collecting view definitions also requires the SHOW VIEW privilege.
             options:
               - name: enabled
                 description: |
@@ -504,7 +505,8 @@ files:
             description: |
               DEPRECATED: Use `collect_schemas` instead.
               Configure collection of schemas (databases).
-              Only tables and schemas for which the user has been granted SELECT privileges are collected.
+              Only tables, views, and schemas for which the user has been granted SELECT privileges are collected.
+              Collecting view definitions also requires the SHOW VIEW privilege.
             options:
               - name: enabled
                 description: |
