@@ -2,13 +2,15 @@
 jmx_metrics:
   - include:
       domain: com.bea
-      bean_regex: com.bea:Name=([-/.\w]+),Type=ServerRuntime
+      Type: ServerRuntime
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         OpenSocketsCurrentCount:
           alias: weblogic.server_runtime.open_sockets
   - include:
       domain: com.bea
-      bean_regex: com.bea:Name=([-/.\w]+),Type=Server
+      Type: Server
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         ThreadPoolPercentSocketReaders:
           alias: weblogic.server.threadpool_socket_readers_percent
@@ -16,7 +18,8 @@ jmx_metrics:
           alias: weblogic.server.max_open_sockets
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=ThreadPoolRuntime,Type=ThreadPoolRuntime
+      Type: ThreadPoolRuntime
+      Name: ThreadPoolRuntime
       attribute:
         CompletedRequestCount:
           alias: weblogic.threadpool_runtime.completed_requests
@@ -45,7 +48,8 @@ jmx_metrics:
           alias: weblogic.threadpool_runtime.throughput
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=([-/.\w]+),Type=JVMRuntime
+      Type: JVMRuntime
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         HeapSizeCurrent:
           alias: weblogic.jvm_runtime.heap_size
@@ -57,7 +61,8 @@ jmx_metrics:
           alias: weblogic.jvm_runtime.heap_size_max
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=([-/.\w]+),ApplicationRuntime=([-.\w]+),Type=ConnectorConnectionPoolRuntime,ConnectorComponentRuntime=([-.\w]+)
+      Type: ConnectorConnectionPoolRuntime
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         ActiveConnectionsCurrentCount:
           alias: weblogic.connector_connection_pool_runtime.connections_active
@@ -68,7 +73,8 @@ jmx_metrics:
           alias: weblogic.connector_connection_pool_runtime.connections_created_total
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=([-/.\w]+),Type=JMSRuntime
+      Type: JMSRuntime
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         ConnectionsCurrentCount:
           alias: weblogic.jms_runtime.connections_current
@@ -82,7 +88,8 @@ jmx_metrics:
           alias: weblogic.jms_runtime.jms_servers_total
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=([-/.\w]+),ApplicationRuntime=([-_.\w]+),Type=WorkManagerRuntime
+      Type: WorkManagerRuntime
+      bean_regex: 'com\.bea:(?=.*ApplicationRuntime=)(?=.*Name=).*'
       attribute:
         CompletedRequests:
           alias: weblogic.work_manager_runtime.requests_completed
@@ -93,7 +100,8 @@ jmx_metrics:
           alias: weblogic.work_manager_runtime.threads_stuck
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_/.\]\w]+),Type=ServerChannelRuntime
+      Type: ServerChannelRuntime
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         AcceptCount:
           alias: weblogic.server_channel_runtime.sockets_accepted
@@ -114,7 +122,8 @@ jmx_metrics:
           metric_type: monotonic_count
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_/.\]\w]+),ApplicationRuntime=([-_.\w]+),Type=ServletRuntime,WebAppComponentRuntime=([-_/.\w]+)
+      Type: ServletRuntime
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         ExecutionTimeHigh:
           metric_type: monotonic_count
@@ -130,7 +139,8 @@ jmx_metrics:
           alias: weblogic.servlet_runtime.pool_max_capacity
   - include:
       domain: com.bea
-      bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_/.\]\w]+),ApplicationRuntime=([-_.\w]+),Type=WebAppComponentRuntime
+      Type: WebAppComponentRuntime
+      bean_regex: 'com\.bea:(?=.*Name=).*'
       attribute:
         OpenSessionsCurrentCount:
           alias: weblogic.webapp_component_runtime.sessions_current
