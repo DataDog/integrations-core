@@ -510,10 +510,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
-              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: attribute-remapper
           name: Map `new_state.vulnerability.id` to `vuln_stage.cve.uid`
           enabled: true
@@ -854,10 +864,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
-              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: string-builder-processor
           name: Add device OS name
           enabled: true
@@ -946,8 +966,13 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_naive_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):vuln_stage.cve.created_time}
-              iso_naive_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.created_time}
+              iso_naive_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):vuln_stage.cve.created_time}
+              iso_naive_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSS"):vuln_stage.cve.created_time}
+              iso_naive_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSS"):vuln_stage.cve.created_time}
+              iso_naive_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSS"):vuln_stage.cve.created_time}
+              iso_naive_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SS"):vuln_stage.cve.created_time}
+              iso_naive_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.S"):vuln_stage.cve.created_time}
+              iso_naive_f0 %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.created_time}
         - type: grok-parser
           name: Parse `cve_modified_at` to `vuln_stage.cve.modified_time`
           enabled: true
@@ -957,8 +982,13 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_naive_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):vuln_stage.cve.modified_time}
-              iso_naive_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.modified_time}
+              iso_naive_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):vuln_stage.cve.modified_time}
+              iso_naive_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSS"):vuln_stage.cve.modified_time}
+              iso_naive_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSS"):vuln_stage.cve.modified_time}
+              iso_naive_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSS"):vuln_stage.cve.modified_time}
+              iso_naive_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SS"):vuln_stage.cve.modified_time}
+              iso_naive_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.S"):vuln_stage.cve.modified_time}
+              iso_naive_f0 %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.modified_time}
         # An Iru blueprint is the device group a Mac is assigned to, so it maps to
         # `device.groups[]` (an array of group objects per the dictionary, despite
         # device.json's description showing bare strings).
@@ -1258,10 +1288,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
-              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: string-builder-processor
           name: Add finding title
           enabled: true
@@ -1506,10 +1546,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
-              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: category-processor
           name: Add malware classification id
           enabled: true
@@ -1672,8 +1722,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.first_seen_time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.first_seen_time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.first_seen_time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.finding_info.first_seen_time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.finding_info.first_seen_time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.finding_info.first_seen_time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.finding_info.first_seen_time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.finding_info.first_seen_time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.first_seen_time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.finding_info.first_seen_time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.finding_info.first_seen_time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.finding_info.first_seen_time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.finding_info.first_seen_time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.finding_info.first_seen_time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.finding_info.first_seen_time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.finding_info.first_seen_time}
         # `metadata.device.name` is the user-facing display name ("IT’s MacBook Air");
         # `local_host_name` is the actual host name ("ITs-MacBook-Air-2").
         - type: attribute-remapper
@@ -1999,10 +2061,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
-              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 3001
           enabled: true
@@ -2191,10 +2263,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
-              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 3004
           enabled: true
@@ -2441,10 +2523,20 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              iso_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
-              iso_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
-              iso_offset_to_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
-              iso_offset_to_ms_no_frac %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
+              iso_z_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              iso_z_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              iso_z_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              iso_z_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+              iso_off_f6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.time}
+              iso_off_f5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):ocsf.time}
+              iso_off_f4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):ocsf.time}
+              iso_off_f3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):ocsf.time}
+              iso_off_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):ocsf.time}
+              iso_off_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):ocsf.time}
+              iso_off_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 0
           enabled: true
