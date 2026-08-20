@@ -571,6 +571,12 @@ class PostgreSql(DatabaseCheck):
                 # value fetched for role is of <type 'bool'>
                 return "standby" if role else "master"
 
+    def _update_replication_role_tags(self, replication_role: str) -> None:
+        self.tag_manager.set_tag('replication_role', replication_role, replace=True)
+        if self.is_aurora:
+            aurora_role = 'reader' if replication_role == 'standby' else 'writer'
+            self.tag_manager.set_tag('aurora_role', aurora_role, replace=True)
+
     def _collect_wal_metrics(self):
         if self.version >= V10:
             # _collect_stats will gather wal file metrics
@@ -783,7 +789,6 @@ class PostgreSql(DatabaseCheck):
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.log.debug("Disabling replication metrics")
-            self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
         except psycopg.errors.UndefinedFunction as e:
             log_func(e)
@@ -1233,7 +1238,8 @@ class PostgreSql(DatabaseCheck):
                 self.tag_manager.set_tag('postgresql_cluster_name', self.cluster_name, replace=True)
 
             if self._config.tag_replication_role:
-                self.tag_manager.set_tag('replication_role', self._get_replication_role(), replace=True)
+                replication_role = self._get_replication_role()
+                self._update_replication_role_tags(replication_role)
 
             tags = self.tag_manager.get_tags()
             self._send_database_instance_metadata()
