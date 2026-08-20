@@ -24,6 +24,16 @@ from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
 pytestmark = pytest.mark.unit
 
+MOCK_CLICKHOUSE_VERSION = '24.8.0'
+
+
+def mock_clickhouse_client():
+    """A client mock whose command() returns a version string, as select_version() expects."""
+    client = mock.MagicMock()
+    client.command.return_value = MOCK_CLICKHOUSE_VERSION
+    client.ping.return_value = True
+    return client
+
 
 def test_config(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
@@ -135,7 +145,8 @@ def test_can_connect_submits_on_every_check_run(is_metadata_collection_enabled, 
     (It used to be submitted only once on check init, which led to customer seeing "no data" in the UI.)
     """
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         # Test for consecutive healthy clickhouse.can_connect statuses
         num_runs = 3
         for _ in range(num_runs):
@@ -148,7 +159,8 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
     check = ClickhouseCheck('clickhouse', {}, [instance])
 
     # Test 1 healthy connection --> 2 Unhealthy service checks --> 1 healthy connection. Recovered
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         check.check({})
     with mock.patch('clickhouse_connect.get_client', side_effect=OperationalError('Connection refused')):
         with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', return_value=False):
@@ -156,7 +168,8 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
                 check.check({})
             with pytest.raises(Exception):
                 check.check({})
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         check.check({})
     aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.CRITICAL)
     aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.OK)
@@ -166,7 +179,8 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
 def test_can_connect_recovers_after_failed_ping(is_metadata_collection_enabled, aggregator, instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     # Test Exception in ping_clickhouse(), but reestablishes connection.
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         check.check({})
         with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', side_effect=Error()):
             # connect() should be able to handle an exception in ping_clickhouse() and attempt reconnection
@@ -290,7 +304,7 @@ def test_connect_no_password_uses_empty_string():
 )
 def test_version_lt(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = ch_version
+    check._dbms_version = ch_version
     assert check.version_lt(comparable) == expected
 
 
@@ -307,7 +321,7 @@ def test_version_lt(instance, ch_version, comparable, expected):
 )
 def test_version_ge(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = ch_version
+    check._dbms_version = ch_version
     assert check.version_ge(comparable) == expected
 
 
@@ -439,7 +453,7 @@ def test_get_queries_tags_system_tables_per_node_in_single_endpoint_mode(instanc
         'use_legacy_queries': not use_advanced_queries,
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
 
     cluster_aware = [q for q in check.get_queries() if 'clusterAllReplicas' in q['query']]
 
@@ -463,7 +477,7 @@ def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advan
         'use_legacy_queries': not use_advanced_queries,
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
 
     assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())
 
@@ -555,7 +569,7 @@ def test_check_tags_with_cluster(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
         cluster_name.return_value = 'prod_cluster'
-        with mock.patch('clickhouse_connect.get_client'):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
             check.check({})
 
     assert f'{CLUSTER_TAG}:prod_cluster' in check.tags
@@ -571,7 +585,7 @@ def test_can_connect_carries_cluster_tag_from_the_second_run(aggregator, instanc
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
         cluster_name.return_value = 'prod_cluster'
-        with mock.patch('clickhouse_connect.get_client'):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
             check.check({})
             first_run_tags = list(check.tags)
             check.check({})
@@ -585,7 +599,7 @@ def test_check_omits_cluster_tag_when_unresolved(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
         cluster_name.return_value = None
-        with mock.patch('clickhouse_connect.get_client'):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
             check.check({})
 
     assert not any(tag.startswith(f'{CLUSTER_TAG}:') for tag in check.tags)
@@ -633,7 +647,7 @@ def test_check_tags_with_hosting_type(instance):
         cluster_name.return_value = None
         with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
             hosting_type.return_value = HostingType.CLOUD
-            with mock.patch('clickhouse_connect.get_client'):
+            with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
                 check.check({})
 
     assert f'{HOSTING_TYPE_TAG}:{HostingType.CLOUD}' in check.tags
@@ -646,7 +660,7 @@ def test_check_always_emits_a_hosting_type_tag(instance):
         cluster_name.return_value = None
         with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
             hosting_type.return_value = HostingType.UNKNOWN
-            with mock.patch('clickhouse_connect.get_client'):
+            with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
                 check.check({})
 
     assert f'{HOSTING_TYPE_TAG}:{HostingType.UNKNOWN}' in check.tags
