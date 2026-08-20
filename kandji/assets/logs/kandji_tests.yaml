@@ -253,7 +253,7 @@ tests:
         category_name: Findings
         finding_info:
           uid: 4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB
-          title: SpyDok
+          title: SpyDok detected in AppStore
           desc: SpyDok is spyware designed to stealthily collect sensitive information such as login credentials, browsing history, and other personal data. It operates by monitoring user activity, exfiltrating stolen data to remote servers controlled by attackers, and maintaining persistence to evade detection.
         status_id: 1
         class_uid: 2004
@@ -578,7 +578,7 @@ tests:
         category_name: Findings
         finding_info:
           uid: e7268916397088438050fdd671054aab
-          title: CVE-2024-44187
+          title: CVE-2024-44187 in Safari
           desc: A cross-origin issue existed with "iframe" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.
         status_id: 1
         class_uid: 2002
@@ -819,7 +819,7 @@ tests:
         finding_info:
           uid: CVE-2025-10892
           src_url: https://nvd.nist.gov/vuln/detail/CVE-2025-10892
-          title: Google Chrome
+          title: CVE-2025-10892 in Google Chrome
         status_id: 1
         class_uid: 2002
         activity_id: 1
@@ -1067,7 +1067,7 @@ tests:
            type_id: 0
            uid: "3a867771-949f-4065-9bc2-e79634af48b1"
          finding_info:
-           title: "DDS-Test"
+           title: "Compliance run for blueprint DDS-Test"
            uid: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
          message: "first_runs: "
          metadata:

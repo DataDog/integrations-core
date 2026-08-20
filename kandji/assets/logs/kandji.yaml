@@ -544,6 +544,12 @@ pipeline:
             target: ocsf.vulnerabilities
             preserveSource: false
             type: append
+        - type: string-builder-processor
+          name: Add finding title
+          enabled: true
+          template: "%{cve_id} in %{file_name}"
+          target: finding_title
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 2002
           enabled: true
@@ -594,11 +600,11 @@ pipeline:
               overrideOnConflict: false
               targetFormat: string
             - type: schema-remapper
-              name: Map `new_state.vulnerability.id` to `ocsf.finding_info.title`
+              name: Map `finding_title` to `ocsf.finding_info.title`
               sources:
-                - new_state.vulnerability.id
+                - finding_title
               target: ocsf.finding_info.title
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: false
             - type: schema-remapper
               name: Map `new_state.vulnerability.description` to `ocsf.finding_info.desc`
@@ -858,6 +864,12 @@ pipeline:
             target: ocsf.vulnerabilities
             preserveSource: false
             type: append
+        - type: string-builder-processor
+          name: Add finding title
+          enabled: true
+          template: "%{cve_id} in %{name}"
+          target: finding_title
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 2002
           enabled: true
@@ -907,11 +919,11 @@ pipeline:
               overrideOnConflict: false
               targetFormat: string
             - type: schema-remapper
-              name: Map `name` to `ocsf.finding_info.title`
+              name: Map `finding_title` to `ocsf.finding_info.title`
               sources:
-                - name
+                - finding_title
               target: ocsf.finding_info.title
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: false
             - type: schema-remapper
               name: Map `cve_description` to `ocsf.finding_info.desc`
@@ -1085,6 +1097,18 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: "iso_to_ms %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ\"):ocsf.time}"
+        - type: string-builder-processor
+          name: Add finding title
+          enabled: true
+          template: "%{new_state.parameter_name}"
+          target: finding_title
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add finding title for blueprint compliance run
+          enabled: true
+          template: "Compliance run for blueprint %{blueprint_name}"
+          target: finding_title
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 2003
           enabled: true
@@ -1142,12 +1166,11 @@ pipeline:
               overrideOnConflict: false
               targetFormat: string
             - type: schema-remapper
-              name: Map `new_state.parameter_name`, `blueprint_name` to `ocsf.finding_info.title`
+              name: Map `finding_title` to `ocsf.finding_info.title`
               sources:
-                - new_state.parameter_name
-                - blueprint_name
+                - finding_title
               target: ocsf.finding_info.title
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: false
             - type: schema-remapper
               name: Map `new_state.parameter_name` to `ocsf.compliance.control`
@@ -1385,6 +1408,12 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add finding title
+          enabled: true
+          template: "%{metadata.threat_family_name} detected in %{file_name}"
+          target: finding_title
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 2004
           enabled: true
@@ -1448,11 +1477,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper
-              name: Map `metadata.threat_family_name` to `ocsf.finding_info.title`
+              name: Map `finding_title` to `ocsf.finding_info.title`
               sources:
-                - metadata.threat_family_name
+                - finding_title
               target: ocsf.finding_info.title
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: false
             - type: schema-remapper
               name: Map `metadata.threat_description` to `ocsf.finding_info.desc`
@@ -1672,13 +1701,6 @@ pipeline:
               sources:
                 - new_state.email
               target: ocsf.user.email_addr
-              preserveSource: true
-              overrideOnConflict: false
-            - type: schema-remapper
-              name: Map `new_state.role` to `ocsf.user.type`
-              sources:
-                - new_state.role
-              target: ocsf.user.type
               preserveSource: true
               overrideOnConflict: false
             - name: ocsf.actor.user.type_id
