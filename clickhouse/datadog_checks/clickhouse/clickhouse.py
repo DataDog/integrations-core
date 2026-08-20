@@ -106,7 +106,6 @@ class ClickhouseCheck(DatabaseCheck):
             ca_cert=self._config.tls_ca_cert,
         )
 
-        # DBM async jobs, left as None by _register_async_jobs() when the configuration disables them
         self.statement_metrics: ClickhouseStatementMetrics | None = None
         self.statement_samples: ClickhouseStatementSamples | None = None
         self.query_completions: ClickhouseQueryCompletions | None = None
@@ -118,47 +117,40 @@ class ClickhouseCheck(DatabaseCheck):
 
     def _register_async_jobs(self):
         """Build and register the async jobs enabled by this check's configuration."""
-        # Every job requires DBM, so it is checked once here rather than repeated per job.
         if not self._config.dbm:
             return
 
-        # Query metrics (from system.query_log - analogous to pg_stat_statements)
+        # Query metrics (from system.query_log)
         if self._config.query_metrics.enabled:
             self.statement_metrics = self.register_async_job(
                 ClickhouseStatementMetrics(self, self._config.query_metrics)
             )
 
-        # Query samples (from system.processes - analogous to pg_stat_activity).
-        # The async insert buffer snapshot collapses into this job (sharing its connection and
-        # loop) instead of running as its own DBMAsyncJob, which would open another concurrent
-        # connection against the check's capped DBM connection pool.
+        # Query samples (from system.processes) and pending async inserts (system.asynchronous_inserts)
         if self._config.query_samples.enabled or self._config.collect_pending_async_inserts.enabled:
             self.statement_samples = self.register_async_job(
                 ClickhouseStatementSamples(self, self._config.query_samples, self._config.collect_pending_async_inserts)
             )
 
-        # Query completions (from system.query_log - completed queries).
-        # The async insert flush log collection collapses into this job (shares its connection and loop),
-        # so its config is passed in here rather than run as its own DBMAsyncJob, which would add another
-        # concurrent connection to the check's capped DBM connection pool.
+        # Completed queries and async insert flushes (from system.query_log and system.asynchronous_insert_log)
         if self._config.query_completions.enabled or self._config.collect_async_inserts.enabled:
             self.query_completions = self.register_async_job(
                 ClickhouseQueryCompletions(self, self._config.query_completions, self._config.collect_async_inserts)
             )
 
-        # Query errors (from system.query_log - failed queries)
+        # Failed queries (from system.query_log)
         if self._config.query_errors.enabled:
             self.query_errors = self.register_async_job(ClickhouseQueryErrors(self, self._config.query_errors))
 
-        # Schema metrics (per-table size and per-view refresh gauges)
+        # Schema metrics (from system.tables and system.view_refreshes)
         if self._config.schema_metrics.enabled:
             self.table_metrics = self.register_async_job(ClickhouseTableMetrics(self, self._config.schema_metrics))
 
-        # Schema collection (catalog metadata for Schema Explorer)
+        # Schema collection (from system.tables and system.columns)
         if self._config.collect_schemas.enabled:
             self.metadata = self.register_async_job(ClickhouseMetadata(self))
 
-        # Parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
+        # Parts and merges (from system.parts, merges, mutations, replication_queue)
         if self._config.parts_and_merges.enabled:
             self.parts_and_merges = self.register_async_job(
                 ClickhousePartsAndMerges(self, self._config.parts_and_merges)
