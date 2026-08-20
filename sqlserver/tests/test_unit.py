@@ -28,7 +28,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
 )
-from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlSimpleMetric
+from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFractionMetric, SqlSimpleMetric
 from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
@@ -781,12 +781,11 @@ def test_autodiscovery_resets_database_metrics_on_db_addition(instance_autodisco
     ],
 )
 def test_SqlFractionMetric_base(caplog, base_name):
-    Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
     fetchall_results = [
-        Row('Buffer cache hit ratio', 537003264, 33453, '', 'SQLServer:Buffer Manager'),
-        Row('Buffer cache hit ratio base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
-        Row('some random counter', 1073939712, 1111, '', 'SQLServer:Buffer Manager'),
-        Row('some random counter base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
+        _padded_counter_row('Buffer cache hit ratio', '', 'SQLServer:Buffer Manager', 33453),
+        _padded_counter_row('Buffer cache hit ratio base', '', 'SQLServer:Buffer Manager', 33531),
+        _padded_counter_row('some random counter', '', 'SQLServer:Buffer Manager', 1111),
+        _padded_counter_row('some random counter base', '', 'SQLServer:Buffer Manager', 33531),
     ]
     mock_cursor = mock.MagicMock()
     mock_cursor.fetchall.return_value = fetchall_results
@@ -823,14 +822,13 @@ def test_SqlFractionMetric_base(caplog, base_name):
 
 
 def test_SqlFractionMetric_group_by_instance(caplog):
-    Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
     fetchall_results = [
-        Row('Buffer cache hit ratio', 537003264, 33453, '', 'SQLServer:Buffer Manager'),
-        Row('Buffer cache hit ratio base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
-        Row('Foo counter', 537003264, 1, 'bar', 'SQLServer:Buffer Manager'),
-        Row('Foo counter base', 1073939712, 50, 'bar', 'SQLServer:Buffer Manager'),
-        Row('Foo counter', 537003264, 5, 'zoo', 'SQLServer:Buffer Manager'),
-        Row('Foo counter base', 1073939712, 100, 'zoo', 'SQLServer:Buffer Manager'),
+        _padded_counter_row('Buffer cache hit ratio', '', 'SQLServer:Buffer Manager', 33453),
+        _padded_counter_row('Buffer cache hit ratio base', '', 'SQLServer:Buffer Manager', 33531),
+        _padded_counter_row('Foo counter', 'bar', 'SQLServer:Buffer Manager', 1),
+        _padded_counter_row('Foo counter base', 'bar', 'SQLServer:Buffer Manager', 50),
+        _padded_counter_row('Foo counter', 'zoo', 'SQLServer:Buffer Manager', 5),
+        _padded_counter_row('Foo counter base', 'zoo', 'SQLServer:Buffer Manager', 100),
     ]
     mock_cursor = mock.MagicMock()
     mock_cursor.fetchall.return_value = fetchall_results
@@ -880,6 +878,48 @@ def _padded_counter_row(
     cntr_value: int,
 ) -> tuple[str, str, str, int]:
     return (counter_name.ljust(128), instance_name.ljust(128), object_name.ljust(128), cntr_value)
+
+
+def test_SqlFractionMetric_skips_instances_without_a_base_counter():
+    """An instance whose base counter is missing must be skipped, and the others still reported.
+
+    A base counter recorded for one instance says nothing about another, and dividing by it would report a
+    wrong value for every instance that has no base of its own.
+    """
+    fetchall_results = [
+        _padded_counter_row('Foo counter', 'bar', 'SQLServer:Buffer Manager', 1),
+        _padded_counter_row('Foo counter', 'zoo', 'SQLServer:Buffer Manager', 5),
+        _padded_counter_row('Foo counter base', 'zoo', 'SQLServer:Buffer Manager', 100),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = fetchall_results
+
+    report_function = mock.MagicMock()
+    metric_obj = SqlFractionMetric(
+        cfg_instance={
+            'name': 'sqlserver.test.metric',
+            'counter_name': 'Foo counter',
+            'instance_name': 'ALL',
+            'physical_db_name': None,
+            'tags': ['optional:tag1'],
+            'hostname': 'stubbed.hostname',
+            'tag_by': 'db',
+        },
+        base_name='Foo counter base',
+        report_function=report_function,
+        column=None,
+        logger=mock.MagicMock(),
+    )
+    results, columns = SqlFractionMetric.fetch_all_values(
+        mock_cursor, ['Foo counter', 'Foo counter base'], mock.MagicMock()
+    )
+    metric_obj.fetch_metric(results, columns)
+
+    assert report_function.call_args_list == [
+        mock.call(
+            'sqlserver.test.metric', 0.05, raw=True, hostname='stubbed.hostname', tags=['optional:tag1', 'db:zoo']
+        )
+    ]
 
 
 SIMPLE_METRIC_ROWS = [
@@ -1006,6 +1046,39 @@ def test_get_sql_counter_type_caches_counters_without_a_base(instance_docker):
         assert check.get_sql_counter_type('Transactions/sec') == (PERF_COUNTER_BULK_COUNT, None)
 
     assert mock_cursor.execute.call_count == 1
+
+
+def test_performance_counter_metrics_share_a_single_query(instance_docker):
+    """The performance counter table must be read once per run, for the counters of every class at once.
+
+    Scanning sys.dm_os_performance_counters costs about as much whether it returns two rows or thousands, so
+    a query per metric class multiplies the most expensive part of the collection without returning more data.
+    """
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.databases = {Database('master')}
+    check.instance_per_type_metrics = {
+        'SqlSimpleMetric': {'Transactions/sec'},
+        'SqlFractionMetric': {'Buffer cache hit ratio', 'Buffer cache hit ratio base'},
+        'SqlIncrFractionMetric': {'Average Latch Wait Time (ms)', 'Average Latch Wait Time Base'},
+        'SqlOsWaitStat': {'LCK_M_S'},
+    }
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = []
+
+    check._fetch_instance_results(mock_cursor)
+
+    executed = [call.args for call in mock_cursor.execute.call_args_list]
+    perf_counter_queries = [args for args in executed if DEFAULT_PERFORMANCE_TABLE in args[0]]
+    assert len(perf_counter_queries) == 1
+    assert sorted(perf_counter_queries[0][1]) == [
+        'Average Latch Wait Time (ms)',
+        'Average Latch Wait Time Base',
+        'Buffer cache hit ratio',
+        'Buffer cache hit ratio base',
+        'Transactions/sec',
+    ]
+    # metrics from other tables keep their own query
+    assert len([args for args in executed if 'sys.dm_os_wait_stats' in args[0]]) == 1
 
 
 def _mock_database_list():
