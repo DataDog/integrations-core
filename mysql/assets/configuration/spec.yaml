@@ -85,6 +85,8 @@ files:
             description: |
               Configure the Data Observability async job, which executes monitoring
               queries delivered via Remote Configuration.
+              Enabling Data Observability with Database Monitoring uses one additional
+              connection. Increase MAX_USER_CONNECTIONS from 5 to 6 for the monitoring user.
             options:
               - name: enabled
                 fleet_configurable: true
