@@ -221,10 +221,19 @@ class DatadogAgentStub(object):
         last_boundary = -1
         for i in range(len(lines) - 1, 0, -1):
             if lines[i].startswith('# HELP ') or lines[i].startswith('# TYPE '):
-                # Check that there is at least one sample line before this boundary.
-                has_sample = any(line and not line.startswith('#') for line in lines[:i])
+                # Walk backward through consecutive meta-lines (# HELP / # TYPE) so
+                # that the entire block for one family stays together in the buffer.
+                # Without this, a fixture with # TYPE before # HELP would split the
+                # pair — # TYPE lands in `complete` while # HELP + samples land in
+                # the buffer, causing the family to be parsed without its type
+                # declaration and treated as untyped.
+                j = i
+                while j > 0 and (lines[j - 1].startswith('# HELP ') or lines[j - 1].startswith('# TYPE ')):
+                    j -= 1
+                # Check that there is at least one sample line before this block.
+                has_sample = any(line and not line.startswith('#') for line in lines[:j])
                 if has_sample:
-                    last_boundary = i
+                    last_boundary = j
                 break
 
         if last_boundary <= 0:
@@ -284,9 +293,21 @@ class DatadogAgentStub(object):
                     sample['exemplar'] = exemplar
                 samples.append(sample)
             if samples:
+                # The real Go parser preserves the TYPE-line name verbatim
+                # (e.g. "foo_total" from "# TYPE foo_total counter"), whereas
+                # prometheus_client strips "_total" from counter family names
+                # (returning "foo").  Restore the suffix here so the JSON
+                # fed to _json_to_metric matches what the real Go parser
+                # produces, letting _json_to_metric's Pattern-1 stripping
+                # apply consistently in both unit-test and E2E contexts.
+                family_name = metric.name
+                if metric.type == 'counter':
+                    first_sample_name = samples[0]['name']
+                    if first_sample_name == family_name + '_total':
+                        family_name = first_sample_name
                 families.append(
                     {
-                        'name': metric.name,
+                        'name': family_name,
                         'type': metric.type,
                         'help': metric.documentation,
                         'samples': samples,

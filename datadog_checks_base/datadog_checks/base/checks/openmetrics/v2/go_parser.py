@@ -103,12 +103,25 @@ def _json_to_metric(family: dict) -> Metric:
     ]
     name = family['name']
     metric_type = family.get('type', 'untyped')
-    # The Python prometheus_client text parser strips the `_total` suffix from
-    # counter metric family names (e.g. `foo_total` → family name `foo`).
-    # Mirror that behaviour here so existing metric maps that key on the
-    # suffix-free name continue to match when the Go parser is active.
-    if metric_type == 'counter' and name.endswith('_total'):
-        name = name[:-6]
+    raw_samples = family.get('samples', ())
+    if metric_type == 'counter':
+        if name.endswith('_total'):
+            # Standard Prometheus convention: `# TYPE foo_total counter`.
+            # The Python prometheus_client parser strips `_total` from the
+            # family name (e.g. `foo_total` → `foo`).  Mirror that so existing
+            # metric maps that key on the suffix-free name continue to match.
+            name = name[:-6]
+        else:
+            # Non-standard but common: `# TYPE foo counter` with the actual
+            # sample named `foo_total`.  The Python parser fails to associate
+            # the `_total` sample with the declared counter family and instead
+            # yields it as a *separate* family of type ``unknown`` whose name
+            # IS `foo_total`.  Metric maps written against the Python parser
+            # therefore key on `foo_total`, not `foo`.  Reproduce that
+            # behaviour here so those maps continue to work.
+            total_name = name + '_total'
+            if any(s.get('name') == total_name for s in raw_samples):
+                name = total_name
     return Metric(
         name,
         metric_type,
