@@ -29,6 +29,21 @@ FROM
     sys.tables
 """
 
+VIEWS_QUERY = """
+SELECT
+    v.object_id AS view_id,
+    v.name AS view_name,
+    v.schema_id,
+    CONVERT(varchar(33), v.create_date, 126) AS create_date,
+    CONVERT(varchar(33), v.modify_date, 126) AS modify_date,
+    m.definition
+FROM
+    sys.views v
+    LEFT JOIN sys.sql_modules m ON v.object_id = m.object_id
+WHERE
+    v.is_ms_shipped = 0
+"""
+
 COLUMN_QUERY = """
 SELECT
     c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable

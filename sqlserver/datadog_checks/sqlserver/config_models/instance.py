@@ -75,6 +75,7 @@ class CollectSchemas(BaseModel):
     enabled: Optional[bool] = None
     max_execution_time: Optional[float] = None
     max_tables: Optional[int] = None
+    max_views: Optional[int] = None
 
 
 class CollectSettings(BaseModel):

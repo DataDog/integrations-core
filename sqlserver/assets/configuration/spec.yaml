@@ -1154,6 +1154,13 @@ files:
             type: integer
             example: 300
           fleet_configurable: false
+        - name: max_views
+          description: |
+            Set the maximum number of views to collect. Defaults to 1000.
+          value:
+            type: integer
+            example: 1000
+          fleet_configurable: false
         - name: max_execution_time
           deprecation:
             Agent version: 7.74.0
