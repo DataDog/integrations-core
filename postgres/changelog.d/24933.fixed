@@ -1,1 +1,1 @@
-Inherit the check cancellation lifecycle from ``DatabaseCheck`` instead of carrying a local copy.
+Inherit the check cancellation lifecycle from ``DatabaseCheck``.
