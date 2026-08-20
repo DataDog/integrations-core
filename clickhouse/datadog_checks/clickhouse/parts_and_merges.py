@@ -266,8 +266,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         }
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
-    def cancel(self):
-        super(ClickhousePartsAndMerges, self).cancel()
+    def shutdown(self) -> None:
         self._close_db_client()
 
     def _close_db_client(self):

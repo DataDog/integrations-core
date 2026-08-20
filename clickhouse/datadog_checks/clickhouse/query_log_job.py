@@ -377,9 +377,8 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         }
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
-    def cancel(self):
-        """Cancel the job and clean up the dedicated client."""
-        super().cancel()
+    def shutdown(self) -> None:
+        """Close the dedicated client, once the job loop has stopped."""
         self._close_db_client()
 
     def _close_db_client(self):

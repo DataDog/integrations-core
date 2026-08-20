@@ -664,3 +664,66 @@ def test_check_always_emits_a_hosting_type_tag(instance):
                 check.check({})
 
     assert f'{HOSTING_TYPE_TAG}:{HostingType.UNKNOWN}' in check.tags
+
+
+ALL_DBM_JOBS = {
+    'query_metrics': 'query-metrics',
+    'query_samples': 'query-samples',
+    'query_completions': 'query-completions',
+    'query_errors': 'query-errors',
+    'schema_metrics': 'clickhouse-table-metrics',
+    'collect_schemas': 'clickhouse-metadata',
+    'parts_and_merges': 'parts-and-merges',
+}
+
+
+def test_async_job_registry_holds_every_enabled_job(instance):
+    """Each enabled job is registered under its job name, and the attribute holds it."""
+    instance = {**instance, 'dbm': True, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
+
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    registered = check._async_job_registry
+    assert sorted(registered) == sorted(ALL_DBM_JOBS.values())
+    assert check.statement_metrics is registered['query-metrics']
+    assert check.statement_samples is registered['query-samples']
+    assert check.query_completions is registered['query-completions']
+    assert check.query_errors is registered['query-errors']
+    assert check.table_metrics is registered['clickhouse-table-metrics']
+    assert check.metadata is registered['clickhouse-metadata']
+    assert check.parts_and_merges is registered['parts-and-merges']
+
+
+def test_async_job_registry_empty_without_dbm(instance):
+    """Every job is gated on dbm, so nothing is registered when it is off."""
+    instance = {**instance, 'dbm': False, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
+
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    assert check._async_job_registry == {}
+
+
+def test_cancel_closes_main_client_and_releases_pool(instance):
+    """cancel() runs shutdown(), which releases what the check holds for its whole lifetime."""
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    client = mock.MagicMock()
+    check._client = client
+
+    check.cancel()
+
+    client.close.assert_called_once()
+    assert check._client is None
+    assert check._pool_manager is None
+
+
+def test_cancel_shuts_down_registered_jobs(instance):
+    """The registry drives teardown, so each job's shutdown() releases its dedicated client."""
+    instance = {**instance, 'dbm': True, 'query_errors': {'enabled': True}}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    job_client = mock.MagicMock()
+    check.query_errors._db_client = job_client
+
+    check.cancel()
+
+    job_client.close.assert_called_once()
+    assert check.query_errors._db_client is None

@@ -82,8 +82,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         self._view_refreshes_permission_logged = False
         self._view_refreshes_skip = False
 
-    def cancel(self):
-        super(ClickhouseTableMetrics, self).cancel()
+    def shutdown(self) -> None:
         self._close_db_client()
 
     def _close_db_client(self):

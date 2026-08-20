@@ -193,9 +193,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         # Set once system.asynchronous_inserts is found to be missing, so we skip collection
         self._buffer_unavailable = False
 
-    def cancel(self):
-        """Cancel the job and clean up the dedicated client."""
-        super(ClickhouseStatementSamples, self).cancel()
+    def shutdown(self) -> None:
+        """Close the dedicated client, once the job loop has stopped."""
         self._close_db_client()
 
     def _close_db_client(self):

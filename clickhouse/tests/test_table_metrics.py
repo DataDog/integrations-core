@@ -151,12 +151,12 @@ def test_run_job_table_sizes_query_dedupes_via_limit_by(check):
     assert 'LIMIT 1 BY database, name' in captured[0]
 
 
-def test_cancel_closes_db_client(check):
+def test_shutdown_closes_db_client(check):
     job = check.table_metrics
     fake_client = mock.MagicMock()
     job._db_client = fake_client
 
-    job.cancel()
+    job.shutdown()
 
     assert job._db_client is None
     fake_client.close.assert_called_once()

@@ -399,11 +399,11 @@ def test_collect_all_chunks_share_collection_started_at(check):
     assert len(started_ats) == 1
 
 
-def test_cancel_closes_db_client(check):
+def test_shutdown_closes_db_client(check):
     fake_client = mock.MagicMock()
     check.metadata._schema_collector._db_client = fake_client
 
-    check.metadata.cancel()
+    check.metadata.shutdown()
 
     assert check.metadata._schema_collector._db_client is None
     fake_client.close.assert_called_once()

@@ -110,10 +110,12 @@ class ClickhouseCheck(DatabaseCheck):
         self._init_dbm_components()
 
     def _init_dbm_components(self):
-        """Initialize DBM components based on typed configuration."""
+        """Build and register the DBM async jobs enabled by the typed configuration."""
         # Initialize query metrics (from system.query_log - analogous to pg_stat_statements)
         if self._config.dbm and self._config.query_metrics.enabled:
-            self.statement_metrics = ClickhouseStatementMetrics(self, self._config.query_metrics)
+            self.statement_metrics = self.register_async_job(
+                ClickhouseStatementMetrics(self, self._config.query_metrics)
+            )
         else:
             self.statement_metrics = None
 
@@ -124,8 +126,8 @@ class ClickhouseCheck(DatabaseCheck):
         if self._config.dbm and (
             self._config.query_samples.enabled or self._config.collect_pending_async_inserts.enabled
         ):
-            self.statement_samples = ClickhouseStatementSamples(
-                self, self._config.query_samples, self._config.collect_pending_async_inserts
+            self.statement_samples = self.register_async_job(
+                ClickhouseStatementSamples(self, self._config.query_samples, self._config.collect_pending_async_inserts)
             )
         else:
             self.statement_samples = None
@@ -135,33 +137,35 @@ class ClickhouseCheck(DatabaseCheck):
         # so its config is passed in here rather than run as its own DBMAsyncJob, which would add another
         # concurrent connection to the check's capped DBM connection pool.
         if self._config.dbm and (self._config.query_completions.enabled or self._config.collect_async_inserts.enabled):
-            self.query_completions = ClickhouseQueryCompletions(
-                self, self._config.query_completions, self._config.collect_async_inserts
+            self.query_completions = self.register_async_job(
+                ClickhouseQueryCompletions(self, self._config.query_completions, self._config.collect_async_inserts)
             )
         else:
             self.query_completions = None
 
         # Initialize query errors (from system.query_log - failed queries)
         if self._config.dbm and self._config.query_errors.enabled:
-            self.query_errors = ClickhouseQueryErrors(self, self._config.query_errors)
+            self.query_errors = self.register_async_job(ClickhouseQueryErrors(self, self._config.query_errors))
         else:
             self.query_errors = None
 
         # Initialize schema metrics (per-table size and per-view refresh gauges)
         if self._config.dbm and self._config.schema_metrics.enabled:
-            self.table_metrics = ClickhouseTableMetrics(self, self._config.schema_metrics)
+            self.table_metrics = self.register_async_job(ClickhouseTableMetrics(self, self._config.schema_metrics))
         else:
             self.table_metrics = None
 
         # Initialize schema collection (catalog metadata for Schema Explorer)
         if self._config.dbm and self._config.collect_schemas.enabled:
-            self.metadata = ClickhouseMetadata(self)
+            self.metadata = self.register_async_job(ClickhouseMetadata(self))
         else:
             self.metadata = None
 
         # Initialize parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
         if self._config.dbm and self._config.parts_and_merges.enabled:
-            self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
+            self.parts_and_merges = self.register_async_job(
+                ClickhousePartsAndMerges(self, self._config.parts_and_merges)
+            )
         else:
             self.parts_and_merges = None
 
@@ -275,33 +279,7 @@ class ClickhouseCheck(DatabaseCheck):
         # Send database instance metadata
         self._send_database_instance_metadata()
 
-        # Run query metrics collection if DBM is enabled (from system.query_log)
-        if self.statement_metrics:
-            self.statement_metrics.run_job_loop(self.tags)
-
-        # Run query samples collection if DBM is enabled (from system.processes)
-        if self.statement_samples:
-            self.statement_samples.run_job_loop(self.tags)
-
-        # Run query completions if DBM is enabled (from system.query_log)
-        if self.query_completions:
-            self.query_completions.run_job_loop(self.tags)
-
-        # Run query errors if DBM is enabled (from system.query_log - failed queries)
-        if self.query_errors:
-            self.query_errors.run_job_loop(self.tags)
-
-        # Run schema metrics (per-table size and per-view refresh gauges) if enabled
-        if self.table_metrics:
-            self.table_metrics.run_job_loop(self.tags)
-
-        # Run schema collection if enabled
-        if self.metadata:
-            self.metadata.run_job_loop(self.tags)
-
-        # Run parts and merges monitoring if enabled
-        if self.parts_and_merges:
-            self.parts_and_merges.run_job_loop(self.tags)
+        self.run_async_jobs(self.tags)
 
     def get_queries(self) -> list[dict]:
         query_list = []
@@ -603,46 +581,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.log.warning(error)
             raise
 
-    def cancel(self):
-        """
-        Cancel DBM async jobs and clean up connections.
-        This is called when the check is being shut down.
-        """
-        self.log.debug("Cancelling ClickHouse check and cleaning up connections")
-
-        # Cancel DBM async jobs
-        if self.statement_metrics:
-            self.statement_metrics.cancel()
-        if self.statement_samples:
-            self.statement_samples.cancel()
-        if self.query_completions:
-            self.query_completions.cancel()
-        if self.query_errors:
-            self.query_errors.cancel()
-        if self.table_metrics:
-            self.table_metrics.cancel()
-        if self.metadata:
-            self.metadata.cancel()
-        if self.parts_and_merges:
-            self.parts_and_merges.cancel()
-
-        # Wait for job loops to finish
-        if self.statement_metrics and self.statement_metrics._job_loop_future:
-            self.statement_metrics._job_loop_future.result()
-        if self.statement_samples and self.statement_samples._job_loop_future:
-            self.statement_samples._job_loop_future.result()
-        if self.query_completions and self.query_completions._job_loop_future:
-            self.query_completions._job_loop_future.result()
-        if self.query_errors and self.query_errors._job_loop_future:
-            self.query_errors._job_loop_future.result()
-        if self.table_metrics and self.table_metrics._job_loop_future:
-            self.table_metrics._job_loop_future.result()
-        if self.metadata and self.metadata._job_loop_future:
-            self.metadata._job_loop_future.result()
-        if self.parts_and_merges and self.parts_and_merges._job_loop_future:
-            self.parts_and_merges._job_loop_future.result()
-
-        # Close main client
+    def shutdown(self) -> None:
+        """Close the main client and release the shared connection pool."""
         if self._client:
             try:
                 self._client.close()
@@ -650,8 +590,8 @@ class ClickhouseCheck(DatabaseCheck):
                 self.log.debug("Error closing main client: %s", e)
             self._client = None
 
-        # Clear the shared pool manager
-        # Note: urllib3 pool connections are automatically closed when idle
+        # urllib3 pool connections are closed automatically once idle, so dropping the manager is
+        # enough. The jobs' dedicated clients share it, and they are shut down before this runs.
         self._pool_manager = None
 
     def version_lt(self, version: str) -> bool:

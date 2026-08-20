@@ -40,8 +40,7 @@ class ClickhouseMetadata(DBMAsyncJob):
         self._schema_collector = ClickhouseSchemaCollector(check)
         self._schema_collector._cancel_event = self._cancel_event
 
-    def cancel(self):
-        super(ClickhouseMetadata, self).cancel()
+    def shutdown(self) -> None:
         self._schema_collector.close()
 
     @tracked_method(agent_check_getter=agent_check_getter)
