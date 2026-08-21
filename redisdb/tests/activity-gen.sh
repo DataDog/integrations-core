@@ -76,6 +76,9 @@ while :; do
   $R -n "$DB" hset "hash:$i" f v      > /dev/null
   $R -n "$DB" xadd "stream:$i" '*' f v > /dev/null
   $R -n "$DB" incr "counter"          > /dev/null
+  # CLIENT SETINFO advertises a client lib-name, surfacing it in CLIENT INFO/LIST
+  # and adding a client|setinfo entry to command_stats. Redis 7.2+ only.
+  $R -n "$DB" client setinfo lib-name activity-gen > /dev/null 2>&1 || true
 
   # --- net.input / net.output and client buffer high-water marks --------
   # A large write then a large read moves total_net_input_bytes and
