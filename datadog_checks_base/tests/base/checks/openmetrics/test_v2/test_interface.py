@@ -40,15 +40,15 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
         pytest.param({'foo': 'corge'}, ['endpoint:test', 'corge:baz', 'qux:quux'], id='colliding_key_instance_wins'),
     ],
 )
-def test_default_config_mapping_merged_with_instance(
+def test_default_rename_labels_merged_with_instance(
     aggregator, dd_run_check, mock_http_response, instance_renames, expected_tags
 ):
     """
-    A mapping-valued default is merged with the instance's mapping for the same option, entry by
-    entry: disjoint keys union together, and on a key collision the instance's entry wins. The
-    instance config is layered over the defaults in a `ChainMap`, which resolves keys shallowly, so
-    without the merge an instance that sets `rename_labels` at all would shadow the class default
-    wholesale and silently lose renames the check depends on.
+    A `rename_labels` default is merged with the instance's `rename_labels`, entry by entry: disjoint
+    keys union together, and on a key collision the instance's entry wins. The instance config is
+    layered over the defaults in a `ChainMap`, which resolves keys shallowly, so without the merge an
+    instance that sets `rename_labels` at all would shadow the class default wholesale and silently
+    lose renames the check depends on.
     """
 
     class Check(OpenMetricsBaseCheckV2):

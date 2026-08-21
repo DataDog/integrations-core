@@ -137,8 +137,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         instance that sets ``rename_labels`` at all would otherwise shadow the whole class default and
         silently drop renames the check depends on -- such as the ones that keep endpoint labels off
         Datadog's reserved tag keys. Renames are additive by nature, so the instance's own entries
-        still win on a per-key basis. Other mapping-valued options keep wholesale-replace semantics,
-        so an instance can still fully override them (e.g. disable ``share_labels`` with ``{}``).
+        still win on a per-key basis. One consequence: ``rename_labels: {}`` cannot disable the
+        check's declared renames -- it merges to the defaults unchanged -- so an instance can override
+        an individual key but cannot opt out of all declared renames wholesale. Other mapping-valued
+        options keep wholesale-replace semantics, so an instance can still fully override them (e.g.
+        disable ``share_labels`` with ``{}``).
         """
         defaults = dict(self.get_default_config())
         if file_metrics := self._load_file_based_metrics(config):
@@ -158,9 +161,10 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
         state leakage between check executions.
 
-        Mapping-valued defaults are merged with any mapping the instance configures for the same
-        option, so a user customizing it adds to these defaults instead of replacing them. Defaults
-        of any other type are replaced outright by an instance-level value.
+        A ``rename_labels`` default is merged entry by entry with the instance's renames, so a user
+        adds to the check's declared renames instead of replacing them, and the instance's own entries
+        win on a per-key collision. Defaults of any other type -- including other mapping-valued
+        options such as ``share_labels`` -- are replaced outright by an instance-level value.
         """
         return {}
 
