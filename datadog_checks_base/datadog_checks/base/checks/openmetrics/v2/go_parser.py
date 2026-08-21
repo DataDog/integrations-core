@@ -90,50 +90,91 @@ def _decode_value(v: float | str) -> float:
     return v
 
 
-def _json_to_metric(family: dict, is_openmetrics: bool = False) -> Metric:
+def _json_to_metrics(family: dict, is_openmetrics: bool = False) -> Iterator[Metric]:
+    """Convert a Go parser JSON family dict into one or more Metric objects.
+
+    For Prometheus-format counters the Python ``prometheus_client`` parser
+    only keeps samples whose name matches a recognised counter suffix
+    (``_total``, ``_created``, or the bare family name) inside the counter
+    family.  Non-standard suffixes (``_last``, ``_min``, ``_max``, ``_mean``,
+    ``_stddev``, …) are emitted as separate ``unknown``-type families.
+
+    The Go parser groups *all* samples between consecutive TYPE directives
+    into one typed family, so we split them here to match the Python
+    behaviour that downstream code relies on.
+    """
     name = family['name']
     metric_type = family.get('type', 'untyped')
     raw_samples = family.get('samples', ())
+    help_text = family.get('help', '')
 
-    # The Python prometheus_client parser adds ``_total`` to the main counter
-    # sample and strips it from the family name.  Non-standard suffixes
-    # (``_last``, ``_min``, ``_max``, etc.) become separate "unknown" families.
-    # The Go parser groups everything under one typed family.  Normalize here
-    # so downstream code sees consistent names.
-    original_name = name
     if not is_openmetrics and metric_type == 'counter':
-        if name.endswith('_total'):
-            name = name[:-6]
-        else:
-            total_name = name + '_total'
-            if any(s.get('name') == total_name for s in raw_samples):
-                name = total_name
+        # --- split standard / non-standard counter samples ---------------
+        standard_raw: list[dict] = []
+        nonstandard_by_name: dict[str, list[dict]] = {}
 
-    def _sample_name(raw_name):
-        # Only add ``_total`` to the sample whose name matches the TYPE-line
-        # family name exactly — that is the standard counter sample.
-        # Non-standard samples (``_last``, ``_min``, etc.) are left as-is.
-        if not is_openmetrics and metric_type == 'counter' and raw_name == original_name and not raw_name.endswith('_total'):
-            return raw_name + '_total'
-        return raw_name
+        for s in raw_samples:
+            sname = s['name']
+            if sname == name or sname == name + '_total' or sname == name + '_created':
+                standard_raw.append(s)
+            else:
+                nonstandard_by_name.setdefault(sname, []).append(s)
 
-    samples = [
-        Sample(
-            _sample_name(s['name']),
-            s.get('labels') or {},
-            _decode_value(s['value']),
-            s.get('timestamp'),
-            s.get('exemplar'),
-        )
-        for s in raw_samples
-    ]
+        # --- emit the counter family with standard samples only ----------
+        if standard_raw:
+            original_name = name
+            if name.endswith('_total'):
+                name = name[:-6]
+            else:
+                total_name = name + '_total'
+                if any(s.get('name') == total_name for s in standard_raw):
+                    name = total_name
 
-    return Metric(
-        name,
-        metric_type,
-        family.get('help', ''),
-        samples,
-    )
+            samples = []
+            for s in standard_raw:
+                sname = s['name']
+                # Add _total to the bare-name sample (Python behaviour).
+                if sname == original_name and not sname.endswith('_total'):
+                    sname = sname + '_total'
+                samples.append(Sample(
+                    sname,
+                    s.get('labels') or {},
+                    _decode_value(s['value']),
+                    s.get('timestamp'),
+                    s.get('exemplar'),
+                ))
+
+            yield Metric(name, 'counter', help_text, samples)
+
+        # --- emit unknown families for non-standard samples --------------
+        for ns_name, ns_raw in nonstandard_by_name.items():
+            yield Metric(
+                ns_name,
+                'unknown',
+                '',
+                [
+                    Sample(
+                        ns_name,
+                        s.get('labels') or {},
+                        _decode_value(s['value']),
+                        s.get('timestamp'),
+                        s.get('exemplar'),
+                    )
+                    for s in ns_raw
+                ],
+            )
+    else:
+        samples = [
+            Sample(
+                s['name'],
+                s.get('labels') or {},
+                _decode_value(s['value']),
+                s.get('timestamp'),
+                s.get('exemplar'),
+            )
+            for s in raw_samples
+        ]
+        yield Metric(name, metric_type, help_text, samples)
 
 
 def parse_with_go_parser(content_type: str, line_streamer: Iterator[str]) -> Iterator[Metric]:
@@ -157,12 +198,12 @@ def parse_with_go_parser(content_type: str, line_streamer: Iterator[str]) -> Ite
             families_json = datadog_agent.feed_prometheus_parser(parser_id, chunk)
             if families_json:
                 for family in json.loads(families_json):
-                    yield _json_to_metric(family, is_openmetrics=is_openmetrics)
+                    yield from _json_to_metrics(family, is_openmetrics=is_openmetrics)
 
         remaining_json = datadog_agent.finish_prometheus_parser(parser_id)
         if remaining_json:
             for family in json.loads(remaining_json):
-                yield _json_to_metric(family, is_openmetrics=is_openmetrics)
+                yield from _json_to_metrics(family, is_openmetrics=is_openmetrics)
     except GeneratorExit:
         # Generator was closed before finishing; clean up the Go-side parser.
         try:
