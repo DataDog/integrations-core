@@ -118,6 +118,44 @@ def _create_check(instance):
     return check
 
 
+@pytest.mark.parametrize(
+    'feature_config',
+    [
+        pytest.param({'dbm': True}, id='dbm'),
+        pytest.param({'data_observability': {'enabled': True}}, id='data-observability'),
+    ],
+)
+def test_schema_collection_enabled_by_default_when_settings_disabled(feature_config):
+    instance = {
+        **BASE_INSTANCE,
+        **feature_config,
+        'collect_settings': {'enabled': False},
+        'collect_schemas': {'run_sync': True},
+    }
+    check = _create_check(instance)
+    check.sql_metadata._schema_collector.collect_schemas = MagicMock()
+
+    check.sql_metadata.run_job_loop(check.tag_manager.get_tags())
+
+    check.sql_metadata._schema_collector.collect_schemas.assert_called_once_with()
+
+
+def test_data_observability_schedules_schema_collection():
+    instance = _make_do_instance(queries=[])
+    check = _create_check(instance)
+    check._submit_initialization_health_event = MagicMock()
+    check.load_static_information = MagicMock()
+    check._query_manager = MagicMock()
+    check._send_database_instance_metadata = MagicMock()
+    check.collect_metrics = MagicMock()
+    check.sql_metadata.run_job_loop = MagicMock()
+    check.data_observability.run_job_loop = MagicMock()
+
+    check.check(instance)
+
+    check.sql_metadata.run_job_loop.assert_called_once_with(check.tag_manager.get_tags())
+
+
 def _setup_and_run(instance=None, queries=None, mock_cursor=None):
     if instance is None:
         instance = _make_do_instance(queries=queries)

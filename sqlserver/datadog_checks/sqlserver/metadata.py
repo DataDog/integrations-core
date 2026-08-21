@@ -58,19 +58,35 @@ class SqlserverMetadata(DBMAsyncJob):
     """
     Collects database metadata. Supports:
         1. collection of sqlserver instance settings
+        2. schema collection
     """
 
     def __init__(self, check, config: SQLServerConfig):
         self.log = check.log
         self._config = config
-        self.collection_interval = self._config.settings_config.get(
+        self._settings_config = self._config.settings_config
+        self._settings_enabled = is_affirmative(self._settings_config.get('enabled', True))
+        self._settings_collection_interval = self._settings_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
+        self._schema_config = self._config.schema_config
+        self._schema_enabled = is_affirmative(self._schema_config.get('enabled', False))
+        self._schema_collection_interval = self._schema_config.get(
+            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        )
+
+        if self._schema_enabled and not self._settings_enabled:
+            self.collection_interval = self._schema_collection_interval
+        elif self._settings_enabled and not self._schema_enabled:
+            self.collection_interval = self._settings_collection_interval
+        else:
+            self.collection_interval = min(self._settings_collection_interval, self._schema_collection_interval)
 
         super(SqlserverMetadata, self).__init__(
             check,
-            run_sync=is_affirmative(self._config.settings_config.get('run_sync', False)),
-            enabled=is_affirmative(self._config.settings_config.get('enabled', True)),
+            run_sync=is_affirmative(self._settings_config.get('run_sync', False))
+            or is_affirmative(self._schema_config.get('run_sync', False)),
+            enabled=self._settings_enabled or self._schema_enabled,
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms=check.dbms,
@@ -83,19 +99,24 @@ class SqlserverMetadata(DBMAsyncJob):
         )
         self._conn_key_prefix = "dbm-metadata-"
         self._settings_query = None
-        self._time_since_last_settings_query = 0
+        self._last_settings_collection_time = 0
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
         self._schema_collector = SQLServerSchemaCollector(check)
-        self._schema_config = self._config.schema_config
-        self._schema_collection_interval = self._schema_config.get(
-            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
-        )
         self._last_schemas_collection_time = 0
 
     def _close_db_conn(self):
         pass
 
     def run_job(self):
+        self._collect_settings()
+        self.collect_schemas()
+
+    def _collect_settings(self) -> None:
+        if not self._settings_enabled:
+            return
+        if time.time() - self._last_settings_collection_time < self._settings_collection_interval:
+            return
+        self._last_settings_collection_time = time.time()
         self.report_sqlserver_metadata()
 
     def _get_available_settings_columns(self, cursor, all_expected_columns):
@@ -159,10 +180,9 @@ class SqlserverMetadata(DBMAsyncJob):
                     "metadata": settings_rows,
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
-        self.collect_schemas()
 
     def collect_schemas(self):
-        if not self._schema_config.get('enabled', False):
+        if not self._schema_enabled:
             return
         if time.time() - self._last_schemas_collection_time < self._schema_collection_interval:
             return
