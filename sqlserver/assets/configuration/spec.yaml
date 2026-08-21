@@ -1104,10 +1104,10 @@ files:
         - name: enabled
           description: |
             Enable schema collection. Requires either `dbm: true` or `data_observability.enabled: true`.
-            Defaults to true when either feature is enabled.
+            Defaults to false.
           value:
             type: boolean
-            example: true
+            example: false
           fleet_configurable: false
         - name: collection_interval
           description: |
@@ -1146,10 +1146,10 @@ files:
         - name: enabled
           description: |
             Enable schema collection. Requires either `dbm: true` or `data_observability.enabled: true`.
-            Defaults to true when either feature is enabled.
+            Defaults to false.
           value:
             type: boolean
-            example: true
+            example: false
           fleet_configurable: false
         - name: collection_interval
           description: |

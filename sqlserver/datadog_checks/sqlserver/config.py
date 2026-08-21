@@ -54,9 +54,6 @@ class SQLServerConfig:
 
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
-        self.data_observability: DataObservability = DataObservability.model_validate(
-            instance.get('data_observability') or {}
-        )
         self.database_metrics_config: dict = self._build_database_metrics_configs(instance)
         self.statement_metrics_config: dict = instance.get('query_metrics', {}) or {}
         self.agent_jobs_config: dict = instance.get('agent_jobs', {}) or {}
@@ -64,11 +61,7 @@ class SQLServerConfig:
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}
         # Backward compatibility: check new names first, then fall back to old names
-        schema_config = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
-        self.schema_config: dict = {
-            'enabled': self.dbm_enabled or bool(self.data_observability.enabled),
-            **schema_config,
-        }
+        self.schema_config: dict = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
         self.deadlocks_config: dict = instance.get('collect_deadlocks', instance.get('deadlocks_collection', {})) or {}
         self.xe_collection_config: dict = instance.get('collect_xe', instance.get('xe_collection', {})) or {}
         self.cloud_metadata: dict = {}
@@ -140,6 +133,9 @@ class SQLServerConfig:
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
+        self.data_observability: DataObservability = DataObservability.model_validate(
+            instance.get('data_observability') or {}
+        )
 
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
