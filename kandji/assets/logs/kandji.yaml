@@ -183,12 +183,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Alert
-    path: ocsf.is_alert
-    source: log
-    type: boolean
-  - groups:
-      - OCSF
     name: Message
     path: ocsf.message
     source: log
