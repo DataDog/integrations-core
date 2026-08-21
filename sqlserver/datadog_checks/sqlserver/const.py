@@ -86,7 +86,16 @@ expected_sys_databases_columns = [
     'physical_database_name',
 ]
 
-DATABASE_SERVICE_CHECK_QUERY = """SELECT 1;"""
+DATABASE_SERVICE_CHECK_QUERY = """
+DECLARE @monitored_databases xml = ?;
+WITH monitored_databases AS (
+    SELECT database_node.value('.', 'nvarchar(128)') AS name
+    FROM @monitored_databases.nodes('/databases/database') AS databases(database_node)
+)
+SELECT name, CASE WHEN state = 0 AND HAS_DBACCESS(name) = 1 THEN 1 ELSE 0 END AS can_connect
+FROM sys.databases
+WHERE name IN (SELECT name FROM monitored_databases);
+"""
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 

@@ -73,6 +73,54 @@ def test_construct_use_statement(db_name, expected):
     assert use_stmt == expected
 
 
+@pytest.mark.parametrize('database_count', [1, 1000])
+def test_autodiscovery_database_service_check_batch_count_is_bounded(instance_autodiscovery, database_count):
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    database_names = [f'database_{index}' for index in range(database_count)]
+    check.databases = {Database(name) for name in database_names}
+    cursor = mock.MagicMock()
+    cursor.fetchall.return_value = [(name, 1) for name in database_names]
+    check._connection = mock.MagicMock()
+    check.connection.get_managed_cursor.return_value.__enter__.return_value = cursor
+    check.handle_service_check = mock.MagicMock()
+
+    check._check_connections_by_use_db()
+
+    cursor.execute.assert_called_once()
+    query, params = cursor.execute.call_args.args
+    assert query.count('?') == 1
+    assert 'USE ' not in query
+    assert params[0].count('<database>') == database_count
+    assert check.handle_service_check.call_count == database_count
+
+
+def test_autodiscovery_database_service_check_preserves_per_database_status(instance_autodiscovery):
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    check.databases = {Database('available'), Database('unavailable')}
+    cursor = mock.MagicMock()
+    cursor.fetchall.return_value = [('available', 1), ('unavailable', 0)]
+    check._connection = mock.MagicMock()
+    check.connection.get_managed_cursor.return_value.__enter__.return_value = cursor
+    check.connection.get_host_with_port = mock.MagicMock(return_value='sql.example:1433')
+    check.handle_service_check = mock.MagicMock()
+
+    check._check_connections_by_use_db()
+
+    check.handle_service_check.assert_has_calls(
+        [
+            mock.call(check.OK, 'sql.example:1433', 'available', False),
+            mock.call(
+                check.CRITICAL,
+                'sql.example:1433',
+                'unavailable',
+                'Database unavailable connection service check failed: database is not accessible',
+                False,
+            ),
+        ],
+        any_order=True,
+    )
+
+
 def create_schema_collector(static_info_cache: dict | None = None) -> SQLServerSchemaCollector:
     check = mock.Mock()
     check._config.schema_config = {}

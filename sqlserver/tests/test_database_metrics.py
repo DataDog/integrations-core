@@ -1567,7 +1567,11 @@ def test_sqlserver_database_files_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
     execute_query_handler_mocked = mock.MagicMock()
-    execute_query_handler_mocked.side_effect = mocked_results
+    execute_query_handler_mocked.return_value = [
+        (db, db, *file_row)
+        for db, database_rows in zip(AUTODISCOVERY_DBS, mocked_results)
+        for file_row in database_rows
+    ]
 
     database_files_metrics = SqlserverDatabaseFilesMetrics(
         config=sqlserver_check._config,
@@ -1591,8 +1595,17 @@ def test_sqlserver_database_files_metrics(
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
-            for row in result:
-                file_id, file_type, file_location, file_name, database_files_state_desc, size, space_used, state = row
+            for file_row in result:
+                (
+                    file_id,
+                    file_type,
+                    file_location,
+                    file_name,
+                    database_files_state_desc,
+                    size,
+                    space_used,
+                    state,
+                ) = file_row
                 size *= 8  # size is in pages, 1 page = 8 KB
                 space_used *= 8  # space_used is in pages, 1 page = 8 KB
                 metrics = zip(database_files_metrics.metric_names()[0], [state, size, space_used])
@@ -1607,6 +1620,30 @@ def test_sqlserver_database_files_metrics(
                 ] + tags
                 for metric_name, metric_value in metrics:
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.parametrize('database_count', [1, 1000])
+def test_database_files_metrics_batch_count_is_bounded(instance_docker_metrics, database_count):
+    instance_docker_metrics['database_metrics'] = {'db_files_metrics': {'enabled': True}}
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker_metrics])
+    new_query_executor = mock.MagicMock()
+
+    database_files_metrics = SqlserverDatabaseFilesMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.MagicMock(),
+        databases=[f'database_{index}' for index in range(database_count)],
+    )
+
+    query_executors = database_files_metrics._build_query_executors()
+
+    assert len(query_executors) == 1
+    new_query_executor.assert_called_once()
+    query = new_query_executor.call_args.args[0][0]
+    assert query['query'].count('?') == 1
+    assert 'USE ' not in query['query']
+    assert query['params'][0].count('<database>') == database_count
 
 
 @pytest.mark.integration

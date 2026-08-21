@@ -63,6 +63,7 @@ from datadog_checks.sqlserver.utils import (
     construct_use_statement,
     parse_sqlserver_major_version,
     parse_sqlserver_year,
+    serialize_database_names,
 )
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
@@ -844,27 +845,24 @@ class SQLServer(DatabaseCheck):
     def _check_connections_by_use_db(self):
         with self.connection.open_managed_default_connection(KEY_PREFIX):
             with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-                for db in self.databases:
-                    check_err_message = "Database {} connection service check failed: {}"
-                    try:
-                        switch_db_statement = construct_use_statement(db.name)
-                        cursor.execute(switch_db_statement)
-                        cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
-                        cursor.fetchall()
-                        self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
-                    except Exception as e:
-                        self.log.warning(check_err_message.format(db.name, str(e)))
-                        self.handle_service_check(
-                            AgentCheck.CRITICAL,
-                            self.connection.get_host_with_port(),
-                            db.name,
-                            check_err_message.format(db.name, str(e)),
-                            False,
-                        )
+                database_names = [db.name for db in self.databases]
+                if not database_names:
+                    return
+
+                cursor.execute(DATABASE_SERVICE_CHECK_QUERY, (serialize_database_names(database_names),))
+                database_access = dict(cursor.fetchall())
+
+                connection_host = self.connection.get_host_with_port()
+                for database_name in database_names:
+                    if database_access.get(database_name) == 1:
+                        self.handle_service_check(AgentCheck.OK, connection_host, database_name, False)
                         continue
-                # Switch DB back to MASTER
-                switch_db_statement = construct_use_statement(self.connection.DEFAULT_DATABASE)
-                cursor.execute(switch_db_statement)
+
+                    message = "Database {} connection service check failed: database is not accessible".format(
+                        database_name
+                    )
+                    self.log.warning(message)
+                    self.handle_service_check(AgentCheck.CRITICAL, connection_host, database_name, message, False)
 
     def get_databases(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
