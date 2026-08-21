@@ -924,6 +924,7 @@ class SQLServer(DatabaseCheck):
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
+            track_operation_time=True,
             databases=db_names,
         )
 

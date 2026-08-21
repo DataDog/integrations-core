@@ -2038,3 +2038,39 @@ def test_sqlserver_database_metrics_init(
     assert len(database_file_metrics) == 1
     assert database_file_metrics[0].enabled is True
     assert 'tempdb' in database_file_metrics[0].databases
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_metric_operation_time_tracks_enabled_collectors(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    instance_docker_metrics['database_metrics'] = {
+        'file_stats_metrics': {'enabled': False},
+        'task_scheduler_metrics': {'enabled': True},
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check._database_metrics = [
+        sqlserver_check._new_database_metric_executor(metric_class)
+        for metric_class in (SqlserverFileStatsMetrics, SqlserverOsSchedulersMetrics, SqlserverOsTasksMetrics)
+    ]
+
+    dd_run_check(sqlserver_check)
+
+    operation_tags = sqlserver_check.debug_stats_kwargs()['tags']
+    for operation in ('sys.dm_os_schedulers', 'sys.dm_os_tasks'):
+        aggregator.assert_metric(
+            'dd.sqlserver.operation.time',
+            tags=[f'operation:{operation}'] + operation_tags,
+            hostname=sqlserver_check.resolved_hostname,
+            count=1,
+        )
+    aggregator.assert_metric(
+        'dd.sqlserver.operation.time',
+        tags=['operation:sys.dm_io_virtual_file_stats'] + operation_tags,
+        hostname=sqlserver_check.resolved_hostname,
+        count=0,
+    )
