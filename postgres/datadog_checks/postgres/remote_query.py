@@ -790,7 +790,7 @@ def _intake_receipt_to_camel(resp: Mapping[str, Any]) -> dict[str, Any]:
         'mode': resp.get('mode', 'POC_PUBLIC_MULTIPART_UPLOAD'),
         'uploadId': resp.get('upload_id', ''),
         'bucketName': resp.get('bucket_name', ''),
-        'objectPath': resp.get('object_key', ''),
+        'objectPath': resp.get('object_path', ''),
         'totalBytes': resp.get('total_bytes', 0),
         'totalRows': resp.get('total_rows', 0),
         'partCount': resp.get('part_count', 0),

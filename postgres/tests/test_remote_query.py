@@ -13,6 +13,7 @@ from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.remote_query import (
     StaticPostgresCheckRegistry,
     _execute_upload_stream,
+    _intake_receipt_to_camel,
     execute_agent_rpc_stream_copy,
     iter_agent_rpc_stream_copy_events,
     normalize_target,
@@ -161,7 +162,7 @@ class FakeUploadClient:
             'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': 0,
             'total_rows': 0,
             'part_count': 0,
@@ -995,7 +996,7 @@ def test_agent_rpc_stream_copy_upload_mode_uploads_parts_directly(monkeypatch):
             'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': 18,
             'total_rows': 0,
             'part_count': 3,
@@ -1293,7 +1294,7 @@ def test_copy_stream_upload_mode_uploads_exact_mib_directly_to_intake(total_mib,
             'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': total_bytes,
             'total_rows': 0,
             'part_count': total_bytes // PROOF_MIB,
@@ -1360,7 +1361,7 @@ def test_copy_stream_upload_mode_backpressure_fences_copy_reads_during_http_uplo
             'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': total_bytes,
             'total_rows': 0,
             'part_count': total_blocks,
@@ -1586,7 +1587,7 @@ def test_copy_stream_upload_mode_finalizes_empty_result_with_zero_parts(monkeypa
             'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': 0,
             'total_rows': 0,
             'part_count': 0,
@@ -1747,7 +1748,7 @@ def test_copy_stream_upload_mode_aggregates_many_copy_reads_into_64_mib_parts(mo
                 'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
                 'upload_id': 'upload-01k',
                 'bucket_name': 'rq-bucket',
-                'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+                'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
                 'total_bytes': total_bytes,
                 'total_rows': 0,
                 'part_count': 2,
@@ -1773,3 +1774,46 @@ def test_copy_stream_upload_mode_aggregates_many_copy_reads_into_64_mib_parts(mo
     assert fake.finalize_calls == 1
     assert fake.abort_calls == 0
     assert pool.closed_copies == 1
+
+
+@pytest.mark.parametrize(
+    'resp, expected_object_path',
+    [
+        (
+            {
+                'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
+                'upload_id': 'upload-01k',
+                'bucket_name': 'rq-bucket',
+                'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+                'total_bytes': 18,
+                'total_rows': 3,
+                'part_count': 1,
+                'sha256': 'aggregate-sha',
+            },
+            'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+        ),
+        ({'object_path': 'solo/path/result.csv'}, 'solo/path/result.csv'),
+    ],
+)
+def test_intake_receipt_to_camel_maps_object_path_to_objectPath(resp, expected_object_path):
+    # The intake finalize route serializes the canonical final path as the snake-case
+    # ``object_path`` field; the AP receipt must carry it as the camelCase ``objectPath``.
+    receipt = _intake_receipt_to_camel(resp)
+    assert receipt['objectPath'] == expected_object_path
+    assert receipt['objectPath'] != ''
+
+
+def test_intake_receipt_to_camel_does_not_preserve_obsolete_object_key():
+    # Remote Queries is greenfield: the obsolete ``object_key`` alias is not preserved, so an
+    # intake response that only carries ``object_key`` yields an empty ``objectPath``.
+    resp = {
+        'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
+        'upload_id': 'upload-01k',
+        'bucket_name': 'rq-bucket',
+        'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+        'total_bytes': 18,
+        'total_rows': 3,
+        'part_count': 1,
+        'sha256': 'aggregate-sha',
+    }
+    assert _intake_receipt_to_camel(resp)['objectPath'] == ''
