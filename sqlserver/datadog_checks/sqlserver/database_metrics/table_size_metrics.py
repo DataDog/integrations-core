@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+import copy
 import functools
 
 from datadog_checks.base.errors import ConfigurationError
@@ -63,6 +65,10 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
         return self.config.database_metrics_config["table_size_metrics"]["collection_interval"]
 
     @property
+    def table_size_object_names(self) -> list[str]:
+        return self.config.table_size_object_names
+
+    @property
     def databases(self):
         '''
         Returns a list of databases to collect table size metrics for.
@@ -93,9 +99,19 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
+        if self.table_size_object_names:
+            placeholders = ','.join(['?'] * len(self.table_size_object_names))
+            object_name_filter = f" WHERE t.name IN ({placeholders})"
+        else:
+            object_name_filter = None
         for database in self.databases:
+            queries = copy.deepcopy(self.queries)
+            if object_name_filter:
+                for query in queries:
+                    query['query'] = query['query'].replace("    GROUP BY", object_name_filter + "\n    GROUP BY")
+                    query['params'] = tuple(self.table_size_object_names)
             executor = self.new_query_executor(
-                self.queries,
+                queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
                 track_operation_time=self.track_operation_time,
             )

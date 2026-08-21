@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import functools
 
 from datadog_checks.base.errors import ConfigurationError
@@ -53,6 +54,10 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
         return self.config.database_metrics_config["index_usage_metrics"]["enabled_tempdb"]
 
     @property
+    def index_usage_object_names(self) -> list[str]:
+        return self.config.index_usage_object_names
+
+    @property
     def collection_interval(self) -> int:
         '''
         Returns the interval in seconds at which to collect index usage metrics.
@@ -100,9 +105,19 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
+        if self.index_usage_object_names:
+            placeholders = ','.join(['?'] * len(self.index_usage_object_names))
+            object_name_filter = f" WHERE OBJECT_NAME(ind.object_id) IN ({placeholders})"
+        else:
+            object_name_filter = None
         for database in self.databases:
+            queries = copy.deepcopy(self.queries)
+            if object_name_filter:
+                for query in queries:
+                    query['query'] += object_name_filter
+                    query['params'] = tuple(self.index_usage_object_names)
             executor = self.new_query_executor(
-                self.queries,
+                queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
                 track_operation_time=self.track_operation_time,
             )

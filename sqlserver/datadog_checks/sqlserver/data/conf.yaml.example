@@ -340,6 +340,20 @@ instances:
     #
     # db_fragmentation_object_names: []
 
+    ## @param index_usage_object_names - list of strings - optional
+    ## Index usage metrics normally emit metrics for all objects within a database.
+    ## This option allows you to specify database object names to query for index usage metrics.
+    ## Note: Each object name is unique to each database.
+    #
+    # index_usage_object_names: []
+
+    ## @param table_size_object_names - list of strings - optional
+    ## Table size metrics normally emit metrics for all objects within a database.
+    ## This option allows you to specify database object names to query for table size metrics.
+    ## Note: Each object name is unique to each database.
+    #
+    # table_size_object_names: []
+
     ## @param adoprovider - string - optional - default: MSOLEDBSQL
     ## Choose the ADO provider.  Note that SQLOLEDB is deprecated.  To use the MSOLEDBSQL
     ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.

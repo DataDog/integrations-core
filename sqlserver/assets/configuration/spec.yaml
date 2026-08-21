@@ -532,6 +532,26 @@ files:
         items:
           type: string
       fleet_configurable: false
+    - name: index_usage_object_names
+      description: |
+        Index usage metrics normally emit metrics for all objects within a database.
+        This option allows you to specify database object names to query for index usage metrics.
+        Note: Each object name is unique to each database.
+      value:
+        type: array
+        items:
+          type: string
+      fleet_configurable: false
+    - name: table_size_object_names
+      description: |
+        Table size metrics normally emit metrics for all objects within a database.
+        This option allows you to specify database object names to query for table size metrics.
+        Note: Each object name is unique to each database.
+      value:
+        type: array
+        items:
+          type: string
+      fleet_configurable: false
     - name: adoprovider
       fleet_configurable: true
       description: |

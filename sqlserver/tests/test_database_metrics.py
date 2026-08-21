@@ -1181,6 +1181,65 @@ def test_sqlserver_index_usage_metrics(
         aggregator.assert_metric(metric_name, count=0)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'object_names, expected_tables',
+    [
+        pytest.param([], {'some_table', 'other_table'}, id='unbounded'),
+        pytest.param(['some_table'], {'some_table'}, id='bounded'),
+    ],
+)
+def test_sqlserver_index_usage_metrics_object_names(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    object_names,
+    expected_tables,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {'enabled': True, 'enabled_tempdb': False},
+    }
+    instance_docker_metrics['index_usage_object_names'] = object_names
+    mocked_results = [
+        ('master', 'some_index', 'dbo', 'some_table', 10, 20, 30, 40),
+        ('master', 'other_index', 'dbo', 'other_table', 50, 60, 70, 80),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None, params=None):
+        if object_names:
+            assert "OBJECT_NAME(ind.object_id) IN (?)" in query
+            assert params == tuple(object_names)
+            return [row for row in mocked_results if row[3] in params]
+        assert "OBJECT_NAME(ind.object_id) IN" not in query
+        assert params is None
+        return mocked_results
+
+    index_usage_metrics = SqlserverIndexUsageMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        databases=['master'],
+    )
+    sqlserver_check._database_metrics = [index_usage_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    for metric_name in index_usage_metrics.metric_names()[0]:
+        emitted_tables = {
+            tag.split(':', 1)[1]
+            for metric in aggregator.metrics(metric_name)
+            for tag in metric.tags
+            if tag.startswith('table:')
+        }
+        assert emitted_tables == expected_tables
+
+
 def test_sqlserver_db_fragmentation_query_uses_parameterized_queries(init_config, instance_docker_metrics):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
@@ -1792,6 +1851,65 @@ def test_sqlserver_table_size_metrics(
             # check that the aggregator got the mocked metrics
             for metric_name, metric_value in metrics:
                 aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'object_names, expected_tables',
+    [
+        pytest.param([], {'table1', 'table2'}, id='unbounded'),
+        pytest.param(['table1'], {'table1'}, id='bounded'),
+    ],
+)
+def test_sqlserver_table_size_metrics_object_names(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    object_names,
+    expected_tables,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'table_size_metrics': {'enabled': True},
+    }
+    instance_docker_metrics['table_size_object_names'] = object_names
+    mocked_results = [
+        ('table1', 'dbo', 'master', 100, 1024, 500, 200),
+        ('table2', 'dbo', 'master', 200, 2048, 1000, 400),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None, params=None):
+        if object_names:
+            assert "WHERE t.name IN (?)" in query
+            assert params == tuple(object_names)
+            return [row for row in mocked_results if row[0] in params]
+        assert "WHERE t.name IN" not in query
+        assert params is None
+        return mocked_results
+
+    table_size_metrics = SqlserverTableSizeMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        databases=['master'],
+    )
+    sqlserver_check._database_metrics = [table_size_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    for metric_name in table_size_metrics.metric_names()[0]:
+        emitted_tables = {
+            tag.split(':', 1)[1]
+            for metric in aggregator.metrics(metric_name)
+            for tag in metric.tags
+            if tag.startswith('table:')
+        }
+        assert emitted_tables == expected_tables
 
 
 @pytest.mark.integration
