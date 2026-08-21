@@ -7,7 +7,7 @@ from collections import ChainMap
 from collections.abc import Mapping
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import yaml
 from requests.exceptions import RequestException
@@ -124,7 +124,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         for scraper in self.scrapers.values():
             scraper.set_dynamic_tags(*tags)
 
-    def get_config_with_defaults(self, config: Mapping) -> ChainMap:
+    def get_config_with_defaults(self, config: Mapping[str, Any]) -> Mapping[str, Any]:
         """Combine instance config with class defaults and file-based metric mappings.
 
         Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
@@ -161,10 +161,10 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
         state leakage between check executions.
 
-        A ``rename_labels`` default is merged entry by entry with the instance's renames, so a user
-        adds to the check's declared renames instead of replacing them, and the instance's own entries
-        win on a per-key collision. Defaults of any other type -- including other mapping-valued
-        options such as ``share_labels`` -- are replaced outright by an instance-level value.
+        A ``rename_labels`` default is merged with the instance's renames rather than replaced; any
+        other default -- including other mapping-valued options such as ``share_labels`` -- is
+        replaced outright by an instance-level value. See ``get_config_with_defaults`` for the exact
+        merge rule.
         """
         return {}
 

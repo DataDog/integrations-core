@@ -38,6 +38,7 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
     [
         pytest.param({'qux': 'corge'}, ['endpoint:test', 'bar:baz', 'corge:quux'], id='disjoint_keys_merged'),
         pytest.param({'foo': 'corge'}, ['endpoint:test', 'corge:baz', 'qux:quux'], id='colliding_key_instance_wins'),
+        pytest.param({}, ['endpoint:test', 'bar:baz', 'qux:quux'], id='empty_instance_keeps_defaults'),
     ],
 )
 def test_default_rename_labels_merged_with_instance(
@@ -89,6 +90,13 @@ def test_default_config_mapping_not_shared_between_scrapers(aggregator, dd_run_c
     class Check(OpenMetricsBaseCheckV2):
         __NAMESPACE__ = 'test'
 
+        def __init__(self, name, init_config, instances):
+            super().__init__(name, init_config, instances)
+            self.scraper_configs = [
+                {'openmetrics_endpoint': 'test1', 'rename_labels': {'qux': 'corge'}},
+                {'openmetrics_endpoint': 'test2', 'rename_labels': {}},
+            ]
+
         def get_default_config(self):
             return {'metrics': ['.+'], 'rename_labels': default_renames}
 
@@ -99,11 +107,7 @@ def test_default_config_mapping_not_shared_between_scrapers(aggregator, dd_run_c
         go_memstats_alloc_bytes{qux="quux"} 6.396288e+06
         """
     )
-    check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
-    check.scraper_configs = [
-        {'openmetrics_endpoint': 'test1', 'rename_labels': {'qux': 'corge'}},
-        {'openmetrics_endpoint': 'test2', 'rename_labels': {}},
-    ]
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test1'}])
     dd_run_check(check)
 
     # A leak would surface `qux` as `corge:quux` on the second scraper too.
