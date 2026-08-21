@@ -91,39 +91,35 @@ def _decode_value(v: float | str) -> float:
 
 
 def _json_to_metric(family: dict, is_openmetrics: bool = False) -> Metric:
+    name = family['name']
+    metric_type = family.get('type', 'untyped')
+    raw_samples = family.get('samples', ())
+
+    # The Python prometheus_client parser adds ``_total`` to counter sample
+    # names and strips it from the family name.  The Go parser preserves
+    # both as-is.  Normalize here so downstream code (which was written
+    # against the Python parser's output) sees consistent names.
+    add_total_to_samples = False
+    if not is_openmetrics and metric_type == 'counter':
+        add_total_to_samples = True
+        if name.endswith('_total'):
+            name = name[:-6]
+        else:
+            total_name = name + '_total'
+            if any(s.get('name') == total_name for s in raw_samples):
+                name = total_name
+
     samples = [
         Sample(
-            s['name'],
+            s['name'] if (not add_total_to_samples or s['name'].endswith('_total')) else s['name'] + '_total',
             s.get('labels') or {},
             _decode_value(s['value']),
             s.get('timestamp'),
             s.get('exemplar'),
         )
-        for s in family.get('samples', ())
+        for s in raw_samples
     ]
-    name = family['name']
-    metric_type = family.get('type', 'untyped')
-    raw_samples = family.get('samples', ())
-    # The Python OpenMetrics parser keeps the TYPE-line name as-is (no
-    # ``_total`` stripping), and the Go OpenMetrics parser does the same,
-    # so no normalization is needed for OpenMetrics.  The ``_total``
-    # stripping below only applies to the Prometheus text format, where
-    # the Python parser's ``build_metric`` strips it automatically.
-    if not is_openmetrics and metric_type == 'counter':
-        if name.endswith('_total'):
-            # Standard Prometheus convention: ``# TYPE foo_total counter``.
-            # Strip ``_total`` so existing metric maps that key on the
-            # suffix-free name continue to match.
-            name = name[:-6]
-        else:
-            # Non-standard but common: ``# TYPE foo counter`` with the actual
-            # sample named ``foo_total``.  The Python parser yields this as a
-            # separate ``unknown`` family named ``foo_total``; metric maps
-            # written against that parser therefore key on ``foo_total``.
-            # Reproduce that here so those maps continue to work.
-            total_name = name + '_total'
-            if any(s.get('name') == total_name for s in raw_samples):
-                name = total_name
+
     return Metric(
         name,
         metric_type,
