@@ -47,13 +47,15 @@ class SqlserverDatabaseStatsMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        query = DATABASE_STATS_METRICS_QUERY.copy()
-        database_filter, params = self._database_filter("name")
-        if database_filter:
-            query['query'] += f" WHERE {database_filter}"
-        if params:
-            query['params'] = params
-        return [query]
+        queries = []
+        for database_filter, params in self._database_filters("name"):
+            query = DATABASE_STATS_METRICS_QUERY.copy()
+            if database_filter:
+                query['query'] += f" WHERE {database_filter}"
+            if params:
+                query['params'] = params
+            queries.append(query)
+        return queries
 
     def __repr__(self) -> str:
         return (

@@ -21,9 +21,12 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        return [self.__get_query_file_stats()]
+        return [
+            self.__get_query_file_stats(database_filter, params)
+            for database_filter, params in self._database_filters("DB_NAME(fs.database_id)")
+        ]
 
-    def __get_query_file_stats(self) -> dict:
+    def __get_query_file_stats(self, database_filter: str, params: tuple[str, ...]) -> dict:
         """
         Construct the dm_io_virtual_file_stats QueryExecutor configuration based on the SQL Server major version
         :return: a QueryExecutor query config object
@@ -66,7 +69,6 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
             metric_columns.append(column_definitions[column])
 
         query_filters = []
-        database_filter, params = self._database_filter("DB_NAME(fs.database_id)")
         if database_filter:
             query_filters.append(database_filter)
         if self.major_version >= 16:

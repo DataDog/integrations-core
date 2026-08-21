@@ -11,6 +11,8 @@ from datadog_checks.base.utils.db.core import QueryExecutor
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_RDS
 
+SQLSERVER_PARAMETER_LIMIT = 2100
+
 
 class SqlserverDatabaseMetricsBase:
     def __init__(
@@ -57,14 +59,18 @@ class SqlserverDatabaseMetricsBase:
     def databases(self) -> Optional[List[str]]:
         return self._databases
 
-    def _database_filter(self, column: str) -> tuple[str, tuple[str, ...]]:
+    def _database_filters(self, column: str) -> list[tuple[str, tuple[str, ...]]]:
         if self.databases is None:
-            return "", ()
+            return [("", ())]
         if not self.databases:
-            return "1 = 0", ()
+            return [("1 = 0", ())]
 
-        placeholders = ", ".join("?" for _ in self.databases)
-        return f"{column} IN ({placeholders})", tuple(self.databases)
+        filters = []
+        for start in range(0, len(self.databases), SQLSERVER_PARAMETER_LIMIT):
+            params = tuple(self.databases[start : start + SQLSERVER_PARAMETER_LIMIT])
+            placeholders = ", ".join("?" for _ in params)
+            filters.append((f"{column} IN ({placeholders})", params))
+        return filters
 
     @property
     def query_executors(self) -> List[QueryExecutor]:
