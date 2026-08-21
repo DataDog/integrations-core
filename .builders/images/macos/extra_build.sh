@@ -22,6 +22,12 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     install_name_tool -change liblmdb.so "${DD_PREFIX_PATH}/lib/liblmdb.so" "${DD_PREFIX_PATH}/lib/librdkafka.1.dylib"
     install_name_tool -change /usr/local/lib/libzstd.1.dylib "${DD_PREFIX_PATH}/lib/libzstd.1.dylib" "${DD_PREFIX_PATH}/lib/librdkafka.1.dylib"
     always_build+=("confluent-kafka")
+
+    # EXPERIMENT (not for merge): ddtrace 4.x publishes macosx_14_0 wheels, which we currently
+    # ship as-is, so MACOSX_DEPLOYMENT_TARGET never applies to them. Build from source to find
+    # out which binaries actually hold the macOS 14 floor. The bundled libddwaf 2.x dylib is
+    # downloaded prebuilt at macOS 14.2.1, so this is expected to fail delocate's 12.0 check.
+    always_build+=("ddtrace")
 fi
 
 # Make sure IBM MQ libraries are found under /opt/mqm even when we're using the builder cache
@@ -45,8 +51,9 @@ echo "CARGO_HOME=${DD_PREFIX_PATH}/cargo" >> $DD_ENV_FILE
 
 # Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that
 # (see https://stackoverflow.com/a/61551944)
-pip_no_binary=${always_build[@]+"${always_build[@]}"}
+# package names passed to PIP_NO_BINARY need to be separated by commas
+pip_no_binary=$(IFS=, ; printf '%s' "${always_build[*]-}")
 if [[ "$pip_no_binary" ]]; then
     # If there are any packages that must always be built, inform pip
-    echo "PIP_NO_BINARY=\"${pip_no_binary}\"" >> $DD_ENV_FILE
+    echo "PIP_NO_BINARY=${pip_no_binary}" >> $DD_ENV_FILE
 fi
