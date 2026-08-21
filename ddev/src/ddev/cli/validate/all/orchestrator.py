@@ -17,10 +17,9 @@ from ddev.cli.validate.all.github import (
     COMMENT_HEADING,
     format_pr_comment,
     format_step_summary,
-    get_workflow_run_url,
-    write_step_summary,
 )
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncProcessor
+from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
