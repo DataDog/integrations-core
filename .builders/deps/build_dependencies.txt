@@ -8,3 +8,7 @@ maturin
 cffi>=1.12
 cython==3.2.1
 tomli>=2.0.1
+# EXPERIMENT (not for merge): ddtrace's setup.py imports the cmake package to build its
+# C++ extensions. Build isolation is off, so its build-system requires are never installed
+# and this file is all it sees. Range matches ddtrace's own pyproject constraint.
+cmake>=3.24.2,<3.28
