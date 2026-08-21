@@ -54,6 +54,10 @@ class SQLServerViewCollector(SQLServerSchemaCollector):
     def kind(self) -> str:
         return "sqlserver_views"
 
+    @property
+    def object_count_metric_name(self) -> str:
+        return f"dd.{self._check.dbms}.schema.views_count"
+
     def _get_tables_query(self) -> str:
         limit = int(self._config.max_views or 1_000_000)
         query = f"""
