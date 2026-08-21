@@ -2,20 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.sqlserver.utils import serialize_database_names
+import functools
 
 from .base import SqlserverDatabaseMetricsBase
 
 DATABASE_FILES_METRICS_QUERY = {
     "name": "sys.database_files",
-    "query": """DECLARE @monitored_databases xml = ?;
-    WITH monitored_databases AS (
-        SELECT database_node.value('.', 'nvarchar(128)') AS name
-        FROM @monitored_databases.nodes('/databases/database') AS databases(database_node)
-    )
-    SELECT
-        monitored_databases.name as db,
-        monitored_databases.name as database_name,
+    "query": """SELECT
         file_id,
         CASE type
             WHEN 0 THEN 'data'
@@ -26,18 +19,14 @@ DATABASE_FILES_METRICS_QUERY = {
             ELSE 'other'
         END AS file_type,
         physical_name,
-        sys.master_files.name,
-        sys.master_files.state_desc,
+        name,
+        state_desc,
         ISNULL(size, 0) as size,
-        ISNULL(CAST(FILEPROPERTY(sys.master_files.name, 'SpaceUsed') as int), 0) as space_used,
-        sys.master_files.state
-        FROM monitored_databases
-        INNER JOIN sys.databases ON sys.databases.name = monitored_databases.name
-        INNER JOIN sys.master_files ON sys.master_files.database_id = sys.databases.database_id
+        ISNULL(CAST(FILEPROPERTY(name, 'SpaceUsed') as int), 0) as space_used,
+        state
+        FROM sys.database_files
     """,
     "columns": [
-        {"name": "db", "type": "tag"},
-        {"name": "database", "type": "tag"},
         {"name": "file_id", "type": "tag"},
         {"name": "file_type", "type": "tag"},
         {"name": "file_location", "type": "tag"},
@@ -79,8 +68,13 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
         )
 
     def _build_query_executors(self):
-        query = dict(DATABASE_FILES_METRICS_QUERY)
-        query['params'] = (serialize_database_names(self.databases or []),)
-        executor = self.new_query_executor([query], executor=self.execute_query_handler)
-        executor.compile_queries()
-        return [executor]
+        executors = []
+        for database in self.databases:
+            executor = self.new_query_executor(
+                self.queries,
+                executor=functools.partial(self.execute_query_handler, db=database),
+                extra_tags=['db:{}'.format(database), 'database:{}'.format(database)],
+            )
+            executor.compile_queries()
+            executors.append(executor)
+        return executors
