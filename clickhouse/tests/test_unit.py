@@ -14,15 +14,27 @@ from datadog_checks.clickhouse.utils import (
     CLUSTER_MACRO_QUERY,
     CLUSTER_NAME_QUERY,
     CLUSTER_TAG,
+    CONNECT_NODE_QUERY,
     HOSTING_TYPE_TAG,
     SHARED_MERGE_TREE_QUERY,
     HostingType,
     cluster_aware_query,
+    cluster_nodes_query,
 )
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
 pytestmark = pytest.mark.unit
+
+MOCK_CLICKHOUSE_VERSION = '24.8.0'
+
+
+def mock_clickhouse_client():
+    """A client mock whose command() returns a version string, as select_version() expects."""
+    client = mock.MagicMock()
+    client.command.return_value = MOCK_CLICKHOUSE_VERSION
+    client.ping.return_value = True
+    return client
 
 
 def test_config(instance):
@@ -135,7 +147,8 @@ def test_can_connect_submits_on_every_check_run(is_metadata_collection_enabled, 
     (It used to be submitted only once on check init, which led to customer seeing "no data" in the UI.)
     """
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         # Test for consecutive healthy clickhouse.can_connect statuses
         num_runs = 3
         for _ in range(num_runs):
@@ -148,7 +161,8 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
     check = ClickhouseCheck('clickhouse', {}, [instance])
 
     # Test 1 healthy connection --> 2 Unhealthy service checks --> 1 healthy connection. Recovered
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         check.check({})
     with mock.patch('clickhouse_connect.get_client', side_effect=OperationalError('Connection refused')):
         with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', return_value=False):
@@ -156,7 +170,8 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
                 check.check({})
             with pytest.raises(Exception):
                 check.check({})
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         check.check({})
     aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.CRITICAL)
     aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.OK)
@@ -166,7 +181,8 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
 def test_can_connect_recovers_after_failed_ping(is_metadata_collection_enabled, aggregator, instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     # Test Exception in ping_clickhouse(), but reestablishes connection.
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
+        mock_connect.get_client.return_value = mock_clickhouse_client()
         check.check({})
         with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', side_effect=Error()):
             # connect() should be able to handle an exception in ping_clickhouse() and attempt reconnection
@@ -290,7 +306,7 @@ def test_connect_no_password_uses_empty_string():
 )
 def test_version_lt(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = ch_version
+    check._dbms_version = ch_version
     assert check.version_lt(comparable) == expected
 
 
@@ -307,7 +323,7 @@ def test_version_lt(instance, ch_version, comparable, expected):
 )
 def test_version_ge(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = ch_version
+    check._dbms_version = ch_version
     assert check.version_ge(comparable) == expected
 
 
@@ -397,7 +413,7 @@ def test_database_hostname_ignores_reported_hostname_override(reported_hostname,
 
 def test_cluster_aware_query_bulk_match_query():
     """The cluster-aware variant reads all replicas and tags system.events per node."""
-    variant = cluster_aware_query(advanced_queries.SystemEvents)
+    variant = cluster_aware_query(advanced_queries.SystemEvents, 'default')
 
     assert variant['query'] == (
         "SELECT value, event, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.events)"
@@ -410,7 +426,7 @@ def test_cluster_aware_query_bulk_match_query():
 
 def test_cluster_aware_query_preserves_where_clause():
     """system.errors carries a WHERE clause that must survive in the cluster-aware variant."""
-    variant = cluster_aware_query(advanced_queries.SystemErrors)
+    variant = cluster_aware_query(advanced_queries.SystemErrors, 'default')
 
     assert variant['query'] == (
         "SELECT value, name, code, remote, hostName() AS clickhouse_node "
@@ -421,13 +437,26 @@ def test_cluster_aware_query_preserves_where_clause():
 
 def test_cluster_aware_query_legacy_query():
     """The helper builds a cluster-aware variant for a legacy query too."""
-    variant = cluster_aware_query(queries.SystemMetrics)
+    variant = cluster_aware_query(queries.SystemMetrics, 'default')
 
     assert variant['query'] == (
         "SELECT value, metric, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.metrics)"
     )
     assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
     assert queries.SystemMetrics['query'] == 'SELECT value, metric FROM system.metrics'
+
+
+def test_cluster_aware_query_fans_out_over_the_named_cluster():
+    """The resolved name has to reach the SQL, since a self-hosted cluster is not 'default'."""
+    variant = cluster_aware_query(queries.SystemMetrics, 'prod_cluster')
+
+    assert "clusterAllReplicas('prod_cluster', system.metrics)" in variant['query']
+
+
+def test_cluster_aware_query_escapes_the_cluster_name():
+    variant = cluster_aware_query(queries.SystemMetrics, "o'brien")
+
+    assert "clusterAllReplicas('o\\'brien', system.metrics)" in variant['query']
 
 
 @pytest.mark.parametrize('use_advanced_queries', [True, False])
@@ -439,7 +468,7 @@ def test_get_queries_tags_system_tables_per_node_in_single_endpoint_mode(instanc
         'use_legacy_queries': not use_advanced_queries,
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
 
     cluster_aware = [q for q in check.get_queries() if 'clusterAllReplicas' in q['query']]
 
@@ -463,9 +492,52 @@ def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advan
         'use_legacy_queries': not use_advanced_queries,
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
 
     assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())
+
+
+def test_get_queries_fans_out_over_the_resolved_cluster(instance):
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = 'prod_cluster'
+        cluster_aware = [q for q in check.get_queries() if 'clusterAllReplicas' in q['query']]
+
+    assert cluster_aware
+    assert all("clusterAllReplicas('prod_cluster'," in q['query'] for q in cluster_aware)
+
+
+def test_get_queries_reads_local_tables_when_there_is_no_cluster_to_fan_out_over(instance):
+    """Without a cluster there is nothing to fan out over, so the local table is read."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = None
+        query_list = check.get_queries()
+
+    assert query_list
+    assert all('clusterAllReplicas' not in q['query'] for q in query_list)
+
+
+@pytest.mark.parametrize(
+    ('single_endpoint_mode', 'fanout_cluster', 'expected'),
+    [
+        pytest.param(True, 'default', "clusterAllReplicas('default', system.query_log)", id='cloud'),
+        pytest.param(True, 'prod_cluster', "clusterAllReplicas('prod_cluster', system.query_log)", id='self-hosted'),
+        pytest.param(True, None, 'system.query_log', id='no-cluster'),
+        pytest.param(False, 'default', 'system.query_log', id='direct-connection'),
+    ],
+)
+def test_get_system_table(instance, single_endpoint_mode, fanout_cluster, expected):
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = fanout_cluster
+
+        assert check.get_system_table('query_log') == expected
 
 
 def make_query_replaying_check(query_results):
@@ -551,11 +623,244 @@ def test_cluster_name_is_cached_including_the_absent_case():
     assert check.execute_query_raw.call_count == 2  # one attempt per source, not per access
 
 
+def test_cluster_nodes_query_fans_out_without_failing_on_a_down_node():
+    query = cluster_nodes_query('default')
+
+    assert 'skip_unavailable_shards=1' in query
+    assert "clusterAllReplicas('default', system.one)" in query
+
+
+def test_cluster_nodes_query_fans_out_over_the_named_cluster():
+    assert "clusterAllReplicas('prod_cluster', system.one)" in cluster_nodes_query('prod_cluster')
+
+
+@pytest.mark.parametrize(
+    ('cluster_name', 'hosting_type', 'expected'),
+    [
+        pytest.param('prod_cluster', HostingType.SELF_HOSTED, 'prod_cluster', id='self-hosted-named-cluster'),
+        pytest.param('default', HostingType.CLOUD, 'default', id='cloud'),
+        pytest.param(None, HostingType.CLOUD, 'default', id='cloud-unresolved-name'),
+        pytest.param(None, HostingType.UNKNOWN, 'default', id='unknown-hosting-unresolved-name'),
+        pytest.param(None, HostingType.SELF_HOSTED, None, id='self-hosted-without-a-cluster'),
+    ],
+)
+def test_fanout_cluster_name(cluster_name, hosting_type, expected):
+    check = make_query_replaying_check({})
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name_prop:
+        with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type_prop:
+            cluster_name_prop.return_value = cluster_name
+            hosting_type_prop.return_value = hosting_type
+
+            assert check.fanout_cluster_name == expected
+
+
+def resolve_cluster_nodes(fanout_cluster, nodes_result, connect_node='node-a'):
+    """Run the node fan-out over a fixed cluster, replaying nodes_result."""
+    replayed = {cluster_nodes_query(fanout_cluster): nodes_result} if fanout_cluster else {}
+    check = make_query_replaying_check(replayed)
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = fanout_cluster
+        return check._resolve_cluster_nodes(connect_node)
+
+
+def test_resolve_cluster_nodes_deduplicates_and_sorts():
+    nodes = resolve_cluster_nodes('default', [['node-b'], ['node-a'], ['node-b']])
+
+    assert nodes == ['node-a', 'node-b']
+
+
+def test_resolve_cluster_nodes_uses_the_self_hosted_cluster_name():
+    nodes = resolve_cluster_nodes('prod_cluster', [['node-b'], ['node-a']])
+
+    assert nodes == ['node-a', 'node-b']
+
+
+def test_resolve_cluster_nodes_empty_when_the_fan_out_fails():
+    assert resolve_cluster_nodes('default', Error('Requested cluster not found')) == []
+
+
+def test_resolve_cluster_nodes_reports_the_single_node_when_there_is_no_cluster():
+    """An instance with no cluster reports the one node that answered."""
+    assert resolve_cluster_nodes(None, None) == ['node-a']
+
+
+def test_resolve_cluster_nodes_empty_when_there_is_neither_a_cluster_nor_a_known_node():
+    assert resolve_cluster_nodes(None, None, connect_node=None) == []
+
+
+def test_cluster_topology_metadata():
+    check = make_query_replaying_check(
+        {
+            CONNECT_NODE_QUERY: [['node-a']],
+            cluster_nodes_query('default'): [['node-a'], ['node-b'], ['node-c']],
+        }
+    )
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+            cluster_name.return_value = 'default'
+            fanout.return_value = 'default'
+            metadata = check._cluster_topology_metadata()
+
+    assert metadata == {
+        'cluster_name': 'default',
+        'connect_node': 'node-a',
+        'nodes': ['node-a', 'node-b', 'node-c'],
+    }
+
+
+@pytest.mark.parametrize(
+    ('cluster_name', 'node_result', 'nodes_result', 'expected'),
+    [
+        pytest.param('default', [], [['node-a']], {'cluster_name', 'nodes'}, id='no-connect-node'),
+        pytest.param('default', [['node-a']], Error('boom'), {'cluster_name', 'connect_node'}, id='fan-out-failed'),
+        pytest.param('default', [['node-a']], [], {'cluster_name', 'connect_node'}, id='no-rows'),
+    ],
+)
+def test_cluster_topology_metadata_omits_what_it_cannot_determine(cluster_name, node_result, nodes_result, expected):
+    """An absent key beats a wrong one: a failed probe must not report a cluster with no nodes."""
+    check = make_query_replaying_check(
+        {CONNECT_NODE_QUERY: node_result, cluster_nodes_query(cluster_name): nodes_result}
+    )
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name_prop:
+        with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+            cluster_name_prop.return_value = cluster_name
+            fanout.return_value = cluster_name
+            metadata = check._cluster_topology_metadata()
+
+    assert set(metadata) == expected
+
+
+def test_cluster_topology_metadata_without_a_cluster_reports_the_connected_node():
+    """cluster_name stays absent, but the connected node is still known."""
+    check = make_query_replaying_check({CONNECT_NODE_QUERY: [['node-a']]})
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+            cluster_name.return_value = None
+            fanout.return_value = None
+            metadata = check._cluster_topology_metadata()
+
+    assert metadata == {'connect_node': 'node-a', 'nodes': ['node-a']}
+
+
+VERSION_QUERY = 'SELECT version()'
+
+
+def make_metadata_emitting_check(instance, nodes_result, fanout_cluster='default'):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    def execute(query):
+        if query == VERSION_QUERY:
+            return [['24.8.1.1']]
+        if query == CONNECT_NODE_QUERY:
+            return [['node-a']]
+        if query == cluster_nodes_query(fanout_cluster):
+            if isinstance(nodes_result, Exception):
+                raise nodes_result
+            return nodes_result
+        return []
+
+    check.execute_query_raw = mock.Mock(side_effect=execute)
+    return check
+
+
+def emitted_metadata(aggregator):
+    events = aggregator.get_event_platform_events('dbm-metadata')
+    return next(e for e in events if e['kind'] == 'database_instance')['metadata']
+
+
+@pytest.mark.parametrize('single_endpoint_mode', [True, False], ids=['single-endpoint-mode', 'direct-connection'])
+def test_database_instance_payload_carries_cluster_topology(aggregator, instance, single_endpoint_mode):
+    """Both connection modes report the inventory, so the node list means one thing rather than two."""
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = make_metadata_emitting_check(instance, [['node-b'], ['node-a']])
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = 'default'
+        check._send_database_instance_metadata()
+
+    metadata = emitted_metadata(aggregator)
+
+    assert metadata['cluster_name'] == 'default'
+    assert metadata['connect_node'] == 'node-a'
+    assert metadata['nodes'] == ['node-a', 'node-b']
+    assert set(metadata) == {
+        'dbm',
+        'connection_host',
+        'hosting_type',
+        'single_endpoint_mode',
+        'cluster_name',
+        'connect_node',
+        'nodes',
+    }
+
+
+def test_database_instance_payload_carries_a_self_hosted_cluster_topology(aggregator, instance):
+    """The fan-out follows the name a self-hosted cluster is given in remote_servers."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = make_metadata_emitting_check(instance, [['node-b'], ['node-a']], fanout_cluster='prod_cluster')
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
+            cluster_name.return_value = 'prod_cluster'
+            hosting_type.return_value = HostingType.SELF_HOSTED
+            check._send_database_instance_metadata()
+
+    metadata = emitted_metadata(aggregator)
+
+    assert metadata['cluster_name'] == 'prod_cluster'
+    assert metadata['nodes'] == ['node-a', 'node-b']
+
+
+def test_database_instance_payload_omits_the_topology_when_every_probe_fails(aggregator, instance):
+    """The payload is still emitted, carrying only what does not depend on a query."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.execute_query_raw = mock.Mock(side_effect=Error('Not enough privileges'))
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
+        cluster_name.return_value = 'default'
+        check._send_database_instance_metadata()
+
+    metadata = emitted_metadata(aggregator)
+
+    assert set(metadata) == {'dbm', 'connection_host', 'hosting_type', 'single_endpoint_mode', 'cluster_name'}
+    assert metadata['hosting_type'] == HostingType.UNKNOWN
+
+
+@pytest.mark.parametrize('single_endpoint_mode', [True, False], ids=['single-endpoint-mode', 'direct-connection'])
+def test_database_instance_payload_carries_the_hosting_type(aggregator, instance, single_endpoint_mode):
+    """The hosting type describes the deployment itself, so both connection modes report it."""
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = make_metadata_emitting_check(instance, [['node-a']])
+    with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
+        hosting_type.return_value = HostingType.CLOUD
+        check._send_database_instance_metadata()
+
+    assert emitted_metadata(aggregator)['hosting_type'] == HostingType.CLOUD
+
+
+@pytest.mark.parametrize('single_endpoint_mode', [True, False], ids=['single-endpoint-mode', 'direct-connection'])
+def test_database_instance_payload_carries_the_connection_mode(aggregator, instance, single_endpoint_mode):
+    """The backend needs to know whether the hostName() it sees is one node or a whole cluster."""
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = make_metadata_emitting_check(instance, [['node-a']])
+
+    check._send_database_instance_metadata()
+
+    assert emitted_metadata(aggregator)['single_endpoint_mode'] is single_endpoint_mode
+
+
+def test_database_instance_payload_reports_the_connection_mode_when_unset(aggregator, instance):
+    """The option is optional, so the payload must still carry an explicit boolean."""
+    check = make_metadata_emitting_check(instance, [['node-a']])
+
+    check._send_database_instance_metadata()
+
+    assert emitted_metadata(aggregator)['single_endpoint_mode'] is False
+
+
 def test_check_tags_with_cluster(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
         cluster_name.return_value = 'prod_cluster'
-        with mock.patch('clickhouse_connect.get_client'):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
             check.check({})
 
     assert f'{CLUSTER_TAG}:prod_cluster' in check.tags
@@ -571,7 +876,7 @@ def test_can_connect_carries_cluster_tag_from_the_second_run(aggregator, instanc
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
         cluster_name.return_value = 'prod_cluster'
-        with mock.patch('clickhouse_connect.get_client'):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
             check.check({})
             first_run_tags = list(check.tags)
             check.check({})
@@ -585,7 +890,7 @@ def test_check_omits_cluster_tag_when_unresolved(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
         cluster_name.return_value = None
-        with mock.patch('clickhouse_connect.get_client'):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
             check.check({})
 
     assert not any(tag.startswith(f'{CLUSTER_TAG}:') for tag in check.tags)
@@ -633,7 +938,7 @@ def test_check_tags_with_hosting_type(instance):
         cluster_name.return_value = None
         with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
             hosting_type.return_value = HostingType.CLOUD
-            with mock.patch('clickhouse_connect.get_client'):
+            with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
                 check.check({})
 
     assert f'{HOSTING_TYPE_TAG}:{HostingType.CLOUD}' in check.tags
@@ -646,7 +951,7 @@ def test_check_always_emits_a_hosting_type_tag(instance):
         cluster_name.return_value = None
         with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type:
             hosting_type.return_value = HostingType.UNKNOWN
-            with mock.patch('clickhouse_connect.get_client'):
+            with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
                 check.check({})
 
     assert f'{HOSTING_TYPE_TAG}:{HostingType.UNKNOWN}' in check.tags

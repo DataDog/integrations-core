@@ -20,6 +20,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from ddev.utils.github_errors import (
     GITHUB_AUTHENTICATION_STATUS_CODES,
     GitHubAuthenticationError,
+    GitHubBodyTooLongError,
+    github_body_too_long_message,
     github_secondary_rate_limit_wait,
 )
 from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
@@ -41,7 +43,23 @@ from .models import (
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
 
+# GitHub's 422 ("body is too long (maximum is 65536 characters)") is the only evidence for this
+# number; neither the OpenAPI description nor the REST docs state it. Measured in UTF-8 bytes, which is
+# never below the character count GitHub means, so it errs only towards refusing a body it might take.
+COMMENT_BODY_LIMIT = 65_536
+
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+
+def _ensure_body_fits(body: str):
+    """Refuse a body GitHub would reject for length, before spending a request on it.
+
+    Raises:
+        GitHubBodyTooLongError: If *body* exceeds `COMMENT_BODY_LIMIT` UTF-8 bytes.
+    """
+    size = len(body.encode("utf-8"))
+    if size > COMMENT_BODY_LIMIT:
+        raise GitHubBodyTooLongError.from_measurement(size, limit=COMMENT_BODY_LIMIT)
 
 
 # ---------------------------------------------------------------------------
@@ -462,19 +480,99 @@ class AsyncGitHubClient:
             owner: Repository owner (user or organisation).
             repo: Repository name.
             issue_number: Issue or pull request number.
-            body: Markdown body text of the comment.
+            body: Markdown body text of the comment. At most `COMMENT_BODY_LIMIT` UTF-8 bytes.
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
             GitHubResponse[IssueComment]: The validated comment data and headers.
+
+        Raises:
+            GitHubBodyTooLongError: If `body` is too long, measured here or refused by GitHub.
         """
-        response = await self._request(
-            "POST",
-            f"/repos/{owner}/{repo}/issues/{issue_number}/comments",
-            timeout=timeout,
-            json={"body": body},
+        response = await self._comment_request(
+            "POST", f"/repos/{owner}/{repo}/issues/{issue_number}/comments", body=body, timeout=timeout
         )
         return self._parse_response(response, IssueComment)
+
+    async def update_issue_comment(
+        self,
+        owner: str,
+        repo: str,
+        comment_id: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
+        """
+        Calls the GitHub API to update an existing comment on an issue or pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/issues/comments#update-an-issue-comment
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            comment_id: Numeric ID of the comment to update.
+            body: New markdown body text of the comment. At most `COMMENT_BODY_LIMIT` UTF-8 bytes.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[IssueComment]: The validated comment data and headers.
+
+        Raises:
+            GitHubBodyTooLongError: If `body` is too long, measured here or refused by GitHub.
+        """
+        response = await self._comment_request(
+            "PATCH", f"/repos/{owner}/{repo}/issues/comments/{comment_id}", body=body, timeout=timeout
+        )
+        return self._parse_response(response, IssueComment)
+
+    async def _comment_request(self, method: str, endpoint: str, *, body: str, timeout: float | None) -> httpx.Response:
+        """Send a comment *body*, enforcing the length limit from both sides.
+
+        Scoped to the comment endpoints rather than `_request`, because a 422 elsewhere has nothing to do
+        with length. Both halves raise `GitHubBodyTooLongError`, so a caller has one thing to catch.
+        """
+        _ensure_body_fits(body)
+        try:
+            return await self._request(method, endpoint, timeout=timeout, json={"body": body})
+        except httpx.HTTPStatusError as exc:
+            if (message := github_body_too_long_message(exc.response)) is not None:
+                raise GitHubBodyTooLongError.from_response(message, limit=COMMENT_BODY_LIMIT) from exc
+            raise
+
+    async def list_issue_comments(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
+        """
+        Calls the GitHub API to list comments on an issue or pull request (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/issues/comments#list-issue-comments
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            issue_number: Issue or pull request number.
+            per_page: Number of comments per page (default 100, GitHub's maximum).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            AsyncIterator[GitHubResponse[list[IssueComment]]]: One page of comments per iteration,
+            following Link headers until exhausted.
+        """
+        # The response body is a bare JSON array, so there is no wrapper model to validate against
+        # (unlike ``WorkflowJobsList``); each item is validated individually.
+        endpoint = f"/repos/{owner}/{repo}/issues/{issue_number}/comments"
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
+            comments = [IssueComment.model_validate(item) for item in response.json()]
+            yield GitHubResponse[list[IssueComment]].model_validate(
+                {"data": comments, "headers": dict(response.headers)}
+            )
 
     async def get_pull_request(
         self,
@@ -500,6 +598,45 @@ class AsyncGitHubClient:
         """
         response = await self._request("GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", timeout=timeout)
         return self._parse_response(response, PullRequest)
+
+    async def list_pull_requests(
+        self,
+        owner: str,
+        repo: str,
+        state: Literal["open", "closed", "all"] = "open",
+        head: str | None = None,
+        base: str | None = None,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> GitHubResponse[list[PullRequest]]:
+        """
+        Calls the GitHub API to list pull requests in a repository.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#list-pull-requests
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            state: Filter by pull request state. One of "open", "closed", or "all".
+            head: Filter by head branch in the format "user:ref-name" (or "org:ref-name"). GitHub
+                matches this against the stored head ref, so a closed PR is still returned even after
+                its head branch has been deleted.
+            base: Filter by base branch name.
+            per_page: Number of results per page (max 100). Only the first page is fetched.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[list[PullRequest]]: The validated pull requests on the first result page.
+        """
+        params: dict[str, Any] = {"state": state, "per_page": per_page}
+        if head is not None:
+            params["head"] = head
+        if base is not None:
+            params["base"] = base
+        response = await self._request("GET", f"/repos/{owner}/{repo}/pulls", timeout=timeout, params=params)
+        pulls = [PullRequest.model_validate(item) for item in response.json()]
+        return GitHubResponse[list[PullRequest]].model_validate({"data": pulls, "headers": dict(response.headers)})
 
     async def create_pull_request(
         self,

@@ -1,3 +1,49 @@
+## Datadog Agent version [7.82.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7822)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.82.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7821)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.82.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7820)
+
+### New Integrations
+* Kueue [1.0.1](https://github.com/DataDog/integrations-core/blob/master/kueue/CHANGELOG.md)
+### Integration Updates
+* ArgoCD [4.8.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
+* Datadog Checks Base [37.42.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* ClickHouse [7.1.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* dcgm [5.0.0](https://github.com/DataDog/integrations-core/blob/master/dcgm/CHANGELOG.md) **BREAKING CHANGE**
+* Elasticsearch [9.6.0](https://github.com/DataDog/integrations-core/blob/master/elastic/CHANGELOG.md)
+* Envoy [6.6.0](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
+* flink [3.3.0](https://github.com/DataDog/integrations-core/blob/master/flink/CHANGELOG.md)
+* Fluentd [5.7.0](https://github.com/DataDog/integrations-core/blob/master/fluentd/CHANGELOG.md)
+* fluxcd [3.5.0](https://github.com/DataDog/integrations-core/blob/master/fluxcd/CHANGELOG.md)
+* HPE Aruba EdgeConnect [1.0.1](https://github.com/DataDog/integrations-core/blob/master/hpe_aruba_edgeconnect/CHANGELOG.md)
+* HTTP [13.0.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md) **BREAKING CHANGE**
+* IBM i [5.0.0](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md) **BREAKING CHANGE**
+* Istio [9.5.3](https://github.com/DataDog/integrations-core/blob/master/istio/CHANGELOG.md)
+* Kafka Actions [2.8.0](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [8.1.2](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* KrakenD [1.5.0](https://github.com/DataDog/integrations-core/blob/master/krakend/CHANGELOG.md)
+* MongoDB [10.11.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.18.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* n8n [2.1.0](https://github.com/DataDog/integrations-core/blob/master/n8n/CHANGELOG.md)
+* Nutanix [1.6.0](https://github.com/DataDog/integrations-core/blob/master/nutanix/CHANGELOG.md)
+* Postgres [23.10.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Proxmox [2.6.0](https://github.com/DataDog/integrations-core/blob/master/proxmox/CHANGELOG.md)
+* Pulsar [3.7.0](https://github.com/DataDog/integrations-core/blob/master/pulsar/CHANGELOG.md)
+* Ray [3.5.0](https://github.com/DataDog/integrations-core/blob/master/ray/CHANGELOG.md)
+* Redis [8.9.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* SAP HANA [5.6.0](https://github.com/DataDog/integrations-core/blob/master/sap_hana/CHANGELOG.md)
+* Slurm [2.5.0](https://github.com/DataDog/integrations-core/blob/master/slurm/CHANGELOG.md)
+* SNMP [13.1.1](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* SQL Server [23.3.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Temporal [4.7.0](https://github.com/DataDog/integrations-core/blob/master/temporal/CHANGELOG.md)
+* Windows Event Log [5.6.1](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/CHANGELOG.md)
+* Yarn [8.4.2](https://github.com/DataDog/integrations-core/blob/master/yarn/CHANGELOG.md)
+
 ## Datadog Agent version [7.81.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7813)
 
 * There were no integration updates for this version of the Agent.
