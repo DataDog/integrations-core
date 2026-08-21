@@ -30,7 +30,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
-from ddev.utils.github_errors import GitHubAuthenticationError
+from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
 from tests.utils.github_async.helpers import ENDPOINT_CALLS, json_response, make_client
 from tests.utils.github_async.payloads import (
     artifact,
@@ -220,6 +220,176 @@ async def test_create_issue_comment_success() -> None:
     assert result.data.user.login == "octocat"
 
 
+# Deliberately a literal rather than `COMMENT_BODY_LIMIT`: a test that reads the same constant the
+# guard reads would pass no matter what that constant said.
+GITHUB_COMMENT_HARD_LIMIT = 65_536
+
+
+def _validation_failed(*messages: str) -> httpx.Response:
+    """A 422 shaped the way GitHub shapes one: generic top-level message, specifics per error.
+
+    `code` is `custom`, which is what GitHub documents when there is no dedicated code.
+    """
+    return json_response(
+        {
+            "message": "Validation Failed",
+            "errors": [
+                {"resource": "IssueComment", "code": "custom", "field": "body", "message": message}
+                for message in messages
+            ],
+        },
+        status_code=422,
+    )
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        pytest.param(lambda client, body: client.create_issue_comment("o", "r", 7, body), id="create"),
+        pytest.param(lambda client, body: client.update_issue_comment("o", "r", 99, body), id="update"),
+    ],
+)
+async def test_an_oversized_comment_body_is_refused_before_the_request(call):
+    """No point spending a round-trip on a body GitHub is certain to reject."""
+    requested = False
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal requested
+        requested = True
+        return json_response(issue_comment_payload())
+
+    client = make_client(httpx.MockTransport(handler))
+    with pytest.raises(GitHubBodyTooLongError):
+        await call(client, "x" * (GITHUB_COMMENT_HARD_LIMIT + 1))
+
+    assert requested is False
+
+
+async def test_a_comment_body_exactly_at_the_limit_is_sent():
+    """The guard rejects over the limit, not at it."""
+    body = "x" * GITHUB_COMMENT_HARD_LIMIT
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert json.loads(request.content) == {"body": body}
+        return json_response(issue_comment_payload(body=body), status_code=201)
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.create_issue_comment("o", "r", 7, body)
+    assert result.data.body == body
+
+
+async def test_the_comment_body_limit_is_measured_in_bytes_not_characters():
+    """GitHub states the limit in characters; bytes is the conservative reading of it.
+
+    This body is under the limit in characters and over it in bytes, so it pins which unit is used.
+    """
+    body = "\u00e9" * (GITHUB_COMMENT_HARD_LIMIT // 2 + 1)  # two bytes each
+    assert len(body) < GITHUB_COMMENT_HARD_LIMIT < len(body.encode("utf-8"))
+
+    client = make_client(httpx.MockTransport(lambda request: json_response(issue_comment_payload())))
+    with pytest.raises(GitHubBodyTooLongError):
+        await client.create_issue_comment("o", "r", 7, body)
+
+
+async def test_githubs_own_too_long_rejection_becomes_the_same_error():
+    """One type for both sources, so a caller never parses a 422 payload to learn it must send less."""
+    client = make_client(
+        httpx.MockTransport(lambda request: _validation_failed("body is too long (maximum is 65536 characters)"))
+    )
+
+    with pytest.raises(GitHubBodyTooLongError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert "too long" in exc_info.value.github_message
+    assert exc_info.value.size is None  # It was GitHub's measurement, not ours.
+
+
+async def test_a_validation_failure_that_is_not_about_length_stays_an_http_error():
+    """GitHub documents 422 here as validation failed *or* spammed, and sending less cannot fix spam."""
+    client = make_client(
+        httpx.MockTransport(lambda request: _validation_failed("was flagged as spam and cannot be created"))
+    )
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert not isinstance(exc_info.value, GitHubBodyTooLongError)
+    assert exc_info.value.response.status_code == 422
+
+
+async def test_a_non_validation_status_is_never_read_as_too_long():
+    """A 500 whose body happens to mention length is a server error, not a length problem."""
+    client = make_client(httpx.MockTransport(lambda request: json_response({"message": "too long"}, status_code=500)))
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert not isinstance(exc_info.value, GitHubBodyTooLongError)
+    assert exc_info.value.response.status_code == 500
+
+
+async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_length():
+    """The pre-flight guard already measured this body, so an unreadable 422 is not about length.
+
+    Assuming otherwise would spend a request on a fallback that cannot work and bury the real cause.
+    """
+    client = make_client(httpx.MockTransport(lambda request: httpx.Response(422, text="<html>nope</html>")))
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_issue_comment("o", "r", 7, "short")
+
+    assert not isinstance(exc_info.value, GitHubBodyTooLongError)
+
+
+async def test_update_issue_comment_success():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "PATCH"
+        assert request.url.path == "/repos/owner/repo/issues/comments/99"
+        assert json.loads(request.content) == {"body": "edited"}
+        return json_response(issue_comment_payload(id=99, body="edited"))
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.update_issue_comment("owner", "repo", 99, "edited")
+    assert isinstance(result.data, IssueComment)
+    assert (result.data.id, result.data.body) == (99, "edited")
+
+
+async def test_list_issue_comments_success():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/issues/7/comments"
+        assert request.url.params["per_page"] == "100"
+        # The response body is a bare array, not an object with a wrapper key.
+        return json_response([issue_comment_payload(id=1), issue_comment_payload(id=2, body="second")])
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_issue_comments("owner", "repo", 7)]
+
+    assert len(pages) == 1
+    comments = pages[0].data
+    assert [comment.id for comment in comments] == [1, 2]
+    assert all(isinstance(comment, IssueComment) for comment in comments)
+    assert comments[1].body == "second"
+
+
+async def test_list_issue_comments_follows_link_header():
+    """The updater must see every comment, or it creates a duplicate instead of editing its own."""
+    second_page_url = "https://api.github.com/repos/owner/repo/issues/7/comments?page=2"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.params.get("page") == "2":
+            return json_response([issue_comment_payload(id=2, body="second")])
+        return json_response(
+            [issue_comment_payload(id=1)],
+            headers={"link": f'<{second_page_url}>; rel="next"'},
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_issue_comments("owner", "repo", 7)]
+
+    assert [comment.id for page in pages for comment in page.data] == [1, 2]
+
+
 async def test_create_pr_review_comment_success_with_position() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert "/pulls/3/comments" in request.url.path
@@ -307,7 +477,7 @@ async def test_get_pull_request_unexpected_state_raises() -> None:
         await client.get_pull_request("o", "r", 5)
 
 
-async def test_list_pull_requests_success() -> None:
+async def test_list_pull_requests_success():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert request.url.path == "/repos/owner/repo/pulls"
@@ -326,13 +496,13 @@ async def test_list_pull_requests_success() -> None:
     assert all(isinstance(pr, PullRequest) for pr in result.data)
 
 
-async def test_list_pull_requests_empty_result() -> None:
+async def test_list_pull_requests_empty_result():
     client = make_client(httpx.MockTransport(lambda r: json_response([])))
     result = await client.list_pull_requests("o", "r")
     assert result.data == []
 
 
-async def test_list_pull_requests_defaults_to_open_and_omits_optional_filters() -> None:
+async def test_list_pull_requests_defaults_to_open_and_omits_optional_filters():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params.get("state") == "open"
         assert "head" not in request.url.params
@@ -343,7 +513,7 @@ async def test_list_pull_requests_defaults_to_open_and_omits_optional_filters() 
     await client.list_pull_requests("o", "r")
 
 
-async def test_list_pull_requests_forwards_base_filter() -> None:
+async def test_list_pull_requests_forwards_base_filter():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params.get("base") == "7.62.x"
         return json_response([pull_request_payload(number=1)])
