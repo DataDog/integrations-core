@@ -13,6 +13,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
+    SQLSERVER_PARAMETER_LIMIT,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_SERVERNAME,
@@ -1911,6 +1912,57 @@ def test_sqlserver_table_size_metrics_object_names(
             if tag.startswith('table:')
         }
         assert emitted_tables == expected_tables
+
+
+@pytest.mark.parametrize(
+    'metrics_class, database_metrics_config, object_names_option, object_name_filter',
+    [
+        pytest.param(
+            SqlserverIndexUsageMetrics,
+            {'index_usage_metrics': {'enabled': True, 'enabled_tempdb': False}},
+            'index_usage_object_names',
+            'WHERE o.name IN',
+            id='index-usage',
+        ),
+        pytest.param(
+            SqlserverTableSizeMetrics,
+            {'table_size_metrics': {'enabled': True}},
+            'table_size_object_names',
+            'WHERE t.name IN',
+            id='table-size',
+        ),
+    ],
+)
+def test_object_name_filters_stay_within_parameter_limit(
+    init_config,
+    instance_docker_metrics,
+    metrics_class,
+    database_metrics_config,
+    object_names_option,
+    object_name_filter,
+):
+    object_names = [f'table_{n}' for n in range(SQLSERVER_PARAMETER_LIMIT + 1)]
+    instance_docker_metrics['database_metrics'] = database_metrics_config
+    instance_docker_metrics[object_names_option] = object_names
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    query_configs = []
+
+    def new_query_executor(queries: list[dict], **_kwargs) -> mock.Mock:
+        query_configs.extend(queries)
+        return mock.Mock()
+
+    metrics = metrics_class(
+        config=sqlserver_check._config,
+        new_query_executor=new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.Mock(),
+        databases=['master'],
+    )
+
+    assert len(metrics._build_query_executors()) == 1
+    assert [len(query['params']) for query in query_configs] == [SQLSERVER_PARAMETER_LIMIT, 1]
+    assert [name for query in query_configs for name in query['params']] == object_names
+    assert all(object_name_filter in query['query'] for query in query_configs)
 
 
 @pytest.mark.integration
