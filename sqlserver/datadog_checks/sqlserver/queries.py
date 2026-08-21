@@ -54,6 +54,21 @@ FROM
 WHERE c.object_id = schema_tables.table_id
 """
 
+VIEW_COLUMN_QUERY = """
+SELECT
+    c.name,
+    t.name AS data_type,
+    coalesce(dc.definition, 'None') AS "default",
+    c.is_nullable AS nullable,
+    CONVERT(varchar(10), c.column_id) AS ordinal_position
+FROM
+    sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+    LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
+WHERE c.object_id = schema_views.view_id
+ORDER BY c.column_id
+"""
+
 PARTITIONS_QUERY = """
 SELECT
     COUNT(*) AS partition_count
