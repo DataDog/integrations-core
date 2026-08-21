@@ -59,6 +59,7 @@ class SqlserverTempDBFileSpaceUsageMetrics(SqlserverDatabaseMetricsBase):
             self.queries,
             executor=functools.partial(self.execute_query_handler, db='tempdb'),
             extra_tags=['db:tempdb', 'database:tempdb'],
+            track_operation_time=self.track_operation_time,
         )
         executor.compile_queries()
         return [executor]

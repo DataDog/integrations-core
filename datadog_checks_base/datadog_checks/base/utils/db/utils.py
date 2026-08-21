@@ -551,7 +551,8 @@ def tracked_query(check, operation, tags=None):
     stats_kwargs = {}
     if hasattr(check, 'debug_stats_kwargs'):
         stats_kwargs = dict(check.debug_stats_kwargs())
-    stats_kwargs['tags'] = stats_kwargs.get('tags', []) + ["operation:{}".format(operation)] + (tags or [])
+    metric_tags = stats_kwargs.get('tags', []) + ["operation:{}".format(operation)] + (tags or [])
+    stats_kwargs['tags'] = list(dict.fromkeys(metric_tags))
     stats_kwargs['raw'] = True  # always submit as raw to ignore any defined namespace prefix
     yield
     elapsed_ms = (time.time() - start_time) * 1000

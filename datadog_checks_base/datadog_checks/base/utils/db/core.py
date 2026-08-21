@@ -83,7 +83,7 @@ class QueryExecutor(object):
 
             try:
                 if self.track_operation_time:
-                    with tracked_query(check=self.submitter, operation=query_name):
+                    with tracked_query(check=self.submitter, operation=query_name, tags=global_tags):
                         rows = self.execute_query(query.query, query.params)
                 else:
                     rows = self.execute_query(query.query, query.params)

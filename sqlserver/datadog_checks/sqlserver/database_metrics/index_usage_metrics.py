@@ -104,6 +104,7 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
             executor = self.new_query_executor(
                 self.queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
+                extra_tags=['db:{}'.format(database), 'database:{}'.format(database)],
                 track_operation_time=self.track_operation_time,
             )
             executor.compile_queries()
