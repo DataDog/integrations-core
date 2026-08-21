@@ -251,22 +251,11 @@ class ClickhouseCheck(DatabaseCheck):
         self.connect()
         self._dbms_version = self.select_version()
 
-        # The Agent cancels from another thread, and teardown is deferred until this returns so it
-        # cannot close the client from under us. Each remaining stage queries, so gate them on the
-        # cancellation rather than working through them all against a check that is going away.
-        if self.is_cancelled:
-            self.log.debug("Check cancelled, skipping the rest of the run")
-            return
-
         # Must run before the query manager is built and before the DBM jobs are handed
         # self.tags below, since both snapshot the tag list.
         if self.cluster_name:
             self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
         self.tag_manager.set_tag(HOSTING_TYPE_TAG, self.hosting_type, replace=True)
-
-        if self.is_cancelled:
-            self.log.debug("Check cancelled, skipping the rest of the run")
-            return
 
         if self._query_manager is None or self._query_manager_version != self.dbms_version:
             self._query_manager = self._build_query_manager()

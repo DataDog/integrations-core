@@ -707,31 +707,6 @@ def test_configured_jobs_are_the_jobs_that_run(instance, dbm_enabled, expected):
     assert sorted(started) == expected
 
 
-def test_cancel_mid_run_stops_core_collection(instance):
-    """A cancel arriving mid-run must stop the check from issuing further queries.
-
-    Teardown is deferred until check() returns, so the main client stays open and nothing else
-    interrupts the run. Without the cancellation checks the check works through cluster resolution
-    and every configured core query, each bounded only by the client read timeout.
-    """
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-    client = mock_clickhouse_client()
-
-    def cancel_then_report_version(*_args, **_kwargs):
-        check.cancel()
-        # Only queries issued after the cancel are of interest.
-        client.query.reset_mock()
-        return MOCK_CLICKHOUSE_VERSION
-
-    client.command.side_effect = cancel_then_report_version
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect") as mock_connect:
-        mock_connect.get_client.return_value = client
-        error_report = check.run()
-
-    assert error_report == '', error_report
-    client.query.assert_not_called()
-
-
 def test_cancel_closes_main_client_and_releases_pool(instance):
     """cancel() runs shutdown(), which releases what the check holds for its whole lifetime."""
     check = ClickhouseCheck('clickhouse', {}, [instance])
