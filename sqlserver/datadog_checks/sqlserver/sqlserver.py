@@ -625,7 +625,7 @@ class SQLServer(DatabaseCheck):
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
-        if is_affirmative(self.instance.get("include_instance_metrics", True)):
+        if is_affirmative(self._config.database_metrics_config['instance_metrics']['enabled']):
             common_metrics = list(INSTANCE_METRICS)
             if year and year >= 2016:
                 common_metrics.extend(INSTANCE_METRICS_NEWER_2016)

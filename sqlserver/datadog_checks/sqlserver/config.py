@@ -283,6 +283,13 @@ class SQLServerConfig:
             for key, value in metric_config.items():
                 if value is not None:
                     config[key] = value
+
+        legacy_instance_metrics = instance.get('include_instance_metrics')
+        instance_metrics = database_metrics.get('instance_metrics', {}).get('enabled')
+        if (legacy_instance_metrics is not None and not is_affirmative(legacy_instance_metrics)) or (
+            instance_metrics is not None and not is_affirmative(instance_metrics)
+        ):
+            configurable_metrics['instance_metrics']['enabled'] = False
         return configurable_metrics
 
     def _validate_only_custom_queries(self, instance):
