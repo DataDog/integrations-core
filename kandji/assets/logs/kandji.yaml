@@ -1435,6 +1435,7 @@ pipeline:
               name: Map `new_state.parameter_name` to `ocsf.compliance.control`
               sources:
                 - new_state.parameter_name
+                - blueprint_name
               target: ocsf.compliance.control
               preserveSource: true
               overrideOnConflict: false
