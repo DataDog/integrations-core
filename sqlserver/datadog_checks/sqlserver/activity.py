@@ -20,7 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery
 
 try:
     import datadog_agent
@@ -386,7 +386,8 @@ class SqlserverActivity(DBMAsyncJob):
             comments = statement['metadata'].get('comments', [])
             row['is_proc'] = bool(row.get('procedure_name'))
             has_proc_context = row['is_proc'] or is_statement_proc(row.get('text', ''))[0]
-            if row.get('text') and (has_proc_context or row['text'] != row['statement_text']):
+            should_recover_comments = needs_comment_recovery(row.get('text'), comments)
+            if row.get('text') and (has_proc_context or should_recover_comments):
                 try:
                     full_text_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True

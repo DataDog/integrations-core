@@ -36,6 +36,7 @@ from datadog_checks.sqlserver.utils import (
     extract_sql_comments_and_procedure_name,
     get_unixodbc_sysconfig,
     is_non_empty_file,
+    needs_comment_recovery,
     parse_sqlserver_major_version,
     parse_sqlserver_year,
     set_default_driver_conf,
@@ -970,6 +971,30 @@ def test_parse_sqlserver_year(version, expected_year):
 )
 def test_parse_sqlserver_major_version(version, expected_major_version):
     assert parse_sqlserver_major_version(version) == expected_major_version
+
+
+@pytest.mark.parametrize(
+    'marker', ['ddps=', 'dddbs=', 'ddh=', 'dddb=', 'ddprs=', 'dde=', 'ddpv=', 'traceparent=', 'ddsh=']
+)
+def test_needs_comment_recovery_recognizes_dbm_comment_markers(marker):
+    assert needs_comment_recovery(f"(@P1 int)/*{marker}'value'*/ SELECT 1", [])
+
+
+@pytest.mark.parametrize(
+    'full_text,statement_comments,expected',
+    [
+        pytest.param('(@P1 int)SELECT @P1', [], False, id='rpc_without_comment'),
+        pytest.param(
+            "/*dddbs='orders-service'*/ SELECT 1",
+            ["/*dddbs='orders-service'*/"],
+            False,
+            id='comment_already_in_statement_metadata',
+        ),
+        pytest.param("/*dddbs='orders-service'*/ SELECT 1", [], True, id='comment_missing_from_statement_metadata'),
+    ],
+)
+def test_needs_comment_recovery_requires_missing_dbm_comment(full_text, statement_comments, expected):
+    assert needs_comment_recovery(full_text, statement_comments) is expected
 
 
 @pytest.mark.parametrize(

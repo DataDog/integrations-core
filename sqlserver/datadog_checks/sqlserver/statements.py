@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery
 
 try:
     import datadog_agent
@@ -433,7 +433,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             row['is_proc'] = bool(row.get('procedure_name'))
             has_sproc_context = row['is_proc'] or bool(row.get('sproc_object_id'))
             needs_procedure_metadata = has_sproc_context or self.disable_secondary_tags
-            if row.get('text') and (needs_procedure_metadata or row['text'] != row['statement_text']):
+            should_recover_comments = needs_comment_recovery(row.get('text'), comments)
+            if row.get('text') and (needs_procedure_metadata or should_recover_comments):
                 try:
                     full_text_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
