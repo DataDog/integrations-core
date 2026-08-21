@@ -57,6 +57,48 @@ STATIC_SERVER_INFO = {
     STATIC_INFO_MAJOR_VERSION: SQLSERVER_MAJOR_VERSION,
 }
 
+AUTODISCOVERY_FILTERED_INSTANCE_METRICS = [
+    'sqlserver.files.size_on_disk',
+    'sqlserver.database.user_access',
+    'sqlserver.database.backup_count',
+]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('metric_name', AUTODISCOVERY_FILTERED_INSTANCE_METRICS)
+def test_instance_level_database_metrics_respect_autodiscovery(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    metric_name,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['autodiscovery_include'] = ['master']
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    dd_run_check(sqlserver_check)
+
+    aggregator.assert_metric_has_tag(metric_name, 'db:master')
+    aggregator.assert_metric_has_tag(metric_name, 'db:msdb', count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_instance_level_database_metrics_remain_unfiltered_without_autodiscovery(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    dd_run_check(sqlserver_check)
+
+    for metric_name in AUTODISCOVERY_FILTERED_INSTANCE_METRICS:
+        aggregator.assert_metric_has_tag(metric_name, 'db:master')
+        aggregator.assert_metric_has_tag(metric_name, 'db:msdb')
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

@@ -978,11 +978,21 @@ class SQLServer(DatabaseCheck):
 
         self._database_metrics = []
         # list of database names to collect metrics for
-        db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+        autodiscovered_db_names = [d.name for d in self.databases]
+        db_names = autodiscovered_db_names or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
 
         # instance level metrics
         for database_metric_class in self._instance_level_database_metrics:
-            self._database_metrics.append(self._new_database_metric_executor(database_metric_class))
+            filter_databases = self._config.autodiscovery and database_metric_class in (
+                SqlserverFileStatsMetrics,
+                SqlserverDatabaseStatsMetrics,
+                SqlserverDatabaseBackupMetrics,
+            )
+            self._database_metrics.append(
+                self._new_database_metric_executor(
+                    database_metric_class, autodiscovered_db_names if filter_databases else None
+                )
+            )
 
         # database level metrics
         for database_metric_class in self._database_level_database_metrics:

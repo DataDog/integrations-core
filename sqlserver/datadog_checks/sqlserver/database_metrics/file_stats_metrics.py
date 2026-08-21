@@ -65,9 +65,13 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
             sql_columns.append("fs.{}".format(column))
             metric_columns.append(column_definitions[column])
 
-        query_filter = ""
+        query_filters = []
+        database_filter, params = self._database_filter("DB_NAME(fs.database_id)")
+        if database_filter:
+            query_filters.append(database_filter)
         if self.major_version >= 16:
-            query_filter = "WHERE DB_NAME(fs.database_id) not like 'model_%'"
+            query_filters.append("DB_NAME(fs.database_id) not like 'model_%'")
+        query_filter = f"WHERE {' AND '.join(query_filters)}" if query_filters else ""
 
         query = """
         SELECT
@@ -93,10 +97,10 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
                 {sql_columns}
             FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL) fs
                 LEFT JOIN sys.database_files df
-                    ON df.file_id = fs.file_id;
+                    ON df.file_id = fs.file_id {filter};
             """
 
-        return {
+        query_config = {
             "name": "sys.dm_io_virtual_file_stats",
             "query": query.strip().format(sql_columns=", ".join(sql_columns), filter=query_filter),
             "columns": [
@@ -107,3 +111,6 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
             ]
             + metric_columns,
         }
+        if params:
+            query_config["params"] = params
+        return query_config

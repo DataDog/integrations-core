@@ -57,6 +57,15 @@ class SqlserverDatabaseMetricsBase:
     def databases(self) -> Optional[List[str]]:
         return self._databases
 
+    def _database_filter(self, column: str) -> tuple[str, tuple[str, ...]]:
+        if self.databases is None:
+            return "", ()
+        if not self.databases:
+            return "1 = 0", ()
+
+        placeholders = ", ".join("?" for _ in self.databases)
+        return f"{column} IN ({placeholders})", tuple(self.databases)
+
     @property
     def query_executors(self) -> List[QueryExecutor]:
         '''
