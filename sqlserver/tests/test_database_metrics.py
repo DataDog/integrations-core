@@ -62,6 +62,33 @@ AUTODISCOVERY_FILTERED_INSTANCE_METRICS = [
     'sqlserver.database.user_access',
     'sqlserver.database.backup_count',
 ]
+SQLSERVER_PARAMETER_LIMIT = 2100
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'database_metric_class',
+    [SqlserverFileStatsMetrics, SqlserverDatabaseStatsMetrics, SqlserverDatabaseBackupMetrics],
+)
+def test_instance_level_database_metrics_stay_within_parameter_limit(
+    init_config,
+    instance_docker_metrics,
+    database_metric_class,
+):
+    databases = [f'database_{index}' for index in range(SQLSERVER_PARAMETER_LIMIT + 1)]
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    database_metrics = database_metric_class(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=sqlserver_check.execute_query_raw,
+        databases=databases,
+    )
+
+    query_params = [query.get('params', ()) for query in database_metrics.queries]
+
+    assert all(len(params) <= SQLSERVER_PARAMETER_LIMIT for params in query_params)
+    assert [database for params in query_params for database in params] == databases
 
 
 @pytest.mark.integration
