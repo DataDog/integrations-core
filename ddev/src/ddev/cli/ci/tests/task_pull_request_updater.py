@@ -96,12 +96,7 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
 
     @property
     def final_report_published(self) -> bool:
-        """Whether the report for a completed run has been published.
-
-        A run whose final snapshot never reached its destination has results nobody can see, so the
-        caller must not treat it as a success. An intermediate failure is different: the next
-        snapshot supersedes it.
-        """
+        """Whether the report for a completed run reached its destination."""
         return self._final_report_published
 
     async def process_message(self, message: UpdatePRComment):

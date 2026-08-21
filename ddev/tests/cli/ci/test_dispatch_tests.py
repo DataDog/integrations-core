@@ -7,9 +7,8 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.ci.tests.messages import TestBatch
 from ddev.utils.github_async.models import PullRequest
-from tests.cli.ci.tests.helpers import make_job
+from tests.cli.ci.tests.helpers import make_batch, make_job
 
 PR_NUMBER = 4242
 PR_PAYLOAD = PullRequest(
@@ -23,13 +22,13 @@ PR_PAYLOAD = PullRequest(
 @pytest.fixture
 def planned(mocker):
     """Stand in for the planning layer, which has its own tests and costs a Hatch call per target."""
-    job = make_job(target='ntp')
-    batches = [TestBatch(id='batch-01', batch_id='batch-01', job_list=[job], jobs_count=1, integrations=['ntp'])]
+    batches = [make_batch(make_job(target='ntp'))]
     return mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=batches)
 
 
 @pytest.fixture
-def pull_request(fake_async_github):
+def github(fake_async_github):
+    """A GitHub that answers `get_pull_request` with `PR_PAYLOAD`."""
     fake_async_github.mock_response('get_pull_request', PR_PAYLOAD)
     return fake_async_github
 
@@ -39,7 +38,7 @@ def pull_request(fake_async_github):
     [PR_NUMBER, f'https://github.com/DataDog/integrations-core/pull/{PR_NUMBER}'],
     ids=['number', 'url'],
 )
-def test_a_pull_request_supplies_the_run_context(ddev, pull_request, planned, reference):
+def test_a_pull_request_supplies_the_run_context(ddev, github, planned, reference):
     """`--pr` is the only input a local run should need: everything else comes from the API."""
     result = ddev('ci', 'dispatch-tests', '--pr', str(reference), '--dry-run')
 
@@ -51,7 +50,7 @@ def test_a_pull_request_supplies_the_run_context(ddev, pull_request, planned, re
     assert f'refs/pull/{PR_NUMBER}/merge' in result.output
 
 
-def test_an_explicit_value_wins_over_the_resolved_one(ddev, pull_request, planned):
+def test_an_explicit_value_wins_over_the_resolved_one(ddev, github, planned):
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--base-sha', 'my-own-sha', '--dry-run')
 
     assert result.exit_code == 0, result.output
@@ -59,12 +58,12 @@ def test_an_explicit_value_wins_over_the_resolved_one(ddev, pull_request, planne
     assert 'head-sha-aaa' not in result.output
 
 
-def test_a_dry_run_dispatches_nothing(ddev, pull_request, planned):
+def test_a_dry_run_dispatches_nothing(ddev, github, planned):
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--dry-run')
 
     assert result.exit_code == 0, result.output
-    pull_request.assert_not_called('create_workflow_dispatch')
-    pull_request.assert_not_called('create_issue_comment')
+    github.assert_not_called('create_workflow_dispatch')
+    github.assert_not_called('create_issue_comment')
 
 
 def test_a_reference_that_is_neither_a_number_nor_a_url_is_refused(ddev, planned):
@@ -83,3 +82,15 @@ def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, mocker):
     assert result.exit_code == 0, result.output
     assert 'No affected target to test.' in result.output
     fake_async_github.assert_not_called('create_workflow_dispatch')
+
+
+def test_the_context_option_offers_every_run_context():
+    """`--context` restates its choices as literals: `RunContext` lives in a module too heavy to
+    import while building the decorator, so a member added there must not be left unreachable.
+    """
+    from ddev.cli.ci.dispatch_tests import dispatch_tests
+    from ddev.cli.ci.tests.dispatcher import RunContext
+
+    option = next(param for param in dispatch_tests.params if param.name == 'run_context')
+
+    assert set(option.type.choices) == {member.value for member in RunContext}

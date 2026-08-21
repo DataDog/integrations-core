@@ -26,8 +26,18 @@ if TYPE_CHECKING:
 
     from httpx import Client
 
+    from ddev.cli.application import Application
     from ddev.cli.terminal import BorrowedStatus
     from ddev.repo.core import Repository
+
+
+def resolve_owner_repo(app: Application, repository: str | None = None) -> tuple[str, str]:
+    """Split `owner/name`, defaulting to the active repository and the `DataDog` organization."""
+    full_name = repository or app.repo.full_name
+    owner, separator, name = full_name.partition('/')
+    if not separator:
+        return 'DataDog', full_name
+    return owner, name
 
 
 def parse_pull_request_reference(value: str) -> int | None:

@@ -32,6 +32,9 @@ class DispatcherConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     global_timeout_seconds: float = Field(default=10800.0, gt=0)  # 3 hours
+    # How long the bus waits for a new message once nothing is running. A batch runs inside a
+    # task, so this only spans the gap between a task finishing and its message being read.
+    grace_period_seconds: float = Field(default=30.0, gt=0)
     # Used when Hatch does not declare a Python version.
     default_python_version: str = Field(default="3.13", pattern=r"^\d+\.\d+$")
     # The workflow each batch is dispatched to, by file name or numeric id.

@@ -27,11 +27,6 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async import AsyncGitHubClient
 
-INITIAL_UPDATE_MESSAGE_ID = "dispatcher-initial"
-# A batch takes minutes, so the bus is idle between results far longer than the bus default
-# allows. It only has to outlast the gap between a task finishing and its message being read.
-DEFAULT_GRACE_PERIOD = 30.0
-
 logger = logging.getLogger(__name__)
 
 
@@ -46,11 +41,12 @@ class RunContext(StrEnum):
 
 @dataclass(frozen=True)
 class DispatcherContext:
-    """Everything the Dispatcher needs to know about the run it is testing.
+    """The run being tested. `build_dispatcher` consumes part of it; the rest describes the run
+    for the plan header and, once metrics land, for their tags.
 
     `base_sha` and `checkout_sha` are deliberately separate: a pull request is tested at the merge
-    commit (`refs/pull/<n>/merge`) but its checks and metrics belong to the head commit. Outside a
-    pull request the two are the same.
+    commit (`refs/pull/<n>/merge`) but its checks belong to the head commit. Outside a pull request
+    the two are the same.
     """
 
     owner: str
@@ -70,22 +66,18 @@ class DispatcherOutcome:
     """What a finished Dispatcher execution amounts to, for the caller to exit on."""
 
     progress: DispatcherProgress
-    pr_comment_failed: bool
     final_report_published: bool
-    error: Exception | None = None
 
     @property
     def successful(self) -> bool:
-        """Whether every batch reached a non-failing terminal state and the report was published.
+        """Whether every batch finished without failing and the final report reached its reader.
 
-        A batch that never finished counts as a failure: `progress.done` is false, and a run whose
-        results are unknown must not read as green. Publishing the final report is part of that,
-        because a run that stalls after the last batch leaves the reader looking at stale progress.
-        An intermediate comment failure is not, since the next snapshot supersedes it.
+        A run whose results nobody can see is not green, so an unfinished plan and an unpublished
+        final report both count as failures. An intermediate comment failure does not: the next
+        snapshot supersedes it.
         """
         return (
-            self.error is None
-            and self.final_report_published
+            self.final_report_published
             and self.progress.done
             and all(batch.status is not Status.FAILURE for batch in self.progress.batches)
         )
@@ -94,10 +86,8 @@ class DispatcherOutcome:
 class Dispatcher(EventBusOrchestrator):
     """Runs a batching plan to completion and publishes its result.
 
-    The whole plan is known before the bus starts, so `on_initialize` primes the queue with the
-    initial pull-request update and every batch, and the tasks carry it from there:
-    `TestBatch` -> runner -> `BatchFinished` -> gatherer -> `UpdatePRComment` -> updater. The bus
-    stops when the queue drains and no task is left running.
+    The whole plan is known before the bus starts, so `on_initialize` queues the initial update and
+    every batch: `TestBatch` -> runner -> `BatchFinished` -> gatherer -> `UpdatePRComment` -> updater.
     """
 
     def __init__(
@@ -109,7 +99,7 @@ class Dispatcher(EventBusOrchestrator):
         gatherer: TaskTestGatherer,
         updater: TaskPullRequestUpdater,
         max_timeout: float | None,
-        grace_period: float = DEFAULT_GRACE_PERIOD,
+        grace_period: float,
         run_logger: logging.Logger | None = None,
     ):
         super().__init__(run_logger or logger, max_timeout=max_timeout, grace_period=grace_period)
@@ -129,7 +119,7 @@ class Dispatcher(EventBusOrchestrator):
         return self._outcome
 
     async def on_initialize(self):
-        self.submit_message(self._gatherer.build_initial_update(INITIAL_UPDATE_MESSAGE_ID))
+        self.submit_message(self._gatherer.build_initial_update())
         for batch in self._batches:
             self.submit_message(batch)
         self._logger.info("Dispatched %s batches", len(self._batches))
@@ -142,9 +132,7 @@ class Dispatcher(EventBusOrchestrator):
             progress = self._gatherer.progress
             self._outcome = DispatcherOutcome(
                 progress=progress,
-                pr_comment_failed=self._updater.pr_comment_failed,
                 final_report_published=self._updater.final_report_published,
-                error=exception,
             )
             self._logger.info(summary_line(progress))
             if (body := self._updater.latest_body) is not None:
@@ -204,5 +192,6 @@ def build_dispatcher(
         gatherer=gatherer,
         updater=updater,
         max_timeout=config.global_timeout_seconds,
+        grace_period=config.grace_period_seconds,
         run_logger=active_logger,
     )

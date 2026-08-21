@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from ddev.utils.github_async.models import PullRequest
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
-MAX_LISTED_INTEGRATIONS = 10
 
 
 @click.command(short_help='Run the Dispatcher to test a commit as parallel batches')
@@ -78,6 +77,7 @@ def dispatch_tests(
     from ddev.cli.ci.tests.batching.build import HatchEnvironmentProvider
     from ddev.cli.ci.tests.dispatcher import DispatcherContext, RunContext, build_dispatcher
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
+    from ddev.utils.github import resolve_owner_repo
 
     # One INFO line per request would bury the Dispatcher's own progress.
     logging.getLogger('httpx').setLevel(logging.WARNING)
@@ -145,22 +145,18 @@ def dispatch_tests(
         output_path=base_path / 'results',
         run_logger=app.logger,
     )
-    dispatcher.run()
+    # A fatal processor or hook failure leaves the bus by raising out of `run`. `on_finalize` has
+    # already published whatever it knew by then, so a message is more use here than a traceback.
+    try:
+        dispatcher.run()
+    except Exception as error:
+        app.abort(f'Dispatcher execution failed: {error}')
 
     outcome = dispatcher.outcome
     if outcome is None or not outcome.successful:
         app.abort('Dispatcher tests failed.')
 
     app.display_success('Dispatcher tests passed.')
-
-
-def resolve_owner_repo(app: Application, repository: str | None) -> tuple[str, str]:
-    """Split `owner/name`, defaulting to the active repository and the `DataDog` organization."""
-    full_name = repository or app.repo.full_name
-    owner, separator, name = full_name.partition('/')
-    if not separator:
-        return 'DataDog', full_name
-    return owner, name
 
 
 def fetch_pull_request(app: Application, owner: str, repo: str, reference: str) -> PullRequest:
@@ -265,11 +261,12 @@ def display_plan(app: Application, context: DispatcherContext, batches: list[Tes
     for batch in batches:
         count = len(batch.integrations)
         app.display(f'  {batch.batch_id}: {batch.jobs_count} jobs, {count} integration{"" if count == 1 else "s"}')
-        # A repository-wide run names every integration, which is hundreds of lines of no use here.
         app.display(f'    {summarize(batch.integrations)}')
 
 
-def summarize(names: list[str], limit: int = MAX_LISTED_INTEGRATIONS) -> str:
+def summarize(names: list[str]) -> str:
+    """The first few names and a count of the rest: a repository-wide run has hundreds."""
+    limit = 10
     if len(names) <= limit:
         return ', '.join(names)
     return f'{", ".join(names[:limit])}, and {len(names) - limit} more'

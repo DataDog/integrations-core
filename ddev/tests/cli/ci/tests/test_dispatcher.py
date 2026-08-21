@@ -11,13 +11,11 @@ import pytest
 
 from ddev.cli.ci.tests.dispatcher import Dispatcher, DispatcherContext, RunContext
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
-from ddev.cli.ci.tests.pr_comment import COMMENT_MARKER
 from ddev.cli.ci.tests.task_pull_request_updater import PullRequestUpdaterOptions, TaskPullRequestUpdater
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
-from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import ArtifactsList, WorkflowJob, WorkflowJobsList, WorkflowRun
-from tests.cli.ci.tests.helpers import jobs_reported, make_job
+from tests.cli.ci.tests.helpers import jobs_reported, make_batch, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 CONTEXT = DispatcherContext(
@@ -32,10 +30,6 @@ CONTEXT = DispatcherContext(
     target_branch="master",
     pr_number=42,
 )
-
-
-def wrap(data):
-    return GitHubResponse(data=data, headers={})
 
 
 def build_bus(
@@ -77,10 +71,6 @@ def build_bus(
     )
 
 
-def batch(job: BatchJob, batch_id: str = "batch-01") -> TestBatch:
-    return TestBatch(id=batch_id, batch_id=batch_id, job_list=[job], jobs_count=1, integrations=[job.target])
-
-
 @pytest.fixture
 def client(request) -> FakeAsyncGitHubClient:
     """A fake GitHub that completes every dispatched run with *conclusion*."""
@@ -88,28 +78,24 @@ def client(request) -> FakeAsyncGitHubClient:
     fake = FakeAsyncGitHubClient()
     fake.mock_response(
         "get_workflow_run",
-        wrap(
-            WorkflowRun(
-                id=123,
-                name="test-batch",
-                status="completed",
-                conclusion=conclusion,
-                html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
-            )
+        WorkflowRun(
+            id=123,
+            name="test-batch",
+            status="completed",
+            conclusion=conclusion,
+            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
         ),
     )
-    fake.mock_response("list_workflow_run_artifacts", wrap(ArtifactsList(total_count=0, artifacts=[])))
+    fake.mock_response("list_workflow_run_artifacts", ArtifactsList(total_count=0, artifacts=[]))
     return fake
 
 
 def mock_job_result(fake: FakeAsyncGitHubClient, job: BatchJob, conclusion: str) -> None:
     fake.mock_response(
         "list_workflow_jobs",
-        wrap(
-            WorkflowJobsList(
-                total_count=1,
-                jobs=[WorkflowJob(id=1, run_id=123, name=job.name, status="completed", conclusion=conclusion)],
-            )
+        WorkflowJobsList(
+            total_count=1,
+            jobs=[WorkflowJob(id=1, run_id=123, name=job.name, status="completed", conclusion=conclusion)],
         ),
     )
 
@@ -122,7 +108,7 @@ def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_p
     """
     job = make_job()
     mock_job_result(client, job, "success")
-    dispatcher = build_bus(client, tmp_path, [batch(job)])
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
 
     dispatcher.run()
 
@@ -153,7 +139,7 @@ def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_p
 def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
     job = make_job()
     mock_job_result(client, job, "failure")
-    dispatcher = build_bus(client, tmp_path, [batch(job)])
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
 
     dispatcher.run()
 
@@ -169,12 +155,9 @@ def test_the_report_is_written_to_the_run_summary(client, tmp_path, monkeypatch)
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
     job = make_job()
     mock_job_result(client, job, "success")
-    dispatcher = build_bus(client, tmp_path, [batch(job)], pr_number=None)
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)], pr_number=None)
 
     dispatcher.run()
 
     client.assert_not_called("create_issue_comment")
-    report = summary.read_text(encoding="utf-8")
-    assert "Dispatcher tests" in report
-    # The marker exists to find a comment; nothing looks a run summary up.
-    assert COMMENT_MARKER not in report
+    assert jobs_reported(summary.read_text(encoding="utf-8")) == 1

@@ -45,6 +45,9 @@ if TYPE_CHECKING:
 # workflow-job conclusion, and a job with no correlated workflow job is a runner bug and raises.
 COVERAGE_GLOB = "coverage*.xml"
 JUNIT_GLOB = "test-*.xml"
+# Every later update borrows the id of the ``BatchFinished`` that caused it. Revision ``0`` has no
+# cause, so it carries its own.
+INITIAL_UPDATE_MESSAGE_ID = "dispatcher-initial"
 
 
 class TaskTestGatherer(SyncProcessor[BatchFinished]):
@@ -127,14 +130,14 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         """Whether every batch is terminal. Hold ``self._lock``."""
         return all(batch.state is ExecutionState.FINISHED for batch in self._progress_by_batch.values())
 
-    def build_initial_update(self, message_id: str) -> UpdatePRComment:
+    def build_initial_update(self) -> UpdatePRComment:
         """Revision ``0``: the complete plan, before any batch has been dispatched.
 
         Returned rather than submitted: a processor can only submit once the bus has attached its
         queue, so the dispatcher entry point publishes this when it starts the bus.
         """
         with self._lock:
-            return self.build_update_message(message_id, revision=0, done=False)
+            return self.build_update_message(INITIAL_UPDATE_MESSAGE_ID, revision=0, done=False)
 
     def build_update_message(self, message_id: str, revision: int, done: bool) -> UpdatePRComment:
         """Build an ``UpdatePRComment`` for *revision*. Hold ``self._lock`` when state is live."""
