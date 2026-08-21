@@ -32,6 +32,7 @@ class QueryExecutor(object):
         hostname=None,  # type: str
         logger=None,
         track_operation_time=False,  # type: bool
+        operation_tags=None,  # type: List[str]
     ):  # type: (...) -> QueryExecutor
         self.executor = executor  # type: QueriesExecutor
         self.submitter = submitter  # type: QueriesSubmitter
@@ -47,6 +48,7 @@ class QueryExecutor(object):
         self.hostname = hostname  # type: str
         self.logger = logger or logging.getLogger(__name__)
         self.track_operation_time = track_operation_time
+        self.operation_tags = operation_tags or []
 
     def compile_queries(self):
         """This method compiles every `Query` object."""
@@ -83,7 +85,7 @@ class QueryExecutor(object):
 
             try:
                 if self.track_operation_time:
-                    with tracked_query(check=self.submitter, operation=query_name, tags=global_tags):
+                    with tracked_query(check=self.submitter, operation=query_name, tags=self.operation_tags):
                         rows = self.execute_query(query.query, query.params)
                 else:
                     rows = self.execute_query(query.query, query.params)

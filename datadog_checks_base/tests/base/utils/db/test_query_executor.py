@@ -242,7 +242,7 @@ class TestQueryExecutor:
         metric_name = '{}.metric'.format(metric_prefix) if metric_prefix else 'test_check.metric'
         aggregator.assert_metric(metric_name, 1, metric_type=aggregator.GAUGE)
 
-    def test_operation_time_uses_executor_tags(self, aggregator):
+    def test_operation_time_uses_only_operation_tags(self, aggregator):
         queries = [
             {
                 'name': 'query1',
@@ -252,11 +252,18 @@ class TestQueryExecutor:
         ]
 
         check = AgentCheck('test', {}, [{}])
-        check.debug_stats_kwargs = lambda: {'tags': ['database:test']}
-        qe = QueryExecutor(mock_executor([[1]]), check, queries, tags=['database:test'], track_operation_time=True)
+        qe = QueryExecutor(
+            mock_executor([[1]]),
+            check,
+            queries,
+            tags=['metric:test'],
+            track_operation_time=True,
+            operation_tags=['database:test'],
+        )
         qe.compile_queries()
         qe.execute()
 
+        aggregator.assert_metric('test.metric', tags=['metric:test'], count=1)
         aggregator.assert_metric(
             'dd.test.operation.time',
             tags=['operation:query1', 'database:test'],

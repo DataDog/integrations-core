@@ -108,7 +108,9 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
             query['query'] = DATABASE_FILES_BATCH_QUERY
             query['params'] = (serialize_database_names(self.databases or []),)
             executor = self.new_query_executor(
-                [query], executor=functools.partial(self.execute_query_handler, fetch_multiple_results=True)
+                [query],
+                executor=functools.partial(self.execute_query_handler, fetch_multiple_results=True),
+                track_operation_time=self.track_operation_time,
             )
             executor.compile_queries()
             return [executor]
@@ -119,6 +121,7 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
                 self.queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
                 track_operation_time=self.track_operation_time,
+                operation_tags=['database:{}'.format(database)],
             )
             executor.compile_queries()
             executors.append(executor)

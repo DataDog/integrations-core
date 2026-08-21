@@ -270,7 +270,7 @@ class SQLServer(DatabaseCheck):
         except Exception as e:
             self.log.error("Error submitting health event for initialization: %s", e)
 
-    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
+    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False, operation_tags=None):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
         return QueryExecutor(
             executor,
@@ -279,6 +279,7 @@ class SQLServer(DatabaseCheck):
             tags=tags,
             hostname=self.reported_hostname,
             track_operation_time=track_operation_time,
+            operation_tags=operation_tags,
         )
 
     def add_core_tags(self):

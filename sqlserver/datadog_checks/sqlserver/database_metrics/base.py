@@ -27,7 +27,7 @@ class SqlserverDatabaseMetricsBase:
         self.config: SQLServerConfig = config
         self.server_static_info: dict = server_static_info
         self.new_query_executor: Callable[
-            [List[dict], Callable, Optional[List[str]], Optional[bool]], QueryExecutor
+            [List[dict], Callable, Optional[List[str]], Optional[bool], Optional[List[str]]], QueryExecutor
         ] = new_query_executor
         self.execute_query_handler: Callable[[str, Optional[str]], List[tuple]] = execute_query_handler
         self.track_operation_time: bool = track_operation_time
