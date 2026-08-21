@@ -39,13 +39,13 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     and emits a ``BatchFinished``.
     """
 
-    def __init__(self, name: str, client: AsyncGitHubClient, options: TestRunnerOptions) -> None:
+    def __init__(self, name: str, client: AsyncGitHubClient, options: TestRunnerOptions):
         super().__init__(name)
         self._client = client
         self._options = options
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
-    async def process_message(self, message: TestBatch) -> None:
+    async def process_message(self, message: TestBatch):
         inputs = self._build_inputs(message)
         log_extra: dict[str, Any] = {"batch_id": message.batch_id}
 
