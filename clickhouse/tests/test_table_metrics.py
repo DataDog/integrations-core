@@ -252,6 +252,25 @@ def test_collect_view_refresh_skips_when_flag_set(check):
     mock_query.assert_not_called()
 
 
+def test_run_job_skips_view_refresh_once_cancelled(check):
+    """A cancel landing mid-tick must not start the view refresh query.
+
+    The table size collection swallows the cancellation raised by _execute_query, so without the
+    check in run_job() unscheduling would issue this query and wait out the client read timeout.
+    """
+    job = check.table_metrics
+    job.cancel()
+
+    with (
+        mock.patch.object(check, 'create_dbm_client') as mock_client,
+        mock.patch.object(check, 'execute_query_raw') as mock_query,
+    ):
+        job.run_job()
+
+    mock_query.assert_not_called()
+    mock_client.assert_not_called()
+
+
 def test_handle_view_refreshes_unknown_table_sets_skip_and_logs_once(check):
     job = check.table_metrics
     with mock.patch.object(job._log, 'info') as mock_log:

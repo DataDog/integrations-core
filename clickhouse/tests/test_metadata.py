@@ -410,6 +410,16 @@ def test_shutdown_closes_db_client(check):
     fake_client.close.assert_called_once()
 
 
+def test_shutdown_is_idempotent(check):
+    """DBMAsyncJob.shutdown() overrides must tolerate a second call.
+
+    shutdown_async_jobs() does not isolate teardown failures per job, so a job that raises here
+    would stop the jobs after it from releasing their own clients.
+    """
+    check.metadata.shutdown()
+    check.metadata.shutdown()
+
+
 def test_combined_query_dedupes_replicas_before_limit(check):
     _capture_payloads(check)
     with _capture_all_queries(check.metadata._schema_collector) as seen_queries:

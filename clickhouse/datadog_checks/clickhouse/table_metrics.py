@@ -110,6 +110,10 @@ class ClickhouseTableMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def run_job(self):
         self._emit_table_size_gauges()
+        # _emit_table_size_gauges() swallows the cancellation raised by _execute_query, and the
+        # view refresh collection queries the check's client directly, so it needs its own check.
+        if self._cancel_event.is_set():
+            return
         self._collect_view_refresh_metrics()
 
     def _emit_table_size_gauges(self) -> None:

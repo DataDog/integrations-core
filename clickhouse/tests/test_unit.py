@@ -10,6 +10,7 @@ import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
 from datadog_checks.clickhouse.utils import (
     BUILTIN_SAMPLE_CLUSTERS,
@@ -681,30 +682,29 @@ ALL_DBM_JOBS = {
 }
 
 
-def test_async_job_registry_holds_every_enabled_job(instance):
-    """Each enabled job is registered under its job name, and the attribute holds it."""
-    instance = {**instance, 'dbm': True, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
+@pytest.mark.parametrize(
+    'dbm_enabled, expected',
+    [
+        pytest.param(True, sorted(ALL_DBM_JOBS.values()), id='dbm-on'),
+        pytest.param(False, [], id='dbm-off'),
+    ],
+)
+def test_configured_jobs_are_the_jobs_that_run(instance, dbm_enabled, expected):
+    """Every job this configuration enables is the set that the check actually starts.
 
+    Catches a job that stops being wired up: it would keep its config option and its attribute
+    while silently never collecting. Every job is gated on dbm, so nothing runs when it is off.
+    """
+    instance = {**instance, 'dbm': dbm_enabled, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
     check = ClickhouseCheck('clickhouse', {}, [instance])
 
-    registered = check._async_job_registry
-    assert sorted(registered) == sorted(ALL_DBM_JOBS.values())
-    assert check.statement_metrics is registered['query-metrics']
-    assert check.statement_samples is registered['query-samples']
-    assert check.query_completions is registered['query-completions']
-    assert check.query_errors is registered['query-errors']
-    assert check.table_metrics is registered['clickhouse-table-metrics']
-    assert check.metadata is registered['clickhouse-metadata']
-    assert check.parts_and_merges is registered['parts-and-merges']
+    started = []
+    with mock.patch.object(
+        DBMAsyncJob, 'run_job_loop', autospec=True, side_effect=lambda self, tags: started.append(self._job_name)
+    ):
+        check.run_async_jobs(check.tags)
 
-
-def test_async_job_registry_empty_without_dbm(instance):
-    """Every job is gated on dbm, so nothing is registered when it is off."""
-    instance = {**instance, 'dbm': False, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
-
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-
-    assert check._async_job_registry == {}
+    assert sorted(started) == expected
 
 
 def test_cancel_closes_main_client_and_releases_pool(instance):
