@@ -1422,17 +1422,21 @@ pipeline:
               target: ocsf.finding_info.title
               preserveSource: true
               overrideOnConflict: true
-            # Deliberately single-source with no fallback. `parameter_name` is
-            # absent on `first_runs` events, and that is correct: OCSF defines
-            # `control` as one named control ("CIS ... Control 2.1 - Ensure
-            # CloudTrail is enabled in all regions"), whereas a first_run
-            # evaluates many checks at once. Those check names map to
-            # `compliance.requirements` as an array, and `blueprint_name` maps to
-            # `device.groups[]`, so no data is dropped. Do not "fix" this by
-            # joining the check names into a string or by using `blueprint_name`:
-            # a Blueprint is a bundle of checks, not a prescriptive control.
+            # Multi-source fallback: `parameter_name` names the single control on
+            # remediation events; `first_runs` events have no `parameter_name`
+            # (they evaluate a whole blueprint at once), so they fall back to
+            # `blueprint_name`. First non-empty source wins.
+            #
+            # Note this is a looser reading of the attribute than OCSF's own
+            # wording -- it defines `control` as one named control ("CIS ...
+            # Control 2.1 - Ensure CloudTrail is enabled in all regions"), and an
+            # Iru Blueprint is a bundle of checks rather than a single control.
+            # The individual check names for those events are also mapped to
+            # `compliance.requirements`, and the blueprint to `device.groups[]`,
+            # so the fallback populates a recommended attribute rather than
+            # recovering data that would otherwise be lost.
             - type: schema-remapper
-              name: Map `new_state.parameter_name` to `ocsf.compliance.control`
+              name: Map `new_state.parameter_name`, `blueprint_name` to `ocsf.compliance.control`
               sources:
                 - new_state.parameter_name
                 - blueprint_name

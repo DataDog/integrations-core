@@ -1082,6 +1082,7 @@ tests:
              - Disable Bluetooth Sharing
              - Application Blocking
              - Disable the "root" user
+           control: DDS-Test
          device:
            hostname: "IT's MacBook Air"
            name: "IT's MacBook Air"
