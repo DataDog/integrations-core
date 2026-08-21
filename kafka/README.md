@@ -2,7 +2,7 @@
 
 ![Kafka Dashboard][1]
 
-**New:** [Kafka Monitoring][24] tracks consumer lag, throughput, schemas, and adds message reading capabilities.
+**New:** [Kafka Console][24] tracks consumer lag, throughput, schemas, and adds message reading capabilities.
 
 ## Overview
 
@@ -182,4 +182,4 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
 [23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
-[24]: https://docs.datadoghq.com/data_streams/kafka?utm_source=docs&utm_medium=callout&utm_campaign=DocsCTA-DSMKafka-IntegrationsKafka
+[24]: https://docs.datadoghq.com/data_streams/kafka/?utm_source=docs&utm_medium=callout&utm_campaign=DocsCTA-DSMKafka-IntegrationsKafka

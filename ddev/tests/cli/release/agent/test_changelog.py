@@ -90,6 +90,32 @@ def test_new_integration_with_non_initial_version(repo_with_new_integration_patc
     assert mock_fetch_tags.call_count == 1
 
 
+def test_changelog_skips_unreleased_integrations(repo_with_history, config_file, ddev, mocker, write_repo_config):
+    config_file.model.repos['core'] = str(repo_with_history.path)
+    config_file.save()
+    write_repo_config(
+        repo_with_history.path,
+        """
+[overrides.release.agent.unreleased-integrations.by-integration]
+bar = ["7.38.0"]
+""",
+    )
+    mock_fetch_tags = mocker.patch('ddev.utils.git.GitRepository.fetch_tags')
+
+    result = ddev('release', 'agent', 'changelog', '--since', '7.37.0', '--to', '7.38.0')
+    assert result.exit_code == 0
+
+    expected_output = """## Datadog Agent version [7.38.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7380)
+
+### New Integrations
+* datadog_checks_base [2.1.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+### Integration Updates
+* foo [1.5.0](https://github.com/DataDog/integrations-core/blob/master/foo/CHANGELOG.md)
+"""
+    assert result.output.rstrip('\n') == expected_output.strip('\n')
+    assert mock_fetch_tags.call_count == 1
+
+
 @pytest.fixture
 def repo_with_fake_changelog(repo_with_history, config_file):
     config_file.model.repos['core'] = str(repo_with_history.path)

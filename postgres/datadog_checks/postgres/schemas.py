@@ -41,6 +41,7 @@ SELECT c.oid                 AS table_id,
        c.relnamespace        AS schema_id,
        c.relname             AS table_name,
        c.relowner :: regrole :: text AS table_owner,
+       c.relkind::text       AS relkind,
        t.relname             AS toast_table
 FROM   pg_class c
        left join pg_class t
@@ -54,6 +55,7 @@ SELECT c.oid                 AS table_id,
        c.relnamespace        AS schema_id,
        c.relname             AS table_name,
        c.relowner :: regrole :: text AS table_owner,
+       c.relkind::text       AS relkind,
        t.relname             AS toast_table
 FROM   pg_class c
        left join pg_class t
@@ -138,6 +140,7 @@ GROUP BY inhparent
 class TableObject(TypedDict):
     id: str
     name: str
+    relkind: str
     columns: list
     indexes: list
     foreign_keys: list
@@ -205,18 +208,22 @@ class PostgresSchemaCollector(SchemaCollector):
         query = DATABASE_INFORMATION_QUERY
         params: list[str] = []
 
-        query += regex_exclude_clauses("datname", self._config.exclude_databases)
-        params.extend(self._config.exclude_databases)
+        if self._check._config.dbstrict and not self._check.autodiscovery:
+            query += " AND datname = %s"
+            params.append(self._check._config.dbname)
+        else:
+            query += regex_exclude_clauses("datname", self._config.exclude_databases)
+            params.extend(self._config.exclude_databases)
 
-        query += regex_include_clause("datname", self._config.include_databases)
-        params.extend(self._config.include_databases)
+            query += regex_include_clause("datname", self._config.include_databases)
+            params.extend(self._config.include_databases)
 
-        # Autodiscovery trumps exclude and include
-        autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
-        if autodiscovery_databases:
-            in_clause = ", ".join(["%s"] * len(autodiscovery_databases))
-            query += f" AND datname IN ({in_clause})"
-            params.extend(autodiscovery_databases)
+            # Autodiscovery trumps exclude and include
+            autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
+            if autodiscovery_databases:
+                in_clause = ", ".join(["%s"] * len(autodiscovery_databases))
+                query += f" AND datname IN ({in_clause})"
+                params.extend(autodiscovery_databases)
 
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
@@ -227,9 +234,11 @@ class PostgresSchemaCollector(SchemaCollector):
     def _get_cursor(self, database_name):
         with self._check.db_pool.get_connection(database_name) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                query, params = self.get_rows_query()
-                cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s';")
-                cursor.execute(query, params)
+                # Explicitly wrap these queries in a transaction so we can set the statement timeout locally
+                with conn.transaction():
+                    query, params = self.get_rows_query()
+                    cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
+                    cursor.execute(query, params)
                 yield cursor
 
     def _get_schemas_query(self):
@@ -315,7 +324,7 @@ class PostgresSchemaCollector(SchemaCollector):
             ),
             schema_tables AS (
                 SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
-                tables.table_id, tables.table_name, tables.table_owner, tables.toast_table
+                tables.table_id, tables.table_name, tables.table_owner, tables.relkind, tables.toast_table
                 FROM schemas
                 LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                 ORDER BY schemas.schema_name, tables.table_name
@@ -333,7 +342,8 @@ class PostgresSchemaCollector(SchemaCollector):
             {partitions_ctes}
 
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
-            schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.toast_table,
+            schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.relkind,
+            schema_tables.toast_table,
                 array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                 array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
                 array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
@@ -345,7 +355,8 @@ class PostgresSchemaCollector(SchemaCollector):
                 LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
                 {partition_joins}
             GROUP BY schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
-                schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.toast_table
+                schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.relkind,
+                schema_tables.toast_table
             ;
         """
 
@@ -382,6 +393,7 @@ class PostgresSchemaCollector(SchemaCollector):
                                 "foreign_keys": list(
                                     {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
                                 ),
+                                "relkind": cursor_row.get("relkind"),
                                 "toast_table": cursor_row.get("toast_table"),
                                 "num_partitions": cursor_row.get("num_partitions"),
                                 "partition_key": cursor_row.get("partition_key"),

@@ -17,10 +17,9 @@ from ddev.cli.validate.all.github import (
     COMMENT_HEADING,
     format_pr_comment,
     format_step_summary,
-    get_workflow_run_url,
-    write_step_summary,
 )
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncProcessor
+from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -42,7 +41,7 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Verify check versions match the Agent requirements file",
     ),
     "ci": ValidationConfig(
-        description="Validate CI configuration and Codecov settings",
+        description="Validate CI configuration and code coverage settings",
         repo_wide=True,
         fix_flag="--sync",
     ),
@@ -103,6 +102,10 @@ VALIDATIONS: dict[str, ValidationConfig] = {
     ),
     "package": ValidationConfig(
         description="Validate Python package metadata and naming",
+    ),
+    "qa-label": ValidationConfig(
+        description="Validate the pull request declares whether it needs QA for the next Agent release",
+        repo_wide=True,
     ),
     "readmes": ValidationConfig(
         description="Validate README files have required sections",

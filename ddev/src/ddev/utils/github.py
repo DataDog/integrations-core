@@ -6,9 +6,20 @@ from __future__ import annotations
 import json
 from functools import cached_property
 from time import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, overload
+
+from ddev.utils.github_errors import (
+    GITHUB_AUTHENTICATION_STATUS_CODES,
+    GitHubAuthenticationError,
+    github_secondary_rate_limit_wait,
+)
+
+MAX_SECONDARY_RATE_LIMIT_RETRIES = 2
+MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS = 3600
 
 if TYPE_CHECKING:
+    from typing import Any, Literal
+
     from httpx import Client
 
     from ddev.cli.terminal import BorrowedStatus
@@ -197,6 +208,8 @@ class GitHubManager:
 
         try:
             response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
+        except GitHubAuthenticationError:
+            raise
         except HTTPStatusError:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
@@ -207,12 +220,60 @@ class GitHubManager:
         data = response.json()
         return data['head']['sha'], data['head']['ref']
 
-    def dispatch_workflow(self, workflow_id: str, ref: str, inputs: dict[str, Any]) -> None:
-        """Trigger a workflow_dispatch event."""
-        self.__api_post(
+    def get_pull_request_labels(self, pr_number: int) -> list[str] | None:
+        """Return the label names on the given PR, or None if it could not be fetched."""
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except GitHubAuthenticationError:
+            raise
+        except HTTPStatusError:
+            return None
+        return [label['name'] for label in response.json().get('labels', [])]
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[False] = False,
+    ) -> None: ...
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[True],
+    ) -> dict[str, Any]: ...
+
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: bool = False,
+    ) -> dict[str, Any] | None:
+        """Trigger a workflow_dispatch event.
+
+        When ``return_run_details`` is true, request the new run's details from
+        the API and return the parsed JSON response (``workflow_run_id``,
+        ``run_url``, ``html_url``). The default keeps the prior fire-and-forget
+        behavior and returns ``None``.
+        """
+        payload: dict[str, Any] = {'ref': ref, 'inputs': inputs}
+        if return_run_details:
+            payload['return_run_details'] = True
+        response = self.__api_post(
             self.WORKFLOW_DISPATCH_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
-            content=json.dumps({'ref': ref, 'inputs': inputs}),
+            content=json.dumps(payload),
         )
+        if not return_run_details:
+            return None
+        return response.json()
 
     def get_pull_request_comments(self, pr_number: int) -> list[dict]:
         response = self.__api_get(
@@ -257,16 +318,29 @@ class GitHubManager:
         return self.__api_call('get', *args, **kwargs)
 
     def __api_call(self, method, *args, **kwargs):
-        from httpx import HTTPError
+        from httpx import HTTPError, HTTPStatusError
 
         retry_wait = 2
+        secondary_rate_limit_retries = 0
         while True:
             try:
                 response = getattr(self.client, method)(*args, auth=self.__auth, **kwargs)
 
+                secondary_rate_limit_wait = github_secondary_rate_limit_wait(response)
+                if secondary_rate_limit_wait is not None:
+                    if (
+                        secondary_rate_limit_retries < MAX_SECONDARY_RATE_LIMIT_RETRIES
+                        and secondary_rate_limit_wait <= MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS
+                    ):
+                        secondary_rate_limit_retries += 1
+                        self.__status.wait_for(
+                            secondary_rate_limit_wait + 1,
+                            context='GitHub API secondary rate limit reached',
+                        )
+                        continue
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits
-                if response.status_code == 403 and response.headers['X-RateLimit-Remaining'] == '0':  # noqa: PLR2004
+                elif response.status_code == 403 and response.headers.get('X-RateLimit-Remaining') == '0':  # noqa: PLR2004
                     self.__status.wait_for(
                         float(response.headers['X-RateLimit-Reset']) - time() + 1,
                         context='GitHub API rate limit reached',
@@ -277,5 +351,12 @@ class GitHubManager:
                 retry_wait *= 2
                 continue
 
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except HTTPStatusError as e:
+                if github_secondary_rate_limit_wait(e.response) is not None:
+                    raise
+                if e.response.status_code in GITHUB_AUTHENTICATION_STATUS_CODES:
+                    raise GitHubAuthenticationError.from_http_status_error(e) from e
+                raise
             return response

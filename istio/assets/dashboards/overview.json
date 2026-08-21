@@ -2014,7 +2014,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Succesful Injection Requests",
+                            "title": "Successful Injection Requests",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"

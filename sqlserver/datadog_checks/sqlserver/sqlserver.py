@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from __future__ import division
+from __future__ import annotations, division
 
+import functools
 import time
 from collections import defaultdict
-from string import Template
+from collections.abc import Iterable
+from typing import Any
 
 from cachetools import TTLCache
 
@@ -27,6 +29,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.data_observability import SqlServerDataObservability
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAgentMetrics,
     SqlserverAoMetrics,
@@ -103,6 +106,7 @@ from datadog_checks.sqlserver.const import (
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
+from datadog_checks.sqlserver.diagnose import run_diagnostics
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.utils import (
     is_azure_sql_database,
@@ -126,8 +130,14 @@ set_default_driver_conf()
 
 KEY_PREFIX = "dbm-sqlserver-"
 
+# What a metric class's `fetch_all_values` hands back: the rows it fetched, in whatever shape that class
+# dispatches from, and their column names. Classes that index their own rows return None for the columns.
+MetricFetchResult = tuple[Any, list[str] | None]
+
 
 class SQLServer(DatabaseCheck):
+    DBMS = "sqlserver"
+
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True
@@ -144,9 +154,7 @@ class SQLServer(DatabaseCheck):
         )
 
         self._resolved_hostname = None
-        self._agent_hostname = None
         self._database_hostname = None
-        self._database_identifier = None
         self._connection = None
         self.failed_connections = {}
         self.instance_metrics = []
@@ -175,6 +183,7 @@ class SQLServer(DatabaseCheck):
         self.activity = SqlserverActivity(self, self._config)
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
+        self.data_observability = SqlServerDataObservability(self, self._config)
 
         # XE Session Handlers
         self.xe_session_handlers = []
@@ -196,6 +205,8 @@ class SQLServer(DatabaseCheck):
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
+
         self._submit_initialization_health_event()
 
     def initialize_xe_session_handlers(self):
@@ -212,6 +223,7 @@ class SQLServer(DatabaseCheck):
         self.sql_metadata.cancel()
         self.deadlocks.cancel()
         self.agent_history.cancel()
+        self.data_observability.cancel()
 
         # Cancel all XE session handlers
         for handler in self.xe_session_handlers:
@@ -328,11 +340,10 @@ class SQLServer(DatabaseCheck):
         return self.host_and_port[1]
 
     def resolve_db_host(self):
+        if "\\" in self.host:
+            # SQL Server instance names are not resolvable, this preserves original fallback behavior prior to v7.79.0
+            return datadog_agent.get_hostname()
         return agent_host_resolver(self.host)
-
-    @property
-    def tags(self):
-        return self.tag_manager.get_tags()
 
     @property
     def cloud_metadata(self):
@@ -356,38 +367,28 @@ class SQLServer(DatabaseCheck):
         return self._resolved_hostname
 
     @property
-    def database_identifier(self):
-        # type: () -> str
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
-            # Copy self.tag_manager._tags and map values to single values instead of lists
-            tag_dict = {}
-            tags = self.tag_manager.get_tags()
-            # sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            tag_dict['resolved_hostname'] = self.resolved_hostname
-            tag_dict['host'] = str(self.host)
-            tag_dict['port'] = str(self.port) if self.port is not None else None
-            database = self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
-            if database is not None:
-                tag_dict['database'] = database
-            if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
-                tag_dict['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
-            if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
-                tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
-            if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
-                tag_dict['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
-            if self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME) is not None:
-                tag_dict['full_server_name'] = self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.get('template') or '$resolved_hostname'
+
+    @property
+    def database_identifier_params(self) -> dict:
+        params = {
+            'resolved_hostname': self.resolved_hostname,
+            'host': str(self.host),
+            'port': str(self.port) if self.port is not None else None,
+        }
+        database = self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
+        if database is not None:
+            params['database'] = database
+        if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
+            params['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
+        if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
+            params['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
+        if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
+            params['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
+        if self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME) is not None:
+            params['full_server_name'] = self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME)
+        return params
 
     @property
     def database_hostname(self):
@@ -496,13 +497,6 @@ class SQLServer(DatabaseCheck):
             "hostname": self.reported_hostname,
             "raw": True,
         }
-
-    @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
 
     @property
     def connection(self):
@@ -713,15 +707,19 @@ class SQLServer(DatabaseCheck):
         self.instance_metrics = metrics_to_collect
         self.log.debug("metrics to collect %s", metrics_to_collect)
 
-        # create an organized grouping of metric names to their metric classes
+        # create an organized grouping of metric names to their metric classes. Build it up locally and swap it in
+        # at the end so a rebuild drops names that are no longer collected without ever leaving this mapping out of
+        # sync with `instance_metrics`.
+        per_type_metrics = defaultdict(set)
         for m in metrics_to_collect:
             cls = m.__class__.__name__
             name = m.sql_name or m.column
             self.log.debug("Adding metric class %s named %s", cls, name)
 
-            self.instance_per_type_metrics[cls].add(name)
+            per_type_metrics[cls].add(name)
             if m.base_name:
-                self.instance_per_type_metrics[cls].add(m.base_name)
+                per_type_metrics[cls].add(m.base_name)
+        self.instance_per_type_metrics = per_type_metrics
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
@@ -795,6 +793,10 @@ class SQLServer(DatabaseCheck):
                         )
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
+            else:
+                # Counters that need no base counter can be cached right away. Base-requiring counters are only
+                # cached once their base is resolved, so a transient lookup failure is retried instead of pinned.
+                self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
 
         return sql_counter_type, base_name
 
@@ -918,6 +920,9 @@ class SQLServer(DatabaseCheck):
                     except Exception as e:
                         self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
 
+            if self._config.data_observability.enabled:
+                self.data_observability.run_job_loop(self.tag_manager.get_tags())
+
         else:
             self.log.debug("Skipping check")
 
@@ -998,31 +1003,7 @@ class SQLServer(DatabaseCheck):
         if self.autodiscover_databases(cursor) or not self.instance_metrics:
             self._make_metric_list_to_collect(self._config.custom_metrics)
 
-        instance_results = {}
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
-        # Execute the `fetch_all` operations first to minimize the database calls
-        for cls, metric_names in self.instance_per_type_metrics.items():
-            if not metric_names:
-                instance_results[cls] = None, None
-            else:
-                try:
-                    db_names = [d.name for d in self.databases] or [
-                        self.instance.get("database", self.connection.DEFAULT_DATABASE)
-                    ]
-                    metric_cls = getattr(metrics, cls)
-                    with tracked_query(self, operation=metric_cls.OPERATION_NAME):
-                        rows, cols = metric_cls.fetch_all_values(
-                            cursor,
-                            list(metric_names),
-                            self.log,
-                            databases=db_names,
-                            engine_edition=engine_edition,
-                        )
-                except Exception as e:
-                    self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
-                    rows, cols = None, None
-
-                instance_results[cls] = rows, cols
+        instance_results = self._fetch_instance_results(cursor)
 
         for metric in self.instance_metrics:
             key = metric.__class__.__name__
@@ -1035,6 +1016,56 @@ class SQLServer(DatabaseCheck):
                         metric.fetch_metric(rows, cols, self.sqlserver_incr_fraction_metric_previous_values)
                     else:
                         metric.fetch_metric(rows, cols)
+
+    def _fetch_instance_results(self, cursor: Any) -> dict[str, MetricFetchResult]:
+        """Run the `fetch_all` of every metric class in use, keyed by class name.
+
+        Executing them up front keeps the number of database calls down, and the performance counter classes
+        share one call between them because they all read the same snapshot of a table that is expensive to
+        scan however few rows are wanted from it.
+        """
+        instance_results = {}
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+        perf_counter_classes = []
+        perf_counter_names = set()
+
+        for cls, metric_names in self.instance_per_type_metrics.items():
+            if not metric_names:
+                instance_results[cls] = None, None
+            elif issubclass(getattr(metrics, cls), metrics.SqlPerfCounterMetric):
+                perf_counter_classes.append(cls)
+                perf_counter_names.update(metric_names)
+            else:
+                instance_results[cls] = self._fetch_all_values(cursor, cls, metric_names, engine_edition)
+
+        if perf_counter_classes:
+            perf_counter_results = self._fetch_all_values(
+                cursor, metrics.SqlPerfCounterMetric.__name__, perf_counter_names, engine_edition
+            )
+            for cls in perf_counter_classes:
+                instance_results[cls] = perf_counter_results
+
+        return instance_results
+
+    def _fetch_all_values(
+        self, cursor: Any, cls: str, metric_names: Iterable[str], engine_edition: str
+    ) -> MetricFetchResult:
+        try:
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get("database", self.connection.DEFAULT_DATABASE)
+            ]
+            metric_cls = getattr(metrics, cls)
+            with tracked_query(self, operation=metric_cls.OPERATION_NAME):
+                return metric_cls.fetch_all_values(
+                    cursor,
+                    list(metric_names),
+                    self.log,
+                    databases=db_names,
+                    engine_edition=engine_edition,
+                )
+        except Exception as e:
+            self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
+            return None, None
 
     def collect_metrics(self):
         """Fetch the metrics from all the associated database tables."""
@@ -1085,39 +1116,38 @@ class SQLServer(DatabaseCheck):
         guardSql = self.instance.get("proc_only_if")
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
-            self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
-            cursor = self.connection.get_cursor(self.connection.DEFAULT_DB_KEY)
+            with self.connection.open_managed_default_connection(KEY_PREFIX):
+                with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+                    try:
+                        self.log.debug("Calling Stored Procedure : %s", proc)
+                        if self.connection.connector == "adodbapi":
+                            cursor.callproc(proc)
+                        else:
+                            # pyodbc does not support callproc; use execute instead.
+                            # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
+                            call_proc = "{{CALL {}}}".format(proc)
+                            cursor.execute(call_proc)
 
-            try:
-                self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.connector == "adodbapi":
-                    cursor.callproc(proc)
-                else:
-                    # pyodbc does not support callproc; use execute instead.
-                    # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
-                    call_proc = "{{CALL {}}}".format(proc)
-                    cursor.execute(call_proc)
+                        rows = cursor.fetchall()
+                        self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
 
-                rows = cursor.fetchall()
-                self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
+                        for row in rows:
+                            tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
+                            tags.extend(self.tag_manager.get_tags())
 
-                for row in rows:
-                    tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
-                    tags.extend(self.tag_manager.get_tags())
+                            if row.type.lower() in self.proc_type_mapping:
+                                self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
+                            else:
+                                self.log.warning(
+                                    "%s is not a recognised type from procedure %s, metric %s",
+                                    row.type,
+                                    proc,
+                                    row.metric,
+                                )
 
-                    if row.type.lower() in self.proc_type_mapping:
-                        self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
-                    else:
-                        self.log.warning(
-                            "%s is not a recognised type from procedure %s, metric %s", row.type, proc, row.metric
-                        )
-
-            except Exception as e:
-                self.log.warning("Could not call procedure %s: %s", proc, e)
-                raise e
-
-            self.connection.close_cursor(cursor)
-            self.connection.close_db_connections(self.connection.DEFAULT_DB_KEY)
+                    except Exception as e:
+                        self.log.warning("Could not call procedure %s: %s", proc, e)
+                        raise
         else:
             self.log.info("Skipping call to %s due to only_if", proc)
 
@@ -1126,19 +1156,17 @@ class SQLServer(DatabaseCheck):
         check to see if the guard SQL returns a single column containing 0 or 1
         We return true if 1, else False
         """
-        self.connection.open_db_connections(self.connection.PROC_GUARD_DB_KEY)
-        cursor = self.connection.get_cursor(self.connection.PROC_GUARD_DB_KEY)
-
         should_run = False
-        try:
-            cursor.execute(sql, ())
-            result = cursor.fetchone()
-            should_run = result[0] == 1
-        except Exception as e:
-            self.log.error("Failed to run proc_only_if sql %s : %s", sql, e)
-
-        self.connection.close_cursor(cursor)
-        self.connection.close_db_connections(self.connection.PROC_GUARD_DB_KEY)
+        with self.connection._open_managed_db_connections(self.connection.PROC_GUARD_DB_KEY):
+            with self.connection.get_managed_cursor(
+                key_prefix=None, db_key=self.connection.PROC_GUARD_DB_KEY
+            ) as cursor:
+                try:
+                    cursor.execute(sql, ())
+                    result = cursor.fetchone()
+                    should_run = result[0] == 1
+                except Exception as e:
+                    self.log.error("Failed to run proc_only_if sql %s : %s", sql, e)
         return should_run
 
     def _send_database_instance_metadata(self):
@@ -1149,7 +1177,7 @@ class SQLServer(DatabaseCheck):
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "sqlserver",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 "dbms_version": self.dbms_version,

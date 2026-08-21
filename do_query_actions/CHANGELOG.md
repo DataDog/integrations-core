@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 1.1.0 / 2026-04-15
+## 1.2.0 / 2026-08-05
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 1.1.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 

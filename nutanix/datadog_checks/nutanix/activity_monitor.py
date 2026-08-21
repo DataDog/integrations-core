@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
 
 
+SEVERITY_TO_ALERT_TYPE = {"CRITICAL": "error", "WARNING": "warning", "INFO": "info"}
+
+
 class _SafeDict(dict):
     """Dict that returns missing keys as template placeholders for safe string formatting."""
 
@@ -31,32 +34,27 @@ class ActivityMonitor:
         self.last_event_collection_time = self.check.read_persistent_cache("last_event_collection_time")
         self.last_task_collection_time = self.check.read_persistent_cache("last_task_collection_time")
         self.last_audit_collection_time = self.check.read_persistent_cache("last_audit_collection_time")
-        self.last_alert_collection_time = self.check.read_persistent_cache("last_alert_collection_time")
         # In-memory caches: id -> raw item (reset each check run)
         self.events: dict[str, dict] = {}
         self.audits: dict[str, dict] = {}
-        self.alerts: dict[str, dict] = {}
         self.tasks: dict[str, dict] = {}
         # Entity counters
         self.events_count = 0
         self.tasks_count = 0
         self.audits_count = 0
         self.alerts_count = 0
-        # Read boolean flag from cache (stored as string)
-        cached_value = self.check.read_persistent_cache("alerts_v42_supported")
-        if cached_value == "True":
-            self.alerts_v42_supported = True
-        elif cached_value == "False":
-            self.alerts_v42_supported = False
-        else:
-            self.alerts_v42_supported = None
+
+        # extId -> last-seen alert dict; reconciled each cycle against the unresolved-alerts API.
+        self._open_alerts: dict[str, dict] = {}
+        # Per-cycle dedup for _get_alert; reset each run so it doesn't grow unbounded.
+        self._alert_fetch_cache: dict[str, dict] = {}
 
     def reset_state(self) -> None:
         """Reset in-memory caches and counters for a new collection run."""
         self.events = {}
         self.audits = {}
-        self.alerts = {}
         self.tasks = {}
+        self._alert_fetch_cache = {}
         self.events_count = 0
         self.tasks_count = 0
         self.audits_count = 0
@@ -193,16 +191,130 @@ class ActivityMonitor:
         )
 
     def collect_alerts(self) -> None:
-        self.alerts_count = self._safe_collect(
-            "alert",
-            lambda: self._collect(
-                activity_kind="alert",
-                list_fn=self._list_alerts,
-                process_fn=self._process_alert,
-                time_field="creationTime",
-                cache_key="last_alert_collection_time",
-            ),
-        )
+        self.alerts_count = self._safe_collect("alert", self._reconcile_alerts)
+
+    @staticmethod
+    def _alert_state(alert: dict) -> str:
+        return "acknowledged" if alert.get("isAcknowledged") else "open"
+
+    def _submit_state_metric(self, alert: dict, state: str, value: int) -> None:
+        """Submit nutanix.alert.<state>=<value> (state encoded in metric name, not tag)."""
+        self.check.gauge(f"alert.{state}", value, tags=self._build_alert_tags(alert))
+
+    def _reconcile_alerts(self) -> int:
+        """Reconcile open alerts against the unresolved-alerts API and emit per-state metrics.
+
+        Returns the number of alerts currently tracked as open, so the check summary reflects
+        active tracking rather than just this cycle's state changes (which are 0 on quiet cycles).
+        """
+        try:
+            alerts = self._list_alerts_unresolved()
+        except Exception:
+            self.check.log.warning(
+                "[%s] Failed to list unresolved alerts; re-emitting cached gauges for %d tracked alerts.",
+                self._pc_label,
+                len(self._open_alerts),
+            )
+            self._reemit_cached_gauges()
+            raise
+
+        # Capture all unresolved ids before applying resource_filters so we can distinguish
+        # alerts that truly left the unresolved set (deleted/resolved upstream) from alerts
+        # that are still open in Prism Central but no longer match the configured filters.
+        unfiltered_ids = frozenset(a.get("extId") for a in alerts if a.get("extId"))
+
+        alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
+        api_alerts = {a.get("extId"): a for a in alerts if a.get("extId")}
+
+        # Pre-compute set diffs before mutating _open_alerts so loop ordering is safe.
+        new_ids = api_alerts.keys() - self._open_alerts.keys()
+        gone_ids = frozenset(self._open_alerts.keys() - unfiltered_ids)
+        filter_excluded_ids = frozenset(self._open_alerts.keys() - api_alerts.keys() - gone_ids)
+        still_tracked = api_alerts.keys() & self._open_alerts.keys()
+
+        self._track_new_alerts(new_ids, api_alerts)
+        self._emit_resolved_alerts(gone_ids)
+        self._drop_filter_excluded(filter_excluded_ids)
+        transitioned = self._emit_alert_transitions(still_tracked, api_alerts)
+        self._emit_heartbeats_and_gauges(transitioned)
+        return len(self._open_alerts)
+
+    def _drop_filter_excluded(self, filter_excluded_ids: frozenset[str]) -> None:
+        """Stop tracking alerts that are still open in Prism Central but no longer match
+        the configured resource_filters. No resolution event or metric is emitted: the
+        alert is not resolved, it's just no longer in scope for this integration. Per-alert
+        monitors auto-recover naturally once heartbeats stop landing.
+        """
+        for ext_id in filter_excluded_ids:
+            self._open_alerts.pop(ext_id, None)
+            self.check.log.info(
+                "[%s] Alert %s no longer matches resource_filters; dropping from tracking "
+                "without emitting a resolution event.",
+                self._pc_label,
+                ext_id,
+            )
+
+    def _reemit_cached_gauges(self) -> None:
+        """Keep per-alert monitors firing while the unresolved-alerts API is unavailable."""
+        for alert in self._open_alerts.values():
+            self._submit_state_metric(alert, self._alert_state(alert), 1)
+
+    def _track_new_alerts(self, new_ids: set[str], api_alerts: dict[str, dict]) -> int:
+        for ext_id in new_ids:
+            self._open_alerts[ext_id] = api_alerts[ext_id]
+        return len(new_ids)
+
+    def _emit_resolved_alerts(self, gone_ids: frozenset[str]) -> int:
+        emitted = 0
+        for ext_id in gone_ids:
+            cached = self._open_alerts.pop(ext_id)
+            # GET-by-id is required: the cached payload only has the open-state alert, but
+            # the resolution event needs resolvedTime / resolvedByUsername / isAutoResolved
+            # which only exist on the post-resolution payload.
+            try:
+                resolved = self._get_alert(ext_id)
+            except HTTPError:
+                # Transient HTTP failure (already logged in _get_alert). Restore tracking
+                # so we retry on the next cycle rather than misclassifying as deleted.
+                self._open_alerts[ext_id] = cached
+                continue
+            if resolved is None:
+                # The alert is gone from the unresolved list AND the GET-by-id returned 404:
+                # the alert was deleted in Prism Central, not resolved. We still emit a
+                # resolution event from cached metadata, but it carries no resolvedBy /
+                # resolvedTime / isAutoResolved, so operators will see a bare "Resolved".
+                self.check.log.info(
+                    "[%s] Alert %s no longer accessible from Prism Central (deleted); "
+                    "emitting resolution event from cached metadata.",
+                    self._pc_label,
+                    ext_id,
+                )
+            self._emit_resolution_event(resolved or cached, cached_tags_alert=cached)
+            emitted += 1
+        return emitted
+
+    def _emit_alert_transitions(self, still_tracked: set[str], api_alerts: dict[str, dict]) -> set[str]:
+        transitioned: set[str] = set()
+        for ext_id in still_tracked:
+            old_alert = self._open_alerts[ext_id]
+            new_alert = api_alerts[ext_id]
+            old_state = self._alert_state(old_alert)
+            new_state = self._alert_state(new_alert)
+            if old_state != new_state:
+                self._submit_state_metric(old_alert, old_state, 0)
+                self._emit_transition_event(new_alert, old_state, new_state)
+                transitioned.add(ext_id)
+            self._open_alerts[ext_id] = new_alert
+        return transitioned
+
+    def _emit_heartbeats_and_gauges(self, transitioned: set[str]) -> None:
+        # Heartbeat each tracked alert every cycle so event-based monitors don't auto-resolve
+        # when the rollup window lapses. Transition cycles skip the heartbeat because the
+        # transition event has already landed under the same aggregation_key.
+        for ext_id, alert in self._open_alerts.items():
+            if ext_id not in transitioned:
+                self._process_alert(alert)
+            self._submit_state_metric(alert, self._alert_state(alert), 1)
 
     def _list_activity(self, endpoint: str, time_field: str, start_time_str: str) -> list[dict]:
         """Fetch activity items from Prism Central."""
@@ -212,76 +324,43 @@ class ActivityMonitor:
         }
         return self.check._get_paginated_request_data(endpoint, params=params)
 
-    def _list_alerts(self, start_time_str: str) -> list[dict]:
-        """Fetch alerts from Prism Central with v4.2/v4.0 fallback."""
+    def _list_alerts_unresolved(self) -> list[dict]:
+        """Fetch all currently-unresolved alerts (the source of truth each cycle)."""
         params = {
-            "$filter": f"creationTime gt {start_time_str}",
-            "$orderBy": "creationTime asc",
+            "$filter": "isResolved eq false",
+            "$orderBy": "lastUpdatedTime asc",
         }
-
-        if self.alerts_v42_supported is False:
-            self.check.log.debug("[%s] Using alerts API v4.0 (v4.2 not supported)", self._pc_label)
-            del params["$filter"]
-            return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
-
-        try:
-            self.check.log.debug("[%s] Attempting to use alerts API v4.2", self._pc_label)
-            result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
-            if self.alerts_v42_supported is None:
-                self.check.log.debug(
-                    "[%s] Alerts API v4.2 is supported, caching for future use",
-                    self._pc_label,
-                )
-                self.alerts_v42_supported = True
-                self.check.write_persistent_cache("alerts_v42_supported", "True")
-            return result
-        except HTTPError as e:
-            if e.response is not None and e.response.status_code == 404:
-                self.check.log.debug(
-                    "[%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
-                    self._pc_label,
-                )
-                self.alerts_v42_supported = False
-                self.check.write_persistent_cache("alerts_v42_supported", "False")
-                del params["$filter"]
-                return self.check._get_paginated_request_data(
-                    "api/monitoring/v4.0/serviceability/alerts", params=params
-                )
-            raise
+        alerts = self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
+        # Safety net: warn loudly if the server returns resolved alerts despite our $filter.
+        filtered = [a for a in alerts if not a.get("isResolved")]
+        if len(filtered) != len(alerts):
+            self.check.log.warning(
+                "[%s] Server returned %d resolved alerts under $filter=isResolved eq false; verify Prism Central API.",
+                self._pc_label,
+                len(alerts) - len(filtered),
+            )
+        return filtered
 
     def _get_alert(self, alert_ext_id: str) -> dict | None:
-        """Get an alert by ID, from cache or fetched from the API."""
-        if alert := self.alerts.get(alert_ext_id):
-            return alert
+        """Fetch an alert detail by ID, deduplicated within a single check run.
 
-        endpoint = "api/monitoring/v4.0/serviceability/alerts"
-        if self.alerts_v42_supported is True:
-            endpoint = "api/monitoring/v4.2/serviceability/alerts"
-
-        self.check.log.debug(
-            "[%s] Alert %s not in cache, fetching from API",
-            self._pc_label,
-            alert_ext_id,
-        )
+        Returns None only when Prism Central confirms the alert no longer exists (HTTP 404).
+        Transient failures (5xx, network, JSON decode) propagate so the caller does not
+        misclassify them as deletions and emit degraded resolution events.
+        """
+        if cached := self._alert_fetch_cache.get(alert_ext_id):
+            return cached
         try:
-            alert = self.check._get_request_data(f"{endpoint}/{alert_ext_id}")
-            if alert:
-                self.alerts[alert_ext_id] = alert
-                self.check.log.debug(
-                    "[%s] Fetched alert %s: %s",
-                    self._pc_label,
-                    alert_ext_id,
-                    alert.get("title", ""),
-                )
-            return alert
-        except Exception as e:
-            self.check.log.debug(
-                "[%s] Failed to fetch alert %s: %s",
-                self._pc_label,
-                alert_ext_id,
-                e,
-            )
-            return None
+            alert = self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
+        except HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                self.check.log.debug("[%s] Alert %s not found (404).", self._pc_label, alert_ext_id)
+                return None
+            self.check.log.warning("[%s] Transient HTTP error fetching alert %s: %s", self._pc_label, alert_ext_id, e)
+            raise
+        if alert:
+            self._alert_fetch_cache[alert_ext_id] = alert
+        return alert
 
     def _process_event(self, event: dict) -> None:
         """Process and send a single event to Datadog."""
@@ -417,56 +496,139 @@ class ActivityMonitor:
             self.check.log.debug("Failed to render alert message template: %s", e)
             return message
 
+    def _build_alert_tags(self, alert: dict, status: str | None = None) -> list[str]:
+        """Build the alert tag set; pass status only for events (metrics encode state in the name)."""
+        tags = self.check.base_tags.copy()
+        if ext_id := alert.get("extId"):
+            tags.append(f"ntnx_alert_ext_id:{ext_id}")
+        if alert_type := alert.get("alertType"):
+            tags.append(f"ntnx_alert_type:{alert_type}")
+        if severity := alert.get("severity"):
+            tags.append(f"ntnx_alert_severity:{severity}")
+        if (user_defined := alert.get("isUserDefined")) is not None:
+            tags.append(f"ntnx_alert_user_defined:{str(user_defined).lower()}")
+        if service_name := alert.get("serviceName"):
+            tags.append(f"ntnx_alert_service:{service_name}")
+
+        self._add_cluster_name_tag(tags, alert.get("clusterUUID"))
+        self._add_cluster_name_tag(tags, alert.get("originatingClusterUUID"), tag_name="ntnx_originating_cluster_name")
+
+        for classification in alert.get("classifications", []) or []:
+            tags.append(f"ntnx_alert_classification:{classification}")
+        for impact in alert.get("impactTypes", []) or []:
+            tags.append(f"ntnx_alert_impact:{impact}")
+
+        self._add_source_entity_tags(tags, alert)
+
+        tags.append("ntnx_type:alert")
+        if status is not None:
+            tags.append(f"ntnx_alert_status:{status}")
+        return tags
+
     def _process_alert(self, alert: dict) -> None:
         """Process and send a single alert to Datadog."""
+        ext_id = alert.get("extId", "")
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
-        created_time = alert.get("creationTime")
-        severity = alert.get("severity")
-        alert_type = alert.get("alertType")
+        is_acknowledged = alert.get("isAcknowledged", False)
 
-        # Render template variables in title and message from parameters
         if parameters := alert.get("parameters"):
             title = self._render_message(title, parameters)
             message = self._render_message(message, parameters)
 
-        # map severity to alert_type
-        severity_map = {
-            "CRITICAL": "error",
-            "WARNING": "warning",
-            "INFO": "info",
-        }
-        event_alert_type = severity_map.get(severity, "info")
-
-        alert_tags = self.check.base_tags.copy()
-        if alert_type:
-            alert_tags.append(f"ntnx_alert_type:{alert_type}")
-        if severity:
-            alert_tags.append(f"ntnx_alert_severity:{severity}")
-
-        self._add_cluster_name_tag(alert_tags, alert.get("clusterUUID"))
-
-        for classification in alert.get("classifications", []) or []:
-            alert_tags.append(f"ntnx_alert_classification:{classification}")
-
-        for impact in alert.get("impactTypes", []) or []:
-            alert_tags.append(f"ntnx_alert_impact:{impact}")
-
-        self._add_source_entity_tags(alert_tags, alert)
-
-        alert_tags.append("ntnx_type:alert")
+        # Acknowledged alerts soften to "warning" regardless of severity (operator already triaging).
+        event_alert_type = "warning" if is_acknowledged else SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+        alert_tags = self._build_alert_tags(alert, "acknowledged" if is_acknowledged else "open")
 
         self.check.event(
             {
-                "timestamp": self._parse_timestamp(created_time)
-                if created_time
-                else get_timestamp(get_current_datetime()),
+                # Stamp at observation time, not creationTime: this event feeds the monitor's
+                # trailing rollup window, so back-dating would auto-recover it while still open.
+                "timestamp": get_timestamp(get_current_datetime()),
                 "event_type": self.check.__NAMESPACE__,
                 "msg_title": f"Alert: {title}",
                 "msg_text": message,
                 "alert_type": event_alert_type,
                 "source_type_name": self.check.__NAMESPACE__,
                 "tags": alert_tags,
+                "aggregation_key": f"nutanix-alert-{ext_id}",
+            }
+        )
+
+    def _emit_resolution_event(self, alert: dict, cached_tags_alert: dict | None = None) -> None:
+        """Emit resolution event, close prev-state gauge, and register a one-shot resolution count."""
+        ext_id = alert.get("extId", "")
+        title = alert.get("title", "Nutanix Alert")
+        resolved_time = alert.get("resolvedTime")
+        resolved_by = alert.get("resolvedByUsername")
+        is_auto_resolved = alert.get("isAutoResolved", False)
+
+        if parameters := alert.get("parameters"):
+            title = self._render_message(title, parameters)
+
+        msg_text = "Auto-resolved" if is_auto_resolved else f"Resolved by {resolved_by}" if resolved_by else "Resolved"
+
+        prev_alert = cached_tags_alert or alert
+        prev_state = self._alert_state(prev_alert)
+        metric_tags = self._build_alert_tags(prev_alert)
+        event_tags = [
+            *metric_tags,
+            "ntnx_alert_status:resolved",
+            f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}",
+        ]
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(resolved_time)
+                if resolved_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Alert Resolved: {title}",
+                "msg_text": msg_text,
+                "alert_type": "success",
+                "source_type_name": self.check.__NAMESPACE__,
+                "aggregation_key": f"nutanix-alert-{ext_id}",
+                "tags": event_tags,
+            }
+        )
+
+        self.check.gauge(f"alert.{prev_state}", 0, tags=metric_tags)
+        # count, not gauge: alerts can transition resolved -> open with the same extId,
+        # and a gauge would stay at 1 indefinitely, falsely indicating "resolved" after reopen.
+        self.check.count("alert.resolved", 1, tags=metric_tags)
+
+    def _emit_transition_event(self, alert: dict, old_state: str, new_state: str) -> None:
+        """Emit an event when a tracked alert's state changes (open <-> acknowledged)."""
+        ext_id = alert.get("extId", "")
+        title = alert.get("title", "Nutanix Alert")
+        if parameters := alert.get("parameters"):
+            title = self._render_message(title, parameters)
+
+        if new_state == "acknowledged":
+            prefix = "Alert acknowledged"
+            who = alert.get("acknowledgedByUsername")
+            msg_text = f"Acknowledged by {who}" if who else "Acknowledged"
+            event_alert_type = "warning"
+            timestamp_field = alert.get("acknowledgedTime")
+        else:  # acknowledged -> open
+            prefix = "Alert reopened"
+            msg_text = "Alert is no longer acknowledged"
+            event_alert_type = SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+            # Nutanix has no dedicated "reopenedTime" field; lastUpdatedTime is the closest signal.
+            timestamp_field = alert.get("lastUpdatedTime")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(timestamp_field)
+                if timestamp_field
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"{prefix}: {title}",
+                "msg_text": msg_text,
+                "alert_type": event_alert_type,
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": self._build_alert_tags(alert, new_state),
+                "aggregation_key": f"nutanix-alert-{ext_id}",
             }
         )
 
@@ -505,9 +667,14 @@ class ActivityMonitor:
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
 
-            # Enrich with rendered alert title when the entity is an alert
+            # Enrich with rendered alert title when the entity is an alert. Best-effort:
+            # a transient failure here must not abort the whole task collection cycle.
             if entity_type == "monitoring:serviceability:alert":
-                if alert := self._get_alert(entity.get("extId", "")):
+                try:
+                    alert = self._get_alert(entity.get("extId", ""))
+                except HTTPError:
+                    alert = None
+                if alert:
                     title = alert.get("title", "")
                     if parameters := alert.get("parameters"):
                         title = self._render_message(title, parameters)
@@ -556,14 +723,20 @@ class ActivityMonitor:
                 if entity_name := source_entity.get("name"):
                     tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
-    def _add_cluster_name_tag(self, tags: list[str], cluster_id: str | None, fallback_name: str | None = None) -> None:
-        """Add cluster name tag from ID lookup, with optional fallback."""
+    def _add_cluster_name_tag(
+        self,
+        tags: list[str],
+        cluster_id: str | None,
+        fallback_name: str | None = None,
+        tag_name: str = "ntnx_cluster_name",
+    ) -> None:
+        """Add a cluster name tag from ID lookup, with optional fallback."""
         if not cluster_id:
             return
         if cluster_id in self.check.cluster_names:
-            tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+            tags.append(f"{tag_name}:{self.check.cluster_names[cluster_id]}")
         elif fallback_name:
-            tags.append(f"ntnx_cluster_name:{fallback_name}")
+            tags.append(f"{tag_name}:{fallback_name}")
 
     def _cluster_resource(self, cluster_id: str) -> tuple[str, dict]:
         """Build a cluster resource tuple from a cluster ID."""

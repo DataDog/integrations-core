@@ -4,7 +4,6 @@
 import click
 from datadog_checks.dev.tooling.commands.validate.agent_reqs import agent_reqs
 from datadog_checks.dev.tooling.commands.validate.agent_signature import legacy_signature
-from datadog_checks.dev.tooling.commands.validate.codeowners import codeowners
 from datadog_checks.dev.tooling.commands.validate.config import config
 from datadog_checks.dev.tooling.commands.validate.dashboards import dashboards
 from datadog_checks.dev.tooling.commands.validate.dep import dep
@@ -21,12 +20,14 @@ from datadog_checks.dev.tooling.commands.validate.typos import typos
 
 from ddev.cli.validate.all import all
 from ddev.cli.validate.ci import ci
+from ddev.cli.validate.codeowners import codeowners
 from ddev.cli.validate.http import http
 from ddev.cli.validate.jmx_metrics import jmx_metrics
 from ddev.cli.validate.labeler import labeler
 from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.metadata import metadata
 from ddev.cli.validate.openmetrics import openmetrics
+from ddev.cli.validate.qa_label import qa_label
 from ddev.cli.validate.version import version
 
 
@@ -57,6 +58,7 @@ validate.add_command(metadata)
 validate.add_command(models)
 validate.add_command(openmetrics)
 validate.add_command(package)
+validate.add_command(qa_label)
 validate.add_command(readmes)
 validate.add_command(saved_views)
 validate.add_command(service_checks)

@@ -1,2 +1,729 @@
 schema-version: v1
 carryforward: true
+gates:
+- type: total_coverage_percentage
+  config:
+    threshold: 75
+    services:
+    - '*'
+    - '!couchbase'
+    - '!datadog_checks_base'
+    - '!datadog_checks_dev'
+    - '!fluentd'
+    - '!foundationdb'
+    - '!gearmand'
+    - '!glusterfs'
+    - '!hdfs_namenode'
+    - '!ibm_i'
+    - '!istio'
+    - '!kafka_actions'
+    - '!mapr'
+    - '!mapreduce'
+    - '!openstack'
+    - '!silverstripe_cms'
+    - '!snmp'
+    - '!varnish'
+# New custom gates for services whose thresholds had to be lowered when migrating to Datadog Code Coverage.
+- type: total_coverage_percentage
+  config:
+    threshold: 74
+    services:
+    - couchbase
+- type: total_coverage_percentage
+  config:
+    threshold: 73
+    services:
+    - foundationdb
+    - varnish
+- type: total_coverage_percentage
+  config:
+    threshold: 72
+    services:
+    - datadog_checks_base
+- type: total_coverage_percentage
+  config:
+    threshold: 71
+    services:
+    - fluentd
+    - hdfs_namenode
+    - mapr
+- type: total_coverage_percentage
+  config:
+    threshold: 70
+    services:
+    - glusterfs
+    - istio
+- type: total_coverage_percentage
+  config:
+    threshold: 69
+    services:
+    - mapreduce
+- type: total_coverage_percentage
+  config:
+    threshold: 67
+    services:
+    - ibm_i
+    - silverstripe_cms
+- type: total_coverage_percentage
+  config:
+    threshold: 61
+    services:
+    - gearmand
+- type: total_coverage_percentage
+  config:
+    threshold: 58
+    services:
+    - kafka_actions
+- type: total_coverage_percentage
+  config:
+    threshold: 52
+    services:
+    - datadog_checks_dev
+# Existing custom gates.
+- type: total_coverage_percentage
+  config:
+    threshold: 45
+    services:
+    - openstack
+- type: total_coverage_percentage
+  config:
+    threshold: 30
+    services:
+    - snmp
+services:
+- id: active_directory
+  paths:
+  - active_directory/datadog_checks/active_directory/
+- id: activemq_xml
+  paths:
+  - activemq_xml/datadog_checks/activemq_xml/
+- id: aerospike
+  paths:
+  - aerospike/datadog_checks/aerospike/
+- id: airflow
+  paths:
+  - airflow/datadog_checks/airflow/
+- id: amazon_msk
+  paths:
+  - amazon_msk/datadog_checks/amazon_msk/
+- id: ambari
+  paths:
+  - ambari/datadog_checks/ambari/
+- id: apache
+  paths:
+  - apache/datadog_checks/apache/
+- id: appgate_sdp
+  paths:
+  - appgate_sdp/datadog_checks/appgate_sdp/
+- id: arangodb
+  paths:
+  - arangodb/datadog_checks/arangodb/
+- id: argo_rollouts
+  paths:
+  - argo_rollouts/datadog_checks/argo_rollouts/
+- id: argo_workflows
+  paths:
+  - argo_workflows/datadog_checks/argo_workflows/
+- id: argocd
+  paths:
+  - argocd/datadog_checks/argocd/
+- id: aspdotnet
+  paths:
+  - aspdotnet/datadog_checks/aspdotnet/
+- id: avi_vantage
+  paths:
+  - avi_vantage/datadog_checks/avi_vantage/
+- id: aws_neuron
+  paths:
+  - aws_neuron/datadog_checks/aws_neuron/
+- id: azure_iot_edge
+  paths:
+  - azure_iot_edge/datadog_checks/azure_iot_edge/
+- id: bentoml
+  paths:
+  - bentoml/datadog_checks/bentoml/
+- id: boundary
+  paths:
+  - boundary/datadog_checks/boundary/
+- id: btrfs
+  paths:
+  - btrfs/datadog_checks/btrfs/
+- id: cacti
+  paths:
+  - cacti/datadog_checks/cacti/
+- id: calico
+  paths:
+  - calico/datadog_checks/calico/
+- id: cassandra_nodetool
+  paths:
+  - cassandra_nodetool/datadog_checks/cassandra_nodetool/
+- id: celery
+  paths:
+  - celery/datadog_checks/celery/
+- id: ceph
+  paths:
+  - ceph/datadog_checks/ceph/
+- id: cert_manager
+  paths:
+  - cert_manager/datadog_checks/cert_manager/
+- id: checkpoint_harmony_endpoint
+  paths:
+  - checkpoint_harmony_endpoint/datadog_checks/checkpoint_harmony_endpoint/
+- id: cilium
+  paths:
+  - cilium/datadog_checks/cilium/
+- id: cisco_aci
+  paths:
+  - cisco_aci/datadog_checks/cisco_aci/
+- id: citrix_hypervisor
+  paths:
+  - citrix_hypervisor/datadog_checks/citrix_hypervisor/
+- id: clickhouse
+  paths:
+  - clickhouse/datadog_checks/clickhouse/
+- id: cloud_foundry_api
+  paths:
+  - cloud_foundry_api/datadog_checks/cloud_foundry_api/
+- id: cloudera
+  paths:
+  - cloudera/datadog_checks/cloudera/
+- id: cockroachdb
+  paths:
+  - cockroachdb/datadog_checks/cockroachdb/
+- id: consul
+  paths:
+  - consul/datadog_checks/consul/
+- id: control_m
+  paths:
+  - control_m/datadog_checks/control_m/
+- id: coredns
+  paths:
+  - coredns/datadog_checks/coredns/
+- id: couch
+  paths:
+  - couch/datadog_checks/couch/
+- id: couchbase
+  paths:
+  - couchbase/datadog_checks/couchbase/
+- id: crio
+  paths:
+  - crio/datadog_checks/crio/
+- id: datadog_checks_base
+  paths:
+  - datadog_checks_base/datadog_checks/base/
+- id: datadog_checks_dev
+  paths:
+  - datadog_checks_dev/datadog_checks/dev/
+- id: datadog_checks_downloader
+  paths:
+  - datadog_checks_downloader/datadog_checks/downloader/
+- id: datadog_cluster_agent
+  paths:
+  - datadog_cluster_agent/datadog_checks/datadog_cluster_agent/
+- id: dcgm
+  paths:
+  - dcgm/datadog_checks/dcgm/
+- id: ddev
+  paths:
+  - ddev/src/ddev/
+- id: dell_powerflex
+  paths:
+  - dell_powerflex/datadog_checks/dell_powerflex/
+- id: directory
+  paths:
+  - directory/datadog_checks/directory/
+- id: disk
+  paths:
+  - disk/datadog_checks/disk/
+- id: dns_check
+  paths:
+  - dns_check/datadog_checks/dns_check/
+- id: do_query_actions
+  paths:
+  - do_query_actions/datadog_checks/do_query_actions/
+- id: dotnetclr
+  paths:
+  - dotnetclr/datadog_checks/dotnetclr/
+- id: druid
+  paths:
+  - druid/datadog_checks/druid/
+- id: duckdb
+  paths:
+  - duckdb/datadog_checks/duckdb/
+- id: ecs_fargate
+  paths:
+  - ecs_fargate/datadog_checks/ecs_fargate/
+- id: eks_fargate
+  paths:
+  - eks_fargate/datadog_checks/eks_fargate/
+- id: elastic
+  paths:
+  - elastic/datadog_checks/elastic/
+- id: envoy
+  paths:
+  - envoy/datadog_checks/envoy/
+- id: esxi
+  paths:
+  - esxi/datadog_checks/esxi/
+- id: etcd
+  paths:
+  - etcd/datadog_checks/etcd/
+- id: exchange_server
+  paths:
+  - exchange_server/datadog_checks/exchange_server/
+- id: external_dns
+  paths:
+  - external_dns/datadog_checks/external_dns/
+- id: falco
+  paths:
+  - falco/datadog_checks/falco/
+- id: flink
+  paths:
+  - flink/datadog_checks/flink/
+- id: fluentd
+  paths:
+  - fluentd/datadog_checks/fluentd/
+- id: fluxcd
+  paths:
+  - fluxcd/datadog_checks/fluxcd/
+- id: fly_io
+  paths:
+  - fly_io/datadog_checks/fly_io/
+- id: foundationdb
+  paths:
+  - foundationdb/datadog_checks/foundationdb/
+- id: gearmand
+  paths:
+  - gearmand/datadog_checks/gearmand/
+- id: gitlab
+  paths:
+  - gitlab/datadog_checks/gitlab/
+- id: gitlab_runner
+  paths:
+  - gitlab_runner/datadog_checks/gitlab_runner/
+- id: glusterfs
+  paths:
+  - glusterfs/datadog_checks/glusterfs/
+- id: go_expvar
+  paths:
+  - go_expvar/datadog_checks/go_expvar/
+- id: guarddog
+  paths:
+  - guarddog/datadog_checks/guarddog/
+- id: gunicorn
+  paths:
+  - gunicorn/datadog_checks/gunicorn/
+- id: haproxy
+  paths:
+  - haproxy/datadog_checks/haproxy/
+- id: harbor
+  paths:
+  - harbor/datadog_checks/harbor/
+- id: hazelcast
+  paths:
+  - hazelcast/datadog_checks/hazelcast/
+- id: hdfs_datanode
+  paths:
+  - hdfs_datanode/datadog_checks/hdfs_datanode/
+- id: hdfs_namenode
+  paths:
+  - hdfs_namenode/datadog_checks/hdfs_namenode/
+- id: hpe_aruba_edgeconnect
+  paths:
+  - hpe_aruba_edgeconnect/datadog_checks/hpe_aruba_edgeconnect/
+- id: http_check
+  paths:
+  - http_check/datadog_checks/http_check/
+- id: hugging_face_tgi
+  paths:
+  - hugging_face_tgi/datadog_checks/hugging_face_tgi/
+- id: ibm_ace
+  paths:
+  - ibm_ace/datadog_checks/ibm_ace/
+- id: ibm_db2
+  paths:
+  - ibm_db2/datadog_checks/ibm_db2/
+- id: ibm_i
+  paths:
+  - ibm_i/datadog_checks/ibm_i/
+- id: ibm_mq
+  paths:
+  - ibm_mq/datadog_checks/ibm_mq/
+- id: ibm_spectrum_lsf
+  paths:
+  - ibm_spectrum_lsf/datadog_checks/ibm_spectrum_lsf/
+- id: ibm_was
+  paths:
+  - ibm_was/datadog_checks/ibm_was/
+- id: iis
+  paths:
+  - iis/datadog_checks/iis/
+- id: impala
+  paths:
+  - impala/datadog_checks/impala/
+- id: infiniband
+  paths:
+  - infiniband/datadog_checks/infiniband/
+- id: istio
+  paths:
+  - istio/datadog_checks/istio/
+- id: kafka_actions
+  paths:
+  - kafka_actions/datadog_checks/kafka_actions/
+- id: kafka_consumer
+  paths:
+  - kafka_consumer/datadog_checks/kafka_consumer/
+- id: karpenter
+  paths:
+  - karpenter/datadog_checks/karpenter/
+- id: keda
+  paths:
+  - keda/datadog_checks/keda/
+- id: kong
+  paths:
+  - kong/datadog_checks/kong/
+- id: krakend
+  paths:
+  - krakend/datadog_checks/krakend/
+- id: kube_apiserver_metrics
+  paths:
+  - kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/
+- id: kube_controller_manager
+  paths:
+  - kube_controller_manager/datadog_checks/kube_controller_manager/
+- id: kube_dns
+  paths:
+  - kube_dns/datadog_checks/kube_dns/
+- id: kube_metrics_server
+  paths:
+  - kube_metrics_server/datadog_checks/kube_metrics_server/
+- id: kube_proxy
+  paths:
+  - kube_proxy/datadog_checks/kube_proxy/
+- id: kube_scheduler
+  paths:
+  - kube_scheduler/datadog_checks/kube_scheduler/
+- id: kubeflow
+  paths:
+  - kubeflow/datadog_checks/kubeflow/
+- id: kubelet
+  paths:
+  - kubelet/datadog_checks/kubelet/
+- id: kubernetes_cluster_autoscaler
+  paths:
+  - kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler/
+- id: kubernetes_state
+  paths:
+  - kubernetes_state/datadog_checks/kubernetes_state/
+- id: kubevirt_api
+  paths:
+  - kubevirt_api/datadog_checks/kubevirt_api/
+- id: kubevirt_controller
+  paths:
+  - kubevirt_controller/datadog_checks/kubevirt_controller/
+- id: kubevirt_handler
+  paths:
+  - kubevirt_handler/datadog_checks/kubevirt_handler/
+- id: kueue
+  paths:
+  - kueue/datadog_checks/kueue/
+- id: kuma
+  paths:
+  - kuma/datadog_checks/kuma/
+- id: kyototycoon
+  paths:
+  - kyototycoon/datadog_checks/kyototycoon/
+- id: kyverno
+  paths:
+  - kyverno/datadog_checks/kyverno/
+- id: lighttpd
+  paths:
+  - lighttpd/datadog_checks/lighttpd/
+- id: linkerd
+  paths:
+  - linkerd/datadog_checks/linkerd/
+- id: linux_proc_extras
+  paths:
+  - linux_proc_extras/datadog_checks/linux_proc_extras/
+- id: litellm
+  paths:
+  - litellm/datadog_checks/litellm/
+- id: lparstats
+  paths:
+  - lparstats/datadog_checks/lparstats/
+- id: lustre
+  paths:
+  - lustre/datadog_checks/lustre/
+- id: mac_audit_logs
+  paths:
+  - mac_audit_logs/datadog_checks/mac_audit_logs/
+- id: mapr
+  paths:
+  - mapr/datadog_checks/mapr/
+- id: mapreduce
+  paths:
+  - mapreduce/datadog_checks/mapreduce/
+- id: marathon
+  paths:
+  - marathon/datadog_checks/marathon/
+- id: marklogic
+  paths:
+  - marklogic/datadog_checks/marklogic/
+- id: mcache
+  paths:
+  - mcache/datadog_checks/mcache/
+- id: mesos_master
+  paths:
+  - mesos_master/datadog_checks/mesos_master/
+- id: mesos_slave
+  paths:
+  - mesos_slave/datadog_checks/mesos_slave/
+- id: milvus
+  paths:
+  - milvus/datadog_checks/milvus/
+- id: mongo
+  paths:
+  - mongo/datadog_checks/mongo/
+- id: mysql
+  paths:
+  - mysql/datadog_checks/mysql/
+- id: n8n
+  paths:
+  - n8n/datadog_checks/n8n/
+- id: nagios
+  paths:
+  - nagios/datadog_checks/nagios/
+- id: network
+  paths:
+  - network/datadog_checks/network/
+- id: nfsstat
+  paths:
+  - nfsstat/datadog_checks/nfsstat/
+- id: nginx
+  paths:
+  - nginx/datadog_checks/nginx/
+- id: nginx_ingress_controller
+  paths:
+  - nginx_ingress_controller/datadog_checks/nginx_ingress_controller/
+- id: nifi
+  paths:
+  - nifi/datadog_checks/nifi/
+- id: nutanix
+  paths:
+  - nutanix/datadog_checks/nutanix/
+- id: nvidia_nim
+  paths:
+  - nvidia_nim/datadog_checks/nvidia_nim/
+- id: nvidia_triton
+  paths:
+  - nvidia_triton/datadog_checks/nvidia_triton/
+- id: octopus_deploy
+  paths:
+  - octopus_deploy/datadog_checks/octopus_deploy/
+- id: openldap
+  paths:
+  - openldap/datadog_checks/openldap/
+- id: openmetrics
+  paths:
+  - openmetrics/datadog_checks/openmetrics/
+- id: openstack
+  paths:
+  - openstack/datadog_checks/openstack/
+- id: openstack_controller
+  paths:
+  - openstack_controller/datadog_checks/openstack_controller/
+- id: pdh_check
+  paths:
+  - pdh_check/datadog_checks/pdh_check/
+- id: pgbouncer
+  paths:
+  - pgbouncer/datadog_checks/pgbouncer/
+- id: php_fpm
+  paths:
+  - php_fpm/datadog_checks/php_fpm/
+- id: postfix
+  paths:
+  - postfix/datadog_checks/postfix/
+- id: postgres
+  paths:
+  - postgres/datadog_checks/postgres/
+- id: powerdns_recursor
+  paths:
+  - powerdns_recursor/datadog_checks/powerdns_recursor/
+- id: prefect
+  paths:
+  - prefect/datadog_checks/prefect/
+- id: process
+  paths:
+  - process/datadog_checks/process/
+- id: prometheus
+  paths:
+  - prometheus/datadog_checks/prometheus/
+- id: proxmox
+  paths:
+  - proxmox/datadog_checks/proxmox/
+- id: proxysql
+  paths:
+  - proxysql/datadog_checks/proxysql/
+- id: pulsar
+  paths:
+  - pulsar/datadog_checks/pulsar/
+- id: quarkus
+  paths:
+  - quarkus/datadog_checks/quarkus/
+- id: rabbitmq
+  paths:
+  - rabbitmq/datadog_checks/rabbitmq/
+- id: ray
+  paths:
+  - ray/datadog_checks/ray/
+- id: redisdb
+  paths:
+  - redisdb/datadog_checks/redisdb/
+- id: rethinkdb
+  paths:
+  - rethinkdb/datadog_checks/rethinkdb/
+- id: riak
+  paths:
+  - riak/datadog_checks/riak/
+- id: riakcs
+  paths:
+  - riakcs/datadog_checks/riakcs/
+- id: sap_hana
+  paths:
+  - sap_hana/datadog_checks/sap_hana/
+- id: scylla
+  paths:
+  - scylla/datadog_checks/scylla/
+- id: silk
+  paths:
+  - silk/datadog_checks/silk/
+- id: silverstripe_cms
+  paths:
+  - silverstripe_cms/datadog_checks/silverstripe_cms/
+- id: singlestore
+  paths:
+  - singlestore/datadog_checks/singlestore/
+- id: slurm
+  paths:
+  - slurm/datadog_checks/slurm/
+- id: snmp
+  paths:
+  - snmp/datadog_checks/snmp/
+- id: sonarqube
+  paths:
+  - sonarqube/datadog_checks/sonarqube/
+- id: sonatype_nexus
+  paths:
+  - sonatype_nexus/datadog_checks/sonatype_nexus/
+- id: spark
+  paths:
+  - spark/datadog_checks/spark/
+- id: sqlserver
+  paths:
+  - sqlserver/datadog_checks/sqlserver/
+- id: squid
+  paths:
+  - squid/datadog_checks/squid/
+- id: ssh_check
+  paths:
+  - ssh_check/datadog_checks/ssh_check/
+- id: statsd
+  paths:
+  - statsd/datadog_checks/statsd/
+- id: strimzi
+  paths:
+  - strimzi/datadog_checks/strimzi/
+- id: supabase
+  paths:
+  - supabase/datadog_checks/supabase/
+- id: supervisord
+  paths:
+  - supervisord/datadog_checks/supervisord/
+- id: system_core
+  paths:
+  - system_core/datadog_checks/system_core/
+- id: system_swap
+  paths:
+  - system_swap/datadog_checks/system_swap/
+- id: tcp_check
+  paths:
+  - tcp_check/datadog_checks/tcp_check/
+- id: teamcity
+  paths:
+  - teamcity/datadog_checks/teamcity/
+- id: tekton
+  paths:
+  - tekton/datadog_checks/tekton/
+- id: teleport
+  paths:
+  - teleport/datadog_checks/teleport/
+- id: temporal
+  paths:
+  - temporal/datadog_checks/temporal/
+- id: teradata
+  paths:
+  - teradata/datadog_checks/teradata/
+- id: tibco_ems
+  paths:
+  - tibco_ems/datadog_checks/tibco_ems/
+- id: tls
+  paths:
+  - tls/datadog_checks/tls/
+- id: torchserve
+  paths:
+  - torchserve/datadog_checks/torchserve/
+- id: traefik_mesh
+  paths:
+  - traefik_mesh/datadog_checks/traefik_mesh/
+- id: traffic_server
+  paths:
+  - traffic_server/datadog_checks/traffic_server/
+- id: twemproxy
+  paths:
+  - twemproxy/datadog_checks/twemproxy/
+- id: twistlock
+  paths:
+  - twistlock/datadog_checks/twistlock/
+- id: varnish
+  paths:
+  - varnish/datadog_checks/varnish/
+- id: vault
+  paths:
+  - vault/datadog_checks/vault/
+- id: velero
+  paths:
+  - velero/datadog_checks/velero/
+- id: vertica
+  paths:
+  - vertica/datadog_checks/vertica/
+- id: vllm
+  paths:
+  - vllm/datadog_checks/vllm/
+- id: voltdb
+  paths:
+  - voltdb/datadog_checks/voltdb/
+- id: vsphere
+  paths:
+  - vsphere/datadog_checks/vsphere/
+- id: weaviate
+  paths:
+  - weaviate/datadog_checks/weaviate/
+- id: win32_event_log
+  paths:
+  - win32_event_log/datadog_checks/win32_event_log/
+- id: windows_performance_counters
+  paths:
+  - windows_performance_counters/datadog_checks/windows_performance_counters/
+- id: windows_service
+  paths:
+  - windows_service/datadog_checks/windows_service/
+- id: wmi_check
+  paths:
+  - wmi_check/datadog_checks/wmi_check/
+- id: yarn
+  paths:
+  - yarn/datadog_checks/yarn/
+- id: zk
+  paths:
+  - zk/datadog_checks/zk/

@@ -68,6 +68,7 @@ files:
           - https://localhost:10259/metrics
           - http://%%host%%:10251/metrics
           - http://localhost:10251/metrics
+      fleet_configurable: false
     - name: prometheus_url
       required: false
       description: |
@@ -76,6 +77,7 @@ files:
       value:
         example: http://%%host%%:10251/metrics
         type: string
+      fleet_configurable: false
     - name: bearer_token_auth
       required: false
       description: |
@@ -87,12 +89,14 @@ files:
         anyOf:
         - type: boolean
         - type: string
+      fleet_configurable: false
     - name: bearer_token_path
       description: Used to specify the path where the service account token is located.
       value:
         type: string
         require_trusted_provider: true
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
+      fleet_configurable: false
     - name: ssl_verify
       description: Used to verify self signed certificates.
       enabled: true
@@ -100,3 +104,4 @@ files:
         type: boolean
         example: false
         display_default: true
+      fleet_configurable: false

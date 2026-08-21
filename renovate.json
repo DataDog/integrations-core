@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": true,
   "enabledManagers": [
     "github-actions",
     "custom.regex"
@@ -7,19 +8,41 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        "^\\.github/workflows/[^/]+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/^\\.github/workflows/[^/]+\\.ya?ml$/"
       ],
       "matchStrings": [
         "(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)==(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})",
         "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)\\s+[A-Z][A-Z0-9_]*: \"(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})\""
       ],
       "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "description": "Track annotated version pins in the builder images.",
+      "managerFilePatterns": [
+        "/^\\.builders/images/.+/Dockerfile$/",
+        "/^\\.builders/images/.+/builder_setup\\.sh$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-zA-Z][a-zA-Z0-9._/-]*)\\s+(?:ENV )?[A-Z][A-Z0-9_]*=\"(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})\""
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Track image:tag@digest references in Dockerfiles.",
+      "managerFilePatterns": [
+        "/^\\.gitlab/tagger/Dockerfile$/"
+      ],
+      "matchStrings": [
+        "(?:COPY --from=|FROM )(?<depName>[^\\s:@]+):(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
     {
-      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation.",
+      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation. matchFileNames must stay broad enough to cover every composite action: the manager discovers all action.yml files regardless of this rule, so any path it omits yields ungrouped, unlabelled PRs.",
       "matchManagers": [
         "github-actions"
       ],
@@ -28,7 +51,7 @@
       ],
       "matchFileNames": [
         ".github/workflows/**",
-        ".github/actions/tag-job/**"
+        ".github/actions/**"
       ],
       "matchPackageNames": [
         "!dtolnay/rust-toolchain"
@@ -108,6 +131,9 @@
       "matchManagers": [
         "custom.regex"
       ],
+      "matchFileNames": [
+        ".github/workflows/**"
+      ],
       "groupName": "workflow python deps",
       "schedule": [
         "before 6am on Monday"
@@ -117,6 +143,42 @@
         "qa/skip-qa"
       ],
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchFileNames": [
+        ".builders/**"
+      ],
+      "groupName": "build dependencies",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/build-deps",
+        "qa/skip-qa"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Neither ghcr.io nor registry.ddbuild.io return release timestamps, and Renovate treats a missing timestamp as never having aged. Without timestamp-optional these updates sit with a permanently pending renovate/stability-days check.",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDatasources": [
+        "docker"
+      ],
+      "groupName": "docker images",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/docker-images",
+        "qa/skip-qa"
+      ],
+      "minimumReleaseAge": "7 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
     }
   ]
 }

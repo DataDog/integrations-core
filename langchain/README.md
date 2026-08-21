@@ -46,7 +46,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the `ddtrace` package if it isn't installed yet:
@@ -124,7 +124,7 @@ This will display any errors related to data transmission or instrumentation, in
                  -p 127.0.0.1:8125:8125/udp \
                  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
                  -e DD_APM_ENABLED=true \
-                 gcr.io/datadoghq/agent:latest
+                 registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Python library.

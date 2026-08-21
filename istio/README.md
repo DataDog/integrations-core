@@ -69,7 +69,10 @@ instances:
 Customize this file with any additional configurations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 ##### Control plane configuration
-To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio v1.5 or later, apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:
+To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, configure the Agent to monitor the `istiod` deployment with one of the following Autodiscovery options:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 ad.datadoghq.com/discovery.checks: |
@@ -84,11 +87,60 @@ ad.datadoghq.com/discovery.checks: |
     }
   }
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the `istiod` Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istiod
+  config:
+    checks:
+      - integration: istio
+        containerName: discovery
+        initConfig: {}
+        instances:
+          - istiod_endpoint: "http://%%host%%:15014/metrics"
+            use_openmetrics: "true"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][33].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 **Note**: The Autodiscovery Annotations v2 syntax is supported for Agent v7.36+.
 
 This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
-The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
+When using annotations, the method for applying them varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method. See the [sample istio.d/conf.yaml][8] for all available configuration options.
+
+##### Ambient mode configuration
+
+Istio ambient mode, generally available in Istio v1.24, replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance. The check scrapes each endpoint that is set. Adjust the URLs in the example below to match your cluster's hostnames and ports.
+
+Example static configuration in `istio.d/conf.yaml` covering all three components:
+
+```yaml
+init_config:
+
+instances:
+  - istio_mode: ambient
+    use_openmetrics: true
+    ztunnel_endpoint: http://ztunnel.istio-system.svc:15020/stats/prometheus
+    waypoint_endpoint: http://waypoint.<NAMESPACE>.svc:15020/stats/prometheus
+    istiod_endpoint: http://istiod.istio-system.svc:15014/metrics
+```
+
+Replace `<NAMESPACE>` with the namespace where you ran `istioctl waypoint apply`. Omit `waypoint_endpoint` if you have not deployed a waypoint proxy. The same options can be set via the Autodiscovery annotation syntax shown in the [Control plane configuration](#control-plane-configuration) section above.
 
 #### Disable sidecar injection for Datadog Agent pods
 
@@ -291,3 +343,4 @@ Additional helpful documentation, links, and articles:
 [30]: https://docs.datadoghq.com/security/application_security/?source=istio-tile-overview
 [31]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=istio-tile-setup
 [32]: https://www.datadoghq.com/blog/app-api-protection-envoy-istio-nginx-haproxy/
+[33]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

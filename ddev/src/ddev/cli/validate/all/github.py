@@ -8,7 +8,9 @@ import json
 import os
 from typing import TYPE_CHECKING
 
-from ddev.utils.fs import Path
+from pydantic import ValidationError
+
+from ddev.utils.github_actions import PullRequestEvent
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -20,17 +22,9 @@ COMMENT_HEADING = "## Validation Report"
 def parse_pr_number_from_event(event_path: str) -> int | None:
     """Extract the PR number from the GitHub Actions event JSON file."""
     try:
-        event = json.loads(Path(event_path).read_text())
-    except (json.JSONDecodeError, OSError):
+        return PullRequestEvent.load(event_path).pr_number
+    except (OSError, json.JSONDecodeError, ValueError, ValidationError):
         return None
-
-    pr = event.get("pull_request")
-    if isinstance(pr, dict):
-        number = pr.get("number")
-        if isinstance(number, int):
-            return number
-
-    return None
 
 
 def parse_pr_number_from_ref(ref: str) -> int | None:
@@ -57,22 +51,6 @@ def get_pr_number(app: Application) -> int | None:
 
     app.display_warning("Running in pull_request context but could not determine PR number")
     return None
-
-
-def get_workflow_run_url() -> str | None:
-    server = os.environ.get("GITHUB_SERVER_URL")
-    repo = os.environ.get("GITHUB_REPOSITORY")
-    run_id = os.environ.get("GITHUB_RUN_ID")
-    if server and repo and run_id:
-        return f"{server}/{repo}/actions/runs/{run_id}"
-    return None
-
-
-def write_step_summary(content: str) -> None:
-    if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
-        with contextlib.suppress(OSError):
-            with open(summary_path, "a", encoding="utf-8") as f:
-                f.write(content + "\n")
 
 
 def _build_preamble(error: str | None, warning: str | None) -> list[str]:

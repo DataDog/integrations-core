@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     '-a',
     'agent_build',
     help=(
-        'The Agent build to use e.g. a Docker image like `datadog/agent:latest`. You can '
+        'The Agent build to use e.g. a Docker image like `registry.datadoghq.com/agent:latest`. You can '
         'also use the name of an Agent defined in the `agents` configuration section.'
     ),
 )

@@ -13,6 +13,7 @@ import pytest
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
+from datadog_checks.mysql.util import supports_explain_json_format_version
 from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
@@ -516,15 +517,39 @@ def test_database_identifier(template, expected, tags):
     assert check.database_identifier == expected
 
 
-def test__eliminate_duplicate_rows():
-    rows = [
-        {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
-        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
-    ]
-    second_pass = {1: {'event_timer_start': 2001}}
-    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == [
-        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
-    ]
+@pytest.mark.parametrize(
+    'rows,second_pass,expected',
+    [
+        pytest.param(
+            [
+                {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+                {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+            ],
+            {1: {'event_timer_start': 2001}},
+            [{'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'}],
+            id='drops_statement_that_ended_before_the_newest_one_started',
+        ),
+        pytest.param(
+            [
+                {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+                {'thread_id': 1, 'event_timer_start': 2001, 'sql_text': 'SELECT 1'},
+            ],
+            {1: {'event_timer_start': 2001}},
+            [{'thread_id': 1, 'event_timer_start': 2001, 'sql_text': 'SELECT 1'}],
+            id='keeps_row_missing_event_timer_end',
+        ),
+        pytest.param(
+            [{'thread_id': 2, 'sql_text': 'SELECT 2'}],
+            {2: {'event_timer_start': None}},
+            [{'thread_id': 2, 'sql_text': 'SELECT 2'}],
+            id='keeps_row_with_no_timers_at_all',
+        ),
+    ],
+)
+def test__eliminate_duplicate_rows(rows, second_pass, expected):
+    # `_sanitize_row` drops keys whose value is NULL before rows reach `_eliminate_duplicate_rows`,
+    # so rows produced by an instrument with `TIMED = NO` arrive without any event timer at all
+    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == expected
 
 
 @pytest.mark.parametrize(
@@ -704,6 +729,20 @@ def test_collect_replication_metrics_returns_vars_when_has_replicas_connected():
     assert results.get('Replicas_connected') == 2
 
 
+def test_get_replica_stats_tags_each_mariadb_connection():
+    """Each MariaDB Connection_name maps to its own channel tag in _get_replica_stats."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    mysql_check._config.replication_enabled = True
+    mysql_check._get_replica_replication_status = mock.MagicMock(
+        return_value=[
+            {'Connection_name': 'conn_a', 'Seconds_Behind_Master': 1},
+            {'Connection_name': 'conn_b', 'Seconds_Behind_Master': 2},
+        ]
+    )
+    results = mysql_check._get_replica_stats(mock.MagicMock())
+    assert results['Seconds_Behind_Master'] == {'channel:conn_a': 1, 'channel:conn_b': 2}
+
+
 def test_source_with_zero_replicas_emits_warning_service_check(aggregator, instance_basic):
     """Test that a source with 0 connected replicas emits WARNING for replica-loss detection."""
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
@@ -777,10 +816,28 @@ class TestShowReplicaStatusQuery:
                 'my-channel',
                 'SHOW REPLICA STATUS',
                 (),
-                id='mariadb_ignores_channel',
+                id='mariadb_modern_with_channel',
             ),
             pytest.param(
-                '10.4.0-MariaDB', 'MariaDB', True, '', 'SHOW SLAVE STATUS', (), id='mariadb_legacy_no_channel'
+                '10.5.1-MariaDB',
+                'MariaDB',
+                True,
+                '',
+                'SHOW ALL REPLICAS STATUS',
+                (),
+                id='mariadb_modern_no_channel',
+            ),
+            pytest.param(
+                '10.4.0-MariaDB', 'MariaDB', True, '', 'SHOW ALL SLAVES STATUS', (), id='mariadb_legacy_no_channel'
+            ),
+            pytest.param(
+                '10.4.0-MariaDB',
+                'MariaDB',
+                True,
+                'my-channel',
+                'SHOW SLAVE STATUS',
+                (),
+                id='mariadb_legacy_with_channel',
             ),
         ],
     )
@@ -878,3 +935,31 @@ class TestReplicaReplicationStatusParameterized:
         for call in mock_cursor.execute.call_args_list:
             query_str = call[0][0]
             assert channel not in query_str
+
+
+class TestSupportsExplainJsonFormatVersion:
+    """The explain_json_format_version variable only exists on MySQL/Percona 8.3.0 and above."""
+
+    @pytest.mark.parametrize(
+        'raw_version,version_comment,expected',
+        [
+            pytest.param('5.7.30', 'MySQL Community Server', False, id='mysql_5_7'),
+            pytest.param('8.0.36', 'MySQL Community Server', False, id='mysql_8_0'),
+            pytest.param('8.2.0', 'MySQL Community Server', False, id='mysql_8_2'),
+            pytest.param('8.3.0', 'MySQL Community Server', True, id='mysql_8_3'),
+            pytest.param('8.4.0', 'MySQL Community Server', True, id='mysql_8_4'),
+            pytest.param('9.7.2', 'MySQL Community Server', True, id='mysql_9_7'),
+            pytest.param('8.0.42', 'Percona Server (GPL)', False, id='percona_8_0'),
+            pytest.param('8.4.0', 'Percona Server (GPL)', True, id='percona_8_4'),
+            # MariaDB never has the variable, even though its version numbers sort above 8.3.0
+            pytest.param('10.11.0-MariaDB', 'MariaDB', False, id='mariadb_10_11'),
+            pytest.param('11.4.0-MariaDB', 'MariaDB', False, id='mariadb_11_4'),
+        ],
+    )
+    def test_supported_versions(self, raw_version, version_comment, expected):
+        version = parse_version(raw_version, version_comment)
+        assert supports_explain_json_format_version(version) is expected
+
+    def test_unknown_version(self):
+        """The variable cannot be set safely before the server version has been detected."""
+        assert supports_explain_json_format_version(None) is False

@@ -256,6 +256,7 @@ files:
             example: true
             display_default: true
             type: boolean
+          fleet_configurable: false
         - name: collect_network_metrics
           legacy: true
           fleet_configurable: true
@@ -274,6 +275,7 @@ files:
             example: true
             display_default: true
             type: boolean
+          fleet_configurable: false
         - name: collect_server_diagnostic_metrics
           legacy: true
           fleet_configurable: true
@@ -294,6 +296,7 @@ files:
             example: false
             display_default: false
             type: boolean
+          fleet_configurable: false
         - name: endpoint_interface
           fleet_configurable: true
           description: |

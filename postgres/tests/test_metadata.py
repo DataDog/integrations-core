@@ -43,8 +43,17 @@ def test_collect_extensions(integration_check, dbm_instance, aggregator):
     assert event['dbms'] == "postgres"
     assert event['kind'] == "pg_extension"
     assert len(event["metadata"]) > 0
-    assert set(event["metadata"][0].keys()) == {'id', 'name', 'owner', 'relocatable', 'schema_name', 'version'}
+    assert set(event["metadata"][0].keys()) == {
+        'id',
+        'name',
+        'owner',
+        'relocatable',
+        'schema_name',
+        'version',
+        'logical_database',
+    }
     assert type(event["metadata"][0]["id"]) is str
+    assert all(row['logical_database'] == dbm_instance['dbname'] for row in event['metadata'])
     assert next((k for k in event['metadata'] if k['name'].startswith('plpgsql')), None) is not None
 
 
@@ -183,6 +192,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
                     assert table['name']
                     assert table['owner']
+                    assert 'relkind' in table
+                    assert table['relkind'] in ('r', 'p', 'f')
 
                     # make some assertions on fields
                     if table['name'] == "persons":

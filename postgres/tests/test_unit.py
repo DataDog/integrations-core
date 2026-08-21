@@ -13,6 +13,8 @@ from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql, util
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
+from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 
 pytestmark = pytest.mark.unit
 
@@ -388,15 +390,20 @@ def test_close_db_noop_when_no_connection(integration_check, pg_instance):
     assert check._db is None
 
 
-def test_cancel_closes_main_db_connection(integration_check, pg_instance):
+def test_cancel_releases_check_resources(integration_check, pg_instance):
+    """cancel() runs shutdown(), which releases everything the check holds for its lifetime."""
     check = integration_check(pg_instance)
     conn = mock.MagicMock()
     check._db = conn
 
-    check.cancel()
+    with mock.patch.object(check.db_pool, 'close_all', wraps=check.db_pool.close_all) as close_all:
+        check.cancel()
 
     conn.close.assert_called_once()
+    close_all.assert_called_once()
     assert check._db is None
+    assert check._query_manager is None
+    assert check.health is None
 
 
 def test_check_gc_after_cancel(pg_instance):
@@ -408,8 +415,8 @@ def test_check_gc_after_cancel(pg_instance):
     1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
     2. Find which attribute on that object points back to the check (usually
        ``self.check`` or ``self._check``).
-    3. Null that attribute in ``cancel()`` or add it to the relevant
-       ``_shutdown()`` method.
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
     4. If the referrer is a closure or ``functools.partial``, find the
        registration site and null or clear the container that holds it.
     """
@@ -443,78 +450,57 @@ def test_check_gc_after_cancel(pg_instance):
         gc.enable()
 
 
-def test_cancel_during_running_check_defers_finalize(pg_instance):
-    """Verify that cancel() during an in-flight check() does not close connections.
-
-    Destructive cleanup (_finalize) must be deferred until run() completes so
-    that check() never accesses a closed psycopg connection, which would cause
-    a SIGSEGV in libpq.
-    """
-    import threading
+@pytest.mark.parametrize(
+    'dbm, data_observability_enabled, expected_jobs',
+    [
+        (False, False, []),
+        (True, False, ['query-metrics', 'query-samples', 'database-metadata']),
+        (False, True, ['database-metadata', 'data-observability']),
+        (True, True, ['query-metrics', 'query-samples', 'database-metadata', 'data-observability']),
+    ],
+)
+def test_async_job_registry_matches_config(pg_instance, dbm, data_observability_enabled, expected_jobs):
+    """Only the jobs enabled by the instance config are built and registered."""
+    pg_instance['dbm'] = dbm
+    pg_instance['data_observability'] = {'enabled': data_observability_enabled}
 
     check = PostgreSql('postgres', {}, [pg_instance])
-    conn = mock.MagicMock()
-    check._db = conn
 
-    check_started = threading.Event()
-    cancel_done = threading.Event()
-
-    def slow_run(self_arg):
-        check_started.set()
-        cancel_done.wait(timeout=5)
-        return ''
-
-    run_result = [None]
-
-    def run_check():
-        with mock.patch.object(type(check).__mro__[1], 'run', slow_run):
-            run_result[0] = check.run()
-
-    run_thread = threading.Thread(target=run_check)
-    run_thread.start()
-
-    check_started.wait(timeout=5)
-
-    check.cancel()
-    # cancel() should have signaled but NOT finalized since run() is in-flight
-    assert not conn.close.called, "_close_db() ran while check() was still executing"
-    assert check._cancelled is True
-
-    cancel_done.set()
-    run_thread.join(timeout=5)
-
-    # After run() completes, _finalize() should have been called
-    conn.close.assert_called_once()
-    assert check._db is None
-    assert check._query_manager is None
-    assert check.health is None
+    registered = check._async_job_registry
+    assert list(registered) == expected_jobs
+    # Each attribute holds the registered job, or None when the config does not enable it.
+    assert check.statement_metrics is registered.get('query-metrics')
+    assert check.statement_samples is registered.get('query-samples')
+    assert check.metadata_samples is registered.get('database-metadata')
+    assert check.data_observability is registered.get('data-observability')
 
 
-def test_cancel_on_idle_check_finalizes_immediately(pg_instance):
-    """Verify that cancel() on an idle check runs _finalize() inline."""
+def test_initialize_statement_metrics_replaces_registered_job(pg_instance):
+    """The incremental collector replaces the placeholder registered before the version was known."""
+    pg_instance['dbm'] = True
+    pg_instance['query_metrics'] = {'enabled': True, 'incremental_query_metrics': True}
+
     check = PostgreSql('postgres', {}, [pg_instance])
-    conn = mock.MagicMock()
-    check._db = conn
+    assert isinstance(check._async_job_registry['query-metrics'], PostgresStatementMetrics)
 
-    assert not check._is_running
+    check.version = VersionInfo(14, 0, 0)
+    check._initialize_statement_metrics()
 
-    check.cancel()
-
-    conn.close.assert_called_once()
-    assert check._db is None
-    assert check._query_manager is None
-    assert check.health is None
+    assert isinstance(check.statement_metrics, PostgresStatementMetricsV2)
+    assert check._async_job_registry['query-metrics'] is check.statement_metrics
+    assert list(check._async_job_registry) == ['query-metrics', 'query-samples', 'database-metadata']
 
 
-def test_run_after_cancel_returns_immediately(pg_instance):
-    """Verify that run() returns '' without executing check() if already cancelled."""
+def test_initialize_statement_metrics_noop_without_dbm(pg_instance):
+    """Without DBM there is no query metrics job to build."""
+    pg_instance['dbm'] = False
+
     check = PostgreSql('postgres', {}, [pg_instance])
-    check.cancel()
+    check.version = VersionInfo(14, 0, 0)
+    check._initialize_statement_metrics()
 
-    with mock.patch.object(check, 'check', side_effect=AssertionError("check() should not be called")):
-        result = check.run()
-
-    assert result == ''
+    assert check.statement_metrics is None
+    assert check._async_job_registry == {}
 
 
 def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):

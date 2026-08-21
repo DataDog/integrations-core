@@ -9,15 +9,13 @@ from ddev.cli.validate.all.github import (
     format_pr_comment,
     format_step_summary,
     get_pr_number,
-    get_workflow_run_url,
     parse_pr_number_from_event,
     parse_pr_number_from_ref,
-    write_step_summary,
 )
 from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
 
 CONFIGS = {
-    "ci": ValidationConfig(description="Validate CI configuration and Codecov settings", repo_wide=True),
+    "ci": ValidationConfig(description="Validate CI configuration and code coverage settings", repo_wide=True),
     "config": ValidationConfig(description="Validate default configuration files against spec.yaml"),
     "metadata": ValidationConfig(description="Validate metadata.csv metric definitions"),
 }
@@ -30,6 +28,7 @@ CONFIGS = {
     [
         pytest.param('{"pull_request": {"number": 42}}', 42, id="happy-path"),
         pytest.param("{bad json}", None, id="malformed-json"),
+        pytest.param("[]", None, id="not-an-object"),
         pytest.param("{}", None, id="missing-pr-key"),
         pytest.param('{"pull_request": "bad"}', None, id="pr-not-dict"),
         pytest.param('{"pull_request": {}}', None, id="missing-number"),
@@ -134,7 +133,7 @@ def test_format_pr_comment_all_passed(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
         | `config` | Validate default configuration files against spec.yaml | ✅ |
 
         </details>""")
@@ -160,7 +159,7 @@ def test_format_pr_comment_one_failure_with_target(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
 
         </details>""")
     assert format_pr_comment(results, CONFIGS, "changed", list(results)) == expected
@@ -266,7 +265,7 @@ def test_format_step_summary_all_passed(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
         | `config` | Validate default configuration files against spec.yaml | ✅ |""")
     assert format_step_summary(results, CONFIGS, "changed", list(results)) == expected
 
@@ -281,7 +280,7 @@ def test_format_step_summary_with_failures(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
         | `config` | Validate default configuration files against spec.yaml | ❌ |
 
         Run `ddev validate all changed --fix` to attempt to auto-fix supported validations.""")
@@ -313,41 +312,3 @@ def test_format_step_summary_with_error_and_warning(helpers):
 
         Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
     assert format_step_summary(results, CONFIGS, None, list(results), error="boom", warning="no PR") == expected
-
-
-# --- get_workflow_run_url ---
-
-
-def test_get_workflow_run_url_returns_url():
-    assert get_workflow_run_url() == "https://github.com/DataDog/integrations-core/actions/runs/12345"
-
-
-def test_get_workflow_run_url_returns_none_when_env_missing(monkeypatch):
-    monkeypatch.delenv("GITHUB_RUN_ID")
-    assert get_workflow_run_url() is None
-
-
-# --- write_step_summary ---
-
-
-def test_write_step_summary_writes_to_file(tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
-    write_step_summary("## Report\nAll good")
-    assert summary_file.read_text() == "## Report\nAll good\n"
-
-
-def test_write_step_summary_appends(tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    summary_file.write_text("existing\n")
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
-    write_step_summary("new content")
-    assert "existing\n" in summary_file.read_text()
-    assert "new content\n" in summary_file.read_text()
-
-
-def test_write_step_summary_noop_without_env(monkeypatch):
-    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
-    write_step_summary("should not error")
