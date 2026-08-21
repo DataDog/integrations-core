@@ -13,15 +13,18 @@ def generated_instances(service: Service) -> list[dict]:
     return [config['instances'][0] for config in Vault.generate_configs(service)]
 
 
-def test_generates_one_candidate_per_scheme_and_mode() -> None:
+def test_generates_one_candidate_per_scheme() -> None:
     # Only `no_token=True` candidates are generated. A candidate without `no_token` and without a
     # configured `client_token`/`client_token_path` never attempts a metrics scrape at all (see
-    # `VaultCheckV2.metric_collection_enabled` and the equivalent legacy-check gating), so it would
-    # only ever emit the always-unauthenticated leader/health metrics and never the real metric
-    # set. Discovery accepts the first candidate whose check run collects at least one metric with
-    # no error, so such a health-only candidate would trivially "succeed" and get locked in
-    # permanently — a degraded config masquerading as a working one. We never synthesize a token,
-    # so the only way to guarantee a real metrics scrape is `no_token=True`.
+    # `VaultCheckV2.metric_collection_enabled`), so it would only ever emit the
+    # always-unauthenticated leader/health metrics and never the real metric set. Discovery
+    # accepts the first candidate whose check run collects at least one metric with no error, so
+    # such a health-only candidate would trivially "succeed" and get locked in permanently — a
+    # degraded config masquerading as a working one. We never synthesize a token, so the only way
+    # to guarantee a real metrics scrape is `no_token=True`.
+    #
+    # Only the OpenMetrics mode (`use_openmetrics: true`) is generated; the legacy mode is not
+    # covered by discovery.
     service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
 
     instances = generated_instances(service)
@@ -30,9 +33,7 @@ def test_generates_one_candidate_per_scheme_and_mode() -> None:
         (instance['api_url'], instance.get('use_openmetrics'), instance.get('no_token')) for instance in instances
     ] == [
         ('http://127.0.0.1:8200/v1', True, True),
-        ('http://127.0.0.1:8200/v1', False, True),
         ('https://127.0.0.1:8200/v1', True, True),
-        ('https://127.0.0.1:8200/v1', False, True),
     ]
 
 
@@ -57,8 +58,6 @@ def test_all_candidates_target_supported_api_url_schemes() -> None:
 
     assert [instance['api_url'] for instance in instances] == [
         'http://127.0.0.1:8200/v1',
-        'http://127.0.0.1:8200/v1',
-        'https://127.0.0.1:8200/v1',
         'https://127.0.0.1:8200/v1',
     ]
 
@@ -81,7 +80,5 @@ def test_ipv6_host_is_bracketed_in_generated_api_url() -> None:
 
     assert [instance['api_url'] for instance in instances] == [
         'http://[fd00::1]:8200/v1',
-        'http://[fd00::1]:8200/v1',
-        'https://[fd00::1]:8200/v1',
         'https://[fd00::1]:8200/v1',
     ]
