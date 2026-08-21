@@ -410,12 +410,15 @@ class MySql(DatabaseCheck):
                     if self._get_runtime_queries(db):
                         self._get_runtime_queries(db).execute(extra_tags=tags)
 
-                if self._config.dbm_enabled:
-                    dbm_tags = list(set(self.service_check_tags) | set(tags))
-                    self._statement_metrics.run_job_loop(dbm_tags)
-                    self._statement_samples.run_job_loop(dbm_tags)
-                    self._query_activity.run_job_loop(dbm_tags)
-                    self._mysql_metadata.run_job_loop(dbm_tags)
+                if self._config.dbm_enabled or self._do_config.enabled:
+                    database_monitoring_tags = list(set(self.service_check_tags) | set(tags))
+
+                    if self._config.dbm_enabled:
+                        self._statement_metrics.run_job_loop(database_monitoring_tags)
+                        self._statement_samples.run_job_loop(database_monitoring_tags)
+                        self._query_activity.run_job_loop(database_monitoring_tags)
+
+                    self._mysql_metadata.run_job_loop(database_monitoring_tags)
 
                 if self._do_config.enabled:
                     self._data_observability.run_job_loop(tags)

@@ -110,10 +110,10 @@ def _get_do_event_calls(mock_epe):
     return [call for call in mock_epe.call_args_list if len(call.args) >= 2 and call.args[1] == EVENT_TRACK_TYPE]
 
 
-def test_disabled_by_default_at_check_boundary(aggregator, instance_basic):
-    check = MySql(common.CHECK_NAME, {}, [instance_basic])
+def _prepare_check_boundary(check):
     db = MagicMock()
     check._connect = MagicMock(return_value=nullcontext(db))
+    check.service_check_tags = []
     check._submit_initialization_health_event = MagicMock()
     check._set_qcache_stats = MagicMock()
     check.global_variables.collect = MagicMock()
@@ -129,6 +129,11 @@ def test_disabled_by_default_at_check_boundary(aggregator, instance_basic):
     check._put_qcache_stats = MagicMock()
     check._query_manager.execute = MagicMock()
     check._report_warnings = MagicMock()
+
+
+def test_disabled_by_default_at_check_boundary(aggregator, instance_basic):
+    check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    _prepare_check_boundary(check)
     check._data_observability.run_job_loop = MagicMock()
     check._data_observability._connection_args_provider = MagicMock()
     check.event_platform_event = MagicMock()
@@ -139,6 +144,27 @@ def test_disabled_by_default_at_check_boundary(aggregator, instance_basic):
     check._data_observability._connection_args_provider.assert_not_called()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
     assert not _get_do_event_calls(check.event_platform_event)
+
+
+def test_data_observability_starts_schema_collection_without_dbm(instance_basic):
+    instance = _make_do_instance(instance_basic, queries=[])
+    instance['collect_schemas'] = {'enabled': True}
+    instance['collect_settings'] = {'enabled': False}
+    check = MySql(common.CHECK_NAME, {}, [instance])
+    _prepare_check_boundary(check)
+    check._statement_metrics.run_job_loop = MagicMock()
+    check._statement_samples.run_job_loop = MagicMock()
+    check._query_activity.run_job_loop = MagicMock()
+    check._mysql_metadata.run_job_loop = MagicMock()
+    check._data_observability.run_job_loop = MagicMock()
+
+    check.check(None)
+
+    check._mysql_metadata.run_job_loop.assert_called_once()
+    check._data_observability.run_job_loop.assert_called_once()
+    check._statement_metrics.run_job_loop.assert_not_called()
+    check._statement_samples.run_job_loop.assert_not_called()
+    check._query_activity.run_job_loop.assert_not_called()
 
 
 def test_no_queries_does_nothing(aggregator, instance_basic):
