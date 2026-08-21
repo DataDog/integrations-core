@@ -2,7 +2,7 @@
 import http.client
 import json
 import urllib.error
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -99,27 +99,91 @@ def test_post_returns_true_on_success():
     "error",
     [urllib.error.URLError("boom"), http.client.RemoteDisconnected("disconnected")],
 )
-def test_post_warns_on_transient_network_error(error, capsys):
-    with patch("urllib.request.urlopen", side_effect=error):
+def test_post_retries_transient_network_error(error, capsys):
+    with (
+        patch("urllib.request.urlopen", side_effect=[error, MagicMock()]) as urlopen,
+        patch("notify_release.time.sleep") as sleep,
+    ):
         result = notify_release.post(WEBHOOK, "api", "app", "hi")
     assert result is True
+    assert urlopen.call_count == 2
+    sleep.assert_called_once_with(2)
+    assert "retrying" in capsys.readouterr().out
+
+
+def test_post_warns_after_transient_network_retries(capsys):
+    with (
+        patch("urllib.request.urlopen", side_effect=urllib.error.URLError("boom")) as urlopen,
+        patch("notify_release.time.sleep") as sleep,
+    ):
+        result = notify_release.post(WEBHOOK, "api", "app", "hi")
+    assert result is True
+    assert urlopen.call_count == 5
+    assert sleep.call_args_list == [call(2), call(4), call(8), call(16)]
     out = capsys.readouterr().out
     assert "transient" in out
     assert "::error::" not in out
 
 
-@pytest.mark.parametrize("code", [500, 502, 503, 429])
-def test_post_warns_on_transient_http_error(code, capsys):
+@pytest.mark.parametrize("code", [408, 429, 500, 502, 503])
+def test_post_retries_transient_http_error(code, capsys):
     error = urllib.error.HTTPError(WEBHOOK, code, "err", {}, None)
-    with patch("urllib.request.urlopen", side_effect=error):
+    with (
+        patch("urllib.request.urlopen", side_effect=[error, MagicMock()]) as urlopen,
+        patch("notify_release.time.sleep") as sleep,
+    ):
         result = notify_release.post(WEBHOOK, "api", "app", "hi")
     assert result is True
+    assert urlopen.call_count == 2
+    sleep.assert_called_once_with(2)
+    assert "retrying" in capsys.readouterr().out
+
+
+def test_post_warns_after_transient_http_retries(capsys):
+    error = urllib.error.HTTPError(WEBHOOK, 503, "err", {}, None)
+    with (
+        patch("urllib.request.urlopen", side_effect=error) as urlopen,
+        patch("notify_release.time.sleep") as sleep,
+    ):
+        result = notify_release.post(WEBHOOK, "api", "app", "hi")
+    assert result is True
+    assert urlopen.call_count == 5
+    assert sleep.call_args_list == [call(2), call(4), call(8), call(16)]
     out = capsys.readouterr().out
     assert "transient" in out
     assert "::error::" not in out
 
 
-@pytest.mark.parametrize("code", [400, 401, 403, 404])
+def test_post_retries_forbidden_response(capsys):
+    error = urllib.error.HTTPError(WEBHOOK, 403, "err", {}, None)
+    with (
+        patch("urllib.request.urlopen", side_effect=[error, MagicMock()]) as urlopen,
+        patch("notify_release.time.sleep") as sleep,
+    ):
+        result = notify_release.post(WEBHOOK, "api", "app", "hi")
+    assert result is True
+    assert urlopen.call_count == 2
+    sleep.assert_called_once_with(2)
+    assert "retrying" in capsys.readouterr().out
+
+
+def test_post_fails_after_forbidden_retries(capsys, tmp_path, monkeypatch):
+    summary = tmp_path / "summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    error = urllib.error.HTTPError(WEBHOOK, 403, "err", {}, None)
+    with (
+        patch("urllib.request.urlopen", side_effect=error) as urlopen,
+        patch("notify_release.time.sleep") as sleep,
+    ):
+        result = notify_release.post(WEBHOOK, "api", "app", "hi")
+    assert result is False
+    assert urlopen.call_count == 5
+    assert sleep.call_args_list == [call(2), call(4), call(8), call(16)]
+    assert "::error::" in capsys.readouterr().out
+    assert "HTTP 403" in summary.read_text()
+
+
+@pytest.mark.parametrize("code", [400, 401, 404])
 def test_post_fails_on_config_http_error(code, capsys, tmp_path, monkeypatch):
     summary = tmp_path / "summary.md"
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))

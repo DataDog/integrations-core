@@ -7,6 +7,7 @@ import http.client
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -56,6 +57,10 @@ def report_config_error(error: str) -> None:
             summary.write(f"### \u274c Release notification failed\n\n{message}\n")
 
 
+RETRY_DELAYS = (2, 4, 8, 16)
+TRANSIENT_HTTP_STATUSES = frozenset({408, 429})
+
+
 def post(api_url: str, api_key: str, app_key: str, text: str) -> bool:
     """Trigger the workflow; return False only on a persistent misconfiguration."""
     data = json.dumps({"meta": {"payload": {"text": text}}}).encode()
@@ -68,18 +73,33 @@ def post(api_url: str, api_key: str, app_key: str, text: str) -> bool:
             "DD-APPLICATION-KEY": app_key,
         },
     )
-    try:
-        urllib.request.urlopen(request, timeout=15).close()
-    except urllib.error.HTTPError as e:
-        if e.code == 429 or e.code >= 500:
-            print(f"::warning::Release notification failed (transient): HTTP {e.code}")
+    for attempt in range(len(RETRY_DELAYS) + 1):
+        try:
+            urllib.request.urlopen(request, timeout=15).close()
+        except urllib.error.HTTPError as e:
+            is_transient = e.code in TRANSIENT_HTTP_STATUSES or e.code >= 500
+            # dd-sts registers new application keys with the Actions API before
+            # returning them, but authorization reads can briefly lag that write.
+            if (e.code == 403 or is_transient) and attempt < len(RETRY_DELAYS):
+                delay = RETRY_DELAYS[attempt]
+                print(f"::warning::Release notification received HTTP {e.code}; retrying in {delay} seconds")
+                time.sleep(delay)
+                continue
+            if is_transient:
+                print(f"::warning::Release notification failed (transient): HTTP {e.code}")
+                return True
+            report_config_error(f"HTTP {e.code}")
+            return False
+        except (OSError, http.client.HTTPException, ValueError) as e:
+            if attempt < len(RETRY_DELAYS):
+                delay = RETRY_DELAYS[attempt]
+                print(f"::warning::Release notification request failed: {e}; retrying in {delay} seconds")
+                time.sleep(delay)
+                continue
+            print(f"::warning::Release notification request failed (transient): {e}")
             return True
-        report_config_error(f"HTTP {e.code}")
-        return False
-    except (OSError, http.client.HTTPException, ValueError) as e:
-        print(f"::warning::Release notification request failed (transient): {e}")
         return True
-    return True
+    raise AssertionError("unreachable")
 
 
 def main() -> None:
