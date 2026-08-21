@@ -46,7 +46,7 @@ REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
 )
 
 CopyStreamFormat = Literal['csv', 'binary']
-ResultDeliveryMode = Literal['POC_PUBLIC_CHUNKED_UPLOAD']
+ResultDeliveryMode = Literal['POC_PUBLIC_MULTIPART_UPLOAD']
 ResultDeliveryFormat = Literal['csv']
 ResultDeliveryCompression = Literal['none']
 CopyStreamEmit = Callable[[str, str, bytes], None]
@@ -138,7 +138,7 @@ class RemoteQueryResultDelivery(BaseModel):
     HTTP. The Agent forwards the intake base URL and scoped upload token here; the integration
     reads the org API key and POC application key from Agent config via ``datadog_agent.get_config``
     and attaches them to its own HTTP upload requests. The integration performs the HTTP upload
-    itself; bulk chunk bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action
+    itself; bulk part bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action
     output. Omitting ``resultDelivery`` keeps the existing inline streaming behavior unchanged.
     """
 
@@ -148,15 +148,15 @@ class RemoteQueryResultDelivery(BaseModel):
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
     token: StrictStr = Field(alias='token', min_length=1)
-    chunk_bytes: StrictInt = Field(alias='chunkBytes', ge=1)
+    part_bytes: StrictInt = Field(alias='partBytes', ge=1)
     max_bytes: StrictInt = Field(alias='maxBytes', ge=1)
     format: ResultDeliveryFormat = 'csv'
     compression: ResultDeliveryCompression = 'none'
 
     @model_validator(mode='after')
-    def validate_chunk_within_max(self) -> 'RemoteQueryResultDelivery':
-        if self.chunk_bytes > self.max_bytes:
-            raise ValueError('chunkBytes must not exceed maxBytes')
+    def validate_part_within_max(self) -> 'RemoteQueryResultDelivery':
+        if self.part_bytes > self.max_bytes:
+            raise ValueError('partBytes must not exceed maxBytes')
         return self
 
 
@@ -175,20 +175,20 @@ class RemoteQueryCopyRequest(BaseModel):
     @model_validator(mode='after')
     def validate_format_consistency(self) -> 'RemoteQueryCopyRequest':
         # When resultDelivery is present, the COPY stream format must match the upload format so the
-        # emitted bytes and the manifest agree. The current contract allows only ``csv`` for upload,
-        # so upload mode is CSV-only; a ``binary`` COPY stream with a ``csv`` upload is rejected.
+        # emitted bytes and the finalized object agree. The current contract allows only ``csv`` for
+        # upload, so upload mode is CSV-only; a ``binary`` COPY stream with a ``csv`` upload is rejected.
         if self.result_delivery is not None and self.format != self.result_delivery.format:
             raise ValueError('format must match resultDelivery.format when resultDelivery is present')
         return self
 
     @model_validator(mode='after')
-    def validate_chunk_within_limits(self) -> 'RemoteQueryCopyRequest':
+    def validate_part_within_limits(self) -> 'RemoteQueryCopyRequest':
         # The upload caps must not widen the caller/backend COPY safety caps. Fail closed so a
         # backend-injected resultDelivery cannot raise the integration's configured byte ceiling;
         # equal or smaller upload caps are accepted.
         if self.result_delivery is not None:
-            if self.result_delivery.chunk_bytes > self.limits.chunk_bytes:
-                raise ValueError('resultDelivery.chunkBytes must not exceed limits.chunkBytes')
+            if self.result_delivery.part_bytes > self.limits.chunk_bytes:
+                raise ValueError('resultDelivery.partBytes must not exceed limits.chunkBytes')
             if self.result_delivery.max_bytes > self.limits.max_bytes:
                 raise ValueError('resultDelivery.maxBytes must not exceed limits.maxBytes')
         return self
@@ -343,7 +343,7 @@ def _dbname_from_check(check: 'PostgreSql') -> str | None:
 
 def _started_metadata(request: RemoteQueryCopyRequest) -> dict[str, Any]:
     result_delivery = request.result_delivery
-    chunk_bytes = result_delivery.chunk_bytes if result_delivery is not None else request.limits.chunk_bytes
+    chunk_bytes = result_delivery.part_bytes if result_delivery is not None else request.limits.chunk_bytes
     max_bytes = result_delivery.max_bytes if result_delivery is not None else request.limits.max_bytes
     metadata: dict[str, Any] = {
         'status': 'STARTED',
@@ -357,7 +357,7 @@ def _started_metadata(request: RemoteQueryCopyRequest) -> dict[str, Any]:
         metadata['resultDelivery'] = {
             'mode': result_delivery.mode,
             'uploadId': result_delivery.upload_id,
-            'chunkBytes': result_delivery.chunk_bytes,
+            'partBytes': result_delivery.part_bytes,
             'maxBytes': result_delivery.max_bytes,
             'format': result_delivery.format,
             'compression': result_delivery.compression,
@@ -370,15 +370,15 @@ def _succeeded_metadata(state: _CopyStreamState, started_at: float, request: Rem
     result_delivery = request.result_delivery
     if result_delivery is not None:
         # Provisional receipt aligned to the Agent-owned uploadReceipt shape
-        # {mode, uploadId, bucketName, manifestPath, totalBytes, totalRows, chunkCount, sha256}.
+        # {mode, uploadId, bucketName, objectPath, totalBytes, totalRows, partCount, sha256}.
         # Python owns only the fields it can compute from the byte stream; the Agent Go side
-        # enriches it with bucketName, manifestPath, totalRows, and the aggregate sha256 after
+        # enriches it with bucketName, objectPath, totalRows, and the aggregate sha256 after
         # it finalizes the upload session.
         metadata['uploadReceipt'] = {
             'mode': result_delivery.mode,
             'uploadId': result_delivery.upload_id,
             'totalBytes': state.bytes_emitted,
-            'chunkCount': state.chunks_emitted,
+            'partCount': state.chunks_emitted,
         }
     return metadata
 
@@ -442,7 +442,7 @@ def _copy_stream_data_events(
 ) -> Iterator[tuple[CopyStreamEvent, _CopyStreamState]]:
     limits = request.limits
     result_delivery = request.result_delivery
-    chunk_bytes = result_delivery.chunk_bytes if result_delivery is not None else limits.chunk_bytes
+    chunk_bytes = result_delivery.part_bytes if result_delivery is not None else limits.chunk_bytes
     max_bytes = result_delivery.max_bytes if result_delivery is not None else limits.max_bytes
     max_row_bytes = limits.max_row_bytes
     timeout_ms = limits.timeout_ms
@@ -608,13 +608,13 @@ def _validation_location(location: tuple[Any, ...]) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Direct chunked upload to its-agent-intake (POC_PUBLIC_CHUNKED_UPLOAD)
+# Direct multipart upload to its-agent-intake (POC_PUBLIC_MULTIPART_UPLOAD)
 #
-# When resultDelivery is present, the integration uploads bounded COPY chunks
+# When resultDelivery is present, the integration uploads bounded COPY parts
 # directly to its-agent-intake over HTTP. The Agent forwards the intake base
 # URL and scoped upload token in resultDelivery, and the integration reads the
 # org API key and POC application key from Agent config via datadog_agent.get_config.
-# Bulk chunk bytes never traverse the native emit bridge, AgentSecure, PAR, or
+# Bulk part bytes never traverse the native emit bridge, AgentSecure, PAR, or
 # AP action output; only the compact final receipt is emitted back.
 
 REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS = 60
@@ -636,7 +636,9 @@ class _UploadCredentials:
 
 
 class _UploadClient(Protocol):
-    def put_chunk(self, creds: _UploadCredentials, index: int, payload: bytes, sha256_hex: str, rows: int) -> None: ...
+    def put_part(
+        self, creds: _UploadCredentials, part_number: int, payload: bytes, sha256_hex: str, rows: int
+    ) -> None: ...
 
     def finalize(self, creds: _UploadCredentials) -> Mapping[str, Any]: ...
 
@@ -661,12 +663,12 @@ class _RequestsUploadClient:
             headers[REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER] = creds.test_drive_selector
         return headers
 
-    def put_chunk(self, creds: _UploadCredentials, index: int, payload: bytes, sha256_hex: str, rows: int) -> None:
+    def put_part(self, creds: _UploadCredentials, part_number: int, payload: bytes, sha256_hex: str, rows: int) -> None:
         headers = self._headers(creds, 'application/octet-stream')
-        headers['X-DD-Chunk-SHA256'] = sha256_hex
-        headers['X-DD-Chunk-Bytes'] = str(len(payload))
-        headers['X-DD-Chunk-Rows'] = str(rows)
-        url = '{}/uploads/{}/chunks/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, index)
+        headers['X-DD-Part-SHA256'] = sha256_hex
+        headers['X-DD-Part-Bytes'] = str(len(payload))
+        headers['X-DD-Part-Rows'] = str(rows)
+        url = '{}/uploads/{}/parts/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, part_number)
         _upload_with_retry('PUT', url, headers, payload)
 
     def finalize(self, creds: _UploadCredentials) -> Mapping[str, Any]:
@@ -721,7 +723,7 @@ def _upload_with_retry(method: str, url: str, headers: Mapping[str, str], body: 
 
 def _is_upload_request(request: Mapping[str, Any]) -> bool:
     delivery = request.get('resultDelivery')
-    return isinstance(delivery, Mapping) and delivery.get('mode') == 'POC_PUBLIC_CHUNKED_UPLOAD'
+    return isinstance(delivery, Mapping) and delivery.get('mode') == 'POC_PUBLIC_MULTIPART_UPLOAD'
 
 
 def _get_agent_config(key: str) -> str:
@@ -758,13 +760,13 @@ def _count_newlines(payload: bytes) -> int:
 
 def _intake_receipt_to_camel(resp: Mapping[str, Any]) -> dict[str, Any]:
     return {
-        'mode': resp.get('mode', 'POC_PUBLIC_CHUNKED_UPLOAD'),
+        'mode': resp.get('mode', 'POC_PUBLIC_MULTIPART_UPLOAD'),
         'uploadId': resp.get('upload_id', ''),
         'bucketName': resp.get('bucket_name', ''),
-        'manifestPath': resp.get('manifest_key', ''),
+        'objectPath': resp.get('object_key', ''),
         'totalBytes': resp.get('total_bytes', 0),
         'totalRows': resp.get('total_rows', 0),
-        'chunkCount': resp.get('chunk_count', 0),
+        'partCount': resp.get('part_count', 0),
         'sha256': resp.get('sha256', ''),
     }
 
@@ -778,9 +780,12 @@ def _safe_abort(client: _UploadClient, creds: _UploadCredentials) -> None:
         LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
 
 
-def _upload_one_chunk(client: _UploadClient, creds: _UploadCredentials, event: CopyStreamEvent) -> None:
+def _upload_one_part(client: _UploadClient, creds: _UploadCredentials, event: CopyStreamEvent) -> None:
     metadata = event.metadata
-    client.put_chunk(creds, metadata['sequence'], event.payload, metadata['sha256'], _count_newlines(event.payload))
+    # Part numbers are contiguous and 1-based to match provider multipart conventions; the
+    # iterator's 0-based sequence maps directly to a 1-based part number.
+    part_number = metadata['sequence'] + 1
+    client.put_part(creds, part_number, event.payload, metadata['sha256'], _count_newlines(event.payload))
 
 
 def _finalize_upload(
@@ -801,7 +806,7 @@ def _execute_upload_stream(
     emit: CopyStreamEmit,
     http_client: _UploadClient | None = None,
 ) -> None:
-    """Upload COPY chunks directly to its-agent-intake; emit only metadata/final/error events."""
+    """Upload COPY parts directly to its-agent-intake; emit only metadata/final/error events."""
     creds = _resolve_upload_credentials(request)
     if not creds.api_key or not creds.app_key:
         _emit_copy_event(
@@ -817,7 +822,7 @@ def _execute_upload_stream(
     try:
         for event in events:
             if event.event_type == 'data':
-                _upload_one_chunk(client, creds, event)
+                _upload_one_part(client, creds, event)
             elif event.event_type == 'final':
                 _finalize_upload(client, creds, event, emit)
             elif event.event_type == 'error':

@@ -131,11 +131,11 @@ def valid_database_instance_copy_request(database_instance='postgres-dbi', **ext
 
 def valid_result_delivery(**extra):
     result_delivery = {
-        'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+        'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
         'uploadId': 'upload-01k',
         'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
         'token': 'scoped-upload-token',
-        'chunkBytes': 8,
+        'partBytes': 8,
         'maxBytes': 24,
         'format': 'csv',
         'compression': 'none',
@@ -158,21 +158,21 @@ class FakeUploadClient:
         self.put_status = put_status
         self.raise_on_put = raise_on_put
         self.finalize_resp = finalize_resp or {
-            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'manifest_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': 0,
             'total_rows': 0,
-            'chunk_count': 0,
+            'part_count': 0,
             'sha256': 'aggregate',
             'format': 'csv',
             'compression': 'none',
-            'finalized_at': '2026-08-20T00:00:00Z',
+            'completed_at': '2026-08-20T00:00:00Z',
         }
 
-    def put_chunk(self, creds, index, payload, sha256_hex, rows):
-        self.put_calls.append((index, payload, sha256_hex, rows))
+    def put_part(self, creds, part_number, payload, sha256_hex, rows):
+        self.put_calls.append((part_number, payload, sha256_hex, rows))
         if self.raise_on_put is not None:
             raise self.raise_on_put
 
@@ -820,9 +820,9 @@ def test_copy_stream_upload_mode_emits_started_result_delivery_data_sha256_and_r
     assert events[0].event_type == 'metadata'
     started = event_metadata(events[0])
     assert started['status'] == 'STARTED'
-    assert started['resultDelivery']['mode'] == 'POC_PUBLIC_CHUNKED_UPLOAD'
+    assert started['resultDelivery']['mode'] == 'POC_PUBLIC_MULTIPART_UPLOAD'
     assert started['resultDelivery']['uploadId'] == 'upload-01k'
-    assert started['resultDelivery']['chunkBytes'] == 8
+    assert started['resultDelivery']['partBytes'] == 8
     assert started['resultDelivery']['maxBytes'] == 24
     assert 'baseUrl' not in started['resultDelivery']
     assert 'token' not in started['resultDelivery']
@@ -839,10 +839,10 @@ def test_copy_stream_upload_mode_emits_started_result_delivery_data_sha256_and_r
         assert len(payload) <= 8
     assert events[-1].event_type == 'final'
     assert event_metadata(events[-1])['uploadReceipt'] == {
-        'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+        'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
         'uploadId': 'upload-01k',
         'totalBytes': 18,
-        'chunkCount': 3,
+        'partCount': 3,
     }
     assert event_metadata(events[-1])['stats']['bytesEmitted'] == 18
     assert event_metadata(events[-1])['stats']['chunksEmitted'] == 3
@@ -902,7 +902,7 @@ def test_copy_stream_upload_mode_rejects_binary_format_mismatch_with_result_deli
     request = valid_upload_copy_request()
     request['format'] = 'binary'
     request['query'] = "SELECT decode('00ff80', 'hex') AS payload"
-    request['resultDelivery']['chunkBytes'] = 1024
+    request['resultDelivery']['partBytes'] = 1024
     request['resultDelivery']['maxBytes'] = 4096
     request['limits'] = {'chunkBytes': 1024, 'maxBytes': 4096, 'maxRowBytes': 4096, 'timeoutMs': 5000}
 
@@ -929,7 +929,7 @@ def test_copy_stream_upload_mode_never_buffers_more_than_one_chunk(monkeypatch):
     patch_upload_credentials(monkeypatch)
     pool = FakePool(copy_blocks=[b'aaaa', b'bbbb', b'cccc', b'dddd', b'eeee', b'ffff'])
     request = valid_upload_copy_request()
-    request['resultDelivery']['chunkBytes'] = 4
+    request['resultDelivery']['partBytes'] = 4
     request['resultDelivery']['maxBytes'] = 28
     request['limits'] = {'chunkBytes': 4, 'maxBytes': 28, 'maxRowBytes': 32, 'timeoutMs': 5000}
     fake = FakeUploadClient()
@@ -987,22 +987,22 @@ def test_copy_stream_upload_mode_accepts_baseurl_and_token():
     assert pool.requested_dbnames != []
 
 
-def test_agent_rpc_stream_copy_upload_mode_uploads_chunks_directly(monkeypatch):
+def test_agent_rpc_stream_copy_upload_mode_uploads_parts_directly(monkeypatch):
     patch_upload_credentials(monkeypatch)
     pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
     fake = FakeUploadClient(
         finalize_resp={
-            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'manifest_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': 18,
             'total_rows': 0,
-            'chunk_count': 3,
+            'part_count': 3,
             'sha256': 'aggregate-sha',
             'format': 'csv',
             'compression': 'none',
-            'finalized_at': '2026-08-20T00:00:00Z',
+            'completed_at': '2026-08-20T00:00:00Z',
         }
     )
     events = []
@@ -1018,10 +1018,11 @@ def test_agent_rpc_stream_copy_upload_mode_uploads_chunks_directly(monkeypatch):
     assert 'baseUrl' not in started['resultDelivery']
     assert 'token' not in started['resultDelivery']
 
-    # Three chunks uploaded directly, each with its sha256 and byte count.
+    # Three parts uploaded directly with contiguous 1-based part numbers, each carrying its
+    # sha256 and byte count.
     assert len(fake.put_calls) == 3
-    assert [call[0] for call in fake.put_calls] == [0, 1, 2]
-    for _index, payload, sha256_hex, _rows in fake.put_calls:
+    assert [call[0] for call in fake.put_calls] == [1, 2, 3]
+    for _part_number, payload, sha256_hex, _rows in fake.put_calls:
         assert sha256_hex == hashlib.sha256(payload).hexdigest()
     assert fake.finalize_calls == 1
     assert fake.abort_calls == 0
@@ -1030,13 +1031,13 @@ def test_agent_rpc_stream_copy_upload_mode_uploads_chunks_directly(monkeypatch):
     # server-expected snake_case outer key.
     receipt = json.loads(events[-1][1])['upload_receipt']
     assert receipt == {
-        'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+        'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
         'uploadId': 'upload-01k',
         'bucketName': 'rq-bucket',
-        'manifestPath': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+        'objectPath': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
         'totalBytes': 18,
         'totalRows': 0,
-        'chunkCount': 3,
+        'partCount': 3,
         'sha256': 'aggregate-sha',
     }
 
@@ -1071,10 +1072,10 @@ def test_copy_stream_upload_mode_stops_on_http_failure_and_aborts(monkeypatch):
         ({'mode': 'PRESIGNED_URL'}, 'mode'),
         ({'format': 'json'}, 'format'),
         ({'compression': 'gzip'}, 'compression'),
-        ({'chunkBytes': 0}, 'chunkBytes'),
+        ({'partBytes': 0}, 'partBytes'),
         ({'maxBytes': 0}, 'maxBytes'),
-        ({'chunkBytes': '8'}, 'chunkBytes'),
-        ({'chunkBytes': 64, 'maxBytes': 32}, 'chunkBytes must not exceed maxBytes'),
+        ({'partBytes': '8'}, 'partBytes'),
+        ({'partBytes': 64, 'maxBytes': 32}, 'partBytes must not exceed maxBytes'),
     ],
 )
 def test_copy_stream_upload_mode_rejects_invalid_result_delivery(mutation, expected):
@@ -1097,9 +1098,9 @@ def test_copy_stream_upload_mode_rejects_missing_upload_id():
     'delivery, limits, expected',
     [
         (
-            {'chunkBytes': 16},
+            {'partBytes': 16},
             {'chunkBytes': 8, 'maxBytes': 64},
-            'resultDelivery.chunkBytes must not exceed limits.chunkBytes',
+            'resultDelivery.partBytes must not exceed limits.chunkBytes',
         ),
         (
             {'maxBytes': 128},
@@ -1119,7 +1120,7 @@ def test_copy_stream_upload_mode_rejects_upload_cap_widening(delivery, limits, e
 def test_copy_stream_upload_mode_accepts_equal_upload_caps():
     pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
     request = valid_upload_copy_request()
-    request['resultDelivery']['chunkBytes'] = 8
+    request['resultDelivery']['partBytes'] = 8
     request['resultDelivery']['maxBytes'] = 64
     request['limits'] = {'chunkBytes': 8, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 5000}
 
@@ -1160,7 +1161,7 @@ def test_copy_stream_upload_mode_enforces_smaller_upload_cap_over_wider_limit():
 # those byte counts (the CSV ``\n`` terminator is elided); this is documented
 # here and asserted by the total-bytes assertions.
 #
-# Unlike the prior emit-bridge proof, bulk chunk bytes go directly to
+# Unlike the prior emit-bridge proof, bulk part bytes go directly to
 # its-agent-intake over HTTP via an injectable ``_UploadClient`` (a fake here),
 # NOT through the native emit callback. Only metadata/final/error events cross
 # the callback. This proves the integration owns the upload and the Agent is
@@ -1193,18 +1194,18 @@ def incremental_reference_sha256(total_bytes, block_size=PROOF_MIB):
     return hasher.hexdigest()
 
 
-def mib_upload_request(query, total_bytes, chunk_bytes=PROOF_MIB, upload_max_bytes=None, copy_max_bytes=None):
-    """Build a valid ``resultDelivery`` upload request sized for MiB-scale proof."""
+def mib_upload_request(query, total_bytes, part_bytes=PROOF_MIB, upload_max_bytes=None, copy_max_bytes=None):
+    """Build a valid ``resultDelivery`` multipart upload request sized for MiB-scale proof."""
     upload_cap = upload_max_bytes if upload_max_bytes is not None else total_bytes
     copy_cap = copy_max_bytes if copy_max_bytes is not None else total_bytes
     request = valid_upload_copy_request()
     request['query'] = query
     request['format'] = 'csv'
     request['resultDelivery']['format'] = 'csv'
-    request['resultDelivery']['chunkBytes'] = chunk_bytes
+    request['resultDelivery']['partBytes'] = part_bytes
     request['resultDelivery']['maxBytes'] = upload_cap
     request['limits'] = {
-        'chunkBytes': chunk_bytes,
+        'chunkBytes': part_bytes,
         'maxBytes': copy_cap,
         'maxRowBytes': PROOF_MIB,
         'timeoutMs': 30000,
@@ -1215,11 +1216,11 @@ def mib_upload_request(query, total_bytes, chunk_bytes=PROOF_MIB, upload_max_byt
 def run_direct_upload_stream(request, pool, fake, monkeypatch=None):
     """Drive the real direct-HTTP upload path and collect proof metrics.
 
-    Bulk chunk bytes are hashed and discarded as the fake intake accepts them, so the
+    Bulk part bytes are hashed and discarded as the fake intake accepts them, so the
     full multi-MiB payload is never accumulated in memory. Returns the STARTED/FINAL
     metadata emitted on the callback, plus the fake intake's recorded put/finalize/abort
-    calls, the total uploaded bytes, chunk count, max chunk size, and the incremental
-    SHA-256 of the uploaded chunk bodies.
+    calls, the total uploaded bytes, part count, max part size, and the incremental
+    SHA-256 of the uploaded part bodies.
     """
     if monkeypatch is not None:
         patch_upload_credentials(monkeypatch)
@@ -1236,7 +1237,7 @@ def run_direct_upload_stream(request, pool, fake, monkeypatch=None):
 
     _execute_upload_stream(request, make_check(pool=pool), emit, http_client=fake)
 
-    for _index, payload, _sha256_hex, _rows in fake.put_calls:
+    for _part_number, payload, _sha256_hex, _rows in fake.put_calls:
         hasher.update(payload)
         total_bytes += len(payload)
 
@@ -1247,8 +1248,8 @@ def run_direct_upload_stream(request, pool, fake, monkeypatch=None):
         finalize_calls=fake.finalize_calls,
         abort_calls=fake.abort_calls,
         total_bytes=total_bytes,
-        chunk_count=len(fake.put_calls),
-        max_chunk=max((len(c[1]) for c in fake.put_calls), default=0),
+        part_count=len(fake.put_calls),
+        max_part=max((len(c[1]) for c in fake.put_calls), default=0),
         digest=hasher.hexdigest(),
     )
 
@@ -1266,31 +1267,31 @@ def test_copy_stream_upload_mode_uploads_exact_mib_directly_to_intake(total_mib,
     pool = FakePool(copy_blocks=incremental_copy_blocks(total_bytes))
     fake = FakeUploadClient(
         finalize_resp={
-            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'manifest_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/manifest.json',
+            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': total_bytes,
             'total_rows': 0,
-            'chunk_count': total_bytes // PROOF_MIB,
+            'part_count': total_bytes // PROOF_MIB,
             'sha256': incremental_reference_sha256(total_bytes),
             'format': 'csv',
             'compression': 'none',
-            'finalized_at': '2026-08-20T00:00:00Z',
+            'completed_at': '2026-08-20T00:00:00Z',
         }
     )
 
     proof = run_direct_upload_stream(request, pool, fake, monkeypatch)
 
     # Bulk bytes go directly to the intake over HTTP, not through the emit callback.
-    assert proof.chunk_count == total_bytes // PROOF_MIB
+    assert proof.part_count == total_bytes // PROOF_MIB
     assert proof.total_bytes == total_bytes
-    assert proof.max_chunk == PROOF_MIB
-    # Each uploaded chunk carries its per-chunk SHA-256 over the raw body.
-    for _index, payload, _sha256_hex, _rows in proof.put_calls:
+    assert proof.max_part == PROOF_MIB
+    # Each uploaded part carries its per-part SHA-256 over the raw body.
+    for _part_number, payload, _sha256_hex, _rows in proof.put_calls:
         assert _sha256_hex == hashlib.sha256(payload).hexdigest()
         assert len(payload) == PROOF_MIB
-    # The aggregate SHA-256 of uploaded chunk bodies matches the incremental reference.
+    # The aggregate SHA-256 of uploaded part bodies matches the incremental reference.
     assert proof.digest == incremental_reference_sha256(total_bytes)
     # Finalize is called exactly once; no abort on the happy path.
     assert proof.finalize_calls == 1
@@ -1298,7 +1299,7 @@ def test_copy_stream_upload_mode_uploads_exact_mib_directly_to_intake(total_mib,
 
     # Only metadata and final reach the emit callback; no bulk data events cross it.
     assert proof.started['status'] == 'STARTED'
-    assert proof.started['resultDelivery']['mode'] == 'POC_PUBLIC_CHUNKED_UPLOAD'
+    assert proof.started['resultDelivery']['mode'] == 'POC_PUBLIC_MULTIPART_UPLOAD'
     assert proof.started['resultDelivery']['uploadId'] == 'upload-01k'
     assert 'baseUrl' not in proof.started['resultDelivery']
     assert 'token' not in proof.started['resultDelivery']
@@ -1306,7 +1307,7 @@ def test_copy_stream_upload_mode_uploads_exact_mib_directly_to_intake(total_mib,
     # The final receipt is the Agent-shaped camelCase receipt under the snake_case outer key.
     assert proof.final['upload_receipt']['uploadId'] == 'upload-01k'
     assert proof.final['upload_receipt']['totalBytes'] == total_bytes
-    assert proof.final['upload_receipt']['chunkCount'] == total_bytes // PROOF_MIB
+    assert proof.final['upload_receipt']['partCount'] == total_bytes // PROOF_MIB
     assert proof.final['upload_receipt']['sha256'] == incremental_reference_sha256(total_bytes)
     assert pool.closed_copies == 1
 
@@ -1323,38 +1324,38 @@ def test_copy_stream_upload_mode_backpressure_fences_copy_reads_during_http_uplo
 
     request = mib_upload_request(M3_PROOF_QUERY, total_bytes)
     pool = FakePool(copy_blocks=counting_block_stream())
-    # Record how many COPY blocks have been read at the moment each chunk is uploaded.
+    # Record how many COPY blocks have been read at the moment each part is uploaded.
     reads_at_put = []
 
     class LockstepFakeClient(FakeUploadClient):
-        def put_chunk(self, creds, index, payload, sha256_hex, rows):
+        def put_part(self, creds, part_number, payload, sha256_hex, rows):
             reads_at_put.append(read_state['count'])
-            super().put_chunk(creds, index, payload, sha256_hex, rows)
+            super().put_part(creds, part_number, payload, sha256_hex, rows)
 
     fake = LockstepFakeClient(
         finalize_resp={
-            'mode': 'POC_PUBLIC_CHUNKED_UPLOAD',
+            'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
             'upload_id': 'upload-01k',
             'bucket_name': 'rq-bucket',
-            'manifest_key': 'manifest.json',
+            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
             'total_bytes': total_bytes,
             'total_rows': 0,
-            'chunk_count': total_blocks,
+            'part_count': total_blocks,
             'sha256': incremental_reference_sha256(total_bytes),
             'format': 'csv',
             'compression': 'none',
-            'finalized_at': '2026-08-20T00:00:00Z',
+            'completed_at': '2026-08-20T00:00:00Z',
         }
     )
 
     proof = run_direct_upload_stream(request, pool, fake, monkeypatch)
 
-    # Lockstep backpressure: when chunk i (1-indexed) is uploaded, exactly i blocks have
-    # been read and block i+1 is fenced (not yet read). The full 8 MiB is never buffered
-    # ahead of the HTTP upload.
+    # Lockstep backpressure: when part i is uploaded, exactly i blocks have been read and
+    # block i+1 is fenced (not yet read). The full 8 MiB is never buffered ahead of the
+    # HTTP upload.
     assert reads_at_put == list(range(1, total_blocks + 1))
     assert read_state['count'] == total_blocks
-    assert proof.chunk_count == total_blocks
+    assert proof.part_count == total_blocks
     assert pool.closed_copies == 1
 
 
@@ -1368,7 +1369,7 @@ def test_copy_stream_upload_mode_aborts_on_http_failure_at_mib_scale(monkeypatch
 
     proof = run_direct_upload_stream(request, pool, fake, monkeypatch)
 
-    # The first chunk upload fails; the session is aborted and an error event is emitted.
+    # The first part upload fails; the session is aborted and an error event is emitted.
     assert len(proof.put_calls) == 1
     assert proof.abort_calls == 1
     assert proof.final['status'] == 'FAILED'
@@ -1388,10 +1389,199 @@ def test_copy_stream_upload_mode_enforces_max_bytes_at_mib_scale(monkeypatch):
 
     # maxBytes enforced: exactly the upload cap is uploaded, then the stream fails.
     assert proof.total_bytes == upload_cap
-    assert proof.chunk_count == upload_cap // PROOF_MIB
-    assert proof.max_chunk == PROOF_MIB
+    assert proof.part_count == upload_cap // PROOF_MIB
+    assert proof.max_part == PROOF_MIB
     assert proof.final['status'] == 'FAILED'
     assert proof.final['error']['code'] == 'max_bytes_exceeded'
     # No receipt is emitted when the upload cap is exceeded.
     assert 'upload_receipt' not in proof.final
+    assert pool.closed_copies == 1
+
+
+# ---------------------------------------------------------------------------
+# Multipart HTTP contract, retry, sizing, and empty-result behavior
+#
+# These tests pin the exact POC_PUBLIC_MULTIPART_UPLOAD data-plane contract
+# (routes, 1-based part numbers, X-DD-Part-* headers) against the real
+# ``_RequestsUploadClient`` by stubbing ``requests.request``, plus the
+# integration-level multipart sizing and zero-row finalization behavior.
+# ---------------------------------------------------------------------------
+
+
+def _upload_creds(**overrides):
+    defaults = {
+        'base_url': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
+        'upload_id': 'upload-01k',
+        'api_key': 'TEST_API_KEY',
+        'app_key': 'TEST_APP_KEY',
+        'token': 'scoped-upload-token',
+        'test_drive_selector': 'its-agent-intake-poc',
+    }
+    defaults.update(overrides)
+    return remote_query._UploadCredentials(**defaults)
+
+
+def test_requests_upload_client_uses_exact_multipart_http_contract(monkeypatch):
+    import requests
+
+    captured = []
+
+    def fake_request(method, url, headers=None, data=None, timeout=None):
+        captured.append(
+            SimpleNamespace(method=method, url=url, headers=dict(headers or {}), data=data, timeout=timeout)
+        )
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', fake_request)
+    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
+
+    creds = _upload_creds()
+    client = remote_query._RequestsUploadClient()
+    payload = b'abcdefgh'
+    client.put_part(creds, 2, payload, hashlib.sha256(payload).hexdigest(), 1)
+
+    # PUT to the 1-based part route with the exact multipart headers and auth.
+    put = captured[0]
+    assert put.method == 'PUT'
+    assert put.url == 'https://dd.datad0g.com/api/unstable/its-agent-intake/uploads/upload-01k/parts/2'
+    assert put.headers['Content-Type'] == 'application/octet-stream'
+    assert put.headers['X-DD-Part-SHA256'] == hashlib.sha256(payload).hexdigest()
+    assert put.headers['X-DD-Part-Bytes'] == '8'
+    assert put.headers['X-DD-Part-Rows'] == '1'
+    assert put.headers['dd-api-key'] == 'TEST_API_KEY'
+    assert put.headers['dd-application-key'] == 'TEST_APP_KEY'
+    assert put.headers['Authorization'] == 'Bearer scoped-upload-token'
+    assert put.headers[remote_query.REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER] == 'its-agent-intake-poc'
+    assert put.data == payload
+    assert put.timeout == remote_query.REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS
+
+    # finalize -> POST .../finalize with an empty JSON body.
+    client.finalize(creds)
+    finalize = captured[1]
+    assert finalize.method == 'POST'
+    assert finalize.url == 'https://dd.datad0g.com/api/unstable/its-agent-intake/uploads/upload-01k/finalize'
+    assert finalize.headers['Content-Type'] == 'application/json'
+    assert finalize.data == b'{}'
+
+    # abort -> POST .../abort with an empty JSON body (best-effort).
+    client.abort(creds)
+    abort = captured[2]
+    assert abort.method == 'POST'
+    assert abort.url == 'https://dd.datad0g.com/api/unstable/its-agent-intake/uploads/upload-01k/abort'
+    assert abort.data == b'{}'
+
+
+@pytest.mark.parametrize('trigger', ['transient_status', 'connection_error'])
+def test_requests_upload_client_retries_part_idempotently(monkeypatch, trigger):
+    import requests
+
+    calls = []
+
+    def fake_request(method, url, headers=None, data=None, timeout=None):
+        calls.append(SimpleNamespace(url=url, headers=dict(headers or {}), data=data))
+        if len(calls) == 1 and trigger == 'transient_status':
+            return SimpleNamespace(status_code=503, content=b'')
+        if len(calls) == 1 and trigger == 'connection_error':
+            raise requests.exceptions.RequestException('boom')
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', fake_request)
+    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
+
+    creds = _upload_creds(test_drive_selector=None)
+    client = remote_query._RequestsUploadClient()
+    payload = b'ijklmnop'
+    client.put_part(creds, 1, payload, hashlib.sha256(payload).hexdigest(), 0)
+
+    # The same part request (same 1-based part URL, same checksum header, same body) is
+    # retried verbatim after a transient failure, so a server-side idempotent replay by
+    # (part_number, sha256) cannot double-count bytes.
+    assert len(calls) == 2
+    assert calls[0].url == calls[1].url
+    assert calls[0].url == 'https://dd.datad0g.com/api/unstable/its-agent-intake/uploads/upload-01k/parts/1'
+    assert calls[0].headers['X-DD-Part-SHA256'] == calls[1].headers['X-DD-Part-SHA256']
+    assert calls[0].data == calls[1].data == payload
+
+
+def test_requests_upload_client_fails_closed_on_non_transient_status(monkeypatch):
+    import requests
+
+    calls = []
+
+    def fake_request(method, url, headers=None, data=None, timeout=None):
+        calls.append(url)
+        return SimpleNamespace(status_code=400, content=b'')
+
+    monkeypatch.setattr(requests, 'request', fake_request)
+    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
+
+    creds = _upload_creds(test_drive_selector=None)
+    client = remote_query._RequestsUploadClient()
+
+    with pytest.raises(remote_query._CopyStreamFailure) as excinfo:
+        client.put_part(creds, 1, b'x', 'deadbeef', 0)
+    assert excinfo.value.code == 'upload_failed'
+    assert excinfo.value.retryable is False
+    # A non-transient rejection is not retried.
+    assert len(calls) == 1
+
+
+def test_copy_stream_upload_mode_sizes_multipart_parts_with_final_short_part(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    # 20 bytes total with 8-byte parts -> two full parts and one final short part.
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'mnop'])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['partBytes'] = 8
+    request['resultDelivery']['maxBytes'] = 24
+    request['limits'] = {'chunkBytes': 8, 'maxBytes': 24, 'maxRowBytes': 32, 'timeoutMs': 5000}
+    fake = FakeUploadClient()
+
+    _execute_upload_stream(request, make_check(pool=pool), lambda *event: None, http_client=fake)
+
+    # Contiguous 1-based part numbers; non-final parts are exactly partBytes and the
+    # final part is allowed to be shorter.
+    assert [call[0] for call in fake.put_calls] == [1, 2, 3]
+    assert [len(call[1]) for call in fake.put_calls] == [8, 8, 4]
+    assert sum(len(call[1]) for call in fake.put_calls) == 20
+    assert fake.finalize_calls == 1
+    assert fake.abort_calls == 0
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_finalizes_empty_result_with_zero_parts(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(copy_blocks=[])
+    request = valid_upload_copy_request()
+    fake = FakeUploadClient(
+        finalize_resp={
+            'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
+            'upload_id': 'upload-01k',
+            'bucket_name': 'rq-bucket',
+            'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'total_bytes': 0,
+            'total_rows': 0,
+            'part_count': 0,
+            'sha256': hashlib.sha256(b'').hexdigest(),
+            'format': 'csv',
+            'compression': 'none',
+            'completed_at': '2026-08-20T00:00:00Z',
+        }
+    )
+    events = []
+
+    _execute_upload_stream(request, make_check(pool=pool), lambda *event: events.append(event), http_client=fake)
+
+    # Zero-row result: no parts are uploaded, but finalize is called once so the intake
+    # takes the explicit empty-object finalization path. Only metadata and final cross
+    # the callback; the receipt reports partCount 0 and a result.csv object path.
+    assert fake.put_calls == []
+    assert fake.finalize_calls == 1
+    assert fake.abort_calls == 0
+    assert [event[0] for event in events] == ['metadata', 'final']
+    receipt = json.loads(events[-1][1])['upload_receipt']
+    assert receipt['mode'] == 'POC_PUBLIC_MULTIPART_UPLOAD'
+    assert receipt['partCount'] == 0
+    assert receipt['totalBytes'] == 0
+    assert receipt['totalRows'] == 0
+    assert receipt['objectPath'].endswith('result.csv')
     assert pool.closed_copies == 1
