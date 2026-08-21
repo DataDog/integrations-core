@@ -56,21 +56,10 @@ class DatabaseObject(TypedDict):
     owner: str
 
 
-class ColumnObjectBase(TypedDict):
-    data_type: str
-    name: str
-    nullable: bool
-
-
-class ColumnObject(ColumnObjectBase, total=False):
-    default: str | None
-    ordinal_position: str | None
-
-
 class TableObject(TypedDict):
     id: str
     name: str
-    columns: list[ColumnObject]
+    columns: list
     indexes: list
     foreign_keys: list
 
@@ -78,7 +67,7 @@ class TableObject(TypedDict):
 class SchemaObject(TypedDict):
     name: str
     id: str
-    owner_name: str
+    owner: str
     tables: list[TableObject]
 
 
@@ -88,8 +77,6 @@ class SQLServerDatabaseObject(DatabaseObject):
 
 class SQLServerSchemaCollector(SchemaCollector):
     _check: SQLServer
-    connection_key_prefix = KEY_PREFIX
-    legacy_connection_key_prefix = KEY_PREFIX_PRE_2017
 
     def __init__(self, check: SQLServer):
         config = SchemaCollectorConfig()
@@ -108,8 +95,8 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     def _get_databases(self) -> list[DatabaseInfo]:
         database_names = self._check.get_databases()
-        with self._check.connection.open_managed_default_connection(self.connection_key_prefix):
-            with self._check.connection.get_managed_cursor(self.connection_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(KEY_PREFIX):
+            with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 if not database_names:
                     return []
                 placeholders = ",".join(["?"] * len(database_names))
@@ -122,22 +109,20 @@ class SQLServerSchemaCollector(SchemaCollector):
     def _get_cursor(self, database_name):
         with contextlib.ExitStack() as stack:
             try:
-                stack.enter_context(self._check.connection.open_managed_default_connection(self.connection_key_prefix))
-                cursor = stack.enter_context(self._check.connection.get_managed_cursor(self.connection_key_prefix))
+                stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX))
+                cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
                 switch_db_statement = construct_use_statement(database_name)
                 cursor.execute(switch_db_statement)
                 self._is_2016_or_earlier = self._should_use_legacy_schema_query(database_name)
 
                 if self._is_2016_or_earlier:
-                    stack.enter_context(
-                        self._check.connection.open_managed_default_connection(self.legacy_connection_key_prefix)
-                    )
+                    stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
                     self._pre_2017_cursor = stack.enter_context(
-                        self._check.connection.get_managed_cursor(self.legacy_connection_key_prefix)
+                        self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017)
                     )
                     self._pre_2017_cursor.execute(switch_db_statement)
 
-                query = self._get_objects_query()
+                query = self._get_tables_query()
                 cursor.execute(query)
                 yield cursor
             finally:
@@ -180,7 +165,7 @@ class SQLServerSchemaCollector(SchemaCollector):
             return True
         return compatibility_level < MINIMUM_JSON_COMPATIBILITY_LEVEL
 
-    def _get_objects_query(self):
+    def _get_tables_query(self):
         limit = int(self._config.max_tables or 1_000_000)
 
         # Note that we INNER JOIN tables to omit schemas with no tables
@@ -213,7 +198,7 @@ class SQLServerSchemaCollector(SchemaCollector):
         # For 2017 and later we can get all the data in one query
         query += f"""
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
-                schema_tables.table_name, schema_tables.table_id
+                schema_tables.table_name
                 , json_query(({COLUMN_QUERY} FOR JSON PATH), '$') as columns
                 , json_query(({INDEX_QUERY} FOR JSON PATH), '$') as indexes
                 , json_query(({FOREIGN_KEY_QUERY} FOR JSON PATH), '$') as foreign_keys
@@ -264,24 +249,28 @@ class SQLServerSchemaCollector(SchemaCollector):
                 "name": cursor_row.get("schema_name"),
                 "id": str(cursor_row.get("schema_id")),  # Backend expects a string
                 "owner_name": cursor_row.get("owner_name"),
-                "tables": [
-                    {
-                        k: v
-                        for k, v in {
-                            "id": str(cursor_row.get("table_id")),  # Backend expects a string
-                            "name": cursor_row.get("table_name"),
-                            "columns": [column for column in columns if column.get("name") is not None],
-                            "indexes": [index for index in indexes if index.get("name") is not None],
-                            "foreign_keys": [
-                                foreign_key
-                                for foreign_key in foreign_keys
-                                if foreign_key.get("foreign_key_name") is not None
-                            ],
-                            "partitions": {"partition_count": partition_count},
-                        }.items()
-                        if v is not None
-                    }
-                ],
+                "tables": (
+                    [
+                        {
+                            k: v
+                            for k, v in {
+                                "id": str(cursor_row.get("table_id")),  # Backend expects a string
+                                "name": cursor_row.get("table_name"),
+                                "columns": [column for column in columns if column.get("name") is not None],
+                                "indexes": [index for index in indexes if index.get("name") is not None],
+                                "foreign_keys": [
+                                    foreign_key
+                                    for foreign_key in foreign_keys
+                                    if foreign_key.get("foreign_key_name") is not None
+                                ],
+                                "partitions": {"partition_count": partition_count},
+                            }.items()
+                            if v is not None
+                        }
+                    ]
+                    if cursor_row.get("table_name") is not None
+                    else []
+                ),
             }
         ]
         return object

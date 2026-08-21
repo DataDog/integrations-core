@@ -9,14 +9,21 @@ from typing import TYPE_CHECKING, TypedDict
 from datadog_checks.base.utils.db.schemas import SchemaCollector
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.queries import SCHEMA_QUERY, VIEW_COLUMN_QUERY, VIEWS_QUERY
-from datadog_checks.sqlserver.schemas import ColumnObject, DatabaseInfo, DatabaseObject, SQLServerSchemaCollector
+from datadog_checks.sqlserver.schemas import DatabaseInfo, DatabaseObject, SQLServerSchemaCollector
 
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
 
 
-KEY_PREFIX = "dbm-views-"
-KEY_PREFIX_PRE_2017 = "dbm-views-pre-2017"
+class ViewColumnObjectBase(TypedDict):
+    data_type: str
+    name: str
+    nullable: bool
+
+
+class ViewColumnObject(ViewColumnObjectBase, total=False):
+    default: str | None
+    ordinal_position: str | None
 
 
 class ViewObject(TypedDict):
@@ -25,7 +32,7 @@ class ViewObject(TypedDict):
     create_date: str
     modify_date: str
     definition: str | None
-    columns: list[ColumnObject]
+    columns: list[ViewColumnObject]
 
 
 class ViewSchemaObject(TypedDict):
@@ -38,8 +45,6 @@ class ViewSchemaObject(TypedDict):
 
 class SQLServerViewCollector(SQLServerSchemaCollector):
     _check: SQLServer
-    connection_key_prefix = KEY_PREFIX
-    legacy_connection_key_prefix = KEY_PREFIX_PRE_2017
 
     def __init__(self, check: SQLServer):
         super().__init__(check)
@@ -49,7 +54,7 @@ class SQLServerViewCollector(SQLServerSchemaCollector):
     def kind(self) -> str:
         return "sqlserver_views"
 
-    def _get_objects_query(self) -> str:
+    def _get_tables_query(self) -> str:
         limit = int(self._config.max_views or 1_000_000)
         query = f"""
             WITH

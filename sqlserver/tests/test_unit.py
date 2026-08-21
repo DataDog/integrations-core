@@ -158,8 +158,8 @@ def test_schema_collectors_use_independent_queries_and_limits() -> None:
     table_collector._is_2016_or_earlier = False
     view_collector._is_2016_or_earlier = False
 
-    table_query = table_collector._get_objects_query()
-    view_query = view_collector._get_objects_query()
+    table_query = table_collector._get_tables_query()
+    view_query = view_collector._get_tables_query()
 
     assert table_collector._config.max_tables == 25
     assert view_collector._config.max_views == 1000
