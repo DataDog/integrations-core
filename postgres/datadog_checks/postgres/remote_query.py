@@ -50,7 +50,7 @@ REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
 # (limits.chunkBytes); it may be up to 128 MiB. maxBytes must not exceed the caller/backend COPY
 # safety cap (limits.maxBytes).
 REMOTE_QUERY_UPLOAD_MAX_PART_BYTES = 128 * 1024 * 1024
-REMOTE_QUERY_UPLOAD_MAX_TOTAL_BYTES = 10 * 1024 * 1024 * 1024
+REMOTE_QUERY_UPLOAD_MAX_TOTAL_BYTES = 100 * 1024 * 1024 * 1024
 
 CopyStreamFormat = Literal['csv', 'binary']
 ResultDeliveryMode = Literal['POC_PUBLIC_MULTIPART_UPLOAD']

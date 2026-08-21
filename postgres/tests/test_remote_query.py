@@ -1646,51 +1646,79 @@ def test_copy_stream_upload_mode_aggregates_copy_chunks_into_partbytes_parts(mon
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: 10 GiB capacity, 128 MiB part ceiling, and 5-minute HTTP timeout
+# Phase 2: 100 GiB capacity, 128 MiB part ceiling, and 5-minute HTTP timeout
 #
-# These tests prove the server-owned maximums (10 GiB total, 128 MiB per part) are accepted
+# These tests prove the server-owned maximums (100 GiB total, 128 MiB per part) are accepted
 # up to the boundary and rejected one byte past it, that partBytes stays independent of the
 # 1 MiB COPY read chunk, that many 1 MiB COPY reads aggregate into 64 MiB parts without
 # materializing the full result, and that the per-upload HTTP timeout is a 5-minute
-# (connect, read) tuple. No test allocates 10 GiB; the boundary tests are pure validation,
+# (connect, read) tuple. No test allocates 100 GiB; the boundary tests are pure validation,
 # and the aggregation test uses a generated 1 MiB-block stream with a discarding client.
 # ---------------------------------------------------------------------------
 
 GIB = 1024 * 1024 * 1024
-TEN_GIB = 10 * GIB
+HUNDRED_GIB = 100 * GIB
 MAX_PART_BYTES = 128 * 1024 * 1024
 
 
-def test_copy_stream_upload_mode_accepts_ten_gib_max_bytes_when_extraction_cap_matches():
-    # A large int64 maxBytes (10 GiB) is accepted when the COPY extraction cap matches. No data is
+def test_copy_stream_upload_mode_accepts_hundred_gib_max_bytes_when_extraction_cap_matches():
+    # A large int64 maxBytes (100 GiB) is accepted when the COPY extraction cap matches. No data is
     # allocated: an empty result finalizes with zero bytes, proving the caps validate without
-    # materializing 10 GiB.
+    # materializing 100 GiB.
     pool = FakePool(copy_blocks=[])
     request = valid_upload_copy_request()
     request['resultDelivery']['partBytes'] = MAX_PART_BYTES
-    request['resultDelivery']['maxBytes'] = TEN_GIB
-    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': TEN_GIB, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
+    request['resultDelivery']['maxBytes'] = HUNDRED_GIB
+    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': HUNDRED_GIB, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
 
     events = collect_copy_events(request, make_check(pool=pool))
 
     started = event_metadata(events[0])
     assert started['status'] == 'STARTED'
     assert started['resultDelivery']['partBytes'] == MAX_PART_BYTES
-    assert started['resultDelivery']['maxBytes'] == TEN_GIB
-    assert started['maxBytes'] == TEN_GIB
+    assert started['resultDelivery']['maxBytes'] == HUNDRED_GIB
+    assert started['maxBytes'] == HUNDRED_GIB
     assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
     assert event_metadata(events[-1])['uploadReceipt']['totalBytes'] == 0
     assert event_metadata(events[-1])['uploadReceipt']['partCount'] == 0
     assert pool.closed_copies == 1
 
 
-def test_copy_stream_upload_mode_rejects_max_bytes_above_ten_gib():
-    # Plus-one safety: one byte past the 10 GiB server-owned maximum is rejected before any pool
+def test_copy_stream_upload_mode_accepts_twenty_gib_logical_result_envelope():
+    # A logical 20 GiB result envelope is accepted well under the 100 GiB server-owned maximum
+    # when the COPY extraction cap matches. No data is allocated: an empty result finalizes with
+    # zero bytes, proving a realistic large result validates without materializing 20 GiB.
+    pool = FakePool(copy_blocks=[])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['partBytes'] = 64 * 1024 * 1024
+    request['resultDelivery']['maxBytes'] = 20 * GIB
+    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': 20 * GIB, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    started = event_metadata(events[0])
+    assert started['status'] == 'STARTED'
+    assert started['resultDelivery']['partBytes'] == 64 * 1024 * 1024
+    assert started['resultDelivery']['maxBytes'] == 20 * GIB
+    assert started['maxBytes'] == 20 * GIB
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert event_metadata(events[-1])['uploadReceipt']['totalBytes'] == 0
+    assert event_metadata(events[-1])['uploadReceipt']['partCount'] == 0
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_rejects_max_bytes_above_hundred_gib():
+    # Plus-one safety: one byte past the 100 GiB server-owned maximum is rejected before any pool
     # access. No allocation.
     request = valid_upload_copy_request()
     request['resultDelivery']['partBytes'] = MAX_PART_BYTES
-    request['resultDelivery']['maxBytes'] = TEN_GIB + 1
-    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': TEN_GIB + 1, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
+    request['resultDelivery']['maxBytes'] = HUNDRED_GIB + 1
+    request['limits'] = {
+        'chunkBytes': PROOF_MIB,
+        'maxBytes': HUNDRED_GIB + 1,
+        'maxRowBytes': PROOF_MIB,
+        'timeoutMs': 30000,
+    }
 
     events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
 
@@ -1701,8 +1729,8 @@ def test_copy_stream_upload_mode_rejects_max_bytes_above_ten_gib():
 def test_copy_stream_upload_mode_part_bytes_boundary(part_bytes):
     request = valid_upload_copy_request()
     request['resultDelivery']['partBytes'] = part_bytes
-    request['resultDelivery']['maxBytes'] = TEN_GIB
-    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': TEN_GIB, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
+    request['resultDelivery']['maxBytes'] = HUNDRED_GIB
+    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': HUNDRED_GIB, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
     # An empty registry separates validation from resolution: a valid request reaches target
     # resolution (target_not_found), while an invalid one fails at validation (invalid_request)
     # before the registry is touched. No data is allocated in either case.
