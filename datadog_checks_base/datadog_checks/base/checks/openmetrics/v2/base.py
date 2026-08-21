@@ -124,7 +124,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         for scraper in self.scrapers.values():
             scraper.set_dynamic_tags(*tags)
 
-    def get_config_with_defaults(self, config):
+    def get_config_with_defaults(self, config: Mapping) -> ChainMap:
         """Combine instance config with class defaults and file-based metric mappings.
 
         Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
