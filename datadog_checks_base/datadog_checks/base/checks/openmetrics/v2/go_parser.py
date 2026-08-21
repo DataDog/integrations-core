@@ -95,13 +95,13 @@ def _json_to_metric(family: dict, is_openmetrics: bool = False) -> Metric:
     metric_type = family.get('type', 'untyped')
     raw_samples = family.get('samples', ())
 
-    # The Python prometheus_client parser adds ``_total`` to counter sample
-    # names and strips it from the family name.  The Go parser preserves
-    # both as-is.  Normalize here so downstream code (which was written
-    # against the Python parser's output) sees consistent names.
-    add_total_to_samples = False
+    # The Python prometheus_client parser adds ``_total`` to the main counter
+    # sample and strips it from the family name.  Non-standard suffixes
+    # (``_last``, ``_min``, ``_max``, etc.) become separate "unknown" families.
+    # The Go parser groups everything under one typed family.  Normalize here
+    # so downstream code sees consistent names.
+    original_name = name
     if not is_openmetrics and metric_type == 'counter':
-        add_total_to_samples = True
         if name.endswith('_total'):
             name = name[:-6]
         else:
@@ -109,9 +109,17 @@ def _json_to_metric(family: dict, is_openmetrics: bool = False) -> Metric:
             if any(s.get('name') == total_name for s in raw_samples):
                 name = total_name
 
+    def _sample_name(raw_name):
+        # Only add ``_total`` to the sample whose name matches the TYPE-line
+        # family name exactly — that is the standard counter sample.
+        # Non-standard samples (``_last``, ``_min``, etc.) are left as-is.
+        if not is_openmetrics and metric_type == 'counter' and raw_name == original_name and not raw_name.endswith('_total'):
+            return raw_name + '_total'
+        return raw_name
+
     samples = [
         Sample(
-            s['name'] if (not add_total_to_samples or s['name'].endswith('_total')) else s['name'] + '_total',
+            _sample_name(s['name']),
             s.get('labels') or {},
             _decode_value(s['value']),
             s.get('timestamp'),
