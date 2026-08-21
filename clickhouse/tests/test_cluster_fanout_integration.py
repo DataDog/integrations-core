@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.utils import CLUSTER_NODE_TAG
+from datadog_checks.clickhouse.utils import CLUSTER_NODE_TAG, CLUSTER_TAG, HOSTING_TYPE_TAG
 
 from .common import CLICKHOUSE_VERSION, is_legacy
 
@@ -46,6 +46,31 @@ def test_get_system_table_fans_out_over_the_resolved_cluster(instance, dd_run_ch
     # cluster on a self-hosted deployment) or silently read the stock local-only cluster instead.
     rows = check.execute_query_raw(f'SELECT count() FROM {table_ref}')
     assert rows[0][0] == 1
+
+
+def test_database_instance_payload_carries_real_cluster_topology(aggregator, instance, dd_run_check):
+    """The metadata payload reports topology read from the actual ClickHouse cluster."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    dd_run_check(check)
+
+    connect_node = check.execute_query_raw('SELECT hostName()')[0][0]
+    node_rows = check.execute_query_raw(
+        f"SELECT hostName() FROM clusterAllReplicas('{TEST_CLUSTER_NAME}', system.one) "
+        "SETTINGS skip_unavailable_shards=1"
+    )
+    nodes = sorted({row[0] for row in node_rows})
+    events = aggregator.get_event_platform_events('dbm-metadata')
+    event = next(event for event in events if event['kind'] == 'database_instance')
+
+    assert event['metadata']['cluster_name'] == TEST_CLUSTER_NAME
+    assert event['metadata']['connect_node'] == connect_node
+    assert event['metadata']['nodes'] == nodes
+    assert event['metadata']['single_endpoint_mode'] is True
+    assert event['metadata']['hosting_type'] == check.hosting_type
+    assert connect_node in nodes
+    assert f'{CLUSTER_TAG}:{TEST_CLUSTER_NAME}' in event['tags']
+    assert f'{HOSTING_TYPE_TAG}:{check.hosting_type}' in event['tags']
 
 
 def test_single_endpoint_mode_metrics_carry_the_cluster_node_tag(aggregator, instance, dd_run_check):

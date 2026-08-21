@@ -28,12 +28,14 @@ from .utils import (
     CLUSTER_MACRO_QUERY,
     CLUSTER_NAME_QUERY,
     CLUSTER_TAG,
+    CONNECT_NODE_QUERY,
     HOSTING_TYPE_TAG,
     SHARED_MERGE_TREE_QUERY,
     ErrorSanitizer,
     HostingType,
     cluster_all_replicas,
     cluster_aware_query,
+    cluster_nodes_query,
 )
 
 try:
@@ -234,6 +236,14 @@ class ClickhouseCheck(DatabaseCheck):
             # Get tags without db: prefix for metadata
             tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
+            metadata = {
+                "dbm": self._config.dbm,
+                "connection_host": self._config.server,
+                "hosting_type": self.hosting_type,
+                "single_endpoint_mode": self.is_single_endpoint_mode,
+                **self._cluster_topology_metadata(),
+            }
+
             event = {
                 "host": self.reported_hostname,
                 "port": self._config.port,
@@ -248,10 +258,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "integration_version": __version__,
                 "tags": tags_no_db,
                 "timestamp": current_time * 1000,
-                "metadata": {
-                    "dbm": self._config.dbm,
-                    "connection_host": self._config.server,
-                },
+                "metadata": metadata,
             }
 
             self._database_instance_last_emitted = current_time
@@ -419,6 +426,48 @@ class ClickhouseCheck(DatabaseCheck):
         if self.cluster_name:
             return self.cluster_name
         return None if self.hosting_type == HostingType.SELF_HOSTED else 'default'
+
+    def _cluster_topology_metadata(self) -> dict:
+        """The cluster node inventory, for the database_instance payload.
+
+        Keys are omitted rather than reported empty, so a failed query never claims a cluster has
+        no nodes.
+        """
+        metadata = {}
+        if self.cluster_name:
+            metadata["cluster_name"] = self.cluster_name
+        connect_node = self._resolve_connect_node()
+        if connect_node:
+            metadata["connect_node"] = connect_node
+        nodes = self._resolve_cluster_nodes(connect_node)
+        if nodes:
+            metadata["nodes"] = nodes
+        return metadata
+
+    def _resolve_connect_node(self) -> str | None:
+        """The name of the node serving this connection, or None when it cannot be read."""
+        try:
+            rows = self.execute_query_raw(CONNECT_NODE_QUERY)
+        except Exception as e:
+            self.log.debug('Unable to read the connected node name: %s', e)
+            return None
+        return str(rows[0][0]) if rows and rows[0] and rows[0][0] else None
+
+    def _resolve_cluster_nodes(self, connect_node: str | None) -> list[str]:
+        """Sorted, de-duplicated cluster node names, or an empty list when they cannot be determined.
+
+        A point-in-time observation rather than a steady-state count: replicas are replaced
+        make-before-break, so old and new both answer while the old one drains.
+        """
+        cluster = self.fanout_cluster_name
+        if not cluster:
+            return [connect_node] if connect_node else []
+        try:
+            rows = self.execute_query_raw(cluster_nodes_query(cluster))
+        except Exception as e:
+            self.log.debug('Unable to enumerate the nodes of cluster %r: %s', cluster, e)
+            return []
+        return sorted({str(row[0]) for row in rows if row and row[0]})
 
     @property
     def hosting_type(self) -> str:
