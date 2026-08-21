@@ -1098,11 +1098,6 @@ def test_copy_stream_upload_mode_rejects_missing_upload_id():
     'delivery, limits, expected',
     [
         (
-            {'partBytes': 16},
-            {'chunkBytes': 8, 'maxBytes': 64},
-            'resultDelivery.partBytes must not exceed limits.chunkBytes',
-        ),
-        (
             {'maxBytes': 128},
             {'chunkBytes': 8, 'maxBytes': 64},
             'resultDelivery.maxBytes must not exceed limits.maxBytes',
@@ -1115,6 +1110,29 @@ def test_copy_stream_upload_mode_rejects_upload_cap_widening(delivery, limits, e
     request['limits'].update(limits)
     events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
     assert_failed_event(events, 'invalid_request', expected)
+
+
+def test_copy_stream_upload_mode_part_bytes_may_exceed_copy_chunk_bytes():
+    # partBytes (the multipart part size) and limits.chunkBytes (the COPY streaming chunk size)
+    # are distinct concepts: partBytes may exceed chunkBytes. The request validates without
+    # widening the COPY maxBytes cap and the stream proceeds to SUCCEEDED.
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])  # 18 bytes
+    request = valid_upload_copy_request()
+    request['resultDelivery']['partBytes'] = 16
+    request['resultDelivery']['maxBytes'] = 64
+    request['limits'] = {'chunkBytes': 8, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 5000}
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    started = event_metadata(events[0])
+    assert started['status'] == 'STARTED'
+    assert started['chunkBytes'] == 8  # COPY streaming chunk size
+    assert started['resultDelivery']['partBytes'] == 16  # multipart part size, exceeds chunkBytes
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    # The COPY stream emits 3 chunkBytes-sized chunks, but the upload aggregates them into
+    # ceil(18/16) = 2 parts: the provisional receipt reports the part count, not the chunk count.
+    assert event_metadata(events[-1])['stats']['chunksEmitted'] == 3
+    assert event_metadata(events[-1])['uploadReceipt']['partCount'] == 2
 
 
 def test_copy_stream_upload_mode_accepts_equal_upload_caps():
@@ -1584,4 +1602,31 @@ def test_copy_stream_upload_mode_finalizes_empty_result_with_zero_parts(monkeypa
     assert receipt['totalBytes'] == 0
     assert receipt['totalRows'] == 0
     assert receipt['objectPath'].endswith('result.csv')
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_aggregates_copy_chunks_into_partbytes_parts(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    # partBytes (8) exceeds limits.chunkBytes (4): the COPY stream emits 4-byte chunks and the
+    # upload client aggregates them into 8-byte parts. Two full parts plus a final short part.
+    pool = FakePool(copy_blocks=[b'aaaa', b'bbbb', b'cccc', b'dddd', b'ee'])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['partBytes'] = 8
+    request['resultDelivery']['maxBytes'] = 24
+    request['limits'] = {'chunkBytes': 4, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 5000}
+    fake = FakeUploadClient()
+
+    _execute_upload_stream(request, make_check(pool=pool), lambda *event: None, http_client=fake)
+
+    # Contiguous 1-based part numbers; each non-final part is exactly partBytes (8) and aggregates
+    # two 4-byte COPY chunks; the final part is the short remainder.
+    assert [call[0] for call in fake.put_calls] == [1, 2, 3]
+    assert [call[1] for call in fake.put_calls] == [b'aaaabbbb', b'ccccdddd', b'ee']
+    assert [len(call[1]) for call in fake.put_calls] == [8, 8, 2]
+    assert sum(len(call[1]) for call in fake.put_calls) == 18
+    # Each part carries the SHA-256 of its aggregated body, not of the individual COPY chunks.
+    for _part_number, payload, sha256_hex, _rows in fake.put_calls:
+        assert sha256_hex == hashlib.sha256(payload).hexdigest()
+    assert fake.finalize_calls == 1
+    assert fake.abort_calls == 0
     assert pool.closed_copies == 1

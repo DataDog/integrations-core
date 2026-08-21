@@ -182,13 +182,14 @@ class RemoteQueryCopyRequest(BaseModel):
         return self
 
     @model_validator(mode='after')
-    def validate_part_within_limits(self) -> 'RemoteQueryCopyRequest':
-        # The upload caps must not widen the caller/backend COPY safety caps. Fail closed so a
+    def validate_max_within_limits(self) -> 'RemoteQueryCopyRequest':
+        # The upload byte cap must not widen the caller/backend COPY safety cap. Fail closed so a
         # backend-injected resultDelivery cannot raise the integration's configured byte ceiling;
-        # equal or smaller upload caps are accepted.
+        # an equal or smaller upload maxBytes is accepted. ``partBytes`` (the multipart part size)
+        # and ``limits.chunkBytes`` (the COPY streaming chunk size) are distinct concepts, so
+        # partBytes may exceed chunkBytes: the COPY stream emits chunkBytes-sized events that the
+        # upload client aggregates into partBytes-sized parts.
         if self.result_delivery is not None:
-            if self.result_delivery.part_bytes > self.limits.chunk_bytes:
-                raise ValueError('resultDelivery.partBytes must not exceed limits.chunkBytes')
             if self.result_delivery.max_bytes > self.limits.max_bytes:
                 raise ValueError('resultDelivery.maxBytes must not exceed limits.maxBytes')
         return self
@@ -343,13 +344,12 @@ def _dbname_from_check(check: 'PostgreSql') -> str | None:
 
 def _started_metadata(request: RemoteQueryCopyRequest) -> dict[str, Any]:
     result_delivery = request.result_delivery
-    chunk_bytes = result_delivery.part_bytes if result_delivery is not None else request.limits.chunk_bytes
     max_bytes = result_delivery.max_bytes if result_delivery is not None else request.limits.max_bytes
     metadata: dict[str, Any] = {
         'status': 'STARTED',
         'format': request.format,
         'operation': request.operation,
-        'chunkBytes': chunk_bytes,
+        'chunkBytes': request.limits.chunk_bytes,
         'maxBytes': max_bytes,
         'maxRowBytes': request.limits.max_row_bytes,
     }
@@ -378,7 +378,7 @@ def _succeeded_metadata(state: _CopyStreamState, started_at: float, request: Rem
             'mode': result_delivery.mode,
             'uploadId': result_delivery.upload_id,
             'totalBytes': state.bytes_emitted,
-            'partCount': state.chunks_emitted,
+            'partCount': _multipart_part_count(state.bytes_emitted, result_delivery.part_bytes),
         }
     return metadata
 
@@ -442,7 +442,7 @@ def _copy_stream_data_events(
 ) -> Iterator[tuple[CopyStreamEvent, _CopyStreamState]]:
     limits = request.limits
     result_delivery = request.result_delivery
-    chunk_bytes = result_delivery.part_bytes if result_delivery is not None else limits.chunk_bytes
+    chunk_bytes = limits.chunk_bytes
     max_bytes = result_delivery.max_bytes if result_delivery is not None else limits.max_bytes
     max_row_bytes = limits.max_row_bytes
     timeout_ms = limits.timeout_ms
@@ -758,6 +758,14 @@ def _count_newlines(payload: bytes) -> int:
     return payload.count(b'\n')
 
 
+def _multipart_part_count(total_bytes: int, part_bytes: int) -> int:
+    # Number of multipart parts for ``total_bytes`` aggregated at ``part_bytes``: full parts of
+    # exactly partBytes plus a final short part, or zero parts for an empty result.
+    if total_bytes <= 0:
+        return 0
+    return (total_bytes + part_bytes - 1) // part_bytes
+
+
 def _intake_receipt_to_camel(resp: Mapping[str, Any]) -> dict[str, Any]:
     return {
         'mode': resp.get('mode', 'POC_PUBLIC_MULTIPART_UPLOAD'),
@@ -780,12 +788,52 @@ def _safe_abort(client: _UploadClient, creds: _UploadCredentials) -> None:
         LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
 
 
-def _upload_one_part(client: _UploadClient, creds: _UploadCredentials, event: CopyStreamEvent) -> None:
-    metadata = event.metadata
-    # Part numbers are contiguous and 1-based to match provider multipart conventions; the
-    # iterator's 0-based sequence maps directly to a 1-based part number.
-    part_number = metadata['sequence'] + 1
-    client.put_part(creds, part_number, event.payload, metadata['sha256'], _count_newlines(event.payload))
+@dataclass(frozen=True)
+class _MultipartPart:
+    part_number: int
+    payload: bytes
+
+
+class _MultipartBuffer:
+    """Aggregate COPY chunk bytes into server-clamped multipart parts.
+
+    The COPY stream emits ``limits.chunkBytes``-sized chunks; this buffer accumulates them into
+    ``partBytes``-sized parts (the multipart part size), which may exceed the COPY chunk size.
+    At most one part is buffered at a time. Part numbers are contiguous and 1-based to match
+    provider multipart conventions.
+    """
+
+    def __init__(self, part_bytes: int) -> None:
+        self._part_bytes = part_bytes
+        self._pending = bytearray()
+        self._next_part_number = 1
+
+    def extend(self, data: bytes) -> None:
+        self._pending.extend(data)
+
+    def _take(self) -> _MultipartPart:
+        payload = bytes(self._pending[: self._part_bytes])
+        del self._pending[: self._part_bytes]
+        part = _MultipartPart(self._next_part_number, payload)
+        self._next_part_number += 1
+        return part
+
+    def full_parts(self) -> Iterator[_MultipartPart]:
+        while len(self._pending) >= self._part_bytes:
+            yield self._take()
+
+    def flush_final(self) -> _MultipartPart | None:
+        if not self._pending:
+            return None
+        return self._take()
+
+
+def _upload_one_part(client: _UploadClient, creds: _UploadCredentials, part: _MultipartPart) -> None:
+    # The part SHA-256 is over the aggregated part body (all chunks combined), not the
+    # individual COPY chunks, so the intake can verify the part it receives.
+    client.put_part(
+        creds, part.part_number, part.payload, hashlib.sha256(part.payload).hexdigest(), _count_newlines(part.payload)
+    )
 
 
 def _finalize_upload(
@@ -819,11 +867,25 @@ def _execute_upload_stream(
         return
     client = http_client if http_client is not None else _default_upload_client()
     events = iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check]))
+    buffer: _MultipartBuffer | None = None
     try:
         for event in events:
-            if event.event_type == 'data':
-                _upload_one_part(client, creds, event)
+            if event.event_type == 'metadata':
+                # The STARTED metadata carries the backend-validated partBytes; the COPY stream
+                # emits chunkBytes-sized events that this client aggregates into partBytes parts.
+                delivery_meta = event.metadata.get('resultDelivery') or {}
+                buffer = _MultipartBuffer(int(delivery_meta.get('partBytes') or 0))
+                _emit_copy_event(emit, event)
+            elif event.event_type == 'data':
+                if buffer is not None:
+                    buffer.extend(event.payload)
+                    for part in buffer.full_parts():
+                        _upload_one_part(client, creds, part)
             elif event.event_type == 'final':
+                if buffer is not None:
+                    final_part = buffer.flush_final()
+                    if final_part is not None:
+                        _upload_one_part(client, creds, final_part)
                 _finalize_upload(client, creds, event, emit)
             elif event.event_type == 'error':
                 _safe_abort(client, creds)
