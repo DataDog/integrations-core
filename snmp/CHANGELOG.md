@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 13.3.0 / 2026-08-21
+
+***Security***:
+
+* Bump pyasn1 from 0.6.3 to 0.6.4 to remediate CVE-2026-59884, CVE-2026-59885, CVE-2026-59886, and PYSEC-2026-3455 (denial-of-service in BER/CER/DER decoding). ([#24727](https://github.com/DataDog/integrations-core/pull/24727))
+
 ## 13.2.0 / 2026-08-05
 
 ***Added***:
