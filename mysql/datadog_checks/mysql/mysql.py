@@ -85,6 +85,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
+from .statements_v2 import MySQLStatementMetricsV2
 from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
 from .version_utils import parse_version
 
@@ -150,9 +151,7 @@ class MySql(DatabaseCheck):
         )
 
         # Pass function reference and managed auth flag to async jobs
-        self._statement_metrics = MySQLStatementMetrics(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
+        self._initialize_statement_metrics()
         self._statement_samples = MySQLStatementSamples(
             self, self._config, self._get_connection_args, self._uses_aws_managed_auth
         )
@@ -170,6 +169,16 @@ class MySql(DatabaseCheck):
         self._is_innodb_engine_enabled_cached = None
 
         self._submit_initialization_health_event()
+
+    def _initialize_statement_metrics(self):
+        if is_affirmative(self._config.statement_metrics_config.get('incremental_query_metrics', False)):
+            self.log.info("Using incremental query metrics collector")
+            collector_class = MySQLStatementMetricsV2
+        else:
+            collector_class = MySQLStatementMetrics
+        self._statement_metrics = collector_class(
+            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
+        )
 
     def _submit_initialization_health_event(self):
         try:

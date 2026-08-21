@@ -1,0 +1,1 @@
+Add an opt-in incremental query metrics collector that only obfuscates statements whose execution counters changed since the previous collection.
