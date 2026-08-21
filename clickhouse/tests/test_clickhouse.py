@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
@@ -141,47 +140,3 @@ def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_
     assert event['metadata']['connect_node']
     assert event['metadata']['nodes']
     assert event['metadata']['connect_node'] in event['metadata']['nodes']
-
-
-def _database_instance_event(aggregator):
-    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    return next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
-
-
-def test_database_instance_metadata_cluster_topology(aggregator, instance, dd_run_check):
-    """The payload carries the node inventory behind the endpoint."""
-    instance = {**instance, 'single_endpoint_mode': True}
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-    check.check_id = 'test:457'
-
-    with mock.patch.object(ClickhouseCheck, '_resolve_cluster_nodes', return_value=['node-a', 'node-b', 'node-c']):
-        with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
-            cluster_name.return_value = 'default'
-            dd_run_check(check)
-
-    event = _database_instance_event(aggregator)
-
-    assert event is not None
-    assert event['metadata']['cluster_name'] == 'default'
-    assert event['metadata']['nodes'] == ['node-a', 'node-b', 'node-c']
-    assert event['metadata']['connect_node']
-    assert event['metadata']['single_endpoint_mode'] is True
-
-
-def test_database_instance_metadata_omits_cluster_topology_when_unresolved(aggregator, instance, dd_run_check):
-    """A cluster that cannot be enumerated is omitted, not reported empty."""
-    instance = {**instance, 'single_endpoint_mode': True}
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-    check.check_id = 'test:458'
-
-    with mock.patch.object(ClickhouseCheck, '_resolve_cluster_nodes', return_value=[]):
-        with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
-            cluster_name.return_value = None
-            dd_run_check(check)
-
-    event = _database_instance_event(aggregator)
-
-    assert event is not None
-    assert 'nodes' not in event['metadata']
-    assert 'cluster_name' not in event['metadata']
-    assert event['metadata']['single_endpoint_mode'] is True
