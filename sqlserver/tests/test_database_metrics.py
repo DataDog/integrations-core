@@ -1211,11 +1211,12 @@ def test_sqlserver_index_usage_metrics_object_names(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
     def execute_query_handler_mocked(query, db=None, params=None):
+        assert "OBJECT_NAME(" not in query
         if object_names:
-            assert "OBJECT_NAME(ind.object_id) IN (?)" in query
+            assert "WHERE o.name IN (?)" in query
             assert params == tuple(object_names)
             return [row for row in mocked_results if row[3] in params]
-        assert "OBJECT_NAME(ind.object_id) IN" not in query
+        assert "WHERE o.name IN" not in query
         assert params is None
         return mocked_results
 

@@ -14,9 +14,9 @@ INDEX_USAGE_STATS_QUERY = {
     "query": """
     SELECT
         DB_NAME(ixus.database_id) AS db,
-        COALESCE(ind.name, 'HeapIndex_' + OBJECT_NAME(ind.object_id)) AS index_name,
+        COALESCE(ind.name, 'HeapIndex_' + o.name) AS index_name,
         OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) AS "schema",
-        OBJECT_NAME(ind.object_id) AS table_name,
+        o.name AS table_name,
         ixus.user_seeks as user_seeks,
         ixus.user_scans as user_scans,
         ixus.user_lookups as user_lookups,
@@ -107,7 +107,7 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
         executors = []
         if self.index_usage_object_names:
             placeholders = ','.join(['?'] * len(self.index_usage_object_names))
-            object_name_filter = f" WHERE OBJECT_NAME(ind.object_id) IN ({placeholders})"
+            object_name_filter = f" WHERE o.name IN ({placeholders})"
         else:
             object_name_filter = None
         for database in self.databases:
