@@ -54,6 +54,19 @@ Kueue is a cluster-level service. Configure this integration as a Cluster Agent 
 
 See the [sample kueue.d/conf.yaml][4] for all available configuration options.
 
+### Cluster agent configuration and GPU monitoring integration
+
+Enabling [GPU monitoring][13] will enrich the Kueue integration with GPU-related data, and will also show GPU-related tags in the Kueue metrics. In order to enable this part of the integration, two settings need to be configured in the Datadog Agent configuration:
+
+```yaml
+gpu:
+  enabled: true
+
+cluster_agent:
+  kueue:
+    enabled: true
+```
+
 ### Log collection
 
 The Kueue controller manager writes logs to its container output, which Kubernetes captures as container logs. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12]. Logs are collected by the node Agent running on the node that hosts the Kueue controller manager, not by the Cluster Agent that runs this cluster check.
@@ -115,3 +128,4 @@ Need help? Contact [Datadog support][8].
 [10]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
 [11]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent
 [12]: https://docs.datadoghq.com/containers/kubernetes/log/
+[13]: https://docs.datadoghq.com/gpu_monitoring/
