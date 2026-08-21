@@ -12,8 +12,10 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 
 CONTROLLER_IP_STATE = 'argo_workflows_controller_ip'
+KUBECONFIG_STATE = 'argo_workflows_kubeconfig'
 
 
 def setup_argo_wf():
@@ -45,10 +47,22 @@ def get_workflow_controller_pod_ip() -> str:
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_argo_wf]) as kubeconfig:
+        save_state(KUBECONFIG_STATE, kubeconfig)
         controller_ip = get_state(CONTROLLER_IP_STATE)
-        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
+        metadata = {
+            'agent_type': 'kubernetes',
+            'kubernetes': {
+                'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'argo_workflows', 'data', 'auto_conf.yaml'),
+            },
+        }
 
         yield {'openmetrics_endpoint': f'http://{controller_ip}:9090/metrics'}, metadata
+
+
+@pytest.fixture(scope='session')
+def argo_workflows_kubeconfig():
+    return get_state(KUBECONFIG_STATE)
 
 
 @pytest.fixture

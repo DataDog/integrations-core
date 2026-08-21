@@ -411,7 +411,7 @@ def test_database_hostname_ignores_reported_hostname_override(reported_hostname,
 
 def test_cluster_aware_query_bulk_match_query():
     """The cluster-aware variant reads all replicas and tags system.events per node."""
-    variant = cluster_aware_query(advanced_queries.SystemEvents)
+    variant = cluster_aware_query(advanced_queries.SystemEvents, 'default')
 
     assert variant['query'] == (
         "SELECT value, event, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.events)"
@@ -424,7 +424,7 @@ def test_cluster_aware_query_bulk_match_query():
 
 def test_cluster_aware_query_preserves_where_clause():
     """system.errors carries a WHERE clause that must survive in the cluster-aware variant."""
-    variant = cluster_aware_query(advanced_queries.SystemErrors)
+    variant = cluster_aware_query(advanced_queries.SystemErrors, 'default')
 
     assert variant['query'] == (
         "SELECT value, name, code, remote, hostName() AS clickhouse_node "
@@ -435,13 +435,26 @@ def test_cluster_aware_query_preserves_where_clause():
 
 def test_cluster_aware_query_legacy_query():
     """The helper builds a cluster-aware variant for a legacy query too."""
-    variant = cluster_aware_query(queries.SystemMetrics)
+    variant = cluster_aware_query(queries.SystemMetrics, 'default')
 
     assert variant['query'] == (
         "SELECT value, metric, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.metrics)"
     )
     assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
     assert queries.SystemMetrics['query'] == 'SELECT value, metric FROM system.metrics'
+
+
+def test_cluster_aware_query_fans_out_over_the_named_cluster():
+    """The resolved name has to reach the SQL, since a self-hosted cluster is not 'default'."""
+    variant = cluster_aware_query(queries.SystemMetrics, 'prod_cluster')
+
+    assert "clusterAllReplicas('prod_cluster', system.metrics)" in variant['query']
+
+
+def test_cluster_aware_query_escapes_the_cluster_name():
+    variant = cluster_aware_query(queries.SystemMetrics, "o'brien")
+
+    assert "clusterAllReplicas('o\\'brien', system.metrics)" in variant['query']
 
 
 @pytest.mark.parametrize('use_advanced_queries', [True, False])
@@ -480,6 +493,49 @@ def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advan
     check._dbms_version = '24.8'
 
     assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())
+
+
+def test_get_queries_fans_out_over_the_resolved_cluster(instance):
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = 'prod_cluster'
+        cluster_aware = [q for q in check.get_queries() if 'clusterAllReplicas' in q['query']]
+
+    assert cluster_aware
+    assert all("clusterAllReplicas('prod_cluster'," in q['query'] for q in cluster_aware)
+
+
+def test_get_queries_reads_local_tables_when_there_is_no_cluster_to_fan_out_over(instance):
+    """Without a cluster there is nothing to fan out over, so the local table is read."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = None
+        query_list = check.get_queries()
+
+    assert query_list
+    assert all('clusterAllReplicas' not in q['query'] for q in query_list)
+
+
+@pytest.mark.parametrize(
+    ('single_endpoint_mode', 'fanout_cluster', 'expected'),
+    [
+        pytest.param(True, 'default', "clusterAllReplicas('default', system.query_log)", id='cloud'),
+        pytest.param(True, 'prod_cluster', "clusterAllReplicas('prod_cluster', system.query_log)", id='self-hosted'),
+        pytest.param(True, None, 'system.query_log', id='no-cluster'),
+        pytest.param(False, 'default', 'system.query_log', id='direct-connection'),
+    ],
+)
+def test_get_system_table(instance, single_endpoint_mode, fanout_cluster, expected):
+    instance = {**instance, 'single_endpoint_mode': single_endpoint_mode}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout:
+        fanout.return_value = fanout_cluster
+
+        assert check.get_system_table('query_log') == expected
 
 
 def make_query_replaying_check(query_results):
@@ -563,6 +619,26 @@ def test_cluster_name_is_cached_including_the_absent_case():
     assert check.cluster_name is None
 
     assert check.execute_query_raw.call_count == 2  # one attempt per source, not per access
+
+
+@pytest.mark.parametrize(
+    ('cluster_name', 'hosting_type', 'expected'),
+    [
+        pytest.param('prod_cluster', HostingType.SELF_HOSTED, 'prod_cluster', id='self-hosted-named-cluster'),
+        pytest.param('default', HostingType.CLOUD, 'default', id='cloud'),
+        pytest.param(None, HostingType.CLOUD, 'default', id='cloud-unresolved-name'),
+        pytest.param(None, HostingType.UNKNOWN, 'default', id='unknown-hosting-unresolved-name'),
+        pytest.param(None, HostingType.SELF_HOSTED, None, id='self-hosted-without-a-cluster'),
+    ],
+)
+def test_fanout_cluster_name(cluster_name, hosting_type, expected):
+    check = make_query_replaying_check({})
+    with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name_prop:
+        with mock.patch.object(ClickhouseCheck, 'hosting_type', new_callable=mock.PropertyMock) as hosting_type_prop:
+            cluster_name_prop.return_value = cluster_name
+            hosting_type_prop.return_value = hosting_type
+
+            assert check.fanout_cluster_name == expected
 
 
 def test_check_tags_with_cluster(instance):
