@@ -152,20 +152,29 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
 
     try:
         check = integration_check(dbm_instance)
-        collector = SQLServerSchemaCollector(check)
-        collector.collect_schemas()
+        check.sql_metadata.collect_schemas()
 
         views = [
             view
             for event in aggregator.get_event_platform_events('dbm-metadata')
-            if event['kind'] == 'sqlserver_databases'
+            if event['kind'] == 'sqlserver_views'
             for database in event['metadata']
             if database['name'] == SCHEMA_DATABASE
             for schema in database['schemas']
             for view in schema.get('views', [])
         ]
         view = next(view for view in views if view['name'] == view_name)
+        schema = next(
+            schema
+            for event in aggregator.get_event_platform_events('dbm-metadata')
+            if event['kind'] == 'sqlserver_views'
+            for database in event['metadata']
+            if database['name'] == SCHEMA_DATABASE
+            for schema in database['schemas']
+            if any(candidate['name'] == view_name for candidate in schema['views'])
+        )
 
+        assert schema['tables'] == []
         assert view['id'].isdigit()
         datetime.fromisoformat(view['create_date'])
         datetime.fromisoformat(view['modify_date'])
@@ -173,8 +182,8 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
         assert view_name in view['definition']
         assert {column['name'] for column in view['columns']} == {'id', 'name', 'population'}
         for column in view['columns']:
-            assert {'name', 'data_type', 'nullable'} <= set(column)
-            assert set(column) <= {'name', 'data_type', 'default', 'nullable', 'ordinal_position'}
+            assert set(column) == {'name', 'data_type', 'default', 'nullable', 'ordinal_position'}
+        assert [column['ordinal_position'] for column in view['columns']] == ['1', '2', '3']
     finally:
         with sa_conn.cursor() as cursor:
             cursor.execute('USE {}'.format(SCHEMA_DATABASE))

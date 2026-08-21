@@ -29,7 +29,6 @@ from datadog_checks.sqlserver.queries import (
     PARTITIONS_QUERY,
     SCHEMA_QUERY,
     TABLES_QUERY,
-    VIEWS_QUERY,
 )
 
 KEY_PREFIX = "dbm-schemas-"
@@ -76,35 +75,21 @@ class TableObject(TypedDict):
     foreign_keys: list
 
 
-class ViewObject(TypedDict):
-    id: str
-    name: str
-    create_date: str
-    modify_date: str
-    definition: str | None
-    columns: list[ColumnObject]
-
-
 class SchemaObject(TypedDict):
     name: str
     id: str
     owner_name: str
-
-
-class TableSchemaObject(SchemaObject):
     tables: list[TableObject]
 
 
-class ViewSchemaObject(SchemaObject):
-    views: list[ViewObject]
-
-
 class SQLServerDatabaseObject(DatabaseObject):
-    schemas: list[TableSchemaObject | ViewSchemaObject]
+    schemas: list[SchemaObject]
 
 
 class SQLServerSchemaCollector(SchemaCollector):
     _check: SQLServer
+    connection_key_prefix = KEY_PREFIX
+    legacy_connection_key_prefix = KEY_PREFIX_PRE_2017
 
     def __init__(self, check: SQLServer):
         config = SchemaCollectorConfig()
@@ -112,7 +97,6 @@ class SQLServerSchemaCollector(SchemaCollector):
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         config.max_tables = check._config.schema_config.get('max_tables', 300)
-        config.max_views = check._config.schema_config.get('max_views', 1000)
         self._is_2016_or_earlier = None
         self._database_compatibility_levels: dict[str, int] = {}
         self._pre_2017_cursor = None
@@ -124,8 +108,8 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     def _get_databases(self) -> list[DatabaseInfo]:
         database_names = self._check.get_databases()
-        with self._check.connection.open_managed_default_connection(KEY_PREFIX):
-            with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+        with self._check.connection.open_managed_default_connection(self.connection_key_prefix):
+            with self._check.connection.get_managed_cursor(self.connection_key_prefix) as cursor:
                 if not database_names:
                     return []
                 placeholders = ",".join(["?"] * len(database_names))
@@ -138,20 +122,22 @@ class SQLServerSchemaCollector(SchemaCollector):
     def _get_cursor(self, database_name):
         with contextlib.ExitStack() as stack:
             try:
-                stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX))
-                cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
+                stack.enter_context(self._check.connection.open_managed_default_connection(self.connection_key_prefix))
+                cursor = stack.enter_context(self._check.connection.get_managed_cursor(self.connection_key_prefix))
                 switch_db_statement = construct_use_statement(database_name)
                 cursor.execute(switch_db_statement)
                 self._is_2016_or_earlier = self._should_use_legacy_schema_query(database_name)
 
                 if self._is_2016_or_earlier:
-                    stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
+                    stack.enter_context(
+                        self._check.connection.open_managed_default_connection(self.legacy_connection_key_prefix)
+                    )
                     self._pre_2017_cursor = stack.enter_context(
-                        self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017)
+                        self._check.connection.get_managed_cursor(self.legacy_connection_key_prefix)
                     )
                     self._pre_2017_cursor.execute(switch_db_statement)
 
-                query = self._get_schema_objects_query()
+                query = self._get_objects_query()
                 cursor.execute(query)
                 yield cursor
             finally:
@@ -194,12 +180,11 @@ class SQLServerSchemaCollector(SchemaCollector):
             return True
         return compatibility_level < MINIMUM_JSON_COMPATIBILITY_LEVEL
 
-    def _get_schema_objects_query(self):
-        table_limit = int(self._config.max_tables or 1_000_000)
-        view_limit = int(self._config.max_views or 1_000_000)
+    def _get_objects_query(self):
+        limit = int(self._config.max_tables or 1_000_000)
 
-        # Limit tables and views independently, then combine them into one result stream.
-        # `_map_row` uses object_type to place each object in its corresponding schema list.
+        # Note that we INNER JOIN tables to omit schemas with no tables
+        # This is a simple way to omit the system tables like db_blah
         query = f"""
             WITH
             schemas AS (
@@ -208,41 +193,18 @@ class SQLServerSchemaCollector(SchemaCollector):
             tables AS (
                 {TABLES_QUERY}
             ),
-            views AS (
-                {VIEWS_QUERY}
-            ),
-            limited_tables AS (
-                SELECT TOP {table_limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
+            schema_tables AS (
+                SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
                 tables.table_id, tables.table_name
                 FROM schemas
                 INNER JOIN tables ON schemas.schema_id = tables.schema_id
                 ORDER BY schemas.schema_name, tables.table_name
-            ),
-            limited_views AS (
-                SELECT TOP {view_limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
-                views.view_id, views.view_name, views.create_date, views.modify_date, views.definition
-                FROM schemas
-                INNER JOIN views ON schemas.schema_id = views.schema_id
-                ORDER BY schemas.schema_name, views.view_name
-            ),
-            schema_tables AS (
-                SELECT schema_name, schema_id, owner_name, table_id, table_name,
-                    'TABLE' AS object_type,
-                    CAST(NULL AS varchar(33)) AS create_date,
-                    CAST(NULL AS varchar(33)) AS modify_date,
-                    CAST(NULL AS nvarchar(max)) AS definition
-                FROM limited_tables
-                UNION ALL
-                SELECT schema_name, schema_id, owner_name, view_id AS table_id, view_name AS table_name,
-                    'VIEW' AS object_type, create_date, modify_date, definition
-                FROM limited_views
             )
         """
         if self._is_2016_or_earlier:
             query += """
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
-                schema_tables.table_name, schema_tables.table_id, schema_tables.object_type,
-                schema_tables.create_date, schema_tables.modify_date, schema_tables.definition
+                schema_tables.table_name, schema_tables.table_id
             FROM schema_tables
             ;
         """
@@ -251,14 +213,11 @@ class SQLServerSchemaCollector(SchemaCollector):
         # For 2017 and later we can get all the data in one query
         query += f"""
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
-                schema_tables.table_name, schema_tables.table_id, schema_tables.object_type,
-                schema_tables.create_date, schema_tables.modify_date, schema_tables.definition
+                schema_tables.table_name, schema_tables.table_id
                 , json_query(({COLUMN_QUERY} FOR JSON PATH), '$') as columns
-                , CASE WHEN schema_tables.object_type = 'TABLE'
-                    THEN json_query(({INDEX_QUERY} FOR JSON PATH), '$') ELSE json_query('[]') END as indexes
-                , CASE WHEN schema_tables.object_type = 'TABLE'
-                    THEN json_query(({FOREIGN_KEY_QUERY} FOR JSON PATH), '$') ELSE json_query('[]') END as foreign_keys
-                , CASE WHEN schema_tables.object_type = 'TABLE' THEN ({PARTITIONS_QUERY}) END as partition_count
+                , json_query(({INDEX_QUERY} FOR JSON PATH), '$') as indexes
+                , json_query(({FOREIGN_KEY_QUERY} FOR JSON PATH), '$') as foreign_keys
+                , ({PARTITIONS_QUERY}) as partition_count
             FROM schema_tables
             ;
         """
@@ -272,9 +231,8 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
-        is_view = cursor_row.get("object_type") == "VIEW"
         if self._is_2016_or_earlier:
-            # We need to fetch the related data for each table or view.
+            # We need to fetch the related data for each table
             # Use a separate connection to avoid conflicts with the main cursor while it streams table rows.
             cursor = self._pre_2017_cursor
             if cursor is None:
@@ -284,21 +242,16 @@ class SQLServerSchemaCollector(SchemaCollector):
             columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)
             cursor.execute(columns_query)
             columns = cursor.fetchall_dict()
-            if is_view:
-                indexes = []
-                foreign_keys = []
-                partition_count = None
-            else:
-                indexes_query = INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
-                cursor.execute(indexes_query)
-                indexes = cursor.fetchall_dict()
-                foreign_keys_query = FOREIGN_KEY_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
-                cursor.execute(foreign_keys_query)
-                foreign_keys = cursor.fetchall_dict()
-                partitions_query = PARTITIONS_QUERY.replace("schema_tables.table_id", table_id)
-                cursor.execute(partitions_query)
-                partition_row = cursor.fetchone_dict()
-                partition_count = partition_row.get("partition_count") if partition_row else None
+            indexes_query = INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
+            cursor.execute(indexes_query)
+            indexes = cursor.fetchall_dict()
+            foreign_keys_query = FOREIGN_KEY_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
+            cursor.execute(foreign_keys_query)
+            foreign_keys = cursor.fetchall_dict()
+            partitions_query = PARTITIONS_QUERY.replace("schema_tables.table_id", table_id)
+            cursor.execute(partitions_query)
+            partition_row = cursor.fetchone_dict()
+            partition_count = partition_row.get("partition_count") if partition_row else None
         else:
             columns = json.loads(cursor_row.get("columns") or "[]")
             indexes = json.loads(cursor_row.get("indexes") or "[]")
@@ -306,40 +259,29 @@ class SQLServerSchemaCollector(SchemaCollector):
             partition_count = cursor_row.get("partition_count")
 
         # Map the cursor row to the expected schema, and strip out None values
-        schema = {
-            "name": cursor_row.get("schema_name"),
-            "id": str(cursor_row.get("schema_id")),  # Backend expects a string
-            "owner_name": cursor_row.get("owner_name"),
-        }
-        if is_view:
-            schema["views"] = [
-                {
-                    "id": str(cursor_row.get("table_id")),  # Backend expects a string
-                    "name": cursor_row.get("table_name"),
-                    "create_date": cursor_row.get("create_date"),
-                    "modify_date": cursor_row.get("modify_date"),
-                    "definition": cursor_row.get("definition"),
-                    "columns": [column for column in columns if column.get("name") is not None],
-                }
-            ]
-        else:
-            schema["tables"] = [
-                {
-                    k: v
-                    for k, v in {
-                        "id": str(cursor_row.get("table_id")),  # Backend expects a string
-                        "name": cursor_row.get("table_name"),
-                        "columns": [column for column in columns if column.get("name") is not None],
-                        "indexes": [index for index in indexes if index.get("name") is not None],
-                        "foreign_keys": [
-                            foreign_key
-                            for foreign_key in foreign_keys
-                            if foreign_key.get("foreign_key_name") is not None
-                        ],
-                        "partitions": {"partition_count": partition_count},
-                    }.items()
-                    if v is not None
-                }
-            ]
-        object["schemas"] = [schema]
+        object["schemas"] = [
+            {
+                "name": cursor_row.get("schema_name"),
+                "id": str(cursor_row.get("schema_id")),  # Backend expects a string
+                "owner_name": cursor_row.get("owner_name"),
+                "tables": [
+                    {
+                        k: v
+                        for k, v in {
+                            "id": str(cursor_row.get("table_id")),  # Backend expects a string
+                            "name": cursor_row.get("table_name"),
+                            "columns": [column for column in columns if column.get("name") is not None],
+                            "indexes": [index for index in indexes if index.get("name") is not None],
+                            "foreign_keys": [
+                                foreign_key
+                                for foreign_key in foreign_keys
+                                if foreign_key.get("foreign_key_name") is not None
+                            ],
+                            "partitions": {"partition_count": partition_count},
+                        }.items()
+                        if v is not None
+                    }
+                ],
+            }
+        ]
         return object

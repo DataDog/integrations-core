@@ -47,6 +47,7 @@ from datadog_checks.sqlserver.utils import (
     parse_sqlserver_year,
     set_default_driver_conf,
 )
+from datadog_checks.sqlserver.views import SQLServerViewCollector
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import not_windows_ci, windows_ci
@@ -151,18 +152,23 @@ def create_schema_collector(
     return SQLServerSchemaCollector(check)
 
 
-def test_schema_collector_configures_independent_table_and_view_limits() -> None:
-    collector = create_schema_collector(schema_config={'max_tables': 25})
-    collector._is_2016_or_earlier = False
+def test_schema_collectors_use_independent_queries_and_limits() -> None:
+    table_collector = create_schema_collector(schema_config={'max_tables': 25, 'max_views': 1000})
+    view_collector = SQLServerViewCollector(table_collector._check)
+    table_collector._is_2016_or_earlier = False
+    view_collector._is_2016_or_earlier = False
 
-    query = collector._get_schema_objects_query()
+    table_query = table_collector._get_objects_query()
+    view_query = view_collector._get_objects_query()
 
-    assert collector._config.max_tables == 25
-    assert collector._config.max_views == 1000
-    assert "SELECT TOP 25" in query
-    assert "SELECT TOP 1000" in query
-    assert "sys.tables" in query
-    assert "sys.views" in query
+    assert table_collector._config.max_tables == 25
+    assert view_collector._config.max_views == 1000
+    assert "SELECT TOP 25" in table_query
+    assert "sys.tables" in table_query
+    assert "sys.views" not in table_query
+    assert "SELECT TOP 1000" in view_query
+    assert "sys.views" in view_query
+    assert "sys.tables" not in view_query
 
 
 def test_schema_collector_records_database_compatibility_levels() -> None:
@@ -468,28 +474,25 @@ def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -
 
 
 def test_schema_collector_maps_view_metadata() -> None:
-    collector = create_schema_collector()
+    check = create_schema_collector()._check
+    collector = SQLServerViewCollector(check)
     collector._is_2016_or_earlier = False
     database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
     row = {
         "schema_name": "test_schema",
         "schema_id": 1,
         "owner_name": "dbo",
-        "table_name": "city_names",
-        "table_id": 201,
-        "object_type": "VIEW",
+        "view_name": "city_names",
+        "view_id": 201,
         "create_date": "2026-08-19T10:15:00",
         "modify_date": "2026-08-19T11:30:00",
         "definition": "CREATE VIEW test_schema.city_names AS SELECT id, name FROM test_schema.cities",
-        "columns": '[{"name":"id","data_type":"int","default":"None","nullable":false}]',
-        "indexes": "[]",
-        "foreign_keys": "[]",
-        "partition_count": None,
+        "columns": ('[{"name":"id","data_type":"int","default":"None","nullable":false,"ordinal_position":"1"}]'),
     }
 
     mapped_row = collector._map_row(database, row)
 
-    assert "tables" not in mapped_row["schemas"][0]
+    assert mapped_row["schemas"][0]["tables"] == []
     assert mapped_row["schemas"][0]["views"] == [
         {
             "id": "201",
@@ -497,17 +500,32 @@ def test_schema_collector_maps_view_metadata() -> None:
             "create_date": "2026-08-19T10:15:00",
             "modify_date": "2026-08-19T11:30:00",
             "definition": "CREATE VIEW test_schema.city_names AS SELECT id, name FROM test_schema.cities",
-            "columns": [{"name": "id", "data_type": "int", "default": "None", "nullable": False}],
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "int",
+                    "default": "None",
+                    "nullable": False,
+                    "ordinal_position": "1",
+                }
+            ],
         }
     ]
 
 
 def test_schema_collector_legacy_view_fetches_only_columns() -> None:
-    collector = create_schema_collector()
+    check = create_schema_collector()._check
+    collector = SQLServerViewCollector(check)
     collector._is_2016_or_earlier = True
     detail_cursor = mock.Mock()
     detail_cursor.fetchall_dict.return_value = [
-        {"name": "id", "data_type": "int", "default": "None", "nullable": False}
+        {
+            "name": "id",
+            "data_type": "int",
+            "default": "None",
+            "nullable": False,
+            "ordinal_position": "1",
+        }
     ]
     collector._pre_2017_cursor = detail_cursor
     database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
@@ -515,9 +533,8 @@ def test_schema_collector_legacy_view_fetches_only_columns() -> None:
         "schema_name": "test_schema",
         "schema_id": 1,
         "owner_name": "dbo",
-        "table_name": "city_names",
-        "table_id": 201,
-        "object_type": "VIEW",
+        "view_name": "city_names",
+        "view_id": 201,
         "create_date": "2026-08-19T10:15:00",
         "modify_date": "2026-08-19T11:30:00",
         "definition": None,
@@ -529,7 +546,13 @@ def test_schema_collector_legacy_view_fetches_only_columns() -> None:
     assert "201" in detail_cursor.execute.call_args.args[0]
     assert mapped_row["schemas"][0]["views"][0]["definition"] is None
     assert mapped_row["schemas"][0]["views"][0]["columns"] == [
-        {"name": "id", "data_type": "int", "default": "None", "nullable": False}
+        {
+            "name": "id",
+            "data_type": "int",
+            "default": "None",
+            "nullable": False,
+            "ordinal_position": "1",
+        }
     ]
 
 
