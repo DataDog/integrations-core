@@ -49,6 +49,12 @@ echo "OPENSSL_INCLUDE_DIR=${DD_PREFIX_PATH}/include" >> $DD_ENV_FILE
 echo "RUSTUP_HOME=${DD_PREFIX_PATH}/rustup" >> $DD_ENV_FILE
 echo "CARGO_HOME=${DD_PREFIX_PATH}/cargo" >> $DD_ENV_FILE
 
+# Send `cargo install` binaries straight to ${DD_PREFIX_PATH}/bin, which build.py already puts on
+# PATH. ddtrace's build cargo-installs libdatadog's dedup_headers and then calls it by bare name;
+# without this it lands in ${CARGO_HOME}/bin, which is not on PATH. The builder_setup symlinks
+# don't cover it because they are made before ddtrace runs.
+echo "CARGO_INSTALL_ROOT=${DD_PREFIX_PATH}" >> $DD_ENV_FILE
+
 # Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that
 # (see https://stackoverflow.com/a/61551944)
 # package names passed to PIP_NO_BINARY need to be separated by commas
