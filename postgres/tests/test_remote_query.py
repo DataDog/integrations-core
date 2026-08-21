@@ -1212,10 +1212,15 @@ def incremental_reference_sha256(total_bytes, block_size=PROOF_MIB):
     return hasher.hexdigest()
 
 
-def mib_upload_request(query, total_bytes, part_bytes=PROOF_MIB, upload_max_bytes=None, copy_max_bytes=None):
+def mib_upload_request(
+    query, total_bytes, part_bytes=PROOF_MIB, upload_max_bytes=None, copy_max_bytes=None, copy_chunk_bytes=None
+):
     """Build a valid ``resultDelivery`` multipart upload request sized for MiB-scale proof."""
     upload_cap = upload_max_bytes if upload_max_bytes is not None else total_bytes
     copy_cap = copy_max_bytes if copy_max_bytes is not None else total_bytes
+    # The COPY read chunk size is independent of the multipart part size; default it to the part
+    # size to preserve prior proof behavior, but allow a smaller chunk to prove aggregation.
+    chunk_bytes = copy_chunk_bytes if copy_chunk_bytes is not None else part_bytes
     request = valid_upload_copy_request()
     request['query'] = query
     request['format'] = 'csv'
@@ -1223,7 +1228,7 @@ def mib_upload_request(query, total_bytes, part_bytes=PROOF_MIB, upload_max_byte
     request['resultDelivery']['partBytes'] = part_bytes
     request['resultDelivery']['maxBytes'] = upload_cap
     request['limits'] = {
-        'chunkBytes': part_bytes,
+        'chunkBytes': chunk_bytes,
         'maxBytes': copy_cap,
         'maxRowBytes': PROOF_MIB,
         'timeoutMs': 30000,
@@ -1471,7 +1476,13 @@ def test_requests_upload_client_uses_exact_multipart_http_contract(monkeypatch):
     assert put.headers['Authorization'] == 'Bearer scoped-upload-token'
     assert put.headers[remote_query.REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER] == 'its-agent-intake-poc'
     assert put.data == payload
-    assert put.timeout == remote_query.REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS
+    # The HTTP timeout is an explicit (connect, read) tuple with a 5-minute read timeout.
+    assert put.timeout == remote_query.REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT
+    assert put.timeout == (
+        remote_query.REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS,
+        remote_query.REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS,
+    )
+    assert remote_query.REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS == 300
 
     # finalize -> POST .../finalize with an empty JSON body.
     client.finalize(creds)
@@ -1627,6 +1638,138 @@ def test_copy_stream_upload_mode_aggregates_copy_chunks_into_partbytes_parts(mon
     # Each part carries the SHA-256 of its aggregated body, not of the individual COPY chunks.
     for _part_number, payload, sha256_hex, _rows in fake.put_calls:
         assert sha256_hex == hashlib.sha256(payload).hexdigest()
+    assert fake.finalize_calls == 1
+    assert fake.abort_calls == 0
+    assert pool.closed_copies == 1
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: 10 GiB capacity, 128 MiB part ceiling, and 5-minute HTTP timeout
+#
+# These tests prove the server-owned maximums (10 GiB total, 128 MiB per part) are accepted
+# up to the boundary and rejected one byte past it, that partBytes stays independent of the
+# 1 MiB COPY read chunk, that many 1 MiB COPY reads aggregate into 64 MiB parts without
+# materializing the full result, and that the per-upload HTTP timeout is a 5-minute
+# (connect, read) tuple. No test allocates 10 GiB; the boundary tests are pure validation,
+# and the aggregation test uses a generated 1 MiB-block stream with a discarding client.
+# ---------------------------------------------------------------------------
+
+GIB = 1024 * 1024 * 1024
+TEN_GIB = 10 * GIB
+MAX_PART_BYTES = 128 * 1024 * 1024
+
+
+def test_copy_stream_upload_mode_accepts_ten_gib_max_bytes_when_extraction_cap_matches():
+    # A large int64 maxBytes (10 GiB) is accepted when the COPY extraction cap matches. No data is
+    # allocated: an empty result finalizes with zero bytes, proving the caps validate without
+    # materializing 10 GiB.
+    pool = FakePool(copy_blocks=[])
+    request = valid_upload_copy_request()
+    request['resultDelivery']['partBytes'] = MAX_PART_BYTES
+    request['resultDelivery']['maxBytes'] = TEN_GIB
+    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': TEN_GIB, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    started = event_metadata(events[0])
+    assert started['status'] == 'STARTED'
+    assert started['resultDelivery']['partBytes'] == MAX_PART_BYTES
+    assert started['resultDelivery']['maxBytes'] == TEN_GIB
+    assert started['maxBytes'] == TEN_GIB
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert event_metadata(events[-1])['uploadReceipt']['totalBytes'] == 0
+    assert event_metadata(events[-1])['uploadReceipt']['partCount'] == 0
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_rejects_max_bytes_above_ten_gib():
+    # Plus-one safety: one byte past the 10 GiB server-owned maximum is rejected before any pool
+    # access. No allocation.
+    request = valid_upload_copy_request()
+    request['resultDelivery']['partBytes'] = MAX_PART_BYTES
+    request['resultDelivery']['maxBytes'] = TEN_GIB + 1
+    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': TEN_GIB + 1, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
+
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+
+    assert_failed_event(events, 'invalid_request', 'maxBytes')
+
+
+@pytest.mark.parametrize('part_bytes', [MAX_PART_BYTES, MAX_PART_BYTES + 1])
+def test_copy_stream_upload_mode_part_bytes_boundary(part_bytes):
+    request = valid_upload_copy_request()
+    request['resultDelivery']['partBytes'] = part_bytes
+    request['resultDelivery']['maxBytes'] = TEN_GIB
+    request['limits'] = {'chunkBytes': PROOF_MIB, 'maxBytes': TEN_GIB, 'maxRowBytes': PROOF_MIB, 'timeoutMs': 30000}
+    # An empty registry separates validation from resolution: a valid request reaches target
+    # resolution (target_not_found), while an invalid one fails at validation (invalid_request)
+    # before the registry is touched. No data is allocated in either case.
+    events = list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([])))
+    if part_bytes <= MAX_PART_BYTES:
+        assert_failed_event(events, 'target_not_found')
+    else:
+        assert_failed_event(events, 'invalid_request', 'partBytes')
+
+
+def test_copy_stream_upload_mode_aggregates_many_copy_reads_into_64_mib_parts(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    # 128 MiB total, 1 MiB COPY reads, 64 MiB parts: 128 reads form 2 parts of 64 MiB each. The
+    # full 128 MiB is never materialized; at most one 64 MiB part is buffered at a time.
+    total_bytes = 128 * PROOF_MIB
+    part_bytes = 64 * PROOF_MIB
+    read_state = {'count': 0}
+
+    def counting_block_stream():
+        for _ in range(total_bytes // PROOF_MIB):
+            read_state['count'] += 1
+            yield b'x' * PROOF_MIB
+
+    request = mib_upload_request(M4_PROOF_QUERY, total_bytes, part_bytes=part_bytes, copy_chunk_bytes=PROOF_MIB)
+    pool = FakePool(copy_blocks=counting_block_stream())
+    reads_at_put = []
+
+    # Discard part bodies immediately so the fake never accumulates the full 128 MiB; record only
+    # the part number, size, checksum, and how many COPY blocks had been read when it uploaded.
+    class DiscardingCountingClient:
+        def __init__(self):
+            self.put_calls = []
+            self.finalize_calls = 0
+            self.abort_calls = 0
+
+        def put_part(self, creds, part_number, payload, sha256_hex, rows):
+            reads_at_put.append(read_state['count'])
+            self.put_calls.append((part_number, len(payload), sha256_hex, rows))
+            assert sha256_hex == hashlib.sha256(payload).hexdigest()
+
+        def finalize(self, creds):
+            self.finalize_calls += 1
+            return {
+                'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
+                'upload_id': 'upload-01k',
+                'bucket_name': 'rq-bucket',
+                'object_key': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+                'total_bytes': total_bytes,
+                'total_rows': 0,
+                'part_count': 2,
+                'sha256': incremental_reference_sha256(total_bytes),
+                'format': 'csv',
+                'compression': 'none',
+                'completed_at': '2026-08-21T00:00:00Z',
+            }
+
+        def abort(self, creds):
+            self.abort_calls += 1
+
+    fake = DiscardingCountingClient()
+    _execute_upload_stream(request, make_check(pool=pool), lambda *event: None, http_client=fake)
+
+    # Two 64 MiB parts aggregated from 128 one-MiB COPY reads; each part is exactly partBytes.
+    assert [call[0] for call in fake.put_calls] == [1, 2]
+    assert [call[1] for call in fake.put_calls] == [part_bytes, part_bytes]
+    # Lockstep bounding: part 1 uploads after exactly 64 reads (the next 64 not yet read), and
+    # part 2 uploads at finalize after all 128 reads. The full 128 MiB is never held at once.
+    assert reads_at_put == [64, 128]
+    assert read_state['count'] == 128
     assert fake.finalize_calls == 1
     assert fake.abort_calls == 0
     assert pool.closed_copies == 1

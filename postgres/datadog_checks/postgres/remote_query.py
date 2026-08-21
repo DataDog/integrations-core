@@ -45,6 +45,13 @@ REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
     )
 )
 
+# Server-owned maximums for the POC multipart upload path. The backend selects/clamps these,
+# not the caller. The multipart part size is independent of the COPY read chunk size
+# (limits.chunkBytes); it may be up to 128 MiB. maxBytes must not exceed the caller/backend COPY
+# safety cap (limits.maxBytes).
+REMOTE_QUERY_UPLOAD_MAX_PART_BYTES = 128 * 1024 * 1024
+REMOTE_QUERY_UPLOAD_MAX_TOTAL_BYTES = 10 * 1024 * 1024 * 1024
+
 CopyStreamFormat = Literal['csv', 'binary']
 ResultDeliveryMode = Literal['POC_PUBLIC_MULTIPART_UPLOAD']
 ResultDeliveryFormat = Literal['csv']
@@ -148,8 +155,8 @@ class RemoteQueryResultDelivery(BaseModel):
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
     token: StrictStr = Field(alias='token', min_length=1)
-    part_bytes: StrictInt = Field(alias='partBytes', ge=1)
-    max_bytes: StrictInt = Field(alias='maxBytes', ge=1)
+    part_bytes: StrictInt = Field(alias='partBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_PART_BYTES)
+    max_bytes: StrictInt = Field(alias='maxBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_TOTAL_BYTES)
     format: ResultDeliveryFormat = 'csv'
     compression: ResultDeliveryCompression = 'none'
 
@@ -617,12 +624,20 @@ def _validation_location(location: tuple[Any, ...]) -> str:
 # Bulk part bytes never traverse the native emit bridge, AgentSecure, PAR, or
 # AP action output; only the compact final receipt is emitted back.
 
-REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS = 60
 REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER = 'test-drive-its-agent-intake-poc'
 REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive_selector'
 REMOTE_QUERY_UPLOAD_MAX_RETRIES = 4
 REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS = 0.1
 REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
+# Per-upload HTTP timeout as an explicit (connect, read) tuple: a short connect timeout and a
+# 5-minute read timeout so a slow part upload (e.g. a large part over a constrained link) is
+# not cut short, while a stuck connect fails fast. Retry count and backoff stay bounded above.
+REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS = 10
+REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS = 300
+REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT = (
+    REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS,
+    REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS,
+)
 
 
 @dataclass(frozen=True)
@@ -648,8 +663,8 @@ class _UploadClient(Protocol):
 class _RequestsUploadClient:
     """HTTP upload client for its-agent-intake. Imports requests lazily."""
 
-    def __init__(self, timeout_seconds: int = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS) -> None:
-        self._timeout = timeout_seconds
+    def __init__(self, timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT) -> None:
+        self._timeout = timeout
 
     def _headers(self, creds: _UploadCredentials, content_type: str | None = None) -> dict[str, str]:
         headers = {
@@ -669,19 +684,19 @@ class _RequestsUploadClient:
         headers['X-DD-Part-Bytes'] = str(len(payload))
         headers['X-DD-Part-Rows'] = str(rows)
         url = '{}/uploads/{}/parts/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, part_number)
-        _upload_with_retry('PUT', url, headers, payload)
+        _upload_with_retry('PUT', url, headers, payload, self._timeout)
 
     def finalize(self, creds: _UploadCredentials) -> Mapping[str, Any]:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
-        _status, body = _upload_with_retry('POST', url, headers, b'{}')
+        _status, body = _upload_with_retry('POST', url, headers, b'{}', self._timeout)
         return json.loads(body.decode('utf-8'))
 
     def abort(self, creds: _UploadCredentials) -> None:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
         try:
-            _upload_with_retry('POST', url, headers, b'{}')
+            _upload_with_retry('POST', url, headers, b'{}', self._timeout)
         except _CopyStreamFailure:
             LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
 
@@ -690,16 +705,20 @@ def _is_transient_upload_status(status: int) -> bool:
     return status == 408 or status == 429 or status >= 500
 
 
-def _upload_with_retry(method: str, url: str, headers: Mapping[str, str], body: bytes) -> tuple[int, bytes]:
+def _upload_with_retry(
+    method: str,
+    url: str,
+    headers: Mapping[str, str],
+    body: bytes,
+    timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
+) -> tuple[int, bytes]:
     import requests  # lazy: only the POC upload path needs it
 
     backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
     last_err: Any = None
     for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
         try:
-            resp = requests.request(
-                method, url, headers=dict(headers), data=body, timeout=REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT_SECONDS
-            )
+            resp = requests.request(method, url, headers=dict(headers), data=body, timeout=timeout)
         except requests.exceptions.RequestException as e:
             last_err = e
         else:
