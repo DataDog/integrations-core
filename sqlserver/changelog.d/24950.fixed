@@ -1,0 +1,1 @@
+Collapse the per-database service check and database files metrics loops into single batched queries.
