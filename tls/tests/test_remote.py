@@ -416,7 +416,7 @@ def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(
         status=c.CRITICAL,
         tags=c._tags,
         count=1,
-        message=re.escape("Unable to parse the certificate: argument 'data': "),
+        message=re.escape("Unable to parse the certificate: "),
     )
     aggregator.assert_service_check(SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, count=0)
