@@ -131,23 +131,23 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
         silently skipped.
 
-        The instance config takes precedence over the defaults, option by option. Mapping-valued
-        options are the exception: they are merged entry by entry rather than replaced wholesale,
-        since a ``ChainMap`` resolves keys shallowly and an instance that sets such an option at all
-        would otherwise shadow the whole class default -- silently dropping entries the check
-        depends on, such as the ``rename_labels`` renames that keep endpoint labels off Datadog's
-        reserved tag keys. The instance's own entries still win on a per-entry basis.
+        The instance config takes precedence over the defaults, option by option. ``rename_labels``
+        is the exception: the instance's renames are merged entry by entry with the check's declared
+        renames rather than replacing them wholesale. A ``ChainMap`` resolves keys shallowly, so an
+        instance that sets ``rename_labels`` at all would otherwise shadow the whole class default and
+        silently drop renames the check depends on -- such as the ones that keep endpoint labels off
+        Datadog's reserved tag keys. Renames are additive by nature, so the instance's own entries
+        still win on a per-key basis. Other mapping-valued options keep wholesale-replace semantics,
+        so an instance can still fully override them (e.g. disable ``share_labels`` with ``{}``).
         """
         defaults = dict(self.get_default_config())
         if file_metrics := self._load_file_based_metrics(config):
             defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
 
-        if merged := {
-            option: {**default, **config[option]}
-            for option, default in defaults.items()
-            if isinstance(default, Mapping) and isinstance(config.get(option), Mapping)
-        }:
-            config = {**config, **merged}
+        default_renames = defaults.get('rename_labels')
+        instance_renames = config.get('rename_labels')
+        if isinstance(default_renames, Mapping) and isinstance(instance_renames, Mapping):
+            config = {**config, 'rename_labels': {**default_renames, **instance_renames}}
 
         return ChainMap(config, defaults)
 

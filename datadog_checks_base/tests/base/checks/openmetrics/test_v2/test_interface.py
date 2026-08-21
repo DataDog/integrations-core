@@ -118,6 +118,28 @@ def test_default_config_mapping_not_shared_between_scrapers(aggregator, dd_run_c
     assert default_renames == {'foo': 'bar'}
 
 
+def test_default_config_only_rename_labels_is_merged():
+    """
+    Only `rename_labels` is merged with the check's declared default. Other mapping-valued options
+    keep wholesale-replace semantics, so an instance can still fully override them -- e.g. disable a
+    check's `share_labels` default by passing `{}`.
+    """
+
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def get_default_config(self):
+            return {'rename_labels': {'foo': 'bar'}, 'share_labels': {'cp_info': {'labels': ['version']}}}
+
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
+    resolved = check.get_config_with_defaults(
+        {'openmetrics_endpoint': 'test', 'rename_labels': {'qux': 'corge'}, 'share_labels': {}}
+    )
+
+    assert resolved['rename_labels'] == {'foo': 'bar', 'qux': 'corge'}
+    assert resolved['share_labels'] == {}
+
+
 def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
         """
