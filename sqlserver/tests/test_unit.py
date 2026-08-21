@@ -162,14 +162,47 @@ def test_schema_collectors_use_independent_queries_and_limits() -> None:
     table_query = table_collector._get_tables_query()
     view_query = view_collector._get_tables_query()
 
-    assert table_collector._config.max_tables == 25
-    assert view_collector._config.max_views == 1000
     assert "SELECT TOP 25" in table_query
     assert "sys.tables" in table_query
     assert "sys.views" not in table_query
     assert "SELECT TOP 1000" in view_query
     assert "sys.views" in view_query
     assert "sys.tables" not in view_query
+
+
+@pytest.mark.parametrize(
+    ('collector_class', 'expected_metric', 'unexpected_metric'),
+    [
+        (
+            SQLServerSchemaCollector,
+            'dd.sqlserver.schema.tables_count',
+            'dd.sqlserver.schema.views_count',
+        ),
+        (
+            SQLServerViewCollector,
+            'dd.sqlserver.schema.views_count',
+            'dd.sqlserver.schema.tables_count',
+        ),
+    ],
+)
+def test_schema_collectors_report_separate_object_counts(
+    collector_class: type[SQLServerSchemaCollector], expected_metric: str, unexpected_metric: str
+) -> None:
+    check = mock.Mock()
+    check._config.schema_config = {}
+    check.log = mock.Mock()
+    check.static_info_cache = {}
+    check.dbms = 'sqlserver'
+    check.tags = []
+    check.reported_hostname = 'test-host'
+    collector = collector_class(check)
+    collector._get_databases = mock.Mock(return_value=[])
+
+    collector.collect_schemas()
+
+    submitted_metrics = {call.args[0] for call in check.gauge.call_args_list}
+    assert expected_metric in submitted_metrics
+    assert unexpected_metric not in submitted_metrics
 
 
 @pytest.mark.parametrize(
