@@ -174,4 +174,5 @@ class SqlserverMetadata(DBMAsyncJob):
         raise_if_cancelled(self._cancel_event)
         self._last_schemas_collection_time = time.time()
         self._schema_collector.collect_schemas()
-        self._view_collector.collect_schemas()
+        if self._schema_config.get('collect_views', True):
+            self._view_collector.collect_schemas()
