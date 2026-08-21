@@ -638,6 +638,10 @@ REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT = (
     REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS,
     REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS,
 )
+# Minimum spacing between rate-limited INFO progress logs for a multipart upload, in seconds.
+# The first acknowledged part and the final completion line are always logged; intermediate
+# parts are logged at most once per interval so a long upload does not flood agent.log.
+REMOTE_QUERY_UPLOAD_PROGRESS_INTERVAL_SECONDS = 30.0
 
 
 @dataclass(frozen=True)
@@ -847,12 +851,79 @@ class _MultipartBuffer:
         return self._take()
 
 
+@dataclass
+class _UploadProgress:
+    """Track acknowledged multipart upload totals for rate-limited progress logging.
+
+    Counters advance only after a part is acknowledged by the intake, so the logged totals stay
+    authoritative even when a part upload retries. Only aggregate counts and the upload id are
+    stored; no base URL, token, API/app keys, query text, part checksums, object path, or
+    result bytes are kept here.
+    """
+
+    upload_id: str
+    started_at: float
+    last_logged_at: float | None = None
+    acknowledged_part_count: int = 0
+    total_bytes: int = 0
+    total_rows: int = 0
+
+    def record_part(self, part: _MultipartPart) -> None:
+        self.acknowledged_part_count += 1
+        self.total_bytes += len(part.payload)
+        self.total_rows += _count_newlines(part.payload)
+
+    def elapsed_seconds(self, now: float) -> float:
+        return max(0.0, now - self.started_at)
+
+
 def _upload_one_part(client: _UploadClient, creds: _UploadCredentials, part: _MultipartPart) -> None:
     # The part SHA-256 is over the aggregated part body (all chunks combined), not the
     # individual COPY chunks, so the intake can verify the part it receives.
     client.put_part(
         creds, part.part_number, part.payload, hashlib.sha256(part.payload).hexdigest(), _count_newlines(part.payload)
     )
+
+
+def _average_mib_s(total_bytes: int, elapsed_seconds: float) -> float:
+    if elapsed_seconds <= 0:
+        return 0.0
+    return total_bytes / (1024 * 1024) / elapsed_seconds
+
+
+def _emit_upload_progress_log(progress: _UploadProgress, message: str, now: float) -> None:
+    elapsed = progress.elapsed_seconds(now)
+    LOGGER.info(
+        '%s: upload_id=%s part_count=%d total_bytes=%d total_rows=%d elapsed_seconds=%.2f average_mib_s=%.2f',
+        message,
+        progress.upload_id,
+        progress.acknowledged_part_count,
+        progress.total_bytes,
+        progress.total_rows,
+        elapsed,
+        _average_mib_s(progress.total_bytes, elapsed),
+    )
+
+
+def _log_upload_progress(progress: _UploadProgress) -> None:
+    # Always log after the first acknowledged part (``last_logged_at`` is None until then), then
+    # at most once per interval so a long upload does not flood agent.log. Totals are read after
+    # the part was acknowledged, so they are authoritative.
+    now = time.monotonic()
+    if (
+        progress.last_logged_at is not None
+        and (now - progress.last_logged_at) < REMOTE_QUERY_UPLOAD_PROGRESS_INTERVAL_SECONDS
+    ):
+        return
+    _emit_upload_progress_log(progress, 'Remote query upload progress', now)
+    progress.last_logged_at = now
+
+
+def _log_upload_complete(progress: _UploadProgress) -> None:
+    # A distinct completion line is always emitted at successful finalization so a short upload
+    # produces both a first-part progress line and a final completion line, and the completion
+    # message stays distinguishable from the rate-limited progress line.
+    _emit_upload_progress_log(progress, 'Remote query upload complete', time.monotonic())
 
 
 def _finalize_upload(
@@ -885,6 +956,7 @@ def _execute_upload_stream(
         )
         return
     client = http_client if http_client is not None else _default_upload_client()
+    progress = _UploadProgress(upload_id=creds.upload_id, started_at=time.monotonic())
     events = iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check]))
     buffer: _MultipartBuffer | None = None
     try:
@@ -900,12 +972,19 @@ def _execute_upload_stream(
                     buffer.extend(event.payload)
                     for part in buffer.full_parts():
                         _upload_one_part(client, creds, part)
+                        # Record and log only after the part is acknowledged so the totals stay
+                        # authoritative; a retried part is counted once, not once per HTTP attempt.
+                        progress.record_part(part)
+                        _log_upload_progress(progress)
             elif event.event_type == 'final':
                 if buffer is not None:
                     final_part = buffer.flush_final()
                     if final_part is not None:
                         _upload_one_part(client, creds, final_part)
+                        progress.record_part(final_part)
+                        _log_upload_progress(progress)
                 _finalize_upload(client, creds, event, emit)
+                _log_upload_complete(progress)
             elif event.event_type == 'error':
                 _safe_abort(client, creds)
                 _emit_copy_event(emit, event)

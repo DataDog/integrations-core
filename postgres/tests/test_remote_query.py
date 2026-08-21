@@ -4,6 +4,7 @@
 
 import hashlib
 import json
+import logging
 from contextlib import contextmanager
 from types import SimpleNamespace
 
@@ -1817,3 +1818,161 @@ def test_intake_receipt_to_camel_does_not_preserve_obsolete_object_key():
         'sha256': 'aggregate-sha',
     }
     assert _intake_receipt_to_camel(resp)['objectPath'] == ''
+
+
+# ---------------------------------------------------------------------------
+# Rate-limited multipart upload progress logging
+#
+# The direct-HTTP upload path emits INFO progress through the module logger (which already
+# reaches agent.log via AgentLogHandler) after the first acknowledged part, then at most once
+# per 30s while parts continue, and once at successful finalization. Totals are read only after
+# a part is acknowledged, so they stay authoritative even when a part upload retries. The
+# progress line carries only aggregate counts and the upload id; no base URL, scoped token,
+# API/app keys, query text, result bytes, part checksum, object path, or credentials are logged.
+# ---------------------------------------------------------------------------
+
+
+def test_upload_progress_logs_after_first_part_then_rate_limits_at_30_seconds(monkeypatch, caplog):
+    # The rate-limited progress logger must emit the first acknowledged part immediately, then
+    # stay quiet within the 30s interval and log again only once it has elapsed. Without the
+    # rate limit a long upload would flood agent.log; without the first-part guarantee a short
+    # upload would emit no progress line at all.
+    caplog.set_level(logging.INFO, logger='datadog_checks.postgres.remote_query')
+    times = iter([0.0, 5.0, 35.0])
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(times))
+
+    progress = remote_query._UploadProgress(upload_id='upload-01k', started_at=0.0)
+    progress.record_part(remote_query._MultipartPart(1, b'aaa\n'))  # 4 bytes, 1 row
+
+    remote_query._log_upload_progress(progress)  # now=0.0 -> first acknowledged part, logs
+    remote_query._log_upload_progress(progress)  # now=5.0 -> within 30s, suppressed
+    remote_query._log_upload_progress(progress)  # now=35.0 -> interval elapsed, logs
+
+    progress_lines = [
+        record.getMessage() for record in caplog.records if 'Remote query upload progress' in record.getMessage()
+    ]
+    assert len(progress_lines) == 2
+    # Both progress lines carry the authoritative acknowledged totals and the required fields.
+    first = progress_lines[0]
+    assert 'upload_id=upload-01k' in first
+    assert 'part_count=1' in first
+    assert 'total_bytes=4' in first
+    assert 'total_rows=1' in first
+    assert 'elapsed_seconds=0.00' in first
+    assert 'average_mib_s=0.00' in first
+    assert 'elapsed_seconds=35.00' in progress_lines[1]
+
+
+def test_upload_progress_completion_log_uses_distinct_message(monkeypatch, caplog):
+    # Successful finalization always emits a distinct completion line (not a duplicate of the
+    # last progress line) so operators can tell when an upload finished, even for a short
+    # one-part upload whose totals match the first-part progress line.
+    caplog.set_level(logging.INFO, logger='datadog_checks.postgres.remote_query')
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 12.0)
+
+    progress = remote_query._UploadProgress(upload_id='upload-01k', started_at=0.0)
+    progress.record_part(remote_query._MultipartPart(1, b'abcdefgh\n'))  # 9 bytes, 1 row
+
+    remote_query._log_upload_complete(progress)
+
+    complete_lines = [
+        record.getMessage() for record in caplog.records if 'Remote query upload complete' in record.getMessage()
+    ]
+    assert len(complete_lines) == 1
+    line = complete_lines[0]
+    assert line.startswith('Remote query upload complete: upload_id=upload-01k')
+    assert 'part_count=1' in line
+    assert 'total_bytes=9' in line
+    assert 'total_rows=1' in line
+    assert 'elapsed_seconds=12.00' in line
+    assert 'average_mib_s=0.00' in line
+    # The completion message is distinct from the rate-limited progress message.
+    assert 'Remote query upload progress' not in line
+
+
+def test_upload_progress_does_not_double_count_or_log_part_on_http_retry(monkeypatch, caplog):
+    # A part whose PUT is rejected with a transient status and then accepted on retry must be
+    # counted and logged once, not once per HTTP attempt, so the acknowledged totals stay
+    # authoritative and agent.log is not noisy. Drives the real direct-HTTP upload path with a
+    # stubbed requests transport so the retry loop runs without sleeping.
+    import requests
+
+    caplog.set_level(logging.INFO, logger='datadog_checks.postgres.remote_query')
+    patch_upload_credentials(monkeypatch)
+
+    calls = []
+
+    def fake_request(method, url, headers=None, data=None, timeout=None):
+        calls.append(SimpleNamespace(method=method, url=url, data=data))
+        # The part PUT is rejected once with a transient 503, then accepted; finalize succeeds.
+        if method == 'PUT' and len(calls) == 1:
+            return SimpleNamespace(status_code=503, content=b'')
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', fake_request)
+    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
+    times = iter([0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0])
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(times))
+
+    pool = FakePool(copy_blocks=[b'abcdefgh'])  # one 8-byte block -> one part
+    request = valid_upload_copy_request()
+    fake = remote_query._RequestsUploadClient()
+    events = []
+
+    _execute_upload_stream(request, make_check(pool=pool), lambda *event: events.append(event), http_client=fake)
+
+    # The part PUT was attempted twice (transient 503 then 200) at the same 1-based part route.
+    put_calls = [call for call in calls if call.method == 'PUT']
+    assert len(put_calls) == 2
+    assert put_calls[0].url == put_calls[1].url
+    assert put_calls[0].url.endswith('/uploads/upload-01k/parts/1')
+
+    progress_lines = [
+        record.getMessage() for record in caplog.records if 'Remote query upload progress' in record.getMessage()
+    ]
+    complete_lines = [
+        record.getMessage() for record in caplog.records if 'Remote query upload complete' in record.getMessage()
+    ]
+    # The retried part is counted and logged exactly once: part_count=1, not 2.
+    assert len(progress_lines) == 1
+    assert 'part_count=1' in progress_lines[0]
+    assert 'total_bytes=8' in progress_lines[0]
+    assert len(complete_lines) == 1
+    assert 'part_count=1' in complete_lines[0]
+
+    # Progress logs carry only aggregate counts and the upload id; no secrets or part checksums.
+    log_text = caplog.text
+    assert 'upload-01k' in log_text
+    assert 'TEST_API_KEY' not in log_text
+    assert 'TEST_APP_KEY' not in log_text
+    assert 'scoped-upload-token' not in log_text
+    assert 'datad0g.com' not in log_text
+    assert 'sha256' not in log_text.lower()
+    assert 'object_path' not in log_text
+    assert 'bucket' not in log_text.lower()
+    assert pool.closed_copies == 1
+
+
+def test_upload_progress_does_not_log_unacknowledged_part_on_upload_failure(monkeypatch, caplog):
+    # Progress must be logged only after a part is acknowledged, so a part whose upload fails is
+    # neither counted nor logged: the totals stay authoritative. Only the error event crosses
+    # the callback and the session is aborted.
+    caplog.set_level(logging.INFO, logger='datadog_checks.postgres.remote_query')
+    patch_upload_credentials(monkeypatch)
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 0.0)
+
+    pool = FakePool(copy_blocks=[b'abcdefgh'])  # one 8-byte block -> one part
+    request = valid_upload_copy_request()
+    fake = FakeUploadClient(raise_on_put=remote_query._CopyStreamFailure('upload_failed', 'rejected', retryable=True))
+    events = []
+
+    _execute_upload_stream(request, make_check(pool=pool), lambda *event: events.append(event), http_client=fake)
+
+    # The part PUT never succeeds, so no progress or completion line is emitted.
+    assert 'Remote query upload progress' not in caplog.text
+    assert 'Remote query upload complete' not in caplog.text
+    assert events[-1][0] == 'error'
+    assert json.loads(events[-1][1])['error']['code'] == 'upload_failed'
+    assert len(fake.put_calls) == 1
+    assert fake.abort_calls == 1
+    assert pool.closed_copies == 1
