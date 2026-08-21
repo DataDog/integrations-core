@@ -829,6 +829,12 @@ instances:
         #
         # enabled: false
 
+        ## @param collect_views - boolean - optional - default: true
+        ## Enable collection of SQL Server views. Set to false to continue collecting table schemas
+        ## without collecting views. Defaults to true.
+        #
+        # collect_views: true
+
         ## @param collection_interval - number - optional - default: 600
         ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
         #

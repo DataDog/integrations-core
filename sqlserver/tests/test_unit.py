@@ -33,6 +33,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseStatsMetrics
+from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFractionMetric, SqlSimpleMetric
 from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -169,6 +170,28 @@ def test_schema_collectors_use_independent_queries_and_limits() -> None:
     assert "SELECT TOP 1000" in view_query
     assert "sys.views" in view_query
     assert "sys.tables" not in view_query
+
+
+@pytest.mark.parametrize(
+    ('schema_config', 'views_collected'),
+    [
+        ({'enabled': True}, True),
+        ({'enabled': True, 'collect_views': True}, True),
+        ({'enabled': True, 'collect_views': False}, False),
+    ],
+)
+def test_schema_collection_can_disable_views(schema_config: dict, views_collected: bool) -> None:
+    metadata = object.__new__(SqlserverMetadata)
+    metadata._schema_config = schema_config
+    metadata._schema_collection_interval = 0
+    metadata._last_schemas_collection_time = 0
+    metadata._schema_collector = mock.Mock()
+    metadata._view_collector = mock.Mock()
+
+    metadata.collect_schemas()
+
+    metadata._schema_collector.collect_schemas.assert_called_once_with()
+    assert metadata._view_collector.collect_schemas.called is views_collected
 
 
 def test_schema_collector_records_database_compatibility_levels() -> None:

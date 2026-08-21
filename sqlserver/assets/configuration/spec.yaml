@@ -1140,6 +1140,14 @@ files:
             type: boolean
             example: false
           fleet_configurable: false
+        - name: collect_views
+          description: |
+            Enable collection of SQL Server views. Set to false to continue collecting table schemas
+            without collecting views. Defaults to true.
+          value:
+            type: boolean
+            example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the database schema collection interval (in seconds). Defaults to 600 seconds.
