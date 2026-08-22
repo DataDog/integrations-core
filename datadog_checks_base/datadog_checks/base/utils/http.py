@@ -36,8 +36,6 @@ from datadog_checks.base.utils import _http_utils
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .headers import set_header as set_header_value
-
-# Re-export HTTP exceptions for single import location
 from .http_exceptions import (  # noqa: F401
     HTTPConnectionError,
     HTTPConnectTimeoutError,
@@ -259,21 +257,9 @@ def _translate_requests_request(
 
 
 def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[BaseException]) -> type[T]:
-    """Build the raised type: the target exception plus its requests counterparts as extra bases.
-
-    The agnostic tree roots at ``Exception``, so an ``except requests.exceptions.*``,
-    ``except RequestException`` or ``except OSError`` arm written against a released
-    ``datadog_checks_base`` stops matching once a check runs on this client. Those arms live in
-    repositories whose CI never sees this one, and the Agent ships a single ``datadog_checks_base``
-    for all of them, so the major version bump warns nobody. While requests is still the backend,
-    carrying the matching backend classes keeps those arms working at no cost.
-
-    Delete this helper and ``_COMPAT_EXCEPTIONS`` when the backend changes, after a deprecation
-    cycle. ``http_exceptions`` itself stays free of any backend import.
-    """
+    """Add requests bases so released checks' exception handlers keep matching."""
     bases = tuple(dict.fromkeys((agnostic, *backend)))
-    # A backend type may already derive from the agnostic type. Keep the child as the direct base so
-    # both exception arms still match without creating an invalid parent-before-child MRO.
+    # Keep only the most-derived bases to avoid an invalid parent-before-child MRO.
     most_derived_bases = tuple(
         base for base in bases if not any(base is not candidate and issubclass(candidate, base) for candidate in bases)
     )
@@ -284,21 +270,17 @@ def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[Bas
     return compat
 
 
-# Built once at import. Keyed by the agnostic type so tests and callers can resolve what a given
-# agnostic class is actually raised as.
 _COMPAT_EXCEPTIONS: dict[type[HTTPError], type[HTTPError]] = {
     HTTPError: _backend_compat_type(HTTPError, requests_exceptions.RequestException),
     HTTPRequestError: _backend_compat_type(HTTPRequestError, requests_exceptions.RequestException),
     HTTPStatusError: _backend_compat_type(HTTPStatusError, requests_exceptions.HTTPError),
     HTTPTimeoutError: _backend_compat_type(HTTPTimeoutError, requests_exceptions.Timeout),
     HTTPConnectTimeoutError: _backend_compat_type(HTTPConnectTimeoutError, requests_exceptions.ConnectTimeout),
-    # requests split this case, so both bases are needed to preserve the old arms: a header-phase
-    # read timeout was ReadTimeout, a body-phase one was ConnectionError.
+    # requests used ReadTimeout for headers and ConnectionError for body reads.
     HTTPReadTimeoutError: _backend_compat_type(
         HTTPReadTimeoutError, requests_exceptions.ReadTimeout, requests_exceptions.ConnectionError
     ),
     HTTPConnectionError: _backend_compat_type(HTTPConnectionError, requests_exceptions.ConnectionError),
-    # The translator collapses all four URL types into one agnostic type, so all four are carried.
     HTTPInvalidURLError: _backend_compat_type(
         HTTPInvalidURLError,
         requests_exceptions.InvalidURL,
@@ -309,25 +291,12 @@ _COMPAT_EXCEPTIONS: dict[type[HTTPError], type[HTTPError]] = {
     HTTPSSLError: _backend_compat_type(HTTPSSLError, requests_exceptions.SSLError),
 }
 
-# The JSON seam converges on the standard library error, but that class and the backend's own
-# JSONDecodeError are siblings under ValueError, so neither one catches the other. Carrying the
-# backend class as an extra base keeps an arm written against it matching. Where simplejson is
-# installed the backend class derives from it as well, so those arms ride on the same base.
+# stdlib and requests JSONDecodeError are siblings, so the compatibility type carries both.
 _COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
 
 
 def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
-    """Translate a requests exception into the library-agnostic equivalent.
-
-    Order is significant. Several requests types subclass others, so the most
-    specific must be tested first.
-
-    The type actually raised is the ``_COMPAT_EXCEPTIONS`` entry for the agnostic class, which is a
-    subclass of it. ``isinstance`` against the agnostic type is unaffected.
-
-    ``response`` is supplied only by the ``raise_for_status`` seam, which passes the
-    agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
-    """
+    """Map a requests exception to its agnostic compatibility type, most-specific first."""
     message = str(exc) or exc.__class__.__name__
     request = _translate_requests_request(getattr(exc, 'request', None))
     if isinstance(
@@ -433,8 +402,7 @@ class ResponseWrapper(ObjectProxy):
         raw = getattr(self.__wrapped__, 'raw', None)
         connection = getattr(raw, 'connection', None)
         sock = getattr(connection, 'sock', None)
-        # sock is None once the connection is released, and a bare (non-TLS) socket has no getpeercert,
-        # so a plain http:// request lands here. Either way there is no peer certificate to report.
+        # No peer certificate exists for plain HTTP or a released connection.
         getpeercert = getattr(sock, 'getpeercert', None)
         if getpeercert is None:
             return None
@@ -442,7 +410,7 @@ class ResponseWrapper(ObjectProxy):
 
     @property
     def history(self):
-        # Wrap redirect responses so history items satisfy the protocol too, never leaking a raw backend object.
+        # Keep redirect history protocol-typed.
         return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
 
     def __enter__(self):
@@ -649,9 +617,7 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
-        # Whether to trust environment configuration (proxies, auth, CA bundles).
-        # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
-        # value so the reported state matches it.
+        # Match an injected session's trust_env; otherwise use the requests default.
         self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
 
         # Whether or not to log request information like method and url
@@ -686,19 +652,13 @@ class RequestsWrapper(object):
             self._session.trust_env = value
 
     def close(self) -> None:
-        """Close any open connections. Idempotent; the client stays usable and lazily rebuilds a default
-        session on the next request. An injected session is not restored after being closed."""
+        """Close connections; the next request rebuilds a default session."""
         if self._session is not None:
             self._session.close()
             self._session = None
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
-        """Look up a cookie by name on the persistent session, returning its value, or default if absent or ambiguous.
-
-        Only cookies retained on the persistent session are visible. Requests made without persistence
-        (the default unless persist_connections is set or persist=True is passed) use a throwaway session
-        whose cookies are discarded, so a cookie set by such a request is not found here.
-        """
+        """Return a persistent cookie, or default if it is missing or ambiguous."""
         try:
             return self.session.cookies.get(name, default)
         except requests_cookies.CookieConflictError:
@@ -709,15 +669,7 @@ class RequestsWrapper(object):
         return should_bypass_proxy(url, self.no_proxy_uris or [])
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
-        """Look up a request header by name. Lookup is case-insensitive.
-
-        The header mapping is an ordinary dict, so it can hold the same header under several
-        spellings. Requests collapses those into a CaseInsensitiveDict per request, where the last
-        spelling wins, so the last match is the value that actually reaches the wire. Returning the
-        first match instead would report a value that is never sent, and a caller negotiating over a
-        seeded default would read the default, conclude the header is unset, and overwrite the value
-        the user configured under the other spelling.
-        """
+        """Return the last case-insensitive match, which requests sends on the wire."""
         found = default
         for key, value in self.options['headers'].items():
             if key.lower() == name.lower():
@@ -728,8 +680,7 @@ class RequestsWrapper(object):
         set_header_value(self.options['headers'], name, value)
 
     def disable_auth(self) -> None:
-        """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
-        # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
+        """Suppress configured and .netrc auth without disabling other environment settings."""
         self.options['auth'] = suppress_default_auth
 
     def get(self, url, **options):
@@ -1020,16 +971,8 @@ class RequestsWrapper(object):
             pass
 
     def apply_tls_to_requests_session(self, session: requests.Session) -> None:
-        """Apply this wrapper's TLS configuration to a requests session it does not own.
-
-        For third-party libraries that build their own requests transport and accept only verify and
-        cert, which cannot express tls_validate_hostname, tls_ciphers, tls_private_key_password or
-        tls_intermediate_ca_certs. Those live on the SSLContext, so the adapter carrying it has to be
-        mounted on the foreign session for them to take effect.
-        """
-        # A dedicated adapter, never one from the cache. Closing a requests session closes every
-        # adapter mounted on it, and the owner of a foreign session decides when that happens, so a
-        # shared adapter would let it drop the connection pool this client's own requests run on.
+        """Apply this client's TLS configuration to a foreign requests session."""
+        # Use a dedicated adapter because closing the foreign session closes its adapters.
         session.mount('https://', self._create_https_adapter(self.tls_config))
 
     def _mount_https_adapter(self, session, tls_config):
@@ -1066,7 +1009,7 @@ class RequestsWrapper(object):
 def create_http_client(
     instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
 ) -> HTTPClient:
-    """Build the agnostic HTTP client from explicit config, confining the concrete backend to one place."""
+    """Construct the HTTP client."""
     return RequestsWrapper(instance or {}, init_config, remapper, logger)
 
 

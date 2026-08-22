@@ -1,15 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Deprecated requests-backed mock response, reachable only as ``datadog_checks.dev.http.MockResponse``.
+"""Deprecated requests-backed ``datadog_checks.dev.http.MockResponse``.
 
-Kept in its own module so that ``datadog_checks.dev.http`` stays free of a ``requests`` import. Repositories
-outside integrations-core, notably integrations-extras, install datadog-checks-dev unpinned and test against a
-released, requests-backed datadog-checks-base. ``MockHTTPResponse`` cannot serve them: it raises
-``HTTPStatusError``, which does not inherit from ``requests.HTTPError``, and it reaches into
-``datadog_checks.base.utils.http_protocol``, a module no released base ships.
-
-Remove this module once those repositories run against an agnostic base.
+Isolated to keep ``requests`` out of ``http`` while downstream repositories test against
+a released base without the agnostic HTTP protocol. Remove after those repositories migrate.
 """
 
 import json
@@ -40,14 +35,12 @@ class MockResponse(Response):
             self._content = json.dumps(json_data).encode('utf-8')
             self.raw = BytesIO(self._content)
         else:
-            # For multi-line string literals
             if normalize_content and content.startswith('\n'):
                 content = dedent(content[1:])
 
             self._content = content.encode('utf-8')
             self.raw = BytesIO(self._content)
 
-        # Add new keyword arguments to set as needed
         self.status_code = status_code
 
         if headers is not None:

@@ -395,10 +395,7 @@ def mock_http(mocker):
     client = create_autospec(HTTPClient)
     cookie_return_value_unset = object()
 
-    # create_autospec does not materialize attributes declared only as annotations on the protocol,
-    # and seal() below turns any later attribute access into an AttributeError, so options has to be
-    # a real dict assigned here. Its 'headers' value is the same object get_header and set_header
-    # read, so mutating options['headers'] directly stays visible through those methods.
+    # create_autospec skips annotation-only attributes; assign them before seal().
     header_state: dict[str, str] = {}
     client.options = {
         'auth': None,
@@ -409,7 +406,6 @@ def mock_http(mocker):
         'verify': True,
         'allow_redirects': True,
     }
-    # Empty, matching a client built with no tls_ configuration. A test that needs it populates it.
     client.tls_config = {}
     client.trust_env = True
     client.ignore_tls_warning = False
@@ -423,7 +419,6 @@ def mock_http(mocker):
         return found
 
     def _set_header(name, value):
-        # The client's own helper, so the double cannot drift from the surface it stands in for.
         set_header(client.options['headers'], name, value)
 
     def _get_cookie(name: str, default: str | None = None) -> str | None:
@@ -436,8 +431,6 @@ def mock_http(mocker):
     client.get_header.side_effect = _get_header
     client.set_header.side_effect = _set_header
     client.disable_auth.side_effect = _disable_auth
-    # No no_proxy rules are configured on the mock, matching a client built without them. A test that
-    # needs bypass behavior overrides this return_value.
     client.should_bypass_proxy.return_value = False
     client.get_cookie.return_value = cookie_return_value_unset
     client.get_cookie.side_effect = _get_cookie
@@ -450,12 +443,7 @@ def mock_http(mocker):
 
 @pytest.fixture
 def mock_openmetrics_http(mock_http, mocker):
-    """OpenMetrics HTTP mock with dual interception:
-
-    - v1 checks (OpenMetricsBaseCheck): patches OpenMetricsScraperMixin.get_http_handler to return mock_http.
-    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck HTTP client patches; the
-      get_http_handler patch is unused on this path.
-    """
+    """Patch the OpenMetrics v1 handler; v2 uses the AgentCheck patches from mock_http."""
     mocker.patch(
         'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
         return_value=mock_http,
@@ -465,7 +453,6 @@ def mock_openmetrics_http(mock_http, mocker):
 
 @pytest.fixture
 def mock_prometheus_http(mock_http, mocker):
-    """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
     mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
         return_value=mock_http,

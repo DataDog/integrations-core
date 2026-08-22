@@ -21,7 +21,6 @@ pytestmark = [pytest.mark.unit]
 class TestClose:
     def test_close_without_session_is_noop(self):
         http = RequestsWrapper({}, {})
-        # No session has been created yet; closing must not raise.
         http.close()
         assert http._session is None
 
@@ -37,20 +36,16 @@ class TestClose:
         first = http.session
         http.close()
         assert http._session is None
-        # A fresh session is created on next access.
         assert http.session is not first
 
     def test_close_is_idempotent_after_open(self):
         http = RequestsWrapper({}, {})
-        # Open a session, then close twice; the second close must be a safe no-op.
         assert http.session is not None
         http.close()
         http.close()
         assert http._session is None
 
     def test_request_succeeds_after_close(self):
-        # The documented contract is that the client stays usable after close(): a subsequent request
-        # transparently rebuilds the session and goes through.
         http = RequestsWrapper({}, {})
         http.persist_connections = True
         with mock.patch('requests.Session.get') as get:
@@ -68,18 +63,15 @@ class TestDisableAuth:
         http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
         assert http.options['auth'] == ('user', 'pass')
         http.disable_auth()
-        # A truthy sentinel replaces the config-derived tuple so no Basic header is derived from config.
         assert http.options['auth'] is not None
         assert http.options['auth'] != ('user', 'pass')
 
     def test_disable_auth_preserves_trust_env(self):
         http = RequestsWrapper({}, {})
         http.disable_auth()
-        # Only auth is suppressed. Env proxy and CA bundle resolution must stay on.
         assert http.trust_env is True
 
     def test_netrc_header_injected_without_disable_auth(self):
-        # Guards the regression: with auth=None and trust_env on, a matching .netrc entry injects Authorization.
         http = RequestsWrapper({}, {})
         http.options['auth'] = None
         captured = {}
@@ -115,7 +107,6 @@ class TestDisableAuth:
             http.disable_auth()
             http.get('http://example.com')
 
-        # The truthy no-op auth short-circuits requests' .netrc lookup, so no Authorization header goes out.
         assert 'Authorization' not in captured['headers']
 
 
@@ -134,17 +125,11 @@ class TestCookies:
 
     def test_get_cookie_conflict_returns_default(self):
         http = RequestsWrapper({}, {})
-        # Same cookie name on multiple domains makes RequestsCookieJar.get raise
-        # CookieConflictError. get_cookie must still honor its value-or-default contract.
         http.session.cookies.set('dup', 'a', domain='a.example.com')
         http.session.cookies.set('dup', 'b', domain='b.example.com')
         assert http.get_cookie('dup', 'fallback') == 'fallback'
 
     def test_per_request_cookies_reach_the_request(self):
-        # The tests above cover cookies the session holds. spark instead keeps the YARN proxy's cookie
-        # on the check and hands it to the next hop as a per-request mapping, so nothing on the session
-        # carries it. Dropping the kwarg would send that hop uncredentialed, and YARN's web proxy would
-        # answer with its HTML warning page instead of the JSON payload.
         http = RequestsWrapper({}, {})
 
         wire_headers = get_wire_headers(http, cookies={'proxy': 'approved'})
@@ -167,7 +152,6 @@ class TestTrustEnv:
     def test_trust_env_applies_to_new_session(self):
         http = RequestsWrapper({}, {})
         http.trust_env = False
-        # Session created after the setting must honor it.
         assert http.session.trust_env is False
 
     def test_trust_env_reset_to_true(self):
@@ -180,11 +164,9 @@ class TestTrustEnv:
         session = requests.Session()
         session.trust_env = False
         http = RequestsWrapper({}, {}, session=session)
-        # The reported value must match the injected session, not the default True.
         assert http.trust_env is False
 
     def test_trust_env_defaults_true_when_injected_session_lacks_attribute(self):
-        # A duck-typed session without trust_env must fall back to the True default.
         http = RequestsWrapper({}, {}, session=mock.Mock(spec=[]))
         assert http.trust_env is True
 
@@ -217,11 +199,6 @@ class TestClientProtocolSurface:
         assert callable(HTTPClient.should_bypass_proxy)
 
     def test_tls_escape_hatch_refuses_to_no_op(self):
-        """A backend inheriting the protocol without implementing this member must fail loudly.
-
-        An inherited empty body returns None to a caller that cannot tell the TLS configuration was
-        never applied, which is the silent drop the member exists to prevent.
-        """
         from datadog_checks.base.utils.http_protocol import HTTPClient
 
         class BackendWithoutTheEscapeHatch(HTTPClient):
@@ -241,16 +218,6 @@ class TestClientProtocolSurface:
                 assert hasattr(http, name), f'RequestsWrapper missing member {name}'
 
     def test_shipped_code_reads_only_declared_client_members(self):
-        """Every client member shipped code reads has to be one the protocol declares.
-
-        The reverse direction, that the wrapper satisfies the protocol, is covered above and cannot
-        catch this: a member reachable on the concrete client but absent from the protocol is invisible
-        to it, the sealed test double raises AttributeError on it, and a backend that satisfies the
-        declared protocol drops the behaviour with nothing left to notice.
-
-        This walks the direct `.http.<member>` idiom. A read through a local alias is not visible to it,
-        and the census only runs when the base suite runs, so it is a tripwire rather than a gate.
-        """
         from datadog_checks.base.utils.http_protocol import HTTPClient
 
         repo_root = pathlib.Path(__file__).resolve().parents[5]
@@ -262,8 +229,7 @@ class TestClientProtocolSurface:
             repo_root / 'datadog_checks_base/datadog_checks/base/utils/http_protocol.py',
         }
 
-        # These reach past the declared surface for backend-specific members. Remove each entry as its
-        # integration moves onto the surface, and this set along with the ddev enforcement check.
+        # Remove entries as integrations migrate to the declared surface.
         PENDING_MIGRATION = {
             'avi_vantage/datadog_checks/avi_vantage/check.py',
             'cisco_aci/datadog_checks/cisco_aci/api.py',
@@ -281,7 +247,7 @@ class TestClientProtocolSurface:
             try:
                 tree = ast.parse(path.read_text(encoding='utf-8'))
             except SyntaxError:
-                # A vendored Python 2 module and the cookiecutter templates, none of which ship a client.
+                # Vendored Python 2 and cookiecutter templates do not ship a client.
                 continue
             for node in ast.walk(tree):
                 if (
@@ -319,12 +285,7 @@ class TestResponseProtocolSurface:
 
 
 def build_requests_response(content: bytes, headers: dict[str, str] | None = None) -> ResponseWrapper:
-    """Build a response through the requests adapter, which is where the character set is derived.
-
-    A hand-constructed requests.Response leaves encoding at None no matter what headers it carries, so
-    a test that built one directly would compare the double against a backend that never derived
-    anything. Pre-consuming the body keeps the raw stream out of the picture.
-    """
+    """Build through the requests adapter so headers determine encoding."""
     raw = mock.Mock(spec=['status', 'headers', 'reason', 'version'])
     raw.status, raw.headers, raw.reason, raw.version = 200, headers or {}, 'OK', 11
     response = HTTPAdapter().build_response(requests.Request('GET', 'http://example.com').prepare(), raw)
@@ -342,16 +303,11 @@ def build_requests_response(content: bytes, headers: dict[str, str] | None = Non
         ({'Content-Type': 'text/plain'}, 'ISO-8859-1'),
         ({'Content-Type': 'text/plain; charset=latin-1'}, 'latin-1'),
         ({'Content-Type': 'application/json'}, 'utf-8'),
-        # "text" is matched anywhere in the media type, so an OpenMetrics body with no charset is
-        # latin-1 too. The charset value is passed through verbatim rather than normalized.
         ({'Content-Type': 'application/openmetrics-text; version=1.0.0'}, 'ISO-8859-1'),
         ({'Content-Type': 'TEXT/PLAIN; CHARSET=UTF-8'}, 'UTF-8'),
     ],
 )
 def test_encoding_derived_from_content_type(backend, headers, expected):
-    # A double that ignored the header would decode every body as utf-8, so a test could not tell a
-    # correctly parsed latin-1 payload from a mangled one, and no test could reach the branch where
-    # the character set stays undetermined.
     if backend == 'requests':
         response = build_requests_response(b'abc', headers)
     else:
@@ -362,9 +318,6 @@ def test_encoding_derived_from_content_type(backend, headers, expected):
 
 @pytest.mark.parametrize('backend', ['requests', 'mock'])
 def test_decode_unicode_yields_bytes_when_the_encoding_is_undetermined(backend):
-    # An endpoint that omits Content-Type leaves nothing to decode with, and callers that split or
-    # search the yielded records raise TypeError against bytes. A double that always handed back text
-    # would make that crash unreachable from a test.
     content = 'a: café\nb: 2'.encode('utf-8')
     if backend == 'requests':
         response = build_requests_response(content)
@@ -436,7 +389,6 @@ class TestPeerCert:
         assert wrapper.get_peer_cert() is None
 
     def test_returns_none_for_non_tls_socket(self):
-        # A plain http:// connection exposes a bare socket with no getpeercert; must return None, not raise.
         response = mock.Mock()
         response.raw.connection.sock = object()
         wrapper = ResponseWrapper(response, 1024)
@@ -463,7 +415,6 @@ class TestHistory:
         final = mock.Mock()
         final.history = [redirect]
         wrapper = ResponseWrapper(final, 1024)
-        # A raw requests error on a history item must surface as the translated agnostic exception.
         with pytest.raises(HTTPStatusError):
             wrapper.history[0].raise_for_status()
 

@@ -12,13 +12,8 @@ from typing import TYPE_CHECKING, Any, Protocol
 if TYPE_CHECKING:
     import requests
 
-# Provisional backend-neutral HTTP surface, stabilizing once a second backend implements it.
-# RequestsWrapper implements it on requests today. Do not change existing methods, attributes, or
-# their semantics without coordinating every implementation.
-# Capabilities expose behavior, never a backend object, with one documented exception:
-# apply_tls_to_requests_session takes a requests.Session, for third-party libraries that cannot be
-# handed anything else. It is provisional and goes away once openstack_controller's SDK backend is
-# routed through ApiRest.
+# Provisional until a second backend implements it. Coordinate member and semantic changes across implementations.
+# apply_tls_to_requests_session is a requests-only keystoneauth1 escape hatch until that path uses ApiRest.
 
 
 class HTTPHeaders(Mapping[str, str]):
@@ -67,21 +62,13 @@ class HTTPResponse(Protocol):
     status_code: int
     content: bytes
     text: str
-    # Response headers. Lookup, containment and equality against another mapping MUST all be
-    # case-insensitive. The casing reported by iteration, keys(), items() and dict() is
-    # backend-defined and MUST NOT be relied on, since a backend may lowercase or preserve wire casing.
+    # Lookup and equality are case-insensitive; iteration casing is backend-defined.
     headers: Mapping[str, str]
-    # Character encoding used to decode text. None until determined. Writable to force a default.
     encoding: str | None
-    # Time elapsed between sending the request and finishing parsing of the response headers.
     elapsed: timedelta
-    # Cookies the server set on this response.
     cookies: Mapping[str, str]
-    # Parsed Link header, keyed by rel, or by URL when no rel is present.
     links: Mapping[str, Mapping[str, str]]
-    # Final URL of the response, after any redirects.
     url: str
-    # Redirect responses that led to this one, oldest first.
     history: list[HTTPResponse]
 
     @property
@@ -92,100 +79,69 @@ class HTTPResponse(Protocol):
     def json(self, **kwargs: Any) -> Any: ...
     def raise_for_status(self) -> None: ...
     def close(self) -> None: ...
-    # Peer TLS certificate of the connection, or None if not HTTPS or already released.
-    def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None: ...
+    def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None:
+        """Return None for plain HTTP or a released connection."""
+        ...
+
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]: ...
-    # Empty bodies yield no records. With default line splitting, one terminal line ending only closes
-    # the current record, while complete empty records are preserved. With a custom delimiter, a complete
-    # terminal delimiter produces an empty final record, while an incomplete delimiter remains part of
-    # the final record.
-    # Records are bytes by default; decode_unicode yields text when an encoding is configured or determined.
     def iter_lines(
         self,
         chunk_size: int | None = None,
         decode_unicode: bool = False,
         delimiter: bytes | str | None = None,
-    ) -> Iterator[bytes | str]: ...
+    ) -> Iterator[bytes | str]:
+        """Iterate records with requests-compatible line and delimiter boundaries."""
+        ...
+
     def __enter__(self) -> HTTPResponse: ...
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None: ...
     def __iter__(self) -> Iterator[bytes | str]: ...
 
 
 class HTTPClient(Protocol):
-    # Request defaults, a plain mutable dict and public surface: integrations outside this repository
-    # read and mutate it directly. A backend MUST populate exactly these keys, which callers index
-    # unguarded: auth, cert, headers (mutable, case-insensitive), proxies, timeout as a (connect, read)
-    # pair, verify as True/False/CA-bundle-path, allow_redirects.
-    # Read per request, not snapshotted: a write after construction MUST affect the next request, and
-    # copying it onto a backend client is not enough, since a backend need not expose these as
-    # settable attributes at all.
+    # Public mutable defaults: auth, cert, headers, proxies, timeout, verify, and allow_redirects.
+    # Backends read this mapping for every request so post-construction writes take effect.
     options: dict[str, Any]
 
-    # TLS settings keyed by their tls_ prefixed configuration names, for callers that build their own
-    # SSL context outside the client. Today the tls integration, for intermediate-certificate discovery.
+    # tls_* settings for callers that build their own SSLContext.
     tls_config: dict[str, Any]
 
-    # Whether the client trusts environment config (proxies, auth, CA bundles).
     trust_env: bool
 
-    # Suppress the debug log emitted for an unverified HTTPS request. Writable to silence it.
     ignore_tls_warning: bool
 
-    # Reuse a single persistent connection across requests by default. Writable after construction.
     persist_connections: bool
 
-    # Every verb also takes per-request keywords, all of which a backend MUST accept:
-    #   params, headers, data, json, auth, cookies, timeout
-    #                   override the same key in options for this request. headers REPLACES the
-    #                   configured headers rather than adding to them.
-    #   allow_redirects overrides the same key in options for this request. A backend whose own
-    #                   redirect option carries a different name MUST accept this name and map it.
-    #                   The legacy cAdvisor probe passes False and depends on a 3xx being returned
-    #                   rather than chased.
-    #   verify, cert    per-request TLS. A backend that binds TLS at construction needs a
-    #                   per-configuration transport cache rather than a pass-through.
-    #   extra_headers   merged over whichever header set applies, adding without discarding.
-    #   stream          defer reading the body so the caller can iterate it, relied on by the
-    #                   OpenMetrics scrapers, the kubelet pod-list query and argocd's endless watch.
-    #   persist         override persist_connections for this call.
-    # Only the first group is a plain per-request forward. extra_headers and persist exist on this
-    # surface alone, and allow_redirects, stream and the TLS pair may need machinery or a rename
-    # rather than a pass-through.
+    # Per-request options: params, headers, data, json, auth, cookies, timeout, allow_redirects, verify,
+    # cert, extra_headers, stream, and persist. extra_headers merges; headers replaces.
     def get(self, url: str, **options: Any) -> HTTPResponse: ...
     def post(self, url: str, **options: Any) -> HTTPResponse: ...
     def head(self, url: str, **options: Any) -> HTTPResponse: ...
     def put(self, url: str, **options: Any) -> HTTPResponse: ...
     def patch(self, url: str, **options: Any) -> HTTPResponse: ...
     def delete(self, url: str, **options: Any) -> HTTPResponse: ...
-    # The HTTP OPTIONS verb. Suffixed because ``options`` above is the request-defaults dict.
-    def options_method(self, url: str, **options: Any) -> HTTPResponse: ...
-    # Case-insensitive. When the same header is held under several spellings, this reports the one
-    # the backend will actually send, so a caller can tell a configured value from an unset one.
-    def get_header(self, name: str, default: str | None = None) -> str | None: ...
+    def options_method(self, url: str, **options: Any) -> HTTPResponse:
+        """Perform OPTIONS; suffixed to avoid the request-defaults attribute."""
+        ...
+
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Return the wire value using case-insensitive lookup."""
+        ...
+
     def set_header(self, name: str, value: str) -> None: ...
 
-    # Suppress all HTTP-level auth (config-derived and environment/.netrc) for later requests, leaving trust_env intact.
-    def disable_auth(self) -> None: ...
+    def disable_auth(self) -> None:
+        """Clear configured and .netrc auth without disabling other environment settings."""
+        ...
 
-    # Close any open connections. Idempotent (safe to call repeatedly or before any connection was
-    # opened); the client stays usable and reconnects on the next request.
     def close(self) -> None: ...
 
-    # Look up a persisted cookie by name, returning its value as a plain string, or default when the
-    # cookie is absent or its name is ambiguous (the same name set for multiple domains or paths). A
-    # backend must return default in the ambiguous case rather than raising.
-    def get_cookie(self, name: str, default: str | None = None) -> str | None: ...
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Return default for missing or ambiguous persisted cookies."""
+        ...
 
-    # Whether url should bypass any configured proxy under the client's no_proxy rules, False if none match.
     def should_bypass_proxy(self, url: str) -> bool: ...
 
-    # Escape hatch, requests-only. Applies this client's TLS configuration to a requests.Session owned
-    # by a third-party library that is hard-bound to requests: today only keystoneauth1, reached through
-    # openstack_controller's SDK backend. Scoped to TLS deliberately. Proxies are not covered, because
-    # no_proxy is per-host and one shared transport cannot express per-host bypass, so callers set
-    # session.proxies themselves.
-    # A backend that is not requests-based MUST raise NotImplementedError rather than no-op, which the
-    # body below enforces for any backend inheriting from this protocol. Nothing downstream of this
-    # call can detect a no-op, so an unimplemented member would drop the caller's TLS options silently.
     def apply_tls_to_requests_session(self, session: requests.Session) -> None:
+        """Apply TLS to a keystoneauth1 requests session; proxies remain caller-owned."""
         raise NotImplementedError('a non-requests backend must not silently skip applying TLS configuration')

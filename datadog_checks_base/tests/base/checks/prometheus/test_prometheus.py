@@ -1875,11 +1875,6 @@ def test_health_service_check_failing():
 
 
 def test_health_service_check_failing_on_status_error(mock_prometheus_http):
-    """A status error surfacing from the request reports the endpoint down.
-
-    The auth token is fetched inside the request, so a bad status there fails the request itself.
-    Requests raised that as an OSError subclass, which the IOError arm caught.
-    """
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
@@ -2021,8 +2016,6 @@ def test_prometheus_http_config(mock_http, mock_response, mocker):
 
 
 def test_get_http_handler_negotiates_over_seeded_default_headers(p_check):
-    """A real client seeds Accept/Accept-Encoding with values that express no preference, and the
-    scraper must still negotiate the exposition format over them."""
     endpoint = 'http://fake.endpoint:10055/metrics'
 
     http_handler = p_check.get_http_handler(endpoint, {})
@@ -2042,8 +2035,6 @@ def test_get_http_handler_preserves_user_configured_headers(p_check):
 
 
 def test_get_http_handler_preserves_non_canonically_cased_extra_headers(p_check):
-    """Header names are case-insensitive, so a user value configured under a non-canonical spelling
-    still counts as explicitly configured and must survive the exposition-format negotiation."""
     endpoint = 'http://fake.endpoint:10055/metrics'
     instance = {'extra_headers': {'accept': 'application/openmetrics-text', 'accept-encoding': 'br'}}
 

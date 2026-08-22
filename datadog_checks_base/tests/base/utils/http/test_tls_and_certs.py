@@ -130,11 +130,6 @@ class TestCert:
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
 
     def test_missing_ca_cert_file_is_reported(self, tmp_path, caplog):
-        # http_check holds the only other assertion on this warning, and it reads it off that check's
-        # own get_tls_context(), which builds a context beside the client rather than the one the request
-        # uses. Only the client's tls_config decides what the request's context loads, so a tls_ca_cert
-        # that stopped reaching the client would leave that assertion intact while every request ran
-        # against the system trust store instead of the operator's CA.
         missing_ca_cert = str(tmp_path / 'unexisting.crt')
         http = RequestsWrapper({'tls_ca_cert': missing_ca_cert}, {})
 
@@ -570,12 +565,7 @@ class TestSSLContextAdapter:
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
 
     def test_foreign_session_does_not_share_this_client_adapter(self):
-        """A session this client does not own gets its own adapter, carrying the same TLS configuration.
-
-        requests.Session.close() closes every adapter mounted on it, and a library that builds its own
-        transport closes it when the transport is collected. Sharing the adapter would take down the
-        connection pool this client's own requests run on.
-        """
+        """Closing a foreign session must not close this client's adapter."""
         http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
         own_adapter = http.session.get_adapter('https://example.com')
         foreign_session = requests.Session()

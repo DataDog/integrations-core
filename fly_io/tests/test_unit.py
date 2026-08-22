@@ -197,7 +197,6 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
 )
 @pytest.mark.usefixtures('mock_http_get')
 def test_non_json_body_logged_at_debug(dd_run_check, instance, caplog):
-    # A 200 carrying a body that is not JSON is an upstream fault, so it must not be reported as an agent fault.
     caplog.set_level(logging.DEBUG)
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)

@@ -6,6 +6,8 @@ from functools import wraps
 
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPStatusError
 
+UPSTREAM_EXCEPTIONS = (HTTPRequestError, HTTPStatusError, json.JSONDecodeError)
+
 
 def handle_error(f):
     @wraps(f)
@@ -13,8 +15,7 @@ def handle_error(f):
         try:
             result = f(check, *args, **kwargs)
             return result
-        # A body that fails to decode is an upstream fault, so it stays on the debug arm.
-        except (HTTPRequestError, HTTPStatusError, json.JSONDecodeError) as e:
+        except UPSTREAM_EXCEPTIONS as e:
             check.log.debug(
                 "Encountered an HTTP error in '%s' [%s]: %s",
                 f.__name__,

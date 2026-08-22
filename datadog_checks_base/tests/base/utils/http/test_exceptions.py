@@ -72,11 +72,9 @@ def test_raise_for_status_maps_to_status_error():
         wrapped = http.get('http://example.test/')
         with pytest.raises(HTTPStatusError) as exc_info:
             wrapped.raise_for_status()
-    # .response carries the agnostic wrapper, never the raw backend response
     assert exc_info.value.response is wrapped
 
 
-# Group A: the translator as a pure function, over the full mapping table.
 @pytest.mark.parametrize(
     'raised, expected',
     [
@@ -105,9 +103,6 @@ def test_translate_maps_requests_to_agnostic(raised, expected):
 
 
 def test_invalid_header_leaves_the_value_error_family():
-    # Requests raises InvalidHeader when a server answers with a multi-valued Content-Length, and its
-    # own InvalidHeader is a ValueError. The agnostic equivalent is not, which is why the yarn, spark,
-    # mapreduce, hdfs_datanode, hdfs_namenode and consul handlers name it next to ValueError.
     assert isinstance(requests.exceptions.InvalidHeader('multiple values'), ValueError)
 
     translated = _translate_requests_exception(requests.exceptions.InvalidHeader('multiple values'))
@@ -115,10 +110,6 @@ def test_invalid_header_leaves_the_value_error_family():
     assert not isinstance(translated, ValueError)
 
 
-# Group A2: the backend-compatibility bases. Checks outside this repository catch the requests tree
-# around self.http and the Agent ships one datadog_checks_base for all of them, so while requests is
-# the backend the arms they were written against must keep matching. Each case names the arms that
-# caught the failure before the agnostic types existed.
 @pytest.mark.parametrize(
     'raised, still_caught_by',
     [
@@ -158,7 +149,6 @@ def test_invalid_header_leaves_the_value_error_family():
 def test_translated_exceptions_keep_matching_the_requests_arms(raised, still_caught_by):
     translated = _translate_requests_exception(raised)
 
-    # Every failure stays catchable by the two broadest arms, whatever its specific type.
     assert isinstance(translated, requests.exceptions.RequestException)
     assert isinstance(translated, OSError)
 
@@ -167,8 +157,6 @@ def test_translated_exceptions_keep_matching_the_requests_arms(raised, still_cau
 
 
 def test_body_phase_read_timeout_keeps_matching_connection_error():
-    # requests reported a body-phase read timeout as ConnectionError, not ReadTimeout. The agnostic
-    # type unifies both phases, so it has to satisfy the arms for both.
     raised = requests.exceptions.ConnectionError(ReadTimeoutError(None, 'http://example.test/', 'timed out'))
 
     translated = _translate_requests_exception(raised)
@@ -178,14 +166,12 @@ def test_body_phase_read_timeout_keeps_matching_connection_error():
 
 
 def test_compat_bases_do_not_leak_into_the_agnostic_tree():
-    # The compat subclass is what gets raised, but the agnostic hierarchy it is built on is unchanged.
     assert not isinstance(_translate_requests_exception(requests.exceptions.HTTPError('500')), HTTPRequestError)
     assert not isinstance(
         _translate_requests_exception(requests.exceptions.ConnectTimeout('boom')), HTTPConnectionError
     )
     for agnostic, compat in _COMPAT_EXCEPTIONS.items():
         assert compat.__bases__[0] is agnostic
-        # Tracebacks and reprs must be indistinguishable from the agnostic class.
         assert compat.__name__ == agnostic.__name__
         assert compat.__module__ == agnostic.__module__
 
@@ -201,11 +187,7 @@ def test_backend_compat_type_supports_backend_subclassing_agnostic():
 
 
 def requests_exception_types():
-    """Every requests exception type reachable from RequestException, discovered rather than listed.
-
-    Restricted to requests' own module so an installed library that subclasses one of these, as the
-    OpenStack SDK does, cannot change what this suite measures.
-    """
+    """Return requests' own RequestException subclasses."""
     found: dict[str, type] = {}
     pending = [requests.exceptions.RequestException]
     while pending:
@@ -220,20 +202,12 @@ def requests_exception_types():
 
 @pytest.mark.parametrize('exc_type', requests_exception_types(), ids=lambda exc_type: exc_type.__name__)
 def test_every_requests_exception_lands_under_a_handled_agnostic_type(exc_type):
-    # Four shared OpenMetrics handler tuples (openmetrics/base_check.py, openmetrics/mixins.py,
-    # openmetrics/v2/base.py, prometheus/mixins.py) catch HTTPRequestError and HTTPStatusError but not
-    # their common root, so a type that translated to the root alone would escape all four at once and
-    # break every OpenMetrics integration together. Constructed without __init__ because the
-    # signatures differ across the family and the translator reads only args, str() and request.
     translated = _translate_requests_exception(exc_type.__new__(exc_type))
 
     assert isinstance(translated, (HTTPRequestError, HTTPStatusError))
 
 
 def test_a_non_requests_failure_reaches_the_caller_untranslated():
-    # This is what keeps the bare-root fallback above unreachable through the client, and the four
-    # OpenMetrics handler tuples depend on that. Widening the translation guard to cover more than
-    # requests exceptions would let the root escape all four.
     http = RequestsWrapper({}, {})
 
     with mock.patch('requests.Session.get', side_effect=RuntimeError('not a requests failure')):
@@ -242,7 +216,6 @@ def test_a_non_requests_failure_reaches_the_caller_untranslated():
 
 
 def test_translate_does_not_leak_raw_response():
-    # The translator never carries a raw backend response; the agnostic wrapper is attached at raise_for_status.
     err = requests.exceptions.HTTPError('500 Server Error')
     err.response = object()
     result = _translate_requests_exception(err)
@@ -266,7 +239,6 @@ def test_translate_converts_raw_request_to_agnostic_snapshot():
     assert result.request.headers == {'X-Test-Header': 'original'}
 
 
-# Group B: the streaming seam. The failure surfaces only when the generator is consumed.
 @pytest.mark.parametrize(
     'raised, expected',
     [
@@ -322,7 +294,6 @@ class FailingRead:
         raise self._exc
 
 
-# Group C: the buffered seam. content and text are properties, json is a method.
 @pytest.mark.parametrize(
     'read',
     [
@@ -340,7 +311,6 @@ def test_buffered_seam_maps_exceptions(read):
             read(wrapped)
 
 
-# Group D: a malformed body must converge to the stdlib json.JSONDecodeError, not an agnostic type.
 def test_json_parse_error_converges_to_stdlib():
     response = FailingRead(requests.exceptions.JSONDecodeError('Expecting value', 'not json', 0))
     http = RequestsWrapper({}, {})
@@ -354,13 +324,6 @@ def test_json_parse_error_converges_to_stdlib():
 
 
 def test_json_parse_error_keeps_matching_requests_arms():
-    """An arm written against the backend's own JSONDecodeError has to keep matching.
-
-    That class and the stdlib one are siblings under ValueError, neither catching the other, so
-    converging on the stdlib type alone lets a malformed body escape an
-    ``except requests.exceptions.JSONDecodeError`` arm entirely. Those arms live in checks whose CI
-    never sees this repository, and the Agent ships one datadog_checks_base for all of them.
-    """
     response = FailingRead(requests.exceptions.JSONDecodeError('Expecting value', 'not json', 0))
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', return_value=response):
@@ -369,8 +332,6 @@ def test_json_parse_error_keeps_matching_requests_arms():
             wrapped.json()
 
 
-# Group E: the auth-token seam. The poll runs before the main request (see handle_auth_token), so a
-# transport failure while fetching the token must surface as an agnostic type, not a raw requests one.
 def test_auth_token_fetch_error_maps_to_agnostic():
     http = RequestsWrapper({}, {})
     http.auth_token_handler = mock.MagicMock()
@@ -393,8 +354,6 @@ class IterableFailingResponse:
         return self.iter_content(128)
 
 
-# Group F: direct iteration. requests.Response.__iter__ delegates to iter_content, so `for chunk in
-# response` must translate mid-stream errors the same as an explicit iter_content() call.
 def test_direct_iteration_maps_mid_stream_exceptions():
     response = IterableFailingResponse(requests.exceptions.ConnectionError('dropped'))
     http = RequestsWrapper({}, {})

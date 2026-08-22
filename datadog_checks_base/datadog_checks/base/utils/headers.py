@@ -5,9 +5,7 @@ from collections.abc import MutableMapping
 
 from datadog_checks.base.agent import datadog_agent
 
-# Values seeded by get_default_headers(). They express no preference of their own, so a caller that
-# negotiates a more specific value treats a header still holding its seeded default as unset. Comparing
-# against these instead of only against None is what keeps that check from silently never firing.
+# Seeded defaults count as unset when negotiating a more specific value.
 DEFAULT_ACCEPT = '*/*'
 DEFAULT_ACCEPT_ENCODING = 'gzip, deflate'
 

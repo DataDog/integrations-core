@@ -161,9 +161,7 @@ class TestAllowRedirect:
         assert http.options['allow_redirects'] is False
 
     def test_per_request_override_reaches_the_request(self):
-        # A per-request value has to beat the configured one and be forwarded explicitly, because
-        # requests defaults HEAD to allow_redirects=False and only an explicit value overrides that.
-        # The legacy cAdvisor probe relies on this to keep a 3xx from being chased.
+        # requests HEAD defaults to False; cAdvisor requires the explicit per-request value.
         http = RequestsWrapper({}, {})
         assert http.options['allow_redirects'] is True
 

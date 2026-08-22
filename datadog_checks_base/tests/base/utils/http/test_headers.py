@@ -85,8 +85,6 @@ def test_config_extra_headers_override_config_headers_across_case():
 
 
 def test_get_header_reports_the_value_that_reaches_the_wire():
-    """Callers negotiate a default only when a header is unset, so a lookup that disagreed with what
-    is sent would let them overwrite a value the user configured under a different spelling."""
     http = RequestsWrapper({'extra_headers': {'accept': 'application/openmetrics-text'}}, {})
 
     with mock.patch('requests.Session.get') as get:
@@ -96,9 +94,7 @@ def test_get_header_reports_the_value_that_reaches_the_wire():
 
 
 def test_config_headers_keep_every_configured_spelling():
-    # The header mapping is not deduplicated: requests collapses spellings per request, and the
-    # `Host` detection below reads the exact key. Collapsing here would silently disable the
-    # HostHeaderSSLAdapter for a config that spells Host more than one way.
+    # HostHeaderSSLAdapter detects the exact configured spelling.
     instance = {'headers': {'host': 'first'}, 'extra_headers': {'Host': 'second'}, 'tls_use_host_header': True}
     init_config = {}
     http = RequestsWrapper(instance, init_config)
@@ -158,13 +154,10 @@ def test_request_headers_override_defaults_before_extra_headers():
     assert wire_headers['X-Request'] == 'request'
     assert wire_headers['X-Extra'] == 'extra'
     assert wire_headers['X-Precedence'] == 'extra'
-    # A per-request mapping does not discard the configured one.
     assert wire_headers['X-Default'] == 'default'
 
 
 def test_a_per_request_mapping_keeps_the_configured_headers():
-    # cisco_aci and cloud_foundry_api pass a per-request mapping holding only their session cookie, so
-    # the Agent's User-Agent and everything the user configured reach the wire through the merge alone.
     http = RequestsWrapper({'extra_headers': {'X-Configured': 'configured'}}, {})
 
     wire_headers = get_wire_headers(http, headers={'Cookie': 'APIC-cookie=token'})
@@ -198,9 +191,7 @@ def test_set_header():
 def test_set_header_case_insensitive():
     http = RequestsWrapper({}, {})
     http.set_header('accept', 'application/json')
-    # Overwrites the existing 'Accept' key (preserving original casing)
     assert http.get_header('Accept') == 'application/json'
-    # No duplicate key created
     assert sum(1 for k in http.options['headers'] if k.lower() == 'accept') == 1
 
 

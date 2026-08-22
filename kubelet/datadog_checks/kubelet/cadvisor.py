@@ -46,8 +46,7 @@ class CadvisorScraper(object):
             raise ValueError("kubelet hostname empty")
         url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port, LEGACY_CADVISOR_METRICS_PATH)
 
-        # Test the endpoint is present. A 3xx answer counts as present, so the probe must not chase
-        # the redirect: the target could answer 4xx and report the legacy endpoint as absent.
+        # A 3xx means the legacy endpoint exists; its redirect target may still return 4xx.
         r = self.http.head(url, timeout=1, allow_redirects=False)  # SKIP_HTTP_VALIDATION
         r.raise_for_status()
 

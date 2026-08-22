@@ -44,9 +44,6 @@ def test_detect_cadvisor_404(mock_openmetrics_http):
 
 
 def test_detect_cadvisor_does_not_follow_redirects(mock_openmetrics_http):
-    # A 3xx from the probe port means the legacy endpoint is present. Chasing the redirect would
-    # test the target instead, so a 4xx there reports the endpoint as absent and silently drops the
-    # whole legacy cAdvisor metric family.
     mock_openmetrics_http.head.return_value = MockHTTPResponse(content='{}', status_code=200)
     check = KubeletCheck('kubelet', {}, [{}])
     check.detect_cadvisor("http://kubelet:10250", 4192)

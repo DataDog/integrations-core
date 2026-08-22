@@ -34,12 +34,6 @@ def test_config_basic():
 
 
 def test_config_basic_reaches_the_request():
-    # Every other assertion here reads options['auth'] back out of the dict, and hdfs_datanode,
-    # hdfs_namenode, mapreduce, spark and yarn each prove their configured credentials the same way. A
-    # client that stored the tuple and never applied it would satisfy all of them while every one of
-    # those endpoints answered 401 and reported no metrics. Read the header off the outgoing request
-    # rather than the credentials off the call: an Authorization header can also arrive from .netrc,
-    # and the header is what the endpoint judges.
     http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
 
     wire_headers = get_wire_headers(http)
