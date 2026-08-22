@@ -677,10 +677,7 @@ class SparkCheck(AgentCheck):
                 response.raise_for_status()
 
         except HTTPTimeoutError as e:
-            # The agnostic exception tree intentionally treats header- and body-phase read timeouts alike.
-            # This widens the old requests behavior: either phase may now be suppressed for terminal pods.
-            # Connect timeouts remain ineligible and always alert.
-            if isinstance(e, HTTPReadTimeoutError) and self._should_suppress_connection_error(e, tags):
+            if isinstance(e, HTTPReadTimeoutError) and self._should_suppress_request_error(e, tags):
                 return None
 
             self.service_check(
@@ -696,7 +693,7 @@ class SparkCheck(AgentCheck):
             HTTPInvalidURLError,
             AgentHTTPConnectionError,
         ) as e:
-            if isinstance(e, AgentHTTPConnectionError) and self._should_suppress_connection_error(e, tags):
+            if isinstance(e, AgentHTTPConnectionError) and self._should_suppress_request_error(e, tags):
                 return None
 
             self.service_check(
@@ -707,8 +704,6 @@ class SparkCheck(AgentCheck):
             )
             raise
 
-        # HTTPRequestError is the translator's fallthrough type, so it carries the malformed-header
-        # and malformed-body failures that have no more specific agnostic equivalent.
         except (ValueError, HTTPRequestError) as e:
             self.service_check(service_name, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
@@ -762,8 +757,8 @@ class SparkCheck(AgentCheck):
         self._startup_retry_count = 0
         return response_json
 
-    def _should_suppress_connection_error(self, exception, tags):
-        """Suppress kubernetes-only connection false positives during pod shutdown."""
+    def _should_suppress_request_error(self, exception, tags):
+        """Suppress terminal-pod errors and one transient startup connection failure."""
         pod_phase = self._get_pod_phase(tags)
         if pod_phase is None:
             return False

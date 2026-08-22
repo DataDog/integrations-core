@@ -473,8 +473,7 @@ class PrometheusScraperMixin(object):
         if bearer_token is not None:
             http_handler.set_header('Authorization', 'Bearer {}'.format(bearer_token))
 
-        # Never clobber a header the user explicitly configured. get_default_headers() seeds both of
-        # these, so their seeded value means "unset" and is safe to replace.
+        # Seeded defaults count as unset; user values do not.
         if http_handler.get_header('accept-encoding') in (None, DEFAULT_ACCEPT_ENCODING):
             http_handler.set_header('accept-encoding', 'gzip')
 
@@ -579,8 +578,7 @@ class PrometheusScraperMixin(object):
         except HTTPSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        # HTTPStatusError is a sibling of HTTPRequestError, not a subclass. It reaches here from the
-        # auth-token fetch, which requests raised as an OSError subclass, so the IOError arm caught it.
+        # Auth-token fetching can raise HTTPStatusError, a sibling of HTTPRequestError.
         except (IOError, HTTPRequestError, HTTPStatusError):
             if self.health_service_check:
                 self._submit_service_check(

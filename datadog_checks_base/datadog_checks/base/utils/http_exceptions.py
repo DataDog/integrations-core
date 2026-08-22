@@ -22,15 +22,9 @@ __all__ = [
 
 
 class HTTPError(Exception):
-    """Root of the backend-agnostic HTTP exception tree.
+    """Backend-agnostic HTTP error root under Exception, not OSError or ValueError.
 
-    Catch this to catch everything the HTTP client can raise. Note that it roots at Exception and not at
-    OSError or ValueError, so arms written against the requests tree do not transfer by inheritance.
-
-    The types in this module stay free of any backend import. The client does not raise them directly: it
-    raises the subclasses built in ``http.py`` (``_COMPAT_EXCEPTIONS``), which add the matching requests
-    classes as extra bases so handlers in checks outside this repository keep matching while requests is
-    still the backend. Testing against the types here is unaffected, since those subclasses derive from them.
+    The client raises compatibility subclasses so existing requests exception handlers still match.
     """
 
     def __init__(
@@ -45,19 +39,13 @@ class HTTPError(Exception):
 
 
 class HTTPRequestError(HTTPError):
-    """A request that never produced a usable response.
-
-    Also the fallthrough type: a backend failure with no more specific agnostic equivalent arrives as a bare
-    HTTPRequestError, so an arm naming only the subclasses below can miss it.
-    """
+    """A request that produced no usable response, including unmapped backend failures."""
 
 
 class HTTPStatusError(HTTPError):
-    """An error status on a response that was received in full.
+    """An error status on a received response.
 
-    This is a sibling of HTTPRequestError, not a subclass, so catching HTTPRequestError does not catch it. The
-    response attribute is populated only by the raise_for_status seam. Other seams, notably the auth-token fetch,
-    raise it with response set to None, so any status check must guard against that before dereferencing.
+    This is a sibling of HTTPRequestError. ``response`` may be None outside ``raise_for_status``.
     """
 
 
@@ -70,22 +58,13 @@ class HTTPConnectTimeoutError(HTTPTimeoutError):
 
 
 class HTTPReadTimeoutError(HTTPTimeoutError):
-    """A timeout while waiting for response data, whether for the headers or for the body.
-
-    Both read phases collapse into this one type, and code that needs to treat them differently cannot do so
-    through the type. requests split them: the header-phase case was ReadTimeout but the body-phase case was
-    ConnectionError.
-    """
+    """A timeout waiting for response headers or body data."""
 
 
 class HTTPConnectionError(HTTPRequestError):
-    """A failure to establish or maintain the connection.
+    """A connection failure, excluding timeouts.
 
-    Substantially narrower than requests.ConnectionError, which also carried connect timeouts and body-phase read
-    timeouts. Neither reaches this type: they are HTTPConnectTimeoutError and HTTPReadTimeoutError, both of which
-    sit under HTTPTimeoutError instead. So an arm ported from except requests.ConnectionError needs
-    (HTTPConnectionError, HTTPTimeoutError) to keep catching what it used to, at the cost of newly catching
-    header-phase read timeouts.
+    Ports of ``except requests.ConnectionError`` usually also need ``HTTPTimeoutError``.
     """
 
 
@@ -94,7 +73,4 @@ class HTTPInvalidURLError(HTTPRequestError):
 
 
 class HTTPSSLError(HTTPConnectionError):
-    """A TLS handshake or certificate verification failure.
-
-    A subclass of HTTPConnectionError, so it must be tested first where the two are distinguished.
-    """
+    """A TLS failure; catch before HTTPConnectionError when distinguishing them."""

@@ -2587,11 +2587,6 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
 def test_health_service_check_failing_on_status_error(
     aggregator, mock_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
-    """A status error surfacing from send_request reports the endpoint down.
-
-    The auth token is fetched inside the request, so a bad status there fails the request itself.
-    Requests raised that as an OSError subclass, which the IOError arm caught.
-    """
     check = mocked_prometheus_check
     mock_openmetrics_http.get.side_effect = HTTPStatusError('503 Server Error')
 
@@ -2736,12 +2731,6 @@ def test_ssl_verify_not_raise_warning(caplog, mock_openmetrics_http, mock_respon
 def test_get_http_handler_applies_tls_deprecation_shims(
     mocked_openmetrics_check_factory, instance_overrides, expected_verify, expected_ignore_warning
 ):
-    """The two shims translating the ssl_ prefixed settings have to reach the client they configure.
-
-    A user setting ssl_ca_cert to false is asking for an unverified scrape, and the client only learns
-    that through these translations, so losing either one turns verification back on and every scrape
-    against a self-signed endpoint starts failing.
-    """
     instance = {
         'prometheus_url': 'https://www.example.com/metrics',
         'metrics': [{'foo': 'bar'}],
@@ -2803,10 +2792,6 @@ def test_http_handler(mock_http, mocked_openmetrics_check_factory, mocker):
 
 
 def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_openmetrics_check_factory):
-    # Checks that resolve credentials dynamically on every run, the kubelet among them, call
-    # reset_http_config so the cached per-endpoint clients are rebuilt. Without the reset a node that
-    # stops presenting a CA keeps being scraped by the first run's client, so every scrape fails on
-    # TLS verification and the metrics disappear until the Agent restarts.
     instance = {
         'prometheus_url': 'https://www.example.com',
         'metrics': [{'foo': 'bar'}],
@@ -2819,7 +2804,6 @@ def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_o
     assert first.options['verify'] is True
     assert check.get_http_handler(scraper_config) is first
 
-    # A credential change landing between runs, the way KubeletCredentials.configure_scraper applies it.
     scraper_config['ssl_ca_cert'] = False
     assert check.get_http_handler(scraper_config) is first
 
@@ -2831,8 +2815,6 @@ def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_o
 
 
 def test_http_handler_negotiates_over_seeded_default_headers(mocked_openmetrics_check_factory):
-    """A real client seeds Accept/Accept-Encoding with values that express no preference, and the
-    scraper must still negotiate the exposition format over them."""
     instance = {
         'prometheus_url': 'https://www.example.com',
         'metrics': [{'foo': 'bar'}],
@@ -2864,8 +2846,6 @@ def test_http_handler_preserves_user_configured_headers(mocked_openmetrics_check
 
 
 def test_http_handler_preserves_non_canonically_cased_extra_headers(mocked_openmetrics_check_factory):
-    """Header names are case-insensitive, so a user value configured under a non-canonical spelling
-    still counts as explicitly configured and must survive the exposition-format negotiation."""
     instance = {
         'prometheus_url': 'https://www.example.com',
         'metrics': [{'foo': 'bar'}],

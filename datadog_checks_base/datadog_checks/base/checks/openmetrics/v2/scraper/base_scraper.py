@@ -409,8 +409,7 @@ class OpenMetricsScraper:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        # A read timeout can surface either while opening the connection or midway through the body,
-        # so both phases are treated as the endpoint being unreachable.
+        # Opening and streaming failures both make the endpoint unreachable.
         except (HTTPConnectionError, HTTPTimeoutError):
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
@@ -462,9 +461,7 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
-        # Negotiate the OpenMetrics exposition format, but never clobber an Accept header the user
-        # explicitly configured. get_default_headers() seeds Accept with DEFAULT_ACCEPT, so that value
-        # (or an absent header) means "unset" and is safe to replace.
+        # Negotiate only when Accept is absent or still seeded.
         extra_headers = kwargs.get('extra_headers', {})
         has_extra_accept = any(name.lower() == 'accept' for name in extra_headers)
         if self.http.get_header('Accept') in (None, DEFAULT_ACCEPT) and not has_extra_accept:

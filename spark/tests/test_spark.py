@@ -1634,12 +1634,6 @@ def test_connection_failure_non_k8s(aggregator, dd_run_check, mock_http):
 
 @pytest.mark.unit
 def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
-    """A server-sent malformed header must still emit spark.driver.can_connect.
-
-    A multi-valued Content-Length makes the backend reject the response header. The translator has
-    no more specific agnostic subtype for that, so it arrives as a bare HTTPRequestError and the
-    last arm has to name that type.
-    """
     message = 'Content-Length contained multiple unmatching values'
     mock_http.get.side_effect = HTTPRequestError(message)
     instance = DRIVER_CONFIG.copy()
@@ -1652,8 +1646,6 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
     service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
     assert len(service_checks) == 1
     assert service_checks[0].status == SparkCheck.CRITICAL
-    # The last arm reports the bare error text, unlike the status/connection arm above it, which
-    # prefixes "Request failed". Pin the exact message so the arm cannot drift.
     assert service_checks[0].message == message
 
 
@@ -1779,7 +1771,6 @@ def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, mock_http):
 
 @pytest.mark.unit
 def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog, mock_http):
-    """The agnostic type makes both header- and body-phase read timeouts suppression-eligible."""
     mock_http.get.side_effect = HTTPReadTimeoutError("Read timed out")
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
@@ -1794,7 +1785,6 @@ def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog
 
 @pytest.mark.unit
 def test_connect_timeout_terminal_phase_still_alerts(aggregator, dd_run_check, mock_http):
-    """A connect timeout was never suppression-eligible, so the terminal phase must not silence it."""
     mock_http.get.side_effect = HTTPConnectTimeoutError("Connection timed out")
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
