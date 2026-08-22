@@ -11,6 +11,8 @@ from datadog_checks.litellm import LitellmCheck
 from .common import (
     ENDPOINT_METRICS,
     METRICS,
+    METRICS_V1_95,
+    NEW_METRICS_V1_95,
     OM_MOCKED_INSTANCE,
     RENAMED_METRICS_V1_75,
     get_fixture_path,
@@ -90,6 +92,26 @@ def test__extract_error_type_not_found():
     check = LitellmCheck('litellm', {}, [{}])
     error_msg = 'no litellm error here'
     assert check._extract_error_type(error_msg) == 'unknown'
+
+
+def test_litellm_v1_95_metrics(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics_v1_95.txt'))
+    check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
+    dd_run_check(check)
+
+    for metric in METRICS_V1_95:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.OK)
+
+
+def test_litellm_v1_95_new_metrics_are_mapped(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics_v1_95.txt'))
+    check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
+    dd_run_check(check)
+
+    for metric in NEW_METRICS_V1_95:
+        aggregator.assert_metric(metric)
 
 
 def test_litellm_renamed_metrics(dd_run_check, aggregator, mock_http_response):
