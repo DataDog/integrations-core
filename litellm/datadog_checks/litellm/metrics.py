@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 METRICS = {
+    'litellm_active_users': 'active_users',
     'litellm_api_key_budget_remaining_hours_metric': 'api.key.budget.remaining_hours.metric',
     'litellm_api_key_max_budget_metric': 'api.key.max_budget.metric',
     'litellm_auth_failed_requests': 'auth.failed_requests',
@@ -33,6 +34,7 @@ METRICS = {
     'litellm_guardrail_errors': 'guardrail.errors',
     'litellm_guardrail_latency_seconds': 'guardrail.latency_seconds',
     'litellm_guardrail_requests': 'guardrail.requests',
+    'litellm_images_generated_metric': 'images_generated.metric',
     'litellm_in_flight_requests': 'in_flight_requests',
     'litellm_in_memory_daily_spend_update_queue_size': 'in_memory.daily_spend_update_queue.size',
     'litellm_in_memory_spend_update_queue_size': 'in_memory.spend_update_queue.size',
@@ -63,6 +65,8 @@ METRICS = {
     'litellm_postgres_failed_requests': 'postgres.failed_requests',
     'litellm_postgres_latency': 'postgres.latency',
     'litellm_postgres_total_requests': 'postgres.total_requests',
+    'litellm_provider_cache_creation_input_tokens_metric': 'provider_cache.creation_input_tokens.metric',
+    'litellm_provider_cache_read_input_tokens_metric': 'provider_cache.read_input_tokens.metric',
     'litellm_provider_remaining_budget_metric': 'provider.remaining_budget.metric',
     'litellm_proxy_failed_requests_metric': 'proxy.failed_requests.metric',
     'litellm_proxy_pre_call_failed_requests': 'proxy.pre_call.failed_requests',
@@ -108,10 +112,14 @@ METRICS = {
     'litellm_spend_metric': 'spend.metric',
     'litellm_team_budget_remaining_hours_metric': 'team.budget.remaining_hours.metric',
     'litellm_team_max_budget_metric': 'team.max_budget.metric',
+    'litellm_team_members_metric': 'team.members.metric',
+    'litellm_teams_count': 'teams_count',
     'litellm_total_tokens': 'total.tokens',
     'litellm_total_tokens_metric': 'total.tokens',
+    'litellm_total_users': 'total_users',
     'litellm_user_budget_remaining_hours_metric': 'user.budget.remaining_hours.metric',
     'litellm_user_max_budget_metric': 'user.max_budget.metric',
+    'litellm_video_duration_seconds_metric': 'video_duration_seconds.metric',
     'process_start_time_seconds': {'name': 'process.uptime.seconds', 'type': 'time_elapsed'},
     # Deprecated
     'litellm_llm_api_failed_requests_metric': 'llm.api.failed_requests.metric',

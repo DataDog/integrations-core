@@ -131,6 +131,7 @@ RENAMED_METRICS_V1_75 = [
 # Full /metrics scrape from litellm v1.95.0 (fixtures/metrics_v1_95.txt).
 # Captured live against the proxy with traffic, budgets, caching and guardrails exercised.
 METRICS_V1_95 = [
+    'litellm.active_users',
     'litellm.api.key.budget.remaining_hours.metric',
     'litellm.api.key.max_budget.metric',
     'litellm.cache.hits.metric.count',
@@ -170,6 +171,8 @@ METRICS_V1_95 = [
     'litellm.overhead_with_guardrails_latency.metric.count',
     'litellm.overhead_with_guardrails_latency.metric.sum',
     'litellm.process.uptime.seconds',
+    'litellm.provider_cache.creation_input_tokens.metric.count',
+    'litellm.provider_cache.read_input_tokens.metric.count',
     'litellm.proxy.failed_requests.metric.count',
     'litellm.proxy.total_requests.metric.count',
     'litellm.remaining.api_key.budget.metric',
@@ -186,11 +189,14 @@ METRICS_V1_95 = [
     'litellm.request.total_latency.metric.sum',
     'litellm.requests.metric.count',
     'litellm.spend.metric.count',
+    'litellm.teams_count',
     'litellm.total.tokens.count',
+    'litellm.total_users',
 ]
 
 # The subset of the above that v1.95.0 added and the check did not previously map.
 NEW_METRICS_V1_95 = [
+    'litellm.active_users',
     'litellm.cache.hits.metric.count',
     'litellm.cached_tokens.metric.count',
     'litellm.check_batch_cost.jobs_polled',
@@ -211,8 +217,12 @@ NEW_METRICS_V1_95 = [
     'litellm.overhead_with_guardrails_latency.metric.bucket',
     'litellm.overhead_with_guardrails_latency.metric.count',
     'litellm.overhead_with_guardrails_latency.metric.sum',
+    'litellm.provider_cache.creation_input_tokens.metric.count',
+    'litellm.provider_cache.read_input_tokens.metric.count',
     'litellm.remaining.org_budget.metric',
     'litellm.request.queue_time_seconds.bucket',
     'litellm.request.queue_time_seconds.count',
     'litellm.request.queue_time_seconds.sum',
+    'litellm.teams_count',
+    'litellm.total_users',
 ]
