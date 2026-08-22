@@ -9,7 +9,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
@@ -1867,7 +1867,7 @@ def test_health_service_check_failing():
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
-    with pytest.raises(HTTPConnectionError):
+    with pytest.raises(HTTPClientConnectionError):
         check.process("http://fake.endpoint:10055/metrics")
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
@@ -1879,9 +1879,9 @@ def test_health_service_check_failing_on_status_error(mock_prometheus_http):
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
-    mock_prometheus_http.get.side_effect = HTTPStatusError('503 Server Error')
+    mock_prometheus_http.get.side_effect = HTTPClientStatusError('503 Server Error')
 
-    with pytest.raises(HTTPStatusError):
+    with pytest.raises(HTTPClientStatusError):
         check.process("http://fake.endpoint:10055/metrics")
 
     check.service_check.assert_called_with(

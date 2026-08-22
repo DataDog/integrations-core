@@ -9,12 +9,16 @@ import pytest
 
 from datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper import OpenMetricsScraper
 from datadog_checks.base.utils.http_exceptions import (
-    HTTPConnectionError,
-    HTTPConnectTimeoutError,
-    HTTPReadTimeoutError,
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
 )
 
-AGNOSTIC_CONNECTION_ERRORS = [HTTPConnectionError, HTTPConnectTimeoutError, HTTPReadTimeoutError]
+AGNOSTIC_CONNECTION_ERRORS = [
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+]
 
 
 def _scraper(*, ignore_connection_errors):
@@ -51,7 +55,7 @@ def test_connection_error_reraised_when_not_ignored(error_cls):
 def test_mid_stream_read_timeout_swallowed_when_connection_errors_are_ignored() -> None:
     def lines() -> Iterator[str]:
         yield 'first'
-        raise HTTPReadTimeoutError('slow')
+        raise HTTPClientReadTimeoutError('slow')
 
     connection = mock.MagicMock()
     connection.__enter__.return_value = connection
@@ -69,7 +73,7 @@ def test_mid_stream_read_timeout_swallowed_when_connection_errors_are_ignored() 
 def test_mid_stream_read_timeout_reraised_when_connection_errors_are_not_ignored() -> None:
     def lines() -> Iterator[str]:
         yield 'first'
-        raise HTTPReadTimeoutError('slow')
+        raise HTTPClientReadTimeoutError('slow')
 
     connection = mock.MagicMock()
     connection.__enter__.return_value = connection
@@ -81,5 +85,5 @@ def test_mid_stream_read_timeout_reraised_when_connection_errors_are_not_ignored
     stream = scraper.stream_connection_lines()
 
     assert next(stream) == 'first'
-    with pytest.raises(HTTPReadTimeoutError, match='slow'):
+    with pytest.raises(HTTPClientReadTimeoutError, match='slow'):
         next(stream)

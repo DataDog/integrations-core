@@ -71,7 +71,7 @@ def test_no_tags(dd_run_check, aggregator, instance):
 @pytest.mark.usefixtures('mock_http_get')
 def test_api_down(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
-    with pytest.raises(Exception, match=r'HTTPStatusError'):
+    with pytest.raises(Exception, match=r'HTTPClientStatusError'):
         dd_run_check(check)
 
     aggregator.assert_metric(

@@ -9,19 +9,19 @@ if TYPE_CHECKING:
     from datadog_checks.base.utils.http_protocol import HTTPRequest, HTTPResponse
 
 __all__ = [
-    'HTTPError',
-    'HTTPRequestError',
-    'HTTPStatusError',
-    'HTTPTimeoutError',
-    'HTTPConnectTimeoutError',
-    'HTTPReadTimeoutError',
-    'HTTPConnectionError',
-    'HTTPInvalidURLError',
-    'HTTPSSLError',
+    'HTTPClientError',
+    'HTTPClientRequestError',
+    'HTTPClientStatusError',
+    'HTTPClientTimeoutError',
+    'HTTPClientConnectTimeoutError',
+    'HTTPClientReadTimeoutError',
+    'HTTPClientConnectionError',
+    'HTTPClientInvalidURLError',
+    'HTTPClientSSLError',
 ]
 
 
-class HTTPError(Exception):
+class HTTPClientError(Exception):
     """Backend-agnostic HTTP error root under Exception, not OSError or ValueError.
 
     The client raises compatibility subclasses so existing requests exception handlers still match.
@@ -38,39 +38,39 @@ class HTTPError(Exception):
         self.request = request
 
 
-class HTTPRequestError(HTTPError):
+class HTTPClientRequestError(HTTPClientError):
     """A request that produced no usable response, including unmapped backend failures."""
 
 
-class HTTPStatusError(HTTPError):
+class HTTPClientStatusError(HTTPClientError):
     """An error status on a received response.
 
-    This is a sibling of HTTPRequestError. ``response`` may be None outside ``raise_for_status``.
+    This is a sibling of HTTPClientRequestError. ``response`` may be None outside ``raise_for_status``.
     """
 
 
-class HTTPTimeoutError(HTTPRequestError):
+class HTTPClientTimeoutError(HTTPClientRequestError):
     """A request that exceeded its configured timeout, at either phase."""
 
 
-class HTTPConnectTimeoutError(HTTPTimeoutError):
+class HTTPClientConnectTimeoutError(HTTPClientTimeoutError):
     """A timeout while establishing the connection, before any request was sent."""
 
 
-class HTTPReadTimeoutError(HTTPTimeoutError):
+class HTTPClientReadTimeoutError(HTTPClientTimeoutError):
     """A timeout waiting for response headers or body data."""
 
 
-class HTTPConnectionError(HTTPRequestError):
+class HTTPClientConnectionError(HTTPClientRequestError):
     """A connection failure, excluding timeouts.
 
-    Ports of ``except requests.ConnectionError`` usually also need ``HTTPTimeoutError``.
+    Ports of ``except requests.ConnectionError`` usually also need ``HTTPClientTimeoutError``.
     """
 
 
-class HTTPInvalidURLError(HTTPRequestError):
+class HTTPClientInvalidURLError(HTTPClientRequestError):
     """A URL the client rejected before attempting a connection."""
 
 
-class HTTPSSLError(HTTPConnectionError):
-    """A TLS failure; catch before HTTPConnectionError when distinguishing them."""
+class HTTPClientSSLError(HTTPClientConnectionError):
+    """A TLS failure; catch before HTTPClientConnectionError when distinguishing them."""

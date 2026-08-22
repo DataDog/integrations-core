@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError, HTTPClientStatusError
 from datadog_checks.base.utils.tracing import traced_class
 
 from .mixins import OpenMetricsScraperMixin
@@ -119,7 +119,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                             instance['prometheus_url'] = url
                             self.get_scraper_config(instance)
                             break
-                        except (IOError, HTTPRequestError, HTTPStatusError) as e:
+                        except (IOError, HTTPClientRequestError, HTTPClientStatusError) as e:
                             self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
                     else:
                         raise CheckException(

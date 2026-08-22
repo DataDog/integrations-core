@@ -107,7 +107,7 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_exception(dd_run_check, instance, aggregator):
     check = FlyIoCheck('fly_io', {}, [instance])
-    with pytest.raises(Exception, match=r'HTTPStatusError'):
+    with pytest.raises(Exception, match=r'HTTPClientStatusError'):
         dd_run_check(check)
 
     aggregator.assert_metric("fly_io.machines_api.up", value=0)
@@ -172,7 +172,7 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
 
     assert (
         "Encountered an HTTP error in '_collect_volumes_for_app'"
-        " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]: "
+        " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]: "
         "404 Client Error" in caplog.text
     )
 
@@ -244,7 +244,7 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
             {'http_error': {'/v1/apps/example-app-2': MockHTTPResponse(status_code=404)}},
             [
                 "Encountered an HTTP error in '_get_app_status'"
-                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
                 " 404 Client Error"
             ],
             id='one app',
@@ -258,10 +258,10 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
             },
             [
                 "Encountered an HTTP error in '_get_app_status'"
-                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
                 " 404 Client Error",
                 "Encountered an HTTP error in '_get_app_status'"
-                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
                 " 500 Server Error",
             ],
             id='two apps',

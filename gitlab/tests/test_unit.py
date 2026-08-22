@@ -5,7 +5,7 @@ import pytest
 from mock.mock import MagicMock
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import HTTPConnectTimeoutError, HTTPReadTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
@@ -176,7 +176,7 @@ def test_parse_readiness_service_checks(
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize('error_cls', [HTTPConnectTimeoutError, HTTPReadTimeoutError])
+@pytest.mark.parametrize('error_cls', [HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError])
 def test_prometheus_scrape_timeout_reports_critical(aggregator, gitlab_check, get_config, error_cls):
     check = gitlab_check(get_config(use_openmetrics=False))
     check.process = MagicMock(side_effect=error_cls("timed out"))

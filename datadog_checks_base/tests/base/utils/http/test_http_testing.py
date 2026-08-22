@@ -7,7 +7,7 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import http as http_testing
 from datadog_checks.dev.http import MockHTTPResponse
 
@@ -117,13 +117,13 @@ def test_mock_response_file_path(tmp_path):
 
 def test_mock_response_raise_for_status():
     response_404 = MockHTTPResponse(content='Not Found', status_code=404)
-    with pytest.raises(HTTPStatusError) as exc_info:
+    with pytest.raises(HTTPClientStatusError) as exc_info:
         response_404.raise_for_status()
     assert '404 Client Error' in str(exc_info.value)
     assert exc_info.value.response is response_404
 
     response_500 = MockHTTPResponse(content='Server Error', status_code=500)
-    with pytest.raises(HTTPStatusError) as exc_info:
+    with pytest.raises(HTTPClientStatusError) as exc_info:
         response_500.raise_for_status()
     assert '500 Server Error' in str(exc_info.value)
     assert exc_info.value.response is response_500
@@ -275,7 +275,7 @@ def test_mock_response_promoted_attributes_delegate():
 
 def test_mock_response_raise_for_status_keeps_identity():
     response = MockHTTPResponse(status_code=500)
-    with pytest.raises(HTTPStatusError) as exc_info:
+    with pytest.raises(HTTPClientStatusError) as exc_info:
         response.raise_for_status()
     assert exc_info.value.response is response
 

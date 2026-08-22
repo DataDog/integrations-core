@@ -37,15 +37,15 @@ from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .headers import set_header as set_header_value
 from .http_exceptions import (  # noqa: F401
-    HTTPConnectionError,
-    HTTPConnectTimeoutError,
-    HTTPError,
-    HTTPInvalidURLError,
-    HTTPReadTimeoutError,
-    HTTPRequestError,
-    HTTPSSLError,
-    HTTPStatusError,
-    HTTPTimeoutError,
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientError,
+    HTTPClientInvalidURLError,
+    HTTPClientReadTimeoutError,
+    HTTPClientRequestError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
 )
 from .http_protocol import (  # noqa: F401
     HTTPClient,
@@ -270,32 +270,34 @@ def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[Bas
     return compat
 
 
-_COMPAT_EXCEPTIONS: dict[type[HTTPError], type[HTTPError]] = {
-    HTTPError: _backend_compat_type(HTTPError, requests_exceptions.RequestException),
-    HTTPRequestError: _backend_compat_type(HTTPRequestError, requests_exceptions.RequestException),
-    HTTPStatusError: _backend_compat_type(HTTPStatusError, requests_exceptions.HTTPError),
-    HTTPTimeoutError: _backend_compat_type(HTTPTimeoutError, requests_exceptions.Timeout),
-    HTTPConnectTimeoutError: _backend_compat_type(HTTPConnectTimeoutError, requests_exceptions.ConnectTimeout),
-    # requests used ReadTimeout for headers and ConnectionError for body reads.
-    HTTPReadTimeoutError: _backend_compat_type(
-        HTTPReadTimeoutError, requests_exceptions.ReadTimeout, requests_exceptions.ConnectionError
+_COMPAT_EXCEPTIONS: dict[type[HTTPClientError], type[HTTPClientError]] = {
+    HTTPClientError: _backend_compat_type(HTTPClientError, requests_exceptions.RequestException),
+    HTTPClientRequestError: _backend_compat_type(HTTPClientRequestError, requests_exceptions.RequestException),
+    HTTPClientStatusError: _backend_compat_type(HTTPClientStatusError, requests_exceptions.HTTPError),
+    HTTPClientTimeoutError: _backend_compat_type(HTTPClientTimeoutError, requests_exceptions.Timeout),
+    HTTPClientConnectTimeoutError: _backend_compat_type(
+        HTTPClientConnectTimeoutError, requests_exceptions.ConnectTimeout
     ),
-    HTTPConnectionError: _backend_compat_type(HTTPConnectionError, requests_exceptions.ConnectionError),
-    HTTPInvalidURLError: _backend_compat_type(
-        HTTPInvalidURLError,
+    # requests used ReadTimeout for headers and ConnectionError for body reads.
+    HTTPClientReadTimeoutError: _backend_compat_type(
+        HTTPClientReadTimeoutError, requests_exceptions.ReadTimeout, requests_exceptions.ConnectionError
+    ),
+    HTTPClientConnectionError: _backend_compat_type(HTTPClientConnectionError, requests_exceptions.ConnectionError),
+    HTTPClientInvalidURLError: _backend_compat_type(
+        HTTPClientInvalidURLError,
         requests_exceptions.InvalidURL,
         requests_exceptions.MissingSchema,
         requests_exceptions.InvalidSchema,
         requests_exceptions.URLRequired,
     ),
-    HTTPSSLError: _backend_compat_type(HTTPSSLError, requests_exceptions.SSLError),
+    HTTPClientSSLError: _backend_compat_type(HTTPClientSSLError, requests_exceptions.SSLError),
 }
 
 # stdlib and requests JSONDecodeError are siblings, so the compatibility type carries both.
 _COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
 
 
-def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
+def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPClientError:
     """Map a requests exception to its agnostic compatibility type, most-specific first."""
     message = str(exc) or exc.__class__.__name__
     request = _translate_requests_request(getattr(exc, 'request', None))
@@ -308,28 +310,28 @@ def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapp
             requests_exceptions.URLRequired,
         ),
     ):
-        return _COMPAT_EXCEPTIONS[HTTPInvalidURLError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientInvalidURLError](message, request=request)
     if isinstance(exc, requests_exceptions.SSLError):
-        return _COMPAT_EXCEPTIONS[HTTPSSLError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientSSLError](message, request=request)
     if isinstance(exc, requests_exceptions.ConnectTimeout):
-        return _COMPAT_EXCEPTIONS[HTTPConnectTimeoutError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientConnectTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.ReadTimeout):
-        return _COMPAT_EXCEPTIONS[HTTPReadTimeoutError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientReadTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.Timeout):
-        return _COMPAT_EXCEPTIONS[HTTPTimeoutError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError) and any(
         isinstance(cause, Urllib3ReadTimeoutError) for cause in (exc.__context__, exc.args[0] if exc.args else None)
     ):
-        return _COMPAT_EXCEPTIONS[HTTPReadTimeoutError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientReadTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError):
-        return _COMPAT_EXCEPTIONS[HTTPConnectionError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientConnectionError](message, request=request)
     if isinstance(exc, requests_exceptions.ContentDecodingError):
-        return _COMPAT_EXCEPTIONS[HTTPRequestError](message, request=request)
+        return _COMPAT_EXCEPTIONS[HTTPClientRequestError](message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):
-        return _COMPAT_EXCEPTIONS[HTTPStatusError](message, request=request, response=response)
+        return _COMPAT_EXCEPTIONS[HTTPClientStatusError](message, request=request, response=response)
     if isinstance(exc, requests_exceptions.RequestException):
-        return _COMPAT_EXCEPTIONS[HTTPRequestError](message, request=request)
-    return _COMPAT_EXCEPTIONS[HTTPError](message)
+        return _COMPAT_EXCEPTIONS[HTTPClientRequestError](message, request=request)
+    return _COMPAT_EXCEPTIONS[HTTPClientError](message)
 
 
 @contextmanager
@@ -388,7 +390,7 @@ class ResponseWrapper(ObjectProxy):
     def json(self, **kwargs):
         # The decode error is raised after the translating block rather than inside it. The compat
         # type carries the backend's JSONDecodeError as a base, so the translator would otherwise
-        # read it as a transport failure and convert it to HTTPRequestError.
+        # read it as a transport failure and convert it to HTTPClientRequestError.
         decode_error = None
         with _translate_http_errors():
             try:

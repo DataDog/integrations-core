@@ -16,7 +16,7 @@ from mock import patch
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockHTTPResponse
@@ -2574,7 +2574,7 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
     mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
-    with pytest.raises(HTTPConnectionError):
+    with pytest.raises(HTTPClientConnectionError):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
         'ksm.prometheus.health',
@@ -2588,11 +2588,11 @@ def test_health_service_check_failing_on_status_error(
     aggregator, mock_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
     check = mocked_prometheus_check
-    mock_openmetrics_http.get.side_effect = HTTPStatusError('503 Server Error')
+    mock_openmetrics_http.get.side_effect = HTTPClientStatusError('503 Server Error')
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
-    with pytest.raises(HTTPStatusError):
+    with pytest.raises(HTTPClientStatusError):
         check.process(mocked_prometheus_scraper_config)
 
     aggregator.assert_service_check(

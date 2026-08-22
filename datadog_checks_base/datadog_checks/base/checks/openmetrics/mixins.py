@@ -20,7 +20,11 @@ from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.headers import DEFAULT_ACCEPT, DEFAULT_ACCEPT_ENCODING
 from datadog_checks.base.utils.http import create_http_client
-from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientRequestError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+)
 
 
 class OpenMetricsScraperMixin(object):
@@ -820,7 +824,7 @@ class OpenMetricsScraperMixin(object):
 
     def poll(self, scraper_config, headers=None):
         """
-        Returns a valid response, otherwise raise HTTPStatusError if the status code of the
+        Returns a valid response, otherwise raise HTTPClientStatusError if the status code of the
         response isn't valid - see `response.raise_for_status()`
 
         The caller needs to close the response.
@@ -837,11 +841,11 @@ class OpenMetricsScraperMixin(object):
 
         try:
             response = self.send_request(endpoint, scraper_config, headers)
-        except HTTPSSLError:
+        except HTTPClientSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        # Auth-token fetching can raise HTTPStatusError, a sibling of HTTPRequestError.
-        except (IOError, HTTPRequestError, HTTPStatusError):
+        # Auth-token fetching can raise HTTPClientStatusError, a sibling of HTTPClientRequestError.
+        except (IOError, HTTPClientRequestError, HTTPClientStatusError):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
@@ -850,7 +854,7 @@ class OpenMetricsScraperMixin(object):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
             return response
-        except HTTPStatusError:
+        except HTTPClientStatusError:
             response.close()
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)

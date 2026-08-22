@@ -10,6 +10,7 @@ import requests
 from requests.adapters import HTTPAdapter
 
 from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPResponse
 from datadog_checks.dev.http import MockHTTPResponse
 
@@ -408,14 +409,12 @@ class TestHistory:
         assert history[0].status_code == 301
 
     def test_history_item_translates_raise_for_status(self):
-        from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-
         redirect = mock.Mock()
         redirect.raise_for_status.side_effect = requests.exceptions.HTTPError('boom')
         final = mock.Mock()
         final.history = [redirect]
         wrapper = ResponseWrapper(final, 1024)
-        with pytest.raises(HTTPStatusError):
+        with pytest.raises(HTTPClientStatusError):
             wrapper.history[0].raise_for_status()
 
     def test_empty_history(self):

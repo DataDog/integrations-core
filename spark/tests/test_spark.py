@@ -14,10 +14,10 @@ import pytest
 import urllib3
 
 from datadog_checks.base.utils.http_exceptions import (
-    HTTPConnectionError,
-    HTTPConnectTimeoutError,
-    HTTPReadTimeoutError,
-    HTTPRequestError,
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+    HTTPClientRequestError,
 )
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -1169,7 +1169,7 @@ def test_enable_query_name_tag_for_structured_streaming(
 
 def test_do_not_crash_on_version_collection_failure():
     running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
-    rest_requests_to_json = mock.MagicMock(side_effect=[HTTPRequestError("test failure"), []])
+    rest_requests_to_json = mock.MagicMock(side_effect=[HTTPClientRequestError("test failure"), []])
 
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
 
@@ -1582,7 +1582,7 @@ def test_integration_driver_2(aggregator, dd_run_check):
 def test_debounce_connection_failure(aggregator, dd_run_check, caplog, mock_http):
     # Mock connection failure
     def connection_failure_mock(*args, **kwargs):
-        raise HTTPConnectionError("Connection refused")
+        raise HTTPClientConnectionError("Connection refused")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
@@ -1614,7 +1614,7 @@ def test_debounce_connection_failure(aggregator, dd_run_check, caplog, mock_http
 @pytest.mark.unit
 def test_connection_failure_non_k8s(aggregator, dd_run_check, mock_http):
     def connection_failure_mock(*args, **kwargs):
-        raise HTTPConnectionError("Connection refused")
+        raise HTTPClientConnectionError("Connection refused")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', []))
@@ -1635,7 +1635,7 @@ def test_connection_failure_non_k8s(aggregator, dd_run_check, mock_http):
 @pytest.mark.unit
 def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
     message = 'Content-Length contained multiple unmatching values'
-    mock_http.get.side_effect = HTTPRequestError(message)
+    mock_http.get.side_effect = HTTPClientRequestError(message)
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', []))
     c = SparkCheck('spark', {}, [instance])
@@ -1652,7 +1652,7 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
 @pytest.mark.unit
 def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, caplog, mock_http):
     def connection_failure_mock(*args, **kwargs):
-        raise HTTPConnectionError("Connection refused")
+        raise HTTPClientConnectionError("Connection refused")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
@@ -1674,7 +1674,7 @@ def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, ca
 def test_debounce_connection_recovery(aggregator, dd_run_check, caplog, mock_http):
     # Mock connection failure
     def connection_failure_mock(*args, **kwargs):
-        raise HTTPConnectionError("Connection refused")
+        raise HTTPClientConnectionError("Connection refused")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
@@ -1729,7 +1729,7 @@ def test_debounce_connection_failure_all_terminal_phases(aggregator, dd_run_chec
     """Test that all terminal pod phases suppress connection errors."""
 
     def connection_failure_mock(*args, **kwargs):
-        raise HTTPConnectionError("Connection refused")
+        raise HTTPClientConnectionError("Connection refused")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:{}'.format(pod_phase)]
@@ -1751,7 +1751,7 @@ def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, mock_http):
     """Test that 'No route to host' errors are also debounced."""
 
     def connection_failure_mock(*args, **kwargs):
-        raise HTTPConnectionError("No route to host")
+        raise HTTPClientConnectionError("No route to host")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
@@ -1771,7 +1771,7 @@ def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, mock_http):
 
 @pytest.mark.unit
 def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog, mock_http):
-    mock_http.get.side_effect = HTTPReadTimeoutError("Read timed out")
+    mock_http.get.side_effect = HTTPClientReadTimeoutError("Read timed out")
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
     c = SparkCheck('spark', {}, [instance])
@@ -1785,7 +1785,7 @@ def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog
 
 @pytest.mark.unit
 def test_connect_timeout_terminal_phase_still_alerts(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = HTTPConnectTimeoutError("Connection timed out")
+    mock_http.get.side_effect = HTTPClientConnectTimeoutError("Connection timed out")
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
     c = SparkCheck('spark', {}, [instance])

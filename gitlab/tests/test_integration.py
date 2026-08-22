@@ -4,7 +4,7 @@
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.gitlab import GitlabCheck
 
 from .common import (
@@ -49,7 +49,7 @@ def test_check_gitaly(dd_run_check, aggregator, gitlab_check, get_config):
 def test_connection_failure(aggregator, gitlab_check, get_bad_config):
     check = gitlab_check(get_bad_config(False))
 
-    with pytest.raises(HTTPConnectionError):
+    with pytest.raises(HTTPClientConnectionError):
         check.check(None)
 
     # We should get only one extra failed service check, the first (readiness)
@@ -71,7 +71,7 @@ def test_connection_failure(aggregator, gitlab_check, get_bad_config):
 def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, get_bad_config):
     check = gitlab_check(get_bad_config(True))
 
-    with pytest.raises(Exception, match="HTTPConnectionError"):
+    with pytest.raises(Exception, match="HTTPClientConnectionError"):
         dd_run_check(check)
 
     aggregator.assert_service_check(

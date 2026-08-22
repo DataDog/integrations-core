@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockHTTPResponse
 
@@ -83,7 +83,7 @@ def mock_http_call(mock_responses):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
-        raise HTTPStatusError('404 Client Error', response=MockHTTPResponse(status_code=404, url=url))
+        raise HTTPClientStatusError('404 Client Error', response=MockHTTPResponse(status_code=404, url=url))
 
     yield call
 

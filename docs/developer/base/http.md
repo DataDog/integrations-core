@@ -58,25 +58,25 @@ exception class belonging to the underlying HTTP library. Catch these instead:
 
 | Exception | Raised when |
 | --- | --- |
-| `HTTPError` | Root of the tree. Catch this to handle any HTTP failure. |
-| `HTTPRequestError` | The request never produced a usable response. |
-| `HTTPConnectionError` | The connection could not be established or was lost. |
-| `HTTPSSLError` | The TLS handshake or certificate verification failed. |
-| `HTTPInvalidURLError` | The URL was rejected before a connection was attempted. |
-| `HTTPTimeoutError` | The request exceeded its configured timeout. |
-| `HTTPConnectTimeoutError` | The timeout elapsed while establishing the connection. |
-| `HTTPReadTimeoutError` | The timeout elapsed while waiting for response data. |
-| `HTTPStatusError` | An error status was raised through `raise_for_status()`. |
+| `HTTPClientError` | Root of the tree. Catch this to handle any HTTP failure. |
+| `HTTPClientRequestError` | The request never produced a usable response. |
+| `HTTPClientConnectionError` | The connection could not be established or was lost. |
+| `HTTPClientSSLError` | The TLS handshake or certificate verification failed. |
+| `HTTPClientInvalidURLError` | The URL was rejected before a connection was attempted. |
+| `HTTPClientTimeoutError` | The request exceeded its configured timeout. |
+| `HTTPClientConnectTimeoutError` | The timeout elapsed while establishing the connection. |
+| `HTTPClientReadTimeoutError` | The timeout elapsed while waiting for response data. |
+| `HTTPClientStatusError` | An error status was raised through `raise_for_status()`. |
 
 A check reporting connectivity therefore looks like this:
 
 ```python
-from datadog_checks.base.utils.http_exceptions import HTTPError
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 try:
     response = self.http.get(url)
     response.raise_for_status()
-except HTTPError as e:
+except HTTPClientError as e:
     self.service_check('can_connect', AgentCheck.CRITICAL, message=str(e))
 else:
     self.service_check('can_connect', AgentCheck.OK)

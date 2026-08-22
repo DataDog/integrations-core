@@ -17,28 +17,28 @@ from datadog_checks.base.utils.http import (
     _translate_requests_exception,
 )
 from datadog_checks.base.utils.http_exceptions import (
-    HTTPConnectionError,
-    HTTPConnectTimeoutError,
-    HTTPError,
-    HTTPInvalidURLError,
-    HTTPReadTimeoutError,
-    HTTPRequestError,
-    HTTPSSLError,
-    HTTPStatusError,
-    HTTPTimeoutError,
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientError,
+    HTTPClientInvalidURLError,
+    HTTPClientReadTimeoutError,
+    HTTPClientRequestError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
 )
 
 
 @pytest.mark.parametrize(
     'raised, expected',
     [
-        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPConnectTimeoutError, id='connect-timeout'),
-        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPReadTimeoutError, id='read-timeout'),
-        pytest.param(requests.exceptions.Timeout('generic'), HTTPTimeoutError, id='generic-timeout'),
-        pytest.param(requests.exceptions.ProxyError('proxy'), HTTPConnectionError, id='proxy-error'),
-        pytest.param(requests.exceptions.ConnectionError('refused'), HTTPConnectionError, id='connection-error'),
-        pytest.param(requests.exceptions.InvalidURL('bad-url'), HTTPInvalidURLError, id='invalid-url'),
-        pytest.param(requests.exceptions.MissingSchema('no-scheme'), HTTPInvalidURLError, id='missing-schema'),
+        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPClientConnectTimeoutError, id='connect-timeout'),
+        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPClientReadTimeoutError, id='read-timeout'),
+        pytest.param(requests.exceptions.Timeout('generic'), HTTPClientTimeoutError, id='generic-timeout'),
+        pytest.param(requests.exceptions.ProxyError('proxy'), HTTPClientConnectionError, id='proxy-error'),
+        pytest.param(requests.exceptions.ConnectionError('refused'), HTTPClientConnectionError, id='connection-error'),
+        pytest.param(requests.exceptions.InvalidURL('bad-url'), HTTPClientInvalidURLError, id='invalid-url'),
+        pytest.param(requests.exceptions.MissingSchema('no-scheme'), HTTPClientInvalidURLError, id='missing-schema'),
     ],
 )
 def test_transport_exception_mapping(raised, expected):
@@ -51,16 +51,16 @@ def test_transport_exception_mapping(raised, expected):
 
 
 def test_phase_specific_timeouts_share_generic_base():
-    assert isinstance(HTTPConnectTimeoutError('connect'), HTTPTimeoutError)
-    assert isinstance(HTTPReadTimeoutError('read'), HTTPTimeoutError)
-    assert not isinstance(HTTPConnectTimeoutError('connect'), HTTPConnectionError)
+    assert isinstance(HTTPClientConnectTimeoutError('connect'), HTTPClientTimeoutError)
+    assert isinstance(HTTPClientReadTimeoutError('read'), HTTPClientTimeoutError)
+    assert not isinstance(HTTPClientConnectTimeoutError('connect'), HTTPClientConnectionError)
 
 
 def test_ssl_error_maps_to_http_ssl_error():
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', side_effect=requests.exceptions.SSLError('bad cert')):
         with mock.patch.object(RequestsWrapper, 'fetch_intermediate_certs', return_value=[]):
-            with pytest.raises(HTTPSSLError):
+            with pytest.raises(HTTPClientSSLError):
                 http.get('https://example.test/')
 
 
@@ -70,7 +70,7 @@ def test_raise_for_status_maps_to_status_error():
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', return_value=response):
         wrapped = http.get('http://example.test/')
-        with pytest.raises(HTTPStatusError) as exc_info:
+        with pytest.raises(HTTPClientStatusError) as exc_info:
             wrapped.raise_for_status()
     assert exc_info.value.response is wrapped
 
@@ -78,21 +78,21 @@ def test_raise_for_status_maps_to_status_error():
 @pytest.mark.parametrize(
     'raised, expected',
     [
-        pytest.param(requests.exceptions.InvalidURL('bad'), HTTPInvalidURLError, id='invalid-url'),
-        pytest.param(requests.exceptions.MissingSchema('no-scheme'), HTTPInvalidURLError, id='missing-schema'),
-        pytest.param(requests.exceptions.InvalidSchema('bad-scheme'), HTTPInvalidURLError, id='invalid-schema'),
-        pytest.param(requests.exceptions.URLRequired('no-url'), HTTPInvalidURLError, id='url-required'),
-        pytest.param(requests.exceptions.SSLError('cert'), HTTPSSLError, id='ssl'),
-        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPConnectTimeoutError, id='connect-timeout'),
-        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPReadTimeoutError, id='read-timeout'),
-        pytest.param(requests.exceptions.Timeout('generic'), HTTPTimeoutError, id='generic-timeout'),
-        pytest.param(requests.exceptions.ConnectionError('refused'), HTTPConnectionError, id='connection-error'),
-        pytest.param(requests.exceptions.ProxyError('proxy'), HTTPConnectionError, id='proxy-error'),
-        pytest.param(requests.exceptions.ContentDecodingError('decode'), HTTPRequestError, id='content-decoding'),
-        pytest.param(requests.exceptions.InvalidHeader('multiple values'), HTTPRequestError, id='invalid-header'),
-        pytest.param(requests.exceptions.HTTPError('500'), HTTPStatusError, id='http-error'),
-        pytest.param(requests.exceptions.RequestException('generic'), HTTPRequestError, id='request-exception'),
-        pytest.param(RuntimeError('not-requests'), HTTPError, id='non-requests-fallback'),
+        pytest.param(requests.exceptions.InvalidURL('bad'), HTTPClientInvalidURLError, id='invalid-url'),
+        pytest.param(requests.exceptions.MissingSchema('no-scheme'), HTTPClientInvalidURLError, id='missing-schema'),
+        pytest.param(requests.exceptions.InvalidSchema('bad-scheme'), HTTPClientInvalidURLError, id='invalid-schema'),
+        pytest.param(requests.exceptions.URLRequired('no-url'), HTTPClientInvalidURLError, id='url-required'),
+        pytest.param(requests.exceptions.SSLError('cert'), HTTPClientSSLError, id='ssl'),
+        pytest.param(requests.exceptions.ConnectTimeout('boom'), HTTPClientConnectTimeoutError, id='connect-timeout'),
+        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPClientReadTimeoutError, id='read-timeout'),
+        pytest.param(requests.exceptions.Timeout('generic'), HTTPClientTimeoutError, id='generic-timeout'),
+        pytest.param(requests.exceptions.ConnectionError('refused'), HTTPClientConnectionError, id='connection-error'),
+        pytest.param(requests.exceptions.ProxyError('proxy'), HTTPClientConnectionError, id='proxy-error'),
+        pytest.param(requests.exceptions.ContentDecodingError('decode'), HTTPClientRequestError, id='content-decoding'),
+        pytest.param(requests.exceptions.InvalidHeader('multiple values'), HTTPClientRequestError, id='invalid-header'),
+        pytest.param(requests.exceptions.HTTPError('500'), HTTPClientStatusError, id='http-error'),
+        pytest.param(requests.exceptions.RequestException('generic'), HTTPClientRequestError, id='request-exception'),
+        pytest.param(RuntimeError('not-requests'), HTTPClientError, id='non-requests-fallback'),
     ],
 )
 def test_translate_maps_requests_to_agnostic(raised, expected):
@@ -161,14 +161,14 @@ def test_body_phase_read_timeout_keeps_matching_connection_error():
 
     translated = _translate_requests_exception(raised)
 
-    assert isinstance(translated, HTTPReadTimeoutError)
+    assert isinstance(translated, HTTPClientReadTimeoutError)
     assert isinstance(translated, requests.exceptions.ConnectionError)
 
 
 def test_compat_bases_do_not_leak_into_the_agnostic_tree():
-    assert not isinstance(_translate_requests_exception(requests.exceptions.HTTPError('500')), HTTPRequestError)
+    assert not isinstance(_translate_requests_exception(requests.exceptions.HTTPError('500')), HTTPClientRequestError)
     assert not isinstance(
-        _translate_requests_exception(requests.exceptions.ConnectTimeout('boom')), HTTPConnectionError
+        _translate_requests_exception(requests.exceptions.ConnectTimeout('boom')), HTTPClientConnectionError
     )
     for agnostic, compat in _COMPAT_EXCEPTIONS.items():
         assert compat.__bases__[0] is agnostic
@@ -204,7 +204,7 @@ def requests_exception_types():
 def test_every_requests_exception_lands_under_a_handled_agnostic_type(exc_type):
     translated = _translate_requests_exception(exc_type.__new__(exc_type))
 
-    assert isinstance(translated, (HTTPRequestError, HTTPStatusError))
+    assert isinstance(translated, (HTTPClientRequestError, HTTPClientStatusError))
 
 
 def test_a_non_requests_failure_reaches_the_caller_untranslated():
@@ -219,7 +219,7 @@ def test_translate_does_not_leak_raw_response():
     err = requests.exceptions.HTTPError('500 Server Error')
     err.response = object()
     result = _translate_requests_exception(err)
-    assert isinstance(result, HTTPStatusError)
+    assert isinstance(result, HTTPClientStatusError)
     assert result.response is None
 
 
@@ -242,8 +242,8 @@ def test_translate_converts_raw_request_to_agnostic_snapshot():
 @pytest.mark.parametrize(
     'raised, expected',
     [
-        pytest.param(requests.exceptions.ConnectionError('dropped'), HTTPConnectionError, id='connection-error'),
-        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPReadTimeoutError, id='read-timeout'),
+        pytest.param(requests.exceptions.ConnectionError('dropped'), HTTPClientConnectionError, id='connection-error'),
+        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPClientReadTimeoutError, id='read-timeout'),
     ],
 )
 @pytest.mark.parametrize('iter_method', ['iter_content', 'iter_lines'])
@@ -272,7 +272,7 @@ def test_response_wrapper_maps_requests_wrapped_mid_stream_read_timeout() -> Non
     stream = ResponseWrapper(response, 1024).iter_lines(decode_unicode=True)
 
     assert next(stream) == 'first'
-    with pytest.raises(HTTPReadTimeoutError, match='slow'):
+    with pytest.raises(HTTPClientReadTimeoutError, match='slow'):
         next(stream)
 
 
@@ -307,7 +307,7 @@ def test_buffered_seam_maps_exceptions(read):
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', return_value=response):
         wrapped = http.get('http://example.test/')
-        with pytest.raises(HTTPConnectionError):
+        with pytest.raises(HTTPClientConnectionError):
             read(wrapped)
 
 
@@ -336,7 +336,7 @@ def test_auth_token_fetch_error_maps_to_agnostic():
     http = RequestsWrapper({}, {})
     http.auth_token_handler = mock.MagicMock()
     http.auth_token_handler.poll.side_effect = requests.exceptions.ConnectionError('token endpoint refused')
-    with pytest.raises(HTTPConnectionError):
+    with pytest.raises(HTTPClientConnectionError):
         http.get('http://example.test/')
 
 
@@ -359,5 +359,5 @@ def test_direct_iteration_maps_mid_stream_exceptions():
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', return_value=response):
         wrapped = http.get('http://example.test/', stream=True)
-        with pytest.raises(HTTPConnectionError):
+        with pytest.raises(HTTPClientConnectionError):
             list(wrapped)
