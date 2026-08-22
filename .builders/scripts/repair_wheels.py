@@ -295,18 +295,22 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
             print('Removed bundled libddwaf from Agent ddtrace wheel:')
             print('\n'.join(removed_libddwaf))
 
-        output_wheel = Path(built_dir) / wheel.name
+            # Verify on the stripped input rather than delocate's output: delocate renames the
+            # output wheel to match the macOS version it scans off the binaries, so its final
+            # name is not known here. It only ever copies libraries in, so an input that is
+            # clean of libddwaf guarantees the output is too.
+            remaining_libddwaf = find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN])
+            stale_record_entries = _find_record_references(wheel, MACOS_DDTRACE_LIBDDWAF_PATTERN)
+            if remaining_libddwaf or stale_record_entries:
+                raise RuntimeError(f'Failed to remove bundled libddwaf from {wheel.name}')
+
         copied_libs = delocate_wheel(
             str(wheel),
-            str(output_wheel),
+            str(Path(built_dir) / wheel.name),
             copy_filt_func=copy_filt_func,
             require_archs=[os.uname().machine],
             require_target_macos_version=min_macos_version,
         )
-        remaining_libddwaf = find_patterns_in_wheel(output_wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN])
-        stale_record_entries = _find_record_references(output_wheel, MACOS_DDTRACE_LIBDDWAF_PATTERN)
-        if remaining_libddwaf or stale_record_entries:
-            raise RuntimeError(f'Failed to remove bundled libddwaf from {wheel.name}')
         print('Repaired wheel')
         if copied_libs:
             print('Libraries copied into the wheel:')
