@@ -7,6 +7,11 @@ facets:
     name: IRIS Facility
     path: iris.facility
     source: log
+  - groups:
+      - Event
+    name: IRIS Severity
+    path: iris.severity
+    source: log
 pipeline:
   type: pipeline
   name: InterSystems IRIS
@@ -33,13 +38,13 @@ pipeline:
       enabled: true
       categories:
         - filter:
-            query: "@iris.severity:(0 OR 1)"
+            query: "@iris.severity:0"
           name: info
         - filter:
-            query: "@iris.severity:2"
+            query: "@iris.severity:1"
           name: warning
         - filter:
-            query: "@iris.severity:3"
+            query: "@iris.severity:(2 OR 3)"
           name: error
       target: iris.status
     - type: status-remapper
@@ -52,3 +57,8 @@ pipeline:
       enabled: true
       sources:
         - iris.timestamp
+    - type: message-remapper
+      name: Define `iris.message` as the official message of the log
+      enabled: true
+      sources:
+        - iris.message
