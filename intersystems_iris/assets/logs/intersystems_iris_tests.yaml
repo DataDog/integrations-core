@@ -6,13 +6,12 @@ tests:
       custom:
         iris:
           facility: "Generic.Event"
-          message: "ECP: connection from 'PRIMARY:IP-10-1-57-213:IRISAPP' dropped (127.0.0.1:60308)"
           pid: 103291
           severity: 1
-          status: "info"
+          status: "warning"
           timestamp: 1786024502627
-      message: "08/06/26-13:55:02:627 (103291) 1 [Generic.Event] ECP: connection from 'PRIMARY:IP-10-1-57-213:IRISAPP' dropped (127.0.0.1:60308)"
-      status: "info"
+      message: "ECP: connection from 'PRIMARY:IP-10-1-57-213:IRISAPP' dropped (127.0.0.1:60308)"
+      status: "warn"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1786024502627
@@ -22,13 +21,12 @@ tests:
       custom:
         iris:
           facility: "Utility.Event"
-          message: "License limit exceeded."
           pid: 44210
           severity: 2
-          status: "warning"
+          status: "error"
           timestamp: 1786024931004
-      message: "08/06/26-14:02:11:004 (44210) 2 [Utility.Event] License limit exceeded."
-      status: "warning"
+      message: "License limit exceeded."
+      status: "error"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1786024931004
@@ -38,12 +36,11 @@ tests:
       custom:
         iris:
           facility: "Utility.Event"
-          message: "LMF Error: No valid license key found."
           pid: 44210
           severity: 3
           status: "error"
           timestamp: 1786024931050
-      message: "08/06/26-14:02:11:050 (44210) 3 [Utility.Event] LMF Error: No valid license key found."
+      message: "LMF Error: No valid license key found."
       status: "error"
       tags:
         - "source:LOGS_SOURCE"
@@ -54,12 +51,11 @@ tests:
       custom:
         iris:
           facility: "Utility.Event"
-          message: "[MIRRORING] DELETE: /usr/irissys/mgr/journal/MIRROR-IRISLAB-20260804.001"
           pid: 141266
           severity: 0
           status: "info"
           timestamp: 1786062600075
-      message: "08/07/26-00:30:00:075 (141266) 0 [Utility.Event] [MIRRORING] DELETE: /usr/irissys/mgr/journal/MIRROR-IRISLAB-20260804.001"
+      message: "[MIRRORING] DELETE: /usr/irissys/mgr/journal/MIRROR-IRISLAB-20260804.001"
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
@@ -70,12 +66,11 @@ tests:
       custom:
         iris:
           facility: "Database.StartExpansion"
-          message: "Starting Expansion for database /usr/irissys/mgr/iristemp/. 10 MB requested."
           pid: 23153
           severity: 0
           status: "info"
           timestamp: 1785940722383
-      message: "08/05/26-14:38:42:383 (23153) 0 [Database.StartExpansion] Starting Expansion for database /usr/irissys/mgr/iristemp/. 10 MB requested."
+      message: "Starting Expansion for database /usr/irissys/mgr/iristemp/. 10 MB requested."
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
