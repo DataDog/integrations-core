@@ -15,7 +15,11 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.headers import DEFAULT_ACCEPT, DEFAULT_ACCEPT_ENCODING
 from datadog_checks.base.utils.http import create_http_client
-from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientRequestError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+)
 from datadog_checks.base.utils.prometheus import metrics_pb2
 
 
@@ -547,7 +551,7 @@ class PrometheusScraperMixin(object):
         the PrometheusFormat class.
         Custom headers can be added to the default headers.
 
-        Returns a valid response, raise HTTPStatusError if the status code of the response
+        Returns a valid response, raise HTTPClientStatusError if the status code of the response
         isn't valid - see response.raise_for_status()
 
         The caller needs to close the response
@@ -575,11 +579,11 @@ class PrometheusScraperMixin(object):
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)
-        except HTTPSSLError:
+        except HTTPClientSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        # Auth-token fetching can raise HTTPStatusError, a sibling of HTTPRequestError.
-        except (IOError, HTTPRequestError, HTTPStatusError):
+        # Auth-token fetching can raise HTTPClientStatusError, a sibling of HTTPClientRequestError.
+        except (IOError, HTTPClientRequestError, HTTPClientStatusError):
             if self.health_service_check:
                 self._submit_service_check(
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"),
@@ -594,7 +598,7 @@ class PrometheusScraperMixin(object):
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"), AgentCheck.OK, tags=["endpoint:" + endpoint]
                 )
             return response
-        except HTTPStatusError:
+        except HTTPClientStatusError:
             response.close()
             if self.health_service_check:
                 self._submit_service_check(

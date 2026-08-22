@@ -13,7 +13,7 @@ import pytest
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.date import parse_rfc3339
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
@@ -1586,7 +1586,7 @@ def test_detect_probes_404_cached(monkeypatch, mock_openmetrics_http):
 
 
 def test_detect_probes_req_exception(monkeypatch, mock_openmetrics_http):
-    mock_openmetrics_http.head.side_effect = HTTPConnectionError("connect timeout")
+    mock_openmetrics_http.head.side_effect = HTTPClientConnectionError("connect timeout")
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)

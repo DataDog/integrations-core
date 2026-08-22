@@ -13,6 +13,8 @@ from textwrap import dedent
 from typing import Any
 from unittest.mock import MagicMock
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
+
 
 class CaseInsensitiveDict(dict):
     """Dict with case-insensitive string keys stored lowercased."""
@@ -174,13 +176,11 @@ class MockHTTPResponseImpl:
         return json.loads(self.text, **kwargs)
 
     def raise_for_status(self) -> None:
-        from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-
         if self.status_code >= 400:
             message = (
                 f'{self.status_code} Client Error' if self.status_code < 500 else f'{self.status_code} Server Error'
             )
-            raise HTTPStatusError(message, response=self)
+            raise HTTPClientStatusError(message, response=self)
 
     def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None:
         return self.raw.connection.sock.getpeercert(binary_form=binary_form)
@@ -270,11 +270,9 @@ class MockHTTPResponse:
         setattr(self.__wrapped__, name, value)
 
     def raise_for_status(self) -> None:
-        from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-
         try:
             self.__wrapped__.raise_for_status()
-        except HTTPStatusError as exc:
+        except HTTPClientStatusError as exc:
             exc.response = self
             raise
 

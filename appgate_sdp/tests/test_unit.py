@@ -33,7 +33,7 @@ def test_emits_critical_service_check_when_service_is_down(
 ):
     mock_http.get.return_value = mock_response(status_code=404)
     check = AppgateSDPCheck('appgate_sdp', {}, [instance])
-    with pytest.raises(Exception, match='HTTPStatusError'):
+    with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)
     aggregator.assert_service_check('appgate_sdp.openmetrics.health', AppgateSDPCheck.CRITICAL)
 

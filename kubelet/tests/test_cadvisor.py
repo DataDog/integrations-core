@@ -7,7 +7,7 @@ import sys
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck
 
@@ -39,7 +39,7 @@ def test_detect_cadvisor_nominal(mock_openmetrics_http):
 def test_detect_cadvisor_404(mock_openmetrics_http):
     mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
     check = KubeletCheck('kubelet', {}, [{}])
-    with pytest.raises(HTTPStatusError):
+    with pytest.raises(HTTPClientStatusError):
         check.detect_cadvisor("http://kubelet:10250", 4192)
 
 

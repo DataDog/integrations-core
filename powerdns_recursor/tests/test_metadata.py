@@ -5,7 +5,7 @@
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
@@ -27,7 +27,7 @@ def _make_check():
 
 def test_metadata_unit_timeout(datadog_agent, mock_http):
     check, config_obj = _make_check()
-    mock_http.get.side_effect = HTTPTimeoutError('')
+    mock_http.get.side_effect = HTTPClientTimeoutError('')
     check._collect_metadata(config_obj)
     datadog_agent.assert_metadata_count(0)
     check.log.debug.assert_called_with('Error collecting PowerDNS Recursor version: %s', '')

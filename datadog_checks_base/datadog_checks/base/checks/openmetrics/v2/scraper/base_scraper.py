@@ -24,7 +24,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.headers import DEFAULT_ACCEPT
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientTimeoutError
 
 
 class OpenMetricsScraper:
@@ -410,7 +410,7 @@ class OpenMetricsScraper:
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
         # Opening and streaming failures both make the endpoint unreachable.
-        except (HTTPConnectionError, HTTPTimeoutError):
+        except (HTTPClientConnectionError, HTTPClientTimeoutError):
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:

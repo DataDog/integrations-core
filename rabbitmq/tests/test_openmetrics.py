@@ -350,6 +350,6 @@ def test_config(prom_plugin_settings, err):
 def test_service_check_critical(aggregator, dd_run_check, mock_http):
     mock_http.get.return_value = MockHTTPResponse(status_code=404)
     check = _rmq_om_check({'url': 'http://fail'})
-    with pytest.raises(Exception, match="HTTPStatusError"):
+    with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
     aggregator.assert_service_check('rabbitmq.openmetrics.health', status=check.CRITICAL)
