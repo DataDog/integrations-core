@@ -404,7 +404,6 @@ class ResponseWrapper(ObjectProxy):
         raw = getattr(self.__wrapped__, 'raw', None)
         connection = getattr(raw, 'connection', None)
         sock = getattr(connection, 'sock', None)
-        # No peer certificate exists for plain HTTP or a released connection.
         getpeercert = getattr(sock, 'getpeercert', None)
         if getpeercert is None:
             return None
@@ -412,7 +411,6 @@ class ResponseWrapper(ObjectProxy):
 
     @property
     def history(self):
-        # Keep redirect history protocol-typed.
         return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
 
     def __enter__(self):
