@@ -1,19 +1,21 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Provisional backend-neutral HTTP interfaces.
+
+Coordinate member and semantic changes across implementations until a second backend implements the protocols.
+"""
+
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from datetime import timedelta
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, TypedDict, Unpack
 
 if TYPE_CHECKING:
     import requests
-
-# Provisional until a second backend implements it. Coordinate member and semantic changes across implementations.
-# apply_tls_to_requests_session is a requests-only keystoneauth1 escape hatch until that path uses ApiRest.
 
 
 class HTTPHeaders(Mapping[str, str]):
@@ -62,8 +64,8 @@ class HTTPResponse(Protocol):
     status_code: int
     content: bytes
     text: str
-    # Lookup and equality are case-insensitive; iteration casing is backend-defined.
     headers: Mapping[str, str]
+    """Case-insensitive headers whose iteration casing is backend-defined."""
     encoding: str | None
     elapsed: timedelta
     cookies: Mapping[str, str]
@@ -98,13 +100,43 @@ class HTTPResponse(Protocol):
     def __iter__(self) -> Iterator[bytes | str]: ...
 
 
-class HTTPClient(Protocol):
-    # Public mutable defaults: auth, cert, headers, proxies, timeout, verify, and allow_redirects.
-    # Backends read this mapping for every request so post-construction writes take effect.
-    options: dict[str, Any]
+class HTTPRequestOptions(TypedDict, total=False):
+    params: Mapping[str, Any] | None
+    """Query parameters appended to the request URL."""
+    headers: Mapping[str, str] | None
+    """Request headers used instead of the configured client headers."""
+    data: Any
+    """Request body encoded according to the value's type."""
+    json: Any
+    """JSON-serializable request body."""
+    auth: Any
+    """Authentication applied to the request."""
+    cookies: Mapping[str, str] | None
+    """Cookies sent with the request."""
+    timeout: float | tuple[float, float] | None
+    """Timeout in seconds, or separate connect and read timeouts."""
+    allow_redirects: bool
+    """Whether the request should follow redirects."""
+    verify: bool | str | None
+    """Whether to verify TLS, or the path to a CA bundle."""
+    cert: str | tuple[str, str] | None
+    """Client certificate, optionally paired with its private key."""
+    proxies: Mapping[str, str] | None
+    """Proxy URLs keyed by scheme; None uses configured client proxies."""
+    extra_headers: Mapping[str, str]
+    """Headers merged after configured and per-request headers."""
+    stream: bool
+    """Whether response body consumption should be deferred."""
+    persist: bool
+    """Whether this request should use the persistent client."""
 
-    # tls_* settings for callers that build their own SSLContext.
+
+class HTTPClient(Protocol):
+    options: dict[str, Any]
+    """Mutable defaults read by the backend before every request."""
+
     tls_config: dict[str, Any]
+    """TLS settings for callers that build their own SSL context."""
 
     trust_env: bool
 
@@ -112,16 +144,32 @@ class HTTPClient(Protocol):
 
     persist_connections: bool
 
-    # Per-request options: params, headers, data, json, auth, cookies, timeout, allow_redirects, verify,
-    # cert, extra_headers, stream, and persist. extra_headers merges; headers replaces.
-    def get(self, url: str, **options: Any) -> HTTPResponse: ...
-    def post(self, url: str, **options: Any) -> HTTPResponse: ...
-    def head(self, url: str, **options: Any) -> HTTPResponse: ...
-    def put(self, url: str, **options: Any) -> HTTPResponse: ...
-    def patch(self, url: str, **options: Any) -> HTTPResponse: ...
-    def delete(self, url: str, **options: Any) -> HTTPResponse: ...
-    def options_method(self, url: str, **options: Any) -> HTTPResponse:
-        """Perform OPTIONS; suffixed to avoid the request-defaults attribute."""
+    def get(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
+        """Perform a GET request using :class:`HTTPRequestOptions`."""
+        ...
+
+    def post(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
+        """Perform a POST request using :class:`HTTPRequestOptions`."""
+        ...
+
+    def head(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
+        """Perform a HEAD request using :class:`HTTPRequestOptions`."""
+        ...
+
+    def put(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
+        """Perform a PUT request using :class:`HTTPRequestOptions`."""
+        ...
+
+    def patch(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
+        """Perform a PATCH request using :class:`HTTPRequestOptions`."""
+        ...
+
+    def delete(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
+        """Perform a DELETE request using :class:`HTTPRequestOptions`."""
+        ...
+
+    def options_method(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
+        """Perform an OPTIONS request using :class:`HTTPRequestOptions`; suffixed to avoid the defaults attribute."""
         ...
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
