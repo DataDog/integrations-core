@@ -4,6 +4,7 @@
 
 import datetime
 from collections.abc import Iterable
+from typing import NamedTuple
 
 from cachetools import TTLCache
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -30,6 +31,14 @@ EVENT_TO_ALERT_TYPE = {
     'MachineAdded': 'info',
     'MachineDeleted': 'info',
 }
+
+
+class ProjectContext(NamedTuple):
+    """The space and project a deployment task is reported against."""
+
+    space_id: str
+    space_name: str
+    project_name: str
 
 
 class OctopusDeployCheck(AgentCheck, ConfigMixin):
@@ -189,21 +198,28 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 for space in self._process_paginated_endpoint("api/spaces", report_service_check=True).get('Items', [])
             ]
         self.log.debug("Monitoring %s spaces", len(spaces))
+        space_ids = []
+        monitored_projects: dict[str, ProjectContext] = {}
         for _, _, space, space_config in spaces:
             space_id = space.get("Id")
             space_name = space.get("Name")
+            space_ids.append(space_id)
             tags = self._base_tags + [f'space_id:{space_id}', f'space_name:{space_name}']
             self.gauge("space.count", 1, tags=tags)
             self.log.debug("Processing space %s", space_name)
             self._process_environments(space_id, space_name)
             self._process_project_groups(
-                space_id, space_name, space_config.get("project_groups") if space_config else None
+                space_id,
+                space_name,
+                space_config.get("project_groups") if space_config else None,
+                monitored_projects,
             )
             self._collect_machine_metrics(space_id)
             if self.collect_events:
                 self._collect_new_events(space_id, space_name)
+        self._process_deployment_tasks(space_ids, monitored_projects)
 
-    def _process_project_groups(self, space_id, space_name, project_groups_config):
+    def _process_project_groups(self, space_id, space_name, project_groups_config, monitored_projects):
         if project_groups_config:
             self._init_project_groups_discovery(space_id, ProjectGroups(**project_groups_config))
             project_groups = list(self._project_groups_discovery[space_id].get_items())
@@ -234,9 +250,12 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 project_group_id,
                 project_group_name,
                 project_group_config.get("projects") if project_group_config else None,
+                monitored_projects,
             )
 
-    def _process_projects(self, space_id, space_name, project_group_id, project_group_name, projects_config):
+    def _process_projects(
+        self, space_id, space_name, project_group_id, project_group_name, projects_config, monitored_projects
+    ):
         if projects_config:
             self._init_projects_discovery(space_id, project_group_id, Projects(**projects_config))
             projects = list(self._projects_discovery[space_id][project_group_id].get_items())
@@ -264,8 +283,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             if not self.config.disable_generic_tags and self.config.unified_service_tagging:
                 tags.append(f'service:{project_name}')
             self.gauge("project.count", 1, tags=tags)
-            self._process_queued_and_running_tasks(space_id, space_name, project_id, project_name)
-            self._process_completed_tasks(space_id, space_name, project_id, project_name)
+            monitored_projects[project_id] = ProjectContext(space_id, space_name, project_name)
 
     def _process_environments(self, space_id, space_name):
         if self.config.environments:
@@ -311,22 +329,38 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 key=lambda environment: environment.get("Name"),
             )
 
-    def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
-        self.log.debug("Collecting running and queued tasks for project %s", project_name)
-        params = {'name': 'Deploy', 'project': project_id, 'states': ["Queued", "Executing"]}
-        response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
+    def _process_deployment_tasks(self, space_ids, monitored_projects):
+        """Collect deployment tasks for every monitored project.
 
-    def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
-        self.log.debug("Collecting completed tasks for project %s", project_name)
-        params = {
-            'name': 'Deploy',
-            'project': project_id,
-            'fromCompletedDate': self._from_completed_time,
-            'toCompletedDate': self._to_completed_time,
-        }
-        response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
+        The server-wide `api/tasks` endpoint returns tasks from all spaces, so the whole check needs
+        two requests instead of two per project. Tasks carry the project they belong to, so they are
+        matched back to the monitored projects here rather than by querying each project in turn.
+        """
+        if not monitored_projects:
+            return
+
+        params = {'name': 'Deploy'}
+        # Only narrow by space when the configuration excludes some. Listing every space would grow
+        # the query string with no benefit when all of them are monitored anyway.
+        if self.config.spaces:
+            params['spaces'] = space_ids
+
+        self.log.debug("Collecting queued and running tasks for %s projects", len(monitored_projects))
+        queued_and_running = self._process_paginated_endpoint(
+            "api/tasks", {**params, 'states': ["Queued", "Executing"]}
+        ).get('Items', [])
+
+        self.log.debug("Collecting completed tasks for %s projects", len(monitored_projects))
+        completed = self._process_paginated_endpoint(
+            "api/tasks",
+            {
+                **params,
+                'fromCompletedDate': self._from_completed_time,
+                'toCompletedDate': self._to_completed_time,
+            },
+        ).get('Items', [])
+
+        self._process_tasks(queued_and_running + completed, monitored_projects)
 
     def _calculate_task_times(self, task):
         task_queue_time = task.get("QueueTime")
@@ -355,9 +389,14 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time = -1
         return queued_time, executing_time, completed_time
 
-    def _process_tasks(self, space_id, space_name, project_name, tasks_json):
-        self.log.debug("Discovered %s tasks for project %s", len(tasks_json), project_name)
+    def _process_tasks(self, tasks_json, monitored_projects):
+        self.log.debug("Discovered %s tasks", len(tasks_json))
         for task in tasks_json:
+            project = monitored_projects.get(task.get("ProjectId"))
+            if project is None:
+                # The task belongs to a project or space excluded by the configuration.
+                continue
+            space_id, space_name, project_name = project
             task_id = task.get("Id")
             server_node = task.get("ServerNode")
             task_state = task.get("State")

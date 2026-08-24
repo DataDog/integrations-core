@@ -448,6 +448,22 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator,
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_tasks_collected_server_wide(get_current_datetime, dd_run_check, aggregator, mock_http_get, instance):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+
+    dd_run_check(check)
+
+    urls = [call[0][0] for call in mock_http_get.call_args_list]
+    # Every monitored project is covered by one request per task state, so the number of requests
+    # stays flat as projects are added rather than growing at two per project.
+    assert len(aggregator.metrics('octopus_deploy.project.count')) == 4
+    assert urls.count('http://localhost:80/api/tasks') == 2
+    assert 'http://localhost:80/api/Spaces-1/tasks' not in urls
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_completed_tasks(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
 
@@ -1038,10 +1054,10 @@ def test_empty_include(get_current_datetime, dd_run_check, aggregator):
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/tasks': MockResponse(status_code=500),
+                    '/api/tasks': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/tasks: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/tasks: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -2429,16 +2445,17 @@ def test_paginated_limit_projects_projectgroups1(
         pytest.param(
             30,
             [
-                (['http://localhost:80/api/Spaces-1/tasks'], 0, 30),
-                (['http://localhost:80/api/Spaces-1/tasks'], 0, 30),
+                (['http://localhost:80/api/tasks'], 0, 30),
+                (['http://localhost:80/api/tasks'], 0, 30),
             ],
             id='high limit',
         ),
         pytest.param(
             2,
             [
-                (['http://localhost:80/api/Spaces-1/tasks'], 0, 2),
-                (['http://localhost:80/api/Spaces-1/tasks'], 0, 2),
+                (['http://localhost:80/api/tasks'], 0, 2),
+                (['http://localhost:80/api/tasks'], 0, 2),
+                (['http://localhost:80/api/tasks'], 2, 2),
             ],
             id='low limit',
         ),
@@ -2456,14 +2473,17 @@ def test_paginated_limit_tasks(
 
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
+    # The completed window is empty on the first run, so run again to page through completed tasks.
+    mock_http_get.reset_mock()
+    get_current_datetime.return_value = MOCKED_TIME2
+    dd_run_check(check)
 
     skip_take_args = []
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         take = kwargs.get('params', {}).get('take')
         skip = kwargs.get('params', {}).get('skip')
-        project = kwargs.get('params', {}).get('project')
-        if 'http://localhost:80/api/Spaces-1/tasks' == args[0] and project == 'Projects-1':
+        if 'http://localhost:80/api/tasks' == args[0]:
             skip_take_args += [(list(args), skip, take)]
 
     assert skip_take_args == expected_skip_take_args
