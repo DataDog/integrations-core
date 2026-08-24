@@ -1124,11 +1124,29 @@ class AsyncGitHubClient:
         dest_path: Path,
         timeout: float | None = None,
     ) -> None:
-        """Anonymous fetch (no bearer token to S3) + zip-slip-validated extractall."""
+        """Anonymous fetch (no bearer token to S3) + zip-slip-validated extractall.
+
+        Failures are re-raised without the URL. The signature lives in its query string, and a failure
+        here is retryable, so the exception reaches both this client's log line and stamina's retry
+        hook, each of which renders it.
+        """
         effective_timeout = self._effective_timeout(timeout)
+        safe_url = loggable_url(signed_url)
         async with httpx.AsyncClient(timeout=effective_timeout) as anonymous_client:
-            download_response = await anonymous_client.get(signed_url)
-            download_response.raise_for_status()
+            try:
+                download_response = await anonymous_client.get(signed_url)
+            except httpx.TransportError as exc:
+                # Chained: a transport error reports an OS-level reason and keeps the URL in its
+                # request, not its message.
+                raise type(exc)(f"artifact download from {safe_url}: {exc}") from exc
+            if download_response.is_error or is_redirect_status(download_response.status_code):
+                # Built here rather than by raise_for_status, whose message embeds the full URL. Not
+                # chained, so the original message cannot resurface in a traceback.
+                raise httpx.HTTPStatusError(
+                    f"artifact download from {safe_url} failed with HTTP {download_response.status_code}",
+                    request=download_response.request,
+                    response=download_response,
+                )
 
         dest_path.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(io.BytesIO(download_response.content)) as zf:

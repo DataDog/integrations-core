@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import httpx
 import pytest
 
@@ -150,3 +152,38 @@ async def test_a_denial_from_github_itself_is_not_retried_as_an_expired_url(tmp_
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
     assert len(calls) == 1
+
+
+async def test_the_signed_url_credentials_never_reach_the_log(monkeypatch, tmp_path, caplog) -> None:
+    """A presigned URL carries its signature in the query string, so a retry must not log the URL.
+
+    The retried exception reaches this client's log line and stamina's retry hook, and httpx builds
+    its message from the full URL, so a leak here would write usable artifact credentials into CI
+    logs that outlive the run.
+    """
+    signature = "X-Amz-Signature=b1acc0dedb1acc0de"
+    github_calls: list[httpx.Request] = []
+
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        github_calls.append(request)
+        return httpx.Response(302, headers={"location": f"https://signed.example/zip?{signature}"})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        if len(github_calls) == 1:
+            return httpx.Response(403, content=b"<Error>AccessDenied</Error>")
+        return httpx.Response(200, content=make_zip({"hello.txt": b"hi"}))
+
+    patch_signed_download(monkeypatch, signed_handler)
+    client = AsyncGitHubClient(
+        token=TOKEN, transport=httpx.MockTransport(github_handler), logger=logging.getLogger("test-client")
+    )
+
+    with caplog.at_level(logging.WARNING):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    # The expired URL was retried, so there is a retry to have logged something.
+    assert len(github_calls) == 2
+    assert caplog.records
+    # Messages and every structured field, since the signature can hide in either.
+    logged = "\n".join(f"{record.getMessage()} {record.__dict__}" for record in caplog.records)
+    assert signature not in logged
