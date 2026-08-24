@@ -16,8 +16,12 @@ from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, 
 
 from .config_models import ConfigMixin
 
-TTL_CACHE_MAXSIZE = 50
+TTL_CACHE_MAXSIZE = 5000
 TTL_CACHE_TTL = 3600
+
+# Maximum number of ids sent to an endpoint's `ids` filter at once, to keep the query string within
+# the length servers and proxies accept.
+BULK_ID_LIMIT = 100
 
 EVENT_TO_ALERT_TYPE = {
     'MachineHealthy': 'success',
@@ -357,6 +361,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def _process_tasks(self, space_id, space_name, project_name, tasks_json):
         self.log.debug("Discovered %s tasks for project %s", len(tasks_json), project_name)
+        self._cache_deployments(space_id, [task.get("Arguments", {}).get("DeploymentId") for task in tasks_json])
         for task in tasks_json:
             task_id = task.get("Id")
             server_node = task.get("ServerNode")
@@ -365,7 +370,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             is_queued = task_state == "Queued"
             is_executing = task_state == "Executing"
             deployment_id = task.get("Arguments", {}).get("DeploymentId")
-            environment_name, deployment_tags = self._get_deployment_tags(space_id, deployment_id)
+            environment_name, deployment_tags = self._get_deployment_tags(deployment_id)
             if environment_name in self._environments_cache.values():
                 tags = (
                     self._base_tags
@@ -402,29 +407,57 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                     environment_name,
                 )
 
-    def _get_deployment_tags(self, space_id, deployment_id):
+    def _fetch_by_ids(self, endpoint, ids):
+        """Fetch the resources with the given ids, in as few requests as the id limit allows."""
+        items = []
+        for start in range(0, len(ids), BULK_ID_LIMIT):
+            chunk = ids[start : start + BULK_ID_LIMIT]
+            items += self._process_paginated_endpoint(endpoint, params={'ids': chunk}).get('Items', [])
+        return items
+
+    def _cache_deployments(self, space_id, deployment_ids):
+        """Look up the deployments and releases needed to tag tasks, in bulk.
+
+        Both endpoints accept an `ids` filter, so the deployments not seen before are fetched
+        together and their releases likewise, rather than issuing one request per deployment plus
+        one per release.
+        """
+        missing = sorted(
+            {
+                deployment_id
+                for deployment_id in deployment_ids
+                if deployment_id is not None and deployment_id not in self._deployments_cache
+            }
+        )
+        if not missing:
+            return
+
+        self.log.debug("Fetching %s uncached deployments in space %s", len(missing), space_id)
+        deployments = self._fetch_by_ids(f"api/{space_id}/deployments", missing)
+
+        missing_releases = sorted(
+            {
+                release_id
+                for release_id in (deployment.get("ReleaseId") for deployment in deployments)
+                if release_id is not None and release_id not in self._releases_cache
+            }
+        )
+        if missing_releases:
+            self.log.debug("Fetching %s uncached releases in space %s", len(missing_releases), space_id)
+            for release in self._fetch_by_ids(f"api/{space_id}/releases", missing_releases):
+                self._releases_cache[release.get("Id")] = release.get("Version")
+
+        for deployment in deployments:
+            self._deployments_cache[deployment.get("Id")] = (
+                self._releases_cache.get(deployment.get("ReleaseId")),
+                self._environments_cache.get(deployment.get("EnvironmentId")),
+            )
+
+    def _get_deployment_tags(self, deployment_id):
         self.log.debug("Getting deployment tags for deployment id: %s", deployment_id)
-        cached_deployment = self._deployments_cache.get(deployment_id)
-
-        if cached_deployment is not None:
-            release_version = cached_deployment[0]
-            environment_name = cached_deployment[1]
-        else:
-            self.log.debug("Cached deployment not found for deployment id: %s", deployment_id)
-            deployment = self._process_endpoint(f"api/{space_id}/deployments/{deployment_id}")
-            release_id = deployment.get("ReleaseId")
-            environment_id = deployment.get("EnvironmentId")
-            environment_name = self._environments_cache.get(environment_id)
-            release_version = self._releases_cache.get(release_id)
-            if release_version is None:
-                self.log.debug(
-                    "Cached release not found for deployment id: %s, release id: %s", deployment_id, release_id
-                )
-                release = self._process_endpoint(f"api/{space_id}/releases/{release_id}")
-                release_version = release.get("Version")
-                self._releases_cache[release_id] = release_version
-
-            self._deployments_cache[deployment_id] = (release_version, environment_name)
+        # Deployments are cached in bulk before the tasks are processed. A deployment still missing
+        # here could not be retrieved, and is reported without a release or environment.
+        release_version, environment_name = self._deployments_cache.get(deployment_id, (None, None))
 
         tags = [
             f'deployment_id:{deployment_id}',
