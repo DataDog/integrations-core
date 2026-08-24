@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.20.0 / 2026-08-24
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
 ## 15.19.0 / 2026-08-05
 
 ***Added***:
