@@ -1,6 +1,6 @@
 {
   "title": "PingOne Advanced Identity Cloud",
-  "description": "This is an overview of your PingOne Advanced Identity Cloud tenant security events. From here you can discover insights on event types, trends over time, region info, and more.\n\nFor further information, see:\n\n- [Monitoring Activity with PingOne Advanced Identity Cloud](https://www.datadoghq.com/blog/monitor-activity-with-okta/)\n\n- [PingOne Advanced Identity Cloud Integration Documentation](https://docs.datadoghq.com/integrations/okta/)\n\n- [PingOne Advanced Identity Cloud Event Type API Documentation](https://developer.okta.com/docs/reference/api/event-types/) (cloned)",
+  "description": "This is an overview of your PingOne Advanced Identity Cloud tenant security events. From here you can discover insights on event types, trends over time, region info, and more.",
   "widgets": [
     {
       "id": 7607829837331299,
@@ -34,7 +34,7 @@
           {
             "id": 4415186906368536,
             "definition": {
-              "title": "Log Count by Source ",
+              "title": "Log Count by Source",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
@@ -196,7 +196,7 @@
       "id": 8208293367094565,
       "definition": {
         "type": "note",
-        "content": "Use this dashboard to monitor your PingOne Advanced Identity Cloud environments, giving you greater visibility into security-related events from all of your journeys, applications and users. With PingOne Advanced Identity Cloud and Datadog, you can proactively detect threats to your applications, track user and administrator activity, debug authentication and authorization issues, and create an audit trail for regulatory compliance.\n\nThe PingOne Advanced Identity Cloud integration pulls the following log sources for each configured environment: _am-authentication_, _am-config_, _am_activity_,  _idm-activity_, and _idm-config_. The log source name is available in the log's `@evt.category` attribute.\n\nFilters are available to search on specific realms, journeys, client IP addresses, principal names, and event outcomes.\n\nFor further reading, see:\n\n-   [Advanced Identity Cloud Log Sources](https://docs.pingidentity.com/pingoneaic/tenants/audit-debug-log-sources.html#log-source-descriptions)",
+        "content": "Use this dashboard to monitor your PingOne Advanced Identity Cloud environments, giving you greater visibility into security-related events from all of your journeys, applications and users. With PingOne Advanced Identity Cloud and Datadog, you can proactively detect threats to your applications, track user and administrator activity, debug authentication and authorization issues, and create an audit trail for regulatory compliance.\n\nThe PingOne Advanced Identity Cloud integration pulls the following log sources for each configured environment: _am-authentication_, _am-config_, _am-activity_,  _idm-activity_, and a subset of _am-access_. The log source name is available in the log's `@evt.category` attribute.\n\nFilters are available to search on specific realms, journeys, client IP addresses, principal names, and event outcomes.\n\nFor further reading, see:\n\n-   [Advanced Identity Cloud Log Sources](https://docs.pingidentity.com/pingoneaic/tenants/audit-debug-log-sources.html#log-source-descriptions)",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
