@@ -1006,7 +1006,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     # The skipped job is recorded as skipped.
     assert _find_result(gatherer, "consul").status == "skipped"
 
-    # The same run as the published snapshot, which is what the PR reporter renders: 12 planned jobs,
+    # The same run as the published snapshot, which is what the run reporter renders: 12 planned jobs,
     # all complete, with per-batch labels and links matching the registry exactly.
     progress = final.progress
     assert progress.done is True
@@ -1053,7 +1053,7 @@ def test_dispatcher_scenario_revisions_are_monotonic(tmp_path: Path):
 
 
 # ---------------------------------------------------------------------------
-# Gatherer -> PR reporter, over a real event bus
+# Gatherer -> run reporter, over a real event bus
 # ---------------------------------------------------------------------------
 
 
