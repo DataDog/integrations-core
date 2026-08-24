@@ -70,11 +70,15 @@ class DispatcherOutcome:
 
     @property
     def successful(self) -> bool:
-        """Whether every batch finished without failing and the final report reached its reader.
+        """Whether every batch finished without failing and the final report was not lost.
 
-        A run whose results nobody can see is not green, so an unfinished plan and an unpublished
-        final report both count as failures. An intermediate comment failure does not: the next
-        snapshot supersedes it.
+        An unfinished plan is a failure: results nobody can see must not read as green. So is losing
+        the final snapshot to a pull-request comment that would not take it. An intermediate comment
+        failure is not, since the next snapshot supersedes it.
+
+        A run with no pull request has nothing to lose the report to, so it passes that condition on
+        arrival. `on_finalize` logs `summary_line` whatever happens, and the run summary is written
+        when GitHub Actions offers one, so such a run still reports somewhere.
         """
         return (
             self.final_report_published

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import pytest
 
+from ddev.cli.ci.tests.dispatcher import RunContext
 from ddev.utils.github_async.models import PullRequest
 from tests.cli.ci.tests.helpers import make_batch, make_job
 
@@ -84,13 +85,13 @@ def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, mocker):
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
-def test_the_context_option_offers_every_run_context():
-    """`--context` restates its choices as literals: `RunContext` lives in a module too heavy to
-    import while building the decorator, so a member added there must not be left unreachable.
+@pytest.mark.parametrize('run_context', list(RunContext), ids=lambda member: member.value)
+def test_every_run_context_is_accepted(ddev, github, planned, run_context):
+    """`--context` restates its choices as literals, because `RunContext` lives in a module too
+    heavy to import while building the decorator. Parameterizing over the enum catches a member
+    added there and never wired up.
     """
-    from ddev.cli.ci.dispatch_tests import dispatch_tests
-    from ddev.cli.ci.tests.dispatcher import RunContext
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--context', run_context.value, '--dry-run')
 
-    option = next(param for param in dispatch_tests.params if param.name == 'run_context')
-
-    assert set(option.type.choices) == {member.value for member in RunContext}
+    assert result.exit_code == 0, result.output
+    assert f'Context -> {run_context.value}' in result.output

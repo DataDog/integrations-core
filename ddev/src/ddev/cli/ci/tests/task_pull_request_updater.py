@@ -96,7 +96,7 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
 
     @property
     def final_report_published(self) -> bool:
-        """Whether the report for a completed run reached its destination."""
+        """Whether a completed run's report was not lost: it reached the comment, or had none to reach."""
         return self._final_report_published
 
     async def process_message(self, message: UpdatePRComment):
