@@ -172,7 +172,9 @@ def test_routes_through_cluster_all_replicas_in_single_endpoint_mode(schema_metr
     with (
         mock.patch.object(check.table_metrics, '_execute_query', side_effect=lambda q: dbm_queries.append(q) or []),
         mock.patch.object(check, 'execute_query_raw', side_effect=lambda q: raw_queries.append(q) or []),
+        mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout,
     ):
+        fanout.return_value = 'default'
         check.table_metrics.run_job()
 
     assert any("clusterAllReplicas('default', system.tables)" in q for q in dbm_queries)
