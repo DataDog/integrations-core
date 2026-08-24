@@ -6,14 +6,22 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import (
     ISSUE_NAME,
     _issue_id,
+    _issue_id_set,
 )
 
 ENDPOINT = 'http://example.test/metrics'
 ISSUE_ID = 'openmetrics-dropped-config:5505571e531f7cf6'
+
+AGENT_ENDPOINT = 'http://agent.example.test/metrics'
+OPERATOR_ENDPOINT = 'http://operator.example.test/metrics'
+# Identity for the two-endpoint set ('stubbed.hostname', 'openmetrics_test', sorted endpoints, 'demo').
+MULTI_ISSUE_ID = 'openmetrics-dropped-config:2bba3f2efc1f1130'
+# Identity for the single generated agent endpoint ('stubbed.hostname', 'openmetrics_test', AGENT_ENDPOINT, 'demo').
+GENERATED_ISSUE_ID = 'openmetrics-dropped-config:a88b6a441052c38a'
 
 
 class GenericLimitedCheck(AgentCheck):
@@ -28,7 +36,34 @@ class MetricLimitOpenMetricsCheck(OpenMetricsBaseCheckV2):
         self.observed = 0
 
     def configure_scrapers(self) -> None:
-        pass
+        # Populate scraper keys without performing real scraping, so the metric-limit reporter sees
+        # the configured endpoint(s). Tests that synthesize endpoints set ``scraper_configs`` first.
+        self.scrapers = {config.get('openmetrics_endpoint', ''): None for config in self.scraper_configs}
+
+    def check(self, _: Any) -> None:
+        for value in range(self.observed):
+            self.gauge('openmetrics.metric', value)
+
+
+class GeneratedEndpointCheck(MetricLimitOpenMetricsCheck):
+    """Mimics integrations such as Cilium that synthesize scraper configs from non-openmetrics options."""
+
+    def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
+        super().__init__(name, init_config, instances)
+        self.check_initializations.appendleft(self._parse_config)
+
+    def _parse_config(self) -> None:
+        self.scraper_configs = []
+        for option in ('agent_endpoint', 'operator_endpoint'):
+            endpoint = self.instance.get(option)
+            if endpoint:
+                self.scraper_configs.append({**self.instance, 'openmetrics_endpoint': endpoint})
+
+
+class MetricLimitOpenMetricsV1Check(OpenMetricsBaseCheck):
+    def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
+        super().__init__(name, init_config, instances)
+        self.observed = 0
 
     def check(self, _: Any) -> None:
         for value in range(self.observed):
@@ -42,6 +77,39 @@ def create_check(limit: int = 5, endpoint: str = ENDPOINT) -> MetricLimitOpenMet
         'max_returned_metrics': limit,
     }
     return MetricLimitOpenMetricsCheck('openmetrics_test', {}, [instance])
+
+
+def create_v1_check(limit: int = 5, endpoint: str = ENDPOINT) -> MetricLimitOpenMetricsV1Check:
+    instance = {
+        'prometheus_url': endpoint,
+        'namespace': 'demo',
+        'metrics': ['openmetrics.metric'],
+        'max_returned_metrics': limit,
+    }
+    return MetricLimitOpenMetricsV1Check('openmetrics_test', {}, [instance])
+
+
+def create_generated_check(endpoint: str = AGENT_ENDPOINT, limit: int = 5) -> GeneratedEndpointCheck:
+    instance = {
+        'agent_endpoint': endpoint,
+        'namespace': 'demo',
+        'max_returned_metrics': limit,
+    }
+    return GeneratedEndpointCheck('openmetrics_test', {}, [instance])
+
+
+def create_multi_check(limit: int = 5) -> MetricLimitOpenMetricsCheck:
+    instance = {
+        'namespace': 'demo',
+        'max_returned_metrics': limit,
+    }
+    check = MetricLimitOpenMetricsCheck('openmetrics_test', {}, [instance])
+    # Non-sorted order to prove handle normalizes to a deterministic sorted tuple.
+    check.scraper_configs = [
+        {'openmetrics_endpoint': OPERATOR_ENDPOINT},
+        {'openmetrics_endpoint': AGENT_ENDPOINT},
+    ]
+    return check
 
 
 def reported_issues(datadog_agent: Any) -> list[dict[str, Any]]:
@@ -70,7 +138,7 @@ def test_over_limit_run_reports_expected_issue(datadog_agent: Any) -> None:
     assert issue['severity'] == check.IssueSeverity['HIGH']
     assert issue['extra'] == {
         'check_name': 'openmetrics_test',
-        'endpoint': ENDPOINT,
+        'endpoints': [ENDPOINT],
         'effective_limit': 5,
         'observed_contexts': 20,
         'dropped_contexts': 15,
@@ -233,3 +301,92 @@ def test_missing_endpoint_does_nothing(datadog_agent: Any, caplog: Any) -> None:
     assert not datadog_agent._sent_reported_issues
     assert datadog_agent._sent_resolved_issues == []
     assert 'without an endpoint' in caplog.text
+
+
+# --- Multi-endpoint and generated-endpoint reporting ---
+
+
+def test_v1_singular_reports_and_resolves(datadog_agent: Any) -> None:
+    check = create_v1_check()
+    check.observed = 20
+
+    assert check.run() == ''
+
+    [issue] = reported_issues(datadog_agent)
+    assert issue['id'] == ISSUE_ID
+    assert issue['title'] == f'Dropping 15 of 20 metrics from {ENDPOINT}'
+    assert issue['extra']['endpoints'] == [ENDPOINT]
+
+    check.observed = 5
+    check.run()
+
+    assert datadog_agent._sent_resolved_issues == [ISSUE_ID]
+
+
+def test_generated_endpoint_reports_when_instance_lacks_openmetrics_endpoint(datadog_agent: Any) -> None:
+    check = create_generated_check()
+    check.observed = 20
+
+    assert check.run() == ''
+
+    [issue] = reported_issues(datadog_agent)
+    assert issue['id'] == GENERATED_ISSUE_ID
+    # The raw instance only carries ``agent_endpoint``; the reported endpoint is the generated scraper key.
+    assert 'openmetrics_endpoint' not in check.instance
+    assert issue['extra']['endpoints'] == [AGENT_ENDPOINT]
+    assert issue['title'] == f'Dropping 15 of 20 metrics from {AGENT_ENDPOINT}'
+
+
+def test_two_endpoints_report_one_aggregate_issue(datadog_agent: Any) -> None:
+    check = create_multi_check()
+    check.observed = 20
+
+    assert check.run() == ''
+
+    [issue] = reported_issues(datadog_agent)
+    assert issue['id'] == MULTI_ISSUE_ID
+    # Deterministic, sorted endpoint order regardless of the non-sorted scraper_configs order.
+    assert issue['extra']['endpoints'] == [AGENT_ENDPOINT, OPERATOR_ENDPOINT]
+    assert issue['title'] == 'Dropping 15 of 20 metrics across 2 endpoints'
+    assert issue['description'] == (
+        'The openmetrics_test check collects 2 endpoints: '
+        f'{AGENT_ENDPOINT}, {OPERATOR_ENDPOINT}. It is configured to submit at most 5 metric contexts per '
+        'run, and the last collection produced 20 across all 2 endpoints. The reported observed and dropped '
+        'counts are combined across these endpoints and cannot be attributed to a single one. The Agent '
+        'submitted 5 and discarded the remaining 15.'
+    )
+    assert datadog_agent._sent_resolved_issues == []
+
+
+def test_two_endpoints_resolve_on_clean_run(datadog_agent: Any) -> None:
+    check = create_multi_check()
+    check.observed = 20
+    check.run()
+
+    check.observed = 5
+    check.run()
+
+    assert datadog_agent._sent_resolved_issues == [MULTI_ISSUE_ID]
+
+
+def test_no_configured_scrapers_does_nothing(datadog_agent: Any, caplog: Any) -> None:
+    instance = {'namespace': 'demo', 'max_returned_metrics': 5}
+    check = GeneratedEndpointCheck('openmetrics_test', {}, [instance])
+    check.observed = 20
+
+    with caplog.at_level('DEBUG'):
+        assert check.run() == ''
+
+    assert not datadog_agent._sent_reported_issues
+    assert datadog_agent._sent_resolved_issues == []
+    assert 'without an endpoint' in caplog.text
+
+
+def test_multi_issue_id_changes_with_endpoint_set() -> None:
+    base_id = _issue_id_set('stubbed.hostname', 'openmetrics_test', (AGENT_ENDPOINT, OPERATOR_ENDPOINT), 'demo')
+
+    assert _issue_id_set('stubbed.hostname', 'openmetrics_test', (AGENT_ENDPOINT,), 'demo') != base_id
+    assert _issue_id_set('stubbed.hostname', 'openmetrics_test', (OPERATOR_ENDPOINT,), 'demo') != base_id
+    assert (
+        _issue_id_set('stubbed.hostname', 'openmetrics_test', (AGENT_ENDPOINT, OPERATOR_ENDPOINT), 'other') != base_id
+    )

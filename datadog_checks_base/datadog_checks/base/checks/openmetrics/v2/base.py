@@ -101,9 +101,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
 
     def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
+        # Use the actual configured scraper endpoint keys rather than the raw instance field, so
+        # integrations that synthesize ``scraper_configs`` from options such as ``agent_endpoint``
+        # (e.g. Cilium) still report drops against the endpoint that was scraped.
         self.metric_limit_issue_reporter.handle(
             self,
-            self.instance.get('openmetrics_endpoint'),
+            self.scrapers,
             reached_limit,
             observed_count,
             limit,

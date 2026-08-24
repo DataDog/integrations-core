@@ -41,6 +41,11 @@ def test_openmetrics_base_classes_report_metric_limit_issue(
     datadog_agent: Any, instance: dict[str, Any], filter_option: str
 ) -> None:
     check = OpenMetricsCheck('openmetrics', {}, [instance])
+    # V2 reads configured endpoints from ``self.scrapers``, which ``run()`` populates via
+    # ``configure_scrapers()``. Seed it directly here because this test invokes the callback
+    # without a full check run; V1 reads ``prometheus_url`` from the instance instead.
+    if 'openmetrics_endpoint' in instance:
+        check.scrapers = {instance['openmetrics_endpoint']: None}
 
     check._on_metric_limit_state(True, 20, 5)
 

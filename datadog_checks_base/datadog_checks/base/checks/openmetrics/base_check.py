@@ -148,7 +148,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
         self.metric_limit_issue_reporter.handle(
             self,
-            self.instance.get('prometheus_url'),
+            (self.instance.get('prometheus_url'),),
             reached_limit,
             observed_count,
             limit,
