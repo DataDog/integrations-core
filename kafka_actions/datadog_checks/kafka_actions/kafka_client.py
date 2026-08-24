@@ -520,9 +520,7 @@ class KafkaActionsClient:
 
         resource = ConfigResource(ResourceType.TOPIC, topic)
         for key, value in configs.items():
-            resource.add_incremental_config(
-                ConfigEntry(key, value, incremental_operation=AlterConfigOpType.SET)
-            )
+            resource.add_incremental_config(ConfigEntry(key, value, incremental_operation=AlterConfigOpType.SET))
 
         futures = admin.incremental_alter_configs([resource])
 
@@ -552,9 +550,7 @@ class KafkaActionsClient:
 
         resource = ConfigResource(ResourceType.TOPIC, topic)
         for key in config_keys:
-            resource.add_incremental_config(
-                ConfigEntry(key, None, incremental_operation=AlterConfigOpType.DELETE)
-            )
+            resource.add_incremental_config(ConfigEntry(key, None, incremental_operation=AlterConfigOpType.DELETE))
 
         futures = admin.incremental_alter_configs([resource])
 
