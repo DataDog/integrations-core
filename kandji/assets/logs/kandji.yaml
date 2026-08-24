@@ -946,6 +946,14 @@ pipeline:
           template: "3.1"
           target: cvss_stage.version
           replaceMissing: false
+        - type: array-processor
+          name: Move attributes into cve.cvss array
+          enabled: true
+          operation:
+            source: cvss_stage
+            target: vuln_stage.cve.cvss
+            preserveSource: false
+            type: append
         - type: grok-parser
           name: Parse `cve_published_at` to `vuln_stage.cve.created_time`
           enabled: true
@@ -978,6 +986,14 @@ pipeline:
               iso_naive_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SS"):vuln_stage.cve.modified_time}
               iso_naive_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.S"):vuln_stage.cve.modified_time}
               iso_naive_f0 %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.modified_time}
+        - type: array-processor
+          name: Move attributes into vulnerabilities array
+          enabled: true
+          operation:
+            source: vuln_stage
+            target: ocsf.vulnerabilities
+            preserveSource: false
+            type: append
         - type: attribute-remapper
           name: Map `blueprint_id` to `group_stage.uid`
           enabled: true
@@ -998,22 +1014,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: array-processor
-          name: Move attributes into cve.cvss array
-          enabled: true
-          operation:
-            source: cvss_stage
-            target: vuln_stage.cve.cvss
-            preserveSource: false
-            type: append
-        - type: array-processor
-          name: Move attributes into vulnerabilities array
-          enabled: true
-          operation:
-            source: vuln_stage
-            target: ocsf.vulnerabilities
-            preserveSource: false
-            type: append
         - type: array-processor
           name: Move attributes into device.groups array
           enabled: true
@@ -1648,6 +1648,48 @@ pipeline:
             target: malware_stage.classifications
             preserveSource: false
             type: append
+        # `malware` is an array of Malware objects (dictionary is_array: true),
+        # so it is staged as an object and appended. Writing ocsf.malware.*
+        # directly produces a bare object, which the local validator does not
+        # currently catch because it no-ops array validation.
+        - type: attribute-remapper
+          name: Map `metadata.threat_family_name` to `malware_stage.name`
+          enabled: true
+          sources:
+            - metadata.threat_family_name
+          sourceType: attribute
+          target: malware_stage.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `metadata.threat_id` to `malware_stage.uid`
+          enabled: true
+          sources:
+            - metadata.threat_id
+          sourceType: attribute
+          target: malware_stage.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `metadata.classification_source` to `malware_stage.provider`
+          enabled: true
+          sources:
+            - metadata.classification_source
+          sourceType: attribute
+          target: malware_stage.provider
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move attributes into malware array
+          enabled: true
+          operation:
+            source: malware_stage
+            target: ocsf.malware
+            preserveSource: false
+            type: append
         - type: attribute-remapper
           name: Map `new_state.file.name` to `evidence_stage.file.name`
           enabled: true
@@ -1697,48 +1739,6 @@ pipeline:
           operation:
             source: evidence_stage
             target: ocsf.evidences
-            preserveSource: false
-            type: append
-        # `malware` is an array of Malware objects (dictionary is_array: true),
-        # so it is staged as an object and appended. Writing ocsf.malware.*
-        # directly produces a bare object, which the local validator does not
-        # currently catch because it no-ops array validation.
-        - type: attribute-remapper
-          name: Map `metadata.threat_family_name` to `malware_stage.name`
-          enabled: true
-          sources:
-            - metadata.threat_family_name
-          sourceType: attribute
-          target: malware_stage.name
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `metadata.threat_id` to `malware_stage.uid`
-          enabled: true
-          sources:
-            - metadata.threat_id
-          sourceType: attribute
-          target: malware_stage.uid
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `metadata.classification_source` to `malware_stage.provider`
-          enabled: true
-          sources:
-            - metadata.classification_source
-          sourceType: attribute
-          target: malware_stage.provider
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: array-processor
-          name: Move attributes into malware array
-          enabled: true
-          operation:
-            source: malware_stage
-            target: ocsf.malware
             preserveSource: false
             type: append
         - type: string-builder-processor
