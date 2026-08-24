@@ -98,6 +98,11 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         valid: list[Query] = []
         schedulers: dict[int, CronScheduler] = {}
         for query in queries:
+            try:
+                self._validate_dbname(query.dbname)
+            except ValueError as e:
+                self._log.warning("Skipping DO query monitor_id=%d: %s", query.monitor_id, e)
+                continue
             if query.schedule:
                 try:
                     schedulers[query.monitor_id] = CronScheduler(

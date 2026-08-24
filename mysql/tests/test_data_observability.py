@@ -238,16 +238,15 @@ def test_queries_are_sorted_to_minimize_database_and_timeout_changes(instance_ba
 
 
 @pytest.mark.parametrize('dbname', ['bad-name', 'bad`name', 'db.name', 'db name', '', 'db;DROP TABLE users'])
-def test_invalid_database_name_is_rejected(instance_basic, dbname):
-    query = {**deepcopy(BASE_QUERY), 'dbname': dbname}
-    mock_conn, cursor = _make_mock_conn()
-    check = _create_check(instance_basic, queries=[query])
-    check._data_observability._db = mock_conn
+def test_invalid_database_name_is_skipped_without_blocking_valid_query(aggregator, instance_basic, dbname):
+    invalid_query = {**deepcopy(BASE_QUERY), 'monitor_id': 2, 'dbname': dbname}
+    _, _, cursor = _setup_and_run(instance_basic, queries=[invalid_query, deepcopy(BASE_QUERY)])
 
-    with pytest.raises(ValueError, match='Invalid database name'):
-        check._data_observability.run_job()
-
-    cursor.execute.assert_not_called()
+    assert [call.args[0] for call in cursor.execute.call_args_list] == [
+        'USE `test_db`',
+        BASE_QUERY['query'],
+    ]
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
 
 @pytest.mark.parametrize('dbname', ['shopist', 'shopist_analytics', 'shopist$raw', 'DB123'])
