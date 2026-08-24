@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ddev.cli.ci.tests.github_retries import GitHubRetryConfig
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactoryConfig
 
 if TYPE_CHECKING:
@@ -36,6 +37,7 @@ class DispatcherConfig(BaseModel):
     default_python_version: str = Field(default="3.13", pattern=r"^\d+\.\d+$")
     batching: BatchingConfig = BatchingConfig()
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()
+    github_retries: GitHubRetryConfig = GitHubRetryConfig()
 
     @classmethod
     def from_repo_config(cls, repo_config: RepositoryConfig) -> DispatcherConfig:

@@ -9,6 +9,8 @@ from ddev.utils.github_async import AsyncGitHubClient
 from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.utils.github_async.helpers import TOKEN, make_client, make_zip, patch_signed_download
 
+pytestmark = pytest.mark.usefixtures("instant_backoff")
+
 
 async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch, tmp_path) -> None:
     captured_signed_headers: dict[str, str] = {}
@@ -50,7 +52,7 @@ async def test_download_artifact_authentication_error_remains_actionable(tmp_pat
 async def test_download_artifact_signed_url_error_propagates(
     monkeypatch: pytest.MonkeyPatch, tmp_path, status_code: int
 ) -> None:
-    """A failed signed-URL download propagates as httpx.HTTPStatusError (no retries)."""
+    """A signed-URL download that keeps failing reaches the caller once the retries are spent."""
 
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
@@ -96,3 +98,55 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malici
 
     # Nothing was extracted before the guard fired.
     assert list(dest.rglob("*")) == []
+
+
+async def test_an_expired_signed_url_is_resolved_again_rather_than_refetched(monkeypatch, tmp_path) -> None:
+    """The signed URL is short-lived, so the retry has to start from the redirect.
+
+    An expired URL comes back from the storage host as a 403. Retrying only the download would
+    refetch the same dead URL and fail identically, so the pair is retried together and the second
+    attempt asks GitHub for a fresh one.
+    """
+    signed_urls = ["https://signed.example/expired", "https://signed.example/fresh"]
+    github_calls: list[httpx.Request] = []
+    signed_calls: list[str] = []
+
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        github_calls.append(request)
+        return httpx.Response(302, headers={"location": signed_urls[min(len(github_calls) - 1, 1)]})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        signed_calls.append(url)
+        if url.endswith("/expired"):
+            return httpx.Response(403, content=b"<Error>AccessDenied</Error>")
+        return httpx.Response(200, content=make_zip({"hello.txt": b"hi"}))
+
+    patch_signed_download(monkeypatch, signed_handler)
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+
+    await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    assert len(github_calls) == 2
+    assert signed_calls == ["https://signed.example/expired", "https://signed.example/fresh"]
+    assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
+
+
+async def test_a_denial_from_github_itself_is_not_retried_as_an_expired_url(tmp_path) -> None:
+    """The 403 the artifact policy retries is the storage host's, not GitHub's.
+
+    GitHub answers a real permission problem with its own 403, which arrives as an authentication
+    error; retrying that would spend the whole ladder on a failure no wait can fix.
+    """
+    calls: list[httpx.Request] = []
+
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(403)
+
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+
+    with pytest.raises(GitHubAuthenticationError):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    assert len(calls) == 1

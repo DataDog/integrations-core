@@ -47,11 +47,19 @@ def test_from_repo_config_reads_full_dispatcher_table(repo_config: RepoConfigBui
 
         [dispatcher.github_rate_limits.slow]
         max_rate = 120
+
+        [dispatcher.github_retries.safe]
+        attempts = 5
+
+        [dispatcher.github_retries.mutating]
+        attempts = 1
         """
     )
 
     result = DispatcherConfig.from_repo_config(config)
 
+    assert result.github_retries.safe.attempts == 5
+    assert result.github_retries.mutating.attempts == 1
     assert result.batching.max_jobs_per_batch == 120
     assert result.batching.allow_integration_splitting is True
     assert result.global_timeout_seconds == 3600.0
