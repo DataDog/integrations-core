@@ -1440,7 +1440,7 @@ def _upload_creds(**overrides):
         'api_key': 'TEST_API_KEY',
         'app_key': 'TEST_APP_KEY',
         'token': 'scoped-upload-token',
-        'test_drive_selector': 'its-agent-intake-poc',
+        'test_drive': 'its-agent-intake-development',
     }
     defaults.update(overrides)
     return remote_query._UploadCredentials(**defaults)
@@ -1476,7 +1476,9 @@ def test_requests_upload_client_uses_exact_multipart_http_contract(monkeypatch):
     assert put.headers['dd-api-key'] == 'TEST_API_KEY'
     assert put.headers['dd-application-key'] == 'TEST_APP_KEY'
     assert put.headers['Authorization'] == 'Bearer scoped-upload-token'
-    assert put.headers[remote_query.REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER] == 'its-agent-intake-poc'
+    # The Test Drive routing header is derived from the validated Agent-config name as
+    # ``test-drive-<name>: 1``; no such header is emitted when the config is absent.
+    assert put.headers['test-drive-its-agent-intake-development'] == '1'
     assert put.data == payload
     # The HTTP timeout is an explicit (connect, read) tuple with a 5-minute read timeout.
     assert put.timeout == remote_query.REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT
@@ -1519,7 +1521,7 @@ def test_requests_upload_client_retries_part_idempotently(monkeypatch, trigger):
     monkeypatch.setattr(requests, 'request', fake_request)
     monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
 
-    creds = _upload_creds(test_drive_selector=None)
+    creds = _upload_creds(test_drive=None)
     client = remote_query._RequestsUploadClient()
     payload = b'ijklmnop'
     client.put_part(creds, 1, payload, hashlib.sha256(payload).hexdigest(), 0)
@@ -1546,7 +1548,7 @@ def test_requests_upload_client_fails_closed_on_non_transient_status(monkeypatch
     monkeypatch.setattr(requests, 'request', fake_request)
     monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
 
-    creds = _upload_creds(test_drive_selector=None)
+    creds = _upload_creds(test_drive=None)
     client = remote_query._RequestsUploadClient()
 
     with pytest.raises(remote_query._CopyStreamFailure) as excinfo:
@@ -1555,6 +1557,103 @@ def test_requests_upload_client_fails_closed_on_non_transient_status(monkeypatch
     assert excinfo.value.retryable is False
     # A non-transient rejection is not retried.
     assert len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    'raw,expected',
+    [
+        ('its-agent-intake-development', 'its-agent-intake-development'),
+        ('  its-agent-intake-development  ', 'its-agent-intake-development'),
+        ('ITS-AGENT-INTAKE-DEVELOPMENT', 'its-agent-intake-development'),
+        ('its-agent-intake-2', 'its-agent-intake-2'),
+    ],
+)
+def test_validate_test_drive_name_normalizes_valid_test_drive_names(raw, expected):
+    # Valid names are trimmed and lowercased so the emitted ``test-drive-<name>: 1`` header is
+    # deterministic regardless of how the Agent config value is cased or padded.
+    assert remote_query._validate_test_drive_name(raw) == expected
+
+
+@pytest.mark.parametrize(
+    'raw',
+    [
+        None,
+        '',
+        '   ',
+        'its-agent-intake-development:1',
+        'its-agent-intake-development\r\nX-Other: 1',
+        'its agent intake development',
+        '-its-agent-intake-development',
+        'its-agent-intake-development-',
+        'a' * 64,
+    ],
+)
+def test_validate_test_drive_name_rejects_invalid_names_fail_closed(raw):
+    # Invalid names must fail closed to None so no Test Drive header is emitted: the permanent
+    # service is targeted and the Agent config value cannot inject arbitrary headers.
+    assert remote_query._validate_test_drive_name(raw) is None
+
+
+def test_requests_upload_client_omits_test_drive_header_when_not_configured(monkeypatch):
+    import requests
+
+    captured = []
+
+    def fake_request(method, url, headers=None, data=None, timeout=None):
+        captured.append(SimpleNamespace(headers=dict(headers or {})))
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', fake_request)
+    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
+
+    creds = _upload_creds(test_drive=None)
+    client = remote_query._RequestsUploadClient()
+    client.put_part(creds, 1, b'x', 'deadbeef', 0)
+
+    # With no Test Drive configured, the permanent-service path is preserved: no header whose
+    # name starts with the test-drive prefix is sent on the upload request.
+    put = captured[0]
+    assert not any(name.startswith(remote_query.REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_PREFIX) for name in put.headers)
+
+
+@pytest.mark.parametrize(
+    'config_value,expected',
+    [
+        ('  ITS-AGENT-INTAKE-DEVELOPMENT  ', 'its-agent-intake-development'),
+        ('', None),
+    ],
+)
+def test_resolve_upload_credentials_reads_validated_test_drive_from_agent_config(monkeypatch, config_value, expected):
+    def get_config(key):
+        if key == 'api_key':
+            return 'TEST_API_KEY'
+        if key == 'app_key':
+            return 'TEST_APP_KEY'
+        if key == remote_query.REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY:
+            return config_value
+        return None
+
+    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
+
+    creds = remote_query._resolve_upload_credentials(
+        {
+            'resultDelivery': {
+                'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
+                'uploadId': 'upload-01k',
+                'token': 'scoped-upload-token',
+            }
+        }
+    )
+
+    # The Agent-config Test Drive name is read through the dedicated config key and normalized
+    # before reaching the uploader; an absent value yields None so the upload keeps the
+    # permanent-service path instead of routing to a Test Drive.
+    assert creds.test_drive == expected
+    assert creds.api_key == 'TEST_API_KEY'
+    assert creds.app_key == 'TEST_APP_KEY'
+    assert creds.base_url == 'https://dd.datad0g.com/api/unstable/its-agent-intake'
+    assert creds.upload_id == 'upload-01k'
+    assert creds.token == 'scoped-upload-token'
 
 
 def test_copy_stream_upload_mode_sizes_multipart_parts_with_final_short_part(monkeypatch):
