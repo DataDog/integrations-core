@@ -7,7 +7,6 @@ import calendar
 import datetime
 import json
 import logging
-from contextlib import nullcontext
 from copy import deepcopy
 from unittest.mock import MagicMock, call, patch
 
@@ -104,8 +103,8 @@ def _setup_and_run(instance_basic, queries=None, config_id='test-config-123', mo
     else:
         mock_cursor = mock_conn.query_cursor
     check = _create_check(instance_basic, queries=queries, config_id=config_id)
-    check._data_observability._db = mock_conn
-    check._data_observability.run_job()
+    check.data_observability._db = mock_conn
+    check.data_observability.run_job()
     return check, mock_conn, mock_cursor
 
 
@@ -113,70 +112,13 @@ def _get_do_event_calls(mock_epe):
     return [call for call in mock_epe.call_args_list if len(call.args) >= 2 and call.args[1] == EVENT_TRACK_TYPE]
 
 
-def _prepare_check_boundary(check):
-    db = MagicMock()
-    check._connect = MagicMock(return_value=nullcontext(db))
-    check.service_check_tags = []
-    check._submit_initialization_health_event = MagicMock()
-    check._set_qcache_stats = MagicMock()
-    check.global_variables.collect = MagicMock()
-    check.set_version = MagicMock()
-    check._send_metadata = MagicMock()
-    check._check_database_configuration = MagicMock()
-    check.set_server_uuid = MagicMock()
-    check.set_cluster_tags = MagicMock()
-    check._send_database_instance_metadata = MagicMock()
-    check._collect_metrics = MagicMock()
-    check._collect_system_metrics = MagicMock()
-    check._get_runtime_queries = MagicMock(return_value=None)
-    check._put_qcache_stats = MagicMock()
-    check._query_manager.execute = MagicMock()
-    check._report_warnings = MagicMock()
-
-
-def test_disabled_by_default_at_check_boundary(aggregator, instance_basic):
-    check = MySql(common.CHECK_NAME, {}, [instance_basic])
-    _prepare_check_boundary(check)
-    check._data_observability.run_job_loop = MagicMock()
-    check._data_observability._connection_args_provider = MagicMock()
-    check.event_platform_event = MagicMock()
-
-    check.check(None)
-
-    check._data_observability.run_job_loop.assert_not_called()
-    check._data_observability._connection_args_provider.assert_not_called()
-    assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
-    assert not _get_do_event_calls(check.event_platform_event)
-
-
-def test_data_observability_starts_schema_collection_without_dbm(instance_basic):
-    instance = _make_do_instance(instance_basic, queries=[])
-    instance['collect_schemas'] = {'enabled': True}
-    instance['collect_settings'] = {'enabled': False}
-    check = MySql(common.CHECK_NAME, {}, [instance])
-    _prepare_check_boundary(check)
-    check._statement_metrics.run_job_loop = MagicMock()
-    check._statement_samples.run_job_loop = MagicMock()
-    check._query_activity.run_job_loop = MagicMock()
-    check._mysql_metadata.run_job_loop = MagicMock()
-    check._data_observability.run_job_loop = MagicMock()
-
-    check.check(None)
-
-    check._mysql_metadata.run_job_loop.assert_called_once()
-    check._data_observability.run_job_loop.assert_called_once()
-    check._statement_metrics.run_job_loop.assert_not_called()
-    check._statement_samples.run_job_loop.assert_not_called()
-    check._query_activity.run_job_loop.assert_not_called()
-
-
 def test_no_queries_does_nothing(aggregator, instance_basic):
     check = _create_check(instance_basic, queries=[])
-    check._data_observability._connection_args_provider = MagicMock()
+    check.data_observability._connection_args_provider = MagicMock()
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
-    check._data_observability._connection_args_provider.assert_not_called()
+    check.data_observability._connection_args_provider.assert_not_called()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
 
@@ -220,7 +162,7 @@ def test_queries_are_sorted_to_minimize_database_and_timeout_changes(instance_ba
     ]
     check, conn, cursor = _setup_and_run(instance_basic, queries=queries)
 
-    assert check._data_observability._db is conn
+    assert check.data_observability._db is conn
     assert [call.args[0] for call in cursor.execute.call_args_list] == [
         'USE `analytics`',
         'SELECT analytics_20_a',
@@ -270,26 +212,26 @@ def test_query_failure_database_error(aggregator, instance_basic):
 
 def test_connection_failure_propagates(instance_basic):
     check = _create_check(instance_basic)
-    check._data_observability._connection_args_provider = MagicMock(
+    check.data_observability._connection_args_provider = MagicMock(
         side_effect=pymysql.err.OperationalError('Connection refused')
     )
 
     with pytest.raises(pymysql.err.OperationalError, match='Connection refused'):
-        check._data_observability.run_job()
+        check.data_observability.run_job()
 
 
 def test_interface_error_propagates(instance_basic):
     mock_conn, cursor = _make_mock_conn()
     cursor.execute.side_effect = pymysql.err.InterfaceError('connection closed')
     check = _create_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
     with pytest.raises(pymysql.err.InterfaceError, match='connection closed'):
-        check._data_observability.run_job()
+        check.data_observability.run_job()
 
-    assert check._data_observability._db is None
-    assert check._data_observability._current_dbname is None
-    assert check._data_observability._current_query_timeout_ms is None
+    assert check.data_observability._db is None
+    assert check.data_observability._current_dbname is None
+    assert check.data_observability._current_query_timeout_ms is None
 
 
 def test_closed_connection_propagates_and_cron_query_is_retried(instance_basic, aggregator, monkeypatch):
@@ -298,16 +240,16 @@ def test_closed_connection_propagates_and_cron_query_is_retried(instance_basic, 
     failed_conn, failed_cursor = _make_mock_conn(open=False)
     failed_cursor.execute.side_effect = pymysql.err.OperationalError('server closed the connection')
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = failed_conn
+    check.data_observability._db = failed_conn
 
     with pytest.raises(pymysql.err.OperationalError, match='server closed'):
-        check._data_observability.run_job()
+        check.data_observability.run_job()
 
-    assert check._data_observability._db is None
+    assert check.data_observability._db is None
 
     recovered_conn, recovered_cursor = _make_mock_conn()
-    check._data_observability._db = recovered_conn
-    check._data_observability.run_job()
+    check.data_observability._db = recovered_conn
+    check.data_observability.run_job()
 
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
     assert [call.args[0] for call in recovered_cursor.execute.call_args_list] == [
@@ -342,9 +284,9 @@ def test_query_timeout_is_applied(instance_basic, is_mariadb, variable, configur
     mock_conn, _ = _make_mock_conn()
     check = _create_check(instance_basic)
     check.is_mariadb = is_mariadb
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     assert mock_conn.timeout_cursor.execute.call_args_list == [
         call(f'SET SESSION {variable} = %s', (configured_timeout,)),
@@ -355,9 +297,9 @@ def test_mysql_56_executes_query_without_unsupported_session_timeout(instance_ba
     mock_conn, cursor = _make_mock_conn()
     check = _create_check(instance_basic)
     check.version = MySQLVersion('5.6.51', 'MySQL', '')
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     mock_conn.timeout_cursor.execute.assert_not_called()
     assert [call.args[0] for call in cursor.execute.call_args_list] == [
@@ -442,18 +384,18 @@ def test_per_query_interval_tracking(aggregator, instance_basic, monkeypatch):
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _create_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
     aggregator.reset()
     current_time[0] += BASE_QUERY['interval_seconds'] - 1
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
     current_time[0] += 1
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
 
@@ -461,13 +403,13 @@ def test_failed_query_updates_last_execution(aggregator, instance_basic):
     mock_conn, cursor = _make_mock_conn()
     cursor.execute.side_effect = [None, pymysql.err.ProgrammingError('syntax error')]
     check = _create_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
-    assert check._data_observability._last_execution[1] > 0
+    check.data_observability.run_job()
+    assert check.data_observability._last_execution[1] > 0
 
     aggregator.reset()
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
 
@@ -483,9 +425,9 @@ def test_schedule_query_does_not_fire_before_tick(instance_basic, monkeypatch):
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, cursor = _make_mock_conn()
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     cursor.execute.assert_not_called()
 
@@ -495,11 +437,11 @@ def test_schedule_query_fires_at_cron_tick(instance_basic, aggregator, monkeypat
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     current_time[0] = _BASE_EPOCH + 65
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
@@ -509,9 +451,9 @@ def test_first_poll_exactly_at_cron_tick_fires(instance_basic, aggregator, monke
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: tick_time)
     mock_conn, _ = _make_mock_conn()
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
@@ -522,15 +464,15 @@ def test_schedule_takes_precedence_over_interval(instance_basic, aggregator, mon
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _create_check(instance_basic, queries=[query])
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     current_time[0] += 10
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
     current_time[0] = _BASE_EPOCH + 65
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
 
@@ -539,12 +481,12 @@ def test_invalid_cron_filtered_at_init(instance_basic, aggregator, caplog):
     with caplog.at_level(logging.WARNING):
         check = _create_check(instance_basic, queries=[bad, deepcopy(BASE_QUERY)])
 
-    assert {query.monitor_id for query in check._data_observability._queries} == {1}
+    assert {query.monitor_id for query in check.data_observability._queries} == {1}
     assert any('invalid cron schedule' in record.message for record in caplog.records)
 
     mock_conn, _ = _make_mock_conn()
-    check._data_observability._db = mock_conn
-    check._data_observability.run_job()
+    check.data_observability._db = mock_conn
+    check.data_observability.run_job()
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
 
@@ -554,7 +496,7 @@ def test_missing_schedule_and_interval_filtered_at_init(instance_basic, caplog):
     with caplog.at_level(logging.WARNING):
         check = _create_check(instance_basic, queries=[query])
 
-    assert check._data_observability._queries == ()
+    assert check.data_observability._queries == ()
     assert any('neither schedule nor positive interval_seconds' in record.message for record in caplog.records)
 
 
@@ -563,12 +505,12 @@ def test_lateness_metric_for_cron(instance_basic, aggregator, monkeypatch):
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = mock_conn
-    check._data_observability.run_job()
-    scheduled_tick = check._data_observability._schedulers[10].next_tick
+    check.data_observability._db = mock_conn
+    check.data_observability.run_job()
+    scheduled_tick = check.data_observability._schedulers[10].next_tick
 
     current_time[0] = _BASE_EPOCH + 180
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     metric = aggregator.metrics('dd.mysql.data_observability.query_fire_lateness_seconds')[0]
     assert abs(metric.value - (current_time[0] - scheduled_tick)) < 5
@@ -580,16 +522,16 @@ def test_lateness_metric_for_interval(instance_basic, aggregator, monkeypatch):
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _create_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     first = aggregator.metrics('dd.mysql.data_observability.query_fire_lateness_seconds')[0]
     assert first.value == 0
     assert 'mode:interval' in first.tags
 
     current_time[0] = 1080.0
     aggregator.reset()
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     second = aggregator.metrics('dd.mysql.data_observability.query_fire_lateness_seconds')[0]
     assert second.value == 20
 
@@ -601,15 +543,15 @@ def test_lateness_clamped_at_zero(instance_basic, aggregator, monkeypatch):
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
     query = check._do_config.queries[0]
 
     with patch.object(
-        check._data_observability,
+        check.data_observability,
         '_get_due_queries',
         return_value=[DueQuery(query, current_time[0] + 100, 'cron')],
     ):
-        check._data_observability.run_job()
+        check.data_observability.run_job()
 
     metric = aggregator.metrics('dd.mysql.data_observability.query_fire_lateness_seconds')[0]
     assert metric.value == 0
@@ -625,9 +567,9 @@ def test_cron_startup_lookback(instance_basic, aggregator, monkeypatch, window_s
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _make_cron_check(instance_basic, window_seconds=window_seconds, monkeypatch=monkeypatch)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == expected_fires
 
@@ -637,14 +579,14 @@ def test_cron_startup_lookback_does_not_double_fire(instance_basic, aggregator, 
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
     current_time[0] += 10
     aggregator.reset()
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
 
@@ -654,15 +596,15 @@ def test_failed_cron_query_advances_scheduler(instance_basic, aggregator, monkey
     mock_conn, cursor = _make_mock_conn()
     cursor.execute.side_effect = [None, pymysql.err.ProgrammingError('missing table')]
     check = _make_cron_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
-    check._data_observability.run_job()
-    next_tick = check._data_observability._schedulers[10].next_tick
+    check.data_observability.run_job()
+    next_tick = check.data_observability._schedulers[10].next_tick
 
     aggregator.reset()
-    check._data_observability.run_job()
+    check.data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
-    assert check._data_observability._schedulers[10].next_tick == next_tick
+    assert check.data_observability._schedulers[10].next_tick == next_tick
 
 
 def test_cron_query_is_retried_after_connection_failure(instance_basic, aggregator, monkeypatch):
@@ -670,15 +612,15 @@ def test_cron_query_is_retried_after_connection_failure(instance_basic, aggregat
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, cursor = _make_mock_conn()
     check = _make_cron_check(instance_basic)
-    check._data_observability._get_db_connection = MagicMock(
+    check.data_observability._get_db_connection = MagicMock(
         side_effect=[pymysql.err.OperationalError('Connection refused'), mock_conn]
     )
 
     with pytest.raises(pymysql.err.OperationalError, match='Connection refused'):
-        check._data_observability.run_job()
+        check.data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
     assert [call.args[0] for call in cursor.execute.call_args_list] == ['USE `test_db`', CRON_QUERY['query']]
@@ -691,19 +633,19 @@ def test_non_positive_collection_interval_uses_default(instance_basic, collectio
 
     check = MySql(common.CHECK_NAME, {}, [instance])
 
-    assert check._data_observability._rate_limiter.rate_limit_s == pytest.approx(1 / 10)
+    assert check.data_observability._rate_limiter.rate_limit_s == pytest.approx(1 / 10)
 
 
 def test_emit_failure_metric(instance_basic, aggregator, monkeypatch):
     mock_conn, _ = _make_mock_conn()
     check = _create_check(instance_basic)
-    check._data_observability._db = mock_conn
+    check.data_observability._db = mock_conn
 
     def boom(*args, **kwargs):
         raise json.JSONDecodeError('boom', 'doc', 0)
 
     monkeypatch.setattr('datadog_checks.mysql.data_observability.json.dumps', boom)
-    check._data_observability.run_job()
+    check.data_observability.run_job()
 
     failures = aggregator.metrics('dd.mysql.data_observability.emit_failures')
     assert len(failures) == 1
@@ -713,8 +655,8 @@ def test_emit_failure_metric(instance_basic, aggregator, monkeypatch):
 
 def test_cancel_stops_data_observability_job(instance_basic):
     check = _create_check(instance_basic)
-    check._data_observability.cancel = MagicMock()
+    check.data_observability.cancel = MagicMock()
 
     check.cancel()
 
-    check._data_observability.cancel.assert_called_once_with()
+    check.data_observability.cancel.assert_called_once_with()

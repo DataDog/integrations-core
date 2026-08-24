@@ -159,19 +159,13 @@ class MySql(DatabaseCheck):
                 **(self.instance.get('data_observability') or {}),
             }
         )
-        self._data_observability = MySQLDataObservability(
-            self, self._do_config, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
 
-        # Pass function reference and managed auth flag to async jobs
-        self._statement_metrics = MySQLStatementMetrics(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
-        self._statement_samples = MySQLStatementSamples(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
-        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        self.statement_metrics = None
+        self.statement_samples = None
+        self.mysql_metadata = None
+        self.query_activity = None
+        self.data_observability = None
+        self._register_async_jobs()
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -184,6 +178,39 @@ class MySql(DatabaseCheck):
         self._is_innodb_engine_enabled_cached = None
 
         self._submit_initialization_health_event()
+
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime."""
+        self._query_manager = None
+        self._runtime_queries_cached = None
+        self.health = None
+
+    def _register_async_jobs(self):
+        """Build and register the async jobs enabled by this check's configuration."""
+        if self._config.dbm_enabled:
+            self.statement_metrics = self.register_async_job(
+                MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+            self.statement_samples = self.register_async_job(
+                MySQLStatementSamples(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+            self.query_activity = self.register_async_job(
+                MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+
+        # Data Observability needs the schema collection the metadata job performs, so either
+        # feature brings it along.
+        if self._config.dbm_enabled or self._do_config.enabled:
+            self.mysql_metadata = self.register_async_job(
+                MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+
+        if self._do_config.enabled:
+            self.data_observability = self.register_async_job(
+                MySQLDataObservability(
+                    self, self._do_config, self._config, self._get_connection_args, self._uses_aws_managed_auth
+                )
+            )
 
     def _submit_initialization_health_event(self):
         try:
@@ -410,18 +437,7 @@ class MySql(DatabaseCheck):
                     if self._get_runtime_queries(db):
                         self._get_runtime_queries(db).execute(extra_tags=tags)
 
-                if self._config.dbm_enabled or self._do_config.enabled:
-                    database_monitoring_tags = list(set(self.service_check_tags) | set(tags))
-
-                    if self._config.dbm_enabled:
-                        self._statement_metrics.run_job_loop(database_monitoring_tags)
-                        self._statement_samples.run_job_loop(database_monitoring_tags)
-                        self._query_activity.run_job_loop(database_monitoring_tags)
-
-                    self._mysql_metadata.run_job_loop(database_monitoring_tags)
-
-                if self._do_config.enabled:
-                    self._data_observability.run_job_loop(tags)
+                self.run_async_jobs(list(set(self.service_check_tags) | set(tags)))
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -435,13 +451,6 @@ class MySql(DatabaseCheck):
         finally:
             self._conn = None
             self._report_warnings()
-
-    def cancel(self):
-        self._statement_samples.cancel()
-        self._statement_metrics.cancel()
-        self._query_activity.cancel()
-        self._mysql_metadata.cancel()
-        self._data_observability.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(

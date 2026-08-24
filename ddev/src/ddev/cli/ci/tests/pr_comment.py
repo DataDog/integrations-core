@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     # A tier's section builder: given the snapshot and the bytes left, render the section or nothing.
     type SectionBuilder = Callable[[DispatcherProgress, int], str | None]
 
-# Hidden first line of every Dispatcher comment. It brands the comment and is how the updater finds
+# Hidden first line of every Dispatcher comment. It brands the comment and is how the run reporter finds
 # an existing one to edit, so nothing else may write it.
 COMMENT_MARKER = "<!-- ddev-dispatcher-tests -->"
 

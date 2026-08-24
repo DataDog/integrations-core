@@ -89,6 +89,19 @@ def cluster_all_replicas(cluster: str, table: str) -> str:
     return f"clusterAllReplicas({quote_string(cluster)}, system.{table})"
 
 
+# The node serving the current connection. Read per emission rather than cached, since behind a
+# single endpoint the connection can land on a different node after any reconnect.
+CONNECT_NODE_QUERY = "SELECT hostName()"
+
+
+def cluster_nodes_query(cluster: str) -> str:
+    """Query listing every replica of a cluster currently serving traffic, one row per node.
+
+    skip_unavailable_shards keeps one unreachable node from failing the whole fan-out.
+    """
+    return f"SELECT hostName() FROM {cluster_all_replicas(cluster, 'one')} SETTINGS skip_unavailable_shards=1"
+
+
 HOSTING_TYPE_TAG = 'hosting_type'
 
 

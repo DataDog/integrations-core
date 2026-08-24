@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gc
+import inspect
 import json
 import subprocess
 import time
+import weakref
 
 import mock
 import psutil
@@ -465,14 +468,16 @@ def test_get_tables_data_uses_parameterized_queries():
         assert query.count('%s') == len(table_list) + 1
 
 
-def test_exception_handling_by_do_for_dbs():
+def test_fetch_for_databases_continues_after_database_error():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
     with mock.patch(
         'datadog_checks.mysql.databases_data.DatabasesData._fetch_database_data',
-        side_effect=Exception("Can't connect to DB"),
-    ):
-        databases_data._fetch_for_databases([{"name": "my_db"}], "dummy_cursor")
+        side_effect=[pymysql.DatabaseError("Can't connect to DB"), None],
+    ) as fetch_database_data:
+        databases_data._fetch_for_databases([{"name": "first_db"}, {"name": "second_db"}], "dummy_cursor")
+
+    assert [call.args[2] for call in fetch_database_data.call_args_list] == ['first_db', 'second_db']
 
 
 def test_update_aurora_replication_role():
@@ -963,3 +968,114 @@ class TestSupportsExplainJsonFormatVersion:
     def test_unknown_version(self):
         """The variable cannot be set safely before the server version has been detected."""
         assert supports_explain_json_format_version(None) is False
+
+
+@pytest.mark.parametrize(
+    'dbm, expected_jobs',
+    [
+        (False, []),
+        (True, ['statement-metrics', 'statement-samples', 'query-activity', 'database-metadata']),
+    ],
+)
+def test_async_job_registry_matches_config(dbm, expected_jobs):
+    """Only the jobs enabled by the instance config are built and registered.
+
+    Every job requires DBM, and each job's own enabled flag defaults to true, so without the
+    DBM gate a non-DBM instance would start collecting.
+    """
+    instance = {'server': 'localhost', 'user': 'datadog', 'dbm': dbm}
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+
+    registered = check._async_job_registry
+    assert list(registered) == expected_jobs
+    assert check.statement_metrics is registered.get('statement-metrics')
+    assert check.statement_samples is registered.get('statement-samples')
+    assert check.mysql_metadata is registered.get('database-metadata')
+    assert check.query_activity is registered.get('query-activity')
+
+
+@pytest.mark.parametrize(
+    'job_attr',
+    ['statement_metrics', 'statement_samples', 'mysql_metadata', 'query_activity'],
+)
+def test_job_shutdown_closes_connection(job_attr):
+    """Each job must close its own connection on shutdown; the GC test would not catch a leak."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+    job = getattr(check, job_attr)
+    conn = mock.MagicMock()
+    job._db = conn
+
+    job.shutdown()
+
+    conn.close.assert_called_once()
+    assert job._db is None
+
+
+@pytest.mark.parametrize(
+    'job_attr, invoke',
+    [
+        ('statement_samples', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('mysql_metadata', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('statement_metrics', lambda job, cursor: job._get_statement_count([])),
+        ('query_activity', lambda job, cursor: job._get_activity(cursor)),
+    ],
+)
+def test_job_aborts_query_when_cancelled(job_attr, invoke):
+    """Cancelling a job must stop collection queries before they hit the database."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+    job = getattr(check, job_attr)
+    job.cancel()
+    job._get_db_connection = mock.MagicMock()
+    cursor = mock.MagicMock()
+
+    with pytest.raises(Exception, match='cancelled'):
+        invoke(job, cursor)
+
+    job._get_db_connection.assert_not_called()
+    cursor.execute.assert_not_called()
+
+
+def test_check_gc_after_cancel():
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': True,
+        'query_samples': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'query_metrics': {'enabled': True, 'run_sync': True, 'collection_interval': 10},
+        'query_activity': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'collect_settings': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+    }
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()

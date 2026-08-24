@@ -60,7 +60,7 @@ from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_lon
 DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
 
 # Id returned by the default `create_issue_comment` / `update_issue_comment` responses. Exported so
-# tests can assert the updater edits the comment it created rather than duplicating the literal.
+# tests can assert the run reporter edits the comment it created rather than duplicating the literal.
 DEFAULT_COMMENT_ID = 4242
 
 
@@ -115,14 +115,18 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         'create_issue_comment': lambda: GitHubResponse(
-            data=IssueComment(id=DEFAULT_COMMENT_ID, body=''),
+            data=IssueComment(
+                id=DEFAULT_COMMENT_ID,
+                body='',
+                html_url='https://github.com/test/repo/issues/1#issuecomment-1',
+            ),
             headers={},
         ),
         'update_issue_comment': lambda: GitHubResponse(
             data=IssueComment(id=DEFAULT_COMMENT_ID, body=''),
             headers={},
         ),
-        # Default to a PR with no existing Dispatcher comment, so the updater creates one.
+        # Default to a PR with no existing Dispatcher comment, so the run reporter creates one.
         'list_issue_comments': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         # Default to "PR not found" so tests that don't care about PR lookup auto-fall-through
         # to commit resolution. Tests that need a specific PR register their own mock_response.

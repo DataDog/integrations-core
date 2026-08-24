@@ -198,7 +198,7 @@ class UpdatePRComment(BaseMessage):
     """Emitted per finished batch to request a PR comment update.
 
     ``revision`` is ordering metadata: revision ``0`` is the initial plan, then one per consumed
-    ``BatchFinished``. The updater renders the latest and rejects stale revisions. ``progress`` is
+    ``BatchFinished``. The run reporter renders the latest and rejects stale revisions. ``progress`` is
     the whole payload, including whether the run is done and every count the comment needs.
     """
 
