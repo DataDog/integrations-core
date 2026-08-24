@@ -608,8 +608,6 @@ pipeline:
             target: vuln_stage.cve.cvss
             preserveSource: false
             type: append
-        # score.exploitability is an EPSS-style probability; cve.epss.score is
-        # its OCSF home (the cvss object has no exploitability attribute).
         - type: attribute-remapper
           name: Map `new_state.vulnerability.score.exploitability` to `vuln_stage.cve.epss.score`
           enabled: true
@@ -948,9 +946,6 @@ pipeline:
           template: "3.1"
           target: cvss_stage.version
           replaceMissing: false
-        # NVD publication/modification dates for the CVE. Iru emits these with no
-        # zone suffix at all (unlike `detection_datetime`, which is Z-form), so
-        # they get their own patterns; a bare local-time pattern is treated as UTC.
         - type: grok-parser
           name: Parse `cve_published_at` to `vuln_stage.cve.created_time`
           enabled: true
@@ -983,9 +978,6 @@ pipeline:
               iso_naive_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SS"):vuln_stage.cve.modified_time}
               iso_naive_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.S"):vuln_stage.cve.modified_time}
               iso_naive_f0 %{date("yyyy-MM-dd'T'HH:mm:ss"):vuln_stage.cve.modified_time}
-        # An Iru blueprint is the device group a Mac is assigned to, so it maps to
-        # `device.groups[]` (an array of group objects per the dictionary, despite
-        # device.json's description showing bare strings).
         - type: attribute-remapper
           name: Map `blueprint_id` to `group_stage.uid`
           enabled: true
@@ -1317,8 +1309,6 @@ pipeline:
           template: "%{target_id}-%{new_state.parameter_name}"
           target: ocsf.finding_info.uid
           replaceMissing: false
-        # An Iru blueprint is the device group a Mac is assigned to. No
-        # `blueprint_id` is present on this shape, so only the name is available.
         - type: attribute-remapper
           name: Map `blueprint_name` to `group_stage.name`
           enabled: true
@@ -1376,13 +1366,6 @@ pipeline:
               target: ocsf.message
               preserveSource: true
               overrideOnConflict: true
-            # first_runs events evaluate a whole blueprint at once, so they carry
-            # parameter_names.* arrays rather than a single parameter_name. Those
-            # check names are compliance requirements, not a control -- a
-            # Blueprint is a bundle of checks, so mapping it to
-            # compliance.control would be wrong. Mapped as a multi-source
-            # fallback (first non-empty list wins) because array-processor
-            # `append` nests arrays instead of concatenating them.
             - type: schema-remapper
               name: Map `new_state.parameter_names.passed`, `new_state.parameter_names.remediated`, `new_state.parameter_names.incompatible` to `ocsf.compliance.requirements`
               sources:
@@ -1422,19 +1405,6 @@ pipeline:
               target: ocsf.finding_info.title
               preserveSource: true
               overrideOnConflict: true
-            # Multi-source fallback: `parameter_name` names the single control on
-            # remediation events; `first_runs` events have no `parameter_name`
-            # (they evaluate a whole blueprint at once), so they fall back to
-            # `blueprint_name`. First non-empty source wins.
-            #
-            # Note this is a looser reading of the attribute than OCSF's own
-            # wording -- it defines `control` as one named control ("CIS ...
-            # Control 2.1 - Ensure CloudTrail is enabled in all regions"), and an
-            # Iru Blueprint is a bundle of checks rather than a single control.
-            # The individual check names for those events are also mapped to
-            # `compliance.requirements`, and the blueprint to `device.groups[]`,
-            # so the fallback populates a recommended attribute rather than
-            # recovering data that would otherwise be lost.
             - type: schema-remapper
               name: Map `new_state.parameter_name`, `blueprint_name` to `ocsf.compliance.control`
               sources:
@@ -1640,20 +1610,9 @@ pipeline:
             target: malware_stage.classification_ids
             preserveSource: false
             type: append
-        # `classifications` is the caption array paired with classification_ids:
-        # OCSF defines it as "the list of malware classifications, normalized to
-        # the captions of the classification_id values. In the case of 'Other',
-        # they are defined by the event source." So the vendor's own family name
-        # is written first and the category-processor overwrites it with the
-        # canonical caption when a classification is recognized -- leaving an
-        # unrecognized family to survive as the source-defined value rather than
-        # a literal "Other".
-        #
-        # The branches below MUST stay in the same order as the
-        # classification_ids processor above. These are overlapping keyword
-        # filters, so a description mentioning both "spyware" and "trojan" takes
-        # whichever branch comes first; divergent ordering would pair id 17 with
-        # the caption "Trojan".
+        # Keep these branches in the same order as the classification_ids
+        # processor above: the keyword filters overlap, so divergent ordering
+        # would pair id 17 with the caption "Trojan".
         - type: attribute-remapper
           name: Map `metadata.threat_family_name` to `malware_classification_str`
           enabled: true
@@ -1689,10 +1648,6 @@ pipeline:
             target: malware_stage.classifications
             preserveSource: false
             type: append
-        # The detected file is evidence of the detection, not an affected
-        # resource: `evidences` has a purpose-built `file` attribute and
-        # `resource_details` does not, and `resources` describes what the
-        # activity affected rather than the artifact that triggered it.
         - type: attribute-remapper
           name: Map `new_state.file.name` to `evidence_stage.file.name`
           enabled: true
@@ -1713,8 +1668,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        # file.type_id is a required attribute of the file object. Iru only
-        # reports regular files here, so it is set to Regular File (1).
         - type: string-builder-processor
           name: Add evidence file type
           enabled: true
@@ -1794,7 +1747,6 @@ pipeline:
           template: "%{metadata.threat_family_name} detected in %{file_name}"
           target: ocsf.finding_info.title
           replaceMissing: false
-        # security_control profile: a malware detection is an alertable signal.
         - type: string-builder-processor
           name: Add is alert
           enabled: true
@@ -1838,8 +1790,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        # security_control profile: the Iru library item is the threat-protection
-        # policy that produced the detection.
         - type: attribute-remapper
           name: Map `metadata.library_item_id` to `ocsf.policy.uid`
           enabled: true
@@ -2052,19 +2002,9 @@ pipeline:
                 name: ocsf.status
                 id: ocsf.status_id
               type: schema-category-mapper
-            # security_control profile. Iru's `file_detection` events were absent
-            # from every org we sampled, so the only disposition vocabulary we
-            # have evidence for is the documented audit event: action_taken
-            # "No Action", threat_status "Not Quarantined", file_status
-            # "Detected". Values beyond those fall to Other (99) with the literal
-            # preserved by the fallback, rather than guessing at a vocabulary the
-            # vendor may never emit. `action_id` is left unmapped: its enum is
-            # Allowed/Denied, and "No Action" is neither.
-            #
-            # Order matters: "Not Quarantined" tokenizes to include
-            # `quarantined`, so the Quarantined branch must exclude the negative
-            # phrase explicitly or every un-quarantined threat is misreported as
-            # quarantined.
+            # "Not Quarantined" tokenizes to include `quarantined`, so the
+            # Quarantined branch must exclude the negative phrase explicitly or
+            # every un-quarantined threat is misreported as quarantined.
             - name: ocsf.disposition_id
               categories:
                 - filter:
