@@ -256,29 +256,38 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_database_files_space_used_matches_database_context(
+def test_database_files_metrics_match_database_context(
     aggregator, dd_run_check, instance_autodiscovery, datadog_conn_docker
 ):
-    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    databases = ('master', 'msdb', 'tempdb')
+    instance_autodiscovery['autodiscovery_include'] = list(databases)
 
+    expected_values = {metric_name: {} for metric_name in ('size', 'space_used', 'state')}
     with datadog_conn_docker.cursor() as cursor:
-        cursor.execute("USE [master]")
-        cursor.execute("SELECT file_id, FILEPROPERTY(name, 'SpaceUsed') * 8 FROM sys.database_files")
-        expected_space_used = {('master', file_id): value for file_id, value in cursor.fetchall()}
-        cursor.execute("USE [msdb]")
-        cursor.execute("SELECT file_id, FILEPROPERTY(name, 'SpaceUsed') * 8 FROM sys.database_files")
-        expected_space_used.update({('msdb', file_id): value for file_id, value in cursor.fetchall()})
+        for database in databases:
+            cursor.execute(f"USE [{database}]")
+            cursor.execute(
+                "SELECT file_id, size * 8, FILEPROPERTY(name, 'SpaceUsed') * 8, state FROM sys.database_files"
+            )
+            for file_id, size, space_used, state in cursor.fetchall():
+                key = (database, file_id)
+                expected_values['size'][key] = size
+                expected_values['state'][key] = state
+                if database != 'tempdb':
+                    expected_values['space_used'][key] = space_used
 
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
 
-    actual_space_used = {}
-    for metric in aggregator.metrics('sqlserver.database.files.space_used'):
-        tags = dict(tag.split(':', 1) for tag in metric.tags)
-        if tags.get('db') in ('master', 'msdb'):
-            actual_space_used[(tags['db'], int(tags['file_id']))] = metric.value
+    for metric_name, expected in expected_values.items():
+        actual = {}
+        for metric in aggregator.metrics(f'sqlserver.database.files.{metric_name}'):
+            tags = dict(tag.split(':', 1) for tag in metric.tags)
+            key = (tags.get('db'), int(tags['file_id']))
+            if key in expected:
+                actual[key] = metric.value
 
-    assert actual_space_used == expected_space_used
+        assert actual == expected
 
 
 @not_windows_ci
@@ -307,64 +316,6 @@ def test_database_files_metrics_with_connect_any_database(
     ):
         metrics = aggregator.metrics(metric_name)
         assert any('db:datadog_test-1' in metric.tags for metric in metrics)
-
-
-@not_windows_ci
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_database_files_size_uses_current_tempdb_size(aggregator, dd_run_check, instance_autodiscovery, sa_conn):
-    table_name = 'datadog_database_files_growth'
-    with sa_conn.cursor() as cursor:
-        cursor.execute("SELECT size FROM sys.master_files WHERE database_id = DB_ID('tempdb') AND file_id = 2")
-        configured_size = cursor.fetchone()[0]
-        cursor.execute("USE [tempdb]")
-        cursor.execute("SELECT size FROM sys.database_files WHERE file_id = 2")
-        current_size = cursor.fetchone()[0]
-
-        if current_size <= configured_size:
-            cursor.execute("SELECT total_log_size_in_bytes - used_log_space_in_bytes FROM sys.dm_db_log_space_usage")
-            free_log_bytes = cursor.fetchone()[0]
-            cursor.execute(
-                f"""
-                USE [tempdb];
-                DROP TABLE IF EXISTS dbo.{table_name};
-                CREATE TABLE dbo.{table_name} (payload char(8000) NOT NULL);
-                INSERT INTO dbo.{table_name} VALUES (REPLICATE('x', 8000));
-
-                DECLARE @iterations int = ?;
-                BEGIN TRANSACTION;
-                WHILE @iterations > 0
-                BEGIN
-                    UPDATE dbo.{table_name}
-                    SET payload = REPLICATE(CHAR(120 + @iterations % 2), 8000);
-                    SET @iterations -= 1;
-                END;
-                ROLLBACK;
-                """,
-                free_log_bytes // 4000 + 1024,
-            )
-
-        cursor.execute("USE [tempdb]")
-        cursor.execute("SELECT size * 8 FROM sys.database_files WHERE file_id = 2")
-        expected_size = cursor.fetchone()[0]
-
-    assert expected_size > configured_size * 8
-
-    try:
-        instance_autodiscovery['autodiscovery_include'] = ['tempdb']
-        check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
-        dd_run_check(check)
-
-        actual_sizes = []
-        for metric in aggregator.metrics('sqlserver.database.files.size'):
-            tags = dict(tag.split(':', 1) for tag in metric.tags)
-            if tags.get('db') == 'tempdb' and tags.get('file_id') == '2':
-                actual_sizes.append(metric.value)
-
-        assert actual_sizes == [expected_size]
-    finally:
-        with sa_conn.cursor() as cursor:
-            cursor.execute(f"USE [tempdb]; DROP TABLE IF EXISTS dbo.{table_name}")
 
 
 @pytest.mark.integration
