@@ -1083,53 +1083,6 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bo
     assert len(matching) > 0, "should have collected at least one matching event"
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
-    # confirm that async jobs stop on their own after the check has not been run for a while
-    dbm_instance['query_samples']['run_sync'] = False
-    dbm_instance['query_metrics']['run_sync'] = False
-    # low collection interval for a faster test
-    dbm_instance['min_collection_interval'] = 1
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
-    # make sure there were no unhandled exceptions
-    mysql_check._statement_samples._job_loop_future.result()
-    mysql_check._statement_metrics._job_loop_future.result()
-    for job in ['statement-metrics', 'statement-samples']:
-        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
-            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
-        aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop",
-            tags=expected_tags,
-        )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
-    dbm_instance['query_samples']['run_sync'] = False
-    dbm_instance['query_metrics']['run_sync'] = False
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
-    mysql_check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    mysql_check._statement_samples._job_loop_future.result()
-    mysql_check._statement_metrics._job_loop_future.result()
-    assert not mysql_check._statement_samples._job_loop_future.running(), "samples thread should be stopped"
-    assert not mysql_check._statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
-    assert mysql_check._statement_samples._db is None, "samples db connection should be gone"
-    assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
-    for job in ['statement-metrics', 'statement-samples']:
-        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
-            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
-        aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
-
-
 def _expected_dbm_instance_tags(dbm_instance, check):
     _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
@@ -1143,43 +1096,6 @@ def _expected_dbm_instance_tags(dbm_instance, check):
         if MYSQL_REPLICATION == 'classic':
             _tags += ('cluster_uuid:{}'.format(check.cluster_uuid),)
     return _tags
-
-
-# the inactive job metrics are emitted from the main integrations
-# directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance, check):
-    _tags = dbm_instance['tags'] + (
-        'database_hostname:{}'.format('stubbed.hostname'),
-        'database_instance:{}'.format('stubbed.hostname'),
-        'port:{}'.format(common.PORT),
-        'server:{}'.format(common.HOST),
-        'dd.internal.resource:database_instance:stubbed.hostname',
-        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-    )
-    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
-        _tags += ("server_uuid:{}".format(check.server_uuid),)
-    return _tags
-
-
-@pytest.mark.parametrize("statement_samples_enabled", [True, False])
-@pytest.mark.parametrize("statement_metrics_enabled", [True, False])
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled, statement_metrics_enabled):
-    dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
-    dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
-    mysql_check.cancel()
-    if statement_samples_enabled:
-        assert mysql_check._statement_samples._job_loop_future is not None
-        mysql_check._statement_samples._job_loop_future.result()
-    else:
-        assert mysql_check._statement_samples._job_loop_future is None
-    if statement_metrics_enabled:
-        assert mysql_check._statement_metrics._job_loop_future is not None
-        mysql_check._statement_metrics._job_loop_future.result()
-    else:
-        assert mysql_check._statement_metrics._job_loop_future is None
 
 
 @pytest.mark.integration

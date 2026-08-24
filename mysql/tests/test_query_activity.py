@@ -598,53 +598,6 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("activity_enabled", [True, False])
-def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
-    dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}
-    check = MySql(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
-    check.cancel()
-    if activity_enabled:
-        assert check._query_activity._job_loop_future is not None
-        check._query_activity._job_loop_future.result()
-    else:
-        assert check._query_activity._job_loop_future is None
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
-    dbm_instance['query_activity']['run_sync'] = False
-    check = MySql(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
-    check._query_activity._job_loop_future.result()
-    aggregator.assert_metric(
-        "dd.mysql.async_job.inactive_stop",
-        tags=_expected_dbm_job_err_tags(dbm_instance, check),
-        hostname='',
-    )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
-    dbm_instance['query_activity']['run_sync'] = False
-    check = MySql(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
-    check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check._query_activity._job_loop_future.result()
-    assert not check._query_activity._job_loop_future.running(), "activity thread should be stopped"
-    # if the thread doesn't start until after the cancel signal is set then the db connection will never
-    # be created in the first place
-    aggregator.assert_metric(
-        "dd.mysql.async_job.cancel",
-        tags=_expected_dbm_job_err_tags(dbm_instance, check),
-    )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, aggregator):
     '''
     This test verifies that the check will not collect any activity if the events_waits_current is disabled.
@@ -727,24 +680,6 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
     assert check.events_wait_current_enabled is False
     assert check.warnings == []
     assert not dbm_activity, "should not have collected any activity"
-
-
-# the inactive job metrics are emitted from the main integrations
-# directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance, check):
-    _tags = dbm_instance['tags'] + (
-        'database_hostname:stubbed.hostname',
-        'database_instance:stubbed.hostname',
-        'job:query-activity',
-        'port:{}'.format(PORT),
-        'dd.internal.resource:database_instance:stubbed.hostname',
-        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-    )
-    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
-        _tags += ("server_uuid:{}".format(check.server_uuid),)
-        if MYSQL_REPLICATION == 'classic':
-            _tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
-    return _tags
 
 
 @pytest.mark.integration

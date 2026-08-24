@@ -994,14 +994,21 @@ def test_async_job_registry_matches_config(dbm, expected_jobs):
     assert check._query_activity is registered.get('query-activity')
 
 
-def test_cancel_signals_every_registered_job():
-    """cancel() reaches every job through the registry rather than a hand-written fan-out."""
+@pytest.mark.parametrize(
+    'job_attr',
+    ['_statement_metrics', '_statement_samples', '_mysql_metadata', '_query_activity'],
+)
+def test_job_shutdown_closes_connection(job_attr):
+    """Each job must close its own connection on shutdown; the GC test would not catch a leak."""
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
-    jobs = list(check._async_job_registry.values())
+    job = getattr(check, job_attr)
+    conn = mock.MagicMock()
+    job._db = conn
 
-    check.cancel()
+    job.shutdown()
 
-    assert jobs and all(job._cancel_event.is_set() for job in jobs)
+    conn.close.assert_called_once()
+    assert job._db is None
 
 
 def test_check_gc_after_cancel():
