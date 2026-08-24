@@ -279,7 +279,7 @@ class DatabasesData:
                     )
                 )
                 return
-            except Exception as e:
+            except pymysql.DatabaseError as e:
                 self._log.error(
                     "While executing fetch database data for database {}, the following exception occurred {}".format(
                         db_info['name'], e

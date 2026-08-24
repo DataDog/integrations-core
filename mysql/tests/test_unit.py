@@ -468,14 +468,16 @@ def test_get_tables_data_uses_parameterized_queries():
         assert query.count('%s') == len(table_list) + 1
 
 
-def test_exception_handling_by_do_for_dbs():
+def test_fetch_for_databases_continues_after_database_error():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
     with mock.patch(
         'datadog_checks.mysql.databases_data.DatabasesData._fetch_database_data',
-        side_effect=Exception("Can't connect to DB"),
-    ):
-        databases_data._fetch_for_databases([{"name": "my_db"}], "dummy_cursor")
+        side_effect=[pymysql.DatabaseError("Can't connect to DB"), None],
+    ) as fetch_database_data:
+        databases_data._fetch_for_databases([{"name": "first_db"}, {"name": "second_db"}], "dummy_cursor")
+
+    assert [call.args[2] for call in fetch_database_data.call_args_list] == ['first_db', 'second_db']
 
 
 def test_update_aurora_replication_role():

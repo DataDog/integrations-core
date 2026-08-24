@@ -73,7 +73,7 @@ def test_schema_collection_aborts_query_when_cancelled(dbm_instance):
     cursor = mock.MagicMock()
 
     with pytest.raises(Exception, match='cancelled'):
-        databases_data._cursor_run(cursor, 'SELECT 1')
+        databases_data._fetch_for_databases([{'name': 'db1'}, {'name': 'db2'}], cursor)
     cursor.execute.assert_not_called()
 
 
