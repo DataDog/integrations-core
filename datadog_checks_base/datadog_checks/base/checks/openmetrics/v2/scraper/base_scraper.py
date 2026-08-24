@@ -461,16 +461,20 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
-        # Negotiate only when Accept is absent or still seeded.
-        extra_headers = kwargs.get('extra_headers', {})
-        has_extra_accept = any(name.lower() == 'accept' for name in extra_headers)
-        if self.http.get_header('Accept') in (None, DEFAULT_ACCEPT) and not has_extra_accept:
+        # Per-request headers replace client headers, while extra_headers merge last.
+        explicit_headers = kwargs.get('headers')
+        extra_headers = kwargs.get('extra_headers')
+        has_explicit_accept = explicit_headers is not None and any(
+            name.lower() == 'accept' for name in explicit_headers
+        )
+        has_extra_accept = any(name.lower() == 'accept' for name in (extra_headers or {}))
+        can_negotiate_accept = explicit_headers is not None or self.http.get_header('Accept') in (None, DEFAULT_ACCEPT)
+        if can_negotiate_accept and not has_explicit_accept and not has_extra_accept:
             if self._use_latest_spec:
                 accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
             else:
                 accept_header = 'text/plain'
-            extra_headers['Accept'] = accept_header
-            kwargs['extra_headers'] = extra_headers
+            kwargs['extra_headers'] = {**(extra_headers or {}), 'Accept': accept_header}
         return self.http.get(self.endpoint, **kwargs)
 
     def set_dynamic_tags(self, *tags):
