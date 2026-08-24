@@ -409,7 +409,7 @@ class OpenMetricsScraper:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        # Opening and streaming failures both make the endpoint unreachable.
+        # A timeout at any phase means the endpoint is unreachable, same as a connection failure.
         except (HTTPClientConnectionError, HTTPClientTimeoutError):
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
