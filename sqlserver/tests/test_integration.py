@@ -267,13 +267,13 @@ def test_database_files_metrics_match_database_context(
         for database in databases:
             cursor.execute(f"USE [{database}]")
             cursor.execute(
-                "SELECT file_id, size * 8, FILEPROPERTY(name, 'SpaceUsed') * 8, state FROM sys.database_files"
+                "SELECT file_id, type, size * 8, FILEPROPERTY(name, 'SpaceUsed') * 8, state FROM sys.database_files"
             )
-            for file_id, size, space_used, state in cursor.fetchall():
+            for file_id, file_type, size, space_used, state in cursor.fetchall():
                 key = (database, file_id)
                 expected_values['size'][key] = size
                 expected_values['state'][key] = state
-                if database != 'tempdb':
+                if file_type == 0 and database != 'tempdb':
                     expected_values['space_used'][key] = space_used
 
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
