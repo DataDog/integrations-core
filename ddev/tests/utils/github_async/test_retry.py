@@ -10,12 +10,14 @@ effect. Rate-limit retries are a different layer, covered in `test_rate_limiting
 from __future__ import annotations
 
 import logging
+from dataclasses import FrozenInstanceError
 
 import httpx
 import pytest
 
 from ddev.utils.github_async import AsyncGitHubClient
 from ddev.utils.github_async.retry import (
+    DEFAULT_ATTEMPTS,
     MUTATION_RETRY,
     NO_RETRY,
     SAFE_RETRY,
@@ -278,6 +280,21 @@ def test_unless_removes_a_condition_the_policy_would_otherwise_retry() -> None:
 
     assert not policy.should_retry(_status_error(503))
     assert policy.should_retry(_status_error(502))
+
+
+def test_a_shared_default_cannot_be_retuned_in_place() -> None:
+    """The defaults are shared for the life of the process, so one caller must not retune them.
+
+    `SAFE_RETRY.attempts = 1` would otherwise disable retries for every client already holding it,
+    including ones on other tasks, which is a change nobody could trace back to its cause.
+    """
+    with pytest.raises(FrozenInstanceError):
+        SAFE_RETRY.attempts = 1  # type: ignore[misc]
+
+    assert SAFE_RETRY.attempts == DEFAULT_ATTEMPTS
+    # Tuning goes through replace, which leaves the shared default alone.
+    assert SAFE_RETRY.replace(attempts=1).attempts == 1
+    assert SAFE_RETRY.attempts == DEFAULT_ATTEMPTS
 
 
 @pytest.mark.parametrize(

@@ -94,36 +94,30 @@ def any_of(*predicates: RetryPredicate) -> RetryPredicate:
 # ---------------------------------------------------------------------------
 
 
+@dataclass(frozen=True, slots=True)
 class RetryPolicy:
     """What to retry, and how hard to try.
 
-    Treat instances as values: `replace`, `also_on` and `unless` return new policies rather than
-    mutating this one, which matters because the defaults below are shared.
+    Frozen because the defaults below are shared for the life of the process: tuning one in place would
+    change the behaviour of every client that took it. `replace`, `also_on` and `unless` return new
+    policies instead.
+
+    `timeout` bounds the whole ladder including backoff; None leaves `attempts` as the only stop.
     """
 
-    __slots__ = ("attempts", "should_retry", "timeout", "wait_initial", "wait_jitter", "wait_max")
+    should_retry: RetryPredicate = never
+    attempts: int = DEFAULT_ATTEMPTS
+    timeout: float | None = DEFAULT_TIMEOUT_SECONDS
+    wait_initial: float = DEFAULT_WAIT_INITIAL_SECONDS
+    wait_max: float = DEFAULT_WAIT_MAX_SECONDS
+    wait_jitter: float = DEFAULT_WAIT_JITTER_SECONDS
 
-    def __init__(
-        self,
-        should_retry: RetryPredicate = never,
-        attempts: int = DEFAULT_ATTEMPTS,
-        timeout: float | None = DEFAULT_TIMEOUT_SECONDS,
-        wait_initial: float = DEFAULT_WAIT_INITIAL_SECONDS,
-        wait_max: float = DEFAULT_WAIT_MAX_SECONDS,
-        wait_jitter: float = DEFAULT_WAIT_JITTER_SECONDS,
-    ) -> None:
-        """`timeout` bounds the whole ladder including backoff; None leaves `attempts` as the only stop."""
-        if attempts < 1:
-            raise ValueError(f"attempts must be at least 1, got {attempts}")
-        if timeout is not None and timeout <= 0:
+    def __post_init__(self) -> None:
+        if self.attempts < 1:
+            raise ValueError(f"attempts must be at least 1, got {self.attempts}")
+        if self.timeout is not None and self.timeout <= 0:
             # stamina reads timeout=0 as "no retries", a confusing way to spell attempts=1.
-            raise ValueError(f"timeout must be positive or None, got {timeout}")
-        self.should_retry = should_retry
-        self.attempts = attempts
-        self.timeout = timeout
-        self.wait_initial = wait_initial
-        self.wait_max = wait_max
-        self.wait_jitter = wait_jitter
+            raise ValueError(f"timeout must be positive or None, got {self.timeout}")
 
     def replace(
         self,
@@ -165,7 +159,7 @@ SAFE_RETRY = RetryPolicy(should_retry=any_of(on_transport_error, on_status(*RETR
 MUTATION_RETRY = RetryPolicy(should_retry=on_pre_send_transport_error, attempts=MUTATION_ATTEMPTS)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class RetryPolicies:
     """The defaults a client picks from, one per replay-safety class.
 
