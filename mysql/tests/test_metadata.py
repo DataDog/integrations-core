@@ -66,10 +66,10 @@ def normalize_values(actual_payload):
 
 @pytest.mark.unit
 def test_schema_collection_aborts_query_when_cancelled(dbm_instance):
-    """Schema collection is not a DBMAsyncJob; it must honor the metadata job's cancel event."""
+    """Schema collection is not a DBMAsyncJob; it must honor metadata job cancellation."""
     check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    check._mysql_metadata._cancel_event.set()
-    databases_data = DatabasesData(check._mysql_metadata, check, check._config)
+    check.mysql_metadata.cancel()
+    databases_data = DatabasesData(check.mysql_metadata, check, check._config)
     cursor = mock.MagicMock()
 
     with pytest.raises(Exception, match='cancelled'):
@@ -92,32 +92,33 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     assert len(event["metadata"]) > 0
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_metadata_collection_interval_and_enabled(dbm_instance):
-    dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
-    dbm_instance['collect_settings'] = {"enabled": False, "collection_interval": 100}
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'schemas_collection, collect_settings, expected_enabled, expected_interval',
+    [
+        ({"enabled": True, "collection_interval": 101}, {"enabled": False}, True, 101),
+        ({"enabled": False}, {"enabled": True, "collection_interval": 102}, True, 102),
+        (
+            {"enabled": True, "collection_interval": 101},
+            {"enabled": True, "collection_interval": 102},
+            True,
+            101,
+        ),
+        ({"enabled": False}, {"enabled": False}, False, None),
+    ],
+    ids=['schemas-only', 'settings-only', 'both', 'neither'],
+)
+def test_metadata_collection_interval_and_enabled(
+    dbm_instance, schemas_collection, collect_settings, expected_enabled, expected_interval
+):
+    dbm_instance['schemas_collection'] = schemas_collection
+    dbm_instance['collect_settings'] = collect_settings
 
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert mysql_check._mysql_metadata.enabled
-    assert mysql_check._mysql_metadata.collection_interval == 101
-    dbm_instance['schemas_collection'] = {"enabled": False, "collection_interval": 101}
-    dbm_instance['collect_settings'] = {"enabled": True, "collection_interval": 102}
+    metadata = MySql(common.CHECK_NAME, {}, instances=[dbm_instance]).mysql_metadata
 
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert mysql_check._mysql_metadata.enabled
-    assert mysql_check._mysql_metadata.collection_interval == 102
-
-    dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
-    dbm_instance['collect_settings'] = {"enabled": True, "collection_interval": 102}
-
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert mysql_check._mysql_metadata.enabled
-    assert mysql_check._mysql_metadata.collection_interval == 101
-    dbm_instance['schemas_collection'] = {"enabled": False}
-    dbm_instance['collect_settings'] = {"enabled": False}
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert not mysql_check._mysql_metadata.enabled
+    assert metadata.enabled is expected_enabled
+    if expected_interval is not None:
+        assert metadata.collection_interval == expected_interval
 
 
 @pytest.mark.integration

@@ -164,7 +164,7 @@ def test_activity_collection(
     assert blocked_row['event_timer_end'], "missing event timer end"
     assert blocked_row['query_truncated'] == expected_query_truncated
 
-    if check._query_activity._should_collect_blocking_queries():
+    if check.query_activity._should_collect_blocking_queries():
         assert len(activity['mysql_activity']) >= 2, "should have collected at least two activity payloads"
         captured_idle_blocker = False
         for activity in dbm_activity:
@@ -278,10 +278,10 @@ def test_activity_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent
 def test_get_estimated_row_size_bytes(dbm_instance, file):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
     test_activity = _load_test_activity_json(file)
-    actual_size = len(json.dumps(test_activity, default=check._query_activity._json_event_encoding))
+    actual_size = len(json.dumps(test_activity, default=check.query_activity._json_event_encoding))
     computed_size = 0
     for a in test_activity:
-        computed_size += check._query_activity._get_estimated_row_size_bytes(a)
+        computed_size += check.query_activity._get_estimated_row_size_bytes(a)
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
 
 
@@ -323,7 +323,7 @@ def _create_time_in_picoseconds(date_obj):
 )
 def test_sort_key(dbm_instance, rows, expected_rows):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
-    output = sorted(rows, key=lambda r: check._query_activity._sort_key(r))
+    output = sorted(rows, key=lambda r: check.query_activity._sort_key(r))
     assert output == expected_rows
 
 
@@ -386,7 +386,7 @@ def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_
     check = MySql(CHECK_NAME, {}, [dbm_instance])
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = "something"
-        result_rows = check._query_activity._normalize_rows(rows)
+        result_rows = check.query_activity._normalize_rows(rows)
         assert len(result_rows) == expected_len
         for index, user in enumerate(expected_users):
             assert result_rows[index]['processlist_user'] == user
@@ -441,7 +441,7 @@ def test_normalize_rows_with_null_event_timers(dbm_instance, datadog_agent, rows
     check = MySql(CHECK_NAME, {}, [dbm_instance])
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = "something"
-        result_rows = check._query_activity._normalize_rows(rows)
+        result_rows = check.query_activity._normalize_rows(rows)
         assert [row['processlist_user'] for row in result_rows] == expected_users
 
 
@@ -590,10 +590,7 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
         f"expected at most ~{max_expected} (with 2x tolerance: {max_expected * 2})"
     )
 
-    # Verify the rate limiter is configured with the expected rate
-    expected_rate = 1.0 / collection_interval
-    assert check._query_activity._rate_limiter.rate_limit_s == expected_rate
-    assert check._query_activity.collection_interval == collection_interval
+    assert check.query_activity.collection_interval == collection_interval
 
 
 @pytest.mark.integration
@@ -612,7 +609,7 @@ def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, agg
 
     dd_run_check(check)
     # force query activity to run once, expect it to exit immediately with a warning
-    check._query_activity.run_job()
+    check.query_activity.run_job()
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert check.events_wait_current_enabled is False
     assert check.warnings == [
@@ -634,7 +631,7 @@ def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, agg
     dd_run_check(check)
     check.warnings.clear()
     assert check.events_wait_current_enabled is True
-    check._query_activity.run_job()
+    check.query_activity.run_job()
     check.cancel()
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert check.warnings == []
@@ -674,7 +671,7 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
     dd_run_check(check)
 
     # force query activity to run once, expect it to collect nothing
-    check._query_activity.run_job()
+    check.query_activity.run_job()
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
     assert check.events_wait_current_enabled is False

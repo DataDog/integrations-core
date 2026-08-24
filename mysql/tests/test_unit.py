@@ -988,15 +988,15 @@ def test_async_job_registry_matches_config(dbm, expected_jobs):
     registered = check._async_job_registry
     assert list(registered) == expected_jobs
     # Each attribute holds the registered job, or None when the config does not enable it.
-    assert check._statement_metrics is registered.get('statement-metrics')
-    assert check._statement_samples is registered.get('statement-samples')
-    assert check._mysql_metadata is registered.get('database-metadata')
-    assert check._query_activity is registered.get('query-activity')
+    assert check.statement_metrics is registered.get('statement-metrics')
+    assert check.statement_samples is registered.get('statement-samples')
+    assert check.mysql_metadata is registered.get('database-metadata')
+    assert check.query_activity is registered.get('query-activity')
 
 
 @pytest.mark.parametrize(
     'job_attr',
-    ['_statement_metrics', '_statement_samples', '_mysql_metadata', '_query_activity'],
+    ['statement_metrics', 'statement_samples', 'mysql_metadata', 'query_activity'],
 )
 def test_job_shutdown_closes_connection(job_attr):
     """Each job must close its own connection on shutdown; the GC test would not catch a leak."""
@@ -1014,17 +1014,17 @@ def test_job_shutdown_closes_connection(job_attr):
 @pytest.mark.parametrize(
     'job_attr, invoke',
     [
-        ('_statement_samples', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
-        ('_mysql_metadata', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
-        ('_statement_metrics', lambda job, cursor: job._get_statement_count([])),
-        ('_query_activity', lambda job, cursor: job._get_activity(cursor)),
+        ('statement_samples', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('mysql_metadata', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('statement_metrics', lambda job, cursor: job._get_statement_count([])),
+        ('query_activity', lambda job, cursor: job._get_activity(cursor)),
     ],
 )
 def test_job_aborts_query_when_cancelled(job_attr, invoke):
-    """A set cancel event must stop collection queries before they hit the database."""
+    """Cancelling a job must stop collection queries before they hit the database."""
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
     job = getattr(check, job_attr)
-    job._cancel_event.set()
+    job.cancel()
     job._get_db_connection = mock.MagicMock()
     cursor = mock.MagicMock()
 

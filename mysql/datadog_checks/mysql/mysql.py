@@ -150,10 +150,10 @@ class MySql(DatabaseCheck):
         )
 
         # Jobs stay None unless the configuration enables DBM.
-        self._statement_metrics = None
-        self._statement_samples = None
-        self._mysql_metadata = None
-        self._query_activity = None
+        self.statement_metrics = None
+        self.statement_samples = None
+        self.mysql_metadata = None
+        self.query_activity = None
         self._register_async_jobs()
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -182,16 +182,16 @@ class MySql(DatabaseCheck):
             return
 
         # Pass function reference and managed auth flag to async jobs
-        self._statement_metrics = self.register_async_job(
+        self.statement_metrics = self.register_async_job(
             MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         )
-        self._statement_samples = self.register_async_job(
+        self.statement_samples = self.register_async_job(
             MySQLStatementSamples(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         )
-        self._mysql_metadata = self.register_async_job(
+        self.mysql_metadata = self.register_async_job(
             MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         )
-        self._query_activity = self.register_async_job(
+        self.query_activity = self.register_async_job(
             MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         )
 
