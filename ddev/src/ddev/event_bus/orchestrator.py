@@ -91,13 +91,15 @@ class BaseProcessor[T: BaseMessage]:
         A ``SyncProcessor`` runs in an executor thread, and ``asyncio.Queue`` is not thread-safe: a
         put landing between ``get``'s ``empty()`` check and its waiter being registered wakes nobody,
         leaving the bus spinning on a message it never reads. Such a put is handed to the loop
-        thread instead. A caller already on that thread, or with no bus running, puts directly, so
-        the message is queued by the time this returns.
+        thread instead. A caller already on that thread, or with no live loop to hand it to, puts
+        directly, so the message is queued by the time this returns.
         """
         if self.queue is None:
             raise ProcessorQueueError("This processor has not been added to an active event bus")
 
-        if self.loop is None or running_loop() is self.loop:
+        # ``asyncio.run`` closes the loop when the bus stops, and a stopped bus is queued into
+        # directly, as it was before there was a loop to hop onto.
+        if self.loop is None or self.loop.is_closed() or running_loop() is self.loop:
             self.queue.put_nowait(message)
             return
 
@@ -181,6 +183,10 @@ class EventBusOrchestrator(ABC):
     def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
         """Registers a processor to receive specific message types."""
         processor.queue = self._queue
+        # Registering while the bus runs — from `on_initialize`, say — still needs the loop, or a
+        # `SyncProcessor` added that way submits unsafely from its executor thread.
+        if self._running:
+            processor.loop = asyncio.get_running_loop()
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
 

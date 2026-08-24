@@ -745,23 +745,30 @@ def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secreta
     assert secretary.delivered_memos[0].id == "async_memo"
 
 
-def test_sync_processor_submits_on_the_loop_thread(analyst: Analyst):
-    """A sync processor's submission must reach the queue on the loop thread.
+def test_a_worker_thread_submission_is_delivered(analyst: Analyst):
+    """A `SyncProcessor` runs in an executor thread, and what it submits must still be delivered.
 
-    `asyncio.Queue` is not thread-safe. A put from an executor thread that lands between `get`'s
-    `empty()` check and its waiter being registered wakes nobody, so the message is never read and
-    the bus spins until `max_timeout` — with the results of whatever produced it lost. The window is
-    a few bytecodes wide, so this asserts the invariant that closes it rather than trying to lose the
-    race on demand.
+    `asyncio.Queue` is not thread-safe: a put from another thread landing between `get`'s `empty()`
+    check and its waiter being registered wakes nobody, so the message is never read and the bus
+    spins until `max_timeout` with the results of whatever produced it lost.
+
+    That window is a few bytecodes wide and cannot be forced without reimplementing `Queue.get`, so
+    the queue below stands in for it: it loses every off-loop put rather than the unlucky ones. That
+    is stricter than the real queue on purpose — it turns "delivery depends on winning a race" into a
+    deterministic failure, and leaves the assertion on the contract that matters, which is that the
+    message arrives at all.
     """
 
-    class RecordingQueue(asyncio.Queue):
-        def __init__(self):
+    class LoseOffLoopPuts(asyncio.Queue):
+        """Drops a put made anywhere but the loop thread, the worst case of the real race."""
+
+        def __init__(self, loop_thread: int):
             super().__init__()
-            self.put_threads: list[int] = []
+            self._loop_thread = loop_thread
 
         def put_nowait(self, item):
-            self.put_threads.append(threading.get_ident())
+            if threading.get_ident() != self._loop_thread:
+                return
             super().put_nowait(item)
 
     class Delegator(SyncProcessor[Memo]):
@@ -769,22 +776,18 @@ def test_sync_processor_submits_on_the_loop_thread(analyst: Analyst):
             self.submit_message(Announcement(id="delegated", announcement_type="FromWorkerThread"))
 
     logger = logging.getLogger("test_thread_safe_submit")
-    orchestrator = MockOrchestrator(logger, max_timeout=10, grace_period=0.1)
-    queue = RecordingQueue()
-    # Replaced before registration, which is what hands the queue to each processor.
-    orchestrator._queue = queue
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0.1)
+    # `asyncio.run` runs the loop on the calling thread. Replaced before registration, which is what
+    # hands the queue to each processor.
+    orchestrator._queue = LoseOffLoopPuts(threading.get_ident())
     orchestrator.register_processor(Delegator("delegator"), [Memo])
     orchestrator.register_processor(analyst, [Announcement])
 
     orchestrator.submit_message(Memo("delegate_me"))
 
-    with assert_time(0, 5.0):
-        orchestrator.run()
+    orchestrator.run()
 
-    # The chain completed rather than stalling on a message nobody woke up for.
     assert [message.id for message in analyst.completed_tasks] == ["delegated"]
-    # Every put landed on the loop thread, which `asyncio.run` runs on the calling thread.
-    assert set(queue.put_threads) == {threading.get_ident()}
 
 
 def test_processor_submit_without_bus():
