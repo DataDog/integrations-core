@@ -17,6 +17,10 @@ from utils import iter_wheels
 
 
 MACOS_DDTRACE_LIBDDWAF_PATTERN = 'ddtrace/appsec/_ddwaf/libddwaf/*/lib/libddwaf.dylib'
+# Deliberately broader than the pattern we strip with. The narrow pattern encodes the layout
+# ddtrace ships today; this one encodes what we refuse to ship regardless of layout, so that a
+# relocation upstream fails the build instead of silently restoring the bundled dylib.
+MACOS_DDTRACE_LIBDDWAF_GUARD_PATTERN = '*libddwaf*.dylib'
 
 
 def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
@@ -270,7 +274,7 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
     for wheel in iter_wheels(source_external_dir):
         print(f'--> {wheel.name}')
         wheel_name = WheelName.parse(wheel.name)
-        if wheel_name.name == 'ddtrace' and find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN]):
+        if wheel_name.name == 'ddtrace' and find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_GUARD_PATTERN]):
             shutil.move(wheel, Path(source_built_dir) / wheel.name)
             continue
         print('Using existing wheel')
@@ -295,14 +299,29 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
             print('Removed bundled libddwaf from Agent ddtrace wheel:')
             print('\n'.join(removed_libddwaf))
 
+        if wheel_name.name == 'ddtrace':
+            # Runs for every ddtrace wheel, not just ones we stripped something from. A strip
+            # that matched nothing is the dangerous case: MACOS_DDTRACE_LIBDDWAF_PATTERN pins the
+            # layout ddtrace ships today, so moving the dylib (lib/ -> lib64/, dropping the
+            # version directory, versioning the filename) makes it match nothing and the wheel
+            # ships with the dylib intact. Nothing downstream catches that -- the Agent's macOS
+            # ABI gate allow-lists libddwaf.dylib by name -- so it has to fail here.
+            #
             # Verify on the stripped input rather than delocate's output: delocate renames the
             # output wheel to match the macOS version it scans off the binaries, so its final
             # name is not known here. It only ever copies libraries in, so an input that is
             # clean of libddwaf guarantees the output is too.
-            remaining_libddwaf = find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN])
-            stale_record_entries = _find_record_references(wheel, MACOS_DDTRACE_LIBDDWAF_PATTERN)
+            remaining_libddwaf = find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_GUARD_PATTERN])
+            stale_record_entries = _find_record_references(wheel, MACOS_DDTRACE_LIBDDWAF_GUARD_PATTERN)
             if remaining_libddwaf or stale_record_entries:
-                raise RuntimeError(f'Failed to remove bundled libddwaf from {wheel.name}')
+                found = sorted(set(remaining_libddwaf) | set(stale_record_entries))
+                raise RuntimeError(
+                    f'{wheel.name} still bundles libddwaf: {found}. If the strip pattern '
+                    f'({MACOS_DDTRACE_LIBDDWAF_PATTERN}) no longer matches the layout ddtrace '
+                    'ships, update it. Shipping the bundled dylib makes ddtrace report AppSec as '
+                    'available via os.path.exists() and then fail to dlopen it on the oldest '
+                    'macOS the Agent supports.'
+                )
 
         copied_libs = delocate_wheel(
             str(wheel),
