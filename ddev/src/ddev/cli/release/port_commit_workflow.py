@@ -1011,6 +1011,8 @@ def run_backport_from_pr(
         options=options,
     )
     _display_backport_summary(app, pr_number, results)
+    if not options.dry_run:
+        _comment_on_backport_failures(app, pr_number, results, options)
     return all(result.status is not BackportStatus.FAILED for result in results)
 
 
@@ -1106,3 +1108,89 @@ def _display_backport_summary(app: Application, pr_number: int, results: list[Ba
         ),
         stderr=True,
     )
+
+
+def _comment_on_backport_failures(
+    app: Application, pr_number: int, results: list[BackportResult], options: PortOptions
+) -> None:
+    """Post a best-effort comment on the source PR listing the bases that failed to backport.
+
+    Without it, a failure is only visible as a red workflow run. A comment failure is warned, not
+    raised, so it never masks the backport result it reports.
+    """
+    failures = [result for result in results if result.status is BackportStatus.FAILED]
+    if not failures:
+        return
+    token = app.config.github.token
+    if not token:
+        # Unreachable today: every caller reaches here via _resolve_pr, which aborts on a falsy token.
+        # Kept as insurance in case a future caller invokes this helper without that guarantee.
+        app.display_warning(f'No GitHub token configured; skipping backport-failure comment on PR #{pr_number}.')
+        return
+
+    owner, repo = resolve_owner_repo(app)
+    body = _build_backport_failure_comment(pr_number, failures, options)
+    try:
+        _post_issue_comment(token, owner, repo, pr_number, body)
+    except Exception as e:  # noqa: BLE001 - best-effort comment; never mask the backport result
+        app.display_warning(f'Could not post backport-failure comment on PR #{pr_number}: {e}')
+
+
+def _build_backport_failure_comment(pr_number: int, failures: list[BackportResult], options: PortOptions) -> str:
+    """Render the Markdown body: one bullet per failed base with a copy-paste retry command. Pure, no I/O."""
+    lines = [f'⚠️ Automatic backport of this PR failed for {len(failures)} target branch(es):', '']
+    for result in failures:
+        retry = _build_retry_command(pr_number, result.base, options)
+        lines.append(f'- `{result.base}` — retry manually with `{retry}`.')
+        # `detail` is often a multi-line cherry-pick-conflict listing; fence it so it doesn't collapse
+        # into the bullet and bury the retry command.
+        if result.detail:
+            lines.extend(['', '  ```', *(f'  {line}' for line in result.detail.splitlines()), '  ```', ''])
+    return '\n'.join(lines)
+
+
+def _build_retry_command(pr_number: int, base: str, options: PortOptions) -> str:
+    """Return a shell-safe `ddev release port-commit` that reproduces the failed run.
+
+    Echoes every behavior-affecting option (not just prefix/labels) so the retry lands on the same head
+    branch and runs the same hooks; `shlex.join` quotes user-controlled values so a hostile base can't
+    inject shell commands. `dry_run` is omitted — a retry should actually run.
+    """
+    import shlex
+
+    argv = [
+        'ddev',
+        'release',
+        'port-commit',
+        '--from-pr',
+        str(pr_number),
+        '--target-branch',
+        base,
+        '--branch-prefix',
+        options.branch_prefix,
+        '--pr-labels',
+        options.pr_labels,
+    ]
+    if options.branch_suffix is not None:
+        argv += ['--branch-suffix', options.branch_suffix]
+    if options.no_pr:
+        argv.append('--no-pr')
+    if options.draft:
+        argv.append('--draft')
+    if options.verify:
+        argv.append('--verify')
+    return shlex.join(argv)
+
+
+def _post_issue_comment(token: str, owner: str, repo: str, issue_number: int, body: str) -> None:
+    """Create a comment on the given issue or pull request."""
+    import asyncio
+
+    asyncio.run(_create_issue_comment(token, owner, repo, issue_number, body))
+
+
+async def _create_issue_comment(token: str, owner: str, repo: str, issue_number: int, body: str) -> None:
+    from ddev.utils.github_async import async_github_client
+
+    async with async_github_client(token=token) as client:
+        await client.create_issue_comment(owner=owner, repo=repo, issue_number=issue_number, body=body)

@@ -1,0 +1,1 @@
+Add the hosting type, the connection mode and the cluster node inventory to the ``database_instance`` metadata payload.

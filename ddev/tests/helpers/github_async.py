@@ -115,7 +115,11 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         'create_issue_comment': lambda: GitHubResponse(
-            data=IssueComment(id=DEFAULT_COMMENT_ID, body=''),
+            data=IssueComment(
+                id=DEFAULT_COMMENT_ID,
+                body='',
+                html_url='https://github.com/test/repo/issues/1#issuecomment-1',
+            ),
             headers={},
         ),
         'update_issue_comment': lambda: GitHubResponse(
