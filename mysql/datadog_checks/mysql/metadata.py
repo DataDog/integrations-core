@@ -132,6 +132,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)

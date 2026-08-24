@@ -336,6 +336,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             logged_query = obfuscated_query if obfuscated_query else query
             self._log.debug("Running query [%s] %s", logged_query, obfuscated_params if obfuscated_params else params)

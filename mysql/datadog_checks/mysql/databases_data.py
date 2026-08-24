@@ -146,6 +146,9 @@ class DatabasesData:
 
     def _cursor_run(self, cursor, query, params=None):
         """Run the query, log it, and emit a metric on database error."""
+        cancel_event = getattr(self._metadata, '_cancel_event', None)
+        if cancel_event is not None and cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         try:
             params_repr = "({} params)".format(len(params)) if isinstance(params, list) else params
             self._log.debug("Running query [{}] params={}".format(query, params_repr))

@@ -3,11 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from unittest import mock
 
 import pytest
 from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.databases_data import DatabasesData
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
@@ -60,6 +62,19 @@ def normalize_values(actual_payload):
                             subpartition["subpartition_expression"] = (
                                 subpartition["subpartition_expression"].replace("`", "").lower().strip()
                             )
+
+
+@pytest.mark.unit
+def test_schema_collection_aborts_query_when_cancelled(dbm_instance):
+    """Schema collection is not a DBMAsyncJob; it must honor the metadata job's cancel event."""
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    check._mysql_metadata._cancel_event.set()
+    databases_data = DatabasesData(check._mysql_metadata, check, check._config)
+    cursor = mock.MagicMock()
+
+    with pytest.raises(Exception, match='cancelled'):
+        databases_data._cursor_run(cursor, 'SELECT 1')
+    cursor.execute.assert_not_called()
 
 
 @pytest.mark.integration

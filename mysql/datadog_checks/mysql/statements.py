@@ -242,6 +242,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         return rows
 
     def _get_statement_count(self, tags):
+        self._raise_if_cancelled()
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             cursor.execute("SELECT count(*) AS count from performance_schema.events_statements_summary_by_digest")
 
@@ -349,6 +350,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 LIMIT 10000
                 """
 
+        self._raise_if_cancelled()
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             args = [self._last_seen] if only_query_recent_statements else None
             cursor.execute(sql_statement_summary, args)

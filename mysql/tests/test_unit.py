@@ -1011,6 +1011,30 @@ def test_job_shutdown_closes_connection(job_attr):
     assert job._db is None
 
 
+@pytest.mark.parametrize(
+    'job_attr, invoke',
+    [
+        ('_statement_samples', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('_mysql_metadata', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('_statement_metrics', lambda job, cursor: job._get_statement_count([])),
+        ('_query_activity', lambda job, cursor: job._get_activity(cursor)),
+    ],
+)
+def test_job_aborts_query_when_cancelled(job_attr, invoke):
+    """A set cancel event must stop collection queries before they hit the database."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+    job = getattr(check, job_attr)
+    job._cancel_event.set()
+    job._get_db_connection = mock.MagicMock()
+    cursor = mock.MagicMock()
+
+    with pytest.raises(Exception, match='cancelled'):
+        invoke(job, cursor)
+
+    job._get_db_connection.assert_not_called()
+    cursor.execute.assert_not_called()
+
+
 def test_check_gc_after_cancel():
     """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
 
