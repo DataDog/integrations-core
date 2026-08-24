@@ -5,11 +5,13 @@
 name: Build Placeholder PyPI Packages
 
 on:
-  workflow_dispatch:
   schedule:
     # At 3AM UTC
     # Running this every night strikes a good balance between claiming names fast without spamming PyPI with requests.
     - cron: "0 3 * * *"
+
+env:
+  PYTHON_VERSION: "3.13"
 
 defaults:
   run:
@@ -17,27 +19,83 @@ defaults:
 
 
 jobs:
-  python-artifacts:
-    name: Build wheel
+  find-new-integrations:
+    name: Find unclaimed PyPI packages
     runs-on: ubuntu-latest
 
-    environment: typo-squatting-release
+    permissions:
+      contents: read
+
+    outputs:
+      packages: ${{ steps.find.outputs.packages }}
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
-        python-version: 3.11
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: Find unclaimed packages
+      id: find
+      run: |
+        packages=()
+        shopt -s nullglob
+        for pyproject in */pyproject.toml; do
+          pkg=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/${pkg}/json")
+          if [ "$status" = "404" ]; then
+            packages+=("\"${pkg}\"")
+          elif [ "$status" != "200" ]; then
+            echo "PyPI returned unexpected HTTP status ${status} for package ${pkg}. Please re-run this job." >&2
+            exit 1
+          fi
+        done
+        echo "packages=[$(IFS=,; echo "${packages[*]}")]" >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Publish ${{ matrix.package }}
+    needs: find-new-integrations
+    if: needs.find-new-integrations.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+
+    environment: publish-pypi
+
+    permissions:
+      id-token: write
+
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.find-new-integrations.outputs.packages) }}
+
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Install Build Deps
       run: pip install -U build[virtualenv] hatchling
 
-    - name: Build Packages
+    - name: Build Package
+      env:
+        PACKAGE_NAME: ${{ matrix.package }}
       run: |
-        bash .github/workflows/scripts/build_placeholders.sh
+        mkdir -p dist pkg_placeholder
+        cat > pkg_placeholder/pyproject.toml << EOF
+        [build-system]
+        requires = ["hatchling"]
+        build-backend = "hatchling.build"
+        [project]
+        name = "${PACKAGE_NAME}"
+        version = "0.0.1"
+        [tool.hatch.build.targets.wheel]
+        bypass-selection = true
+        EOF
+        python -m build --no-isolation --wheel pkg_placeholder
+        mv pkg_placeholder/dist/* dist/
 
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
@@ -45,7 +103,4 @@ jobs:
         # We don't mind invalid metadata, we only want to claim the package name.
         verify-metadata: false
         verbose: true
-        # Only uploading the missing wheels makes this job idempotent and reduces its complexity.
         skip-existing: true
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN }}

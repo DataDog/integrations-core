@@ -223,7 +223,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         """Copy coverage and JUnit files into the output tree, prefixed by the job's
         target/environment/platform — the same fields that make ``BatchJob.artifact_name`` unique.
         """
-        prefix = f"{batch_job.target}-{batch_job.environment}-{batch_job.platform}"
+        prefix = batch_job.artifact_name()
 
         coverage_dir = self._output_base_path / "coverage"
         for index, coverage_file in enumerate(sorted(job_artifacts_path.rglob(COVERAGE_GLOB))):
@@ -234,7 +234,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         for junit_file in sorted(job_artifacts_path.rglob(JUNIT_GLOB)):
             self._copy(junit_file, test_results_dir / f"{prefix}-{junit_file.stem}.xml")
 
-    def _copy(self, source: Path, destination: Path) -> None:
+    def _copy(self, source: Path, destination: Path):
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
         self._logger.debug("Organized artifact %s -> %s", source, destination)

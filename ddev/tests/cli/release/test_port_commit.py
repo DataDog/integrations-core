@@ -464,7 +464,7 @@ def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_g
     pr_call = fake_async_github.last_call('create_pull_request')
     assert pr_call.kwargs['owner'] == 'DataDog'
     assert pr_call.kwargs['repo'] == 'integrations-core'
-    assert pr_call.kwargs['title'] == '[Backport] Fix bug'
+    assert pr_call.kwargs['title'] == '[Backport master] Fix bug'
     assert pr_call.kwargs['head'] == 'alice/port-1234567890-to-master'
     assert pr_call.kwargs['base'] == 'master'
     assert pr_call.kwargs['draft'] is False
@@ -792,7 +792,7 @@ def test_command_fetches_commit_when_not_local(
         'create_pull_request',
         owner='DataDog',
         repo='integrations-core',
-        title='[Backport] Fix bug',
+        title='[Backport master] Fix bug',
         head=f'alice/port-{commit_sha[:10]}-to-master',
         base='master',
         body=mocker.ANY,
@@ -1086,6 +1086,8 @@ def test_command_from_pr_ports_every_backport_label(
     assert bases == ['7.62.x', '7.61.x']
     heads = [c.kwargs['head'] for c in fake_async_github.calls_to('create_pull_request')]
     assert heads == ['alice/port-1234567890-to-7.62.x', 'alice/port-1234567890-to-7.61.x']
+    titles = [c.kwargs['title'] for c in fake_async_github.calls_to('create_pull_request')]
+    assert titles == ['[Backport 7.62.x] Fix bug', '[Backport 7.61.x] Fix bug']
 
 
 def test_command_from_pr_explicit_target_restricts_to_one_base(

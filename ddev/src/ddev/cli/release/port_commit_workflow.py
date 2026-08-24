@@ -740,7 +740,7 @@ def build_port_plan(
         target_branch=target_branch,
         new_branch=new_branch,
         worktree_path=_worktree_path_for(app, new_branch),
-        pr_title=f'[Backport] {clean_subject}',
+        pr_title=f'[Backport {target_branch}] {clean_subject}',
         pr_body=build_pr_body(
             app,
             sha=full_sha,
