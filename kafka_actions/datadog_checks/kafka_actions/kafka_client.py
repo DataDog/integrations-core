@@ -18,7 +18,6 @@ from confluent_kafka import (
 )
 from confluent_kafka.admin import (
     AdminClient,
-    AlterConfigOp,
     AlterConfigOpType,
     ConfigEntry,
     ConfigResource,
@@ -520,9 +519,12 @@ class KafkaActionsClient:
         admin = self.get_admin_client()
 
         resource = ConfigResource(ResourceType.TOPIC, topic)
-        ops = [AlterConfigOp(ConfigEntry(key, value), AlterConfigOpType.SET) for key, value in configs.items()]
+        for key, value in configs.items():
+            resource.add_incremental_config(
+                ConfigEntry(key, value, incremental_operation=AlterConfigOpType.SET)
+            )
 
-        futures = admin.incremental_alter_configs({resource: ops})
+        futures = admin.incremental_alter_configs([resource])
 
         for _res, future in futures.items():
             try:
@@ -549,9 +551,12 @@ class KafkaActionsClient:
         admin = self.get_admin_client()
 
         resource = ConfigResource(ResourceType.TOPIC, topic)
-        ops = [AlterConfigOp(ConfigEntry(key, None), AlterConfigOpType.DELETE) for key in config_keys]
+        for key in config_keys:
+            resource.add_incremental_config(
+                ConfigEntry(key, None, incremental_operation=AlterConfigOpType.DELETE)
+            )
 
-        futures = admin.incremental_alter_configs({resource: ops})
+        futures = admin.incremental_alter_configs([resource])
 
         for _res, future in futures.items():
             try:

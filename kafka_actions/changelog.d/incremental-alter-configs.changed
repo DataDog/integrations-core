@@ -1,1 +1,0 @@
-Switch ``update_topic_config`` and ``delete_topic_config`` from the deprecated ``alter_configs`` API to ``incremental_alter_configs``, providing PATCH semantics that only modify specified config keys instead of replacing the entire config set.
