@@ -1008,11 +1008,17 @@ def test_async_job_registry_matches_config(dbm, data_observability, expected_job
 
 @pytest.mark.parametrize(
     'job_attr',
-    ['statement_metrics', 'statement_samples', 'mysql_metadata', 'query_activity'],
+    ['statement_metrics', 'statement_samples', 'mysql_metadata', 'query_activity', 'data_observability'],
 )
 def test_job_shutdown_closes_connection(job_attr):
     """Each job must close its own connection on shutdown; the GC test would not catch a leak."""
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': True,
+        'data_observability': {'enabled': True},
+    }
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
     job = getattr(check, job_attr)
     conn = mock.MagicMock()
     job._db = conn
@@ -1069,6 +1075,7 @@ def test_check_gc_after_cancel():
         'query_metrics': {'enabled': True, 'run_sync': True, 'collection_interval': 10},
         'query_activity': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
         'collect_settings': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'data_observability': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
     }
 
     check = MySql(common.CHECK_NAME, {}, instances=[instance])

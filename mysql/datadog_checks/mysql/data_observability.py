@@ -83,6 +83,12 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         )
         self._queries, self._schedulers = self._filter_valid_queries(do_config.queries or ())
 
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        # A bound method of the check, so it pins the check even once _check is gone.
+        self._connection_args_provider = None
+
     def _close_db_conn(self) -> None:
         db = self._db
         self._db = None
