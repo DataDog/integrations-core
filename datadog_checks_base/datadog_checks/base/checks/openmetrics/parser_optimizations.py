@@ -17,6 +17,8 @@ https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parse
 https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/openmetrics/parser.py
 """
 
+from sys import intern as _intern
+
 import prometheus_client.parser as _prom_parser
 from prometheus_client.samples import Sample
 from prometheus_client.validation import METRIC_LABEL_NAME_RE
@@ -66,7 +68,7 @@ def _parse_labels(labels_string):
             # Replace escaping if needed
             if escaping:
                 label_value = _prom_parser._replace_escaping(label_value)
-            labels[label_name.strip()] = label_value
+            labels[_intern(label_name.strip())] = label_value
 
             # Remove the processed label from the sub-slice for next iteration
             sub_labels = sub_labels[quote_end + 1 :]
@@ -137,7 +139,7 @@ def _om_parse_labels_with_state_machine(text):
             if char == '\\':
                 state = 'labelvalueslash'
             elif char == '"':
-                ln = ''.join(labelname)
+                ln = _intern(''.join(labelname))
                 if not METRIC_LABEL_NAME_RE.match(ln):
                     raise ValueError("Invalid line, bad label name: " + text)
                 if ln in labels:
@@ -224,7 +226,7 @@ def _om_parse_labels(text):
                 raise ValueError("invalid line, bad label name: " + text)
             if label_name in labels:
                 raise ValueError("invalid line, duplicate label name: " + text)
-            labels[label_name] = label_value
+            labels[_intern(label_name)] = label_value
 
             # Remove the processed label from the sub-slice for next iteration
             sub_labels = sub_labels[quote_end + 1 :]
