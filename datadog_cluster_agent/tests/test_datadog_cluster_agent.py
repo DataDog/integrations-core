@@ -68,6 +68,8 @@ METRICS = [
     'go.goroutines',
     'go.memstats.alloc_bytes',
     'go.threads',
+    'instrumentation_controller.reconciliations',
+    'instrumentation_controller.resources',
     'kubernetes_apiserver.emitted_events',
     'kubernetes_apiserver.kube_events',
     'language_detection_dca_handler.processed_requests',
@@ -94,6 +96,16 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
     for metric in METRICS:
         aggregator.assert_metric(NAMESPACE + '.' + metric)
         aggregator.assert_metric_has_tag_prefix(NAMESPACE + '.' + metric, 'is_leader:')
+
+    aggregator.assert_metric(
+        NAMESPACE + '.instrumentation_controller.reconciliations',
+        tags=['is_leader:true', 'section:checks', 'status:success'],
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.instrumentation_controller.reconciliations',
+        tags=['is_leader:true', 'section:logs', 'status:error'],
+    )
+    aggregator.assert_metric(NAMESPACE + '.instrumentation_controller.resources', tags=['is_leader:true'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
