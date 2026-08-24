@@ -568,11 +568,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        # The audit vulnerability stream carries its own CVSS data under
-        # new_state.vulnerability.score, so build cve.cvss[] here too rather than
-        # only in the Detections sub-pipeline. cvss.version is a required
-        # attribute and Iru does not report it, so it is pinned to 3.1 to match
-        # the Detections sub-pipeline.
         - type: attribute-remapper
           name: Map `new_state.vulnerability.score.base` to `cvss_stage.base_score`
           enabled: true
@@ -939,7 +934,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        #`cvss.version` is required and not in the logs, hardcoding it
         - type: string-builder-processor
           name: Add CVSS version
           enabled: true
@@ -1028,19 +1022,6 @@ pipeline:
           template: "%{cve_id} identified in %{name}"
           target: ocsf.finding_info.title
           replaceMissing: false
-        # Synthesize a finding identifier. GET /api/v1/vulnerability-management/
-        # detections returns no per-detection id (no id, detection_id or uuid --
-        # confirmed against the vendor's published API collection), so there is
-        # no single field that can serve ocsf.finding_info.uid or
-        # ocsf.metadata.uid. The endpoint returns one row per
-        # (device, application, CVE) across the whole fleet, while the sibling
-        # /vulnerabilities endpoint is the CVE-grouped view -- so cve_id is the
-        # grouping key and repeats across every affected device, which makes it
-        # unusable as a unique finding id on its own. device_id + cve_id is the
-        # essential identity; bundle_id additionally separates the case where one
-        # CVE affects two applications on the same device. replaceMissing must
-        # stay true: with false a single absent field yields no uid at all, and
-        # finding_info.uid is a required attribute.
         - type: string-builder-processor
           name: Add finding uid
           enabled: true
@@ -1294,15 +1275,6 @@ pipeline:
           template: "%{new_state.parameter_name}"
           target: ocsf.finding_info.title
           replaceMissing: false
-        # `finding_info.uid` must identify the *finding*, not the event -- the
-        # event id belongs on `metadata.uid`. Iru exposes no per-finding id, so
-        # it is composed the same way as the 2002 Detections uid. A compliance
-        # finding is "this control on this device", so successive evaluations
-        # collapse onto one finding whose status updates over time.
-        # `target_id` is the device UUID on this shape. The two builders are
-        # mutually exclusive: `parameter_name` appears only on remediation events
-        # and `blueprint_name` only on first_runs, so with replaceMissing false
-        # exactly one fires per event.
         - type: string-builder-processor
           name: Add finding uid
           enabled: true
@@ -1333,8 +1305,6 @@ pipeline:
           template: "Compliance run for blueprint %{blueprint_name}"
           target: ocsf.finding_info.title
           replaceMissing: false
-        # A first_run is "the compliance state of this device against this
-        # blueprint", which recurs, so the blueprint is the stable discriminator.
         - type: string-builder-processor
           name: Add finding uid for blueprint compliance run
           enabled: true
@@ -1451,13 +1421,6 @@ pipeline:
                 name: ocsf.device.type
                 id: ocsf.device.type_id
               type: schema-category-mapper
-            # A remediation resolves the finding, so the activity is Close (3), not
-            # Update -- matching how 2002 treats `@action:remediate` and matching
-            # this class's own status_id, which already reports Resolved (4) for
-            # these events. The Create/Update branches exclude remediation
-            # explicitly so ascending id order can be preserved; a remediation
-            # arrives as `@action:update`, so without the exclusion it would match
-            # Update (2) first.
             - name: ocsf.activity_id
               categories:
                 - filter:
@@ -1610,9 +1573,6 @@ pipeline:
             target: malware_stage.classification_ids
             preserveSource: false
             type: append
-        # Keep these branches in the same order as the classification_ids
-        # processor above: the keyword filters overlap, so divergent ordering
-        # would pair id 17 with the caption "Trojan".
         - type: attribute-remapper
           name: Map `metadata.threat_family_name` to `malware_classification_str`
           enabled: true
@@ -1648,10 +1608,6 @@ pipeline:
             target: malware_stage.classifications
             preserveSource: false
             type: append
-        # `malware` is an array of Malware objects (dictionary is_array: true),
-        # so it is staged as an object and appended. Writing ocsf.malware.*
-        # directly produces a bare object, which the local validator does not
-        # currently catch because it no-ops array validation.
         - type: attribute-remapper
           name: Map `metadata.threat_family_name` to `malware_stage.name`
           enabled: true
@@ -1753,8 +1709,6 @@ pipeline:
           template: "true"
           target: ocsf.is_alert
           replaceMissing: false
-        # `initial_detection_date` uses an offset-with-colon (+00:00) rather than
-        # the `Z` form used by `occurred_at`, so it needs its own pattern.
         - type: grok-parser
           name: Parse `metadata.initial_detection_date` to `ocsf.finding_info.first_seen_time`
           enabled: true
@@ -1778,8 +1732,6 @@ pipeline:
               iso_z_f2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.finding_info.first_seen_time}
               iso_z_f1 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.finding_info.first_seen_time}
               iso_z_f0 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.finding_info.first_seen_time}
-        # `metadata.device.name` is the user-facing display name ("IT’s MacBook Air");
-        # `local_host_name` is the actual host name ("ITs-MacBook-Air-2").
         - type: attribute-remapper
           name: Map `metadata.local_host_name` to `ocsf.device.hostname`
           enabled: true
@@ -1850,12 +1802,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
               targetFormat: string
-            # `target_id` is `<host uuid>.<device>.<inode>`, so it identifies this
-            # file instance on this host and is unique per finding. Deliberately
-            # not `metadata.threat_id`: that value is the file's SHA256 (identical
-            # to new_state.file.hash.sha256), so it is shared by every device the
-            # same malware is found on. The hash stays on the malware[] entry's
-            # uid, which is where an identifier for the malware itself belongs.
             - type: schema-remapper
               name: Map `target_id` to `ocsf.finding_info.uid`
               sources:
@@ -2002,9 +1948,6 @@ pipeline:
                 name: ocsf.status
                 id: ocsf.status_id
               type: schema-category-mapper
-            # "Not Quarantined" tokenizes to include `quarantined`, so the
-            # Quarantined branch must exclude the negative phrase explicitly or
-            # every un-quarantined threat is misreported as quarantined.
             - name: ocsf.disposition_id
               categories:
                 - filter:
@@ -2419,11 +2362,6 @@ pipeline:
                   ocsf.actor.user.type:
                     - actor_type
               type: schema-category-mapper
-            # `Device` is a real managed_entity type_id (1). `library_item` and
-            # `blueprint` have no OCSF equivalent, so they take Other/99 and the
-            # fallback copies Iru's own `target_type` string into the name instead
-            # of inventing a caption -- OCSF requires `type` to be the caption of
-            # `type_id`, so pairing a made-up caption with 99 is invalid.
             - name: ocsf.entity.type_id
               categories:
                 - filter:
