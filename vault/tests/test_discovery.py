@@ -13,8 +13,8 @@ def generated_instances(service: Service) -> list[dict]:
     return [config['instances'][0] for config in Vault.generate_configs(service)]
 
 
-def test_generates_one_candidate_per_scheme() -> None:
-    # Only `no_token=True` candidates are generated. A candidate without `no_token` and without a
+def test_generates_one_http_candidate() -> None:
+    # Only a `no_token=True` candidate is generated. A candidate without `no_token` and without a
     # configured `client_token`/`client_token_path` never attempts a metrics scrape at all (see
     # `VaultCheckV2.metric_collection_enabled`), so it would only ever emit the
     # always-unauthenticated leader/health metrics and never the real metric set. Discovery
@@ -24,7 +24,9 @@ def test_generates_one_candidate_per_scheme() -> None:
     # to guarantee a real metrics scrape is `no_token=True`.
     #
     # Only the OpenMetrics mode (`use_openmetrics: true`) is generated; the legacy mode is not
-    # covered by discovery.
+    # covered by discovery. HTTPS is not covered either: the official Vault Helm chart disables
+    # TLS by default (`global.tlsDisable: true`), so plain HTTP is the common container listener,
+    # and an HTTPS candidate would need a trusted CA to ever succeed.
     service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
 
     instances = generated_instances(service)
@@ -33,7 +35,6 @@ def test_generates_one_candidate_per_scheme() -> None:
         (instance['api_url'], instance.get('use_openmetrics'), instance.get('no_token')) for instance in instances
     ] == [
         ('http://127.0.0.1:8200/v1', True, True),
-        ('https://127.0.0.1:8200/v1', True, True),
     ]
 
 
@@ -51,28 +52,6 @@ def test_all_candidates_enable_metric_collection() -> None:
     )
 
 
-def test_all_candidates_target_supported_api_url_schemes() -> None:
-    service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
-
-    instances = generated_instances(service)
-
-    assert [instance['api_url'] for instance in instances] == [
-        'http://127.0.0.1:8200/v1',
-        'https://127.0.0.1:8200/v1',
-    ]
-
-
-def test_https_candidates_preserve_tls_verification() -> None:
-    service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
-
-    https_instances = [
-        instance for instance in generated_instances(service) if instance['api_url'].startswith('https://')
-    ]
-
-    assert https_instances
-    assert all(instance.get('tls_verify') is True for instance in https_instances)
-
-
 def test_ipv6_host_is_bracketed_in_generated_api_url() -> None:
     service = Service(id='vault', host='fd00::1', ports=(Port(number=8200),))
 
@@ -80,5 +59,4 @@ def test_ipv6_host_is_bracketed_in_generated_api_url() -> None:
 
     assert [instance['api_url'] for instance in instances] == [
         'http://[fd00::1]:8200/v1',
-        'https://[fd00::1]:8200/v1',
     ]
