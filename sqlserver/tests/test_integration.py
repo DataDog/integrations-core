@@ -315,13 +315,14 @@ def test_database_files_metrics_with_connect_any_database(
 def test_database_files_size_uses_current_tempdb_size(aggregator, dd_run_check, instance_autodiscovery, sa_conn):
     table_name = 'datadog_database_files_growth'
     with sa_conn.cursor() as cursor:
-        cursor.execute("SELECT size FROM sys.master_files WHERE database_id = DB_ID('tempdb') AND file_id = 1")
-        initial_size = cursor.fetchone()[0]
+        cursor.execute("SELECT file_id, size FROM sys.master_files WHERE database_id = DB_ID('tempdb') AND type = 0")
+        configured_sizes = dict(cursor.fetchall())
         cursor.execute("USE [tempdb]")
-        cursor.execute("SELECT size FROM sys.database_files WHERE file_id = 1")
-        current_size = cursor.fetchone()[0]
+        cursor.execute("SELECT file_id, size, FILEPROPERTY(name, 'SpaceUsed') FROM sys.database_files WHERE type = 0")
+        current_files = cursor.fetchall()
 
-        if current_size <= initial_size:
+        if not any(size > configured_sizes[file_id] for file_id, size, _ in current_files):
+            free_pages = sum(size - space_used for _, size, space_used in current_files)
             cursor.execute(
                 f"""
                 USE [tempdb];
@@ -332,14 +333,15 @@ def test_database_files_size_uses_current_tempdb_size(aggregator, dd_run_check, 
                 FROM sys.all_objects AS objects_a
                 CROSS JOIN sys.all_objects AS objects_b;
                 """,
-                initial_size + 1024,
+                free_pages + 1024,
             )
 
         cursor.execute("USE [tempdb]")
-        cursor.execute("SELECT size * 8 FROM sys.database_files WHERE file_id = 1")
-        expected_size = cursor.fetchone()[0]
+        cursor.execute("SELECT file_id, size FROM sys.database_files WHERE type = 0")
+        current_sizes = dict(cursor.fetchall())
 
-    assert expected_size > initial_size * 8
+    grown_file_id = next(file_id for file_id, size in current_sizes.items() if size > configured_sizes[file_id])
+    expected_size = current_sizes[grown_file_id] * 8
 
     try:
         instance_autodiscovery['autodiscovery_include'] = ['tempdb']
@@ -349,7 +351,7 @@ def test_database_files_size_uses_current_tempdb_size(aggregator, dd_run_check, 
         actual_sizes = []
         for metric in aggregator.metrics('sqlserver.database.files.size'):
             tags = dict(tag.split(':', 1) for tag in metric.tags)
-            if tags.get('db') == 'tempdb' and tags.get('file_id') == '1':
+            if tags.get('db') == 'tempdb' and tags.get('file_id') == str(grown_file_id):
                 actual_sizes.append(metric.value)
 
         assert actual_sizes == [expected_size]
