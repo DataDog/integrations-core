@@ -1,10 +1,25 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 from .utils import get_check
+
+
+def test_check_adds_endpoint_context_to_root_http_client_errors(mocker):
+    check = get_check()
+    scraper = mocker.Mock(namespace='test')
+    scraper.scrape.side_effect = HTTPClientError('transport failed')
+    check.scrapers['test'] = scraper
+
+    with pytest.raises(HTTPClientError) as exc_info:
+        check.check(None)
+
+    assert str(exc_info.value) == 'There was an error scraping endpoint test: transport failed'
 
 
 def test_default_config(aggregator, dd_run_check, mock_http_response):
