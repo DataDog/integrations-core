@@ -41,7 +41,7 @@ deps = [
     "jellyfish==1.2.1",
     "lazy-loader==0.5",
     "prometheus-client==0.26.0",
-    "protobuf==7.35.1",
+    "protobuf==7.36.0",
     "pydantic==2.13.4",
     "python-dateutil==2.9.0.post0",
     "pywin32==312; sys_platform == 'win32'",
@@ -55,7 +55,7 @@ deps = [
 ]
 http = [
     "aws-requests-auth==0.4.3",
-    "botocore==1.43.67",
+    "botocore==1.43.78",
     "oauthlib==3.3.1",
     "pyjwt==2.13.0",
     "pyopenssl==26.4.0",
@@ -65,7 +65,7 @@ http = [
     "requests-oauthlib==2.0.0",
 ]
 json = [
-    "orjson==3.11.9",
+    "orjson==3.12.0",
 ]
 kube = [
     "kubernetes==35.0.0",
