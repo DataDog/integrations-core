@@ -746,17 +746,10 @@ def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secreta
 
 
 def test_a_worker_thread_submission_is_delivered(analyst: Analyst):
-    """A `SyncProcessor` runs in an executor thread, and what it submits must still be delivered.
+    """A `SyncProcessor` submits from an executor thread, where `asyncio.Queue` can lose the put.
 
-    `asyncio.Queue` is not thread-safe: a put from another thread landing between `get`'s `empty()`
-    check and its waiter being registered wakes nobody, so the message is never read and the bus
-    spins until `max_timeout` with the results of whatever produced it lost.
-
-    That window is a few bytecodes wide and cannot be forced without reimplementing `Queue.get`, so
-    the queue below stands in for it: it loses every off-loop put rather than the unlucky ones. That
-    is stricter than the real queue on purpose — it turns "delivery depends on winning a race" into a
-    deterministic failure, and leaves the assertion on the contract that matters, which is that the
-    message arrives at all.
+    The real queue loses only the unlucky ones; this one loses every off-loop put, so delivery fails
+    deterministically rather than by winning a race.
     """
 
     class LoseOffLoopPuts(asyncio.Queue):
@@ -777,8 +770,7 @@ def test_a_worker_thread_submission_is_delivered(analyst: Analyst):
 
     logger = logging.getLogger("test_thread_safe_submit")
     orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0.1)
-    # `asyncio.run` runs the loop on the calling thread. Replaced before registration, which is what
-    # hands the queue to each processor.
+    # `asyncio.run` runs the loop here, and registration is what hands the queue to each processor.
     orchestrator._queue = LoseOffLoopPuts(threading.get_ident())
     orchestrator.register_processor(Delegator("delegator"), [Memo])
     orchestrator.register_processor(analyst, [Announcement])
