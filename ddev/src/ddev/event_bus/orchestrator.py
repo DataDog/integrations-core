@@ -48,10 +48,20 @@ class BaseMessage:
     id: str
 
 
+def running_loop() -> asyncio.AbstractEventLoop | None:
+    """The loop running on this thread, or ``None`` outside one."""
+    try:
+        return asyncio.get_running_loop()
+    except RuntimeError:
+        return None
+
+
 class BaseProcessor[T: BaseMessage]:
     def __init__(self, name: str):
         self.name = name
         self.queue: asyncio.Queue[BaseMessage] | None = None
+        # Both set by the bus: the queue at registration, the loop when the bus starts.
+        self.loop: asyncio.AbstractEventLoop | None = None
 
     async def on_success(self, message: T) -> None:
         pass
@@ -76,9 +86,25 @@ class BaseProcessor[T: BaseMessage]:
         raise error
 
     def submit_message(self, message: BaseMessage) -> None:
+        """Put *message* on the bus, from any thread.
+
+        A ``SyncProcessor`` runs in an executor thread, and ``asyncio.Queue`` is not thread-safe: a
+        put landing between ``get``'s ``empty()`` check and its waiter being registered wakes nobody,
+        leaving the bus spinning on a message it never reads. Such a put is handed to the loop
+        thread instead. A caller already on that thread, or with no bus running, puts directly, so
+        the message is queued by the time this returns.
+        """
         if self.queue is None:
             raise ProcessorQueueError("This processor has not been added to an active event bus")
-        self.queue.put_nowait(message)
+
+        if self.loop is None or running_loop() is self.loop:
+            self.queue.put_nowait(message)
+            return
+
+        try:
+            self.loop.call_soon_threadsafe(self.queue.put_nowait, message)
+        except RuntimeError as error:
+            raise ProcessorQueueError("The event bus is no longer running") from error
 
     def should_process_message(self, message: BaseMessage) -> bool:
         return True
@@ -196,6 +222,12 @@ class EventBusOrchestrator(ABC):
         Initializes the orchestrator.
         """
         self._running = True
+        # The first point a running loop exists: processors are registered from __init__, on a
+        # thread that has none. Each one needs it to submit safely from an executor thread.
+        loop = asyncio.get_running_loop()
+        for processors in self._subscribers.values():
+            for processor in processors:
+                processor.loop = loop
         try:
             await self.on_initialize()
         except (FatalProcessingError, asyncio.CancelledError):

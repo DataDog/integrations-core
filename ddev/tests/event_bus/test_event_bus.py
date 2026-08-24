@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
+import threading
 import time
 from collections.abc import Generator
 from contextlib import AbstractContextManager, contextmanager, suppress
@@ -742,6 +743,48 @@ def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secreta
     # Verify async processor also ran
     assert len(secretary.delivered_memos) == 1
     assert secretary.delivered_memos[0].id == "async_memo"
+
+
+def test_sync_processor_submits_on_the_loop_thread(analyst: Analyst):
+    """A sync processor's submission must reach the queue on the loop thread.
+
+    `asyncio.Queue` is not thread-safe. A put from an executor thread that lands between `get`'s
+    `empty()` check and its waiter being registered wakes nobody, so the message is never read and
+    the bus spins until `max_timeout` — with the results of whatever produced it lost. The window is
+    a few bytecodes wide, so this asserts the invariant that closes it rather than trying to lose the
+    race on demand.
+    """
+
+    class RecordingQueue(asyncio.Queue):
+        def __init__(self):
+            super().__init__()
+            self.put_threads: list[int] = []
+
+        def put_nowait(self, item):
+            self.put_threads.append(threading.get_ident())
+            super().put_nowait(item)
+
+    class Delegator(SyncProcessor[Memo]):
+        def process_message(self, message: Memo):
+            self.submit_message(Announcement(id="delegated", announcement_type="FromWorkerThread"))
+
+    logger = logging.getLogger("test_thread_safe_submit")
+    orchestrator = MockOrchestrator(logger, max_timeout=10, grace_period=0.1)
+    queue = RecordingQueue()
+    # Replaced before registration, which is what hands the queue to each processor.
+    orchestrator._queue = queue
+    orchestrator.register_processor(Delegator("delegator"), [Memo])
+    orchestrator.register_processor(analyst, [Announcement])
+
+    orchestrator.submit_message(Memo("delegate_me"))
+
+    with assert_time(0, 5.0):
+        orchestrator.run()
+
+    # The chain completed rather than stalling on a message nobody woke up for.
+    assert [message.id for message in analyst.completed_tasks] == ["delegated"]
+    # Every put landed on the loop thread, which `asyncio.run` runs on the calling thread.
+    assert set(queue.put_threads) == {threading.get_ident()}
 
 
 def test_processor_submit_without_bus():
