@@ -116,6 +116,7 @@ class CollectSchemas(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_views: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     exclude_databases: Optional[tuple[str, ...]] = None
@@ -127,6 +128,7 @@ class CollectSchemas(BaseModel):
     max_columns: Optional[float] = None
     max_query_duration: Optional[float] = None
     max_tables: Optional[float] = None
+    max_views: Optional[float] = None
 
 
 class CollectSettings(BaseModel):

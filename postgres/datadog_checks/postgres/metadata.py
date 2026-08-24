@@ -13,6 +13,7 @@ from psycopg.rows import dict_row
 from .column_statistics import PostgresColumnStatisticsCollector
 from .schemas import PostgresSchemaCollector
 from .util import collection_interval_gcd
+from .views import PostgresViewCollector
 
 try:
     import datadog_agent  # type: ignore
@@ -121,6 +122,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
         self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
+        self._view_collector = PostgresViewCollector(check) if config.collect_schemas.enabled else None
         self._collect_column_statistics_enabled = config.collect_column_statistics.enabled and config.dbm
         self._column_statistics_collector = (
             PostgresColumnStatisticsCollector(check, self._cancel_event)
@@ -140,6 +142,7 @@ class PostgresMetadata(DBMAsyncJob):
     def shutdown(self) -> None:
         self._check = None
         self._schema_collector = None
+        self._view_collector = None
         self._column_statistics_collector = None
         self._compiled_patterns_cache = None
 
@@ -245,6 +248,8 @@ class PostgresMetadata(DBMAsyncJob):
         if not started:
             # TODO: Emit health event for over-long collection
             self._log.warning("Previous schema collection still in progress, skipping this collection")
+        if self._config.collect_schemas.collect_views is not False:
+            self._view_collector.collect_schemas()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):

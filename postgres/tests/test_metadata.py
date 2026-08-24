@@ -100,6 +100,42 @@ def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):
     assert normalize_object(snapshot) == normalize_object(schema_events[0]['metadata'])
 
 
+def test_collect_views(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {
+        'enabled': True,
+        'run_sync': True,
+        'include_databases': ['datadog_test'],
+        'include_schemas': ['^public2$'],
+    }
+    dbm_instance['dbname'] = 'datadog_test'
+    check = integration_check(dbm_instance)
+
+    run_one_check(check, dbm_instance)
+
+    view_events = [
+        event for event in aggregator.get_event_platform_events("dbm-metadata") if event['kind'] == 'pg_views'
+    ]
+    assert len(view_events) == 1
+    schemas = [database['schemas'][0] for event in view_events for database in event['metadata']]
+    assert all(schema['tables'] == [] for schema in schemas)
+    views = [view for schema in schemas for view in schema['views']]
+    views_by_name = {view['name']: view for view in views}
+
+    assert set(views_by_name) == {'active_persons', 'materialized_persons'}
+    assert views_by_name['active_persons']['relkind'] == 'v'
+    assert views_by_name['materialized_persons']['relkind'] == 'm'
+    for view in (views_by_name['active_persons'], views_by_name['materialized_persons']):
+        assert view['id'].isdigit()
+        assert view['owner'] == 'postgres'
+        assert view['definition']
+        assert [column['name'] for column in view['columns']] in [
+            ['personid', 'lastname', 'city'],
+            ['personid', 'firstname', 'city'],
+        ]
+        for column in view['columns']:
+            assert set(column) == {'data_type', 'default', 'name', 'nullable'}
+
+
 @pytest.mark.parametrize(
     "use_default_ignore_schemas_owned_by",
     [

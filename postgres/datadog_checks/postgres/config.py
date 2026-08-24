@@ -158,6 +158,8 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             },
             "collect_schemas": {
                 **dict_defaults.instance_collect_schemas().model_dump(),
+                "collect_views": True,
+                "max_views": 1000,
                 **(instance.get('collect_schemas', {})),
             },
             "collect_column_statistics": {
