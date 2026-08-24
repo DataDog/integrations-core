@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the TaskPullRequestUpdater processor.
+"""Tests for the TaskRunReporter processor.
 
 Mostly ordering and idempotence — create once, edit thereafter, reject anything stale — plus what a
 failed write does, which is to keep the report and never fail the run.
@@ -20,7 +20,7 @@ from ddev.cli.ci.tests.messages import UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import COMMENT_MARKER
 from ddev.cli.ci.tests.progress import JobAttemptProgress, JobProgress, ProgressError
 from ddev.cli.ci.tests.status import Status
-from ddev.cli.ci.tests.task_pull_request_updater import PullRequestUpdaterOptions, TaskPullRequestUpdater
+from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
@@ -56,10 +56,8 @@ def _failing_update(revision: int, *, done: bool = False) -> UpdatePRComment:
     return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=failing_progress(done=done))
 
 
-def _updater(client: FakeAsyncGitHubClient, *, pr_number: int | None = PR_NUMBER) -> TaskPullRequestUpdater:
-    return TaskPullRequestUpdater(
-        "pr-updater", client, PullRequestUpdaterOptions(owner=OWNER, repo=REPO, pr_number=pr_number)
-    )
+def _reporter(client: FakeAsyncGitHubClient, *, pr_number: int | None = PR_NUMBER) -> TaskRunReporter:
+    return TaskRunReporter("run-reporter", client, RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number))
 
 
 def _marked_comment(comment_id: int = 77, note: str = "ours") -> IssueComment:
@@ -106,11 +104,11 @@ def _auth_error(status_code: int) -> GitHubAuthenticationError:
 
 def test_first_revision_creates_the_comment_and_later_ones_edit_it():
     client = FakeAsyncGitHubClient()
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(0)))
-    asyncio.run(updater.process_message(_update(1)))
-    asyncio.run(updater.process_message(_update(2, done=True)))
+    asyncio.run(reporter.process_message(_update(0)))
+    asyncio.run(reporter.process_message(_update(1)))
+    asyncio.run(reporter.process_message(_update(2, done=True)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
     assert len(client.calls_to("update_issue_comment")) == 2
@@ -124,7 +122,7 @@ def test_first_revision_creates_the_comment_and_later_ones_edit_it():
 def test_created_body_carries_the_marker():
     client = FakeAsyncGitHubClient()
 
-    asyncio.run(_updater(client).process_message(_update(0)))
+    asyncio.run(_reporter(client).process_message(_update(0)))
 
     assert client.last_call("create_issue_comment").kwargs["body"].startswith(COMMENT_MARKER)
 
@@ -149,13 +147,13 @@ def test_the_comment_edited_is_the_one_the_marker_identifies(
     """A re-run must edit its previous comment rather than add a second one.
 
     Anchoring the marker at the start of the body is what rules out a quote, since a quote prefixes it
-    with "> ". ``expected_comment_id`` of ``None`` means the updater found nothing to adopt.
+    with "> ". ``expected_comment_id`` of ``None`` means the reporter found nothing to adopt.
     """
     client = FakeAsyncGitHubClient()
     # One page per comment, so the marker is reached by paginating rather than only on the first page.
     client.mock_response("list_issue_comments", [comment_page(comment) for comment in comments] or [comment_page()])
 
-    asyncio.run(_updater(client).process_message(_update(0)))
+    asyncio.run(_reporter(client).process_message(_update(0)))
 
     if expected_comment_id is None:
         assert len(client.calls_to("create_issue_comment")) == 1
@@ -178,21 +176,21 @@ def test_the_comment_edited_is_the_one_the_marker_identifies(
 def test_a_comment_we_cannot_edit_is_replaced_by_one_we_own(error: httpx.HTTPStatusError):
     """403 means the marker pointed at someone else's comment; 404 means it is gone.
 
-    Neither improves on retry, so the updater writes a comment it does own instead.
+    Neither improves on retry, so the reporter writes a comment it does own instead.
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("list_issue_comments", comment_page(_marked_comment(77, "not ours")))
     client.mock_response("update_issue_comment", error, once=True)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(1)))
+    asyncio.run(reporter.process_message(_update(1)))
 
     # First it tried to edit the comment it found, then it created its own.
     assert len(client.calls_to("update_issue_comment")) == 1
     assert len(client.calls_to("create_issue_comment")) == 1
 
     # And from then on it edits the comment it created, not the one it could not.
-    asyncio.run(updater.process_message(_update(2)))
+    asyncio.run(reporter.process_message(_update(2)))
     assert client.last_call("update_issue_comment").kwargs["comment_id"] == DEFAULT_COMMENT_ID
 
 
@@ -219,23 +217,23 @@ def test_neither_the_comment_nor_the_retained_report_goes_backwards(
     not rejected as stale.
     """
     client = FakeAsyncGitHubClient()
-    updater = _updater(client)
+    reporter = _reporter(client)
 
     for revision in revisions:
-        asyncio.run(updater.process_message(_update(revision)))
+        asyncio.run(reporter.process_message(_update(revision)))
 
     assert len(client.calls_to("update_issue_comment")) == expected_edits
     written = client.calls_to("create_issue_comment") + client.calls_to("update_issue_comment")
     assert jobs_reported(written[-1].kwargs["body"]) == expected_final
-    assert updater.latest_body is not None
-    assert jobs_reported(updater.latest_body) == expected_final
+    assert reporter.latest_body is not None
+    assert jobs_reported(reporter.latest_body) == expected_final
 
 
 def test_revision_zero_is_rendered():
     """Revision 0 is the initial plan, not a sentinel; it must not be treated as already-seen."""
     client = FakeAsyncGitHubClient()
 
-    asyncio.run(_updater(client).process_message(_update(0)))
+    asyncio.run(_reporter(client).process_message(_update(0)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
 
@@ -243,13 +241,13 @@ def test_revision_zero_is_rendered():
 def test_concurrent_revisions_are_serialized():
     """Two updates can be in flight at once, and the comment must not regress between them."""
     client = FakeAsyncGitHubClient()
-    updater = _updater(client)
+    reporter = _reporter(client)
 
     async def scenario():
         await asyncio.gather(
-            updater.process_message(_update(1)),
-            updater.process_message(_update(2)),
-            updater.process_message(_update(3)),
+            reporter.process_message(_update(1)),
+            reporter.process_message(_update(2)),
+            reporter.process_message(_update(3)),
         )
 
     asyncio.run(scenario())
@@ -271,7 +269,7 @@ def test_no_pr_number_renders_to_the_log_and_calls_no_api(caplog: pytest.LogCapt
     client = FakeAsyncGitHubClient()
 
     with caplog.at_level("INFO"):
-        asyncio.run(_updater(client, pr_number=None).process_message(_update(0, done=True)))
+        asyncio.run(_reporter(client, pr_number=None).process_message(_update(0, done=True)))
 
     client.assert_not_called("create_issue_comment")
     client.assert_not_called("update_issue_comment")
@@ -281,13 +279,13 @@ def test_no_pr_number_renders_to_the_log_and_calls_no_api(caplog: pytest.LogCapt
 
 def test_a_run_without_a_pull_request_still_retains_its_report():
     """There was no comment to fail, so the report is kept and nothing is marked as failed."""
-    updater = _updater(FakeAsyncGitHubClient(), pr_number=None)
+    reporter = _reporter(FakeAsyncGitHubClient(), pr_number=None)
 
-    asyncio.run(updater.process_message(_update(1, done=True)))
+    asyncio.run(reporter.process_message(_update(1, done=True)))
 
-    assert not updater.pr_comment_failed
-    assert updater.latest_body is not None
-    assert jobs_reported(updater.latest_body) == TOTAL_JOBS
+    assert not reporter.pr_comment_failed
+    assert reporter.latest_body is not None
+    assert jobs_reported(reporter.latest_body) == TOTAL_JOBS
 
 
 # ---------------------------------------------------------------------------
@@ -296,12 +294,12 @@ def test_a_run_without_a_pull_request_still_retains_its_report():
 
 
 def test_a_transient_failure_is_not_retried_here():
-    """Retrying is the GitHub client's job, so the updater makes exactly one call."""
+    """Retrying is the GitHub client's job, so the reporter makes exactly one call."""
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(500))
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(1)))
+    asyncio.run(reporter.process_message(_update(1)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
 
@@ -314,14 +312,14 @@ def test_a_create_that_failed_after_landing_does_not_produce_a_duplicate():
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(502), once=True)
-    # First lookup: nothing on the PR yet, so the updater creates. Every lookup after it: the comment
+    # First lookup: nothing on the PR yet, so the reporter creates. Every lookup after it: the comment
     # that first call really did create, despite reporting failure.
     client.mock_response("list_issue_comments", comment_page(), once=True)
     client.mock_response("list_issue_comments", comment_page(_marked_comment(555, "partial")))
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(1)))
-    asyncio.run(updater.process_message(_update(2)))
+    asyncio.run(reporter.process_message(_update(1)))
+    asyncio.run(reporter.process_message(_update(2)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
     assert client.last_call("update_issue_comment").kwargs["comment_id"] == 555
@@ -331,28 +329,28 @@ def test_a_lost_intermediate_revision_does_not_stop_the_next_one():
     """Losing an intermediate revision is survivable — the next snapshot supersedes it."""
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(500), once=True)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(1)))
-    assert updater.pr_comment_failed
+    asyncio.run(reporter.process_message(_update(1)))
+    assert reporter.pr_comment_failed
 
-    asyncio.run(updater.process_message(_update(2)))
+    asyncio.run(reporter.process_message(_update(2)))
 
     assert len(client.calls_to("create_issue_comment")) == 2
-    assert not updater.pr_comment_failed
+    assert not reporter.pr_comment_failed
 
 
 def test_a_failed_write_keeps_the_report_rather_than_losing_it():
     """The point of retaining the report: the results survive the surface that would not take them."""
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(500))
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(4, done=True)))
+    asyncio.run(reporter.process_message(_update(4, done=True)))
 
-    assert updater.pr_comment_failed
-    assert updater.latest_body is not None
-    assert jobs_reported(updater.latest_body) == TOTAL_JOBS
+    assert reporter.pr_comment_failed
+    assert reporter.latest_body is not None
+    assert jobs_reported(reporter.latest_body) == TOTAL_JOBS
 
 
 def test_a_rejected_token_is_reported_without_failing_the_run(caplog: pytest.LogCaptureFixture):
@@ -367,15 +365,15 @@ def test_a_rejected_token_is_reported_without_failing_the_run(caplog: pytest.Log
         response=httpx.Response(401),
     )
     client.mock_response("create_issue_comment", error)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
     with caplog.at_level("ERROR"):
-        asyncio.run(updater.process_message(_update(1)))
+        asyncio.run(reporter.process_message(_update(1)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
     assert "rejected the credentials" in caplog.text
-    assert updater.pr_comment_failed
-    assert updater.latest_body is not None
+    assert reporter.pr_comment_failed
+    assert reporter.latest_body is not None
 
 
 def test_a_rejected_token_is_not_mistaken_for_a_comment_we_do_not_own():
@@ -384,7 +382,7 @@ def test_a_rejected_token_is_not_mistaken_for_a_comment_we_do_not_own():
     client.mock_response("list_issue_comments", comment_page(_marked_comment()))
     client.mock_response("update_issue_comment", _auth_error(401))
 
-    asyncio.run(_updater(client).process_message(_update(1)))
+    asyncio.run(_reporter(client).process_message(_update(1)))
 
     assert len(client.calls_to("update_issue_comment")) == 1
     client.assert_not_called("create_issue_comment")
@@ -400,13 +398,13 @@ def test_a_token_refused_for_every_comment_gives_up_rather_than_looping():
     client.mock_response("list_issue_comments", comment_page(_marked_comment()))
     client.mock_response("update_issue_comment", _auth_error(403))
     client.mock_response("create_issue_comment", _auth_error(403))
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(1)))
+    asyncio.run(reporter.process_message(_update(1)))
 
     assert len(client.calls_to("update_issue_comment")) == 1
     assert len(client.calls_to("create_issue_comment")) == 1
-    assert updater.pr_comment_failed
+    assert reporter.pr_comment_failed
 
 
 # ---------------------------------------------------------------------------
@@ -418,9 +416,9 @@ def test_a_body_rejected_as_too_long_is_resent_without_detail():
     """422 is not transient: resending the same body would fail identically."""
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_failing_update(1)))
+    asyncio.run(reporter.process_message(_failing_update(1)))
 
     calls = client.calls_to("create_issue_comment")
     assert len(calls) == 2
@@ -435,7 +433,7 @@ def test_a_body_rejected_as_too_long_is_resent_without_detail():
     # And the passes revision 1 spent shrinking do not come out of revision 2's budget: it gets the
     # full ladder of its own rather than inheriting a spent one.
     client.mock_response("update_issue_comment", _too_long_error(), once=True)
-    asyncio.run(updater.process_message(_failing_update(2)))
+    asyncio.run(reporter.process_message(_failing_update(2)))
     assert len(client.calls_to("update_issue_comment")) == 2
 
 
@@ -443,13 +441,13 @@ def test_the_last_tier_rejected_again_stops_rather_than_looping():
     """Once the smallest tier is refused there is nothing left to drop, so the ladder ends."""
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error())
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_failing_update(1, done=True)))
+    asyncio.run(reporter.process_message(_failing_update(1, done=True)))
 
     # The full body, then the smallest tier. No third attempt, and no loop.
     assert len(client.calls_to("create_issue_comment")) == 2
-    assert updater.pr_comment_failed
+    assert reporter.pr_comment_failed
 
 
 def test_a_snapshot_with_nothing_to_drop_is_not_resent():
@@ -459,24 +457,24 @@ def test_a_snapshot_with_nothing_to_drop_is_not_resent():
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error())
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(1, done=True)))
+    asyncio.run(reporter.process_message(_update(1, done=True)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
-    assert updater.pr_comment_failed
+    assert reporter.pr_comment_failed
 
 
 def test_a_write_that_lands_on_a_smaller_tier_still_advances_the_revision():
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_failing_update(1)))
+    asyncio.run(reporter.process_message(_failing_update(1)))
 
     assert len(client.calls_to("create_issue_comment")) == 2
     # The revision advanced, so a repeat of it is rejected as stale rather than written again.
-    asyncio.run(updater.process_message(_failing_update(1)))
+    asyncio.run(reporter.process_message(_failing_update(1)))
     assert len(client.calls_to("create_issue_comment")) == 2
 
 
@@ -494,7 +492,7 @@ def test_a_smaller_tier_also_recovers_from_a_comment_it_cannot_edit(error: httpx
     client.mock_response("update_issue_comment", _too_long_error(), once=True)
     client.mock_response("update_issue_comment", error, once=True)
 
-    asyncio.run(_updater(client).process_message(_failing_update(1, done=True)))
+    asyncio.run(_reporter(client).process_message(_failing_update(1, done=True)))
 
     # The oversized edit, the minimal edit it refused, then a minimal comment of our own.
     assert len(client.calls_to("update_issue_comment")) == 2
@@ -510,15 +508,15 @@ def test_a_smaller_tier_refused_everywhere_is_bounded_and_still_reports():
     client.mock_response("update_issue_comment", _too_long_error(), once=True)
     client.mock_response("update_issue_comment", _http_error(404))
     client.mock_response("create_issue_comment", _http_error(404))
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_failing_update(1, done=True)))
+    asyncio.run(reporter.process_message(_failing_update(1, done=True)))
 
     # Bounded by MAX_WRITE_PASSES: the oversized edit, the minimal edit, the create that replaced it.
     assert len(client.calls_to("update_issue_comment")) == 2
     assert len(client.calls_to("create_issue_comment")) == 1
-    assert updater.pr_comment_failed
-    assert updater.latest_body is not None
+    assert reporter.pr_comment_failed
+    assert reporter.latest_body is not None
 
 
 # ---------------------------------------------------------------------------
@@ -528,17 +526,17 @@ def test_a_smaller_tier_refused_everywhere_is_bounded_and_still_reports():
 
 def test_the_newest_report_is_retained_for_the_caller():
     """The orchestrator publishes this on shutdown, so it must track the newest snapshot."""
-    updater = _updater(FakeAsyncGitHubClient())
-    assert updater.latest_body is None
+    reporter = _reporter(FakeAsyncGitHubClient())
+    assert reporter.latest_body is None
 
-    asyncio.run(updater.process_message(_update(1)))
-    first = updater.latest_body
-    asyncio.run(updater.process_message(_update(2)))
+    asyncio.run(reporter.process_message(_update(1)))
+    first = reporter.latest_body
+    asyncio.run(reporter.process_message(_update(2)))
 
     assert first is not None
-    assert updater.latest_body is not None
-    assert updater.latest_body != first
-    assert jobs_reported(updater.latest_body) == 2
+    assert reporter.latest_body is not None
+    assert reporter.latest_body != first
+    assert jobs_reported(reporter.latest_body) == 2
 
 
 def test_a_lost_write_does_not_hold_the_revision_back():
@@ -548,10 +546,10 @@ def test_a_lost_write_does_not_hold_the_revision_back():
     """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(500), once=True)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_update(3)))
-    asyncio.run(updater.process_message(_update(3)))
+    asyncio.run(reporter.process_message(_update(3)))
+    asyncio.run(reporter.process_message(_update(3)))
 
     # The second delivery of revision 3 is stale, not a fresh chance at a failed write.
     assert len(client.calls_to("create_issue_comment")) == 1
@@ -560,7 +558,7 @@ def test_a_lost_write_does_not_hold_the_revision_back():
 # ---------------------------------------------------------------------------
 # Reacting to a rejection that shrinking cannot fix
 #
-# Classifying a 422 is the client's job and is tested there. What belongs here is what the updater does
+# Classifying a 422 is the client's job and is tested there. What belongs here is what the reporter does
 # with the result: walk the ladder for a length problem, surface anything else.
 # ---------------------------------------------------------------------------
 
@@ -585,12 +583,12 @@ def test_a_lost_write_does_not_hold_the_revision_back():
 def test_a_rejection_shrinking_cannot_fix_is_not_answered_with_a_shorter_body(error: httpx.HTTPStatusError):
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", error)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_failing_update(1)))
+    asyncio.run(reporter.process_message(_failing_update(1)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
-    assert updater.pr_comment_failed
+    assert reporter.pr_comment_failed
 
 
 def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log(caplog: pytest.LogCaptureFixture):
@@ -598,7 +596,7 @@ def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log(caplog:
     client.mock_response("create_issue_comment", _spam_error())
 
     with caplog.at_level("ERROR"):
-        asyncio.run(_updater(client).process_message(_update(1)))
+        asyncio.run(_reporter(client).process_message(_update(1)))
 
     assert "PR comment write failed" in caplog.text
     assert "too long" not in caplog.text
@@ -638,7 +636,7 @@ def test_the_ladder_walks_all_three_tiers():
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
 
-    asyncio.run(_updater(client).process_message(_tiered_update(1, done=True)))
+    asyncio.run(_reporter(client).process_message(_tiered_update(1, done=True)))
 
     bodies = [call.kwargs["body"] for call in client.calls_to("create_issue_comment")]
     assert len(bodies) == 3
@@ -653,7 +651,7 @@ def test_the_ladder_walks_all_three_tiers():
     assert "<table>" in bodies[2]
 
 
-def test_a_too_long_body_never_escapes_the_updater():
+def test_a_too_long_body_never_escapes_the_reporter():
     """The client raises a ValueError subclass, which the HTTP handler would not catch.
 
     A pre-flight raise bypassing the fallback would turn graceful degradation into a failed run.
@@ -662,19 +660,19 @@ def test_a_too_long_body_never_escapes_the_updater():
     client.mock_response("create_issue_comment", _too_long_error())
 
     for done in (False, True):
-        asyncio.run(_updater(client).process_message(_tiered_update(1, done=done)))
+        asyncio.run(_reporter(client).process_message(_tiered_update(1, done=done)))
 
 
 def test_the_retained_report_is_the_full_one_even_when_a_smaller_tier_was_sent():
     """The run summary's own limit is 1 MiB, so the run page can keep the complete report."""
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(_tiered_update(1, done=True)))
+    asyncio.run(reporter.process_message(_tiered_update(1, done=True)))
 
-    assert updater.latest_body is not None
-    assert "test_number_0" in updater.latest_body
+    assert reporter.latest_body is not None
+    assert "test_number_0" in reporter.latest_body
 
 
 def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypatch):
@@ -707,10 +705,10 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
         return await original(owner, repo, issue_number, body, timeout)
 
     monkeypatch.setattr(client, "create_issue_comment", stricter_github)
-    updater = _updater(client)
+    reporter = _reporter(client)
 
-    asyncio.run(updater.process_message(message))
+    asyncio.run(reporter.process_message(message))
 
     # Full refused, compact refused, minimal accepted: the whole ladder, ending on a write.
     assert attempted == tiers
-    assert not updater.pr_comment_failed
+    assert not reporter.pr_comment_failed
