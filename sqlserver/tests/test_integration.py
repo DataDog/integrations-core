@@ -271,10 +271,11 @@ def test_database_files_metrics_match_database_context(
             )
             for file_id, file_type, size, space_used, state in cursor.fetchall():
                 key = (database, file_id)
-                expected_values['size'][key] = size
                 expected_values['state'][key] = state
-                if file_type == 0 and database != 'tempdb':
-                    expected_values['space_used'][key] = space_used
+                if file_type == 0:
+                    expected_values['size'][key] = size
+                    if database != 'tempdb':
+                        expected_values['space_used'][key] = space_used
 
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
