@@ -86,8 +86,8 @@ example to collect everything under a given Flink scope:
 
 Metrics collected this way are submitted under Flink's raw Prometheus metric
 name (for example `flink.flink_taskmanager_job_task_operator_messageLatency`)
-rather than a curated Datadog name, since a regular expression can match more
-than one metric and therefore can't be mapped to a single custom name.
+rather than a curated Datadog name. A regular expression can match more than
+one metric, so it cannot be mapped to a single custom name.
 
 If a custom metric's exposed type is wrong (for example, Flink reports one of
 your operator's counters as a `gauge`), force the correct type the same way:
