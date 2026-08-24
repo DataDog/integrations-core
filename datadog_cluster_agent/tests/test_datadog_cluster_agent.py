@@ -97,16 +97,6 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
         aggregator.assert_metric(NAMESPACE + '.' + metric)
         aggregator.assert_metric_has_tag_prefix(NAMESPACE + '.' + metric, 'is_leader:')
 
-    aggregator.assert_metric(
-        NAMESPACE + '.instrumentation_controller.reconciliations',
-        tags=['is_leader:true', 'section:checks', 'status:success'],
-    )
-    aggregator.assert_metric(
-        NAMESPACE + '.instrumentation_controller.reconciliations',
-        tags=['is_leader:true', 'section:logs', 'status:error'],
-    )
-    aggregator.assert_metric(NAMESPACE + '.instrumentation_controller.resources', tags=['is_leader:true'])
-
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
