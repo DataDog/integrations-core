@@ -315,33 +315,40 @@ def test_database_files_metrics_with_connect_any_database(
 def test_database_files_size_uses_current_tempdb_size(aggregator, dd_run_check, instance_autodiscovery, sa_conn):
     table_name = 'datadog_database_files_growth'
     with sa_conn.cursor() as cursor:
-        cursor.execute("SELECT file_id, size FROM sys.master_files WHERE database_id = DB_ID('tempdb') AND type = 0")
-        configured_sizes = dict(cursor.fetchall())
+        cursor.execute("SELECT size FROM sys.master_files WHERE database_id = DB_ID('tempdb') AND file_id = 2")
+        configured_size = cursor.fetchone()[0]
         cursor.execute("USE [tempdb]")
-        cursor.execute("SELECT file_id, size, FILEPROPERTY(name, 'SpaceUsed') FROM sys.database_files WHERE type = 0")
-        current_files = cursor.fetchall()
+        cursor.execute("SELECT size FROM sys.database_files WHERE file_id = 2")
+        current_size = cursor.fetchone()[0]
 
-        if not any(size > configured_sizes[file_id] for file_id, size, _ in current_files):
-            free_pages = sum(size - space_used for _, size, space_used in current_files)
+        if current_size <= configured_size:
+            cursor.execute("SELECT total_log_size_in_bytes - used_log_space_in_bytes FROM sys.dm_db_log_space_usage")
+            free_log_bytes = cursor.fetchone()[0]
             cursor.execute(
                 f"""
                 USE [tempdb];
                 DROP TABLE IF EXISTS dbo.{table_name};
                 CREATE TABLE dbo.{table_name} (payload char(8000) NOT NULL);
-                INSERT INTO dbo.{table_name}
-                SELECT TOP (?) REPLICATE('x', 8000)
-                FROM sys.all_objects AS objects_a
-                CROSS JOIN sys.all_objects AS objects_b;
+                INSERT INTO dbo.{table_name} VALUES (REPLICATE('x', 8000));
+
+                DECLARE @iterations int = ?;
+                BEGIN TRANSACTION;
+                WHILE @iterations > 0
+                BEGIN
+                    UPDATE dbo.{table_name}
+                    SET payload = REPLICATE(CHAR(120 + @iterations % 2), 8000);
+                    SET @iterations -= 1;
+                END;
+                ROLLBACK;
                 """,
-                free_pages + 1024,
+                free_log_bytes // 4000 + 1024,
             )
 
         cursor.execute("USE [tempdb]")
-        cursor.execute("SELECT file_id, size FROM sys.database_files WHERE type = 0")
-        current_sizes = dict(cursor.fetchall())
+        cursor.execute("SELECT size * 8 FROM sys.database_files WHERE file_id = 2")
+        expected_size = cursor.fetchone()[0]
 
-    grown_file_id = next(file_id for file_id, size in current_sizes.items() if size > configured_sizes[file_id])
-    expected_size = current_sizes[grown_file_id] * 8
+    assert expected_size > configured_size * 8
 
     try:
         instance_autodiscovery['autodiscovery_include'] = ['tempdb']
@@ -351,7 +358,7 @@ def test_database_files_size_uses_current_tempdb_size(aggregator, dd_run_check, 
         actual_sizes = []
         for metric in aggregator.metrics('sqlserver.database.files.size'):
             tags = dict(tag.split(':', 1) for tag in metric.tags)
-            if tags.get('db') == 'tempdb' and tags.get('file_id') == str(grown_file_id):
+            if tags.get('db') == 'tempdb' and tags.get('file_id') == '2':
                 actual_sizes.append(metric.value)
 
         assert actual_sizes == [expected_size]
