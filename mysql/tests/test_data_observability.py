@@ -651,12 +651,3 @@ def test_emit_failure_metric(instance_basic, aggregator, monkeypatch):
     assert len(failures) == 1
     assert 'exc_class:JSONDecodeError' in failures[0].tags
     assert 'monitor_id:1' in failures[0].tags
-
-
-def test_cancel_stops_data_observability_job(instance_basic):
-    check = _create_check(instance_basic)
-    check.data_observability.cancel = MagicMock()
-
-    check.cancel()
-
-    check.data_observability.cancel.assert_called_once_with()

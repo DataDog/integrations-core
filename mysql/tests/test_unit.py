@@ -970,20 +970,30 @@ class TestSupportsExplainJsonFormatVersion:
         assert supports_explain_json_format_version(None) is False
 
 
+DBM_JOBS = ['statement-metrics', 'statement-samples', 'query-activity', 'database-metadata']
+
+
 @pytest.mark.parametrize(
-    'dbm, expected_jobs',
+    'dbm, data_observability, expected_jobs',
     [
-        (False, []),
-        (True, ['statement-metrics', 'statement-samples', 'query-activity', 'database-metadata']),
+        pytest.param(False, False, [], id='neither'),
+        pytest.param(True, False, DBM_JOBS, id='dbm'),
+        pytest.param(False, True, ['database-metadata', 'data-observability'], id='data_observability'),
+        pytest.param(True, True, DBM_JOBS + ['data-observability'], id='both'),
     ],
 )
-def test_async_job_registry_matches_config(dbm, expected_jobs):
+def test_async_job_registry_matches_config(dbm, data_observability, expected_jobs):
     """Only the jobs enabled by the instance config are built and registered.
 
-    Every job requires DBM, and each job's own enabled flag defaults to true, so without the
-    DBM gate a non-DBM instance would start collecting.
+    Each job's own enabled flag defaults to true, so a registered job starts collecting. Data
+    Observability relies on the metadata job for schema collection, so either feature registers it.
     """
-    instance = {'server': 'localhost', 'user': 'datadog', 'dbm': dbm}
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': dbm,
+        'data_observability': {'enabled': data_observability},
+    }
 
     check = MySql(common.CHECK_NAME, {}, instances=[instance])
 
@@ -993,6 +1003,7 @@ def test_async_job_registry_matches_config(dbm, expected_jobs):
     assert check.statement_samples is registered.get('statement-samples')
     assert check.mysql_metadata is registered.get('database-metadata')
     assert check.query_activity is registered.get('query-activity')
+    assert check.data_observability is registered.get('data-observability')
 
 
 @pytest.mark.parametrize(
