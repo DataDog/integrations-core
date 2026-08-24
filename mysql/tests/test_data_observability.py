@@ -16,6 +16,7 @@ import pytest
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.data_observability import EVENT_TRACK_TYPE, MAX_RESULT_ROWS
+from datadog_checks.mysql.version_utils import MySQLVersion
 
 from . import common
 
@@ -92,6 +93,8 @@ def _create_check(instance_basic, queries=None, config_id='test-config-123'):
     instance = _make_do_instance(instance_basic, queries=queries, config_id=config_id)
     check = MySql(common.CHECK_NAME, {}, [instance])
     check._resolved_hostname = 'mysql.test'
+    check.version = MySQLVersion('8.0.0', 'MySQL', '')
+    check.is_mariadb = False
     return check
 
 
@@ -306,6 +309,21 @@ def test_query_timeout_is_applied_and_restored(
         call(f'SELECT @@SESSION.{variable}'),
         call(f'SET SESSION {variable} = %s', (configured_timeout,)),
         call(f'SET SESSION {variable} = %s', (previous_timeout,)),
+    ]
+
+
+def test_mysql_56_executes_query_without_unsupported_session_timeout(instance_basic):
+    mock_conn, cursor = _make_mock_conn()
+    check = _create_check(instance_basic)
+    check.version = MySQLVersion('5.6.51', 'MySQL', '')
+    check._data_observability._db = mock_conn
+
+    check._data_observability.run_job()
+
+    mock_conn.timeout_cursor.execute.assert_not_called()
+    assert [call.args[0] for call in cursor.execute.call_args_list] == [
+        'USE `test_db`',
+        BASE_QUERY['query'],
     ]
 
 

@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import json
 import re
 import time
-from collections.abc import Callable, Iterable, Mapping
-from contextlib import closing
+from collections.abc import Callable, Iterable, Iterator, Mapping
+from contextlib import closing, contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -15,6 +14,7 @@ import pymysql
 
 from datadog_checks.base.utils.cron import CronScheduler
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.serialization import json
 
 from .util import ManagedAuthConnectionMixin
 
@@ -148,6 +148,25 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             )
         return dbname
 
+    @contextmanager
+    def _query_timeout(self, conn: Any, query_timeout_ms: int) -> Iterator[None]:
+        if not self._check.is_mariadb and not self._check.version.version_compatible((5, 7, 4)):
+            # MySQL added max_execution_time in 5.7.4. Older supported servers
+            # must still execute the monitor query without attempting to use it.
+            yield
+            return
+
+        timeout_variable = "max_statement_time" if self._check.is_mariadb else "max_execution_time"
+        timeout_value = query_timeout_ms / 1000 if self._check.is_mariadb else query_timeout_ms
+        with closing(conn.cursor()) as cursor:
+            cursor.execute(f"SELECT @@SESSION.{timeout_variable}")
+            previous_timeout = cursor.fetchone()[0]
+            cursor.execute(f"SET SESSION {timeout_variable} = %s", (timeout_value,))
+            try:
+                yield
+            finally:
+                cursor.execute(f"SET SESSION {timeout_variable} = %s", (previous_timeout,))
+
     def _execute_single_query(self, conn: Any, query_spec: Query) -> dict[str, Any]:
         dbname = self._validate_dbname(query_spec.dbname)
         monitor_id = query_spec.monitor_id
@@ -155,27 +174,19 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
-            timeout_variable = "max_statement_time" if self._check.is_mariadb else "max_execution_time"
-            timeout_value = query_spec.query_timeout / 1000 if self._check.is_mariadb else query_spec.query_timeout
-            with closing(conn.cursor()) as timeout_cursor:
-                timeout_cursor.execute(f"SELECT @@SESSION.{timeout_variable}")
-                previous_timeout = timeout_cursor.fetchone()[0]
-                timeout_cursor.execute(f"SET SESSION {timeout_variable} = %s", (timeout_value,))
-                try:
-                    # SSCursor reads rows as fetchmany() requests them instead of buffering the
-                    # full result in execute(). Closing it drains unread rows before the shared
-                    # connection is reused for another query.
-                    with closing(conn.cursor(pymysql.cursors.SSCursor)) as cursor:
-                        cursor.execute(f"USE `{dbname}`")
-                        cursor.execute(query_spec.query)
-                        if cursor.description is None:
-                            raise pymysql.err.ProgrammingError(
-                                "Query returned no result set — only SELECT statements are supported"
-                            )
-                        columns = [description[0] for description in cursor.description]
-                        rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
-                finally:
-                    timeout_cursor.execute(f"SET SESSION {timeout_variable} = %s", (previous_timeout,))
+            with self._query_timeout(conn, query_spec.query_timeout):
+                # SSCursor reads rows as fetchmany() requests them instead of buffering the
+                # full result in execute(). Closing it drains unread rows before the shared
+                # connection is reused for another query.
+                with closing(conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+                    cursor.execute(f"USE `{dbname}`")
+                    cursor.execute(query_spec.query)
+                    if cursor.description is None:
+                        raise pymysql.err.ProgrammingError(
+                            "Query returned no result set — only SELECT statements are supported"
+                        )
+                    columns = [description[0] for description in cursor.description]
+                    rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
             duration = time.time() - start
             return {
                 'status': 'success',
