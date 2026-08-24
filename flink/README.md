@@ -60,10 +60,10 @@ No additional installation is needed on your server.
 
 3. Restart Flink and the Agent.
 
-Flink jobs can register their own [custom/user metrics][16] (for example, an
+Flink jobs can register their own [custom metrics][16] (for example, an
 operator-scoped counter your operator code emits). By default, this
-integration only collects the metrics documented in [metadata.csv][11] --
-job-specific custom metrics are not collected out of the box. Collect them
+integration collects only the metrics documented in [metadata.csv][11], so
+job-specific custom metrics are not collected. Collect them
 with the `extra_metrics` option, mapping the exact raw Prometheus metric name
 Flink exposes to the Datadog metric name you want:
 
