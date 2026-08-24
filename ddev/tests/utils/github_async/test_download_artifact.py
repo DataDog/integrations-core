@@ -158,8 +158,8 @@ async def test_a_denial_from_github_itself_is_not_retried_as_an_expired_url(tmp_
 # A signed URL keeps its signature in the query string. Both cases below assume the worst about what
 # a failure quotes: a status whose httpx message is built from the full URL, and a transport error
 # whose message happens to contain it. Neither is ours to control, so neither is relied upon.
-SIGNATURE = "X-Amz-Signature=b1acc0dedb1acc0de"
-SIGNED_URL = f"https://signed.example/zip?{SIGNATURE}"
+SIGNATURE = "b1acc0dedb1acc0de"
+SIGNED_URL = f"https://signed.example/zip?X-Amz-Expires=900&X-Amz-Signature={SIGNATURE}"
 
 SIGNED_DOWNLOAD_FAILURES = [
     pytest.param(httpx.Response(403, content=b"<Error>AccessDenied</Error>"), id="expired-signature"),

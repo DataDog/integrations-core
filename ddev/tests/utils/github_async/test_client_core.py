@@ -9,6 +9,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import GITHUB_API_VERSION, AsyncGitHubClient, PaginationData, async_github_client
+from ddev.utils.github_async.client import QUERY_VALUE_MASK, masked_query, with_query_masked
 from tests.utils.github_async.helpers import TOKEN, json_response, make_client
 from tests.utils.github_async.payloads import artifact, workflow_run_payload
 
@@ -122,3 +123,40 @@ async def test_list_workflow_run_artifacts_two_pages() -> None:
     assert len(pages) == 2
     assert pages[0].data.artifacts[0].id == 1
     assert pages[1].data.artifacts[0].id == 2
+
+
+@pytest.mark.parametrize(
+    ("query", "secret", "expected_names"),
+    [
+        pytest.param(
+            "X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=900&X-Amz-Signature=abc123SECRET",
+            "abc123SECRET",
+            ["X-Amz-Algorithm", "X-Amz-Expires", "X-Amz-Signature"],
+            id="s3",
+        ),
+        pytest.param(
+            "se=2026-08-24T13%3A00%3A00Z&sig=SECRETSAS%2Bxyz&sp=r", "SECRETSAS", ["se", "sig", "sp"], id="azure"
+        ),
+    ],
+)
+def test_masking_a_query_hides_every_value_and_keeps_every_name(
+    query: str, secret: str, expected_names: list[str]
+) -> None:
+    """Which parameter holds the signature depends on the storage host, so all values are masked.
+
+    Keeping the names is what makes a masked URL still worth logging: they say which signing scheme
+    was in play. Masking only the names we recognise would leak the first time a download redirects
+    somewhere new.
+    """
+    masked = masked_query(query)
+
+    assert secret not in masked
+    assert [parameter.partition("=")[0] for parameter in masked.split("&")] == expected_names
+    assert {parameter.partition("=")[2] for parameter in masked.split("&")} == {QUERY_VALUE_MASK}
+
+
+def test_masking_leaves_a_message_that_quotes_no_url_alone() -> None:
+    """A transport error reports an OS-level reason, and rewriting one would only obscure it."""
+    assert with_query_masked("[Errno 61] Connection refused", "https://signed.example/zip") == (
+        "[Errno 61] Connection refused"
+    )

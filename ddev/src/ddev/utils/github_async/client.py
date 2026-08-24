@@ -70,6 +70,9 @@ SIGNED_URL_EXPIRED_STATUS = 403
 
 REDIRECT_STATUS_RANGE = range(300, 400)
 
+# Stands in for a query parameter value that must not be logged.
+QUERY_VALUE_MASK = "***"  # noqa: S105
+
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
 
 
@@ -138,19 +141,30 @@ def is_redirect_status(status_code: int) -> bool:
     return status_code in REDIRECT_STATUS_RANGE
 
 
-def loggable_url(url: str) -> str:
-    """`url` without its query string, which is where a signed URL keeps its signature."""
-    return url.split("?", 1)[0]
+def url_without_query(url: str) -> str:
+    """`url` up to its query string, which is where a signed URL keeps its signature."""
+    return url.partition("?")[0]
 
 
-def without_query_of(text: str, url: str) -> str:
-    """`text` with `url`'s query string removed.
+def masked_query(query: str) -> str:
+    """`query` with every parameter value masked.
 
-    For messages that quote a failure reason produced by someone else: whether a URL we must not log
-    ends up in one is not our decision to depend on.
+    Names are kept because they identify the signing scheme and are useful in a log. Values are all
+    masked rather than only the ones known to be secret, because which parameter carries the signature
+    depends on the host a download redirects to (`X-Amz-Signature` on S3, `sig` on Azure Blob), so an
+    allowlist would leak the first time that changes.
     """
-    _, _, query = url.partition("?")
-    return text.replace(query, "<redacted>") if query else text
+    masked = []
+    for parameter in query.split("&"):
+        name, separator, _ = parameter.partition("=")
+        masked.append(f"{name}={QUERY_VALUE_MASK}" if separator else name)
+    return "&".join(masked)
+
+
+def with_query_masked(text: str, url: str) -> str:
+    """`text` with the query of `url` masked, for a message someone else built out of that URL."""
+    query = url.partition("?")[2]
+    return text.replace(query, masked_query(query)) if query else text
 
 
 class RetryCause:
@@ -1136,26 +1150,25 @@ class AsyncGitHubClient:
     ) -> None:
         """Anonymous fetch (no bearer token to S3) + zip-slip-validated extractall.
 
-        Failures are re-raised without the URL and without a cause. The signature lives in its query
-        string, a failure here is retryable, and the exception reaches this client's log line, stamina's
-        retry hook and any traceback, all of which render it or its chain.
+        A failure here reports without the URL. The signature lives in its query string, the failure is
+        retryable, and the exception reaches this client's log line, stamina's retry hook and any
+        traceback, each of which renders its message.
         """
         effective_timeout = self._effective_timeout(timeout)
-        safe_url = loggable_url(signed_url)
         async with httpx.AsyncClient(timeout=effective_timeout) as anonymous_client:
             try:
                 download_response = await anonymous_client.get(signed_url)
-            except httpx.TransportError as exc:
-                raise type(exc)(
-                    f"artifact download from {safe_url}: {without_query_of(str(exc), signed_url)}"
-                ) from None
-            if download_response.is_error or is_redirect_status(download_response.status_code):
-                # Built here rather than by raise_for_status, whose message embeds the full URL.
-                raise httpx.HTTPStatusError(
-                    f"artifact download from {safe_url} failed with HTTP {download_response.status_code}",
-                    request=download_response.request,
-                    response=download_response,
+                download_response.raise_for_status()
+            except httpx.HTTPError as exc:
+                # Rewritten in place rather than replaced by a copy, so the type, the request and the
+                # frames survive and only the reason changes. httpx builds that reason from the full
+                # URL for a bad status, and whether it does so for a transport error is not ours to
+                # depend on.
+                exc.args = (
+                    f"artifact download from {url_without_query(signed_url)}: "
+                    f"{with_query_masked(str(exc), signed_url)}",
                 )
+                raise
 
         dest_path.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(io.BytesIO(download_response.content)) as zf:
@@ -1205,7 +1218,7 @@ class AsyncGitHubClient:
         cause = self._retry_cause(policy)
         async for attempt in retry_attempts(policy, cause):
             with attempt:
-                self._log_retry(f"artifact download {loggable_url(archive_download_url)}", cause, attempt)
+                self._log_retry(f"artifact download {url_without_query(archive_download_url)}", cause, attempt)
                 # NO_RETRY on the inner call: this loop is the only ladder, or the two would multiply.
                 location = await self._resolve_artifact_redirect(archive_download_url, timeout, retry=NO_RETRY)
                 await self._download_and_extract_zip(location, dest_path, timeout)
