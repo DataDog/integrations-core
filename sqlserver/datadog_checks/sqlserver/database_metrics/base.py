@@ -60,6 +60,7 @@ class SqlserverDatabaseMetricsBase:
         return self._databases
 
     def _database_filters(self, column: str) -> list[tuple[str, tuple[str, ...]]]:
+        # None disables filtering; an empty list means autodiscovery selected no databases.
         if self.databases is None:
             return [("", ())]
         if not self.databases:
