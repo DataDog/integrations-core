@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import re
 import time
-from collections.abc import Callable, Iterable, Iterator, Mapping
-from contextlib import closing, contextmanager
+from collections.abc import Callable, Iterable, Mapping
+from contextlib import closing
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -63,6 +63,8 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0.0
         self._db: Any = None
+        self._current_dbname: str | None = None
+        self._current_query_timeout_ms: int | None = None
 
         collection_interval = do_config.collection_interval
         if not collection_interval or collection_interval <= 0:
@@ -82,13 +84,15 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._queries, self._schedulers = self._filter_valid_queries(do_config.queries or ())
 
     def _close_db_conn(self) -> None:
-        if self._db:
+        db = self._db
+        self._db = None
+        self._current_dbname = None
+        self._current_query_timeout_ms = None
+        if db:
             try:
-                self._db.close()
+                db.close()
             except Exception:
                 self._log.debug("Failed to close Data Observability database connection", exc_info=True)
-            finally:
-                self._db = None
 
     def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[tuple[Query, ...], dict[int, CronScheduler]]:
         valid: list[Query] = []
@@ -148,24 +152,21 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             )
         return dbname
 
-    @contextmanager
-    def _query_timeout(self, conn: Any, query_timeout_ms: int) -> Iterator[None]:
+    def _set_query_timeout(self, conn: Any, query_timeout_ms: int) -> None:
         if not self._check.is_mariadb and not self._check.version.version_compatible((5, 7, 4)):
             # MySQL added max_execution_time in 5.7.4. Older supported servers
             # must still execute the monitor query without attempting to use it.
-            yield
+            return
+        if query_timeout_ms == self._current_query_timeout_ms:
             return
 
+        # This connection belongs only to Data Observability, so its timeout can
+        # remain in place until a later query needs a different value.
         timeout_variable = "max_statement_time" if self._check.is_mariadb else "max_execution_time"
         timeout_value = query_timeout_ms / 1000 if self._check.is_mariadb else query_timeout_ms
         with closing(conn.cursor()) as cursor:
-            cursor.execute(f"SELECT @@SESSION.{timeout_variable}")
-            previous_timeout = cursor.fetchone()[0]
             cursor.execute(f"SET SESSION {timeout_variable} = %s", (timeout_value,))
-            try:
-                yield
-            finally:
-                cursor.execute(f"SET SESSION {timeout_variable} = %s", (previous_timeout,))
+        self._current_query_timeout_ms = query_timeout_ms
 
     def _execute_single_query(self, conn: Any, query_spec: Query) -> dict[str, Any]:
         dbname = self._validate_dbname(query_spec.dbname)
@@ -174,19 +175,21 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
-            with self._query_timeout(conn, query_spec.query_timeout):
-                # SSCursor reads rows as fetchmany() requests them instead of buffering the
-                # full result in execute(). Closing it drains unread rows before the shared
-                # connection is reused for another query.
-                with closing(conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+            self._set_query_timeout(conn, query_spec.query_timeout)
+            # SSCursor reads rows as fetchmany() requests them instead of buffering the
+            # full result in execute(). Closing it drains unread rows before the shared
+            # connection is reused for another query.
+            with closing(conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+                if dbname != self._current_dbname:
                     cursor.execute(f"USE `{dbname}`")
-                    cursor.execute(query_spec.query)
-                    if cursor.description is None:
-                        raise pymysql.err.ProgrammingError(
-                            "Query returned no result set — only SELECT statements are supported"
-                        )
-                    columns = [description[0] for description in cursor.description]
-                    rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
+                    self._current_dbname = dbname
+                cursor.execute(query_spec.query)
+                if cursor.description is None:
+                    raise pymysql.err.ProgrammingError(
+                        "Query returned no result set — only SELECT statements are supported"
+                    )
+                columns = [description[0] for description in cursor.description]
+                rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
             duration = time.time() - start
             return {
                 'status': 'success',
@@ -244,7 +247,12 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         due_by_monitor_id = dict(self._pending_retries)
         self._pending_retries = {}
         due_by_monitor_id.update({due.query.monitor_id: due for due in self._get_due_queries()})
-        due_queries = list(due_by_monitor_id.values())
+        # Group shared session state so each database and timeout is selected as
+        # few times as possible during this collection.
+        due_queries = sorted(
+            due_by_monitor_id.values(),
+            key=lambda due: (due.query.dbname, due.query.query_timeout),
+        )
         if not due_queries:
             self._log.debug("No data observability queries due for execution.")
             return
@@ -253,6 +261,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         try:
             conn = self._get_db_connection()
         except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
+            self._close_db_conn()
             self._pending_retries.update(due_by_monitor_id)
             raise
 
@@ -264,6 +273,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             try:
                 result = self._execute_single_query(conn, query)
             except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
+                self._close_db_conn()
                 self._pending_retries.update({pending.query.monitor_id: pending for pending in due_queries[index:]})
                 raise
             now_at_fire_end = time.time()

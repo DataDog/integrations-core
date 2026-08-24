@@ -180,19 +180,60 @@ def test_no_queries_does_nothing(aggregator, instance_basic):
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
 
-def test_single_connection_is_reused_for_multiple_databases(instance_basic):
+def test_queries_are_sorted_to_minimize_database_and_timeout_changes(instance_basic):
     queries = [
-        deepcopy(BASE_QUERY),
-        {**deepcopy(MULTI_QUERIES[1]), 'dbname': 'analytics'},
+        {
+            **deepcopy(BASE_QUERY),
+            'monitor_id': 1,
+            'dbname': 'warehouse',
+            'query': 'SELECT warehouse_30_a',
+            'query_timeout': 30_000,
+        },
+        {
+            **deepcopy(BASE_QUERY),
+            'monitor_id': 2,
+            'dbname': 'analytics',
+            'query': 'SELECT analytics_20_a',
+            'query_timeout': 20_000,
+        },
+        {
+            **deepcopy(BASE_QUERY),
+            'monitor_id': 3,
+            'dbname': 'warehouse',
+            'query': 'SELECT warehouse_10',
+            'query_timeout': 10_000,
+        },
+        {
+            **deepcopy(BASE_QUERY),
+            'monitor_id': 4,
+            'dbname': 'analytics',
+            'query': 'SELECT analytics_20_b',
+            'query_timeout': 20_000,
+        },
+        {
+            **deepcopy(BASE_QUERY),
+            'monitor_id': 5,
+            'dbname': 'warehouse',
+            'query': 'SELECT warehouse_30_b',
+            'query_timeout': 30_000,
+        },
     ]
     check, conn, cursor = _setup_and_run(instance_basic, queries=queries)
 
     assert check._data_observability._db is conn
     assert [call.args[0] for call in cursor.execute.call_args_list] == [
-        'USE `test_db`',
-        BASE_QUERY['query'],
         'USE `analytics`',
-        MULTI_QUERIES[1]['query'],
+        'SELECT analytics_20_a',
+        'SELECT analytics_20_b',
+        'USE `warehouse`',
+        'SELECT warehouse_10',
+        'SELECT warehouse_30_a',
+        'SELECT warehouse_30_b',
+    ]
+    assert conn.timeout_cursor.execute.call_args_list == [
+        call('SET SESSION max_execution_time = %s', (20_000,)),
+        call('SET SESSION max_execution_time = %s', (10_000,)),
+        call('SET SESSION max_execution_time = %s', (30_000,)),
     ]
 
 
@@ -247,6 +288,10 @@ def test_interface_error_propagates(instance_basic):
     with pytest.raises(pymysql.err.InterfaceError, match='connection closed'):
         check._data_observability.run_job()
 
+    assert check._data_observability._db is None
+    assert check._data_observability._current_dbname is None
+    assert check._data_observability._current_query_timeout_ms is None
+
 
 def test_closed_connection_propagates_and_cron_query_is_retried(instance_basic, aggregator, monkeypatch):
     current_time = [float(_BASE_EPOCH + 65)]
@@ -287,18 +332,15 @@ def test_query_failure_does_not_block_subsequent(aggregator, instance_basic):
 
 
 @pytest.mark.parametrize(
-    'is_mariadb,variable,configured_timeout,previous_timeout',
+    'is_mariadb,variable,configured_timeout',
     [
-        (False, 'max_execution_time', 30_000, 1_000),
-        (True, 'max_statement_time', 30.0, 2.5),
+        (False, 'max_execution_time', 30_000),
+        (True, 'max_statement_time', 30.0),
     ],
     ids=['mysql', 'mariadb'],
 )
-def test_query_timeout_is_applied_and_restored(
-    instance_basic, is_mariadb, variable, configured_timeout, previous_timeout
-):
+def test_query_timeout_is_applied(instance_basic, is_mariadb, variable, configured_timeout):
     mock_conn, _ = _make_mock_conn()
-    mock_conn.timeout_cursor.fetchone.return_value = (previous_timeout,)
     check = _create_check(instance_basic)
     check.is_mariadb = is_mariadb
     check._data_observability._db = mock_conn
@@ -306,9 +348,7 @@ def test_query_timeout_is_applied_and_restored(
     check._data_observability.run_job()
 
     assert mock_conn.timeout_cursor.execute.call_args_list == [
-        call(f'SELECT @@SESSION.{variable}'),
         call(f'SET SESSION {variable} = %s', (configured_timeout,)),
-        call(f'SET SESSION {variable} = %s', (previous_timeout,)),
     ]
 
 
