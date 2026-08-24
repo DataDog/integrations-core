@@ -1,1 +1,1 @@
-Collapse per-database service checks into a single batched query.
+Collapse per-database service checks and database file queries into batched requests.

@@ -1622,6 +1622,47 @@ def test_sqlserver_database_files_metrics(
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
+@pytest.mark.parametrize('database_count', [1, 1000])
+def test_database_files_metrics_batch_count_is_bounded(instance_docker_metrics, database_count):
+    instance_docker_metrics['database_metrics'] = {'db_files_metrics': {'enabled': True}}
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker_metrics])
+    new_query_executor = mock.MagicMock()
+    database_files_metrics = SqlserverDatabaseFilesMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.MagicMock(),
+        databases=[f'database_{index}' for index in range(database_count)],
+    )
+
+    query_executors = database_files_metrics._build_query_executors()
+
+    assert len(query_executors) == 1
+    new_query_executor.assert_called_once()
+    query = new_query_executor.call_args.args[0][0]
+    assert query['params'][0].count('<database>') == database_count
+    assert new_query_executor.call_args.kwargs['executor'].keywords == {'fetch_multiple_results': True}
+
+
+def test_database_files_metrics_keep_database_scoped_queries_on_azure_sql_database(instance_docker_metrics):
+    instance_docker_metrics['database_metrics'] = {'db_files_metrics': {'enabled': True}}
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker_metrics])
+    new_query_executor = mock.MagicMock()
+    database_files_metrics = SqlserverDatabaseFilesMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=new_query_executor,
+        server_static_info={**STATIC_SERVER_INFO, STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_SQL_DATABASE},
+        execute_query_handler=mock.MagicMock(),
+        databases=['database_1', 'database_2'],
+    )
+
+    query_executors = database_files_metrics._build_query_executors()
+
+    assert len(query_executors) == 2
+    executors = [call.kwargs['executor'] for call in new_query_executor.call_args_list]
+    assert [executor.keywords for executor in executors] == [{'db': 'database_1'}, {'db': 'database_2'}]
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('include_table_size_metrics', [True, False])

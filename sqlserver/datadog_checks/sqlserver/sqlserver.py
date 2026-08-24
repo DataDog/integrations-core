@@ -1093,7 +1093,7 @@ class SQLServer(DatabaseCheck):
                 with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     cursor.execute("SET NOCOUNT OFF")
 
-    def execute_query_raw(self, query, db=None, params=None):
+    def execute_query_raw(self, query, db=None, params=None, fetch_multiple_results=False):
         with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             if db:
                 ctx = construct_use_statement(db)
@@ -1103,7 +1103,15 @@ class SQLServer(DatabaseCheck):
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
-            return cursor.fetchall()
+            if not fetch_multiple_results:
+                return cursor.fetchall()
+
+            rows = []
+            while True:
+                if cursor.description is not None:
+                    rows.extend(cursor.fetchall())
+                if not cursor.nextset():
+                    return rows
 
     def do_stored_procedure_check(self):
         """

@@ -121,6 +121,21 @@ def test_autodiscovery_database_service_check_preserves_per_database_status(inst
     )
 
 
+def test_execute_query_raw_collects_multiple_result_sets(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    cursor = mock.MagicMock()
+    cursor.description = [('value',)]
+    cursor.fetchall.side_effect = [[('first',)], [('second',)]]
+    cursor.nextset.side_effect = [True, False]
+    check._connection = mock.MagicMock()
+    check.connection.get_managed_cursor.return_value.__enter__.return_value = cursor
+
+    rows = check.execute_query_raw('SELECT 1; SELECT 2', fetch_multiple_results=True)
+
+    assert rows == [('first',), ('second',)]
+    assert cursor.fetchall.call_count == 2
+
+
 def create_schema_collector(static_info_cache: dict | None = None) -> SQLServerSchemaCollector:
     check = mock.Mock()
     check._config.schema_config = {}
