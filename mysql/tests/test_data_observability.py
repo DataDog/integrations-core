@@ -437,7 +437,9 @@ def test_tags_include_monitor_config_and_db_type(aggregator, instance_basic):
     assert 'status:success' in metric.tags
 
 
-def test_per_query_interval_tracking(aggregator, instance_basic):
+def test_per_query_interval_tracking(aggregator, instance_basic, monkeypatch):
+    current_time = [1_000.0]
+    monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     mock_conn, _ = _make_mock_conn()
     check = _create_check(instance_basic)
     check._data_observability._db = mock_conn
@@ -446,10 +448,11 @@ def test_per_query_interval_tracking(aggregator, instance_basic):
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
     aggregator.reset()
+    current_time[0] += BASE_QUERY['interval_seconds'] - 1
     check._data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
 
-    check._data_observability._last_execution[1] = 0.0
+    current_time[0] += 1
     check._data_observability.run_job()
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
