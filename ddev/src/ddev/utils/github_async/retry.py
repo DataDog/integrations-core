@@ -1,49 +1,53 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Retry strategy for the async GitHub client.
+"""Retry strategy for requests that failed for a reason other than rate limiting.
 
-Separate from rate-limit handling, which lives in ``ddev.utils.rate_limiting`` and reacts to GitHub
-telling us to slow down: there the backoff *is* the limiter, so re-acquiring it is the whole retry.
-This layer covers the failures that carry no such instruction, a dropped connection or a 502, where
-the only useful response is to wait a little and ask again.
-
-A ``RetryPolicy`` only describes what to do. stamina executes it, so no backoff arithmetic, sleeping
-or attempt counting lives here.
+Rate limiting is handled elsewhere (`ddev.utils.rate_limiting`), where re-acquiring the limiter is
+itself the backoff. This module covers the rest: a policy says what to retry and how hard to try,
+and stamina executes it.
 """
 
 from __future__ import annotations
 
-import dataclasses
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from enum import Enum, auto
+from typing import TYPE_CHECKING
 
 import httpx
 import stamina
-
-from ddev.utils.github_errors import GitHubAuthenticationError
-from ddev.utils.rate_limiting import RateLimitWaitAbandoned
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
 
 type RetryPredicate = Callable[[Exception], bool]
 
-# Transport failures raised before any byte of the request reached GitHub, so replaying them cannot
-# repeat a side effect. Read and write failures are deliberately absent: once the request is on the
-# wire we cannot know whether the server acted on it.
+# Transport failures raised before any byte of the request reached the server, so a replay cannot
+# repeat a side effect. Read and write failures are absent on purpose.
 PRE_SEND_TRANSPORT_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout)
 
-# Server-side failures an identical later request may well survive.
 RETRYABLE_SERVER_STATUSES = frozenset((500, 502, 503, 504))
 
-# Verbs whose requests can be replayed without changing anything server-side.
 REPLAYABLE_HTTP_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
+DEFAULT_ATTEMPTS = 3
+DEFAULT_TIMEOUT_SECONDS = 60.0
+DEFAULT_WAIT_INITIAL_SECONDS = 0.5
+DEFAULT_WAIT_MAX_SECONDS = 10.0
+DEFAULT_WAIT_JITTER_SECONDS = 1.0
 
-def is_redirect_status(status_code: int) -> bool:
-    """Whether *status_code* is a redirect, Location header or not."""
-    return 300 <= status_code < 400
+# A mutation retries only what provably never left, which a second attempt either fixes at once or
+# is unlikely to fix at all.
+MUTATION_ATTEMPTS = 2
+
+
+class Unset(Enum):
+    """Sentinel for `RetryPolicy.replace`, where `timeout=None` means no timeout, not unchanged."""
+
+    TOKEN = auto()
+
+
+UNSET = Unset.TOKEN
 
 
 # ---------------------------------------------------------------------------
@@ -52,12 +56,12 @@ def is_redirect_status(status_code: int) -> bool:
 
 
 def never(exc: Exception) -> bool:
-    """Refuse everything. The condition of a policy that does not retry."""
+    """Refuse everything."""
     return False
 
 
 def on_transport_error(exc: Exception) -> bool:
-    """Any transport-level failure, whether or not the request reached GitHub."""
+    """Any transport failure, whether or not the request reached the server."""
     return isinstance(exc, httpx.TransportError)
 
 
@@ -67,7 +71,7 @@ def on_pre_send_transport_error(exc: Exception) -> bool:
 
 
 def on_status(*status_codes: int) -> RetryPredicate:
-    """Responses whose status is one of *status_codes*."""
+    """Responses whose status is one of `status_codes`."""
     wanted = frozenset(status_codes)
 
     def matches(exc: Exception) -> bool:
@@ -77,7 +81,7 @@ def on_status(*status_codes: int) -> RetryPredicate:
 
 
 def any_of(*predicates: RetryPredicate) -> RetryPredicate:
-    """Accept what any of *predicates* accepts."""
+    """Accept what any of `predicates` accepts."""
 
     def matches(exc: Exception) -> bool:
         return any(predicate(exc) for predicate in predicates)
@@ -85,129 +89,106 @@ def any_of(*predicates: RetryPredicate) -> RetryPredicate:
     return matches
 
 
-on_server_error = on_status(*RETRYABLE_SERVER_STATUSES)
-
-
 # ---------------------------------------------------------------------------
 # Policies
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
 class RetryPolicy:
-    """How hard to try, and what to try again on, for one request.
+    """What to retry, and how hard to try.
 
-    ``timeout`` bounds the whole ladder including backoff, not one request; ``None`` removes that
-    bound and leaves ``attempts`` as the only stop condition.
+    Treat instances as values: `replace`, `also_on` and `unless` return new policies rather than
+    mutating this one, which matters because the defaults below are shared.
     """
 
-    should_retry: RetryPredicate = never
-    attempts: int = 3
-    timeout: float | None = 60.0
-    wait_initial: float = 0.5
-    wait_max: float = 10.0
-    wait_jitter: float = 1.0
+    __slots__ = ("attempts", "should_retry", "timeout", "wait_initial", "wait_jitter", "wait_max")
 
-    def __post_init__(self) -> None:
-        if self.attempts < 1:
-            raise ValueError(f"attempts must be at least 1, got {self.attempts}")
-        if self.timeout is not None and self.timeout <= 0:
-            # stamina reads timeout=0 as "no retries", which is a confusing way to spell attempts=1.
-            raise ValueError(f"timeout must be positive or None, got {self.timeout}")
+    def __init__(
+        self,
+        should_retry: RetryPredicate = never,
+        attempts: int = DEFAULT_ATTEMPTS,
+        timeout: float | None = DEFAULT_TIMEOUT_SECONDS,
+        wait_initial: float = DEFAULT_WAIT_INITIAL_SECONDS,
+        wait_max: float = DEFAULT_WAIT_MAX_SECONDS,
+        wait_jitter: float = DEFAULT_WAIT_JITTER_SECONDS,
+    ) -> None:
+        """`timeout` bounds the whole ladder including backoff; None leaves `attempts` as the only stop."""
+        if attempts < 1:
+            raise ValueError(f"attempts must be at least 1, got {attempts}")
+        if timeout is not None and timeout <= 0:
+            # stamina reads timeout=0 as "no retries", a confusing way to spell attempts=1.
+            raise ValueError(f"timeout must be positive or None, got {timeout}")
+        self.should_retry = should_retry
+        self.attempts = attempts
+        self.timeout = timeout
+        self.wait_initial = wait_initial
+        self.wait_max = wait_max
+        self.wait_jitter = wait_jitter
 
-    def replace(self, **overrides: Any) -> RetryPolicy:
-        """A copy with *overrides* applied."""
-        return dataclasses.replace(self, **overrides)
+    def replace(
+        self,
+        *,
+        should_retry: RetryPredicate | None = None,
+        attempts: int | None = None,
+        timeout: float | None | Unset = UNSET,
+        wait_initial: float | None = None,
+        wait_max: float | None = None,
+        wait_jitter: float | None = None,
+    ) -> RetryPolicy:
+        """A copy with the given fields changed."""
+        return RetryPolicy(
+            should_retry=self.should_retry if should_retry is None else should_retry,
+            attempts=self.attempts if attempts is None else attempts,
+            timeout=self.timeout if isinstance(timeout, Unset) else timeout,
+            wait_initial=self.wait_initial if wait_initial is None else wait_initial,
+            wait_max=self.wait_max if wait_max is None else wait_max,
+            wait_jitter=self.wait_jitter if wait_jitter is None else wait_jitter,
+        )
 
     def also_on(self, predicate: RetryPredicate) -> RetryPolicy:
-        """A copy that retries what *predicate* accepts as well."""
-        return dataclasses.replace(self, should_retry=any_of(self.should_retry, predicate))
+        """A copy that retries what `predicate` accepts as well."""
+        return self.replace(should_retry=any_of(self.should_retry, predicate))
 
     def unless(self, predicate: RetryPredicate) -> RetryPolicy:
-        """A copy that refuses what *predicate* accepts, whatever this policy accepted before."""
+        """A copy that refuses what `predicate` accepts."""
         accepted = self.should_retry
 
         def narrowed(exc: Exception) -> bool:
             return accepted(exc) and not predicate(exc)
 
-        return dataclasses.replace(self, should_retry=narrowed)
+        return self.replace(should_retry=narrowed)
 
 
+# Policy constants. They follow the class because they are instances of it.
 NO_RETRY = RetryPolicy(attempts=1)
-SAFE_RETRY = RetryPolicy(should_retry=any_of(on_transport_error, on_server_error))
-MUTATION_RETRY = RetryPolicy(should_retry=on_pre_send_transport_error, attempts=2)
+SAFE_RETRY = RetryPolicy(should_retry=any_of(on_transport_error, on_status(*RETRYABLE_SERVER_STATUSES)))
+MUTATION_RETRY = RetryPolicy(should_retry=on_pre_send_transport_error, attempts=MUTATION_ATTEMPTS)
 
 
 @dataclass(frozen=True)
 class RetryPolicies:
-    """The client's defaults, one per replay-safety class.
+    """The defaults a client picks from, one per replay-safety class.
 
-    A verb is the proxy the client uses to pick between them, but idempotence is the real question,
-    so an endpoint that is idempotent despite mutating (setting a comment body, closing a check run)
-    asks for ``safe`` explicitly.
+    The verb is only a proxy: idempotence is the real question, so an endpoint that mutates but is
+    idempotent asks for `safe` explicitly.
     """
 
     safe: RetryPolicy = SAFE_RETRY
     mutating: RetryPolicy = MUTATION_RETRY
 
     def for_method(self, method: str) -> RetryPolicy:
-        """The default for *method*, by whether the verb is replayable."""
+        """The default for `method`, by whether the verb is replayable."""
         return self.safe if method.upper() in REPLAYABLE_HTTP_METHODS else self.mutating
 
 
 DEFAULT_RETRY_POLICIES = RetryPolicies()
 
 
-# ---------------------------------------------------------------------------
-# Execution
-# ---------------------------------------------------------------------------
-
-
-def refuses_retry(is_rate_limit_response: Callable[[httpx.Response], bool]) -> RetryPredicate:
-    """Build the exclusions the client applies whatever policy a caller supplies.
-
-    Retrying any of these is useless or harmful, so no policy may opt in:
-
-    - authentication failures, which no amount of waiting fixes;
-    - rate-limit responses, owned by the limiter, whose pause is the correct backoff;
-    - ``RateLimitWaitAbandoned``, the caller's killswitch for that pause;
-    - redirects, which are an answer rather than a failure.
-    """
-
-    def refuses(exc: Exception) -> bool:
-        if isinstance(exc, (GitHubAuthenticationError, RateLimitWaitAbandoned)):
-            return True
-        if isinstance(exc, httpx.HTTPStatusError):
-            return is_rate_limit_response(exc.response) or is_redirect_status(exc.response.status_code)
-        return False
-
-    return refuses
-
-
-class RetryTracker:
-    """Decides retries for one operation and keeps the failure that caused the most recent one.
-
-    stamina asks whether to retry where the exception is known, and the caller logs where the attempt
-    number is known. This carries the exception between the two.
-    """
-
-    def __init__(self, policy: RetryPolicy, refuses: RetryPredicate) -> None:
-        self._policy = policy
-        self._refuses = refuses
-        self.last_error: Exception | None = None
-
-    def __call__(self, exc: Exception) -> bool:
-        if self._refuses(exc) or not self._policy.should_retry(exc):
-            return False
-        self.last_error = exc
-        return True
-
-
 def retry_attempts(policy: RetryPolicy, should_retry: RetryPredicate) -> AsyncIterator[stamina.Attempt]:
-    """Yield one stamina attempt per try of *policy*, retrying what *should_retry* accepts.
+    """Yield one attempt per try of `policy`, retrying what `should_retry` accepts.
 
-    The caller runs its work inside ``with attempt:``; that context manager is what swallows a
-    retryable exception, waits the backoff and lets the loop turn again.
+    The caller runs its work inside `with attempt:`, which is what swallows a retryable exception,
+    waits the backoff and lets the loop turn again.
     """
     return stamina.retry_context(
         on=should_retry,

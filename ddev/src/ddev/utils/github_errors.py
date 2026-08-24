@@ -46,8 +46,8 @@ def github_secondary_rate_limit_wait(response: httpx.Response) -> float | None:
 class GitHubUnexpectedRedirectError(httpx.HTTPStatusError):
     """A GitHub endpoint answered with a redirect that is not part of its contract.
 
-    The client never follows redirects, because the ``Authorization`` header would travel to whatever
-    host ``Location`` names. One endpoint, the artifact download, does expect a redirect and asks for
+    The client never follows redirects, because the `Authorization` header would travel to whatever
+    host `Location` names. One endpoint, the artifact download, does expect a redirect and asks for
     it; anywhere else a redirect means our assumption about the endpoint is wrong, so it is surfaced
     rather than followed or retried.
     """

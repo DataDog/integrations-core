@@ -27,7 +27,12 @@ from ddev.utils.github_errors import (
     github_body_too_long_message,
     github_secondary_rate_limit_wait,
 )
-from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter, RateLimitEvent
+from ddev.utils.rate_limiting import (
+    NULL_SNAPSHOT,
+    BudgetSnapshot,
+    InstrumentedAsyncLimiter,
+    RateLimitWaitAbandoned,
+)
 
 from .defaults import default_github_rate_limiter, log_rate_limit_events
 from .models import (
@@ -47,10 +52,8 @@ from .retry import (
     NO_RETRY,
     RetryPolicies,
     RetryPolicy,
-    RetryTracker,
-    is_redirect_status,
+    RetryPredicate,
     on_status,
-    refuses_retry,
     retry_attempts,
 )
 
@@ -61,6 +64,11 @@ DEFAULT_BASE_URL = "https://api.github.com"
 # number; neither the OpenAPI description nor the REST docs state it. Measured in UTF-8 bytes, which is
 # never below the character count GitHub means, so it errs only towards refusing a body it might take.
 COMMENT_BODY_LIMIT = 65_536
+
+# How an expired signed URL presents from the artifact storage host.
+SIGNED_URL_EXPIRED_STATUS = 403
+
+REDIRECT_STATUS_RANGE = range(300, 400)
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
 
@@ -125,6 +133,34 @@ def parse_header[T](headers: httpx.Headers, key: str, cast: Callable[[str], T]) 
     return None
 
 
+def is_redirect_status(status_code: int) -> bool:
+    """Whether `status_code` is a redirect, Location header or not."""
+    return status_code in REDIRECT_STATUS_RANGE
+
+
+def loggable_url(url: str) -> str:
+    """`url` without its query string, which is where a signed URL keeps its signature."""
+    return url.split("?", 1)[0]
+
+
+class RetryCause:
+    """Carries the failure from the predicate, which sees it, to the log line, which counts attempts.
+
+    stamina exposes the attempt number but not what went wrong, and the predicate is the only place
+    the exception is available, so a retry cannot otherwise say why it happened.
+    """
+
+    def __init__(self, should_retry: RetryPredicate) -> None:
+        self._should_retry = should_retry
+        self.error: Exception | None = None
+
+    def __call__(self, exc: Exception) -> bool:
+        if not self._should_retry(exc):
+            return False
+        self.error = exc
+        return True
+
+
 def github_rate_limit_snapshot(headers: httpx.Headers) -> BudgetSnapshot | None:
     """Parse GitHub's `x-ratelimit-*` / `retry-after` response headers into a BudgetSnapshot."""
     snapshot = BudgetSnapshot(
@@ -148,8 +184,8 @@ class AsyncGitHubClient:
     backoff, so there is no sleeping or backoff arithmetic in this client.
 
     Failures that are *not* rate limiting, a dropped connection or a 502, are handled separately by
-    the retry strategy in ``retry.py``. The two layers answer different questions, "GitHub told us to
-    wait" against "that request did not land, ask again", and each endpoint method takes a ``retry``
+    the retry strategy in `retry.py`. The two layers answer different questions, "GitHub told us to
+    wait" against "that request did not land, ask again", and each endpoint method takes a `retry`
     argument to override its default for a single call.
 
     Args:
@@ -169,17 +205,13 @@ class AsyncGitHubClient:
             Each retry is a full fresh acquisition (governor wait plus bucket token); the default of
             2 covers the common "hit a secondary limit once, wait, succeed" case plus one repeat.
             Only rate-limit responses are retried here; every other failure belongs to the retry
-            strategy, and RateLimitWaitAbandoned (the governor's ``max_wait_seconds`` killswitch)
+            strategy, and RateLimitWaitAbandoned (the governor's `max_wait_seconds` killswitch)
             reaches the caller untouched by either layer.
-        retry_policies: Overrides the defaults for failures that are not rate limiting. None uses
-            ``DEFAULT_RETRY_POLICIES``. *What* may be retried is a correctness property of each
-            endpoint rather than a preference, so policies supplied here are expected to change how
-            hard to try, not to widen the conditions.
-        logger: Where this client reports its retries. None silences its own reporting; stamina's
-            built-in retry instrumentation is global and independent of this (see AGENTS.md). A logger
-            given here also receives the events of the default rate limiter, while a caller-supplied
-            ``rate_limiter`` keeps whatever logging it was built with, since that choice belongs to
-            whoever built it.
+        retry_policies: The retry strategies to use for failures that are not rate limiting, one per
+            replay-safety class. Defaults to `DEFAULT_RETRY_POLICIES`.
+        logger: Logger this client writes to. None keeps it silent. It also receives the events of the
+            default rate limiter, while a caller-supplied `rate_limiter` keeps whatever logging it was
+            built with, since that choice belongs to whoever built it.
         transport: Optional custom HTTPX transport (useful for testing with MockTransport).
     """
 
@@ -203,17 +235,16 @@ class AsyncGitHubClient:
         # and no secondary limits the governor adds zero wait, so this default is invisible to
         # well-behaved callers and engages only once GitHub has already signaled backpressure.
         self._rate_limiter = (
-            rate_limiter if rate_limiter is not None else default_github_rate_limiter(on_event=self._limiter_events())
+            rate_limiter
+            if rate_limiter is not None
+            else default_github_rate_limiter(on_event=log_rate_limit_events(logger) if logger is not None else None)
         )
         self._default_timeout = default_timeout
         self._max_rate_limit_retries = max_rate_limit_retries
         self._retry_policies = retry_policies if retry_policies is not None else DEFAULT_RETRY_POLICIES
-        self._refuses_retry = refuses_retry(self._is_rate_limit_response)
-        # An expired signed URL comes back from the storage host as a 403, and the cure is resolving
-        # the redirect again rather than refetching a dead URL, so the pair is retried on one. A 403
-        # from GitHub itself arrives as GitHubAuthenticationError, which the guard refuses, so this
-        # cannot turn a real permission denial into a retry loop.
-        self._artifact_retry = self._retry_policies.safe.also_on(on_status(403))
+        # A 403 from GitHub itself arrives as GitHubAuthenticationError, which the guard refuses, so
+        # adding this one cannot turn a permission denial into a retry loop.
+        self._artifact_retry = self._retry_policies.safe.also_on(on_status(SIGNED_URL_EXPIRED_STATUS))
         self._headers = {
             "Authorization": f"Bearer {token}",
             "X-GitHub-Api-Version": GITHUB_API_VERSION,
@@ -234,23 +265,40 @@ class AsyncGitHubClient:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _limiter_events(self) -> Callable[[RateLimitEvent], None] | None:
-        """Handler for the default rate limiter's events, routed to our logger when there is one."""
-        return log_rate_limit_events(self._logger) if self._logger is not None else None
-
     def _effective_timeout(self, timeout: float | None) -> float:
         return timeout if timeout is not None else self._default_timeout
 
-    def _log_retry(self, description: str, tracker: RetryTracker, attempt: stamina.Attempt) -> None:
+    def _retry_cause(self, policy: RetryPolicy) -> RetryCause:
+        """The predicate for one operation: what `policy` accepts, minus what this client refuses."""
+
+        def should_retry(exc: Exception) -> bool:
+            return not self._refuses_retry(exc) and policy.should_retry(exc)
+
+        return RetryCause(should_retry)
+
+    def _refuses_retry(self, exc: Exception) -> bool:
+        """Failures no policy may retry.
+
+        Authentication does not improve by asking again; a rate-limit response belongs to the limiter,
+        whose pause is the correct wait, and `RateLimitWaitAbandoned` is the caller's killswitch for
+        it; a redirect is an answer rather than a failure.
+        """
+        if isinstance(exc, (GitHubAuthenticationError, RateLimitWaitAbandoned)):
+            return True
+        if isinstance(exc, httpx.HTTPStatusError):
+            return self._is_rate_limit_response(exc.response) or is_redirect_status(exc.response.status_code)
+        return False
+
+    def _log_retry(self, description: str, cause: RetryCause, attempt: stamina.Attempt) -> None:
         """Report a retry that is about to run. Silent on the first attempt, and with no logger."""
         if attempt.num == 1 or self._logger is None:
             return
         self._logger.warning(
             "Retrying %s after %r (attempt %s)",
             description,
-            tracker.last_error,
+            cause.error,
             attempt.num,
-            extra={"attempt": attempt.num, "error": repr(tracker.last_error)},
+            extra={"attempt": attempt.num, "error": repr(cause.error)},
         )
 
     @staticmethod
@@ -361,10 +409,10 @@ class AsyncGitHubClient:
         the acquisition and hammer GitHub through its own backoff.
         """
         policy = retry if retry is not None else self._retry_policies.for_method(method)
-        tracker = RetryTracker(policy, self._refuses_retry)
-        async for attempt in retry_attempts(policy, tracker):
+        cause = self._retry_cause(policy)
+        async for attempt in retry_attempts(policy, cause):
             with attempt:
-                self._log_retry(f"{method} {endpoint}", tracker, attempt)
+                self._log_retry(f"{method} {endpoint}", cause, attempt)
                 return await self._rate_limited_request(
                     method, endpoint, timeout, expect_redirect=expect_redirect, **kwargs
                 )
@@ -1127,10 +1175,10 @@ class AsyncGitHubClient:
                 requests, plus the 403 an expired signed URL produces.
         """
         policy = retry if retry is not None else self._artifact_retry
-        tracker = RetryTracker(policy, self._refuses_retry)
-        async for attempt in retry_attempts(policy, tracker):
+        cause = self._retry_cause(policy)
+        async for attempt in retry_attempts(policy, cause):
             with attempt:
-                self._log_retry(f"artifact download {archive_download_url}", tracker, attempt)
+                self._log_retry(f"artifact download {loggable_url(archive_download_url)}", cause, attempt)
                 # NO_RETRY on the inner call: this loop is the only ladder, or the two would multiply.
                 location = await self._resolve_artifact_redirect(archive_download_url, timeout, retry=NO_RETRY)
                 await self._download_and_extract_zip(location, dest_path, timeout)
@@ -1159,7 +1207,7 @@ async def async_github_client(
     Rate-limit protection is on by default; the governor paces requests and supplies the backoff for
     those retries. Header-confirmed rate-limit responses (403/429) are retried there, and
     RateLimitWaitAbandoned propagates to the caller when the governor is configured with a wait
-    budget. Other failures are handled by the retry strategy in ``retry.py``.
+    budget. Other failures are handled by the retry strategy in `retry.py`.
 
     Args:
         token: GitHub personal access token or app token.

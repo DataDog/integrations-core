@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for retrying the failures that are not rate limiting.
 
-The question every test here answers is which failures a given endpoint replays, and the reason it
-matters is that replaying the wrong one duplicates a side effect: a second workflow run, a second
-comment. Rate-limit retries are a different layer and live in ``test_rate_limiting.py``.
+Which failures an endpoint replays, and why that matters: replaying the wrong one duplicates a side
+effect. Rate-limit retries are a different layer, covered in `test_rate_limiting.py`.
 """
 
 from __future__ import annotations
@@ -22,7 +21,6 @@ from ddev.utils.github_async.retry import (
     SAFE_RETRY,
     RetryPolicies,
     RetryPolicy,
-    never,
     on_status,
     on_transport_error,
 )
@@ -132,7 +130,7 @@ async def test_a_caller_can_widen_a_mutation_that_it_knows_is_safe_to_repeat() -
 
 
 async def test_the_client_defaults_can_be_replaced_wholesale() -> None:
-    """Dispatcher builds these from config, so the constructor argument has to reach the requests."""
+    """The limits are configurable, so what the constructor is given has to reach the requests."""
     transport, calls = recording_transport([httpx.ConnectError("refused")])
     policies = RetryPolicies(safe=SAFE_RETRY.replace(attempts=5), mutating=MUTATION_RETRY)
     client = AsyncGitHubClient(token=TOKEN, transport=transport, retry_policies=policies)
@@ -174,7 +172,7 @@ async def test_the_client_refuses_to_replay_what_replaying_cannot_fix(response: 
 
 
 async def test_a_missing_resource_is_an_answer_rather_than_a_failure_to_retry() -> None:
-    """``get_pull_request`` returning 404 means there is no pull request for that number.
+    """`get_pull_request` returning 404 means there is no pull request for that number.
 
     Dispatcher relies on that answer to fall through to commit resolution, so retrying it would only
     delay a decision GitHub has already given. It stays out of the defaults rather than out of every
@@ -282,15 +280,20 @@ def test_unless_removes_a_condition_the_policy_would_otherwise_retry() -> None:
     assert policy.should_retry(_status_error(502))
 
 
-def test_a_policy_that_cannot_retry_is_rejected_rather_than_silently_useless() -> None:
-    """``attempts=0`` would make every request fail without being sent."""
-    with pytest.raises(ValueError, match="attempts must be at least 1"):
-        RetryPolicy(should_retry=on_transport_error, attempts=0)
+@pytest.mark.parametrize(
+    ("limits", "message"),
+    [
+        pytest.param({"attempts": 0}, "attempts must be at least 1", id="no_attempts"),
+        pytest.param({"timeout": 0}, "timeout must be positive", id="zero_timeout"),
+    ],
+)
+def test_a_policy_that_could_never_send_a_request_is_rejected(limits: dict[str, int], message: str) -> None:
+    """Both spellings mean "no attempts at all", which would fail every call without sending it.
 
-
-def test_no_retry_refuses_everything() -> None:
-    assert NO_RETRY.should_retry is never
-    assert NO_RETRY.attempts == 1
+    stamina reads `timeout=0` that way rather than as an error, so it has to be caught here.
+    """
+    with pytest.raises(ValueError, match=message):
+        RetryPolicy(should_retry=on_transport_error, **limits)
 
 
 def _status_error(status_code: int) -> httpx.HTTPStatusError:
