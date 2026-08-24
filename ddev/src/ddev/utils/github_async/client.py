@@ -352,7 +352,10 @@ class AsyncGitHubClient:
         try:
             response = await self._client.request(method, endpoint, timeout=timeout, **kwargs)
         except httpx.TransportError as exc:
-            raise type(exc)(f"{method} {endpoint}: {exc}") from exc
+            # Rewritten in place rather than replaced by a copy, which would drop the request httpx
+            # attached and leave `exc.request` raising RuntimeError for the caller.
+            exc.args = (f"{method} {endpoint}: {exc}",)
+            raise
         # Observe before raise_for_status, never after: learning must not be gated on success. A
         # failed response's rate-limit headers arm the shared pause even if the caller swallows the
         # exception, so one request's 403 protects every other in-flight and future request in this

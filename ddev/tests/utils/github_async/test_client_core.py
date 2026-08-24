@@ -10,6 +10,7 @@ import pytest
 
 from ddev.utils.github_async import GITHUB_API_VERSION, AsyncGitHubClient, PaginationData, async_github_client
 from ddev.utils.github_async.client import QUERY_VALUE_MASK, masked_query, with_query_masked
+from ddev.utils.github_async.retry import NO_RETRY
 from tests.utils.github_async.helpers import TOKEN, json_response, make_client
 from tests.utils.github_async.payloads import artifact, workflow_run_payload
 
@@ -160,3 +161,18 @@ def test_masking_leaves_a_message_that_quotes_no_url_alone() -> None:
     assert with_query_masked("[Errno 61] Connection refused", "https://signed.example/zip") == (
         "[Errno 61] Connection refused"
     )
+
+
+async def test_a_transport_failure_still_carries_the_request_it_failed_on() -> None:
+    """The client adds context to a transport failure without discarding what httpx attached.
+
+    A caller reaching for `exc.request` after a dropped connection would otherwise get
+    `RuntimeError: The .request property has not been set` instead of the request.
+    """
+    client = make_client(httpx.MockTransport(lambda request: (_ for _ in ()).throw(httpx.ConnectError("refused"))))
+
+    with pytest.raises(httpx.ConnectError) as exc_info:
+        await client.get_workflow_run("o", "r", 42, retry=NO_RETRY)
+
+    assert exc_info.value.request.url.path == "/repos/o/r/actions/runs/42"
+    assert "GET /repos/o/r/actions/runs/42" in str(exc_info.value)
