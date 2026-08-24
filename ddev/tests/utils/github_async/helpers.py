@@ -138,9 +138,24 @@ ENDPOINT_CALLS = [
         lambda: json_response(issue_comment_payload()),
     ),
     EndpointCase(
+        "update_issue_comment",
+        lambda c: c.update_issue_comment("o", "r", 1, "body"),
+        lambda: json_response(issue_comment_payload()),
+    ),
+    EndpointCase(
+        "list_issue_comments",
+        lambda c: first_page(c.list_issue_comments("o", "r", 1)),
+        lambda: json_response([issue_comment_payload()]),
+    ),
+    EndpointCase(
         "get_pull_request",
         lambda c: c.get_pull_request("o", "r", 5),
         lambda: json_response(full_pull_request_payload(number=5)),
+    ),
+    EndpointCase(
+        "list_pull_requests",
+        lambda c: c.list_pull_requests("o", "r"),
+        lambda: json_response([pull_request_payload(number=1)]),
     ),
     EndpointCase(
         "create_pull_request",

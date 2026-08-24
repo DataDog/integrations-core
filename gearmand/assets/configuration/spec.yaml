@@ -55,3 +55,6 @@ files:
       value.example:
       - gearmand
   - template: auto_conf/discovery
+    overrides:
+      discovery.example:
+        metrics_prefix: gearman

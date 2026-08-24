@@ -56,3 +56,69 @@ class GitHubAuthenticationError(httpx.HTTPStatusError):
             request=error.request,
             response=error.response,
         )
+
+
+# GitHub answers an over-long body with this status, and also every other validation failure and a
+# body it judges to be spam. Which one it is shows only in the response body.
+VALIDATION_FAILED_STATUS = 422
+
+# Matched as a substring because there is no dedicated error code: this arrives as `custom` with the
+# explanation in a free-text message, for example 'body is too long (maximum is 65536 characters)'.
+# https://docs.github.com/en/rest/using-the-rest-api/troubleshooting-the-rest-api
+BODY_TOO_LONG_MESSAGE = 'too long'
+
+
+def github_body_too_long_message(response: httpx.Response) -> str | None:
+    """Return GitHub's explanation if *response* is it refusing a body for length, else `None`.
+
+    Reading every 422 as 'too long' would answer a spam rejection by sending less, which cannot fix it
+    and hides the real cause. An unreadable 422 counts as not too long for the same reason.
+    """
+    if response.status_code != VALIDATION_FAILED_STATUS:
+        return None
+
+    try:
+        payload = response.json()
+    except ValueError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+
+    # The top-level message is the generic 'Validation Failed' and the specific one is per-error, but
+    # only one of the two is documented to exist, so both are read.
+    messages = [payload.get('message')]
+    if isinstance(entries := payload.get('errors'), list):
+        messages.extend(entry.get('message') for entry in entries if isinstance(entry, dict))
+
+    return next(
+        (message for message in messages if isinstance(message, str) and BODY_TOO_LONG_MESSAGE in message.lower()), None
+    )
+
+
+class GitHubBodyTooLongError(ValueError):
+    """A body GitHub will not accept because it is too long.
+
+    One type for both raise sites -- the client's pre-request measurement and GitHub's own 422 -- so a
+    caller has one thing to catch and one action to take: send less. Not an `httpx.HTTPStatusError`,
+    because the pre-request case has no response to carry; `github_message` is set only by the server.
+    """
+
+    def __init__(self, message: str, *, limit: int, size: int | None = None, github_message: str | None = None):
+        super().__init__(message)
+        self.limit = limit
+        self.size = size
+        self.github_message = github_message
+
+    @classmethod
+    def from_response(cls, github_message: str, *, limit: int) -> GitHubBodyTooLongError:
+        """Build the error for a body GitHub itself refused."""
+        return cls(f'GitHub refused the body: {github_message}', limit=limit, github_message=github_message)
+
+    @classmethod
+    def from_measurement(cls, size: int, *, limit: int) -> GitHubBodyTooLongError:
+        """Build the error for a body the client refused before spending a request."""
+        return cls(
+            f'Body is {size} bytes, over the {limit} GitHub accepts; not sent.',
+            limit=limit,
+            size=size,
+        )
