@@ -1664,7 +1664,7 @@ def test_report_issue_minimal(datadog_agent, issue_check):
 def test_report_issue_full(datadog_agent, issue_check):
     issue_check.report_issue(
         id="issue-2",
-        issue_name="permission_denied",
+        issue_name="Permission Denied",
         issue_type="permission_denied",
         title="Permission denied",
         description="The check lacks required permissions.",
@@ -1683,7 +1683,7 @@ def test_report_issue_full(datadog_agent, issue_check):
         "issue-2",
         {
             'id': 'issue-2',
-            'issue_name': 'permission_denied',
+            'issue_name': 'Permission Denied',
             'issue_type': 'permission_denied',
             'title': 'Permission denied',
             'description': 'The check lacks required permissions.',
