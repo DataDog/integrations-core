@@ -16,7 +16,16 @@ from confluent_kafka import (
     Producer,
     TopicPartition,
 )
-from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
+from confluent_kafka.admin import (
+    AdminClient,
+    AlterConfigOp,
+    AlterConfigOpType,
+    ConfigEntry,
+    ConfigResource,
+    NewTopic,
+    OffsetSpec,
+    ResourceType,
+)
 
 try:
     import boto3
@@ -496,7 +505,10 @@ class KafkaActionsClient:
                 raise
 
     def update_topic_config(self, topic: str, configs: dict[str, str]) -> bool:
-        """Update topic configuration.
+        """Update topic configuration using incremental alter configs (PATCH semantics).
+
+        Only the specified config keys are modified; all other existing configs
+        are left unchanged.
 
         Args:
             topic: Topic name
@@ -508,10 +520,9 @@ class KafkaActionsClient:
         admin = self.get_admin_client()
 
         resource = ConfigResource(ResourceType.TOPIC, topic)
-        for key, value in configs.items():
-            resource.set_config(key, value)
+        ops = [AlterConfigOp(ConfigEntry(key, value), AlterConfigOpType.SET) for key, value in configs.items()]
 
-        futures = admin.alter_configs([resource])
+        futures = admin.incremental_alter_configs({resource: ops})
 
         for _res, future in futures.items():
             try:
@@ -523,7 +534,10 @@ class KafkaActionsClient:
                 raise
 
     def delete_topic_config(self, topic: str, config_keys: list[str]) -> bool:
-        """Delete (reset to default) topic configurations.
+        """Delete (reset to default) topic configurations using incremental alter configs.
+
+        Only the specified config keys are reset to defaults; all other existing
+        configs are left unchanged.
 
         Args:
             topic: Topic name
@@ -535,10 +549,9 @@ class KafkaActionsClient:
         admin = self.get_admin_client()
 
         resource = ConfigResource(ResourceType.TOPIC, topic)
-        for key in config_keys:
-            resource.set_config(key, None)
+        ops = [AlterConfigOp(ConfigEntry(key, None), AlterConfigOpType.DELETE) for key in config_keys]
 
-        futures = admin.alter_configs([resource])
+        futures = admin.incremental_alter_configs({resource: ops})
 
         for _res, future in futures.items():
             try:
