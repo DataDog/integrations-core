@@ -2385,15 +2385,15 @@ def test_paginated_limit_project_groups(
         pytest.param(
             30,
             [
-                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 0, 30),
+                (['http://localhost:80/api/Spaces-1/projects'], 0, 30),
             ],
             id='high limit',
         ),
         pytest.param(
             2,
             [
-                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 0, 2),
-                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 2, 2),
+                (['http://localhost:80/api/Spaces-1/projects'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/projects'], 2, 2),
             ],
             id='low limit',
         ),
@@ -2401,8 +2401,8 @@ def test_paginated_limit_project_groups(
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_paginated_limit_projects_projectgroups1(
-    get_current_datetime, dd_run_check, paginated_limit, mock_http_get, expected_skip_take_args, instance
+def test_paginated_limit_projects(
+    get_current_datetime, dd_run_check, aggregator, paginated_limit, mock_http_get, expected_skip_take_args, instance
 ):
     instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
@@ -2417,9 +2417,12 @@ def test_paginated_limit_projects_projectgroups1(
         args, kwargs = call
         take = kwargs.get('params', {}).get('take')
         skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects' == args[0]:
+        if 'http://localhost:80/api/Spaces-1/projects' == args[0]:
             skip_take_args += [(list(args), skip, take)]
 
+    # The space is listed once and its projects shared between its project groups, so the number of
+    # requests follows the page count rather than the number of project groups.
+    assert len(aggregator.metrics('octopus_deploy.project_group.count')) == 3
     assert skip_take_args == expected_skip_take_args
 
 
