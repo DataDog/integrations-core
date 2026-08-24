@@ -106,6 +106,13 @@ SELECT table_name as `name`,
        WHERE TABLE_SCHEMA = %s AND TABLE_TYPE='BASE TABLE'
 """
 
+SQL_VIEWS = """\
+SELECT table_name as `name`,
+       view_definition as `definition`
+       FROM information_schema.VIEWS
+       WHERE TABLE_SCHEMA = %s
+"""
+
 SQL_COLUMNS = """\
 SELECT table_name as `table_name`,
        column_name as `name`,

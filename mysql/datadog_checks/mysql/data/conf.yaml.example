@@ -334,7 +334,8 @@ instances:
         # collection_interval: 600
 
     ## Configure collection of schemas (databases).
-    ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+    ## Only tables, views, and schemas for which the user has been granted SELECT privileges are collected.
+    ## Collecting view definitions also requires the SHOW VIEW privilege.
     #
     # collect_schemas:
 
@@ -356,7 +357,8 @@ instances:
 
     ## DEPRECATED: Use `collect_schemas` instead.
     ## Configure collection of schemas (databases).
-    ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+    ## Only tables, views, and schemas for which the user has been granted SELECT privileges are collected.
+    ## Collecting view definitions also requires the SHOW VIEW privilege.
     ##
     ##
     ## <<< DEPRECATED >>>

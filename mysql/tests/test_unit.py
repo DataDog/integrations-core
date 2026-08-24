@@ -422,9 +422,10 @@ def test_submit_is_called_if_too_many_columns():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
     with (
-        mock.patch('time.time', side_effect=[0, 0]),
+        mock.patch('time.time', return_value=0),
         mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]),
         mock.patch('datadog_checks.mysql.databases_data.SubmitData.submit') as mocked_submit,
+        mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_views', return_value=[]),
         mock.patch(
             'datadog_checks.mysql.databases_data.DatabasesData._get_tables_data',
             return_value=(1000_000, {"name": "my_table"}),

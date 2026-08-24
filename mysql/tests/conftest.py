@@ -611,6 +611,7 @@ def add_schema_test_databases(cursor):
     cursor.execute("CREATE DATABASE IF NOT EXISTS datadog_test_schemas;")
     cursor.execute("USE datadog_test_schemas;")
     cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
+    cursor.execute("GRANT SHOW VIEW ON datadog_test_schemas.* TO 'dog'@'%';")
     # needed to query INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS in mariadb 10.5 and above
     cursor.execute("GRANT REFERENCES ON datadog_test_schemas.* TO 'dog'@'%';")
     cursor.execute(
@@ -669,6 +670,11 @@ def add_schema_test_databases(cursor):
             Review TEXT,
             CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
             REFERENCES Restaurants(RestaurantName, District) ON DELETE CASCADE ON UPDATE NO ACTION);
+        """
+    )
+    cursor.execute(
+        """CREATE VIEW restaurant_names AS
+           SELECT RestaurantName, District FROM Restaurants;
         """
     )
     # Second DB

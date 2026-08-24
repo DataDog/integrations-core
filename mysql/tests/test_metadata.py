@@ -2,12 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import re
+import time
+from unittest import mock
 
+import pymysql
 import pytest
 from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
@@ -60,6 +65,15 @@ def normalize_values(actual_payload):
                             subpartition["subpartition_expression"] = (
                                 subpartition["subpartition_expression"].replace("`", "").lower().strip()
                             )
+    if 'views' in actual_payload:
+        actual_payload['views'].sort(key=lambda x: x['name'])
+        for view in actual_payload['views']:
+            if view['definition'] is not None:
+                view['definition'] = "normalized_value"
+            view['columns'].sort(key=lambda x: x['name'])
+            for column in view['columns']:
+                if column['column_type'] == 'int':
+                    column['column_type'] = 'int(11)'
 
 
 @pytest.mark.integration
@@ -485,6 +499,32 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
             },
         ],
+        "views": [
+            {
+                "name": "restaurant_names",
+                "definition": "normalized_value",
+                "columns": [
+                    {
+                        "name": "RestaurantName",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 1,
+                        "column_key": "",
+                        "extra": "",
+                    },
+                    {
+                        "name": "District",
+                        "column_type": "varchar(100)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "",
+                        "extra": "",
+                    },
+                ],
+            }
+        ],
     }
     exp_datadog_test_schemas_second = {
         "name": "datadog_test_schemas_second",
@@ -656,6 +696,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 
     actual_payloads = {}
+    table_fragment_found = False
+    view_fragment_found = False
 
     expected_tags = (
         'database_hostname:stubbed.hostname',
@@ -686,12 +728,24 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         if db_name not in databases_to_find:
             continue
 
-        if db_name in actual_payloads:
-            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
-        else:
-            actual_payloads[db_name] = database_metadata[0]
+        database_fragment = database_metadata[0]
+        database_payload = actual_payloads.setdefault(
+            db_name, {key: value for key, value in database_fragment.items() if key not in ('tables', 'views')}
+        )
+        for object_type in ('tables', 'views'):
+            if object_type in database_fragment:
+                database_payload.setdefault(object_type, []).extend(database_fragment[object_type])
+
+        if db_name == 'datadog_test_schemas' and 'tables' in database_fragment:
+            assert 'views' not in database_fragment
+            table_fragment_found = True
+        if db_name == 'datadog_test_schemas' and 'views' in database_fragment:
+            assert 'tables' not in database_fragment
+            view_fragment_found = True
 
     assert len(actual_payloads) == len(expected_data_for_db)
+    assert table_fragment_found
+    assert view_fragment_found
 
     for db_name, actual_payload in actual_payloads.items():
         normalize_values(actual_payload)
@@ -729,3 +783,111 @@ def test_schemas_collection_config(dbm_instance):
     dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
     check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     assert check._config.schemas_config == {"enabled": True, "max_execution_time": 0}
+
+
+@pytest.mark.unit
+def test_submit_data_counts_table_and_view_columns_together():
+    submitted_data = []
+    submitter = SubmitData(submitted_data.append, {"kind": "mysql_databases"}, mock.MagicMock())
+    submitter.store_db_infos([{"name": "test_db"}])
+
+    submitter.store("test_db", [{"name": "table"}], 2)
+    submitter.store_views("test_db", [{"name": "view", "definition": None, "columns": []}], 3)
+
+    assert submitter.columns_since_last_submit() == 5
+
+    submitter.submit()
+    metadata = json.loads(submitted_data[0])["metadata"][0]
+    assert metadata["tables"] == [{"name": "table"}]
+    assert metadata["views"] == [{"name": "view", "definition": None, "columns": []}]
+
+
+@pytest.mark.unit
+def test_submit_data_sends_table_and_view_fragments_independently():
+    submitted_data = []
+    submitter = SubmitData(submitted_data.append, {"kind": "mysql_databases"}, mock.MagicMock())
+    submitter.store_db_infos([{"name": "test_db"}])
+    column = {
+        "name": "id",
+        "column_type": "int",
+        "default": None,
+        "nullable": False,
+        "ordinal_position": 1,
+        "column_key": "",
+        "extra": "",
+    }
+
+    submitter.store("test_db", [{"name": "table"}], 1)
+    submitter.submit()
+    submitter.store_views("test_db", [{"name": "view", "definition": None, "columns": [column]}], 1)
+    submitter.submit()
+
+    table_metadata = json.loads(submitted_data[0])["metadata"][0]
+    view_metadata = json.loads(submitted_data[1])["metadata"][0]
+    assert table_metadata == {"name": "test_db", "tables": [{"name": "table"}]}
+    assert view_metadata == {
+        "name": "test_db",
+        "views": [{"name": "view", "definition": None, "columns": [column]}],
+    }
+    assert set(view_metadata["views"][0]["columns"][0]) == {
+        "name",
+        "column_type",
+        "default",
+        "nullable",
+        "ordinal_position",
+        "column_key",
+        "extra",
+    }
+
+
+@pytest.mark.unit
+def test_view_columns_split_payloads_at_the_column_limit():
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    databases_data = DatabasesData({}, check, check._config)
+    submitted_data = []
+    databases_data.TABLES_CHUNK_SIZE = 1
+    databases_data.MAX_COLUMNS_PER_EVENT = 1
+    databases_data._data_submitter = SubmitData(submitted_data.append, {"kind": "mysql_databases"}, mock.MagicMock())
+    databases_data._data_submitter.store_db_infos([{"name": "test_db"}])
+    views = [{"name": "view_{}".format(i), "definition": None, "columns": []} for i in range(3)]
+
+    with (
+        mock.patch.object(databases_data, '_get_tables', return_value=[]),
+        mock.patch.object(databases_data, '_get_views', return_value=views),
+        mock.patch.object(databases_data, '_get_views_data', side_effect=lambda chunk, *_: (1, chunk)),
+    ):
+        databases_data._fetch_database_data(mock.MagicMock(), time.time(), "test_db")
+
+    payloads = [json.loads(event)["metadata"][0] for event in submitted_data]
+    assert [[view["name"] for view in payload["views"]] for payload in payloads] == [
+        ["view_0", "view_1"],
+        ["view_2"],
+    ]
+
+
+@pytest.mark.unit
+def test_view_permission_failure_preserves_table_metadata():
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    databases_data = DatabasesData({}, check, check._config)
+    submitted_data = []
+    databases_data._log = mock.MagicMock()
+    databases_data._data_submitter = SubmitData(submitted_data.append, {"kind": "mysql_databases"}, databases_data._log)
+    databases_data._data_submitter.store_db_infos([{"name": "test_db"}])
+
+    with (
+        mock.patch.object(databases_data, '_get_tables', return_value=[{"name": "table"}]),
+        mock.patch.object(databases_data, '_get_tables_data', return_value=(1, [{"name": "table", "columns": []}])),
+        mock.patch.object(
+            databases_data,
+            '_get_views',
+            side_effect=pymysql.DatabaseError(
+                pymysql.constants.ER.TABLEACCESS_DENIED_ERROR, "SHOW VIEW command denied"
+            ),
+        ),
+    ):
+        databases_data._fetch_database_data(mock.MagicMock(), time.time(), "test_db")
+
+    metadata = json.loads(submitted_data[0])["metadata"][0]
+    assert metadata == {"name": "test_db", "tables": [{"name": "table", "columns": []}]}
+    databases_data._log.warning.assert_called_once()
+    assert "SHOW VIEW privilege" in databases_data._log.warning.call_args.args[0]
