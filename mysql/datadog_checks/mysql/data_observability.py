@@ -184,8 +184,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         monitor_id = query_spec.monitor_id
         start = time.time()
         try:
-            if self._cancel_event.is_set():
-                raise Exception("Job loop cancelled. Aborting query.")
+            self._raise_if_cancelled()
             self._set_query_timeout(conn, query_spec.query_timeout)
             # SSCursor reads rows as fetchmany() requests them instead of buffering the
             # full result in execute(). Closing it drains unread rows before the shared

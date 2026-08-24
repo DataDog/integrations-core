@@ -651,3 +651,16 @@ def test_emit_failure_metric(instance_basic, aggregator, monkeypatch):
     assert len(failures) == 1
     assert 'exc_class:JSONDecodeError' in failures[0].tags
     assert 'monitor_id:1' in failures[0].tags
+
+
+def test_cancelled_job_aborts_query_before_execution(instance_basic):
+    """Cancelling mid-batch must stop the queries that have not run yet."""
+    check = _create_check(instance_basic)
+    job = check.data_observability
+    conn, cursor = _make_mock_conn()
+    job.cancel()
+
+    with pytest.raises(Exception, match='cancelled'):
+        job._execute_single_query(conn, job._queries[0])
+
+    cursor.execute.assert_not_called()
