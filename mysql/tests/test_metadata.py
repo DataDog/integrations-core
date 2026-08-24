@@ -66,7 +66,6 @@ def normalize_values(actual_payload):
 
 @pytest.mark.unit
 def test_schema_collection_aborts_query_when_cancelled(dbm_instance):
-    """Schema collection is not a DBMAsyncJob; it must honor metadata job cancellation."""
     check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     check.mysql_metadata.cancel()
     databases_data = DatabasesData(check.mysql_metadata, check, check._config)

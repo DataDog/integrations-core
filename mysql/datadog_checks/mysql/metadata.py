@@ -113,10 +113,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     def shutdown(self) -> None:
         self._close_db_conn()
         self._check = None
-        # A bound method of the check, so it pins the check independently of _check above.
         self._connection_args_provider = None
-        # DatabasesData points back at both this job and the check, so dropping it is what lets
-        # refcounting reclaim the pair.
         self._databases_data = None
 
     def _close_db_conn(self):

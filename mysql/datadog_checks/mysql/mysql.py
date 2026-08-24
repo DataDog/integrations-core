@@ -149,7 +149,6 @@ class MySql(DatabaseCheck):
             and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
         )
 
-        # Jobs stay None unless the configuration enables DBM.
         self.statement_metrics = None
         self.statement_samples = None
         self.mysql_metadata = None
@@ -176,12 +175,9 @@ class MySql(DatabaseCheck):
 
     def _register_async_jobs(self):
         """Build and register the async jobs enabled by this check's configuration."""
-        # Every job requires DBM, and each job's own enabled flag defaults to true, so DBM is
-        # checked here rather than left to the jobs.
         if not self._config.dbm_enabled:
             return
 
-        # Pass function reference and managed auth flag to async jobs
         self.statement_metrics = self.register_async_job(
             MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         )

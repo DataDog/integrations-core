@@ -989,7 +989,6 @@ def test_async_job_registry_matches_config(dbm, expected_jobs):
 
     registered = check._async_job_registry
     assert list(registered) == expected_jobs
-    # Each attribute holds the registered job, or None when the config does not enable it.
     assert check.statement_metrics is registered.get('statement-metrics')
     assert check.statement_samples is registered.get('statement-samples')
     assert check.mysql_metadata is registered.get('database-metadata')
