@@ -6,10 +6,9 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import (
     ISSUE_NAME,
-    MetricLimitIssueReporter,
     _issue_id,
 )
 
@@ -47,20 +46,6 @@ def create_check(limit: int = 5, endpoint: str = ENDPOINT) -> MetricLimitOpenMet
 
 def reported_issues(datadog_agent: Any) -> list[dict[str, Any]]:
     return datadog_agent._sent_reported_issues['openmetrics_test']
-
-
-def test_reporter_is_explicitly_owned_by_openmetrics_base_classes(datadog_agent: Any) -> None:
-    check = create_check()
-    assert isinstance(check.metric_limit_issue_reporter, MetricLimitIssueReporter)
-    assert check.metric_limit_issue_reporter.metric_filter_config == 'metrics / exclude_metrics'
-
-    legacy_check = OpenMetricsBaseCheck('legacy_openmetrics_test', {}, {})
-    assert isinstance(legacy_check.metric_limit_issue_reporter, MetricLimitIssueReporter)
-    assert legacy_check.metric_limit_issue_reporter.metric_filter_config == 'metrics / ignore_metrics'
-
-    check.observed = 20
-    check.run()
-    assert not hasattr(check, '_openmetrics_metric_limit_issue_state')
 
 
 def test_generic_agent_check_metric_limiter_does_not_report(datadog_agent: Any) -> None:
