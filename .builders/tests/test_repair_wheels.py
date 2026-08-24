@@ -159,10 +159,13 @@ RELOCATED_LIBDDWAF_PATHS = [
 
 
 def _repair_dirs(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
-    dirs = tuple(tmp_path / name for name in ('source-built', 'source-external', 'built', 'external'))
-    for directory in dirs:
+    source_built_dir = tmp_path / 'source-built'
+    source_external_dir = tmp_path / 'source-external'
+    built_dir = tmp_path / 'built'
+    external_dir = tmp_path / 'external'
+    for directory in (source_built_dir, source_external_dir, built_dir, external_dir):
         directory.mkdir()
-    return dirs
+    return source_built_dir, source_external_dir, built_dir, external_dir
 
 
 def _stub_delocate(monkeypatch: pytest.MonkeyPatch) -> None:
