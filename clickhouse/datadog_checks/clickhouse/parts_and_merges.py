@@ -266,9 +266,9 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         }
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
-    def cancel(self):
-        super(ClickhousePartsAndMerges, self).cancel()
+    def shutdown(self) -> None:
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         if self._db_client:
@@ -282,6 +282,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         return list(self._tags_no_db) if self._tags_no_db else []
 
     def _execute_query(self, query: str) -> list:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         if self._db_client is None:
             self._db_client = self._check.create_dbm_client()
         try:

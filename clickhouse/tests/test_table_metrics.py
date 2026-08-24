@@ -151,12 +151,12 @@ def test_run_job_table_sizes_query_dedupes_via_limit_by(check):
     assert 'LIMIT 1 BY database, name' in captured[0]
 
 
-def test_cancel_closes_db_client(check):
+def test_shutdown_closes_db_client(check):
     job = check.table_metrics
     fake_client = mock.MagicMock()
     job._db_client = fake_client
 
-    job.cancel()
+    job.shutdown()
 
     assert job._db_client is None
     fake_client.close.assert_called_once()
@@ -252,6 +252,25 @@ def test_collect_view_refresh_skips_when_flag_set(check):
         job._collect_view_refresh_metrics()
 
     mock_query.assert_not_called()
+
+
+def test_run_job_skips_view_refresh_once_cancelled(check):
+    """A cancel landing mid-tick must not start the view refresh query.
+
+    The table size collection swallows the cancellation raised by _execute_query, so without the
+    check in run_job() unscheduling would issue this query and wait out the client read timeout.
+    """
+    job = check.table_metrics
+    job.cancel()
+
+    with (
+        mock.patch.object(check, 'create_dbm_client') as mock_client,
+        mock.patch.object(check, 'execute_query_raw') as mock_query,
+    ):
+        job.run_job()
+
+    mock_query.assert_not_called()
+    mock_client.assert_not_called()
 
 
 def test_handle_view_refreshes_unknown_table_sets_skip_and_logs_once(check):
