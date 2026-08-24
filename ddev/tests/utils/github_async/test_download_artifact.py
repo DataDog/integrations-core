@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import traceback
 
 import httpx
 import pytest
@@ -154,25 +155,44 @@ async def test_a_denial_from_github_itself_is_not_retried_as_an_expired_url(tmp_
     assert len(calls) == 1
 
 
-async def test_the_signed_url_credentials_never_reach_the_log(monkeypatch, tmp_path, caplog) -> None:
-    """A presigned URL carries its signature in the query string, so a retry must not log the URL.
+# A signed URL keeps its signature in the query string. Both cases below assume the worst about what
+# a failure quotes: a status whose httpx message is built from the full URL, and a transport error
+# whose message happens to contain it. Neither is ours to control, so neither is relied upon.
+SIGNATURE = "X-Amz-Signature=b1acc0dedb1acc0de"
+SIGNED_URL = f"https://signed.example/zip?{SIGNATURE}"
 
-    The retried exception reaches this client's log line and stamina's retry hook, and httpx builds
-    its message from the full URL, so a leak here would write usable artifact credentials into CI
-    logs that outlive the run.
-    """
-    signature = "X-Amz-Signature=b1acc0dedb1acc0de"
+SIGNED_DOWNLOAD_FAILURES = [
+    pytest.param(httpx.Response(403, content=b"<Error>AccessDenied</Error>"), id="expired-signature"),
+    pytest.param(httpx.ConnectError(f"connection to {SIGNED_URL} refused"), id="transport-error"),
+]
+
+
+def _signed_download(failure: httpx.Response | Exception, *, fail_every_attempt: bool):
+    """GitHub handler and signed handler where the signed download fails at least once."""
     github_calls: list[httpx.Request] = []
 
     def github_handler(request: httpx.Request) -> httpx.Response:
         github_calls.append(request)
-        return httpx.Response(302, headers={"location": f"https://signed.example/zip?{signature}"})
+        return httpx.Response(302, headers={"location": SIGNED_URL})
 
     def signed_handler(request: httpx.Request) -> httpx.Response:
-        if len(github_calls) == 1:
-            return httpx.Response(403, content=b"<Error>AccessDenied</Error>")
+        if fail_every_attempt or len(github_calls) == 1:
+            if isinstance(failure, Exception):
+                raise failure
+            return failure
         return httpx.Response(200, content=make_zip({"hello.txt": b"hi"}))
 
+    return github_handler, signed_handler, github_calls
+
+
+@pytest.mark.parametrize("failure", SIGNED_DOWNLOAD_FAILURES)
+async def test_the_signed_url_credentials_never_reach_the_log(monkeypatch, tmp_path, caplog, failure) -> None:
+    """A retry of the signed download must not write usable artifact credentials into CI logs.
+
+    The retried exception reaches this client's log line and stamina's retry hook, both of which
+    render it, and CI logs outlive the signature's validity.
+    """
+    github_handler, signed_handler, github_calls = _signed_download(failure, fail_every_attempt=False)
     patch_signed_download(monkeypatch, signed_handler)
     client = AsyncGitHubClient(
         token=TOKEN, transport=httpx.MockTransport(github_handler), logger=logging.getLogger("test-client")
@@ -181,9 +201,26 @@ async def test_the_signed_url_credentials_never_reach_the_log(monkeypatch, tmp_p
     with caplog.at_level(logging.WARNING):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
-    # The expired URL was retried, so there is a retry to have logged something.
+    # The failure was retried, so there is a retry to have logged something.
     assert len(github_calls) == 2
     assert caplog.records
     # Messages and every structured field, since the signature can hide in either.
     logged = "\n".join(f"{record.getMessage()} {record.__dict__}" for record in caplog.records)
-    assert signature not in logged
+    assert SIGNATURE not in logged
+
+
+@pytest.mark.parametrize("failure", SIGNED_DOWNLOAD_FAILURES)
+async def test_the_signed_url_credentials_never_reach_the_error_that_escapes(monkeypatch, tmp_path, failure) -> None:
+    """Once the retries are spent the failure reaches the caller, whose handler may log it.
+
+    Python prints a chained cause in full, so the chain has to be as clean as the message.
+    """
+    github_handler, signed_handler, _ = _signed_download(failure, fail_every_attempt=True)
+    patch_signed_download(monkeypatch, signed_handler)
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+
+    with pytest.raises(httpx.HTTPError) as exc_info:
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    reported = "".join(traceback.format_exception(exc_info.value))
+    assert SIGNATURE not in reported

@@ -143,6 +143,16 @@ def loggable_url(url: str) -> str:
     return url.split("?", 1)[0]
 
 
+def without_query_of(text: str, url: str) -> str:
+    """`text` with `url`'s query string removed.
+
+    For messages that quote a failure reason produced by someone else: whether a URL we must not log
+    ends up in one is not our decision to depend on.
+    """
+    _, _, query = url.partition("?")
+    return text.replace(query, "<redacted>") if query else text
+
+
 class RetryCause:
     """Carries the failure from the predicate, which sees it, to the log line, which counts attempts.
 
@@ -1126,9 +1136,9 @@ class AsyncGitHubClient:
     ) -> None:
         """Anonymous fetch (no bearer token to S3) + zip-slip-validated extractall.
 
-        Failures are re-raised without the URL. The signature lives in its query string, and a failure
-        here is retryable, so the exception reaches both this client's log line and stamina's retry
-        hook, each of which renders it.
+        Failures are re-raised without the URL and without a cause. The signature lives in its query
+        string, a failure here is retryable, and the exception reaches this client's log line, stamina's
+        retry hook and any traceback, all of which render it or its chain.
         """
         effective_timeout = self._effective_timeout(timeout)
         safe_url = loggable_url(signed_url)
@@ -1136,12 +1146,11 @@ class AsyncGitHubClient:
             try:
                 download_response = await anonymous_client.get(signed_url)
             except httpx.TransportError as exc:
-                # Chained: a transport error reports an OS-level reason and keeps the URL in its
-                # request, not its message.
-                raise type(exc)(f"artifact download from {safe_url}: {exc}") from exc
+                raise type(exc)(
+                    f"artifact download from {safe_url}: {without_query_of(str(exc), signed_url)}"
+                ) from None
             if download_response.is_error or is_redirect_status(download_response.status_code):
-                # Built here rather than by raise_for_status, whose message embeds the full URL. Not
-                # chained, so the original message cannot resurface in a traceback.
+                # Built here rather than by raise_for_status, whose message embeds the full URL.
                 raise httpx.HTTPStatusError(
                     f"artifact download from {safe_url} failed with HTTP {download_response.status_code}",
                     request=download_response.request,
