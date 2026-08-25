@@ -101,4 +101,5 @@ files:
     overrides:
       value.example:
       - vault
+      - vault-enterprise
   - template: auto_conf/discovery

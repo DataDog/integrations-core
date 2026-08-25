@@ -5,6 +5,7 @@
 #
 ad_identifiers:
   - vault
+  - vault-enterprise
 
 ## Enables configuration discovery
 #
