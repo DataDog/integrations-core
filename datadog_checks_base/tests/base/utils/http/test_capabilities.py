@@ -9,9 +9,10 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 
-from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPResponse
+from datadog_checks.base.utils.requests_adapter import RequestsResponseAdapter
 from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import get_wire_headers
@@ -268,22 +269,31 @@ class TestResponseProtocolSurface:
     def test_context_manager_closes_underlying_response(self):
         response = requests.Response()
         response.close = mock.Mock()
-        wrapper = ResponseWrapper(response, 1024)
+        adapter = RequestsResponseAdapter(response, 1024)
 
-        with wrapper as entered:
-            assert entered is wrapper
+        with adapter as entered:
+            assert entered is adapter
 
         response.close.assert_called_once_with()
 
+    def test_requests_members_are_not_exposed(self):
+        response = requests.Response()
+        response.raw = object()
+        response.request = requests.Request('GET', 'http://example.com').prepare()
+        adapter = RequestsResponseAdapter(response, 1024)
 
-def build_requests_response(content: bytes, headers: dict[str, str] | None = None) -> ResponseWrapper:
+        assert not hasattr(adapter, 'raw')
+        assert not hasattr(adapter, 'request')
+
+
+def build_requests_response(content: bytes, headers: dict[str, str] | None = None) -> RequestsResponseAdapter:
     """Build through the requests adapter so headers determine encoding."""
     raw = mock.Mock(spec=['status', 'headers', 'reason', 'version'])
     raw.status, raw.headers, raw.reason, raw.version = 200, headers or {}, 'OK', 11
     response = HTTPAdapter().build_response(requests.Request('GET', 'http://example.com').prepare(), raw)
     response._content = content
     response._content_consumed = True
-    return ResponseWrapper(response, 1024)
+    return RequestsResponseAdapter(response, 1024)
 
 
 @pytest.mark.parametrize('backend', ['requests', 'mock'])
@@ -346,7 +356,7 @@ def test_iter_lines_contract(
         raw_response = requests.Response()
         raw_response._content = content
         raw_response._content_consumed = True
-        response = ResponseWrapper(raw_response, 1024)
+        response = RequestsResponseAdapter(raw_response, 1024)
     else:
         response = MockHTTPResponse(content=content)
 
@@ -363,28 +373,28 @@ class TestPeerCert:
     def test_returns_cert_from_connection_socket(self):
         response = mock.Mock()
         response.raw.connection.sock.getpeercert.return_value = b'der-bytes'
-        wrapper = ResponseWrapper(response, 1024)
-        assert wrapper.get_peer_cert(binary_form=True) == b'der-bytes'
+        adapter = RequestsResponseAdapter(response, 1024)
+        assert adapter.get_peer_cert(binary_form=True) == b'der-bytes'
         response.raw.connection.sock.getpeercert.assert_called_once_with(binary_form=True)
 
     def test_returns_decoded_cert_with_default_binary_form(self):
         response = mock.Mock()
         response.raw.connection.sock.getpeercert.return_value = {'subject': ()}
-        wrapper = ResponseWrapper(response, 1024)
-        assert wrapper.get_peer_cert() == {'subject': ()}
+        adapter = RequestsResponseAdapter(response, 1024)
+        assert adapter.get_peer_cert() == {'subject': ()}
         response.raw.connection.sock.getpeercert.assert_called_once_with(binary_form=False)
 
     def test_returns_none_when_socket_absent(self):
         response = mock.Mock()
         response.raw.connection.sock = None
-        wrapper = ResponseWrapper(response, 1024)
-        assert wrapper.get_peer_cert() is None
+        adapter = RequestsResponseAdapter(response, 1024)
+        assert adapter.get_peer_cert() is None
 
     def test_returns_none_for_non_tls_socket(self):
         response = mock.Mock()
         response.raw.connection.sock = object()
-        wrapper = ResponseWrapper(response, 1024)
-        assert wrapper.get_peer_cert() is None
+        adapter = RequestsResponseAdapter(response, 1024)
+        assert adapter.get_peer_cert() is None
 
 
 class TestHistory:
@@ -393,10 +403,10 @@ class TestHistory:
         redirect.status_code = 301
         final = mock.Mock()
         final.history = [redirect]
-        wrapper = ResponseWrapper(final, 1024)
-        history = wrapper.history
+        adapter = RequestsResponseAdapter(final, 1024)
+        history = adapter.history
         assert len(history) == 1
-        assert isinstance(history[0], ResponseWrapper)
+        assert isinstance(history[0], RequestsResponseAdapter)
         assert history[0].status_code == 301
 
     def test_history_item_translates_raise_for_status(self):
@@ -404,12 +414,12 @@ class TestHistory:
         redirect.raise_for_status.side_effect = requests.exceptions.HTTPError('boom')
         final = mock.Mock()
         final.history = [redirect]
-        wrapper = ResponseWrapper(final, 1024)
+        adapter = RequestsResponseAdapter(final, 1024)
         with pytest.raises(HTTPClientStatusError):
-            wrapper.history[0].raise_for_status()
+            adapter.history[0].raise_for_status()
 
     def test_empty_history(self):
         response = mock.Mock()
         response.history = []
-        wrapper = ResponseWrapper(response, 1024)
-        assert wrapper.history == []
+        adapter = RequestsResponseAdapter(response, 1024)
+        assert adapter.history == []

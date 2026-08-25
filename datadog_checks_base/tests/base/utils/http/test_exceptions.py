@@ -9,13 +9,7 @@ import pytest
 import requests
 from urllib3.exceptions import ReadTimeoutError
 
-from datadog_checks.base.utils.http import (
-    _COMPAT_EXCEPTIONS,
-    RequestsWrapper,
-    ResponseWrapper,
-    _backend_compat_type,
-    _translate_requests_exception,
-)
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientConnectTimeoutError,
@@ -26,6 +20,12 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPClientSSLError,
     HTTPClientStatusError,
     HTTPClientTimeoutError,
+)
+from datadog_checks.base.utils.requests_adapter import (
+    _COMPAT_EXCEPTIONS,
+    RequestsResponseAdapter,
+    _backend_compat_type,
+    _translate_requests_exception,
 )
 
 
@@ -265,11 +265,11 @@ class TimeoutRawStream:
         raise ReadTimeoutError(None, None, 'slow')
 
 
-def test_response_wrapper_maps_requests_wrapped_mid_stream_read_timeout() -> None:
+def test_response_adapter_maps_requests_wrapped_mid_stream_read_timeout() -> None:
     response = requests.Response()
     response.encoding = 'utf-8'
     response.raw = TimeoutRawStream()
-    stream = ResponseWrapper(response, 1024).iter_lines(decode_unicode=True)
+    stream = RequestsResponseAdapter(response, 1024).iter_lines(decode_unicode=True)
 
     assert next(stream) == 'first'
     with pytest.raises(HTTPClientReadTimeoutError, match='slow'):

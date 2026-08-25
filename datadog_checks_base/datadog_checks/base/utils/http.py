@@ -3,14 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import json
 import logging
 import os
 import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from typing import TYPE_CHECKING
@@ -21,12 +19,9 @@ import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
 from requests import cookies as requests_cookies
-from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from requests.structures import CaseInsensitiveDict
 from urllib3.exceptions import InsecureRequestWarning
-from urllib3.exceptions import ReadTimeoutError as Urllib3ReadTimeoutError
-from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
@@ -212,180 +207,6 @@ def get_tls_config_from_options(new_options):
     elif cert is not None:
         raise TypeError('Unexpected type for `cert` option. Expected str or tuple, got {}.'.format(type(cert).__name__))
     return tls_config
-
-
-def _translate_requests_request(
-    request: requests.Request | requests.PreparedRequest | None,
-) -> HTTPRequestSnapshot | None:
-    if request is None:
-        return None
-
-    return HTTPRequestSnapshot(
-        method=request.method,
-        url=request.url,
-        headers=request.headers or {},
-    )
-
-
-def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[BaseException]) -> type[T]:
-    """Add requests bases so released checks' exception handlers keep matching."""
-    bases = tuple(dict.fromkeys((agnostic, *backend)))
-    # Keep only the most-derived bases to avoid an invalid parent-before-child MRO.
-    most_derived_bases = tuple(
-        base for base in bases if not any(base is not candidate and issubclass(candidate, base) for candidate in bases)
-    )
-    compat = type(agnostic.__name__, most_derived_bases, {})
-    compat.__module__ = agnostic.__module__
-    compat.__qualname__ = agnostic.__qualname__
-    compat.__doc__ = agnostic.__doc__
-    return compat
-
-
-_COMPAT_EXCEPTIONS: dict[type[HTTPClientError], type[HTTPClientError]] = {
-    HTTPClientError: _backend_compat_type(HTTPClientError, requests_exceptions.RequestException),
-    HTTPClientRequestError: _backend_compat_type(HTTPClientRequestError, requests_exceptions.RequestException),
-    HTTPClientStatusError: _backend_compat_type(HTTPClientStatusError, requests_exceptions.HTTPError),
-    HTTPClientTimeoutError: _backend_compat_type(HTTPClientTimeoutError, requests_exceptions.Timeout),
-    HTTPClientConnectTimeoutError: _backend_compat_type(
-        HTTPClientConnectTimeoutError, requests_exceptions.ConnectTimeout
-    ),
-    # requests used ReadTimeout for headers and ConnectionError for body reads.
-    HTTPClientReadTimeoutError: _backend_compat_type(
-        HTTPClientReadTimeoutError, requests_exceptions.ReadTimeout, requests_exceptions.ConnectionError
-    ),
-    HTTPClientConnectionError: _backend_compat_type(HTTPClientConnectionError, requests_exceptions.ConnectionError),
-    HTTPClientInvalidURLError: _backend_compat_type(
-        HTTPClientInvalidURLError,
-        requests_exceptions.InvalidURL,
-        requests_exceptions.MissingSchema,
-        requests_exceptions.InvalidSchema,
-        requests_exceptions.URLRequired,
-    ),
-    HTTPClientSSLError: _backend_compat_type(HTTPClientSSLError, requests_exceptions.SSLError),
-}
-
-# stdlib and requests JSONDecodeError are siblings, so the compatibility type carries both.
-_COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
-
-
-def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPClientError:
-    """Map a requests exception to its agnostic compatibility type, most-specific first."""
-    message = str(exc) or exc.__class__.__name__
-    request = _translate_requests_request(getattr(exc, 'request', None))
-    if isinstance(
-        exc,
-        (
-            requests_exceptions.InvalidURL,
-            requests_exceptions.MissingSchema,
-            requests_exceptions.InvalidSchema,
-            requests_exceptions.URLRequired,
-        ),
-    ):
-        return _COMPAT_EXCEPTIONS[HTTPClientInvalidURLError](message, request=request)
-    if isinstance(exc, requests_exceptions.SSLError):
-        return _COMPAT_EXCEPTIONS[HTTPClientSSLError](message, request=request)
-    if isinstance(exc, requests_exceptions.ConnectTimeout):
-        return _COMPAT_EXCEPTIONS[HTTPClientConnectTimeoutError](message, request=request)
-    if isinstance(exc, requests_exceptions.ReadTimeout):
-        return _COMPAT_EXCEPTIONS[HTTPClientReadTimeoutError](message, request=request)
-    if isinstance(exc, requests_exceptions.Timeout):
-        return _COMPAT_EXCEPTIONS[HTTPClientTimeoutError](message, request=request)
-    if isinstance(exc, requests_exceptions.ConnectionError) and any(
-        isinstance(cause, Urllib3ReadTimeoutError) for cause in (exc.__context__, exc.args[0] if exc.args else None)
-    ):
-        return _COMPAT_EXCEPTIONS[HTTPClientReadTimeoutError](message, request=request)
-    if isinstance(exc, requests_exceptions.ConnectionError):
-        return _COMPAT_EXCEPTIONS[HTTPClientConnectionError](message, request=request)
-    if isinstance(exc, requests_exceptions.ContentDecodingError):
-        return _COMPAT_EXCEPTIONS[HTTPClientRequestError](message, request=request)
-    if isinstance(exc, requests_exceptions.HTTPError):
-        return _COMPAT_EXCEPTIONS[HTTPClientStatusError](message, request=request, response=response)
-    if isinstance(exc, requests_exceptions.RequestException):
-        return _COMPAT_EXCEPTIONS[HTTPClientRequestError](message, request=request)
-    return _COMPAT_EXCEPTIONS[HTTPClientError](message)
-
-
-@contextmanager
-def _translate_http_errors() -> Iterator[None]:
-    """Re-raise requests exceptions as their library-agnostic equivalents."""
-    try:
-        yield
-    except requests_exceptions.RequestException as exc:
-        raise _translate_requests_exception(exc) from exc
-
-
-class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size):
-        super(ResponseWrapper, self).__init__(response)
-
-        # See https://github.com/psf/requests/pull/5942
-        self.__default_chunk_size = default_chunk_size
-
-    def raise_for_status(self):
-        try:
-            self.__wrapped__.raise_for_status()
-        except requests_exceptions.HTTPError as exc:
-            raise _translate_requests_exception(exc, response=self) from exc
-
-    def iter_content(self, chunk_size=None, decode_unicode=False):
-        if chunk_size is None:
-            chunk_size = self.__default_chunk_size
-
-        with _translate_http_errors():
-            yield from self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
-
-    def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
-        if chunk_size is None:
-            chunk_size = self.__default_chunk_size
-
-        with _translate_http_errors():
-            yield from self.__wrapped__.iter_lines(
-                chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
-            )
-
-    def __iter__(self):
-        # requests.Response.__iter__ delegates to the raw iter_content, so route direct iteration
-        # through the translating override instead of the wrapt-forwarded raw one.
-        return self.iter_content(128)
-
-    @property
-    def content(self):
-        with _translate_http_errors():
-            return self.__wrapped__.content
-
-    @property
-    def text(self):
-        with _translate_http_errors():
-            return self.__wrapped__.text
-
-    def json(self, **kwargs):
-        # The decode error is raised after the translating block rather than inside it. The compat
-        # type carries the backend's JSONDecodeError as a base, so the translator would otherwise
-        # read it as a transport failure and convert it to HTTPClientRequestError.
-        decode_error = None
-        with _translate_http_errors():
-            try:
-                return self.__wrapped__.json(**kwargs)
-            except requests_exceptions.JSONDecodeError as exc:
-                decode_error = exc
-
-        raise _COMPAT_JSON_DECODE_ERROR(decode_error.msg, decode_error.doc, decode_error.pos) from decode_error
-
-    def get_peer_cert(self, binary_form=False):
-        raw = getattr(self.__wrapped__, 'raw', None)
-        connection = getattr(raw, 'connection', None)
-        sock = getattr(connection, 'sock', None)
-        getpeercert = getattr(sock, 'getpeercert', None)
-        if getpeercert is None:
-            return None
-        return getpeercert(binary_form=binary_form)
-
-    @property
-    def history(self):
-        return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
-
-    def __enter__(self):
-        return self
 
 
 def suppress_default_auth(request):
@@ -732,10 +553,10 @@ class RequestsWrapper(object):
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return ResponseWrapper(response, self.request_size)
+            return requests_adapter.RequestsResponseAdapter(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
-        with _translate_http_errors():
+        with requests_adapter.translate_http_errors():
             try:
                 response = request_method(url, **new_options)
             except SSLError as e:
@@ -930,7 +751,7 @@ class RequestsWrapper(object):
 
     def handle_auth_token(self, **request):
         if self.auth_token_handler is not None:
-            with _translate_http_errors():
+            with requests_adapter.translate_http_errors():
                 self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
