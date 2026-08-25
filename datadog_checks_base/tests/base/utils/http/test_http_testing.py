@@ -6,7 +6,6 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import http as http_testing
 
 
@@ -108,32 +107,43 @@ def test_legacy_mock_response_reads_a_file(tmp_path):
     assert legacy(file_path=str(path)).json() == {'key': 'value'}
 
 
-def test_mock_response_fixture_builds_base_fake(tmp_path, mock_response):
+def test_mock_response_fixture_builds_requests_response(tmp_path, mock_response):
     path = tmp_path / 'payload.txt'
     path.write_text('line one\nline two')
 
     response = mock_response(file_path=str(path), headers={'X-Test': 'value'})
 
-    assert isinstance(response, FakeHTTPResponse)
+    assert isinstance(response, requests.Response)
     assert response.content == b'line one\nline two'
-    assert list(response.iter_lines()) == ['line one', 'line two']
+    assert list(response.iter_lines()) == [b'line one', b'line two']
     assert response.headers['x-test'] == 'value'
 
 
-def test_mock_response_fixture_configures_json_and_status_errors(mock_response):
+def test_mock_response_fixture_preserves_requests_status_errors(mock_response):
     response = mock_response(json_data={'error': 'unavailable'}, status_code=503)
 
     assert response.json() == {'error': 'unavailable'}
-    with pytest.raises(HTTPClientStatusError, match='503 Server Error') as exc_info:
+    with pytest.raises(requests.HTTPError, match='503 Server Error') as exc_info:
         response.raise_for_status()
     assert exc_info.value.response is response
 
 
-def test_mock_http_response_per_endpoint_accepts_base_fakes(mock_http_response_per_endpoint):
+def test_mock_http_response_preserves_requests_responses(mock_http_response):
     url = 'https://example.test/items'
-    response = FakeHTTPResponse()
+    mock_http_response(content='payload')
+
+    response = requests.Session().get(url)
+
+    assert isinstance(response, requests.Response)
+    assert response.text == 'payload'
+
+
+def test_mock_http_response_per_endpoint_preserves_requests_responses(mock_http_response_per_endpoint, mock_response):
+    url = 'https://example.test/items'
+    response = mock_response()
     mock_http_response_per_endpoint({url: [response]}, mode='exhaust')
 
+    assert isinstance(response, requests.Response)
     assert requests.Session().get(url) is response
 
 
