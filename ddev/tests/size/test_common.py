@@ -382,8 +382,6 @@ def test_save_markdown():
     mock_file.assert_called_once_with("output.md", "a", encoding="utf-8")
     handle = mock_file()
 
-    # The Platform column is omitted because the section summary already names the platform, and the
-    # blank line after </summary> is what makes GitHub render the table as markdown.
     expected_writes = (
         "# Status\n\n"
         "<details>\n"
@@ -481,13 +479,10 @@ def test_save_markdown_one_section_per_platform_and_version():
     assert written_content.count("<details>") == 2
     assert "<summary>linux-x86_64, Python 3.13 (100 B)</summary>" in written_content
     assert "<summary>macos-aarch64, Python 3.13 (200 B)</summary>" in written_content
-    # Both keys are in the summary, so neither should remain as a column.
     assert "Python_Version" not in written_content
 
 
 def test_save_markdown_orders_sections_deterministically():
-    # Platforms reach save_markdown from a set, so without sorting two exports of the same data can
-    # order their sections differently and become hard to compare.
     platforms = ["windows-x86_64", "linux-aarch64", "macos-x86_64", "linux-x86_64", "macos-aarch64"]
     modules = [
         {

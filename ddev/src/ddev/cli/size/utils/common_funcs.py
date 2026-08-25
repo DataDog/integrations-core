@@ -544,8 +544,6 @@ def save_markdown(
     if modules == []:
         return
 
-    # Platform and version key each section, so repeating them on every row of that section adds
-    # nothing.
     headers = [k for k in modules[0].keys() if "Bytes" not in k and k not in ("Platform", "Python_Version")]
 
     # Group modules by platform and version
@@ -563,9 +561,6 @@ def save_markdown(
     lines.append(f"# {title}")
     lines.append("")
 
-    # Sorted because the platforms come from a set, so insertion order varies between runs. Two
-    # exports of the same data would otherwise list their sections in different orders, which makes
-    # the compressed and uncompressed reports of one commit awkward to read side by side.
     def section_key(item: tuple[tuple[object, object], list]) -> tuple[str, str]:
         (platform, version), _ = item
         return str(platform), str(version)
@@ -588,9 +583,6 @@ def save_markdown(
                 readable_total = f"+{readable_total}"
         label = build_section_label(label, readable_total)
 
-        # Collapsed by default so a reader can pick out the platform they care about instead of
-        # scrolling past all of them. The blank line after </summary> is required: without it
-        # GitHub treats the block as raw HTML and the table renders as literal pipes.
         lines.append("<details>")
         lines.append(f"<summary>{label}</summary>")
         lines.append("")

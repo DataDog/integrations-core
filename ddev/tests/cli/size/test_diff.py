@@ -264,7 +264,6 @@ def test_diff_sends_metrics_to_dd(ddev, mock_size_diff_dependencies, compressed)
     assert result.exit_code == 0, result.output
     mock_send.assert_called_once()
     app, commit, modules, org, key, sent_compressed = mock_send.call_args.args
-    # Deltas must be attributed to the later of the two commits.
     assert commit == "commit2"
     assert org is None
     assert key == "fake_key"

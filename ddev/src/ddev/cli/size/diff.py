@@ -128,9 +128,7 @@ def diff(
                     )
                 if format:
                     export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
-                # An empty list means no module changed size between the two commits, so there is nothing to send.
                 if (to_dd_org or to_dd_key) and modules_plat_ver:
-                    # Deltas are attributed to the later commit, which is the one that introduced them.
                     send_diff_metrics_to_dd(app, second_commit, modules_plat_ver, to_dd_org, to_dd_key, compressed)
             except Exception as e:
                 progress.stop()
