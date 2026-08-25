@@ -1,26 +1,44 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 import os.path
 import tempfile
-from contextlib import ExitStack
 
 import pytest
 
 from datadog_checks.dev import run_command
+from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.strimzi import StrimziCheck
 
 from .common import HERE, KUBERNETES_VERSION, STRIMZI_VERSION
 
+NAMESPACE = "kafka"
+CLUSTER_OPERATOR_DEPLOYMENT = "strimzi-cluster-operator"
+ENTITY_OPERATOR_DEPLOYMENT = "my-cluster-entity-operator"
+CLUSTER_OPERATOR_PORT = 8080
+TOPIC_OPERATOR_PORT = 8080
+USER_OPERATOR_PORT = 8081
+
+CLUSTER_OPERATOR_POD_IP_STATE = "strimzi_cluster_operator_pod_ip"
+ENTITY_OPERATOR_POD_IP_STATE = "strimzi_entity_operator_pod_ip"
+
 
 def setup_strimzi():
-    run_command(["kubectl", "create", "namespace", "kafka"])
+    run_command(["kubectl", "create", "namespace", NAMESPACE], check=True)
     run_command(
-        ["kubectl", "create", "-f", os.path.join(HERE, "kind", STRIMZI_VERSION, "strimzi_install.yaml"), "-n", "kafka"]
+        [
+            "kubectl",
+            "create",
+            "-f",
+            os.path.join(HERE, "kind", STRIMZI_VERSION, "strimzi_install.yaml"),
+            "-n",
+            NAMESPACE,
+        ],
+        check=True,
     )
     run_command(
         [
@@ -29,10 +47,22 @@ def setup_strimzi():
             "-f",
             os.path.join(HERE, "kind", STRIMZI_VERSION, "kafka.yaml"),
             "-n",
-            "kafka",
-        ]
+            NAMESPACE,
+        ],
+        check=True,
     )
-    run_command(["kubectl", "wait", "kafka/my-cluster", "--for=condition=Ready", "--timeout=600s", "-n", "kafka"])
+    run_command(
+        [
+            "kubectl",
+            "wait",
+            "kafka/my-cluster",
+            "--for=condition=Ready",
+            "--timeout=600s",
+            "-n",
+            NAMESPACE,
+        ],
+        check=True,
+    )
 
     for file in ("topic.yaml", "user.yaml", "connect.yaml", "connectors.yaml"):
         run_command(
@@ -42,20 +72,72 @@ def setup_strimzi():
                 "-f",
                 os.path.join(HERE, "kind", STRIMZI_VERSION, file),
                 "-n",
-                "kafka",
-            ]
+                NAMESPACE,
+            ],
+            check=True,
         )
+
+    # `setup_strimzi` only runs while the environment is being set up. Later invocations of the
+    # `dd_environment` fixture (e.g. during `ddev env stop`) run in a fresh process, and by then the
+    # cluster may already be gone, so the pod IPs are cached here via `save_state`/`get_state` rather
+    # than looked up live.
+    save_state(
+        CLUSTER_OPERATOR_POD_IP_STATE,
+        get_deployment_pod_ip(CLUSTER_OPERATOR_DEPLOYMENT),
+    )
+    save_state(ENTITY_OPERATOR_POD_IP_STATE, get_deployment_pod_ip(ENTITY_OPERATOR_DEPLOYMENT))
+
+
+def get_deployment_pod_ip(deployment: str) -> str:
+    # Look up the deployment's pod selector, then use it to find the pod.
+    result = run_command(
+        [
+            "kubectl",
+            "get",
+            "deployment",
+            deployment,
+            "--namespace",
+            NAMESPACE,
+            "--output",
+            "json",
+        ],
+        capture="out",
+        check=True,
+    )
+    selector = json.loads(result.stdout)["spec"]["selector"]["matchLabels"]
+    selector_str = ",".join(f"{k}={v}" for k, v in selector.items())
+
+    result = run_command(
+        [
+            "kubectl",
+            "get",
+            "pods",
+            "--namespace",
+            NAMESPACE,
+            "--selector",
+            selector_str,
+            "--output",
+            "json",
+        ],
+        capture="out",
+        check=True,
+    )
+    pods = json.loads(result.stdout)["items"]
+    if len(pods) != 1 or not pods[0].get("status", {}).get("podIP"):
+        pod_names = [pod["metadata"]["name"] for pod in pods]
+        raise RuntimeError(f"Expected exactly one {deployment} pod, found {len(pods)}: {pod_names}")
+    return pods[0]["status"]["podIP"]
 
 
 def render_kind_config(kubernetes_version):
-    template_config_path = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    template_config_path = os.path.join(HERE, "kind", "kind-config.yaml")
     with open(template_config_path, "r") as f:
-        kind_config_content = f.read().replace('%%KUBERNETES_VERSION%%', kubernetes_version)
+        kind_config_content = f.read().replace("%%KUBERNETES_VERSION%%", kubernetes_version)
     return kind_config_content
 
 
-@pytest.fixture(scope='session')
-def dd_environment(dd_save_state):
+@pytest.fixture(scope="session")
+def dd_environment():
     if not KUBERNETES_VERSION:
         pytest.fail("KUBERNETES_VERSION is not set")
     if not STRIMZI_VERSION:
@@ -67,34 +149,33 @@ def dd_environment(dd_save_state):
         kind_config.flush()
 
         with kind_run(conditions=[setup_strimzi], kind_config=kind_config.name) as kubeconfig:
-            with ExitStack() as stack:
-                cluster_operator_ip, cluster_operator_port = stack.enter_context(
-                    port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'strimzi-cluster-operator')
-                )
-                topic_operator_ip, topic_operator_port = stack.enter_context(
-                    port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'my-cluster-entity-operator')
-                )
-                user_operator_ip, user_operator_port = stack.enter_context(
-                    port_forward(kubeconfig, 'kafka', 8081, 'deployment', 'my-cluster-entity-operator')
-                )
+            cluster_operator_ip = get_state(CLUSTER_OPERATOR_POD_IP_STATE)
+            entity_operator_ip = get_state(ENTITY_OPERATOR_POD_IP_STATE)
 
-                yield {
-                    "cluster_operator_endpoint": f"http://{cluster_operator_ip}:{cluster_operator_port}/metrics",
-                    "topic_operator_endpoint": f"http://{topic_operator_ip}:{topic_operator_port}/metrics",
-                    "user_operator_endpoint": f"http://{user_operator_ip}:{user_operator_port}/metrics",
-                }
+            instance = {
+                "cluster_operator_endpoint": f"http://{cluster_operator_ip}:{CLUSTER_OPERATOR_PORT}/metrics",
+                "topic_operator_endpoint": f"http://{entity_operator_ip}:{TOPIC_OPERATOR_PORT}/metrics",
+                "user_operator_endpoint": f"http://{entity_operator_ip}:{USER_OPERATOR_PORT}/metrics",
+            }
+
+            metadata = {
+                "agent_type": "kubernetes",
+                "kubernetes": {"kubeconfig": kubeconfig},
+            }
+
+            yield instance, metadata
 
 
 @pytest.fixture()
 def check():
-    return lambda instance: StrimziCheck('strimzi', {}, [instance])
+    return lambda instance: StrimziCheck("strimzi", {}, [instance])
 
 
 def mock_http_responses(url, **_params):
     mapping = {
-        'http://cluster-operator:8080/metrics': 'cluster_operator_metrics.txt',
-        'http://entity-operator:8080/metrics': 'topic_operator_metrics.txt',
-        'http://entity-operator:8081/metrics': 'user_operator_metrics.txt',
+        "http://cluster-operator:8080/metrics": "cluster_operator_metrics.txt",
+        "http://entity-operator:8080/metrics": "topic_operator_metrics.txt",
+        "http://entity-operator:8081/metrics": "user_operator_metrics.txt",
     }
 
     metrics_file = mapping.get(url)
@@ -102,5 +183,5 @@ def mock_http_responses(url, **_params):
     if not metrics_file:
         pytest.fail(f"url `{url}` not registered")
 
-    with open(os.path.join(HERE, 'fixtures', STRIMZI_VERSION, metrics_file)) as f:
+    with open(os.path.join(HERE, "fixtures", STRIMZI_VERSION, metrics_file)) as f:
         return MockResponse(content=f.read())
