@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the aggregate progress objects the gatherer publishes to the PR updater.
+"""Tests for the aggregate progress objects the gatherer publishes to the run reporter.
 
 These types are pure data, so what is worth testing is the derived reporting rules: a job's history
 can be sparse, only its latest execution counts, and a planned job with no execution is not complete.

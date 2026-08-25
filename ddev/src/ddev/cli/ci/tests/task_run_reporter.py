@@ -37,8 +37,8 @@ MAX_WRITE_PASSES = 5
 
 
 @dataclass(frozen=True)
-class PullRequestUpdaterOptions:
-    """Configuration for a ``TaskPullRequestUpdater``.
+class RunReporterOptions:
+    """Configuration for a ``TaskRunReporter``.
 
     ``pr_number`` is ``None`` for the runs that have no pull request to comment on — a push to
     ``master``, the nightly schedule, and merge-queue runs. Those render to the log and to
@@ -50,10 +50,13 @@ class PullRequestUpdaterOptions:
     pr_number: int | None
 
 
-class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
-    """Projects ``DispatcherProgress`` snapshots onto one pull-request comment.
+class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
+    """Reports on a Dispatcher run, by projecting its ``DispatcherProgress`` snapshots onto one report.
 
-    A serialized projection that renders the newest snapshot and ignores stale revisions, so the comment
+    That report goes to a pull-request comment when the run has a pull request, and otherwise only to
+    ``latest_body``, for the orchestrator to publish to the GitHub Actions run summary.
+
+    A serialized projection that renders the newest snapshot and ignores stale revisions, so the report
     cannot regress. Ordering holds within one Dispatcher execution, which workflow concurrency
     guarantees is the only one running. Terminal consumer: it emits no further messages.
 
@@ -65,7 +68,7 @@ class TaskPullRequestUpdater(AsyncProcessor["UpdatePRComment"]):
     not prove ownership, though, so an edit GitHub refuses means "not our comment".
     """
 
-    def __init__(self, name: str, client: AsyncGitHubClient, options: PullRequestUpdaterOptions):
+    def __init__(self, name: str, client: AsyncGitHubClient, options: RunReporterOptions):
         super().__init__(name)
         self._client = client
         self._options = options

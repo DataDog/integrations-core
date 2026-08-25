@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Builders shared by the Dispatcher batching, gatherer, renderer and updater tests."""
+"""Builders shared by the Dispatcher batching, gatherer, renderer and run reporter tests."""
 
 from __future__ import annotations
 
@@ -186,7 +186,7 @@ def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
 
 
 # ---------------------------------------------------------------------------
-# Progress snapshots, as the renderer and the pull-request updater see them
+# Progress snapshots, as the renderer and the run reporter see them
 # ---------------------------------------------------------------------------
 
 JOB_URL = "https://github.com/o/r/actions/runs/1/job/9"

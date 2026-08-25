@@ -30,7 +30,7 @@ from ddev.cli.ci.tests.messages import (
 )
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
-from ddev.cli.ci.tests.task_pull_request_updater import PullRequestUpdaterOptions, TaskPullRequestUpdater
+from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.cli.ci.tests.task_test_gatherer import INITIAL_UPDATE_MESSAGE_ID, TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.utils.github_async.models import JobStep, WorkflowJob
@@ -1005,7 +1005,7 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     # The skipped job is recorded as skipped.
     assert _find_result(gatherer, "consul").status == "skipped"
 
-    # The same run as the published snapshot, which is what the PR updater renders: 12 planned jobs,
+    # The same run as the published snapshot, which is what the run reporter renders: 12 planned jobs,
     # all complete, with per-batch labels and links matching the registry exactly.
     progress = final.progress
     assert progress.done is True
@@ -1052,7 +1052,7 @@ def test_dispatcher_scenario_revisions_are_monotonic(tmp_path: Path):
 
 
 # ---------------------------------------------------------------------------
-# Gatherer -> PR updater, over a real event bus
+# Gatherer -> run reporter, over a real event bus
 # ---------------------------------------------------------------------------
 
 
@@ -1072,21 +1072,21 @@ class _DispatcherBus(EventBusOrchestrator):
 def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     """The contract between the two processors, not each half in isolation.
 
-    The gatherer emits ``UpdatePRComment`` and the updater consumes it: one comment created for the
+    The gatherer emits ``UpdatePRComment`` and the reporter consumes it: one comment created for the
     initial plan, then edited once per finished batch, never regressing.
     """
     plan = _scenario_plan()
     gatherer = TaskTestGatherer("gatherer", output_base_path=tmp_path / "out", batches=_scenario_batches(plan))
     client = FakeAsyncGitHubClient()
-    updater = TaskPullRequestUpdater(
-        "pr-updater",
+    reporter = TaskRunReporter(
+        "run-reporter",
         client,
-        PullRequestUpdaterOptions(owner="DataDog", repo="integrations-core", pr_number=42),
+        RunReporterOptions(owner="DataDog", repo="integrations-core", pr_number=42),
     )
 
     bus = _DispatcherBus(logging.getLogger("test-bus"), max_timeout=30, grace_period=0.2)
     bus.register_processor(gatherer, [BatchFinished])
-    bus.register_processor(updater, [UpdatePRComment])
+    bus.register_processor(reporter, [UpdatePRComment])
 
     bus.submit_message(gatherer.build_initial_update())
     for index, (batch_id, jobs) in enumerate(plan.items(), start=1):

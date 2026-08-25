@@ -11,7 +11,7 @@ import pytest
 
 from ddev.cli.ci.tests.dispatcher import Dispatcher, DispatcherContext, RunContext
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
-from ddev.cli.ci.tests.task_pull_request_updater import PullRequestUpdaterOptions, TaskPullRequestUpdater
+from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.utils.github_async.models import ArtifactsList, WorkflowJob, WorkflowJobsList, WorkflowRun
@@ -55,17 +55,17 @@ def build_bus(
         ),
     )
     gatherer = TaskTestGatherer("test-gatherer", tmp_path / "results", batches)
-    updater = TaskPullRequestUpdater(
-        "pull-request-updater",
+    reporter = TaskRunReporter(
+        "run-reporter",
         client,  # type: ignore[arg-type]
-        PullRequestUpdaterOptions(owner=CONTEXT.owner, repo=CONTEXT.repo, pr_number=pr_number),
+        RunReporterOptions(owner=CONTEXT.owner, repo=CONTEXT.repo, pr_number=pr_number),
     )
     return Dispatcher(
         batches=batches,
         client=client,  # type: ignore[arg-type]
         runner=runner,
         gatherer=gatherer,
-        updater=updater,
+        reporter=reporter,
         max_timeout=30,
         grace_period=0.2,
     )
