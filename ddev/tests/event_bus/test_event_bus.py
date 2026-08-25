@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
+import threading
 import time
 from collections.abc import Generator
 from contextlib import AbstractContextManager, contextmanager, suppress
@@ -742,6 +743,99 @@ def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secreta
     # Verify async processor also ran
     assert len(secretary.delivered_memos) == 1
     assert secretary.delivered_memos[0].id == "async_memo"
+
+
+class AsyncDelegator(AsyncProcessor[Memo]):
+    """Submits a follow-up from the loop thread."""
+
+    async def process_message(self, message: Memo):
+        self.submit_message(Announcement(id="delegated", announcement_type="Delegated"))
+
+
+class SyncDelegator(SyncProcessor[Memo]):
+    """Submits a follow-up from an executor thread."""
+
+    def process_message(self, message: Memo):
+        self.submit_message(Announcement(id="delegated", announcement_type="Delegated"))
+
+
+def test_a_worker_thread_submission_is_delivered(analyst: Analyst):
+    """A `SyncProcessor` submits from an executor thread, where `asyncio.Queue` can lose the put.
+
+    The real queue loses only the unlucky ones; this one loses every off-loop put, so delivery fails
+    deterministically rather than by winning a race.
+    """
+
+    class LoseOffLoopPuts(asyncio.Queue):
+        """Drops a put made anywhere but the loop thread, the worst case of the real race."""
+
+        def __init__(self, loop_thread: int):
+            super().__init__()
+            self._loop_thread = loop_thread
+
+        def put_nowait(self, item):
+            if threading.get_ident() != self._loop_thread:
+                return
+            super().put_nowait(item)
+
+    logger = logging.getLogger("test_thread_safe_submit")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0.1)
+    # `asyncio.run` runs the loop on this thread, so this is the id the queue lets a put through on.
+    orchestrator._queue = LoseOffLoopPuts(threading.get_ident())
+    orchestrator.register_processor(SyncDelegator("delegator"), [Memo])
+    orchestrator.register_processor(analyst, [Announcement])
+
+    orchestrator.submit_message(Memo("delegate_me"))
+
+    orchestrator.run()
+
+    assert [message.id for message in analyst.completed_tasks] == ["delegated"]
+
+
+@pytest.mark.parametrize("delegator_class", [AsyncDelegator, SyncDelegator], ids=["async", "sync"])
+def test_a_processor_submission_survives_a_zero_grace_period(
+    analyst: Analyst, delegator_class: type[AsyncDelegator | SyncDelegator]
+):
+    """A follow-up is queued before the bus can decide it has nothing left to do.
+
+    Every put is now handed to the loop thread, so it happens after `submit_message` returns, and a
+    zero grace period stops the bus the moment the queue looks empty. Both kinds of processor are
+    covered because the callback that queues the message precedes the task completion that wakes the
+    bus by a different route for each.
+    """
+    logger = logging.getLogger("test_zero_grace_period")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0)
+    orchestrator.register_processor(delegator_class("delegator"), [Memo])
+    orchestrator.register_processor(analyst, [Announcement])
+
+    orchestrator.submit_message(Memo("delegate_me"))
+
+    orchestrator.run()
+
+    assert [message.id for message in analyst.completed_tasks] == ["delegated"]
+
+
+def test_an_on_initialize_submission_survives_a_zero_grace_period(secretary: Secretary):
+    """The bus reads what `on_initialize` submitted, with no grace period to fall back on.
+
+    Nothing awaits between the hook and the bus's first look at the queue, so a put deferred to a loop
+    callback would not have happened yet, and a zero grace period stops instead of waiting for it.
+    """
+    logger = logging.getLogger("test_initialize_submit")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0)
+    orchestrator.register_processor(secretary, [Memo])
+
+    original_on_initialize = orchestrator.on_initialize
+
+    async def on_initialize_submitting():
+        await original_on_initialize()
+        orchestrator.submit_message(Memo("from_initialize"))
+
+    orchestrator.on_initialize = on_initialize_submitting  # type: ignore[method-assign]
+
+    orchestrator.run()
+
+    assert [message.id for message in secretary.delivered_memos] == ["from_initialize"]
 
 
 def test_processor_submit_without_bus():

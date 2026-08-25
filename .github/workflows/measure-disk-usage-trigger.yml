@@ -1,0 +1,21 @@
+name: Measure Disk Usage Trigger
+
+# Fires Measure Disk Usage, which runs on workflow_run and does the measuring. That workflow takes
+# the commit and the event from the workflow_run event, so nothing is handed over.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  trigger:
+    name: Trigger the disk usage measurement
+    runs-on: ubuntu-22.04
+    permissions: {}
+    steps:
+      - name: Trigger only
+        run: echo "Measure Disk Usage runs from this workflow's completion."

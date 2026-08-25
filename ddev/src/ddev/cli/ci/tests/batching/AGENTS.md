@@ -22,7 +22,7 @@ them from git, and `../changes.py` decides which two commits a CI run compares.
 | Module | Role |
 | --- | --- |
 | `build.py` | Composes the stages and adapts concrete `Repository`/`Integration` objects to them. The package's public entry point. |
-| `targets.py` | Maps changed files to affected target names through ordered, independent rules. |
+| `targets.py` | Maps changed files to affected target names through ordered, independent rules. `AllTargetsRule` is the exception: it ignores the change set, for a run that tests everything. |
 | `units.py` | Expands targets into `TestUnit` values: one target, one platform, one environment. |
 | `jobs.py` | Turns each unit into the concrete `BatchJob` the workflow runs. |
 | `strategy/` | Packs jobs into capacity-bounded groups. `types.py` is the contract, `default.py` the implementation. |
