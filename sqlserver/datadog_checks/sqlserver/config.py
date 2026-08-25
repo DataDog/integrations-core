@@ -133,8 +133,8 @@ class SQLServerConfig:
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
-        self.index_usage_object_names = instance.get('index_usage_object_names', []) or []
-        self.table_size_object_names = instance.get('table_size_object_names', []) or []
+        self.index_usage_table_names = instance.get('index_usage_table_names', []) or []
+        self.table_size_table_names = instance.get('table_size_table_names', []) or []
         self.data_observability: DataObservability = DataObservability.model_validate(
             instance.get('data_observability') or {}
         )

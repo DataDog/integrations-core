@@ -55,8 +55,8 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
         return self.config.database_metrics_config["index_usage_metrics"]["enabled_tempdb"]
 
     @property
-    def index_usage_object_names(self) -> list[str]:
-        return self.config.index_usage_object_names
+    def index_usage_table_names(self) -> list[str]:
+        return self.config.index_usage_table_names
 
     @property
     def collection_interval(self) -> int:
@@ -106,23 +106,23 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
-        if self.index_usage_object_names:
-            object_name_batches = [
-                self.index_usage_object_names[start : start + SQLSERVER_PARAMETER_LIMIT]
-                for start in range(0, len(self.index_usage_object_names), SQLSERVER_PARAMETER_LIMIT)
+        if self.index_usage_table_names:
+            table_name_batches = [
+                self.index_usage_table_names[start : start + SQLSERVER_PARAMETER_LIMIT]
+                for start in range(0, len(self.index_usage_table_names), SQLSERVER_PARAMETER_LIMIT)
             ]
         else:
-            object_name_batches = [None]
+            table_name_batches = [None]
         for database in self.databases:
             queries = []
-            for object_names in object_name_batches:
+            for table_names in table_name_batches:
                 batch_queries = copy.deepcopy(self.queries)
-                if object_names:
-                    placeholders = ','.join(['?'] * len(object_names))
-                    object_name_filter = f" WHERE o.name IN ({placeholders})"
+                if table_names:
+                    placeholders = ','.join(['?'] * len(table_names))
+                    table_name_filter = f" WHERE o.name IN ({placeholders})"
                     for query in batch_queries:
-                        query['query'] += object_name_filter
-                        query['params'] = tuple(object_names)
+                        query['query'] += table_name_filter
+                        query['params'] = tuple(table_names)
                 queries.extend(batch_queries)
             executor = self.new_query_executor(
                 queries,

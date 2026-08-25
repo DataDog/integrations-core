@@ -66,8 +66,8 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
         return self.config.database_metrics_config["table_size_metrics"]["collection_interval"]
 
     @property
-    def table_size_object_names(self) -> list[str]:
-        return self.config.table_size_object_names
+    def table_size_table_names(self) -> list[str]:
+        return self.config.table_size_table_names
 
     @property
     def databases(self):
@@ -100,23 +100,23 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
-        if self.table_size_object_names:
-            object_name_batches = [
-                self.table_size_object_names[start : start + SQLSERVER_PARAMETER_LIMIT]
-                for start in range(0, len(self.table_size_object_names), SQLSERVER_PARAMETER_LIMIT)
+        if self.table_size_table_names:
+            table_name_batches = [
+                self.table_size_table_names[start : start + SQLSERVER_PARAMETER_LIMIT]
+                for start in range(0, len(self.table_size_table_names), SQLSERVER_PARAMETER_LIMIT)
             ]
         else:
-            object_name_batches = [None]
+            table_name_batches = [None]
         for database in self.databases:
             queries = []
-            for object_names in object_name_batches:
+            for table_names in table_name_batches:
                 batch_queries = copy.deepcopy(self.queries)
-                if object_names:
-                    placeholders = ','.join(['?'] * len(object_names))
-                    object_name_filter = f" WHERE t.name IN ({placeholders})"
+                if table_names:
+                    placeholders = ','.join(['?'] * len(table_names))
+                    table_name_filter = f" WHERE t.name IN ({placeholders})"
                     for query in batch_queries:
-                        query['query'] = query['query'].replace("    GROUP BY", object_name_filter + "\n    GROUP BY")
-                        query['params'] = tuple(object_names)
+                        query['query'] = query['query'].replace("    GROUP BY", table_name_filter + "\n    GROUP BY")
+                        query['params'] = tuple(table_names)
                 queries.extend(batch_queries)
             executor = self.new_query_executor(
                 queries,

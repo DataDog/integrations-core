@@ -1185,25 +1185,25 @@ def test_sqlserver_index_usage_metrics(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    'object_names, expected_tables',
+    'table_names, expected_tables',
     [
         pytest.param([], {'some_table', 'other_table'}, id='unbounded'),
         pytest.param(['some_table'], {'some_table'}, id='bounded'),
     ],
 )
-def test_sqlserver_index_usage_metrics_object_names(
+def test_sqlserver_index_usage_metrics_table_names(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
-    object_names,
+    table_names,
     expected_tables,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
         'index_usage_metrics': {'enabled': True, 'enabled_tempdb': False},
     }
-    instance_docker_metrics['index_usage_object_names'] = object_names
+    instance_docker_metrics['index_usage_table_names'] = table_names
     mocked_results = [
         ('master', 'some_index', 'dbo', 'some_table', 10, 20, 30, 40),
         ('master', 'other_index', 'dbo', 'other_table', 50, 60, 70, 80),
@@ -1213,9 +1213,9 @@ def test_sqlserver_index_usage_metrics_object_names(
 
     def execute_query_handler_mocked(query, db=None, params=None):
         assert "OBJECT_NAME(" not in query
-        if object_names:
+        if table_names:
             assert "WHERE o.name IN (?)" in query
-            assert params == tuple(object_names)
+            assert params == tuple(table_names)
             return [row for row in mocked_results if row[3] in params]
         assert "WHERE o.name IN" not in query
         assert params is None
@@ -1858,25 +1858,25 @@ def test_sqlserver_table_size_metrics(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    'object_names, expected_tables',
+    'table_names, expected_tables',
     [
         pytest.param([], {'table1', 'table2'}, id='unbounded'),
         pytest.param(['table1'], {'table1'}, id='bounded'),
     ],
 )
-def test_sqlserver_table_size_metrics_object_names(
+def test_sqlserver_table_size_metrics_table_names(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
-    object_names,
+    table_names,
     expected_tables,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
         'table_size_metrics': {'enabled': True},
     }
-    instance_docker_metrics['table_size_object_names'] = object_names
+    instance_docker_metrics['table_size_table_names'] = table_names
     mocked_results = [
         ('table1', 'dbo', 'master', 100, 1024, 500, 200),
         ('table2', 'dbo', 'master', 200, 2048, 1000, 400),
@@ -1885,9 +1885,9 @@ def test_sqlserver_table_size_metrics_object_names(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
     def execute_query_handler_mocked(query, db=None, params=None):
-        if object_names:
+        if table_names:
             assert "WHERE t.name IN (?)" in query
-            assert params == tuple(object_names)
+            assert params == tuple(table_names)
             return [row for row in mocked_results if row[0] in params]
         assert "WHERE t.name IN" not in query
         assert params is None
@@ -1915,35 +1915,35 @@ def test_sqlserver_table_size_metrics_object_names(
 
 
 @pytest.mark.parametrize(
-    'metrics_class, database_metrics_config, object_names_option, object_name_filter',
+    'metrics_class, database_metrics_config, table_names_option, table_name_filter',
     [
         pytest.param(
             SqlserverIndexUsageMetrics,
             {'index_usage_metrics': {'enabled': True, 'enabled_tempdb': False}},
-            'index_usage_object_names',
+            'index_usage_table_names',
             'WHERE o.name IN',
             id='index-usage',
         ),
         pytest.param(
             SqlserverTableSizeMetrics,
             {'table_size_metrics': {'enabled': True}},
-            'table_size_object_names',
+            'table_size_table_names',
             'WHERE t.name IN',
             id='table-size',
         ),
     ],
 )
-def test_object_name_filters_stay_within_parameter_limit(
+def test_table_name_filters_stay_within_parameter_limit(
     init_config,
     instance_docker_metrics,
     metrics_class,
     database_metrics_config,
-    object_names_option,
-    object_name_filter,
+    table_names_option,
+    table_name_filter,
 ):
-    object_names = [f'table_{n}' for n in range(SQLSERVER_PARAMETER_LIMIT + 1)]
+    table_names = [f'table_{n}' for n in range(SQLSERVER_PARAMETER_LIMIT + 1)]
     instance_docker_metrics['database_metrics'] = database_metrics_config
-    instance_docker_metrics[object_names_option] = object_names
+    instance_docker_metrics[table_names_option] = table_names
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     query_configs = []
 
@@ -1961,8 +1961,8 @@ def test_object_name_filters_stay_within_parameter_limit(
 
     assert len(metrics._build_query_executors()) == 1
     assert [len(query['params']) for query in query_configs] == [SQLSERVER_PARAMETER_LIMIT, 1]
-    assert [name for query in query_configs for name in query['params']] == object_names
-    assert all(object_name_filter in query['query'] for query in query_configs)
+    assert [name for query in query_configs for name in query['params']] == table_names
+    assert all(table_name_filter in query['query'] for query in query_configs)
 
 
 @pytest.mark.integration
