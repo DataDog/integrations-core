@@ -1,1 +1,1 @@
-Add ``MockHTTPResponse`` and the ``mock_http`` fixture for testing checks against the HTTP protocol surface, and deprecate ``MockResponse``.
+Add fixtures backed by the base-owned HTTP fakes for backend-neutral check tests, and deprecate ``MockResponse``.

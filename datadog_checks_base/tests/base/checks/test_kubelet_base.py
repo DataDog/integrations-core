@@ -9,6 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockHTTPResponse
 
@@ -78,8 +79,12 @@ def test_retrieve_pod_list_decodes_a_utf8_body_under_a_non_utf8_encoding(mock_ht
     body = json.dumps({'items': [{'metadata': {'labels': labels}}]}, ensure_ascii=False).encode('utf-8')
     assert max(body) > 127, 'the body must carry multibyte UTF-8 for this test to mean anything'
 
-    response = MockHTTPResponse(content=body, headers={'Content-Type': 'text/plain'})
-    response.encoding = 'ISO-8859-1'
+    response = FakeHTTPResponse(
+        content=body,
+        text=body.decode('ISO-8859-1'),
+        headers={'Content-Type': 'text/plain'},
+        encoding='ISO-8859-1',
+    )
     assert 'café-münchen' not in response.text
     mock_http.get.return_value = response
 

@@ -10,7 +10,6 @@ from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPResponse
 from datadog_checks.base.utils.requests_adapter import RequestsResponseAdapter
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import get_wire_headers
 
@@ -228,7 +227,6 @@ def build_requests_response(content: bytes, headers: dict[str, str] | None = Non
     return RequestsResponseAdapter(response, 1024)
 
 
-@pytest.mark.parametrize('backend', ['requests', 'mock'])
 @pytest.mark.parametrize(
     ('headers', 'expected'),
     [
@@ -241,29 +239,20 @@ def build_requests_response(content: bytes, headers: dict[str, str] | None = Non
         ({'Content-Type': 'TEXT/PLAIN; CHARSET=UTF-8'}, 'UTF-8'),
     ],
 )
-def test_encoding_derived_from_content_type(backend, headers, expected):
-    if backend == 'requests':
-        response = build_requests_response(b'abc', headers)
-    else:
-        response = MockHTTPResponse(content=b'abc', headers=headers)
-
+def test_requests_encoding_derived_from_content_type(headers, expected):
+    response = build_requests_response(b'abc', headers)
     assert response.encoding == expected
 
 
-@pytest.mark.parametrize('backend', ['requests', 'mock'])
-def test_decode_unicode_yields_bytes_when_the_encoding_is_undetermined(backend):
+def test_requests_decode_unicode_yields_bytes_when_the_encoding_is_undetermined():
     content = 'a: café\nb: 2'.encode('utf-8')
-    if backend == 'requests':
-        response = build_requests_response(content)
-    else:
-        response = MockHTTPResponse(content=content)
+    response = build_requests_response(content)
 
     assert response.encoding is None
     assert list(response.iter_lines(decode_unicode=True)) == [b'a: caf\xc3\xa9', b'b: 2']
     assert list(response.iter_content(chunk_size=4, decode_unicode=True)) == [b'a: c', b'af\xc3\xa9', b'\nb: ', b'2']
 
 
-@pytest.mark.parametrize('backend', ['requests', 'mock'])
 @pytest.mark.parametrize(
     ('content', 'delimiter', 'decode_unicode', 'expected', 'element_type'),
     [
@@ -276,21 +265,17 @@ def test_decode_unicode_yields_bytes_when_the_encoding_is_undetermined(backend):
         ('café||'.encode('utf-8'), '||', True, ['café', ''], str),
     ],
 )
-def test_iter_lines_contract(
-    backend: str,
+def test_requests_iter_lines_contract(
     content: bytes,
     delimiter: bytes | str | None,
     decode_unicode: bool,
     expected: list[bytes | str],
     element_type: type[bytes] | type[str],
 ) -> None:
-    if backend == 'requests':
-        raw_response = requests.Response()
-        raw_response._content = content
-        raw_response._content_consumed = True
-        response = RequestsResponseAdapter(raw_response, 1024)
-    else:
-        response = MockHTTPResponse(content=content)
+    raw_response = requests.Response()
+    raw_response._content = content
+    raw_response._content_consumed = True
+    response = RequestsResponseAdapter(raw_response, 1024)
 
     if decode_unicode:
         response.encoding = 'utf-8'
