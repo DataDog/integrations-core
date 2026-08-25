@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 import sys
-from typing import Dict
+from typing import Dict, Optional, Sequence
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
@@ -13,6 +13,18 @@ from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 ODBC_INST_INI = 'odbcinst.ini'
+
+DBM_COMMENT_MARKERS = (
+    'ddps=',
+    'dddbs=',
+    'ddh=',
+    'dddb=',
+    'ddprs=',
+    'dde=',
+    'ddpv=',
+    'traceparent=',
+    'ddsh=',
+)
 
 
 # Database is used to store both the name and physical_database_name
@@ -127,6 +139,16 @@ def is_statement_proc(text):
         if 0 <= idx_create < idx_proc and idx_proc >= 0:
             return True, _get_procedure_name(t, idx_proc)
     return False, None
+
+
+def has_dbm_comment_marker(text: Optional[str]) -> bool:
+    return bool(text) and any(marker in text for marker in DBM_COMMENT_MARKERS)
+
+
+def needs_comment_recovery(full_text: Optional[str], statement_comments: Optional[Sequence[str]]) -> bool:
+    return has_dbm_comment_marker(full_text) and not any(
+        has_dbm_comment_marker(comment) for comment in statement_comments or ()
+    )
 
 
 def _get_procedure_name(t, idx):

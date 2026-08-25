@@ -1038,3 +1038,87 @@ def test_sanitize_activity_row(dbm_instance, row):
     row = check.activity._obfuscate_and_sanitize_row(row)
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
+
+
+@pytest.mark.unit
+def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(dbm_instance, datadog_agent):
+    comment = "/*dddbs='orders-service',dde='prod'*/"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
+    row = {
+        # sp_executesql includes the RPC parameter declaration and leading comment in the full
+        # batch text, but SQL Server's statement offsets exclude both from statement_text.
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == [comment]
+    assert not row.get('is_proc')
+    assert 'procedure_signature' not in row
+    assert mock_agent.call_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'text,statement_text,expected_comments',
+    [
+        pytest.param(
+            '(@P1 int)SELECT * FROM orders WHERE customer_id = @P1',
+            'SELECT * FROM orders WHERE customer_id = @P1',
+            [],
+            id='rpc_parameter_prefix',
+        ),
+        pytest.param(
+            'SELECT ' + 'x' * 493,
+            'SELECT ' + 'x' * 493 + ' FROM orders',
+            [],
+            id='full_text_truncated_at_500_characters',
+        ),
+        pytest.param(
+            'SELECT 1; SELECT * FROM orders',
+            'SELECT * FROM orders',
+            [],
+            id='multi_statement_batch',
+        ),
+        pytest.param(
+            "/*dddbs='orders-service'*/ SELECT " + 'x' * 466,
+            "/*dddbs='orders-service'*/ SELECT " + 'x' * 466 + ' FROM blocked_orders',
+            ["/*dddbs='orders-service'*/"],
+            id='idle_blocker_full_statement',
+        ),
+    ],
+)
+def test_sanitize_activity_row_skips_unneeded_full_text_obfuscation(
+    dbm_instance, datadog_agent, text, statement_text, expected_comments
+):
+    row = {
+        'statement_text': statement_text,
+        'text': text,
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comment = "/*dddbs='orders-service'*/"
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == expected_comments
+    assert mock_agent.call_count == 1

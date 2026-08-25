@@ -10,7 +10,7 @@ import re
 from collections.abc import Iterable, Sequence
 
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
-from ddev.cli.ci.tests.messages import BatchJob
+from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
     DispatcherProgress,
@@ -88,6 +88,17 @@ def make_job(
         unit_tests=unit_tests,
         e2e_tests=e2e_tests,
         agent_image=agent_image,
+    )
+
+
+def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
+    job_list = list(batch_jobs) or [make_job()]
+    return TestBatch(
+        id=batch_id,
+        batch_id=batch_id,
+        job_list=job_list,
+        jobs_count=len(job_list),
+        integrations=sorted({job.target for job in job_list}),
     )
 
 

@@ -31,7 +31,7 @@ from ddev.cli.ci.tests.messages import (
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
-from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
+from ddev.cli.ci.tests.task_test_gatherer import INITIAL_UPDATE_MESSAGE_ID, TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.utils.github_async.models import JobStep, WorkflowJob
 from ddev.utils.junit import TestStatus
@@ -553,7 +553,7 @@ def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
 
     assert drain_queue(gatherer.bus.queue) == []
     assert gatherer._revision == 0
-    assert [batch.batch_id for batch in gatherer.build_initial_update("initial").progress.batches] == ["batch-1"]
+    assert [batch.batch_id for batch in gatherer.build_initial_update().progress.batches] == ["batch-1"]
     # Nor may it write into the output tree the planned batches publish from.
     assert not (tmp_path / "out").exists()
 
@@ -665,8 +665,8 @@ def test_initial_update_is_revision_zero_over_the_whole_plan(tmp_path: Path) -> 
     plan = {"b1": [_batch_job("j1"), _batch_job("j2", target="kafka")], "b2": [_batch_job("j3", target="redis")]}
     gatherer = _make_gatherer(tmp_path, plan)
 
-    update = gatherer.build_initial_update("initial")
-    assert (update.id, update.revision) == ("initial", 0)
+    update = gatherer.build_initial_update()
+    assert (update.id, update.revision) == (INITIAL_UPDATE_MESSAGE_ID, 0)
     assert _registry(gatherer) == []
 
     progress = update.progress
@@ -1088,7 +1088,7 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     bus.register_processor(gatherer, [BatchFinished])
     bus.register_processor(reporter, [UpdatePRComment])
 
-    bus.submit_message(gatherer.build_initial_update("initial"))
+    bus.submit_message(gatherer.build_initial_update())
     for index, (batch_id, jobs) in enumerate(plan.items(), start=1):
         artifacts = tmp_path / "artifacts" / batch_id
         results = [_scenario_job(artifacts, job.target, "success", JUNIT_PASSING, run_id=index) for job in jobs]
