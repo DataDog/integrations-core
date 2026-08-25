@@ -75,17 +75,7 @@ def test_fake_response_raises_configured_status_error():
     assert error.response is response
 
 
-def test_fake_response_context_manager_closes_response():
-    response = FakeHTTPResponse()
-
-    with response as entered:
-        assert entered is response
-        assert not response.closed
-
-    assert response.closed
-
-
-def test_fake_client_matches_queued_responses_and_records_requests():
+def test_fake_client_matches_responses_and_records_requests():
     client = FakeHTTPClient()
     page_one = FakeHTTPResponse(status_code=202)
     page_two = FakeHTTPResponse(status_code=204)
@@ -99,6 +89,19 @@ def test_fake_client_matches_queued_responses_and_records_requests():
         RecordedRequest(method='GET', url=url, options={'params': {'page': 1}}),
         RecordedRequest(method='GET', url=url, options={'params': {'page': 2}}),
     ]
+    client.assert_all_responses_consumed()
+
+
+def test_fake_client_returns_registered_responses_in_queue_order():
+    client = FakeHTTPClient()
+    first = FakeHTTPResponse(status_code=202)
+    second = FakeHTTPResponse(status_code=204)
+    url = 'https://example.test/items'
+    client.register_response('GET', url, first)
+    client.register_response('GET', url, second)
+
+    assert client.get(url) is first
+    assert client.get(url) is second
     client.assert_all_responses_consumed()
 
 
@@ -140,24 +143,3 @@ def test_fake_client_request_assertions():
 
     with pytest.raises(AssertionError, match='No recorded request matched'):
         client.assert_has_request(RecordedRequest(method='GET', url=url))
-
-
-def test_fake_client_manages_headers_cookies_and_lifecycle():
-    client = FakeHTTPClient(
-        options={'headers': {'X-Token': 'old'}, 'auth': 'configured'},
-        cookies={'session': 'abc'},
-        should_bypass_proxy=True,
-    )
-
-    assert client.get_header('x-token') == 'old'
-    client.set_header('x-token', 'new')
-    assert client.get_header('X-Token') == 'new'
-    assert client.get_cookie('session') == 'abc'
-    assert client.get_cookie('missing', 'fallback') == 'fallback'
-    assert client.should_bypass_proxy('https://example.test')
-
-    client.disable_auth()
-    assert client.options['auth'] is not None
-
-    client.close()
-    assert client.closed

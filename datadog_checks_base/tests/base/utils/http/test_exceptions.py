@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from collections.abc import Iterator
 
 import mock
 import pytest
@@ -23,10 +22,11 @@ from datadog_checks.base.utils.http_exceptions import (
 )
 from datadog_checks.base.utils.requests_adapter import (
     _COMPAT_EXCEPTIONS,
-    RequestsResponseAdapter,
     _backend_compat_type,
     _translate_requests_exception,
 )
+
+from . import common
 
 
 @pytest.mark.parametrize(
@@ -42,12 +42,16 @@ from datadog_checks.base.utils.requests_adapter import (
     ],
 )
 def test_transport_exception_mapping(raised, expected):
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', side_effect=raised):
-        with pytest.raises(expected) as exc_info:
-            http.get('http://example.test/')
+    transport = common.RequestsTransport()
+    transport.raise_exception(raised)
+    http = common.create_requests_client(transport)
+
+    with pytest.raises(expected) as exc_info:
+        http.get('http://example.test/')
 
     assert type(exc_info.value) is _COMPAT_EXCEPTIONS[expected]
+    assert exc_info.value.request.method == 'GET'
+    assert exc_info.value.request.url == 'http://example.test/'
 
 
 def test_phase_specific_timeouts_share_generic_base():
@@ -57,21 +61,23 @@ def test_phase_specific_timeouts_share_generic_base():
 
 
 def test_ssl_error_maps_to_http_ssl_error():
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', side_effect=requests.exceptions.SSLError('bad cert')):
-        with mock.patch.object(RequestsWrapper, 'fetch_intermediate_certs', return_value=[]):
-            with pytest.raises(HTTPClientSSLError):
-                http.get('https://example.test/')
+    transport = common.RequestsTransport()
+    transport.raise_exception(requests.exceptions.SSLError('bad cert'))
+    http = common.create_requests_client(transport)
+
+    with pytest.raises(HTTPClientSSLError):
+        http.get('http://example.test/')
 
 
 def test_raise_for_status_maps_to_status_error():
-    response = mock.MagicMock()
-    response.raise_for_status.side_effect = requests.exceptions.HTTPError('404 Client Error')
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', return_value=response):
-        wrapped = http.get('http://example.test/')
-        with pytest.raises(HTTPClientStatusError) as exc_info:
-            wrapped.raise_for_status()
+    transport = common.RequestsTransport()
+    transport.respond(status_code=404, content=b'missing')
+    http = common.create_requests_client(transport)
+    wrapped = http.get('http://example.test/')
+
+    with pytest.raises(HTTPClientStatusError) as exc_info:
+        wrapped.raise_for_status()
+
     assert exc_info.value.response is wrapped
 
 
@@ -208,11 +214,12 @@ def test_every_requests_exception_lands_under_a_handled_agnostic_type(exc_type):
 
 
 def test_a_non_requests_failure_reaches_the_caller_untranslated():
-    http = RequestsWrapper({}, {})
+    transport = common.RequestsTransport()
+    transport.raise_exception(RuntimeError('not a requests failure'))
+    http = common.create_requests_client(transport)
 
-    with mock.patch('requests.Session.get', side_effect=RuntimeError('not a requests failure')):
-        with pytest.raises(RuntimeError, match='not a requests failure'):
-            http.get('http://example.test/')
+    with pytest.raises(RuntimeError, match='not a requests failure'):
+        http.get('http://example.test/')
 
 
 def test_translate_does_not_leak_raw_response():
@@ -248,50 +255,29 @@ def test_translate_converts_raw_request_to_agnostic_snapshot():
 )
 @pytest.mark.parametrize('iter_method', ['iter_content', 'iter_lines'])
 def test_stream_seam_maps_mid_stream_exceptions(raised, expected, iter_method):
-    response = mock.MagicMock()
-    getattr(response, iter_method).side_effect = raised
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', return_value=response):
-        wrapped = http.get('http://example.test/', stream=True)
-        with pytest.raises(expected):
-            list(getattr(wrapped, iter_method)())
+    transport = common.RequestsTransport()
+    transport.respond(stream_error=raised)
+    http = common.create_requests_client(transport)
+    wrapped = http.get('http://example.test/', stream=True)
 
-
-class TimeoutRawStream:
-    def stream(self, chunk_size: int, decode_content: bool = False) -> Iterator[bytes]:
-        assert chunk_size > 0
-        assert decode_content
-        yield b'first\n'
-        raise ReadTimeoutError(None, None, 'slow')
+    with pytest.raises(expected):
+        list(getattr(wrapped, iter_method)())
 
 
 def test_response_adapter_maps_requests_wrapped_mid_stream_read_timeout() -> None:
-    response = requests.Response()
-    response.encoding = 'utf-8'
-    response.raw = TimeoutRawStream()
-    stream = RequestsResponseAdapter(response, 1024).iter_lines(decode_unicode=True)
+    transport = common.RequestsTransport()
+    transport.respond(
+        headers={'Content-Type': 'text/plain; charset=utf-8'},
+        content_chunks=(b'first\n',),
+        stream_error=ReadTimeoutError(None, None, 'slow'),
+    )
+    http = common.create_requests_client(transport)
+    response = http.get('http://example.test/', stream=True)
+    stream = response.iter_lines(decode_unicode=True)
 
     assert next(stream) == 'first'
     with pytest.raises(HTTPClientReadTimeoutError, match='slow'):
         next(stream)
-
-
-class FailingRead:
-    """Raw-response stand-in whose buffered reads raise the injected exception."""
-
-    def __init__(self, exc):
-        self._exc = exc
-
-    @property
-    def content(self):
-        raise self._exc
-
-    @property
-    def text(self):
-        raise self._exc
-
-    def json(self, **kwargs):
-        raise self._exc
 
 
 @pytest.mark.parametrize(
@@ -303,33 +289,37 @@ class FailingRead:
     ],
 )
 def test_buffered_seam_maps_exceptions(read):
-    response = FailingRead(requests.exceptions.ConnectionError('dropped'))
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', return_value=response):
-        wrapped = http.get('http://example.test/')
-        with pytest.raises(HTTPClientConnectionError):
-            read(wrapped)
+    transport = common.RequestsTransport()
+    transport.respond(stream_error=requests.exceptions.ConnectionError('dropped'))
+    http = common.create_requests_client(transport)
+    wrapped = http.get('http://example.test/', stream=True)
+
+    with pytest.raises(HTTPClientConnectionError):
+        read(wrapped)
 
 
 def test_json_parse_error_converges_to_stdlib():
-    response = FailingRead(requests.exceptions.JSONDecodeError('Expecting value', 'not json', 0))
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', return_value=response):
-        wrapped = http.get('http://example.test/')
-        with pytest.raises(json.JSONDecodeError) as exc_info:
-            wrapped.json()
+    transport = common.RequestsTransport()
+    transport.respond(content=b'not json')
+    http = common.create_requests_client(transport)
+    wrapped = http.get('http://example.test/')
+
+    with pytest.raises(json.JSONDecodeError) as exc_info:
+        wrapped.json()
+
     assert exc_info.value.msg == 'Expecting value'
     assert exc_info.value.doc == 'not json'
     assert exc_info.value.pos == 0
 
 
 def test_json_parse_error_keeps_matching_requests_arms():
-    response = FailingRead(requests.exceptions.JSONDecodeError('Expecting value', 'not json', 0))
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', return_value=response):
-        wrapped = http.get('http://example.test/')
-        with pytest.raises(requests.exceptions.JSONDecodeError):
-            wrapped.json()
+    transport = common.RequestsTransport()
+    transport.respond(content=b'not json')
+    http = common.create_requests_client(transport)
+    wrapped = http.get('http://example.test/')
+
+    with pytest.raises(requests.exceptions.JSONDecodeError):
+        wrapped.json()
 
 
 def test_auth_token_fetch_error_maps_to_agnostic():
@@ -340,24 +330,14 @@ def test_auth_token_fetch_error_maps_to_agnostic():
         http.get('http://example.test/')
 
 
-class IterableFailingResponse:
-    """Raw-response stand-in mirroring requests.Response.__iter__, which delegates to iter_content."""
-
-    def __init__(self, exc):
-        self._exc = exc
-
-    def iter_content(self, chunk_size=1, decode_unicode=False):
-        yield b'first'
-        raise self._exc
-
-    def __iter__(self):
-        return self.iter_content(128)
-
-
 def test_direct_iteration_maps_mid_stream_exceptions():
-    response = IterableFailingResponse(requests.exceptions.ConnectionError('dropped'))
-    http = RequestsWrapper({}, {})
-    with mock.patch('requests.Session.get', return_value=response):
-        wrapped = http.get('http://example.test/', stream=True)
-        with pytest.raises(HTTPClientConnectionError):
-            list(wrapped)
+    transport = common.RequestsTransport()
+    transport.respond(
+        content_chunks=(b'first',),
+        stream_error=requests.exceptions.ConnectionError('dropped'),
+    )
+    http = common.create_requests_client(transport)
+    wrapped = http.get('http://example.test/', stream=True)
+
+    with pytest.raises(HTTPClientConnectionError):
+        list(wrapped)
