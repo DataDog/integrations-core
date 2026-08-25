@@ -3,15 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
 import copy
+import gc
+import inspect
 import logging
 import os
 import re
+import weakref
 from collections import namedtuple
 
 import mock
 import pytest
 
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
+from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -1738,3 +1742,150 @@ def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected
     with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
         check = SQLServer(CHECK_NAME, {}, [instance])
     assert check.debug_stats_kwargs()['hostname'] == expected_hostname
+
+
+DBM_JOB_NAMES = [
+    'query-metrics',
+    'procedure-metrics',
+    'database-metadata',
+    'query-activity',
+    'agent-jobs-history',
+    'deadlocks',
+]
+
+
+@pytest.mark.parametrize(
+    'dbm, data_observability_enabled, expected_jobs',
+    [
+        (False, False, []),
+        (False, True, ['data-observability']),
+        (True, False, DBM_JOB_NAMES),
+        (True, True, DBM_JOB_NAMES + ['data-observability']),
+    ],
+    ids=['neither', 'data-observability-only', 'dbm-only', 'both'],
+)
+def test_async_job_registry_matches_config(instance_docker, dbm, data_observability_enabled, expected_jobs):
+    """Only the jobs enabled by the instance config are built and registered.
+
+    Data observability is deliberately outside the DBM gate: it collects for instances that have
+    not turned DBM on. Every other job requires DBM, and each one's own enabled flag defaults to
+    true, so without the gate a non-DBM instance would start collecting.
+    """
+    instance_docker['dbm'] = dbm
+    instance_docker['data_observability'] = {'enabled': data_observability_enabled, 'queries': []}
+
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    registered = check._async_job_registry
+    assert list(registered) == expected_jobs
+    assert check.statement_metrics is registered.get('query-metrics')
+    assert check.procedure_metrics is registered.get('procedure-metrics')
+    assert check.sql_metadata is registered.get('database-metadata')
+    assert check.activity is registered.get('query-activity')
+    assert check.agent_history is registered.get('agent-jobs-history')
+    assert check.deadlocks is registered.get('deadlocks')
+    assert check.data_observability is registered.get('data-observability')
+
+
+@pytest.mark.parametrize('dbm', [True, False], ids=['dbm', 'no-dbm'])
+def test_xe_session_handlers_registered_only_with_dbm(instance_docker, dbm):
+    """XE handlers are built during check initialization, so they have to register themselves.
+
+    They only ever ran under the DBM gate in check(), so a non-DBM instance must not get them.
+    """
+    instance_docker['dbm'] = dbm
+    instance_docker['xe_collection'] = {'query_completions': {'enabled': True}, 'query_errors': {'enabled': True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    check.initialize_xe_session_handlers()
+
+    expected = ['xe_datadog_query_completions', 'xe_datadog_query_errors'] if dbm else []
+    assert [handler.job_name for handler in check.xe_session_handlers] == expected
+    assert [name for name in check._async_job_registry if name.startswith('xe_')] == expected
+
+
+@pytest.mark.parametrize(
+    'job_attr, invoke',
+    [
+        ('statement_metrics', lambda job: job.collect_statement_metrics_and_plans()),
+        ('procedure_metrics', lambda job: job.collect_procedure_metrics()),
+        ('sql_metadata', lambda job: job.report_sqlserver_metadata()),
+        ('activity', lambda job: job.collect_activity()),
+        ('agent_history', lambda job: job.collect_agent_history()),
+        ('deadlocks', lambda job: job._query_deadlocks()),
+    ],
+)
+def test_job_aborts_collection_when_cancelled(instance_docker, job_attr, invoke):
+    """A cancelled job must stop before it queries.
+
+    Teardown waits for the job loop, so a tick that works through its remaining queries after a
+    cancel holds up the Agent's unschedule for as long as those queries take.
+    """
+    instance_docker['dbm'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    job = getattr(check, job_attr)
+    job.cancel()
+    check._connection = mock.MagicMock()
+
+    with pytest.raises(Exception, match='cancelled'):
+        invoke(job)
+
+    check._connection.open_managed_default_connection.assert_not_called()
+
+
+def _build_run_state(check):
+    """Bring a freshly constructed check up to the state a collection leaves it in.
+
+    Everything here is built lazily by ``check()``, and each piece holds the check, so without it
+    the reclaim test would pass while the real teardown still leaked.
+    """
+    check.initialize_xe_session_handlers()
+    check._query_manager = QueryManager(check, check.execute_query_raw)
+    assert check.database_metrics
+    check.instance_metrics = [
+        check.typed_metric(
+            cfg_inst={'name': 'sqlserver.stats.connections', 'counter_name': 'User Connections', 'tags': []},
+            table=DEFAULT_PERFORMANCE_TABLE,
+            sql_counter_type=PERF_COUNTER_BULK_COUNT,
+        )
+    ]
+
+
+def test_check_gc_after_cancel(instance_docker):
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    instance_docker['dbm'] = True
+    instance_docker['xe_collection'] = {'query_completions': {'enabled': True}, 'query_errors': {'enabled': True}}
+    instance_docker['data_observability'] = {'enabled': True, 'queries': []}
+
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _build_run_state(check)
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()

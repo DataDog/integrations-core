@@ -177,15 +177,16 @@ class SQLServer(DatabaseCheck):
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
 
         # DBM
-        self.statement_metrics = SqlserverStatementMetrics(self, self._config)
-        self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
-        self.sql_metadata = SqlserverMetadata(self, self._config)
-        self.activity = SqlserverActivity(self, self._config)
-        self.agent_history = SqlserverAgentHistory(self, self._config)
-        self.deadlocks = Deadlocks(self, self._config)
-        self.data_observability = SqlServerDataObservability(self, self._config)
+        self.statement_metrics = None
+        self.procedure_metrics = None
+        self.sql_metadata = None
+        self.activity = None
+        self.agent_history = None
+        self.deadlocks = None
+        self.data_observability = None
+        self._register_async_jobs()
 
-        # XE Session Handlers
+        # XE Session Handlers, registered by initialize_xe_session_handlers()
         self.xe_session_handlers = []
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -209,28 +210,35 @@ class SQLServer(DatabaseCheck):
 
         self._submit_initialization_health_event()
 
+    def _register_async_jobs(self):
+        """Build and register the async jobs enabled by this check's configuration."""
+        if self._config.dbm_enabled:
+            self.statement_metrics = self.register_async_job(SqlserverStatementMetrics(self, self._config))
+            self.procedure_metrics = self.register_async_job(SqlserverProcedureMetrics(self, self._config))
+            self.sql_metadata = self.register_async_job(SqlserverMetadata(self, self._config))
+            self.activity = self.register_async_job(SqlserverActivity(self, self._config))
+            self.agent_history = self.register_async_job(SqlserverAgentHistory(self, self._config))
+            self.deadlocks = self.register_async_job(Deadlocks(self, self._config))
+        if self._config.data_observability.enabled:
+            self.data_observability = self.register_async_job(SqlServerDataObservability(self, self._config))
+
     def initialize_xe_session_handlers(self):
-        """Initialize the XE session handlers without starting them"""
-        # Initialize XE session handlers if not already initialized
-        if not self.xe_session_handlers:
+        """Build and register the XE session handlers without starting them"""
+        if not self.xe_session_handlers and self._config.dbm_enabled:
             self.xe_session_handlers = get_xe_session_handlers(self, self._config)
+            for handler in self.xe_session_handlers:
+                self.register_async_job(handler)
             self.log.debug("Initialized %d XE session handlers", len(self.xe_session_handlers))
 
-    def cancel(self):
-        self.statement_metrics.cancel()
-        self.procedure_metrics.cancel()
-        self.activity.cancel()
-        self.sql_metadata.cancel()
-        self.deadlocks.cancel()
-        self.agent_history.cancel()
-        self.data_observability.cancel()
-
-        # Cancel all XE session handlers
-        for handler in self.xe_session_handlers:
-            try:
-                handler.cancel()
-            except Exception as e:
-                self.log.error("Error canceling XE session handler for %s: %s", handler.session_name, e)
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime."""
+        self._query_manager = None
+        self._database_metrics = None
+        self.health = None
+        self._connection = None
+        self.tag_manager = None
+        self.proc_type_mapping = {}
+        self.instance_metrics = []
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -905,23 +913,8 @@ class SQLServer(DatabaseCheck):
 
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
-            if self._config.dbm_enabled:
-                self.agent_history.run_job_loop(self.tag_manager.get_tags())
-                self.statement_metrics.run_job_loop(self.tag_manager.get_tags())
-                self.procedure_metrics.run_job_loop(self.tag_manager.get_tags())
-                self.activity.run_job_loop(self.tag_manager.get_tags())
-                self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
-                self.deadlocks.run_job_loop(self.tag_manager.get_tags())
 
-                # Run XE session handlers
-                for handler in self.xe_session_handlers:
-                    try:
-                        handler.run_job_loop(self.tag_manager.get_tags())
-                    except Exception as e:
-                        self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
-
-            if self._config.data_observability.enabled:
-                self.data_observability.run_job_loop(self.tag_manager.get_tags())
+            self.run_async_jobs(self.tag_manager.get_tags())
 
         else:
             self.log.debug("Skipping check")

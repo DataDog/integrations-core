@@ -15,6 +15,7 @@ from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
 )
 from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
+from datadog_checks.sqlserver.utils import raise_if_cancelled
 
 try:
     import datadog_agent
@@ -92,6 +93,11 @@ class SqlserverMetadata(DBMAsyncJob):
         )
         self._last_schemas_collection_time = 0
 
+    def shutdown(self) -> None:
+        # The schema collector holds the check too, so dropping it here releases both.
+        self._schema_collector = None
+        self._check = None
+
     def _close_db_conn(self):
         pass
 
@@ -139,6 +145,8 @@ class SqlserverMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
+        raise_if_cancelled(self._cancel_event)
+
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 settings_rows = self._load_settings_rows(cursor)
@@ -166,5 +174,6 @@ class SqlserverMetadata(DBMAsyncJob):
             return
         if time.time() - self._last_schemas_collection_time < self._schema_collection_interval:
             return
+        raise_if_cancelled(self._cancel_event)
         self._last_schemas_collection_time = time.time()
         self._schema_collector.collect_schemas()

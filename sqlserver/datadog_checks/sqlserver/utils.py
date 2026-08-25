@@ -46,6 +46,17 @@ class Database:
         return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
 
 
+def raise_if_cancelled(cancel_event):
+    """Abort before issuing a query once the Agent has unscheduled the check owning the job.
+
+    Teardown waits for the job loop to stop, so a tick that keeps querying after a cancel holds up
+    the Agent. ``DBMAsyncJob._job_loop`` reports an exception raised after a cancel as a
+    cancellation rather than a crash, so raising here is how a job bails out of a tick.
+    """
+    if cancel_event.is_set():
+        raise Exception("Job loop cancelled. Aborting query.")
+
+
 def get_unixodbc_sysconfig(python_executable):
     return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "etc")
 

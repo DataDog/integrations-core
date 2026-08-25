@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery
+from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
 
 try:
     import datadog_agent
@@ -311,6 +311,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / int(self._check.instance.get('samples_per_hour_per_query', 4)),
         )
 
+    def shutdown(self) -> None:
+        self._check = None
+
     def _close_db_conn(self):
         pass
 
@@ -538,6 +541,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         Collects statement metrics and plans.
         :return:
         """
+        raise_if_cancelled(self._cancel_event)
+
         plans_submitted = 0
         deadline = time.time() + self.collection_interval
 
@@ -639,6 +644,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
+                raise_if_cancelled(self._cancel_event)
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan = None
                 collection_errors = []

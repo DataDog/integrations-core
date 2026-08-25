@@ -20,7 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery
+from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery, raise_if_cancelled
 
 try:
     import datadog_agent
@@ -215,6 +215,9 @@ class SqlserverActivity(DBMAsyncJob):
             maxsize=self._config.collect_raw_query_statement["cache_max_size"],
             ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
         )
+
+    def shutdown(self) -> None:
+        self._check = None
 
     def _close_db_conn(self):
         pass
@@ -489,6 +492,7 @@ class SqlserverActivity(DBMAsyncJob):
         Collects all current activity for the SQLServer intance.
         :return:
         """
+        raise_if_cancelled(self._cancel_event)
 
         # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.

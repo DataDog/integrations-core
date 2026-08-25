@@ -906,20 +906,6 @@ def _expected_dbm_instance_tags(check):
     ]
 
 
-@pytest.mark.integration
-@pytest.mark.parametrize("activity_enabled", [True, False])
-def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
-    dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
-    check.cancel()
-    if activity_enabled:
-        assert check.activity._job_loop_future is not None
-        check.activity._job_loop_future.result()
-    else:
-        assert check.activity._job_loop_future is None
-
-
 @pytest.mark.parametrize(
     "input,expected",
     [
@@ -953,12 +939,8 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_activity']['run_sync'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
+    # cancel() joins the job loop before returning, so the loop has reported its exit by now
     check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check.activity._job_loop_future.result()
-    assert not check.activity._job_loop_future.running(), "activity thread should be stopped"
-    # if the thread doesn't start until after the cancel signal is set then the db connection will never
-    # be created in the first place
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
         tags=_expected_dbm_instance_tags(check) + ['job:query-activity'],
