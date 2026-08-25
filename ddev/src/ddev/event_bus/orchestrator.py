@@ -165,11 +165,8 @@ class EventBusOrchestrator(ABC):
     def submit_message(self, message: BaseMessage):
         """Adds a message to the queue, from any thread.
 
-        A ``SyncProcessor`` runs in an executor thread, and ``asyncio.Queue`` is not thread-safe: a
-        put landing between ``get``'s ``empty()`` check and its waiter being registered wakes nobody,
-        leaving the bus spinning on a message it never reads. So while the bus runs, every put is
-        handed to the loop thread, whichever thread asked for it. Before it starts and after it
-        stops there is no loop to hand it to, and the queue takes the message directly.
+        ``asyncio.Queue`` is not thread-safe, and a put it loses leaves the bus spinning on a message
+        it never reads, so while the bus runs the loop thread makes every put.
         """
         if self._loop is not None and self._loop.is_running():
             self._loop.call_soon_threadsafe(self._queue.put_nowait, message)
