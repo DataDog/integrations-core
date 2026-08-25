@@ -51,12 +51,38 @@ def test_a_pull_request_supplies_the_run_context(ddev, github, planned, referenc
     assert f'refs/pull/{PR_NUMBER}/merge' in result.output
 
 
-def test_an_explicit_value_wins_over_the_resolved_one(ddev, github, planned):
-    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--base-sha', 'my-own-sha', '--dry-run')
+@pytest.mark.parametrize(
+    'option, value',
+    [('--pr-number', '77'), ('--branch', 'a-branch'), ('--base-sha', 'a-sha'), ('--target-branch', 'a-target')],
+)
+def test_what_a_pull_request_resolves_cannot_also_be_passed(ddev, github, planned, option, value):
+    """Taking one and ignoring the other would run one pull request's branch against another's diff."""
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), option, value, '--dry-run')
+
+    assert result.exit_code == 1
+    assert f'`{option}` cannot be passed with `--pr`' in result.output
+    planned.assert_not_called()
+
+
+def test_a_run_that_dispatches_needs_a_token_before_it_plans(ddev, planned, mocker):
+    """Planning shells out to git and Hatch for every target, so a missing token must stop it first."""
+    mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': '', 'GH_TOKEN': '', 'GITHUB_TOKEN': ''})
+
+    result = ddev('ci', 'dispatch-tests', '--base-sha', 'a-sha')
+
+    assert result.exit_code == 1
+    assert 'A GitHub token is required' in result.output
+    planned.assert_not_called()
+
+
+def test_a_dry_run_reading_no_pull_request_needs_no_token(ddev, planned, mocker):
+    """The only run that talks to nobody, so it is the one exception to needing a token."""
+    mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': '', 'GH_TOKEN': '', 'GITHUB_TOKEN': ''})
+
+    result = ddev('ci', 'dispatch-tests', '--base-sha', 'a-sha', '--dry-run')
 
     assert result.exit_code == 0, result.output
-    assert 'my-own-sha' in result.output
-    assert 'head-sha-aaa' not in result.output
+    assert 'Dry run: nothing was dispatched.' in result.output
 
 
 def test_a_dry_run_dispatches_nothing(ddev, github, planned):
@@ -72,6 +98,7 @@ def test_a_reference_that_is_neither_a_number_nor_a_url_is_refused(ddev, planned
 
     assert result.exit_code == 1
     assert 'neither a pull request number nor a pull request URL' in result.output
+    planned.assert_not_called()
 
 
 def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, mocker):

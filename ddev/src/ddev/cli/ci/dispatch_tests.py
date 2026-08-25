@@ -45,8 +45,11 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
 @click.option('--workflow', default=None, help='Workflow each batch is dispatched to.')
 @click.option('--workflow-ref', default=None, help='Ref the workflow definition is loaded from.')
-@click.option('--artifacts-dir', default=None, help='Where downloaded artifacts are written.')
-@click.option('--output-dir', default=None, help='Where coverage and test results are organized.')
+@click.option(
+    '--output-dir',
+    default=None,
+    help='Where the run writes what it produces: artifacts, coverage and test results.',
+)
 @click.option('--dry-run', is_flag=True, help='Show the plan and the resolved context without calling GitHub.')
 def dispatch_tests(
     app: Application,
@@ -61,7 +64,6 @@ def dispatch_tests(
     all_targets: bool,
     workflow: str | None,
     workflow_ref: str | None,
-    artifacts_dir: str | None,
     output_dir: str | None,
     dry_run: bool,
 ) -> None:
@@ -79,6 +81,16 @@ def dispatch_tests(
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.utils.github import resolve_owner_repo
 
+    requested_pr, token = validate_options(
+        app,
+        pull_request=pull_request,
+        pr_number=pr_number,
+        branch=branch,
+        base_sha=base_sha,
+        target_branch=target_branch,
+        dry_run=dry_run,
+    )
+
     # One INFO line per request would bury the Dispatcher's own progress.
     logging.getLogger('httpx').setLevel(logging.WARNING)
 
@@ -86,8 +98,8 @@ def dispatch_tests(
     owner, repo = resolve_owner_repo(app, repository)
 
     resolved_number = resolved_branch = resolved_sha = resolved_target = None
-    if pull_request is not None:
-        resolved = fetch_pull_request(app, owner, repo, pull_request)
+    if requested_pr is not None:
+        resolved = fetch_pull_request(app, owner, repo, requested_pr, token)
         if resolved.head is None or resolved.base is None:
             app.abort(f'Pull request {resolved.number} reports no branch references.')
         resolved_number = resolved.number
@@ -131,17 +143,13 @@ def dispatch_tests(
         app.display_info('Dry run: nothing was dispatched.')
         return
 
-    token = app.config.github.token
-    if not token:
-        app.abort('A GitHub token is required. Set `github.token` in your ddev config.')
-
     base_path = Path(output_dir) if output_dir else app.repo.path / DEFAULT_OUTPUT_DIRECTORY
     dispatcher = build_dispatcher(
         batches=batches,
         context=context,
         config=config,
         token=token,
-        artifacts_path=Path(artifacts_dir) if artifacts_dir else base_path / 'artifacts',
+        artifacts_path=base_path / 'artifacts',
         output_path=base_path / 'results',
         run_logger=app.logger,
     )
@@ -159,24 +167,59 @@ def dispatch_tests(
     app.display_success('Dispatcher tests passed.')
 
 
-def fetch_pull_request(app: Application, owner: str, repo: str, reference: str) -> PullRequest:
-    """Read the pull request named by *reference* (a number or a URL) from the GitHub API."""
+def validate_options(
+    app: Application,
+    *,
+    pull_request: str | None,
+    pr_number: int | None,
+    branch: str | None,
+    base_sha: str | None,
+    target_branch: str | None,
+    dry_run: bool,
+) -> tuple[int | None, str]:
+    """Check every input before the run does any work, and return what checking them resolved.
+
+    That is the pull request ``--pr`` names, if any, and the GitHub token, empty when the run needs
+    none: a dry run planning from local git talks to nobody. Reading a pull request needs a token
+    even for a dry run, because the API client refuses to be built without one.
+    """
+    from ddev.utils.github import parse_pull_request_reference
+
+    requested_pr = None
+    if pull_request is not None:
+        resolved_by_pr = [
+            name
+            for name, value in (
+                ('`--pr-number`', pr_number),
+                ('`--branch`', branch),
+                ('`--base-sha`', base_sha),
+                ('`--target-branch`', target_branch),
+            )
+            if value is not None
+        ]
+        if resolved_by_pr:
+            app.abort(f'{", ".join(resolved_by_pr)} cannot be passed with `--pr`, which reads them from GitHub.')
+
+        requested_pr = parse_pull_request_reference(pull_request)
+        if requested_pr is None:
+            app.abort(f'`{pull_request}` is neither a pull request number nor a pull request URL.')
+
+    token = app.config.github.token
+    if not token and (pull_request is not None or not dry_run):
+        app.abort('A GitHub token is required. Set `github.token` in your ddev config.')
+
+    return requested_pr, token
+
+
+def fetch_pull_request(app: Application, owner: str, repo: str, number: int, token: str) -> PullRequest:
+    """Read pull request *number* from the GitHub API."""
     import asyncio
 
     import httpx
     from pydantic import ValidationError
 
-    from ddev.utils.github import parse_pull_request_reference
     from ddev.utils.github_async import async_github_client
     from ddev.utils.github_errors import GitHubAuthenticationError
-
-    number = parse_pull_request_reference(reference)
-    if number is None:
-        app.abort(f'`{reference}` is neither a pull request number nor a pull request URL.')
-
-    token = app.config.github.token
-    if not token:
-        app.abort('A GitHub token is required to read a pull request. Set `github.token` in your ddev config.')
 
     async def fetch() -> PullRequest:
         async with async_github_client(token=token) as client:
