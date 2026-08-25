@@ -7,12 +7,13 @@ dependencies = [
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["2.4", "3.0"]
+version = ["2.4", "3.0", "k8s-driver"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "SPARK_IMAGE", value = "2.4.0-hadoop2.7", if = ["2.4"] },
   { key = "SPARK_IMAGE", value = "3.0.1-hadoop3.2", if = ["3.0"] },
+  { key = "SPARK_PLATFORM", value = "k8s", if = ["k8s-driver"] },
 ]
 
 [envs.default.env-vars]
