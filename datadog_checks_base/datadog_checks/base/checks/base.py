@@ -1761,15 +1761,20 @@ class AgentCheck(object):
                     'Encoding error with device name `%r` for metric `%r`, ignoring tag', device_name, metric_name
                 )
 
+        # This runs for every tag of every submitted metric, so read the generic-tag setting once instead of
+        # once per tag, and skip the conversion call for tags that are already `str` -- in practice nearly all
+        # of them. `to_native_string` returns those unchanged, so the fast path is equivalent.
+        disable_generic_tags = self.disable_generic_tags
         for tag in tags:
             if tag is None:
                 continue
-            try:
-                tag = to_native_string(tag)
-            except UnicodeError:
-                self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
-                continue
-            if self.disable_generic_tags:
+            if type(tag) is not str:
+                try:
+                    tag = to_native_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                    continue
+            if disable_generic_tags:
                 normalized_tags.append(self.degeneralise_tag(tag))
             else:
                 normalized_tags.append(tag)
