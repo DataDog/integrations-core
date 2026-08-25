@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 import shutil
 import threading
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -184,6 +185,57 @@ def _find_result(gatherer: TaskTestGatherer, integration: str) -> JobResult:
 # ---------------------------------------------------------------------------
 # process_message
 # ---------------------------------------------------------------------------
+
+
+def _stopping_before_gathering(gatherer: TaskTestGatherer, bus: RecordingBus) -> None:
+    bus.stopping = True
+
+
+def _stopping_once_the_last_job_is_gathered(gatherer: TaskTestGatherer, bus: RecordingBus) -> None:
+    """Flips after the per-job loop, the window that loop's own check cannot see."""
+    build_status = gatherer._build_workflow_status
+
+    def cancelled_while_building(*args, **kwargs):
+        bus.stopping = True
+        return build_status(*args, **kwargs)
+
+    gatherer._build_workflow_status = cancelled_while_building  # type: ignore[method-assign]
+
+
+@pytest.mark.parametrize(
+    "start_stopping",
+    [
+        pytest.param(_stopping_before_gathering, id="before_gathering"),
+        pytest.param(_stopping_once_the_last_job_is_gathered, id="after_the_last_job"),
+    ],
+)
+def test_a_shutting_down_bus_abandons_gathering_without_registering_the_batch(
+    tmp_path: Path, start_stopping: Callable[[TaskTestGatherer, RecordingBus], None]
+):
+    """Gathering runs in a thread the bus cannot interrupt, so it has to give up on its own.
+
+    Registering what it managed to gather would be worse than registering nothing: the batch would
+    read as finished while holding a fraction of its jobs, and a run that never completed could then
+    report as done.
+    """
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1")
+
+    gatherer = _make_gatherer(tmp_path)
+    bus = RecordingBus()
+    gatherer.bus = bus  # type: ignore[assignment]
+    start_stopping(gatherer, bus)
+
+    gatherer.process_message(
+        _batch_finished(
+            artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+        )
+    )
+
+    assert drain_queue(bus.queue) == []
+    assert _registry(gatherer) == []
+    # Still planned, so nothing downstream can read the batch as one that finished.
+    assert gatherer._progress_by_batch["batch-1"].state is ExecutionState.PLANNED
 
 
 def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path):
