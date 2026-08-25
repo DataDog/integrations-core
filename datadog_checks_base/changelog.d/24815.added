@@ -1,1 +1,1 @@
-Add backend-agnostic ``HTTPClient`` and ``HTTPResponse`` protocols and an HTTP exception tree, so checks can be written without importing ``requests``.
+Add backend-agnostic HTTP protocols, exceptions, and structural test fakes, so checks and their tests can avoid depending on ``requests``.

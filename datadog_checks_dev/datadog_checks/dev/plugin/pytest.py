@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
+import importlib
 import json
 import os
 import re
@@ -10,7 +11,7 @@ from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
-from unittest.mock import PropertyMock, create_autospec, seal
+from unittest.mock import PropertyMock, create_autospec
 
 import pytest
 
@@ -387,6 +388,18 @@ def mock_http_response(mocker, mock_response):
 
 
 @pytest.fixture
+def fake_http(mocker):
+    """Install a base-owned HTTP fake on checks created by the test."""
+    AgentCheck = importlib.import_module('datadog_checks.base.checks.base').AgentCheck
+    FakeHTTPClient = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPClient
+    client = FakeHTTPClient()
+
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
+    return client
+
+
+@pytest.fixture
 def mock_http(mocker):
     from datadog_checks.base.checks.base import AgentCheck
     from datadog_checks.base.utils.headers import set_header
@@ -395,7 +408,7 @@ def mock_http(mocker):
     client = create_autospec(HTTPClient)
     cookie_return_value_unset = object()
 
-    # create_autospec skips annotation-only attributes; assign them before seal().
+    # create_autospec skips annotation-only attributes; assign them explicitly.
     header_state: dict[str, str] = {}
     client.options = {
         'auth': None,
@@ -435,7 +448,6 @@ def mock_http(mocker):
     client.get_cookie.return_value = cookie_return_value_unset
     client.get_cookie.side_effect = _get_cookie
     client.close.return_value = None
-    seal(client)
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
     return client
@@ -464,10 +476,10 @@ def mock_prometheus_http(mock_http, mocker):
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         *,
         mode: Literal["default"],
-        default_response: MockHTTPResponse,
+        default_response: Any,
         method: str = ...,
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
@@ -475,7 +487,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
     ): ...
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         *,
         mode: Literal["cycle", "exhaust"],
         default_response: None = None,
@@ -485,9 +497,9 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         strict: bool = ...,
     ): ...
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
-        default_response: MockHTTPResponse | None = None,
+        default_response: Any = None,
         method: str = _DEFAULT_MOCK_METHOD,
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
