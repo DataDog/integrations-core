@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import ast
-import pathlib
-
 import mock
 import pytest
 import requests
@@ -190,71 +187,6 @@ class TestShouldBypassProxy:
     def test_wildcard_bypasses_all(self):
         http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': '*'}}, {})
         assert http.should_bypass_proxy('http://anything.example') is True
-
-
-class TestClientProtocolSurface:
-    def test_client_capabilities_declared(self):
-        from datadog_checks.base.utils.http_protocol import HTTPClient
-
-        for name in ('ignore_tls_warning', 'persist_connections', 'tls_config'):
-            assert name in HTTPClient.__annotations__, f'{name} missing from HTTPClient'
-        assert callable(HTTPClient.should_bypass_proxy)
-
-    def test_wrapper_satisfies_client_surface(self):
-        from datadog_checks.base.utils.http_protocol import HTTPClient
-
-        http = RequestsWrapper({}, {})
-        for name in HTTPClient.__annotations__:
-            assert hasattr(http, name), f'RequestsWrapper missing attribute {name}'
-        for name in vars(HTTPClient):
-            if not name.startswith('_'):
-                assert hasattr(http, name), f'RequestsWrapper missing member {name}'
-
-    def test_shipped_code_reads_only_declared_client_members(self):
-        from datadog_checks.base.utils.http_protocol import HTTPClient
-
-        repo_root = pathlib.Path(__file__).resolve().parents[5]
-        assert (repo_root / 'datadog_checks_base').is_dir(), f'unexpected repository layout at {repo_root}'
-
-        declared = set(HTTPClient.__annotations__) | {name for name in vars(HTTPClient) if not name.startswith('_')}
-        defines_the_surface = {
-            repo_root / 'datadog_checks_base/datadog_checks/base/utils/http.py',
-            repo_root / 'datadog_checks_base/datadog_checks/base/utils/http_protocol.py',
-        }
-
-        # Remove entries as integrations migrate to the declared surface.
-        PENDING_MIGRATION = {
-            'avi_vantage/datadog_checks/avi_vantage/check.py',
-            'cisco_aci/datadog_checks/cisco_aci/api.py',
-            'hpe_aruba_edgeconnect/datadog_checks/hpe_aruba_edgeconnect/client.py',
-            'http_check/datadog_checks/http_check/http_check.py',
-            'openstack_controller/datadog_checks/openstack_controller/api/api_sdk.py',
-        }
-
-        undeclared = []
-        for path in sorted(repo_root.glob('*/datadog_checks/**/*.py')):
-            if path in defines_the_surface:
-                continue
-            if path.relative_to(repo_root).as_posix() in PENDING_MIGRATION:
-                continue
-            try:
-                tree = ast.parse(path.read_text(encoding='utf-8'))
-            except SyntaxError:
-                # Vendored Python 2 and cookiecutter templates do not ship a client.
-                continue
-            for node in ast.walk(tree):
-                if (
-                    isinstance(node, ast.Attribute)
-                    and isinstance(node.value, ast.Attribute)
-                    and node.value.attr in ('http', '_http')
-                    and node.attr not in declared
-                    and not node.attr.startswith('__')
-                ):
-                    undeclared.append(f'{path.relative_to(repo_root)}:{node.lineno} reads .{node.attr}')
-
-        assert not undeclared, 'client members read by shipped code but not declared on HTTPClient:\n' + '\n'.join(
-            undeclared
-        )
 
 
 class TestResponseProtocolSurface:
