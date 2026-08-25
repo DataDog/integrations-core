@@ -1651,10 +1651,12 @@ def test_environments_metrics_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/releases': MockResponse(status_code=500),
+                    '/api/Spaces-1/releases/Releases-1': MockResponse(status_code=500),
+                    '/api/Spaces-1/releases/Releases-2': MockResponse(status_code=500),
+                    '/api/Spaces-1/releases/Releases-3': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/releases: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/releases/Releases-1: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -1779,26 +1781,23 @@ def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get, 
         args, _ = call
         args_list += list(args)
 
-    # Deployments and releases are fetched by id in bulk, and only for what is not already cached,
-    # so five runs over the same deployments resolve them once rather than once per deployment.
+    # Deployments are fetched by id in bulk, and only for what is not already cached, so five runs
+    # over the same deployments resolve them in one collection request rather than one each.
     deployment_ids = [
         deployment_id
         for call in mock_http_get.call_args_list
         if call[0][0] == 'http://localhost:80/api/Spaces-1/deployments'
         for deployment_id in call[1]['params']['ids']
     ]
-    release_ids = [
-        release_id
-        for call in mock_http_get.call_args_list
-        if call[0][0] == 'http://localhost:80/api/Spaces-1/releases'
-        for release_id in call[1]['params']['ids']
-    ]
-
     assert sorted(deployment_ids) == ['Deployments-16', 'Deployments-17', 'Deployments-18', 'Deployments-19']
-    assert sorted(release_ids) == ['Releases-1', 'Releases-2', 'Releases-3']
-
     assert not [url for url in args_list if url.startswith('http://localhost:80/api/Spaces-1/deployments/')]
-    assert not [url for url in args_list if url.startswith('http://localhost:80/api/Spaces-1/releases/')]
+
+    # Releases have no working `ids` filter, so they are fetched individually — but the cache still
+    # means each is fetched once across five runs.
+    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-1') == 1
+    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-2') == 1
+    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-3') == 1
+    assert 'http://localhost:80/api/Spaces-1/releases' not in args_list
 
     assert args_list.count('http://localhost:80/api/Spaces-1/environments') == 5
 

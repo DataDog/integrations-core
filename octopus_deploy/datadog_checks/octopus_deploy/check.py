@@ -416,11 +416,12 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         return items
 
     def _cache_deployments(self, space_id, deployment_ids):
-        """Look up the deployments and releases needed to tag tasks, in bulk.
+        """Look up the deployments and releases needed to tag tasks.
 
-        Both endpoints accept an `ids` filter, so the deployments not seen before are fetched
-        together and their releases likewise, rather than issuing one request per deployment plus
-        one per release.
+        The deployments endpoint accepts an `ids` filter, so the deployments not seen before are
+        fetched together instead of one request each. The releases endpoint advertises `ids` in its
+        link template but ignores it — passing it returns the space's entire release collection — so
+        releases are still fetched individually, and only the versions not already cached.
         """
         missing = sorted(
             {
@@ -444,8 +445,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         )
         if missing_releases:
             self.log.debug("Fetching %s uncached releases in space %s", len(missing_releases), space_id)
-            for release in self._fetch_by_ids(f"api/{space_id}/releases", missing_releases):
-                self._releases_cache[release.get("Id")] = release.get("Version")
+            for release_id in missing_releases:
+                release = self._process_endpoint(f"api/{space_id}/releases/{release_id}")
+                self._releases_cache[release_id] = release.get("Version")
 
         for deployment in deployments:
             self._deployments_cache[deployment.get("Id")] = (
