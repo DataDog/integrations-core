@@ -5,6 +5,7 @@ import click
 from datadog_checks.dev.tooling.commands.ci.setup import setup
 
 from ddev.cli.ci.codeowners import codeowners
+from ddev.cli.ci.signal_probe import signal_probe
 
 
 @click.group(short_help='Collection of CI utilities')
@@ -17,3 +18,4 @@ def ci():
 
 ci.add_command(setup)
 ci.add_command(codeowners)
+ci.add_command(signal_probe)

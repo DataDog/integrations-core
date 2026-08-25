@@ -1,0 +1,52 @@
+name: signal probe
+
+# Temporary. Answers one question: which signals reach a ddev process when a workflow run is
+# cancelled, and whether being a child of the step's bash costs us them. Delete once recorded.
+
+on:
+  pull_request:
+    paths:
+    - '.github/workflows/signal-probe.yml'
+    - 'ddev/src/ddev/cli/ci/signal_probe.py'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        # ddev is a child of the step's bash, which is how a workflow would normally call it.
+        - invocation: child
+          command: ddev ci signal-probe --duration 300
+        # bash replaces itself with ddev, making ddev the step's entry process.
+        - invocation: exec
+          command: exec ddev ci signal-probe --duration 300
+
+    name: probe (${{ matrix.invocation }})
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.13'
+
+    - name: Install ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev
+
+    - name: Configure ddev
+      run: |
+        ddev config set upgrade_check false
+        ddev config set repos.core .
+        ddev config set repo core
+
+    - name: Run the probe, then cancel this run from the Actions tab
+      run: ${{ matrix.command }}
