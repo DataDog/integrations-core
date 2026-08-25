@@ -48,20 +48,11 @@ class BaseMessage:
     id: str
 
 
-def running_loop() -> asyncio.AbstractEventLoop | None:
-    """The loop running on this thread, or ``None`` outside one."""
-    try:
-        return asyncio.get_running_loop()
-    except RuntimeError:
-        return None
-
-
 class BaseProcessor[T: BaseMessage]:
     def __init__(self, name: str):
         self.name = name
-        self.queue: asyncio.Queue[BaseMessage] | None = None
-        # Both set by the bus: the queue at registration, the loop when the bus starts.
-        self.loop: asyncio.AbstractEventLoop | None = None
+        # Set by the bus at registration.
+        self.bus: EventBusOrchestrator | None = None
 
     async def on_success(self, message: T) -> None:
         pass
@@ -86,27 +77,11 @@ class BaseProcessor[T: BaseMessage]:
         raise error
 
     def submit_message(self, message: BaseMessage) -> None:
-        """Put *message* on the bus, from any thread.
-
-        A ``SyncProcessor`` runs in an executor thread, and ``asyncio.Queue`` is not thread-safe: a
-        put landing between ``get``'s ``empty()`` check and its waiter being registered wakes nobody,
-        leaving the bus spinning on a message it never reads. Such a put is handed to the loop
-        thread instead. A caller already on that thread, or with no live loop to hand it to, puts
-        directly, so the message is queued by the time this returns.
-        """
-        if self.queue is None:
+        """Put *message* on the bus this processor was registered in, from any thread."""
+        if self.bus is None:
             raise ProcessorQueueError("This processor has not been added to an active event bus")
 
-        # ``asyncio.run`` closes the loop when the bus stops, and a stopped bus is queued into
-        # directly, as it was before there was a loop to hop onto.
-        if self.loop is None or self.loop.is_closed() or running_loop() is self.loop:
-            self.queue.put_nowait(message)
-            return
-
-        try:
-            self.loop.call_soon_threadsafe(self.queue.put_nowait, message)
-        except RuntimeError as error:
-            raise ProcessorQueueError("The event bus is no longer running") from error
+        self.bus.submit_message(message)
 
     def should_process_message(self, message: BaseMessage) -> bool:
         return True
@@ -168,6 +143,7 @@ class EventBusOrchestrator(ABC):
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
+        self._loop: asyncio.AbstractEventLoop | None = None
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
         """
@@ -182,19 +158,23 @@ class EventBusOrchestrator(ABC):
 
     def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
         """Registers a processor to receive specific message types."""
-        processor.queue = self._queue
-        # Registering while the bus runs — from `on_initialize`, say — still needs the loop, or a
-        # `SyncProcessor` added that way submits unsafely from its executor thread.
-        if self._running:
-            processor.loop = asyncio.get_running_loop()
+        processor.bus = self
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
 
     def submit_message(self, message: BaseMessage):
+        """Adds a message to the queue, from any thread.
+
+        A ``SyncProcessor`` runs in an executor thread, and ``asyncio.Queue`` is not thread-safe: a
+        put landing between ``get``'s ``empty()`` check and its waiter being registered wakes nobody,
+        leaving the bus spinning on a message it never reads. So while the bus runs, every put is
+        handed to the loop thread, whichever thread asked for it. Before it starts and after it
+        stops there is no loop to hand it to, and the queue takes the message directly.
         """
-        Adds a message to the queue.
-        """
-        self._queue.put_nowait(message)
+        if self._loop is not None and self._loop.is_running():
+            self._loop.call_soon_threadsafe(self._queue.put_nowait, message)
+        else:
+            self._queue.put_nowait(message)
 
     def run(self):
         """
@@ -228,12 +208,6 @@ class EventBusOrchestrator(ABC):
         Initializes the orchestrator.
         """
         self._running = True
-        # The first point a running loop exists: processors are registered from __init__, on a
-        # thread that has none. Each one needs it to submit safely from an executor thread.
-        loop = asyncio.get_running_loop()
-        for processors in self._subscribers.values():
-            for processor in processors:
-                processor.loop = loop
         try:
             await self.on_initialize()
         except (FatalProcessingError, asyncio.CancelledError):
@@ -243,6 +217,10 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_INITIALIZE, e),
                 self.on_error,
             )
+        # Only now, so what the hook submitted is already queued. A deferred put is read because the
+        # callback that queues it precedes the task completion that wakes the loop, and the hook has
+        # no task to be ordered behind: a zero grace period would stop the bus before it ran.
+        self._loop = asyncio.get_running_loop()
 
     @abstractmethod
     async def on_initialize(self):  # pragma: no cover
