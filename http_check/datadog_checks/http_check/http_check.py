@@ -13,10 +13,10 @@ from urllib.parse import urlparse
 import requests
 import socks
 from cryptography import x509
-from requests import Response  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.http import should_bypass_proxy
+from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path, parse_proxy_url
@@ -122,7 +122,7 @@ class HTTPCheck(AgentCheck):
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         service_checks_tags = self._get_service_checks_tags(instance)
-        r = None  # type: Response
+        r: HTTPResponse | None = None
         peer_cert = None  # type: bytes | None
         http_outcome = None
         try:
@@ -186,7 +186,7 @@ class HTTPCheck(AgentCheck):
             if r is not None:
                 http_outcome = str(r.status_code)
             if use_cert_from_response:
-                peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
+                peer_cert = r.get_peer_cert(binary_form=True)
 
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile("^url:").match, tags_list)):
