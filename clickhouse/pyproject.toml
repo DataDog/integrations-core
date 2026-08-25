@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "clickhouse-connect==1.6.0",
+    "clickhouse-connect==1.7.2",
     "lz4==4.4.5",
 ]
 
