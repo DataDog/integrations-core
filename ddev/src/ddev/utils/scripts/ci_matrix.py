@@ -62,6 +62,10 @@ AGENT_REQUIREMENTS_FILE = 'agent_requirements.in'
 # they flow into CI as job inputs. Every real integration directory is lowercase alphanumeric with underscores or
 # hyphens, so anything else is either a mistake or an injection attempt and must never reach a runner.
 TARGET_NAME_PATTERN = re.compile(r'^[a-z0-9][a-z0-9_-]*$')
+# Target environments are built from the `envs.default.matrix` values in an integration's `hatch.toml`, which is also
+# attacker-controlled on fork pull requests. They reach CI as job inputs that are written to `$GITHUB_ENV`, so a value
+# containing a newline would append an arbitrary entry there (`BASH_ENV=...` being the usual escalation).
+TARGET_ENV_NAME_PATTERN = re.compile(r'^[A-Za-z0-9._-]+$')
 NON_TESTABLE_FILES = {'auto_conf.yaml'}
 DISPLAY_ORDER_OVERRIDE = {
     _d: _i
@@ -261,8 +265,12 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
                     os_index = list(keys).index('os') if 'os' in keys else -1
                     for combination in product(*values):
+                        env_name = '-'.join(combination)
+                        if not TARGET_ENV_NAME_PATTERN.match(env_name):
+                            print(f'Ignoring target env with unexpected name: {env_name!r}', file=sys.stderr)
+                            continue
                         os = combination[os_index] if os_index != -1 else platform_ids[0]
-                        target_envs.setdefault(os, []).append('-'.join(combination))
+                        target_envs.setdefault(os, []).append(env_name)
 
         runners = matrix_overrides.get('runners', {})
         for platform_id in platform_ids:
