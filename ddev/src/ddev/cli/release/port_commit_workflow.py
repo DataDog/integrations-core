@@ -26,6 +26,7 @@ from rich.text import Text
 
 from ddev.utils.fs import Path
 from ddev.utils.git import GitRepository
+from ddev.utils.github import PULL_REQUEST_URL_PATTERN, resolve_owner_repo
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -40,7 +41,6 @@ FULL_SHA_PATTERN = re.compile(r'^[0-9a-fA-F]{40}$')
 HEX_PATTERN = re.compile(r'^[0-9a-fA-F]+$')
 DIGITS_PATTERN = re.compile(r'^\d+$')
 PR_PREFIX_PATTERN = re.compile(r'^PR-(\d+)$', re.IGNORECASE)
-PR_URL_PATTERN = re.compile(r'^https?://github\.com/[^/]+/[^/]+/pull/(\d+)(?:[/?#].*)?$', re.IGNORECASE)
 
 # Paths whose content is regenerated per-branch, so a backport must reset them to the target
 # branch's version instead of carrying over the source commit's. A trailing slash matches as a
@@ -417,7 +417,7 @@ def _resolve_input(app: Application, raw: str, *, dry_run: bool) -> str:
 
 def _extract_explicit_pr_number(raw: str) -> int | None:
     """Return the PR number when `raw` is a `PR-12345` token or a GitHub PR URL, else None."""
-    for pattern in (PR_PREFIX_PATTERN, PR_URL_PATTERN):
+    for pattern in (PR_PREFIX_PATTERN, PULL_REQUEST_URL_PATTERN):
         match = pattern.fullmatch(raw)
         if match:
             return int(match.group(1))
@@ -625,18 +625,6 @@ def derive_backport_bases(pr: PullRequest) -> list[str]:
             if base and base not in bases:
                 bases.append(base)
     return bases
-
-
-def resolve_owner_repo(app: Application) -> tuple[str, str]:
-    """Resolve (owner, repo) for the active repository.
-
-    Falls back to `DataDog/<full_name>` when `full_name` is unqualified.
-    """
-    full = app.repo.full_name
-    if '/' in full:
-        owner, repo = full.split('/', 1)
-        return owner, repo
-    return 'DataDog', full
 
 
 def _sanitize_branch_for_path(branch: str) -> str:

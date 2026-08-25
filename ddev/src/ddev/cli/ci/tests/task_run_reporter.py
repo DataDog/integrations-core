@@ -80,6 +80,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._latest_revision = -1
         self._latest_body: str | None = None
         self._pr_comment_failed = False
+        self._final_report_published = False
         self._lock = asyncio.Lock()
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
@@ -95,6 +96,11 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
     def pr_comment_failed(self) -> bool:
         """Whether the newest report failed to reach its pull-request comment."""
         return self._pr_comment_failed
+
+    @property
+    def final_report_published(self) -> bool:
+        """Whether a completed run's report was not lost: it reached the comment, or had none to reach."""
+        return self._final_report_published
 
     async def process_message(self, message: UpdatePRComment):
         # Rendering is pure, so it happens outside the lock.
@@ -114,8 +120,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
             pr_number = self._options.pr_number
             if pr_number is None:
                 self._logger.info("No pull request to update: %s", summary_line(message.progress), extra=log_extra)
+                published = True
             else:
-                self._pr_comment_failed = not await self._write(pr_number, message, body, log_extra)
+                published = await self._write(pr_number, message, body, log_extra)
+                self._pr_comment_failed = not published
+
+            if message.progress.done and published:
+                self._final_report_published = True
 
             # Retained even when the write failed: this is the newest report we have, and losing the
             # comment must not lose the results. The revision advances with it, so a later snapshot
