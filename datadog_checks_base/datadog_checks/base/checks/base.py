@@ -378,6 +378,7 @@ class AgentCheck(object):
 
         # Setup metric limits
         self.metric_limiter = self._get_metric_limiter(self.name, instance=self.instance)
+        self._namespace_cache = {}  # type: dict[tuple[str, bool, str], str]
 
         # Lazily load and validate config
         self._config_model_instance = None  # type: Any
@@ -1562,10 +1563,22 @@ class AgentCheck(object):
 
     def _format_namespace(self, s, raw=False):
         # type: (str, bool) -> str
-        if not raw and self.__NAMESPACE__:
-            return '{}.{}'.format(self.__NAMESPACE__, to_native_string(s))
+        # Runs once per submitted metric, and a check reports the same names every run, so the result is cached.
+        # The namespace is part of the key because `adopt_namespace` swaps `__NAMESPACE__` for the duration of a
+        # context manager, so one name can format two different ways within a single check run.
+        namespace = self.__NAMESPACE__
+        key = (s, raw, namespace)
+        cached = self._namespace_cache.get(key)
+        if cached is not None:
+            return cached
 
-        return to_native_string(s)
+        if not raw and namespace:
+            formatted = '{}.{}'.format(namespace, to_native_string(s))
+        else:
+            formatted = to_native_string(s)
+
+        self._namespace_cache[key] = formatted
+        return formatted
 
     def normalize(self, metric, prefix=None, fix_case=False):
         # type: (Union[str, bytes], Union[str, bytes], bool) -> str

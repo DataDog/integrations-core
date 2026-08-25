@@ -696,6 +696,23 @@ class TestMetrics:
 
         aggregator.assert_metric('metric', count=len(methods))
 
+    def test_namespace_changes_between_submissions(self, aggregator):
+        # `adopt_namespace` in the OpenMetrics and Windows perf-counter base classes swaps `__NAMESPACE__` for
+        # the duration of a context manager, so the same metric name can format two different ways within one
+        # check run.
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'first'
+        check.gauge('metric', 0)
+
+        check.__NAMESPACE__ = 'second'
+        check.gauge('metric', 0)
+
+        check.__NAMESPACE__ = 'first'
+        check.gauge('metric', 0)
+
+        aggregator.assert_metric('first.metric', count=2)
+        aggregator.assert_metric('second.metric', count=1)
+
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
         metric_name = 'test_metric'
