@@ -1,21 +1,36 @@
 {
+  "supported_auth_methods": [
+    {
+      "auth_name": "Service principal and secret",
+      "basic": {
+        "user_setting": {
+          "key": "service_principal",
+          "label": "Service principal",
+          "help": "Your Proofpoint TAP service principal.",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "secret",
+          "label": "Secret",
+          "help": "Your Proofpoint TAP secret.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Proofpoint TAP",
+      "fixed": {
+        "fixed_base_url": "https://tap-api-v2.proofpoint.com"
+      }
+    }
+  ],
   "additional_config_fields": [
-    {
-      "key": "service_principal",
-      "label": "Service principal",
-      "help": "Your Proofpoint TAP service principal.",
-      "editable": true,
-      "required": true,
-      "text": {}
-    },
-    {
-      "key": "secret",
-      "label": "Secret",
-      "help": "Your Proofpoint TAP secret.",
-      "editable": true,
-      "required": true,
-      "password": {}
-    },
     {
       "key": "click_blocked",
       "label": "Collect click blocked events",
@@ -48,5 +63,15 @@
         "default": true
       }
     }
-  ]
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/v2/siem/clicks/blocked?format=json&sinceSeconds=3600",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
 }
