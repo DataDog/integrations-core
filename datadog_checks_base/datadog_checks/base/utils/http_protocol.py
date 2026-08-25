@@ -12,10 +12,7 @@ from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from datetime import timedelta
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Protocol, TypedDict, Unpack
-
-if TYPE_CHECKING:
-    import requests
+from typing import Any, Protocol, TypedDict, Unpack
 
 
 class HTTPHeaders(Mapping[str, str]):
@@ -189,7 +186,3 @@ class HTTPClient(Protocol):
         ...
 
     def should_bypass_proxy(self, url: str) -> bool: ...
-
-    def apply_tls_to_requests_session(self, session: requests.Session) -> None:
-        """Apply TLS to a keystoneauth1 requests session; proxies remain caller-owned."""
-        raise NotImplementedError('a non-requests backend must not silently skip applying TLS configuration')

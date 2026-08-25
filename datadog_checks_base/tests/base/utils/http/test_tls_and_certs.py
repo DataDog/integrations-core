@@ -14,8 +14,10 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
+from datadog_checks.base.utils import _http_utils
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
 from datadog_checks.base.utils.http_exceptions import HTTPClientSSLError
+from datadog_checks.base.utils.requests_adapter import apply_tls
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -518,10 +520,10 @@ class TestSSLContext:
 
 class TestSSLContextAdapter:
     def test_adapter_caching(self):
-        """_SSLContextAdapter should be recovered from cache when possible."""
+        """SSLContextAdapter should be recovered from cache when possible."""
 
         with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            with mock.patch('datadog_checks.base.utils.requests_adapter.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached
                 default_config_key = TlsConfig(**http.tls_config)
@@ -537,10 +539,10 @@ class TestSSLContextAdapter:
                 mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
     def test_adapter_caching_new_adapter(self):
-        """A new _SSLContextAdapter should be created when a new TLS config is requested."""
+        """A new SSLContextAdapter should be created when a new TLS config is requested."""
 
         with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            with mock.patch('datadog_checks.base.utils.requests_adapter.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached for the default TLS config
                 default_config_key = TlsConfig(**http.tls_config)
@@ -570,7 +572,7 @@ class TestSSLContextAdapter:
         own_adapter = http.session.get_adapter('https://example.com')
         foreign_session = requests.Session()
 
-        http.apply_tls_to_requests_session(foreign_session)
+        apply_tls(http, foreign_session)
 
         foreign_adapter = foreign_session.get_adapter('https://example.com')
         assert foreign_adapter.ssl_context.verify_mode == ssl.CERT_REQUIRED
@@ -580,3 +582,15 @@ class TestSSLContextAdapter:
         foreign_session.close()
 
         assert len(own_adapter.poolmanager.pools) == 1
+
+    def test_foreign_session_uses_host_header_tls(self):
+        http = RequestsWrapper(
+            {'headers': {'Host': 'example.com'}, 'tls_use_host_header': True},
+            {},
+        )
+        foreign_session = requests.Session()
+
+        apply_tls(http, foreign_session)
+
+        adapter = foreign_session.get_adapter('https://example.com')
+        assert isinstance(adapter, _http_utils.HostHeaderSSLAdapter)

@@ -33,6 +33,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils import _http_utils
 
+from . import requests_adapter
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .headers import set_header as set_header_value
@@ -211,36 +212,6 @@ def get_tls_config_from_options(new_options):
     elif cert is not None:
         raise TypeError('Unexpected type for `cert` option. Expected str or tuple, got {}.'.format(type(cert).__name__))
     return tls_config
-
-
-class _SSLContextAdapter(requests.adapters.HTTPAdapter):
-    """
-    This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
-    """
-
-    def __init__(self, ssl_context, **kwargs):
-        self.ssl_context = ssl_context
-        super().__init__()
-
-    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        pool_kwargs['ssl_context'] = self.ssl_context
-        return super().init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
-
-    def cert_verify(self, conn, url, verify, cert):
-        """
-        This method is overridden to ensure that the SSL context
-        is configured on the integration side.
-        """
-        pass
-
-    def build_connection_pool_key_attributes(self, request, verify, cert=None):
-        """
-        This method is overridden according to the requests library's
-        expectations to ensure that the custom SSL context is passed to urllib3.
-        """
-        # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
-        host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
-        return host_params, {"ssl_context": self.ssl_context}
 
 
 def _translate_requests_request(
@@ -970,40 +941,15 @@ class RequestsWrapper(object):
             # before _session was ever defined (since __del__ executes even if __init__ fails).
             pass
 
-    def apply_tls_to_requests_session(self, session: requests.Session) -> None:
-        """Apply this client's TLS configuration to a foreign requests session."""
-        # Use a dedicated adapter because closing the foreign session closes its adapters.
-        session.mount('https://', self._create_https_adapter(self.tls_config))
-
     def _mount_https_adapter(self, session, tls_config):
         # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)
         if tls_config_key not in self._https_adapters:
-            self._https_adapters[tls_config_key] = self._create_https_adapter(tls_config)
+            self._https_adapters[tls_config_key] = requests_adapter.create_https_adapter(
+                tls_config, use_host_header=self.tls_use_host_header
+            )
 
         session.mount('https://', self._https_adapters[tls_config_key])
-
-    def _create_https_adapter(self, tls_config):
-        context = create_ssl_context(tls_config)
-        # Enables HostHeaderSSLAdapter if needed
-        # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
-        if self.tls_use_host_header:
-            # Create a combined adapter that supports both TLS context and host headers
-            class SSLContextHostHeaderAdapter(_SSLContextAdapter, _http_utils.HostHeaderSSLAdapter):
-                def __init__(self, ssl_context, **kwargs):
-                    _SSLContextAdapter.__init__(self, ssl_context, **kwargs)
-                    _http_utils.HostHeaderSSLAdapter.__init__(self, **kwargs)
-
-                def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-                    # Use TLS context from wrapper
-                    pool_kwargs['ssl_context'] = self.ssl_context
-                    return _http_utils.HostHeaderSSLAdapter.init_poolmanager(
-                        self, connections, maxsize, block=block, **pool_kwargs
-                    )
-
-            return SSLContextHostHeaderAdapter(context)
-
-        return _SSLContextAdapter(context)
 
 
 def create_http_client(

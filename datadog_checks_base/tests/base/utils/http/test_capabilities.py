@@ -199,15 +199,6 @@ class TestClientProtocolSurface:
             assert name in HTTPClient.__annotations__, f'{name} missing from HTTPClient'
         assert callable(HTTPClient.should_bypass_proxy)
 
-    def test_tls_escape_hatch_refuses_to_no_op(self):
-        from datadog_checks.base.utils.http_protocol import HTTPClient
-
-        class BackendWithoutTheEscapeHatch(HTTPClient):
-            pass
-
-        with pytest.raises(NotImplementedError):
-            BackendWithoutTheEscapeHatch().apply_tls_to_requests_session(requests.Session())
-
     def test_wrapper_satisfies_client_surface(self):
         from datadog_checks.base.utils.http_protocol import HTTPClient
 
