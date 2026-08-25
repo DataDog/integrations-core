@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import functools
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.sqlserver.const import SQLSERVER_PARAMETER_LIMIT
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -13,9 +15,9 @@ INDEX_USAGE_STATS_QUERY = {
     "query": """
     SELECT
         DB_NAME(ixus.database_id) AS db,
-        COALESCE(ind.name, 'HeapIndex_' + OBJECT_NAME(ind.object_id)) AS index_name,
+        COALESCE(ind.name, 'HeapIndex_' + o.name) AS index_name,
         OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) AS "schema",
-        OBJECT_NAME(ind.object_id) AS table_name,
+        o.name AS table_name,
         ixus.user_seeks as user_seeks,
         ixus.user_scans as user_scans,
         ixus.user_lookups as user_lookups,
@@ -51,6 +53,10 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_index_usage_metrics_tempdb(self) -> bool:
         return self.config.database_metrics_config["index_usage_metrics"]["enabled_tempdb"]
+
+    @property
+    def index_usage_table_names(self) -> list[str]:
+        return self.config.index_usage_table_names
 
     @property
     def collection_interval(self) -> int:
@@ -100,9 +106,26 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
+        if self.index_usage_table_names:
+            table_name_batches = [
+                self.index_usage_table_names[start : start + SQLSERVER_PARAMETER_LIMIT]
+                for start in range(0, len(self.index_usage_table_names), SQLSERVER_PARAMETER_LIMIT)
+            ]
+        else:
+            table_name_batches = [None]
         for database in self.databases:
+            queries = []
+            for table_names in table_name_batches:
+                batch_queries = copy.deepcopy(self.queries)
+                if table_names:
+                    placeholders = ','.join(['?'] * len(table_names))
+                    table_name_filter = f" WHERE o.name IN ({placeholders})"
+                    for query in batch_queries:
+                        query['query'] += table_name_filter
+                        query['params'] = tuple(table_names)
+                queries.extend(batch_queries)
             executor = self.new_query_executor(
-                self.queries,
+                queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
                 track_operation_time=self.track_operation_time,
             )

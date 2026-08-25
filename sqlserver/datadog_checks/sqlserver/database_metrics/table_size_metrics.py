@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+import copy
 import functools
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.sqlserver.const import SQLSERVER_PARAMETER_LIMIT
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -63,6 +66,10 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
         return self.config.database_metrics_config["table_size_metrics"]["collection_interval"]
 
     @property
+    def table_size_table_names(self) -> list[str]:
+        return self.config.table_size_table_names
+
+    @property
     def databases(self):
         '''
         Returns a list of databases to collect table size metrics for.
@@ -93,9 +100,26 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
+        if self.table_size_table_names:
+            table_name_batches = [
+                self.table_size_table_names[start : start + SQLSERVER_PARAMETER_LIMIT]
+                for start in range(0, len(self.table_size_table_names), SQLSERVER_PARAMETER_LIMIT)
+            ]
+        else:
+            table_name_batches = [None]
         for database in self.databases:
+            queries = []
+            for table_names in table_name_batches:
+                batch_queries = copy.deepcopy(self.queries)
+                if table_names:
+                    placeholders = ','.join(['?'] * len(table_names))
+                    table_name_filter = f" WHERE t.name IN ({placeholders})"
+                    for query in batch_queries:
+                        query['query'] = query['query'].replace("    GROUP BY", table_name_filter + "\n    GROUP BY")
+                        query['params'] = tuple(table_names)
+                queries.extend(batch_queries)
             executor = self.new_query_executor(
-                self.queries,
+                queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
                 track_operation_time=self.track_operation_time,
             )

@@ -520,6 +520,7 @@ class InstanceConfig(BaseModel):
     host: str
     ignore_missing_database: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
+    index_usage_table_names: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None
@@ -540,6 +541,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     stored_procedure: Optional[str] = None
     stored_procedure_characters_limit: Optional[int] = None
+    table_size_table_names: Optional[tuple[str, ...]] = None
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None

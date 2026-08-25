@@ -532,6 +532,27 @@ files:
         items:
           type: string
       fleet_configurable: false
+    - name: index_usage_table_names
+      description: |
+        Index usage metrics normally emit metrics for all user tables and their indexes within a database.
+        This option allows you to specify exact table names to query for index usage metrics.
+        Specify table names, not index names; metrics are collected for every index belonging to each matching table.
+        Note: Each table name is unique to each database.
+      value:
+        type: array
+        items:
+          type: string
+      fleet_configurable: false
+    - name: table_size_table_names
+      description: |
+        Table size metrics normally emit metrics for all user tables within a database.
+        This option allows you to specify exact table names to query for table size metrics.
+        Note: Each table name is unique to each database.
+      value:
+        type: array
+        items:
+          type: string
+      fleet_configurable: false
     - name: adoprovider
       fleet_configurable: true
       description: |
