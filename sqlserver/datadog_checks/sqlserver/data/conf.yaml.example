@@ -301,6 +301,18 @@ instances:
         #
         # table_size_metrics: {}
 
+    ## @param include_instance_metrics - boolean - optional - default: true
+    ## DEPRECATED: Use `database_metrics.instance_metrics.enabled` instead.
+    ## Enable collection of server-level instance metrics. Defaults to true.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.84.0
+    ## Migration: Use `database_metrics.instance_metrics.enabled` instead.
+    #
+    # include_instance_metrics: true
+
     ## Configure collection of SQL Server Agent jobs events and metrics
     #
     # agent_jobs:

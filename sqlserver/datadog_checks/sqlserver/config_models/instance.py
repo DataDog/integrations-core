@@ -519,6 +519,7 @@ class InstanceConfig(BaseModel):
     gcp: Optional[Gcp] = None
     host: str
     ignore_missing_database: Optional[bool] = None
+    include_instance_metrics: Optional[bool] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None

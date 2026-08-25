@@ -1,0 +1,1 @@
+Make ``database_metrics.instance_metrics.enabled`` gate instance metric collection instead of being ignored.

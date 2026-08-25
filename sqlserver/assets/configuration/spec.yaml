@@ -486,6 +486,17 @@ files:
               example: 600
               display_default: 600
           fleet_configurable: false
+    - name: include_instance_metrics
+      deprecation:
+        Agent version: 7.84.0
+        Migration: Use `database_metrics.instance_metrics.enabled` instead.
+      description: |
+        DEPRECATED: Use `database_metrics.instance_metrics.enabled` instead.
+        Enable collection of server-level instance metrics. Defaults to true.
+      value:
+        type: boolean
+        example: true
+      fleet_configurable: false
     - name: agent_jobs
       description: Configure collection of SQL Server Agent jobs events and metrics
       options:

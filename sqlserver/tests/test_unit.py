@@ -1680,6 +1680,20 @@ def test_database_identifier(instance_docker, template, expected, tags):
     assert check.database_identifier == expected
 
 
+def test_legacy_instance_metrics_option_emits_deprecation_warning(instance_docker_defaults):
+    instance_docker_defaults['include_instance_metrics'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker_defaults])
+
+    check.load_configuration_models()
+
+    assert check.warnings == [
+        """Option `include_instance_metrics` in `instances` is deprecated ->
+Agent version: 7.84.0
+Migration: Use `database_metrics.instance_metrics.enabled` instead.
+"""
+    ]
+
+
 def test_only_custom_queries_validation_warnings(caplog):
     """Test that appropriate warning logs are emitted when only_custom_queries conflicts with other configurations."""
     from datadog_checks.sqlserver.config import SQLServerConfig
