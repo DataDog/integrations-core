@@ -97,6 +97,8 @@ def get_conn_failure_config():
 @pytest.fixture
 def get_multiple_expected_modes_config():
     config = deepcopy(VALID_CONFIG)
+    if get_tls():
+        config = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
     config.update({'expected_mode': ['standalone', 'leader']})
     return config
 
@@ -110,7 +112,7 @@ def get_version():
 
 
 def get_tls():
-    return os.environ.get("SSL") == 'True'
+    return os.environ.get("SSL", "").lower() == 'true'
 
 
 @pytest.fixture(scope="session")
@@ -151,19 +153,24 @@ def dd_environment(get_instance):
 
     if is_tls:
         condition = [
-            CheckDockerLogs(compose_file, patterns=['Starting server', 'Started AdminServer', 'bound to port'])
+            CheckDockerLogs(
+                compose_file, patterns=['Starting server', 'Started AdminServer', 'bound to port'], matches='all'
+            )
         ]
     else:
         condition = [condition_non_tls]
 
     with docker_run(compose_file, conditions=condition, sleep=5):
-        yield get_instance, {
-            'docker_volumes': [
-                '{}:/conf/private_key.pem'.format(private_key),
-                '{}:/conf/cert.pem'.format(cert),
-                '{}:/conf/ca_cert.pem'.format(ca_cert),
-            ]
-        }
+        yield (
+            get_instance,
+            {
+                'docker_volumes': [
+                    '{}:/conf/private_key.pem'.format(private_key),
+                    '{}:/conf/cert.pem'.format(cert),
+                    '{}:/conf/ca_cert.pem'.format(ca_cert),
+                ]
+            },
+        )
 
 
 @pytest.fixture()

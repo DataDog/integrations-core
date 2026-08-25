@@ -1,4 +1,5 @@
 name: dcgm
+fleet_configurable: true
 files:
 - name: dcgm.yaml
   options:

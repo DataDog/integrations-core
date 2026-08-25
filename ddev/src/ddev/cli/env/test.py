@@ -3,12 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import click
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.utils.hatch import Environment
 
 
 @click.command('test')
@@ -27,7 +29,7 @@ if TYPE_CHECKING:
     '-a',
     'agent_build',
     help=(
-        'The Agent build to use e.g. a Docker image like `datadog/agent:latest`. You can '
+        'The Agent build to use e.g. a Docker image like `registry.datadoghq.com/agent:latest`. You can '
         'also use the name of an Agent defined in the `agents` configuration section.'
     ),
 )
@@ -37,6 +39,7 @@ if TYPE_CHECKING:
     multiple=True,
     help='Environment variables to pass to the Agent e.g. -e DD_URL=app.datadoghq.com -e DD_API_KEY=foobar',
 )
+@click.option('--recreate', '-r', is_flag=True, help='Recreate environments from scratch')
 @click.option('--junit', is_flag=True, hidden=True)
 @click.option('--python-filter', envvar='PYTHON_FILTER', hidden=True)
 @click.option('--new-env', is_flag=True, hidden=True)
@@ -51,6 +54,7 @@ def test_command(
     local_base: bool,
     agent_build: str | None,
     extra_env_vars: tuple[str, ...],
+    recreate: bool,
     junit: bool,
     python_filter: str | None,
     new_env: bool,
@@ -72,6 +76,8 @@ def test_command(
     \b
     https://datadoghq.dev/integrations-core/testing/
     """
+    from functools import partial
+
     from ddev.cli.env.start import start
     from ddev.cli.env.stop import stop
     from ddev.cli.test import test
@@ -79,42 +85,37 @@ def test_command(
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import E2EMetadata
     from ddev.utils.ci import running_in_ci
+    from ddev.utils.hatch import HatchCommandError, list_environment_names
     from ddev.utils.structures import EnvVars
 
     app: Application = ctx.obj
-    storage = EnvDataStorage(app.data_dir)
     integration = app.repo.integrations.get(intg_name)
+
+    storage = EnvDataStorage(app.data_dir)
     active_envs = storage.get_environments(integration.name)
 
     if environment is None:
         environment = 'all' if (not active_envs or running_in_ci()) else 'active'
 
-    if environment == 'all':
-        import json
-        import sys
-
-        with integration.path.as_cwd():
-            env_data_output = app.platform.check_command_output(
-                [sys.executable, '-m', 'hatch', '--no-color', '--no-interactive', 'env', 'show', '--json']
-            )
-            try:
-                environments = json.loads(env_data_output)
-            except json.JSONDecodeError:
-                app.abort(f'Failed to parse environments for `{integration.name}`:\n{repr(env_data_output)}')
-
-        env_names = [
-            name
-            for name, data in environments.items()
-            if data.get('e2e-env')
-            and (not data.get('platforms') or app.platform.name in data['platforms'])
-            and (python_filter is None or data.get('python') == python_filter)
-        ]
-    elif environment == 'active':
+    if environment == 'active':
         env_names = active_envs
     else:
-        env_names = [environment]
+        try:
+            env_names = list_environment_names(
+                app.platform,
+                integration,
+                filters=[
+                    is_e2e_environment,
+                    partial(uses_python_version, python_filter=python_filter),
+                    partial(uses_platform, platform=app.platform.name),
+                    partial(is_selected_environment, environment_name=environment),
+                ],
+            )
+        except HatchCommandError as error:
+            app.abort(f'Failed to list environments for `{integration.name}`:\n{error}')
 
     if not env_names:
+        app.display_info(f"Selected target {integration.name!r} disabled by e2e-env option.")
         return
 
     app.display_header(integration.display_name)
@@ -122,6 +123,11 @@ def test_command(
     active = set(active_envs)
     for env_name in env_names:
         env_active = env_name in active
+
+        # If recreating and environment is already active, stop it first to get a fresh environment
+        if recreate and env_active:
+            ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=False)
+
         ctx.invoke(
             start,
             intg_name=intg_name,
@@ -131,7 +137,7 @@ def test_command(
             agent_build=agent_build,
             extra_env_vars=extra_env_vars,
             hide_help=True,
-            ignore_state=env_active,
+            ignore_state=env_active and not recreate,
         )
 
         env_data = storage.get(integration.name, env_name)
@@ -141,13 +147,34 @@ def test_command(
             env_vars[AppEnvVars.REPO] = app.repo.name
 
             with EnvVars(env_vars):
+                # Pass through DDEV_TEST_ENABLE_TRACING since ctx.invoke bypasses envvar parsing
+                ddtrace_env = os.environ.get(AppEnvVars.TEST_ENABLE_TRACING, '')
+                ddtrace = ddtrace_env.lower() in ('1', 'true', 'yes')
                 ctx.invoke(
                     test,
                     target_spec=f'{intg_name}:{env_name}',
                     pytest_args=pytest_args,
+                    recreate=recreate,
                     junit=junit,
                     hide_header=True,
                     e2e=True,
+                    ddtrace=ddtrace,
                 )
         finally:
             ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=env_active)
+
+
+def is_e2e_environment(environment: Environment) -> bool:
+    return environment.e2e_env
+
+
+def uses_python_version(environment: Environment, python_filter: str | None) -> bool:
+    return python_filter is None or environment.python == python_filter
+
+
+def uses_platform(environment: Environment, platform: str) -> bool:
+    return not environment.platforms or platform in environment.platforms
+
+
+def is_selected_environment(environment: Environment, environment_name: str) -> bool:
+    return environment.name == environment_name or environment_name == 'all'

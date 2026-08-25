@@ -20,6 +20,9 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(['ssl_ca_cert', 'ssl_cert', 'ssl_private_key'])
+
+
 class TargetMetric(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -37,28 +40,44 @@ class LabelJoins(BaseModel):
     target_metric: Optional[TargetMetric] = None
 
 
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     health_service_check: Optional[bool] = None
     label_joins: Optional[LabelJoins] = None
     label_to_hostname: Optional[str] = None
     labels_mapper: Optional[MappingProxyType[str, Any]] = None
     max_returned_metrics: Optional[int] = None
+    metric_patterns: Optional[MetricPatterns] = None
     metrics: tuple[Union[MappingProxyType[str, str], str], ...]
+    min_collection_interval: Optional[float] = None
     namespace: str
     prometheus_metrics_prefix: Optional[str] = None
     prometheus_timeout: Optional[int] = None
     prometheus_url: str
     send_histograms_buckets: Optional[bool] = None
     send_monotonic_counter: Optional[bool] = None
+    service: Optional[str] = None
     ssl_ca_cert: Optional[str] = None
     ssl_cert: Optional[str] = None
     ssl_private_key: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
     type_overrides: Optional[MappingProxyType[str, Any]] = None
 
     @model_validator(mode='before')
@@ -71,6 +90,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

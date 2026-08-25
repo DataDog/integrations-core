@@ -7,17 +7,24 @@ from urllib.parse import urlparse
 import click
 from packaging.requirements import Requirement
 
-from ....utils import get_next
-from ...constants import get_agent_requirements, get_root
-from ...dependencies import (
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    annotate_errors,
+    echo_failure,
+    echo_success,
+)
+from datadog_checks.dev.tooling.constants import get_agent_requirements, get_root
+from datadog_checks.dev.tooling.dependencies import (
     get_dependency_set,
     read_agent_dependencies,
     read_check_base_dependencies,
     read_check_dependencies,
 )
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_project_file, has_project_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure, echo_success
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_project_file, has_project_file
+from datadog_checks.dev.utils import get_next
 
 
 def get_marker_string(dependency_definition):
@@ -213,9 +220,9 @@ def dep(check, require_base_check_version, min_base_check_version):
         check_base_dependencies, check_base_errors = read_check_base_dependencies(check_name)
         annotate_errors(base_req_source, check_base_errors)
         if check_base_errors:
+            failed = True
             for check_error in check_base_errors:
                 echo_failure(check_error)
-            abort()
 
         for name, versions in sorted(check_dependencies.items()):
             if not verify_dependency('Checks', name, versions, req_source):
@@ -272,6 +279,6 @@ def dep(check, require_base_check_version, min_base_check_version):
             annotate_error(agent_dependencies_file, message)
             continue
 
-        if failed:
-            abort()
+    if failed:
+        abort()
     echo_success("All dependencies are valid!")

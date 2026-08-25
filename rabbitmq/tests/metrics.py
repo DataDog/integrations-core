@@ -306,14 +306,14 @@ DEFAULT_OPENMETRICS = {
     'rabbitmq.telemetry.scrape.size_bytes.sum',
     'rabbitmq.queue.get.ack.count',
     'rabbitmq.queue.get.count',
+    'rabbitmq.queue.get.empty.count',
+    'rabbitmq.queue.messages.acked.count',
     'rabbitmq.queue.messages.delivered.ack.count',
     'rabbitmq.queue.messages.delivered.count',
     'rabbitmq.queue.messages.redelivered.count',
-    'rabbitmq.queue.messages.acked.count',
-    'rabbitmq.queue.get.empty.count',
 }
 
-RABBITMQ_4_0_ADDED = {
+RABBITMQ_4_0_QUEUE_DELIVERY_METRICS = {
     'rabbitmq.queue.get.ack.count',
     'rabbitmq.queue.get.count',
     'rabbitmq.queue.messages.delivered.ack.count',
@@ -321,6 +321,10 @@ RABBITMQ_4_0_ADDED = {
     'rabbitmq.queue.messages.redelivered.count',
     'rabbitmq.queue.messages.acked.count',
     'rabbitmq.queue.get.empty.count',
+}
+
+RABBITMQ_4_0_ADDED = RABBITMQ_4_0_QUEUE_DELIVERY_METRICS | {
+    'rabbitmq.stream.segments.count',
 }
 
 RABBITMQ_4_0_REMOVED = {
@@ -365,6 +369,27 @@ MISSING_OPENMETRICS = {
     'rabbitmq.erlang.vm.dist.send_bytes',
     'rabbitmq.queue.consumer_capacity',
     'rabbitmq.queue.messages.persistent_bytes',
+    # Detailed-only metrics (only present in detailed endpoint)
+    'rabbitmq.queue.info',
+    # Stream metrics (only present when streams are configured)
+    'rabbitmq.global.stream.error.access_refused.count',
+    'rabbitmq.global.stream.error.authentication_failure.count',
+    'rabbitmq.global.stream.error.frame_too_large.count',
+    'rabbitmq.global.stream.error.internal_error.count',
+    'rabbitmq.global.stream.error.precondition_failed.count',
+    'rabbitmq.global.stream.error.publisher_does_not_exist.count',
+    'rabbitmq.global.stream.error.sasl_authentication_failure_loopback.count',
+    'rabbitmq.global.stream.error.sasl_challenge.count',
+    'rabbitmq.global.stream.error.sasl_error.count',
+    'rabbitmq.global.stream.error.sasl_mechanism_not_supported.count',
+    'rabbitmq.global.stream.error.stream_already_exists.count',
+    'rabbitmq.global.stream.error.stream_does_not_exist.count',
+    'rabbitmq.global.stream.error.stream_not_available.count',
+    'rabbitmq.global.stream.error.subscription_id_already_exists.count',
+    'rabbitmq.global.stream.error.subscription_id_does_not_exist.count',
+    'rabbitmq.global.stream.error.unknown_frame.count',
+    'rabbitmq.global.stream.error.vhost_access_failure.count',
+    'rabbitmq.stream.consumer_max_offset_lag',
 }
 
 # Metrics only present in the aggregated endpoint.

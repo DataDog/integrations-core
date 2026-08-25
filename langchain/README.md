@@ -9,6 +9,8 @@ See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video
 
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [LangChain][1] Python library requests using Datadog metrics and APM.
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### LLM Observability: Get end-to-end visibility into your LLM application using LangChain
@@ -44,7 +46,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the `ddtrace` package if it isn't installed yet:
@@ -122,7 +124,7 @@ This will display any errors related to data transmission or instrumentation, in
                  -p 127.0.0.1:8125:8125/udp \
                  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
                  -e DD_APM_ENABLED=true \
-                 gcr.io/datadoghq/agent:latest
+                 registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Python library.

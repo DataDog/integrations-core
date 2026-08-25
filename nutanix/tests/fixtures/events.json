@@ -1,0 +1,102 @@
+[
+  {
+    "data": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Event",
+        "extId": "8984a4d3-6c9a-4139-bde6-4ec85890786b",
+        "eventType": "PasswordAudit",
+        "classifications": [
+          "UserAction"
+        ],
+        "sourceClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-03-03T23:25:05.314979Z",
+        "message": "Password changed for user {username}",
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "username"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "paramName": "audit_user"
+          }
+        ]
+      }
+    ],
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "monitoring.v4.serviceability.ListEventsApiResponse",
+    "metadata": {
+      "flags": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "hasError",
+          "value": false
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isPaginated",
+          "value": true
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isTruncated",
+          "value": false
+        }
+      ],
+      "$reserved": {
+        "$fv": "v1.r0"
+      },
+      "$objectType": "common.v1.response.ApiResponseMetadata",
+      "links": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.response.ApiLink",
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/events?$filter=creationTime gt 2026-03-03T00:59:41.186944Z&$limit=50&$page=0",
+          "rel": "last"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/events?$filter=creationTime gt 2026-03-03T00:59:41.186944Z&$limit=50&$page=0",
+          "rel": "self"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/events?$filter=creationTime gt 2026-03-03T00:59:41.186944Z&$limit=50&$page=0",
+          "rel": "first"
+        }
+      ],
+      "totalAvailableResults": 1
+    }
+  }
+]

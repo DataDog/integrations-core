@@ -40,112 +40,112 @@ KEYSTONE_INSTANCE = {
 MOCK_CONFIG = {'init_config': {}, 'instances': [KEYSTONE_INSTANCE]}
 
 EXAMPLE_AUTH_RESPONSE = {
-    u'token': {
-        u'methods': [u'password'],
-        u'roles': [
-            {u'id': u'f20c215f5a4d47b7a6e510bc65485ced', u'name': u'datadog_monitoring'},
-            {u'id': u'9fe2ff9ee4384b1894a90878d3e92bab', u'name': u'_member_'},
+    'token': {
+        'methods': ['password'],
+        'roles': [
+            {'id': 'f20c215f5a4d47b7a6e510bc65485ced', 'name': 'datadog_monitoring'},
+            {'id': '9fe2ff9ee4384b1894a90878d3e92bab', 'name': '_member_'},
         ],
-        u'expires_at': u'2015-11-02T15: 57: 43.911674Z',
-        u'project': {
-            u'domain': {u'id': u'default', u'name': u'Default'},
-            u'id': u'0850707581fe4d738221a72db0182876',
-            u'name': u'admin',
+        'expires_at': '2015-11-02T15: 57: 43.911674Z',
+        'project': {
+            'domain': {'id': 'default', 'name': 'Default'},
+            'id': '0850707581fe4d738221a72db0182876',
+            'name': 'admin',
         },
-        u'catalog': [
+        'catalog': [
             {
-                u'endpoints': [
+                'endpoints': [
                     {
-                        u'url': u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876',
-                        u'interface': u'internal',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'354e35ed19774e398f80dc2a90d07f4b',
+                        'url': 'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876',
+                        'interface': 'internal',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': '354e35ed19774e398f80dc2a90d07f4b',
                     },
                     {
-                        u'url': u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876',
-                        u'interface': u'public',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'36e8e2bf24384105b9d56a65b0900172',
+                        'url': 'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876',
+                        'interface': 'public',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': '36e8e2bf24384105b9d56a65b0900172',
                     },
                     {
-                        u'url': u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876',
-                        u'interface': u'admin',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'de93edcbf7f9446286687ec68423c36f',
+                        'url': 'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876',
+                        'interface': 'admin',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': 'de93edcbf7f9446286687ec68423c36f',
                     },
                 ],
-                u'type': u'compute',
-                u'id': u'2023bd4f451849ba8abeaaf283cdde4f',
-                u'name': u'nova',
+                'type': 'compute',
+                'id': '2023bd4f451849ba8abeaaf283cdde4f',
+                'name': 'nova',
             },
             {
-                u'endpoints': [
+                'endpoints': [
                     {
-                        u'url': u'http://10.0.3.111:8776/v1/***************************4bfc1',
-                        u'interface': u'public',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'***************************2452f',
+                        'url': 'http://10.0.3.111:8776/v1/***************************4bfc1',
+                        'interface': 'public',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': '***************************2452f',
                     },
                     {
-                        u'url': u'http://10.0.2.15:8776/v1/***************************4bfc1',
-                        u'interface': u'admin',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'***************************8239f',
+                        'url': 'http://10.0.2.15:8776/v1/***************************4bfc1',
+                        'interface': 'admin',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': '***************************8239f',
                     },
                     {
-                        u'url': u'http://10.0.2.15:8776/v1/***************************4bfc1',
-                        u'interface': u'internal',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'***************************7caa1',
+                        'url': 'http://10.0.2.15:8776/v1/***************************4bfc1',
+                        'interface': 'internal',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': '***************************7caa1',
                     },
                 ],
-                u'type': u'volume',
-                u'id': u'***************************e7e16',
-                u'name': u'cinder',
+                'type': 'volume',
+                'id': '***************************e7e16',
+                'name': 'cinder',
             },
             {
-                u'endpoints': [
+                'endpoints': [
                     {
-                        u'url': u'http://10.0.2.15:9292',
-                        u'interface': u'internal',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'7c1e318d8f7f42029fcb591598df2ef5',
+                        'url': 'http://10.0.2.15:9292',
+                        'interface': 'internal',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': '7c1e318d8f7f42029fcb591598df2ef5',
                     },
                     {
-                        u'url': u'http://10.0.2.15:9292',
-                        u'interface': u'public',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'afcc88b1572f48a38bb393305dc2b584',
+                        'url': 'http://10.0.2.15:9292',
+                        'interface': 'public',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': 'afcc88b1572f48a38bb393305dc2b584',
                     },
                     {
-                        u'url': u'http://10.0.2.15:9292',
-                        u'interface': u'admin',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'd9730dbdc07844d785913219da64a197',
+                        'url': 'http://10.0.2.15:9292',
+                        'interface': 'admin',
+                        'region': 'RegionOne',
+                        'region_id': 'RegionOne',
+                        'id': 'd9730dbdc07844d785913219da64a197',
                     },
                 ],
-                u'type': u'network',
-                u'id': u'21ad241f26194bccb7d2e49ee033d5a2',
-                u'name': u'neutron',
+                'type': 'network',
+                'id': '21ad241f26194bccb7d2e49ee033d5a2',
+                'name': 'neutron',
             },
         ],
-        u'extras': {},
-        u'user': {
-            u'domain': {u'id': u'default', u'name': u'Default'},
-            u'id': u'5f10e63fbd6b411186e561dc62a9a675',
-            u'name': u'datadog',
+        'extras': {},
+        'user': {
+            'domain': {'id': 'default', 'name': 'Default'},
+            'id': '5f10e63fbd6b411186e561dc62a9a675',
+            'name': 'datadog',
         },
-        u'audit_ids': [u'OMQQg9g3QmmxRHwKrfWxyQ'],
-        u'issued_at': u'2015-11-02T14: 57: 43.911697Z',
+        'audit_ids': ['OMQQg9g3QmmxRHwKrfWxyQ'],
+        'issued_at': '2015-11-02T14: 57: 43.911697Z',
     }
 }
 
@@ -278,9 +278,9 @@ MOCK_NOVA_SERVERS = [
 ]
 
 EXAMPLE_GET_FLAVORS_DETAIL_RETURN_VALUE = [
-    {'id': u'10', 'disk': 10, 'vcpus': 2, 'ram': 1024, 'OS-FLV-EXT-DATA:ephemeral': 0, 'swap': 0},
+    {'id': '10', 'disk': 10, 'vcpus': 2, 'ram': 1024, 'OS-FLV-EXT-DATA:ephemeral': 0, 'swap': 0},
     {
-        'id': u'625c2e4b-0a1f-4236-bb67-5ceee1a766e5',
+        'id': '625c2e4b-0a1f-4236-bb67-5ceee1a766e5',
         'disk': 48,
         'vcpus': 8,
         'ram': 5934,
@@ -346,9 +346,9 @@ EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE = {
 
 EXAMPLE_GET_NETWORKS_RETURN_VALUE = [
     {
-        'id': u'2755452c-4fe8-4ba1-9b26-8898665b0958',
-        'name': u'net2',
-        'tenant_id': u'680031a39ce040e1b81289ea8c73fb11',
+        'id': '2755452c-4fe8-4ba1-9b26-8898665b0958',
+        'name': 'net2',
+        'tenant_id': '680031a39ce040e1b81289ea8c73fb11',
         'admin_state_up': True,
     }
 ]

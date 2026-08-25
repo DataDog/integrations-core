@@ -8,7 +8,12 @@ import pytest
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import EXPECTED_PROMETHEUS_METRICS, EXPECTED_PROMETHEUS_METRICS_5_6, HERE, PROMETHEUS_XDR_METRICS
+from .common import (
+    EXPECTED_PROMETHEUS_METRICS,
+    EXPECTED_PROMETHEUS_METRICS_5_6,
+    HERE,
+    PROMETHEUS_XDR_METRICS,
+)
 
 pytestmark = [pytest.mark.unit]
 

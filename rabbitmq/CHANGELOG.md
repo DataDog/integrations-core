@@ -2,6 +2,77 @@
 
 <!-- towncrier release notes start -->
 
+## 8.6.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 8.6.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 8.5.1 / 2026-03-19
+
+***Fixed***:
+
+* Restore HTTP/TLS configuration options for the Management Plugin in the example configuration file. ([#22675](https://github.com/DataDog/integrations-core/pull/22675))
+
+## 8.5.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 8.4.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 8.3.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add RabbitMQ stream metrics and queue info metric for replication monitoring.
+
+  Adds 20 new metrics from RabbitMQ Prometheus plugin:
+  - rabbitmq.queue.info (gauge) with membership/queue_type tags for replication monitoring
+  - 17 stream error counters (rabbitmq.global.stream.error.*)
+  - 2 stream health gauges (rabbitmq.stream.segments, rabbitmq.stream.consumer_max_offset_lag) ([#21604](https://github.com/DataDog/integrations-core/pull/21604))
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 8.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.1.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Add rabbitmq_user and rabbitmq_pass to rabbitmq conf.yaml.example ([#21120](https://github.com/DataDog/integrations-core/pull/21120))
+
+## 8.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 8.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
 ## 7.2.0 / 2025-04-22 / Agent 7.66.0
 
 ***Added***:

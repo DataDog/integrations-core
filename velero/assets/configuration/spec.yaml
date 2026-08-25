@@ -1,4 +1,5 @@
 name: Velero
+fleet_configurable: true
 files:
 - name: velero.yaml
   options:

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import cast
 
 import pytest
 
@@ -9,6 +10,7 @@ from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.repo.constants import NOT_SHIPPABLE
 from ddev.repo.core import IntegrationRegistry, Repository
+from ddev.utils.fs import Path
 
 
 def test_attributes(local_repo):
@@ -20,6 +22,93 @@ def test_attributes(local_repo):
     assert isinstance(repo.config, RepositoryConfig)
 
 
+@pytest.mark.parametrize(
+    'remote_url, expected_full_name',
+    [
+        pytest.param('git@github.com:DataDog/integrations-core.git', 'integrations-core', id='ssh-with-suffix'),
+        pytest.param('git@github.com:DataDog/integrations-core', 'integrations-core', id='ssh-no-suffix'),
+        pytest.param('https://github.com/DataDog/integrations-core.git', 'integrations-core', id='https-with-suffix'),
+        pytest.param('https://github.com/DataDog/integrations-core', 'integrations-core', id='https-no-suffix'),
+        pytest.param('https://github.com/DataDog/integrations-core/', 'integrations-core', id='https-trailing-slash'),
+        pytest.param(
+            'https://user:token@github.com/DataDog/integrations-core.git',
+            'integrations-core',
+            id='https-with-credentials',
+        ),
+        pytest.param(
+            'ssh://git@github.com:22/DataDog/integrations-core.git',
+            'integrations-core',
+            id='ssh-scheme-with-port',
+        ),
+        pytest.param('git://github.com/DataDog/integrations-core.git', 'integrations-core', id='git-proto'),
+        pytest.param('git@github.com:fork-user/integrations-core.git', 'integrations-core', id='ssh-fork'),
+    ],
+)
+def test_repository_identity_uses_git_remote(mocker, tmp_path, remote_url, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=remote_url)
+    repo = Repository('weird-dir-name', str(tmp_path))
+
+    assert repo.name == 'weird-dir-name'
+    assert repo.full_name == expected_full_name
+
+
+def test_repository_identity_falls_back_when_no_remote(mocker, tmp_path):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
+    repo = Repository('core', str(tmp_path))
+
+    assert repo.name == 'core'
+    assert repo.full_name == 'integrations-core'
+
+
+@pytest.mark.parametrize(
+    'remote_url, name, expected_full_name',
+    [
+        pytest.param('', 'core', 'integrations-core', id='empty'),
+        pytest.param('not-a-url', 'extras', 'integrations-extras', id='garbage'),
+        pytest.param('https://github.com/only-one-segment', 'core', 'integrations-core', id='single-segment'),
+    ],
+)
+def test_repository_identity_falls_back_when_remote_unparseable(mocker, tmp_path, remote_url, name, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=remote_url)
+    repo = Repository(name, str(tmp_path))
+
+    assert repo.full_name == expected_full_name
+
+
+def test_repository_identity_unknown_name_falls_back_to_name(mocker, tmp_path):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
+    repo = Repository('custom-repo', str(tmp_path))
+
+    assert repo.full_name == 'custom-repo'
+
+
+def test_repository_identity_reads_real_dot_git_config(tmp_path):
+    git_dir = tmp_path / '.git'
+    git_dir.mkdir()
+    (git_dir / 'config').write_text('[remote "origin"]\n\turl = git@github.com:DataDog/integrations-core.git\n')
+    repo = Repository('weird-dir-name', str(tmp_path))
+
+    assert repo.full_name == 'integrations-core'
+
+
+def test_repository_identity_follows_worktree_gitdir_pointer(tmp_path):
+    primary_git = tmp_path / 'primary' / '.git'
+    primary_git.mkdir(parents=True)
+    (primary_git / 'config').write_text('[remote "origin"]\n\turl = https://github.com/DataDog/integrations-core.git\n')
+
+    worktrees_dir = primary_git / 'worktrees' / 'feature'
+    worktrees_dir.mkdir(parents=True)
+    (worktrees_dir / 'commondir').write_text('../..\n')
+
+    worktree_path = tmp_path / 'feature'
+    worktree_path.mkdir()
+    (worktree_path / '.git').write_text(f'gitdir: {worktrees_dir}\n')
+
+    repo = Repository('feature', str(worktree_path))
+
+    assert repo.full_name == 'integrations-core'
+
+
 class TestGetIntegration:
     def test_unknown(self, local_repo, helpers):
         repo = Repository(local_repo.name, str(local_repo))
@@ -28,10 +117,14 @@ class TestGetIntegration:
         with helpers.error(OSError, message=f'Integration does not exist: {repo.path.name}{os.sep}{integration}'):
             repo.integrations.get(integration)
 
-    def test_invalid(self, local_repo, helpers):
+    @pytest.mark.parametrize(
+        "integration",
+        # These are the directories that are not itnegrations nor packages
+        ["docs", "datadog_checks_tests_helper"],
+    )
+    def test_invalid(self, local_repo, helpers, integration):
         repo = Repository(local_repo.name, str(local_repo))
 
-        integration = '.github'
         with helpers.error(
             OSError, message=f'Path is not an integration nor a Python package: {repo.path.name}{os.sep}{integration}'
         ):
@@ -44,38 +137,82 @@ class TestGetIntegration:
         assert isinstance(integration, Integration)
 
 
-class TestIntegrationsIteration:
+def is_integration(repo: Repository, path: Path) -> bool:
+    is_valid_directory = path.is_dir() and not path.name.startswith('.')
+    has_manifest = (path / 'manifest.json').is_file()
+    overrides_integration = cast(bool, repo.config.get(f'/overrides/is-integration/{path.name}', default=True))
+    return is_valid_directory and (has_manifest or overrides_integration)
 
+
+def is_package(repo: Repository, path: Path) -> bool:
+    is_valid_directory = path.is_dir() and not path.name.startswith('.')
+    has_project_file = (path / 'pyproject.toml').is_file()
+    return is_valid_directory and has_project_file
+
+
+class TestIntegrationsIteration:
     iter_test_params = [
-        pytest.param("iter", lambda path: (path / 'manifest.json').is_file(), id="only integrations"),
+        pytest.param(
+            "iter",
+            lambda repo, path: is_integration(repo, path)
+            # Is not a worktree
+            and not (path / ".git").is_file(),
+            id="only integrations",
+        ),
         pytest.param(
             "iter_all",
-            lambda path: (path / 'manifest.json').is_file() or (path / 'pyproject.toml').is_file(),
+            lambda repo, path: (is_integration(repo, path) or is_package(repo, path))
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="all valid",
         ),
-        pytest.param("iter_packages", lambda path: (path / 'pyproject.toml').is_file(), id="packages"),
+        pytest.param(
+            "iter_packages",
+            lambda repo, path: is_package(repo, path)
+            # Is not a worktree
+            and not (path / ".git").is_file(),
+            id="packages",
+        ),
         pytest.param(
             "iter_tiles",
-            lambda path: (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file(),
+            lambda repo, path: is_integration(repo, path)
+            and not is_package(repo, path)
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="tiles",
         ),
-        pytest.param("iter_testable", lambda path: (path / 'hatch.toml').is_file()),
+        pytest.param(
+            "iter_testable",
+            lambda repo, path: (path / 'hatch.toml').is_file()
+            # Is not a worktree
+            and not (path / ".git").is_file(),
+            id="testable",
+        ),
         pytest.param(
             "iter_shippable",
-            lambda path: (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE,
+            lambda repo, path: is_package(repo, path)
+            and path.name not in NOT_SHIPPABLE
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="shippable",
         ),
         pytest.param(
             "iter_agent_checks",
-            lambda path: (
+            lambda repo, path: (
                 package_root := path / 'datadog_checks' / path.name.replace('-', '_') / '__init__.py'
             ).is_file()
-            and package_root.read_text().count('import ') > 1,
+            and package_root.read_text().count('import ') > 1
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="agent checks",
         ),
         pytest.param(
             "iter_jmx_checks",
-            lambda path: (path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file(),
+            lambda repo, path: (
+                (path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file()
+            )
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="jmx checks",
         ),
     ]
@@ -87,7 +224,7 @@ class TestIntegrationsIteration:
     def test_integrations_iteration_default_changed(self, method_name, integration_filter, repository):
         repo = Repository(repository.path.name, str(repository.path))
 
-        integration_names = sorted(path.name for path in repository.path.iterdir() if integration_filter(path))
+        integration_names = sorted(path.name for path in repository.path.iterdir() if integration_filter(repo, path))
 
         integration = integration_names[0]
         (repo.path / integration / 'foo.txt').touch()
@@ -106,7 +243,7 @@ class TestIntegrationsIteration:
     def test_integrations_iteration_selection(self, method_name, integration_filter, local_repo):
         repo = Repository(local_repo.name, str(local_repo))
 
-        integration_names = sorted(path.name for path in local_repo.iterdir() if integration_filter(path))
+        integration_names = sorted(path.name for path in local_repo.iterdir() if integration_filter(repo, path))
 
         selection = [integration_names[0]]
         iter_method = getattr(repo.integrations, method_name)
@@ -131,7 +268,7 @@ class TestIntegrationsIteration:
     def test_integrations_iteration_select_all(self, method_name, integration_filter, local_repo):
         repo = Repository(local_repo.name, str(local_repo))
 
-        integration_names = sorted(path.name for path in local_repo.iterdir() if integration_filter(path))
+        integration_names = sorted(path.name for path in local_repo.iterdir() if integration_filter(repo, path))
 
         selection = ['all']
         iter_method = getattr(repo.integrations, method_name)
@@ -139,6 +276,71 @@ class TestIntegrationsIteration:
 
         assert [integration.name for integration in integrations] == integration_names
         assert list(iter_method(selection)) == integrations
+
+
+def test_iter_changed_includes_a_rename_source(repository):
+    # Moving a file between integrations changes both: the source lost it and the destination
+    # gained it, so both must be selected.
+    repo = Repository(repository.path.name, str(repository.path))
+
+    # The file has to already exist on the comparison base, otherwise the diff reports a plain
+    # addition rather than a rename.
+    repo.git.capture('mv', 'tekton/README.md', 'nginx/moved_from_tekton.md')
+    repo.git.capture('commit', '-m', 'move a file to another integration')
+
+    integrations = list(repo.integrations.iter(['changed']))
+
+    assert sorted(integration.name for integration in integrations) == ['nginx', 'tekton']
+
+
+def test_iter_changed_keeps_a_committed_change_reverted_in_the_working_tree(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    readme = repo.path / 'tekton' / 'README.md'
+    original_content = readme.read_text()
+    readme.write_text(f'{original_content}\ncommitted change\n')
+    repo.git.capture('add', 'tekton/README.md')
+    repo.git.capture('commit', '-m', 'change a file')
+
+    # Nothing differs from the merge base any more, but the branch still changes the file
+    readme.write_text(original_content)
+
+    integrations = list(repo.integrations.iter(['changed']))
+
+    assert [integration.name for integration in integrations] == ['tekton']
+
+
+def test_iter_changed_against_head_ignores_committed_changes(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    (repo.path / 'tekton' / 'foo.txt').touch()
+    repo.git.capture('add', 'tekton/foo.txt')
+    repo.git.capture('commit', '-m', 'add a file')
+
+    assert list(repo.integrations.comparing(base='HEAD').iter(['changed'])) == []
+    assert [integration.name for integration in repo.integrations.iter(['changed'])] == ['tekton']
+
+
+def test_iter_changed_code_selects_both_sides_of_a_rename(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    repo.git.capture('mv', 'tekton/datadog_checks/tekton/__about__.py', 'nginx/datadog_checks/nginx/moved.py')
+    repo.git.capture('commit', '-m', 'move a shipped file to another integration')
+
+    integrations = list(repo.integrations.iter_changed_code())
+
+    assert sorted(integration.name for integration in integrations) == ['nginx', 'tekton']
+
+
+def test_iter_changed_code_ignores_files_that_need_no_entry(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    # The file is already tracked, so it has to be written to for git to report it at all
+    target = repo.path / 'tekton' / 'tests' / 'test_unit.py'
+    target.write_text(f'{target.read_text()}\n# change\n')
+
+    assert 'tekton/tests/test_unit.py' in repo.integrations.changed_paths
+    assert list(repo.integrations.iter_changed_code()) == []
 
 
 class TestIterationChanged:

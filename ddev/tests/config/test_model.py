@@ -5,7 +5,12 @@ import os
 
 import pytest
 
-from ddev.config.model import ConfigurationError, RootConfig, get_github_token, get_github_user
+from ddev.config.model import (
+    ConfigurationError,
+    RootConfig,
+    get_github_token,
+    get_github_user,
+)
 
 
 def test_default():
@@ -23,8 +28,8 @@ def test_default():
             'agent': os.path.join('~', 'dd', 'datadog-agent'),
         },
         'agents': {
-            'dev': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-            '7': {'docker': 'datadog/agent:7', 'local': '7'},
+            'dev': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
+            '7': {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'},
         },
         'orgs': {
             'default': {
@@ -35,10 +40,7 @@ def test_default():
                 'log_url': os.getenv('DD_LOGS_CONFIG_LOGS_DD_URL', ''),
             },
         },
-        'github': {
-            'user': get_github_user(),
-            'token': get_github_token(),
-        },
+        'github': {},
         'pypi': {
             'user': '',
             'auth': '',
@@ -57,6 +59,9 @@ def test_default():
                 'debug': 'bold',
                 'spinner': 'simpleDotsScrolling',
             },
+        },
+        'ai': {
+            'flow_dirs': [],
         },
     }
 
@@ -194,7 +199,7 @@ class TestAgent:
     def test_default(self):
         config = RootConfig({})
 
-        agent_config = {'docker': 'datadog/agent-dev:master', 'local': 'latest'}
+        agent_config = {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'}
         assert config.agent.name == config.agent.name == 'dev'
         assert config.agent.config == config.agent.config == agent_config
         assert config.agent.raw_data == {'name': 'dev', 'config': agent_config}
@@ -216,7 +221,7 @@ class TestAgent:
     def test_defined(self):
         config = RootConfig({'agent': '7'})
 
-        agent_config = {'docker': 'datadog/agent:7', 'local': '7'}
+        agent_config = {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'}
         assert config.agent.name == config.agent.name == '7'
         assert config.agent.config == config.agent.config == agent_config
         assert config.agent.raw_data == {'name': '7', 'config': agent_config}
@@ -274,7 +279,7 @@ class TestAgent:
         config.agent.name = 9000
         assert config.agent.raw_data == {
             'name': 9000,
-            'config': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+            'config': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
         }
 
         with pytest.raises(
@@ -551,8 +556,8 @@ class TestAgents:
         config = RootConfig({})
 
         agents = {
-            'dev': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-            '7': {'docker': 'datadog/agent:7', 'local': '7'},
+            'dev': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
+            '7': {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'},
         }
         assert config.agents == agents
         assert config.raw_data == {'agents': agents}
@@ -714,10 +719,7 @@ class TestGitHub:
         assert config.github.user == config.github.user == get_github_user()
         assert config.github.token == config.github.token == get_github_token()
         assert config.raw_data == {
-            'github': {
-                'user': get_github_user(),
-                'token': get_github_token(),
-            },
+            'github': {},
         }
 
     def test_not_table(self, helpers):
@@ -1409,3 +1411,233 @@ class TestTerminal:
             ),
         ):
             _ = config.terminal.styles.spinner
+
+
+class TestGitHubConfig:
+    def test_default_github_config_empty_raw_data(self):
+        config = RootConfig({})
+        config.parse_fields()
+
+        # GitHub config should be empty in raw_data when not explicitly set
+        assert config.raw_data['github'] == {}
+
+        # But properties should still work via environment variables
+        assert config.github.user == get_github_user()
+        assert config.github.token == get_github_token()
+
+        # After accessing properties, raw_data should still be empty
+        assert config.raw_data['github'] == {}
+
+    def test_explicit_github_config_in_raw_data(self):
+        config = RootConfig({'github': {'user': 'explicit_user', 'token': 'explicit_token'}})
+
+        # When explicitly set, values should be in raw_data
+        assert config.raw_data['github']['user'] == 'explicit_user'
+        assert config.raw_data['github']['token'] == 'explicit_token'
+
+        # Properties should return explicit values
+        assert config.github.user == 'explicit_user'
+        assert config.github.token == 'explicit_token'
+
+    def test_partial_github_config_explicit_user_only(self):
+        config = RootConfig({'github': {'user': 'explicit_user'}})
+
+        # Only explicitly set field should be in raw_data
+        assert config.raw_data['github']['user'] == 'explicit_user'
+        assert 'token' not in config.raw_data['github']
+
+        # Properties should work - explicit user, env var token
+        assert config.github.user == 'explicit_user'
+        assert config.github.token == get_github_token()
+
+        # raw_data should still only have explicit field
+        assert config.raw_data['github']['user'] == 'explicit_user'
+        assert 'token' not in config.raw_data['github']
+
+    def test_partial_github_config_explicit_token_only(self):
+        config = RootConfig({'github': {'token': 'explicit_token'}})
+
+        # Only explicitly set field should be in raw_data
+        assert 'user' not in config.raw_data['github']
+        assert config.raw_data['github']['token'] == 'explicit_token'
+
+        # Properties should work - env var user, explicit token
+        assert config.github.user == get_github_user()
+        assert config.github.token == 'explicit_token'
+
+        # raw_data should still only have explicit field
+        assert 'user' not in config.raw_data['github']
+        assert config.raw_data['github']['token'] == 'explicit_token'
+
+    def test_github_config_with_environment_variables(self, monkeypatch):
+        # Mock environment variables
+        monkeypatch.setenv('DD_GITHUB_USER', 'env_user')
+        monkeypatch.setenv('DD_GITHUB_TOKEN', 'env_token')
+
+        config = RootConfig({})
+
+        # Properties should return environment variable values
+        assert config.github.user == 'env_user'
+        assert config.github.token == 'env_token'
+
+        # raw_data should still be empty
+        assert config.raw_data['github'] == {}
+
+
+class TestAI:
+    def test_default(self, monkeypatch):
+        monkeypatch.delenv('DD_ANTHROPIC_API_KEY', raising=False)
+        monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == config.ai.anthropic_api_key == ''
+        assert config.ai.flow_dirs == config.ai.flow_dirs == []
+        assert config.raw_data == {'ai': {'flow_dirs': []}}
+
+    def test_not_table(self, helpers):
+        config = RootConfig({'ai': 9000})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai
+                  must be a table"""
+            ),
+        ):
+            _ = config.ai
+
+    def test_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.ai = 9000
+        assert config.raw_data == {'ai': 9000}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai
+                  must be a table"""
+            ),
+        ):
+            _ = config.ai
+
+    def test_anthropic_api_key_from_config(self):
+        config = RootConfig({'ai': {'anthropic_api_key': 'sk-test'}})
+
+        assert config.ai.anthropic_api_key == 'sk-test'
+        assert config.raw_data == {'ai': {'anthropic_api_key': 'sk-test'}}
+
+    def test_anthropic_api_key_dd_env_var(self, monkeypatch):
+        monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'dd-key')
+        monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == 'dd-key'
+        assert config.raw_data == {'ai': {}}
+
+    def test_anthropic_api_key_env_var(self, monkeypatch):
+        monkeypatch.delenv('DD_ANTHROPIC_API_KEY', raising=False)
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'anth-key')
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == 'anth-key'
+        assert config.raw_data == {'ai': {}}
+
+    def test_anthropic_api_key_config_takes_precedence_over_env(self, monkeypatch):
+        monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'ai': {'anthropic_api_key': 'config-key'}})
+
+        assert config.ai.anthropic_api_key == 'config-key'
+
+    def test_anthropic_api_key_dd_takes_precedence(self, monkeypatch):
+        monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'dd-key')
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'anth-key')
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == 'dd-key'
+
+    def test_anthropic_api_key_not_string(self, helpers):
+        config = RootConfig({'ai': {'anthropic_api_key': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> anthropic_api_key
+                  must be a string"""
+            ),
+        ):
+            _ = config.ai.anthropic_api_key
+
+    def test_anthropic_api_key_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.ai.anthropic_api_key = 9000
+        assert config.raw_data == {'ai': {'anthropic_api_key': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> anthropic_api_key
+                  must be a string"""
+            ),
+        ):
+            _ = config.ai.anthropic_api_key
+
+    def test_flow_dirs(self):
+        config = RootConfig({'ai': {'flow_dirs': ['~/foo', './bar', '../baz']}})
+
+        assert config.ai.flow_dirs == ['~/foo', './bar', '../baz']
+        assert config.raw_data == {'ai': {'flow_dirs': ['~/foo', './bar', '../baz']}}
+
+    def test_flow_dirs_not_list(self, helpers):
+        config = RootConfig({'ai': {'flow_dirs': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> flow_dirs
+                  must be an array"""
+            ),
+        ):
+            _ = config.ai.flow_dirs
+
+    def test_flow_dirs_entry_not_string(self, helpers):
+        config = RootConfig({'ai': {'flow_dirs': [9000]}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> flow_dirs -> 0
+                  must be a string"""
+            ),
+        ):
+            _ = config.ai.flow_dirs
+
+    def test_flow_dirs_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.ai.flow_dirs = 9000
+        assert config.raw_data == {'ai': {'flow_dirs': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> flow_dirs
+                  must be an array"""
+            ),
+        ):
+            _ = config.ai.flow_dirs

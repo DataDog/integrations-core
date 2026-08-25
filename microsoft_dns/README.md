@@ -6,6 +6,8 @@
 
 This integration collects and enhances [DNS Server audit events][5], providing detailed insights through out-of-the-box dashboards. It also includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
 
+**Minimum Agent version:** 7.68.0
+
 ## Setup
 
 ### Installation

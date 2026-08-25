@@ -1,0 +1,46 @@
+name: Verify dependency resolution pin
+
+on:
+  # merge_group is what GitHub's merge queue dispatches to required checks;
+  # without it, this workflow can be required-but-never-reported and
+  # leave queued PRs stuck. The push trigger on gh-readonly-queue/** is kept
+  # as a belt-and-braces complement.
+  merge_group:
+  push:
+    branches:
+    # gh-readonly-queue/** is the blocking case: a failing run here keeps the
+    # merge queue from landing a commit with a stale resolution pin.
+    # master and 7.*.* are informational: direct pushes have no gate to fail,
+    # so a red check on those refs surfaces drift (e.g. a reverted pin commit)
+    # without preventing anything.
+    - gh-readonly-queue/**
+    - master
+    - 7.*.*
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  verify:
+    name: Verify resolution hash matches pin
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify resolution pin
+        run: |
+          # Fails if the merged tree's resolution hash does not match the
+          # pinned hash in .deps/builder_inputs.toml.
+          # If this check fails, rebase your branch onto master to re-trigger
+          # dependency resolution and update the pin.
+          cd .builders && python inputs_hash.py verify-resolution

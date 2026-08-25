@@ -2,6 +2,91 @@
 
 <!-- towncrier release notes start -->
 
+## 7.8.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 7.7.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+
+## 7.7.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 7.6.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 7.5.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 7.4.0 / 2026-01-21 / Agent 7.76.0
+
+***Added***:
+
+* Add `startup_wait_retries` option to handle Spark driver startup messages gracefully. ([#22252](https://github.com/DataDog/integrations-core/pull/22252))
+
+## 7.3.1 / 2025-12-22 / Agent 7.75.0
+
+***Fixed***:
+
+* Debounce false-positive connection errors ([#21922](https://github.com/DataDog/integrations-core/pull/21922))
+* Remove unused code and improve test coverage for connection error handling. ([#22128](https://github.com/DataDog/integrations-core/pull/22128))
+
+## 7.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 7.2.1 / 2025-10-31 / Agent 7.73.0
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 7.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 7.1.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 7.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 7.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Modernize bs4 interface by replacing deprecated 'findAll' with 'find_all' ([#20415](https://github.com/DataDog/integrations-core/pull/20415))
+
 ## 6.4.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:

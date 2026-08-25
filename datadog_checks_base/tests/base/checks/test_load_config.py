@@ -76,3 +76,30 @@ def test_load_config_nan():
     config = AgentCheck.load_config("number: .nan")
     assert "number" in config
     assert math.isnan(config["number"])
+
+
+@pytest.mark.parametrize(
+    'yaml_str, expected_object',
+    [
+        pytest.param(
+            "tag: テスト",
+            {"tag": "テスト"},
+            id="japanese_characters",
+        ),
+        pytest.param(
+            "chinese: 中文测试",
+            {"chinese": "中文测试"},
+            id="chinese_characters",
+        ),
+        pytest.param(
+            "korean: 한국어",
+            {"korean": "한국어"},
+            id="korean_characters",
+        ),
+    ],
+)
+def test_load_config_unicode(yaml_str, expected_object):
+    """Test that load_config properly handles Unicode characters including Japanese, Chinese, Korean, and emoji.
+    This is especially important on Windows where the system locale may not default to UTF-8."""
+    config = AgentCheck.load_config(yaml_str)
+    assert config == expected_object

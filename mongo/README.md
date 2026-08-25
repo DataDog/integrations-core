@@ -15,6 +15,8 @@ Enable [Database Monitoring][28] (DBM) for enhanced insights into query performa
 
 **Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and Amazon DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the standard MongoDB Agent integration. If you are looking for the Database Monitoring product for MongoDB, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -27,13 +29,13 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 **Note**: To install Database Monitoring for MongoDB, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
 
-Most low-level metrics (uptime, storage size etc.) need to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
+Most low-level metrics (uptime, storage size etc.) need to be collected on every `mongod` node. Other higher-level metrics (collection/index statistics, etc.) should be collected only once. For these reasons, the way you configure the Agents depends on how your MongoDB cluster is deployed.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Standalone" xxx -->
 #### Standalone
 
-To configure this integration for a single node MongoDB deployment:
+To configure this integration for a single-node MongoDB deployment:
 
 ##### Prepare MongoDB
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
@@ -61,7 +63,7 @@ db.createUser({
 ```
 
 ##### Configure the agents
-You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
+You only need a single agent, preferably running on the same node, to collect all the available MongoDB metrics. See below for configuration options.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Replica Set" xxx -->
 #### Replica set
@@ -165,8 +167,6 @@ Then create the same user from a mongos proxy. This action creates the local use
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
-
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
@@ -218,7 +218,7 @@ To configure this check for an Agent running on a host:
 
 ##### Database Autodiscovery
 
-Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance. 
+Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance.
 Please note that database autodiscovery is disabled by default. Read access to the autodiscovered databases is required to collect metrics from them.
 To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
 
@@ -375,7 +375,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configure with a [file, configmap, or key-value store][14].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with a [file, configmap, or key-value store][14].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -427,6 +429,33 @@ spec:
   containers:
     - name: mongo
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <MONGODB_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: mongo
+        containerName: mongo
+        initConfig: {}
+        instances:
+          - hosts:
+              - "%%host%%:%%port%%"
+            username: "datadog"
+            password: "<UNIQUEPASSWORD>"
+            database: "<DATABASE>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][30].
 
 ##### Log collection
 
@@ -535,6 +564,8 @@ Then, [instrument your application container][8] and set `DD_AGENT_HOST` to the 
 
 ## Data Collected
 
+Some of the metrics listed below require additional configuration, see the [sample mongo.d/conf.yaml][5] for all configurable options. Query metrics for MongoDB require Datadog Agent v7.78 or later.
+
 ### Metrics
 
 See [metadata.csv][22] for a list of metrics provided by this check.
@@ -611,5 +642,6 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/help/
 [26]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
 [27]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
-[28]: https://docs.datadoghq.com/database_monitoring/
+[28]: https://docs.datadoghq.com/database_monitoring/setup_mongodb/
 [29]: https://docs.datadoghq.com/database_monitoring/#mongodb
+[30]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

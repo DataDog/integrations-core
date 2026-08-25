@@ -13,9 +13,9 @@ from .common import DEFAULT_OPTIONS
 def test_get():
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.get'):
+    with mock.patch('requests.Session.get'):
         http.get('https://www.google.com')
-        requests.get.assert_called_once_with('https://www.google.com', **http.options)
+        requests.Session.get.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_get_session():
@@ -31,9 +31,9 @@ def test_get_option_override():
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.get'):
+    with mock.patch('requests.Session.get'):
         http.get('https://www.google.com', auth=options['auth'])
-        requests.get.assert_called_once_with('https://www.google.com', **options)
+        requests.Session.get.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_get_session_option_override():
@@ -49,9 +49,9 @@ def test_get_session_option_override():
 def test_post():
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.post'):
+    with mock.patch('requests.Session.post'):
         http.post('https://www.google.com')
-        requests.post.assert_called_once_with('https://www.google.com', **http.options)
+        requests.Session.post.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_post_session():
@@ -67,9 +67,9 @@ def test_post_option_override():
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.post'):
+    with mock.patch('requests.Session.post'):
         http.post('https://www.google.com', auth=options['auth'])
-        requests.post.assert_called_once_with('https://www.google.com', **options)
+        requests.Session.post.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_post_session_option_override():
@@ -85,9 +85,9 @@ def test_post_session_option_override():
 def test_head():
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.head'):
+    with mock.patch('requests.Session.head'):
         http.head('https://www.google.com')
-        requests.head.assert_called_once_with('https://www.google.com', **http.options)
+        requests.Session.head.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_head_session():
@@ -103,9 +103,9 @@ def test_head_option_override():
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.head'):
+    with mock.patch('requests.Session.head'):
         http.head('https://www.google.com', auth=options['auth'])
-        requests.head.assert_called_once_with('https://www.google.com', **options)
+        requests.Session.head.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_head_session_option_override():
@@ -121,9 +121,9 @@ def test_head_session_option_override():
 def test_put():
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.put'):
+    with mock.patch('requests.Session.put'):
         http.put('https://www.google.com')
-        requests.put.assert_called_once_with('https://www.google.com', **http.options)
+        requests.Session.put.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_put_session():
@@ -139,9 +139,9 @@ def test_put_option_override():
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.put'):
+    with mock.patch('requests.Session.put'):
         http.put('https://www.google.com', auth=options['auth'])
-        requests.put.assert_called_once_with('https://www.google.com', **options)
+        requests.Session.put.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_put_session_option_override():
@@ -157,9 +157,9 @@ def test_put_session_option_override():
 def test_patch():
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.patch'):
+    with mock.patch('requests.Session.patch'):
         http.patch('https://www.google.com')
-        requests.patch.assert_called_once_with('https://www.google.com', **http.options)
+        requests.Session.patch.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_patch_session():
@@ -175,9 +175,9 @@ def test_patch_option_override():
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.patch'):
+    with mock.patch('requests.Session.patch'):
         http.patch('https://www.google.com', auth=options['auth'])
-        requests.patch.assert_called_once_with('https://www.google.com', **options)
+        requests.Session.patch.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_patch_session_option_override():
@@ -193,9 +193,9 @@ def test_patch_session_option_override():
 def test_delete():
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.delete'):
+    with mock.patch('requests.Session.delete'):
         http.delete('https://www.google.com')
-        requests.delete.assert_called_once_with('https://www.google.com', **http.options)
+        requests.Session.delete.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_delete_session():
@@ -211,9 +211,9 @@ def test_delete_option_override():
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.delete'):
+    with mock.patch('requests.Session.delete'):
         http.delete('https://www.google.com', auth=options['auth'])
-        requests.delete.assert_called_once_with('https://www.google.com', **options)
+        requests.Session.delete.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_delete_session_option_override():
@@ -229,9 +229,9 @@ def test_delete_session_option_override():
 def test_options():
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.options'):
+    with mock.patch('requests.Session.options'):
         http.options_method('https://www.google.com')
-        requests.options.assert_called_once_with('https://www.google.com', **http.options)
+        requests.Session.options.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_options_session():
@@ -247,9 +247,9 @@ def test_options_option_override():
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.options'):
+    with mock.patch('requests.Session.options'):
         http.options_method('https://www.google.com', auth=options['auth'])
-        requests.options.assert_called_once_with('https://www.google.com', **options)
+        requests.Session.options.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_options_session_option_override():

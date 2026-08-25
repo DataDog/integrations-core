@@ -1,0 +1,54 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "30d84795-b413-411b-a64f-8baf1a8a7418",
+  "app_id": "datadog-csi-driver",
+  "owner": "container-platform",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Tracks metrics of the Datadog CSI Driver.",
+    "title": "datadog_csi_driver",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Containers",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 56116105,
+      "source_type_name": "datadog_csi_driver",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "datadog.csi_driver.",
+        "check": [
+          "datadog.csi_driver.node_publish_volume_attempts.count",
+          "datadog.csi_driver.node_unpublish_volume_attempts.count"
+        ],
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {
+        "Datadog CSI Driver Overview": "assets/dashboards/datadog_csi_driver_overview.json"
+    },
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

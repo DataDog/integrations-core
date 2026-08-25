@@ -367,7 +367,7 @@ ONLY_TEST_LOGS = [
         'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
-        'message': 'At /home/octopus/.octopus/OctopusServer/Server/Work/' '09234928998123-1847-68/Script.ps1:1 char:6',
+        'message': 'At /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Script.ps1:1 char:6',
         'timestamp': 1727104202605,
         'status': 'Error',
         'stage_name': 'Octopus Server',

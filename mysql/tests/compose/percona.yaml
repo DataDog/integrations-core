@@ -1,0 +1,56 @@
+services:
+  mysql-master:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_ROOT_PASSWORD=mypass
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-pmypass",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ./percona-primary.conf:/etc/my.cnf.d/primary.cnf
+      - ./percona_primary_initdb:/docker-entrypoint-initdb.d
+
+  mysql-slave:
+    container_name: mysql-slave
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_ROOT_PASSWORD=mypass
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-pmypass",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${MYSQL_SLAVE_PORT}:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ./percona-replica.conf:/etc/my.cnf.d/replica.cnf
+      - ./percona_replica_initdb:/docker-entrypoint-initdb.d
+    depends_on:
+      mysql-master:
+        condition: service_healthy

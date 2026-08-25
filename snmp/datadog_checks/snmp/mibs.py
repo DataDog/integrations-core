@@ -21,7 +21,7 @@ def _create_mib_builder(mibs_path=None):
     mib_builder = MibBuilder()
 
     if mibs_path is not None:
-        mib_builder.addMibSources(DirMibSource(mibs_path))
+        mib_builder.add_mib_sources(DirMibSource(mibs_path))
 
     mib_instrum = MibInstrumController(mib_builder)
     mib_view = MibViewController(mib_builder)

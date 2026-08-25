@@ -1,11 +1,16 @@
 import io
 import json
 import os
+import re
 import zipfile
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, mock_open, patch
+from unittest.mock import MagicMock, mock_open, patch
+
+import pytest
+import requests
 
 from ddev.cli.size.utils.common_funcs import (
+    _matches_gitignore,
+    check_python_version,
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
@@ -14,15 +19,17 @@ from ddev.cli.size.utils.common_funcs import (
     get_dependencies_sizes,
     get_files,
     get_gitignore_files,
-    get_org,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
-    is_valid_integration,
+    is_valid_integration_file,
+    request_wheel,
     save_csv,
     save_json,
     save_markdown,
+    wheel_url_candidates,
 )
+from ddev.utils.fs import Path
 
 
 def to_native_path(path: str) -> str:
@@ -37,6 +44,9 @@ def test_get_valid_platforms():
         "linux-x86_64_3.12.txt",
         "linux-x86_64_py2.txt",
         "linux-x86_64_py3.txt",
+        "macos-aarch64_3.12.txt",
+        "macos-aarch64_py2.txt",
+        "macos-aarch64_py3.txt",
         "macos-x86_64_3.12.txt",
         "macos-x86_64_py2.txt",
         "macos-x86_64_py3.txt",
@@ -45,7 +55,7 @@ def test_get_valid_platforms():
         "windows-x86_64_py3.txt",
     ]
 
-    expected_platforms = {"linux-aarch64", "linux-x86_64", "macos-x86_64", "windows-x86_64"}
+    expected_platforms = {"linux-aarch64", "linux-x86_64", "macos-aarch64", "macos-x86_64", "windows-x86_64"}
     with patch("os.listdir", return_value=filenames):
         platforms = get_valid_platforms("fake_repo", {"3.12"})
         assert platforms == expected_platforms
@@ -59,6 +69,9 @@ def test_get_valid_versions():
         "linux-x86_64_3.12.txt",
         "linux-x86_64_py2.txt",
         "linux-x86_64_py3.txt",
+        "macos-aarch64_3.12.txt",
+        "macos-aarch64_py2.txt",
+        "macos-aarch64_py3.txt",
         "macos-x86_64_3.12.txt",
         "macos-x86_64_py2.txt",
         "macos-x86_64_py3.txt",
@@ -73,41 +86,79 @@ def test_get_valid_versions():
         assert versions == expected_versions
 
 
-def test_is_correct_dependency():
-    assert is_correct_dependency("windows-x86_64", "3.12", "windows-x86_64-3.12")
-    assert not is_correct_dependency("windows-x86_64", "3.12", "linux-x86_64-3.12")
-    assert not is_correct_dependency("windows-x86_64", "3.13", "windows-x86_64-3.12")
+@pytest.mark.parametrize(
+    "platform, version, dependency_file_name, expected",
+    [
+        pytest.param("windows-x86_64", "3.12", "windows-x86_64_3.12.txt", True, id="correct"),
+        pytest.param("windows-x86_64", "3.12", "linux-x86_64_3.12.txt", False, id="incorrect_platform"),
+        pytest.param("windows-x86_64", "3.13", "windows-x86_64_3.12.txt", False, id="incorrect_version"),
+    ],
+)
+def test_is_correct_dependency(platform, version, dependency_file_name, expected):
+    assert is_correct_dependency(platform, version, dependency_file_name) is expected
 
 
-def test_convert_to_human_readable_size():
-    assert convert_to_human_readable_size(500) == "500 B"
-    assert convert_to_human_readable_size(1024) == "1.0 KB"
-    assert convert_to_human_readable_size(1048576) == "1.0 MB"
-    assert convert_to_human_readable_size(1073741824) == "1.0 GB"
+@pytest.mark.parametrize(
+    "size_bytes, expected_string",
+    [
+        pytest.param(500, "500 B", id="Bytes"),
+        pytest.param(1024, "1.0 KiB", id="KiB"),
+        pytest.param(1048576, "1.0 MiB", id="MiB"),
+        pytest.param(1073741824, "1.0 GiB", id="GiB"),
+    ],
+)
+def test_convert_to_human_readable_size(size_bytes, expected_string):
+    assert convert_to_human_readable_size(size_bytes) == expected_string
 
 
-def test_is_valid_integration():
-    included_folder = "datadog_checks" + os.sep
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = [".git", "__pycache__"]
+@pytest.mark.parametrize(
+    "file_path, expected",
+    [
+        pytest.param("datadog_checks/example.py", True, id="valid"),
+        pytest.param("__pycache__/file.py", False, id="pycache"),
+        pytest.param("datadog_checks_dev/example.py", False, id="checks_dev"),
+        pytest.param(".git/config", False, id="git"),
+        pytest.param("datadog_checks/module/cache.pyc", False, id="gitignore_glob_ext"),
+        pytest.param("datadog_checks/module/__pycache__/foo.py", False, id="gitignore_glob_dir"),
+    ],
+)
+def test_is_valid_integration_file(file_path, expected):
+    repo_path = "fake_repo"
+    gitignore_patterns = ["*.pyc", "__pycache__"]
+    with patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=gitignore_patterns):
+        assert is_valid_integration_file(to_native_path(file_path), repo_path) is expected
 
-    assert is_valid_integration(to_native_path("datadog_checks/example.py"), included_folder, ignored_files, git_ignore)
-    assert not is_valid_integration(to_native_path("__pycache__/file.py"), included_folder, ignored_files, git_ignore)
-    assert not is_valid_integration(
-        to_native_path("datadog_checks_dev/example.py"), included_folder, ignored_files, git_ignore
-    )
-    assert not is_valid_integration(to_native_path(".git/config"), included_folder, ignored_files, git_ignore)
+
+@pytest.mark.parametrize(
+    "path, patterns, expected",
+    [
+        pytest.param("foo/bar/baz.pyc", ["*.pyc"], True, id="glob_extension_match"),
+        pytest.param("foo/bar/baz.py", ["*.pyc"], False, id="glob_extension_no_match"),
+        pytest.param("foo/__pycache__/module.py", ["__pycache__"], True, id="dir_segment_match"),
+        pytest.param("foo/bar/module.py", ["__pycache__"], False, id="dir_segment_no_match"),
+        pytest.param("foo/bar/notes.log", ["*.log"], True, id="glob_log_match"),
+        pytest.param("foo/bar/notes.txt", ["*.log"], False, id="glob_log_no_match"),
+        pytest.param("foo/bar/baz.py", ["*.pyc", "__pycache__", "*.log"], False, id="no_pattern_matches"),
+        pytest.param("foo/__pycache__/baz.pyc", ["*.pyc", "__pycache__"], True, id="multiple_patterns_first_matches"),
+    ],
+)
+def test_matches_gitignore(path, patterns, expected):
+    assert _matches_gitignore(to_native_path(path), patterns) is expected
 
 
 def test_get_dependencies_list():
-    file_content = "dependency1 @ https://example.com/dependency1/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2/dependency2-1.1.1-.whl"
+    file_content = (
+        "dependency1 @ https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl\n"
+        "dependency2 @ https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency2/dependency2-1.1.1-.whl"
+    )
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
         deps, urls, versions = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
+    # The storage tier placeholder is left unresolved here; it's resolved later when the wheel is requested.
     assert urls == [
-        "https://example.com/dependency1/dependency1-1.1.1-.whl",
-        "https://example.com/dependency2/dependency2-1.1.1-.whl",
+        "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl",
+        "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency2/dependency2-1.1.1-.whl",
     ]
     assert versions == ["1.1.1", "1.1.1"]
 
@@ -125,10 +176,18 @@ def test_get_dependencies_sizes():
     mock_response.content = zip_content
     mock_response.__enter__.return_value = mock_response
     mock_response.__exit__.return_value = None
-    with patch("requests.get", return_value=mock_response):
+    with patch("requests.get", return_value=mock_response) as mock_get:
         file_data = get_dependencies_sizes(
-            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True
+            MagicMock(),
+            ["dependency1"],
+            ["https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl"],
+            ["1.1.1"],
+            True,
+            "dev",
         )
+
+    # The storage tier placeholder must be resolved against the tier passed in, not left as-is.
+    mock_get.assert_called_once_with("https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True)
 
     assert file_data == [
         {
@@ -177,7 +236,7 @@ def test_get_files_grouped_and_with_versions():
         (repo_path / "integration2" / "datadog_checks", [], ["__about__.py"]),
     ]
 
-    def mock_is_valid_integration(path, included_folder, ignored, ignored_files):
+    def mock_is_valid_integration_file(path, repo_path):
         return True
 
     def mock_getsize(path):
@@ -195,14 +254,15 @@ def test_get_files_grouped_and_with_versions():
         ),
         patch("ddev.cli.size.utils.common_funcs.os.path.getsize", side_effect=mock_getsize),
         patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.utils.common_funcs.is_valid_integration", side_effect=mock_is_valid_integration),
+        patch("ddev.cli.size.utils.common_funcs.is_valid_integration_file", side_effect=mock_is_valid_integration_file),
         patch("ddev.cli.size.utils.common_funcs.extract_version_from_about_py", return_value="1.2.3"),
         patch(
             "ddev.cli.size.utils.common_funcs.convert_to_human_readable_size",
             side_effect=lambda s: f"{s / 1024:.2f} KB",
         ),
+        patch("ddev.cli.size.utils.common_funcs.check_python_version", return_value=True),
     ):
-        result = get_files(repo_path, compressed=False)
+        result = get_files(repo_path, compressed=False, py_version="3.12")
 
     expected = [
         {
@@ -224,13 +284,28 @@ def test_get_files_grouped_and_with_versions():
     assert result == expected
 
 
-def test_get_gitignore_files():
-    mock_gitignore = f"__pycache__{os.sep}\n*.log\n"  # Sample .gitignore file
-    repo_path = "fake_repo"
-    with patch("builtins.open", mock_open(read_data=mock_gitignore)):
-        with patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True):
-            ignored_patterns = get_gitignore_files(repo_path)
-    assert ignored_patterns == ["__pycache__" + os.sep, "*.log"]
+@pytest.mark.parametrize(
+    "py_version, expected",
+    [
+        pytest.param("3", True, id="py3"),
+        pytest.param("2", False, id="py2"),
+    ],
+)
+def test_check_version(py_version, expected):
+    with (
+        patch(
+            "ddev.cli.size.utils.common_funcs.load_toml_file",
+            return_value={"project": {"classifiers": ["Programming Language :: Python :: 3.12"]}},
+        ),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+    ):
+        assert check_python_version("fake_repo", "integration1", py_version) is expected
+
+
+def test_get_gitignore_files(tmp_path):
+    gitignore = tmp_path / ".gitignore"
+    gitignore.write_text(f"__pycache__{os.sep}\n*.log\n")
+    assert get_gitignore_files(tmp_path) == ["__pycache__" + os.sep, "*.log"]
 
 
 def test_compress():
@@ -318,49 +393,103 @@ def test_save_markdown():
     assert written_content == expected_writes
 
 
-def test_extract_version_from_about_py_pathlib():
+@pytest.mark.parametrize(
+    "file_content, expected_version",
+    [
+        pytest.param("__version__ = '1.2.3'", "1.2.3", id="version_present"),
+        pytest.param("not_version = 'not_defined'", "", id="version_not_present"),
+    ],
+)
+def test_extract_version_from_about_py(file_content, expected_version):
     fake_path = Path("some") / "module" / "__about__.py"
-    fake_content = "__version__ = '1.2.3'\n"
-
-    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=file_content)):
         version = extract_version_from_about_py(str(fake_path))
-
-    assert version == "1.2.3"
-
-
-def test_extract_version_from_about_py_no_version_pathlib():
-    fake_path = Path("another") / "module" / "__about__.py"
-    fake_content = "version = 'not_defined'\n"
-
-    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
-        version = extract_version_from_about_py(str(fake_path))
-
-    assert version == ""
+    assert version == expected_version
 
 
-def test_get_org():
-    mock_app = Mock()
-    mock_path = Mock()
+PLACEHOLDER_URL = "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/built/dep1/dep1-1.1.1-.whl"
 
-    toml_data = """
-        [orgs.default]
-        api_key = "test_api_key"
-        app_key = "test_app_key"
-        site = "datadoghq.com"
-        """
 
-    mock_app.config_file.path = mock_path
+def make_wheel_response(status_code):
+    response = MagicMock()
+    response.status_code = status_code
+    if status_code >= 400:
+        error = requests.HTTPError(response=response)
+        response.raise_for_status.side_effect = error
+    else:
+        response.raise_for_status.return_value = None
+    return response
 
-    with (
-        patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=toml_data)),
-        patch.object(mock_path, "open", mock_open(read_data=toml_data)),
-    ):
-        result = get_org(mock_app, "default")
 
-    expected = {
-        "api_key": "test_api_key",
-        "app_key": "test_app_key",
-        "site": "datadoghq.com",
-    }
+@pytest.mark.parametrize(
+    "wheels_storage, expected",
+    [
+        pytest.param(
+            "dev",
+            [
+                "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+            ],
+            id="dev",
+        ),
+        pytest.param(
+            "stable",
+            [
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+                "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+            ],
+            id="stable",
+        ),
+    ],
+)
+def test_wheel_url_candidates_prefers_configured_tier(wheels_storage, expected):
+    assert wheel_url_candidates(PLACEHOLDER_URL, wheels_storage) == expected
 
-    assert result == expected
+
+def test_wheel_url_candidates_without_placeholder_is_not_duplicated():
+    url = "https://example.com/built/dep1/dep1-1.1.1-.whl"
+    assert wheel_url_candidates(url, "dev") == [url]
+
+
+@pytest.mark.parametrize("missing_status_code", [404, 403], ids=["not_found", "forbidden"])
+def test_request_wheel_falls_back_to_the_other_tier(missing_status_code):
+    missing = make_wheel_response(missing_status_code)
+    found = make_wheel_response(200)
+
+    with patch("requests.get", side_effect=[missing, found]) as mock_get:
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
+
+    assert [call.args[0] for call in mock_get.call_args_list] == [
+        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+    ]
+    missing.close.assert_called_once()
+
+
+def test_request_wheel_raises_when_no_tier_has_the_wheel():
+    with patch("requests.get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
+        with pytest.raises(
+            requests.HTTPError,
+            match=re.escape(
+                "Tried: https://example.com/dev/built/dep1/dep1-1.1.1-.whl (404), "
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl (404)"
+            ),
+        ):
+            request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+
+def test_request_wheel_does_not_retry_on_a_non_missing_error():
+    with patch("requests.get", side_effect=[make_wheel_response(500), make_wheel_response(200)]) as mock_get:
+        with pytest.raises(requests.HTTPError):
+            request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == 1
+
+
+def test_request_wheel_uses_head_when_requested():
+    found = make_wheel_response(200)
+
+    with patch("requests.head", return_value=found) as mock_head:
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True) is found
+
+    mock_head.assert_called_once_with("https://example.com/stable/built/dep1/dep1-1.1.1-.whl")

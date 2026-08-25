@@ -1,4 +1,5 @@
 name: Delinea Secret Server
+fleet_configurable: true
 files:
 - name: delinea_secret_server.yaml
   options:

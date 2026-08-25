@@ -1,16 +1,16 @@
 {
-    "title": "Trend Micro Vision One Endpoint Security - Overview",
-    "description": "This dashboard provides a comprehensive summary of Trend Micro Vision One Endpoint Security logs.",
+    "title": "TrendAI Vision One Endpoint Security - Overview",
+    "description": "This dashboard provides a comprehensive summary of TrendAI Vision One Endpoint Security logs.",
     "widgets": [
         {
             "id": 4774730152785744,
             "definition": {
                 "type": "image",
-                "url": "https://www.trendmicro.com/content/dam/trendmicro/global/en/global/logo/trend-micro-logo.png",
-                "url_dark_theme": "https://www.trendmicro.com/content/dam/trendmicro/global/en/core/images/logos/tm-logo-red-white-t.svg",
+                "url": "https://static.datadoghq.com/static/images/logos/trend-micro-vision-one-endpoint-security_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/trend-micro-vision-one-endpoint-security_reversed_large.svg",
                 "sizing": "contain",
                 "has_background": false,
-                "has_border": true,
+                "has_border": false,
                 "vertical_align": "center",
                 "horizontal_align": "center"
             },
@@ -25,7 +25,7 @@
             "id": 661152336132838,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a comprehensive summary of security events detected by Trend Micro Vision One Endpoint Security. It offers detailed insights into various aspects of your security posture, allowing for effective monitoring and response to potential threats.\n\nThis holistic approach enhances your ability to monitor, analyze, and respond to security incidents across your endpoints, improving overall security posture and threat mitigation efforts.\n\nFor more information, see the [Trend Micro Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides a comprehensive summary of security events detected by TrendAI Vision One Endpoint Security. It offers detailed insights into various aspects of your security posture, allowing for effective monitoring and response to potential threats.\n\nThis holistic approach enhances your ability to monitor, analyze, and respond to security incidents across your endpoints, improving overall security posture and threat mitigation efforts.\n\nFor more information, see the [TrendAI Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -77,7 +77,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -120,12 +120,12 @@
                         "layout": {
                             "x": 3,
                             "y": 0,
-                            "width": 4,
+                            "width": 3,
                             "height": 3
                         }
                     },
                     {
-                        "id": 3445041831573562,
+                        "id": 6407464138019769,
                         "definition": {
                             "title": "Count of Events by Type",
                             "title_size": "16",
@@ -145,7 +145,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "service",
+                                                    "facet": "vendor_endpoint",
                                                     "limit": 15,
                                                     "sort": {
                                                         "order": "desc",
@@ -154,7 +154,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -193,9 +193,84 @@
                             }
                         },
                         "layout": {
-                            "x": 7,
+                            "x": 6,
                             "y": 0,
-                            "width": 5,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3445041831573562,
+                        "definition": {
+                            "title": "Count of Events by Type [To be deprecate]",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "service",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#bed2f4"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 3,
                             "height": 3
                         }
                     },
@@ -203,6 +278,76 @@
                         "id": 6285436885924462,
                         "definition": {
                             "title": "Events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "vendor_endpoint"
+                                                ],
+                                                "limit": 15,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2113539919332583,
+                        "definition": {
+                            "title": "Events over time [To be deprecate]",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -243,7 +388,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -262,7 +407,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 3,
+                            "y": 6,
                             "width": 12,
                             "height": 3
                         }
@@ -271,6 +416,82 @@
                         "id": 6645119393654626,
                         "definition": {
                             "title": "Top 10 Users with Threat",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "vendor_endpoint",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6630296750602728,
+                        "definition": {
+                            "title": "Top 10 Users with Threat [To be deprecate]",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -305,7 +526,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -337,9 +558,9 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 4,
+                            "x": 3,
+                            "y": 9,
+                            "width": 3,
                             "height": 4
                         }
                     },
@@ -389,7 +610,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -417,9 +638,9 @@
                             "has_search_bar": "auto"
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 6,
-                            "width": 8,
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
                             "height": 4
                         }
                     },
@@ -453,7 +674,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -486,7 +707,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 10,
+                            "y": 13,
                             "width": 4,
                             "height": 4
                         }
@@ -522,7 +743,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -554,7 +775,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 10,
+                            "y": 13,
                             "width": 8,
                             "height": 4
                         }
@@ -589,7 +810,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -622,7 +843,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 14,
+                            "y": 17,
                             "width": 4,
                             "height": 4
                         }
@@ -658,7 +879,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -690,7 +911,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 14,
+                            "y": 17,
                             "width": 8,
                             "height": 4
                         }
@@ -706,7 +927,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security $Event-Type $Event-Type-To-Be-Deprecate $Endpoint-Name $User $Endpoint-OS $Endpoint-IP",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -725,6 +946,10 @@
                                         },
                                         {
                                             "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "vendor_endpoint",
                                             "width": "auto"
                                         },
                                         {
@@ -762,7 +987,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 18,
+                            "y": 21,
                             "width": 12,
                             "height": 4
                         }
@@ -773,7 +998,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 23
+                "height": 26
             }
         },
         {
@@ -841,7 +1066,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -892,7 +1117,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -948,7 +1173,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1013,7 +1238,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1064,7 +1289,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:low $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:low $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1115,7 +1340,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:info $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:info $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1168,7 +1393,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1235,7 +1460,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $Event-Type-To-Be-Deprecate $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1270,7 +1495,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 26,
+                "y": 29,
                 "width": 12,
                 "height": 10
             }
@@ -1279,6 +1504,12 @@
     "template_variables": [
         {
             "name": "Event-Type",
+            "prefix": "vendor_endpoint",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Event-Type-To-Be-Deprecate",
             "prefix": "service",
             "available_values": [],
             "default": "*"

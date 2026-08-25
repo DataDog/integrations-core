@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.api import write_file as _write_file
+
 TOWNCRIER_CHANGELOG_TPL = """\
 # CHANGELOG - dummy
 
@@ -35,9 +37,7 @@ __version__ = '{}'
 
 def write_file(fake_repo, fpath, content):
     full_path = fake_repo.path / fpath
-
-    full_path.parent.mkdir(exist_ok=True, parents=True)
-    full_path.write_text(content)
+    _write_file(fake_repo.path, fpath, content)
     return full_path
 
 

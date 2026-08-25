@@ -3,12 +3,13 @@ check-types = false
 
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 
 [envs.default]
 features = ["db", "deps", "http", "json", "kube"]
 dependencies = [
   "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
+  "hypothesis",
 ]
 e2e-env = false
 

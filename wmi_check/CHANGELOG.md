@@ -2,6 +2,48 @@
 
 <!-- towncrier release notes start -->
 
+## 4.2.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 4.1.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 4.1.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 4.0.0 / 2025-11-26 / Agent 7.74.0
+
+***Changed***:
+
+* Bump minimum base check requirement ([#21921](https://github.com/DataDog/integrations-core/pull/21921))
+
+***Added***:
+
+* Allow tag aliases for WMI `tag_by` and `tag_queries` parameters ([#21792](https://github.com/DataDog/integrations-core/pull/21792))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 3.4.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 3.3.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
 ## 3.2.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:

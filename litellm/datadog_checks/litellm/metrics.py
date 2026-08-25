@@ -64,6 +64,7 @@ METRICS = {
     'litellm_remaining_requests_metric': "remaining_requests.metric",
     'litellm_remaining_team_budget_metric': "remaining.team_budget.metric",
     'litellm_remaining_tokens': "remaining_tokens",
+    'litellm_remaining_tokens_metric': "remaining_tokens.metric",
     'litellm_request_total_latency_metric': "request.total_latency.metric",
     'litellm_reset_budget_job_failed_requests': "reset_budget_job.failed_requests",
     'litellm_reset_budget_job_latency': "reset_budget_job.latency",
@@ -78,6 +79,7 @@ METRICS = {
     'litellm_team_budget_remaining_hours_metric': "team.budget.remaining_hours.metric",
     'litellm_team_max_budget_metric': "team.max_budget.metric",
     'litellm_total_tokens': "total.tokens",
+    'litellm_total_tokens_metric': "total.tokens",
     'process_start_time_seconds': {"name": "process.uptime.seconds", "type": "time_elapsed"},
     # Deprecated
     'litellm_llm_api_failed_requests_metric': "llm.api.failed_requests.metric",

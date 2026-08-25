@@ -7,7 +7,7 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
-from typing import Dict, List  # noqa: F401
+from typing import Any, Dict, List  # noqa: F401
 
 import pymysql
 
@@ -18,12 +18,12 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, connect_with_session_variables, get_truncation_state, warning_with_tags
+from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, get_truncation_state, warning_with_tags
 
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 
 ACTIVITY_QUERY = """\
@@ -89,21 +89,52 @@ WHERE
 """
 
 BLOCKING_COLUMNS_MYSQL8 = """\
-    ,blocking_thread.thread_id AS blocking_thread_id,
-    blocking_thread.processlist_id AS blocking_processlist_id
+    ,COALESCE(blocking_thread.thread_id, mdl_blocking_thread.thread_id) AS blocking_thread_id,
+    COALESCE(blocking_thread.processlist_id, mdl_blocking_thread.processlist_id) AS blocking_processlist_id,
+    mdl_waiting.OBJECT_TYPE AS mdl_object_type,
+    mdl_waiting.OBJECT_SCHEMA AS mdl_object_schema,
+    mdl_waiting.OBJECT_NAME AS mdl_object_name,
+    mdl_waiting.LOCK_TYPE AS mdl_waiting_lock_type,
+    mdl_blocking.LOCK_TYPE AS mdl_blocking_lock_type
 """
 
 BLOCKING_JOINS_MYSQL8 = """\
-    LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON thread_a.thread_id = lock_waits.requesting_thread_id
-    LEFT JOIN performance_schema.threads AS blocking_thread ON lock_waits.blocking_thread_id = blocking_thread.thread_id
+    LEFT JOIN performance_schema.data_lock_waits AS lock_waits
+        ON thread_a.thread_id = lock_waits.requesting_thread_id
+    LEFT JOIN performance_schema.threads AS blocking_thread
+        ON lock_waits.blocking_thread_id = blocking_thread.thread_id
+    LEFT JOIN performance_schema.metadata_locks AS mdl_waiting
+        ON thread_a.thread_id = mdl_waiting.OWNER_THREAD_ID
+        AND mdl_waiting.LOCK_STATUS = 'PENDING'
+    LEFT JOIN performance_schema.metadata_locks AS mdl_blocking
+        ON mdl_waiting.OBJECT_TYPE = mdl_blocking.OBJECT_TYPE
+        AND mdl_waiting.OBJECT_SCHEMA <=> mdl_blocking.OBJECT_SCHEMA
+        AND mdl_waiting.OBJECT_NAME <=> mdl_blocking.OBJECT_NAME
+        AND mdl_blocking.LOCK_STATUS = 'GRANTED'
+        AND mdl_waiting.OWNER_THREAD_ID != mdl_blocking.OWNER_THREAD_ID
+    LEFT JOIN performance_schema.threads AS mdl_blocking_thread
+        ON mdl_blocking.OWNER_THREAD_ID = mdl_blocking_thread.thread_id
 """
 
 IDLE_BLOCKERS_SUBQUERY_MYSQL8 = """\
         OR
-        -- Include idle sessions that are blocking others
+        -- Include idle sessions that are blocking others via InnoDB data locks
         thread_a.thread_id IN (
             SELECT blocking_thread_id
             FROM performance_schema.data_lock_waits
+        )
+        OR
+        -- Include idle sessions that are blocking others via metadata locks
+        thread_a.thread_id IN (
+            SELECT mdl_granted.OWNER_THREAD_ID
+            FROM performance_schema.metadata_locks AS mdl_pending
+            JOIN performance_schema.metadata_locks AS mdl_granted
+                ON mdl_pending.OBJECT_TYPE = mdl_granted.OBJECT_TYPE
+                AND mdl_pending.OBJECT_SCHEMA <=> mdl_granted.OBJECT_SCHEMA
+                AND mdl_pending.OBJECT_NAME <=> mdl_granted.OBJECT_NAME
+                AND mdl_granted.LOCK_STATUS = 'GRANTED'
+                AND mdl_pending.LOCK_STATUS = 'PENDING'
+                AND mdl_pending.OWNER_THREAD_ID != mdl_granted.OWNER_THREAD_ID
         )
 """
 
@@ -144,12 +175,11 @@ def agent_check_getter(self):
     return self._check
 
 
-class MySQLActivity(DBMAsyncJob):
-
+class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
     DEFAULT_COLLECTION_INTERVAL = 10
     MAX_PAYLOAD_BYTES = 19e6
 
-    def __init__(self, check, config, connection_args):
+    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         self.collection_interval = float(
             config.activity_config.get("collection_interval", MySQLActivity.DEFAULT_COLLECTION_INTERVAL)
         )
@@ -161,7 +191,7 @@ class MySQLActivity(DBMAsyncJob):
             enabled=is_affirmative(config.activity_config.get("enabled", True)),
             expected_db_exceptions=(pymysql.err.OperationalError, pymysql.err.InternalError),
             min_collection_interval=config.min_collection_interval,
-            dbms="mysql",
+            dbms=check.dbms,
             rate_limit=1 / float(self.collection_interval),
             job_name="query-activity",
             shutdown_callback=self._close_db_conn,
@@ -170,7 +200,9 @@ class MySQLActivity(DBMAsyncJob):
         self._config = config
         self._log = check.log
 
-        self._connection_args = connection_args
+        self._connection_args_provider = connection_args_provider
+        self._uses_managed_auth = uses_managed_auth
+        self._db_created_at = 0
         self._db = None
         self._db_version = None
         self._obfuscator_options = to_native_string(json.dumps(self._config.obfuscator_options))
@@ -215,6 +247,7 @@ class MySQLActivity(DBMAsyncJob):
     def _collect_activity(self):
         # type: () -> None
         # do not emit any dd.internal metrics for DBM specific check code
+        self._raise_if_cancelled()
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             rows = self._get_activity(cursor)
@@ -257,6 +290,7 @@ class MySQLActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
+        self._raise_if_cancelled()
         query = self._get_activity_query()
         self._log.debug("Running activity query [%s]", query)
         cursor.execute(query)
@@ -271,9 +305,10 @@ class MySQLActivity(DBMAsyncJob):
         estimated_size = 0
         for row in rows:
             if row["thread_id"] in seen:
-                # `performance_schema.events_statements_current` can contain previous statements
-                # for the same thread. We only want the most recent one.
-                if row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
+                # A thread appears more than once when `performance_schema.events_statements_current`
+                # holds a row per nesting level, and when it still holds a statement the thread has
+                # already finished. Only the finished ones are safe to drop.
+                if self._ended_before(row, seen[row["thread_id"]]["event_timer_start"]):
                     continue
                 else:
                     second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
@@ -291,13 +326,30 @@ class MySQLActivity(DBMAsyncJob):
         return normalized_rows
 
     @staticmethod
+    def _ended_before(row: dict[str, Any], event_timer_start: int | None) -> bool:
+        """
+        Whether the statement in `row` finished before `event_timer_start`, the start of the most
+        recent statement seen for the same thread. Such a row is a leftover that
+        `performance_schema.events_statements_current` still holds for a thread that has moved on.
+
+        Both timers are NULL when the instrument that produced the event has `TIMED = NO` in
+        `setup_instruments`, and when no `events_statements_current` row joins to the thread at all,
+        in which case the SQL text comes from `PROCESSLIST_info` instead. Ordering is undecidable
+        without both timers, so such a row is never dropped: reporting a possibly stale statement is
+        preferable to dropping an active one.
+        """
+        event_timer_end = row.get("event_timer_end")
+        if event_timer_end is None or event_timer_start is None:
+            return False
+        return event_timer_end < event_timer_start
+
+    @staticmethod
     def _eliminate_duplicate_rows(rows, second_pass):
         # type: (List[Dict[str]], Dict[str]) -> List[Dict[str]]
         filtered_rows = []
         for row in rows:
-            if (
-                row["thread_id"] in second_pass
-                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+            if row["thread_id"] in second_pass and MySQLActivity._ended_before(
+                row, second_pass[row["thread_id"]]["event_timer_start"]
             ):
                 continue
             filtered_rows.append(row)
@@ -382,13 +434,10 @@ class MySQLActivity(DBMAsyncJob):
             return int(o.total_seconds())
         raise TypeError
 
-    def _get_db_connection(self):
-        """
-        pymysql connections are not thread safe, so we can't reuse the same connection from the main check.
-        """
-        if not self._db:
-            self._db = connect_with_session_variables(**self._connection_args)
-        return self._db
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
 
     def _close_db_conn(self):
         # type: () -> None

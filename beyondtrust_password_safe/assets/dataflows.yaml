@@ -1,0 +1,6 @@
+provides:
+  - id: beyondtrust-password-safe-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound

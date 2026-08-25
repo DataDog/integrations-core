@@ -7,13 +7,11 @@ from pathlib import Path
 from typing import Optional, overload
 
 import click
-import matplotlib.pyplot as plt
-import requests
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.common_params import WheelsStorageTier, common_params
 
 from .utils.common_funcs import (
     CommitEntry,
@@ -26,12 +24,12 @@ from .utils.common_funcs import (
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
-    get_gitignore_files,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
-    is_valid_integration,
+    is_valid_integration_file,
     print_table,
+    request_wheel,
     save_csv,
     save_json,
     save_markdown,
@@ -73,6 +71,7 @@ def timeline(
     compressed: bool,
     format: Optional[list[str]],
     show_gui: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> None:
     """
     Show the size evolution of a module (integration or dependency) over time.
@@ -176,6 +175,7 @@ def timeline(
                                 "show_gui": show_gui,
                                 "first_commit": None,
                                 "platform": plat,
+                                "wheels_storage": wheels_storage,
                             }
 
                             modules_plat.extend(
@@ -198,6 +198,7 @@ def timeline(
                             "show_gui": show_gui,
                             "first_commit": None,
                             "platform": platform,
+                            "wheels_storage": wheels_storage,
                         }
                         modules_plat.extend(
                             timeline_mode(
@@ -222,6 +223,7 @@ def timeline(
                         "show_gui": show_gui,
                         "first_commit": first_commit,
                         "platform": None,
+                        "wheels_storage": wheels_storage,
                     }
                     progress.remove_task(task)
                     modules.extend(
@@ -382,6 +384,7 @@ def process_commits(
         date, message, commit = format_commit_data(date_str, message, commit, params["first_commit"])
         if params["type"] == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
             result = get_dependencies(
+                params["app"],
                 repo,
                 params["module"],
                 params["platform"],
@@ -390,6 +393,7 @@ def process_commits(
                 author,
                 message,
                 params["compressed"],
+                params["wheels_storage"],
             )
             if result:
                 file_data.append(result)
@@ -455,10 +459,6 @@ def get_files(
         )
         return file_data
 
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
-
     total_size = 0
     version = ""
 
@@ -467,7 +467,7 @@ def get_files(
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
 
-            if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
+            if not is_valid_integration_file(relative_path, repo_path):
                 continue
 
             if file == "__about__.py" and "datadog_checks" in relative_path:
@@ -490,6 +490,7 @@ def get_files(
 
 
 def get_dependencies(
+    app: Application,
     repo_path: str,
     module: str,
     platform: str,
@@ -498,6 +499,7 @@ def get_dependencies(
     author: str,
     message: str,
     compressed: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> Optional[CommitEntry]:
     """
     Returns the size and metadata of a dependency for a given commit and platform.
@@ -523,7 +525,9 @@ def get_dependencies(
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
             download_url, dep_version = get_dependency_data(file_path, module)
             return (
-                get_dependency_size(download_url, dep_version, commit, date, author, message, compressed)
+                get_dependency_size(
+                    app, download_url, dep_version, commit, date, author, message, compressed, wheels_storage
+                )
                 if download_url and dep_version is not None
                 else None
             )
@@ -558,7 +562,15 @@ def get_dependency_data(file_path: str, module: str) -> tuple[Optional[str], Opt
 
 
 def get_dependency_size(
-    download_url: str, version: str, commit: str, date: date, author: str, message: str, compressed: bool
+    app: Application,
+    download_url: str,
+    version: str,
+    commit: str,
+    date: date,
+    author: str,
+    message: str,
+    compressed: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> CommitEntry:
     """
     Calculates the size of a dependency wheel at a given commit.
@@ -576,15 +588,13 @@ def get_dependency_size(
         A CommitEntry with size and metadata for the given dependency and commit.
     """
     if compressed:
-        response = requests.head(download_url)
-        response.raise_for_status()
+        response = request_wheel(app, download_url, wheels_storage, head=True)
         size_str = response.headers.get("Content-Length")
         if size_str is None:
             raise ValueError(f"Missing size for commit {commit}")
         size = int(size_str)
     else:
-        with requests.get(download_url, stream=True) as response:
-            response.raise_for_status()
+        with request_wheel(app, download_url, wheels_storage) as response:
             wheel_data = response.content
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -815,6 +825,8 @@ def plot_linegraph(
         show: If True, displays the plot interactively.
         path: If provided, saves the plot to this file path.
     """
+    import matplotlib.pyplot as plt
+
     if modules == []:
         return
 

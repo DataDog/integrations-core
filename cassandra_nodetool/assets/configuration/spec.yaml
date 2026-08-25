@@ -1,4 +1,5 @@
 name: Cassandra Nodetool
+fleet_configurable: true
 files:
 - name: cassandra_nodetool.yaml
   options:
@@ -15,7 +16,9 @@ files:
           You should set those environment variables as system-wide variables.
         value:
           type: string
+          require_trusted_provider: true
           example: /usr/bin/nodetool
+        fleet_configurable: false
       - template: init_config/default
   - template: instances
     options:
@@ -23,6 +26,7 @@ files:
       description: |
         The list of keyspaces to monitor.
         An empty list results in no metrics being sent.
+      fleet_configurable: true
       required: true
       value:
         type: array
@@ -33,11 +37,13 @@ files:
       value:
         type: string
         example: localhost
+      fleet_configurable: false
     - name: port
       description: The port JMX listens to for connections.
       value:
         type: integer
         example: 7199
+      fleet_configurable: false
     - name: username
       description: |
         Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
@@ -45,18 +51,22 @@ files:
         check can execute the `status` command
       value:
         type: string
+      fleet_configurable: false
     - name: password
       description: |
         Password from the credentials needed to connect to the host. These are the credentials for the JMX server.
         For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
         check can execute the `status` command
+      secret: true
       value:
         type: string
+      fleet_configurable: false
     - name: ssl
       description: Whether to use the --ssl parameter with nodetool to initiate a connection over SSL to the JMX server.
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: nodetool
       description: |
         The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
@@ -70,4 +80,6 @@ files:
         This overrides `nodetool` defined in `init_config`.
       value:
         type: string
+        require_trusted_provider: true
+      fleet_configurable: false
     - template: instances/default

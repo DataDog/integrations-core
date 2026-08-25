@@ -4,6 +4,8 @@
 
 This check monitors [Anyscale][1]. Anyscale is a compute platform that hosts [Ray][5] clusters.
 
+**Minimum Agent version:** 7.57.2
+
 ## Setup
 
 To install and configure the Datadog Agent with the Ray integration on Anyscale, see the [official Anyscale documentation][6].

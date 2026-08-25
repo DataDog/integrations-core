@@ -4,6 +4,8 @@
 
 This check monitors [Ray][1] through the Datadog Agent. Ray is an open-source unified compute framework that makes it easy to scale AI and Python workloads, from reinforcement learning to deep learning to tuning, and model serving.
 
+**Minimum Agent version:** 7.48.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -57,7 +59,9 @@ labels:
 
 ##### Metric collection
 
-This example demonstrates the configuration as Kubernetes annotations on your Ray pods. See the [sample configuration file][4] for all available configuration options.
+Choose one of the following Kubernetes Autodiscovery configurations. See the [sample configuration file][4] for all available configuration options.
+
+###### Kubernetes annotations
 
 ```yaml
 apiVersion: v1
@@ -81,6 +85,29 @@ spec:
     - name: 'ray'
 # (...)
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <RAY_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: ray
+        containerName: ray
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8080"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -155,7 +182,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
 
-
 **Annotations v1/v2**
 
 ```yaml
@@ -193,3 +219,4 @@ Need help? Contact [Datadog support][9].
 [12]: https://docs.ray.io/en/latest/ray-observability/user-guides/configure-logging.html
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
+[15]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

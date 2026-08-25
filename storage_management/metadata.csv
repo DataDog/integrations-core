@@ -1,0 +1,8 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+aws.s3.inventory.access_logs.request_latency_by_method,gauge,,millisecond,,S3 inventory access logs request latency by method,0,storage_management,latency by method,,
+aws.s3.inventory.access_logs.total_requests_by_method,gauge,,,,S3 inventory access logs total requests by method,0,storage_management,requests by method,,
+aws.s3.inventory.average_prefix_size,gauge,,byte,,S3 inventory average prefix size,0,storage_management,avg prefix size,,
+aws.s3.inventory.prefix_age_days,gauge,,day,,S3 inventory prefix age in days,0,storage_management,prefix age days,,
+aws.s3.inventory.prefix_object_count,gauge,,,,S3 inventory prefix object count,0,storage_management,prefix object count,,
+aws.s3.inventory.total_prefix_estimated_cost,gauge,,dollar,,S3 inventory total prefix estimated cost,0,storage_management,est. prefix cost,,
+aws.s3.inventory.total_prefix_size,gauge,,byte,,S3 inventory total prefix size,0,storage_management,total prefix size,,

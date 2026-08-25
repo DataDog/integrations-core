@@ -4,6 +4,8 @@ Sonatype Nexus is a popular repository management solution designed for managing
 
 The Sonatype Nexus integration collects analytics and instance health status metrics from Sonatype Nexus and sends them to Datadog for comprehensive analysis.
 
+**Minimum Agent version:** 7.64.0
+
 ## Setup
 
 ### Installation

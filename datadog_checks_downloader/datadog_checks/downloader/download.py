@@ -49,7 +49,7 @@ REPOSITORY_DIR = 'repo'
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
 # Where to find our in-toto root layout.
 IN_TOTO_METADATA_DIR = 'in-toto-metadata'
-ROOT_LAYOUTS = {'core': '7.core.root.layout', 'extras': '1.extras.root.layout'}
+ROOT_LAYOUTS = {'core': '8.core.root.layout', 'extras': '1.extras.root.layout'}
 DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
 

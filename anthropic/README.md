@@ -9,6 +9,8 @@ monitor operational performance, and evaluate the quality, privacy, and safety o
 
 See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
 
+**Minimum Agent version:** 7.59.1
+
 ## Setup
 
 # Configuring Anthropic LLM Evaluations for Datadog
@@ -21,6 +23,8 @@ Datadog's LLM Observability enables end-to-end monitoring of your LLM applicatio
 
 - An **Anthropic account** with access to model deployments.
 - A **valid Anthropic API key** with **write permissions** for model capabilities.
+
+**Minimum Agent version:** 7.59.1
 
 ## Setup
 
@@ -86,7 +90,7 @@ docker run -d \
   -p 127.0.0.1:8125:8125/udp \
   -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
   -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
+  registry.datadoghq.com/agent:latest
 ```
 
 2. If you haven't already, install the `ddtrace` package:

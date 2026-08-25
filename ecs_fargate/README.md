@@ -16,7 +16,7 @@ The Datadog Agent retrieves metrics for the task definition's containers with th
 
 The Task Metadata endpoint is only available from within the task definition itself, which is why the Datadog Agent needs to be run as an additional container within each task definition to be monitored.
 
-The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
+To enable metric collection, set the environment variable `ECS_FARGATE` to `"true"` in the Datadog container definition.
 
 ## Setup
 
@@ -46,7 +46,7 @@ The instructions below show you how to configure the task using the [Amazon Web 
 ##### Web UI Task Definition
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov,uk1" >}}
 
 1. Log in to your [AWS Web Console][4] and navigate to the ECS section.
 2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button or choose an existing Fargate task definition.
@@ -79,7 +79,7 @@ partial -->
 
 1. Download [datadog-agent-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains the JSON file mentioned below.
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov,uk1" >}}
 2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
 
 [41]: /organization-settings/api-keys
@@ -113,7 +113,7 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 You can use [AWS CloudFormation][6] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task.
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov,uk1" >}}
 Update this CloudFormation template below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 [41]: /organization-settings/api-keys
@@ -152,7 +152,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 You can use the [Datadog CDK Constructs][72] to configure your ECS Fargate task definition. Use the `DatadogECSFargate` construct to instrument your containers for desired Datadog features. This is supported in TypeScript, JavaScript, Python, and Go.
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov,uk1" >}}
 Update this construct definition below with your [Datadog API Key][41]. In addition, include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) property if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 [41]: https://app.datadoghq.com/organization-settings/api-keys
@@ -192,7 +192,7 @@ For more information on the `DatadogECSFargate` construct instrumentation and sy
 You can use the [Datadog ECS Fargate Terraform module][71] to configure your containers for Datadog. This Terraform module wraps the [`aws_ecs_task_definition`][68] resource and automatically instruments your task definition for Datadog. Pass your input arguments into the Datadog ECS Fargate Terraform module in a similiar manner as to the `aws_ecs_task_definition`. Make sure to include your task `family` and `container_definitions`.
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov,uk1" >}}
 Update this Terraform module below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 [41]: https://app.datadoghq.com/organization-settings/api-keys
@@ -201,7 +201,7 @@ partial -->
 
 ```hcl
 module "ecs_fargate_task" {
-  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "DataDog/ecs-datadog/aws//modules/ecs_fargate"
   version = "1.0.0"
 
   # Configure Datadog
@@ -229,7 +229,6 @@ Lastly, include your other application containers within the `ContainerDefinitio
 For more information on the Terraform module, see the [Datadog ECS Fargate Terraform documentation][74].
 
 <!-- xxz tab xxx -->
-
 <!-- xxz tabs xxx -->
 
 
@@ -338,7 +337,6 @@ resource "aws_ecs_service" <SERVICE_ID> {
 For more information on the Terraform ECS service module and syntax, see the [AWS Terraform ECS service documentation][70].
 
 <!-- xxz tab xxx -->
-
 <!-- xxz tabs xxx -->
 
 To provide your Datadog API key as a secret, see [Using secrets](#using-secrets).
@@ -436,9 +434,9 @@ You can monitor Fargate logs by using either:
 - The AWS FireLens integration built on Datadog's Fluent Bit output plugin to send logs directly to Datadog
 - Using the `awslogs` log driver to store the logs in a CloudWatch Log Group, and then a Lambda function to route logs to Datadog
 
-Datadog recommends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
-
-**Note**: Log collection with Fluent Bit and FireLens is not supported for AWS Batch on ECS Fargate.
+Datadog recommends using AWS FireLens for the following reasons:
+- You can configure Fluent Bit directly in your Fargate tasks.
+- The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][75] uses the tags to correlate logs with ECS resources.
 
 #### Fluent Bit and FireLens
 
@@ -493,7 +491,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -515,7 +513,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -537,7 +535,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -559,7 +557,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -581,7 +579,29 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      }
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="uk1" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "apikey": "<DATADOG_API_KEY>",
+        "Host": "http-intake.logs.uk1.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -603,7 +623,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -612,6 +632,8 @@ partial -->
   ```
 {{< /site-region >}}
 partial -->
+
+**Note**: Separate tags with commas in the `dd_tags` field.
 
 {{% collapse-content title="Example using secretOptions to avoid exposing the API Key in plain text" level="h4" %}}
 <!-- partial
@@ -626,7 +648,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -653,7 +675,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -680,7 +702,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -707,7 +729,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -734,7 +756,34 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      },
+      "secretOptions": [
+      {
+        "name": "apikey",
+        "valueFrom": "<API_SECRET_ARN>"
+      }
+    ]
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="uk1" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "Host": "http-intake.logs.uk1.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -761,7 +810,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -783,7 +832,7 @@ To provide your Datadog API key as a secret, see [Using secrets](#using-secrets)
 {{% /collapse-content %}}
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov,uk1" >}}
 **Note**: Set your `apikey` as well as the `Host` relative to your respective site `http-intake.logs.`{{< region-param key="dd_site" code="true" >}}. The full list of available parameters is described in the [Datadog Fluent Bit documentation][24].
 
 [24]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
@@ -971,6 +1020,43 @@ Resources:
 {{< /site-region >}}
 partial -->
 <!-- partial
+{{< site-region region="uk1" >}}
+```yaml
+Resources:
+  ECSTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              apikey: <DATADOG_API_KEY>
+              Host: http-intake.logs.uk1.datadoghq.com
+              dd_service: test-service
+              dd_source: test-source
+              TLS: 'on'
+              provider: ecs
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+{{< /site-region >}}
+partial -->
+<!-- partial
 {{< site-region region="gov" >}}
 ```yaml
 Resources:
@@ -1036,7 +1122,7 @@ To enable logging through the [Datadog ECS Fargate Terraform][71] module, config
 
 ```hcl
 module "ecs_fargate_task" {
-  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "DataDog/ecs-datadog/aws//modules/ecs_fargate"
   version = "1.0.0"
 
   # Configure Datadog
@@ -1057,7 +1143,6 @@ module "ecs_fargate_task" {
 ```
 
 <!-- xxz tab xxx -->
-
 <!-- xxz tabs xxx -->
 
 **Note**: Use a [TaskDefinition secret][28] to avoid exposing the `apikey` in plain text.
@@ -1085,12 +1170,14 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
     For more information about using the `awslogs` log driver in your task or job definitions to send container logs to CloudWatch Logs, see [Using the awslogs Log Driver][30]. This driver collects logs generated by the container and sends them to CloudWatch directly.
 
-3. Finally, use the [Datadog Lambda Log Forwarder function][31] to collect logs from CloudWatch and send them to Datadog.
+3. Finally, use the [Datadog Lambda Log Forwarder function][31] to collect logs from CloudWatch and send them to Datadog. To automatically enrich logs with ECS tags (task_arn, service_arn, cluster_arn, ...), ensure the following configuration:
+    1. The CloudWatch Log Group must be named `/ecs/<ECS_CLUSTER_NAME>`.
+    2. The Log Stream must follow the default naming format: `<awslogs-stream-prefix>/<container_name>/<task_id>`.
 
 ### Trace collection
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov,uk1" >}}
 1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task or job definition with the additional environment variable `DD_APM_ENABLED` set to `true`. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
 {{< /site-region >}}
 partial -->
@@ -1164,6 +1251,114 @@ The ECS Fargate check does not include any events.
 See [service_checks.json][45] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+
+
+### Agent does not start on a read-only filesystem
+
+If you experience issues starting the Agent on a filesystem with the setting `"readonlyRootFilesystem": true`, follow either of the approaches below to remediate this:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Create a custom Agent image (recommended)" xxx -->
+1. Use a Dockerfile like the example below to add the volume at the necessary path, and copy over the existing `datadog.yaml` file. The `datadog.yaml` file can have any content or be empty, but it must be present.
+
+```yaml
+FROM gcr.io/datadoghq/agent:latest
+VOLUME /etc/datadog-agent
+ADD datadog.yaml /etc/datadog-agent/datadog.yaml
+```
+
+2. Build the container image. Datadog recommends tagging it with the version and type; for example, `docker.io/example/agent:7.62.2-rofs` (**r**ead **o**nly **f**ile **s**ystem).
+3. Reference the image in your task definition, as shown in the example below.
+4. Set `"readonlyRootFilesystem": true` on the Agent container, as shown in the example below.
+
+```yaml
+    "containerDefinitions": [
+        {
+            "name": "datadog-agent",
+            "image": "docker.io/example/agent:7.62.2-rofs",
+            ...
+            "environment": [
+                {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "<API_KEY>"
+                }
+            ]
+            "readonlyRootFilesystem": true
+        },
+        {
+            "name": "example-app-container",
+            "image": "example-image",
+            ...
+        }
+    ]
+```
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Mount an empty volume on the Agent container" xxx -->
+If you cannot build a custom Agent image, you can follow the steps below to add an empty volume dynamically to the Agent. 
+
+<div class="alert alert-warning">
+This configuration deletes all the preexisting files in the <code>/etc/datadog-agent</code> folder, including:<br /> 
+- All the Autodiscovery config files (<code><INTEGRATION>/auto_conf.yaml</code>)<br /> 
+- JMX <code>metrics.yaml</code> files<br />
+- The main ECS Fargate <code>/etc/datadog-agent/conf.d/ecs_fargate.d/conf.yaml.default</code> file<br /><br /> 
+As such, you must set up the integration with Autodiscovery Docker labels on the Datadog Agent container. This requires setting the <code>ignore_autodiscovery_tag: true</code> flag in the configuration. Otherwise, metrics from the app container are double-tagged with the Agent container's tags.
+</div>
+
+1. Create an empty volume for the Agent container to use. In the example below, this is named `agent_conf`.
+2. Add this volume to the Agent's task definition.
+3. Set `"readonlyRootFilesystem": "true"` on the Agent container.
+4. Add `dockerLabels` to have the Agent start the `ecs_fargate` check manually.
+
+The example below displays this configuration:
+
+```yaml
+    "containerDefinitions": [
+        {
+            "name": "datadog-agent",
+            "image": "public.ecr.aws/datadog/agent:latest",
+            ...
+            "environment": [
+                {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "<API_KEY>"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "agent_conf",
+                    "containerPath": "/etc/datadog-agent",
+                    "readOnly": false
+                }
+            ],
+            "readonlyRootFilesystem": true,
+            "dockerLabels": {
+                "com.datadoghq.ad.checks": "{\"ecs_fargate\":{\"ignore_autodiscovery_tags\":true,\"instances\":[{}]}}"
+            }
+        },
+        {
+            "name": "example-app-container",
+            "image": "example-image",
+            ...
+        }
+    ],
+    "volumes": [
+        {
+            "name": "agent_conf",
+            "host": {}
+        }
+    ]
+```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 Need help? Contact [Datadog support][18].
 
@@ -1255,3 +1450,4 @@ Need help? Contact [Datadog support][18].
 [72]: https://github.com/datadog/datadog-cdk-constructs/
 [73]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
 [74]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest/submodules/ecs_fargate
+[75]: https://docs.datadoghq.com/infrastructure/containers/amazon_elastic_container_explorer

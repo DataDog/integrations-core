@@ -11,7 +11,6 @@ from .common import METRICS, OPTIONAL_METRICS
 
 @pytest.mark.e2e
 def test(dd_agent_check):
-
     instance = {}
     aggregator = dd_agent_check(instance, rate=True)
 

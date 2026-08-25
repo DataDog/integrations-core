@@ -1,12 +1,12 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 impl = ["legacy"]
 version = ["1.9"]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = ["1.9", "1.10", "1.11"]
 
 [envs.default.env-vars]

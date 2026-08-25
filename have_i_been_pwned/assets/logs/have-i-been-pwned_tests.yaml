@@ -1,0 +1,62 @@
+id: "have-i-been-pwned"
+tests:
+ -
+  sample: |-
+    {
+      "LogoPath" : "https://logos.haveibeenpwned.com/List.png",
+      "Description" : "Description here...",
+      "IsSpamList" : false,
+      "user_details" : {
+        "user_name" : "john.munro",
+        "email_domain" : "example.com",
+        "hash_id" : "10"
+      },
+      "IsSensitive" : false,
+      "IsRetired" : false,
+      "Title" : "Operation Endgame 2.0",
+      "IsStealerLog" : false,
+      "ModifiedDate" : "2025-05-25T21:41:13Z",
+      "Name" : "OperationEndgame2",
+      "IsFabricated" : false,
+      "AddedDate" : "2025-05-23T20:47:34Z",
+      "IsMalware" : true,
+      "PwnCount" : 15436844,
+      "BreachDate" : "2025-05-23",
+      "IsVerified" : true,
+      "IsSubscriptionFree" : true,
+      "Domain" : "xyz",
+      "DataClasses" : [ "Email addresses", "Passwords" ]
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      AddedDate: "2025-05-23T20:47:34Z"
+      BreachDate: "2025-05-23"
+      DataClasses:
+       - "Email addresses"
+       - "Passwords"
+      Domain: "xyz"
+      IsFabricated: false
+      IsMalware: true
+      IsRetired: false
+      IsSensitive: false
+      IsSpamList: false
+      IsStealerLog: false
+      IsSubscriptionFree: true
+      IsVerified: true
+      LogoPath: "https://logos.haveibeenpwned.com/List.png"
+      ModifiedDate: "2025-05-25T21:41:13Z"
+      Name: "OperationEndgame2"
+      PwnCount: 15436844
+      Title: "Operation Endgame 2.0"
+      user_details:
+        email_domain: "example.com"
+        hash_id: "10"
+      usr:
+        email: "john.munro@example.com"
+        name: "john.munro"
+    message: "Description here..."
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"

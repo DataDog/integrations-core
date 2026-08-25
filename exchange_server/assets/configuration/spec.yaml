@@ -1,4 +1,5 @@
 name: Exchange Server
+fleet_configurable: true
 files:
 - name: exchange_server.yaml
   options:

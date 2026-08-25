@@ -1,0 +1,55 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+hugging_face_tgi.batch.concat.count,count,,,,Number of batch concatenates,0,hugging_face_tgi,concat count,,reason:chunking
+hugging_face_tgi.batch.concat.duration.bucket,count,,,,Batch concatenation duration distribution,0,hugging_face_tgi,concat duration bucket,,upper_bound:1.0
+hugging_face_tgi.batch.concat.duration.count,count,,,,Number of batch concatenation duration measurements,0,hugging_face_tgi,concat duration count,,
+hugging_face_tgi.batch.concat.duration.sum,count,,second,,Total batch concatenation duration,0,hugging_face_tgi,concat duration sum,,
+hugging_face_tgi.batch.current.max_tokens,gauge,,token,,Maximum tokens the current batch will grow to,0,hugging_face_tgi,current max tokens,,
+hugging_face_tgi.batch.current.size,gauge,,request,,Current batch size,0,hugging_face_tgi,current size,,
+hugging_face_tgi.batch.decode.duration.bucket,count,,,,Batch decode duration distribution,0,hugging_face_tgi,decode duration bucket,,"upper_bound:1.0,method:decode"
+hugging_face_tgi.batch.decode.duration.count,count,,,,Number of batch decode duration measurements,0,hugging_face_tgi,decode duration count,,method:decode
+hugging_face_tgi.batch.decode.duration.sum,count,,second,,Total batch decode duration,0,hugging_face_tgi,decode duration sum,,method:decode
+hugging_face_tgi.batch.filter.duration.bucket,count,,,,Batch filtering duration distribution,0,hugging_face_tgi,filter duration bucket,,"upper_bound:1.0,method:decode"
+hugging_face_tgi.batch.filter.duration.count,count,,,,Number of batch filter duration measurements,0,hugging_face_tgi,filter duration count,,method:decode
+hugging_face_tgi.batch.filter.duration.sum,count,,second,,Total batch filter duration,0,hugging_face_tgi,filter duration sum,,method:decode
+hugging_face_tgi.batch.forward.duration.bucket,count,,,,Batch forward duration distribution,0,hugging_face_tgi,forward duration bucket,,"upper_bound:1.0,method:prefill"
+hugging_face_tgi.batch.forward.duration.count,count,,,,Number of batch forward duration measurements,0,hugging_face_tgi,forward duration count,,method:prefill
+hugging_face_tgi.batch.forward.duration.sum,count,,second,,Total batch forward duration,0,hugging_face_tgi,forward duration sum,,method:prefill
+hugging_face_tgi.batch.inference.count,count,,,,Total number of batch inferences,0,hugging_face_tgi,inference count,,method:prefill
+hugging_face_tgi.batch.inference.duration.bucket,count,,,,Batch inference duration distribution,0,hugging_face_tgi,inference duration bucket,,"upper_bound:1.0,method:decode"
+hugging_face_tgi.batch.inference.duration.count,count,,,,Number of batch inference duration measurements,0,hugging_face_tgi,inference duration count,,method:decode
+hugging_face_tgi.batch.inference.duration.sum,count,,second,,Total batch inference duration,0,hugging_face_tgi,inference duration sum,,method:decode
+hugging_face_tgi.batch.inference.success.count,count,,,,Number of successful batch inferences,0,hugging_face_tgi,inference success,,method:prefill
+hugging_face_tgi.batch.next.size.bucket,count,,,,Next batch size distribution,0,hugging_face_tgi,next size bucket,,upper_bound:1.0
+hugging_face_tgi.batch.next.size.count,count,,,,Number of next batch size measurements,0,hugging_face_tgi,next size count,,
+hugging_face_tgi.batch.next.size.sum,count,,request,,Total next batch size,0,hugging_face_tgi,next size sum,,
+hugging_face_tgi.queue.size,gauge,,request,,Number of requests waiting in the internal queue,0,hugging_face_tgi,queue size,,
+hugging_face_tgi.request.count,count,,request,,Total number of requests received,0,hugging_face_tgi,request count,,
+hugging_face_tgi.request.duration.bucket,count,,,,Request duration distribution,0,hugging_face_tgi,request duration bucket,,upper_bound:1.0
+hugging_face_tgi.request.duration.count,count,,,,Number of request duration measurements,0,hugging_face_tgi,request duration count,,
+hugging_face_tgi.request.duration.sum,count,,second,,Total request duration,0,hugging_face_tgi,request duration sum,,
+hugging_face_tgi.request.failure.count,count,,request,,Number of failed requests,0,hugging_face_tgi,request failure,,error_type:validation
+hugging_face_tgi.request.generated_tokens.bucket,count,,,,Generated tokens per request distribution,0,hugging_face_tgi,generated tokens bucket,,upper_bound:1.0
+hugging_face_tgi.request.generated_tokens.count,count,,,,Number of generated token measurements,0,hugging_face_tgi,generated tokens count,,
+hugging_face_tgi.request.generated_tokens.sum,count,,token,,Total generated tokens,0,hugging_face_tgi,generated tokens sum,,
+hugging_face_tgi.request.inference.duration.bucket,count,,,,Request inference duration distribution,0,hugging_face_tgi,inference duration bucket,,upper_bound:1.0
+hugging_face_tgi.request.inference.duration.count,count,,,,Number of request inference duration measurements,0,hugging_face_tgi,inference duration count,,
+hugging_face_tgi.request.inference.duration.sum,count,,second,,Total request inference duration,0,hugging_face_tgi,inference duration sum,,
+hugging_face_tgi.request.input_length.bucket,count,,,,Input token length per request distribution,0,hugging_face_tgi,input length bucket,,upper_bound:1.0
+hugging_face_tgi.request.input_length.count,count,,,,Number of input length measurements,0,hugging_face_tgi,input length count,,
+hugging_face_tgi.request.input_length.sum,count,,token,,Total input length,0,hugging_face_tgi,input length sum,,
+hugging_face_tgi.request.max_new_tokens.bucket,count,,,,Maximum new tokens per request distribution,0,hugging_face_tgi,max new tokens bucket,,upper_bound:1.0
+hugging_face_tgi.request.max_new_tokens.count,count,,,,Number of max new tokens measurements,0,hugging_face_tgi,max new tokens count,,
+hugging_face_tgi.request.max_new_tokens.sum,count,,token,,Total max new tokens,0,hugging_face_tgi,max new tokens sum,,
+hugging_face_tgi.request.mean_time_per_token.duration.bucket,count,,,,Mean time per token duration distribution,0,hugging_face_tgi,mean time per token bucket,,upper_bound:1.0
+hugging_face_tgi.request.mean_time_per_token.duration.count,count,,,,Number of mean time per token measurements,0,hugging_face_tgi,mean time per token count,,
+hugging_face_tgi.request.mean_time_per_token.duration.sum,count,,second,,Total mean time per token duration,0,hugging_face_tgi,mean time per token sum,,
+hugging_face_tgi.request.queue.duration.bucket,count,,,,Request queue duration distribution,0,hugging_face_tgi,queue duration bucket,,upper_bound:1.0
+hugging_face_tgi.request.queue.duration.count,count,,,,Number of request queue duration measurements,0,hugging_face_tgi,queue duration count,,
+hugging_face_tgi.request.queue.duration.sum,count,,second,,Total request queue duration,0,hugging_face_tgi,queue duration sum,,
+hugging_face_tgi.request.skipped_tokens.count,count,,,,Number of skipped token measurements,0,hugging_face_tgi,skipped tokens count,,
+hugging_face_tgi.request.skipped_tokens.quantile,gauge,,token,,Skipped tokens per request quantile,0,hugging_face_tgi,skipped tokens quantile,,quantile:0.5
+hugging_face_tgi.request.skipped_tokens.sum,count,,token,,Total skipped tokens,0,hugging_face_tgi,skipped tokens sum,,
+hugging_face_tgi.request.success.count,count,,request,,Number of successful requests,0,hugging_face_tgi,request success,,
+hugging_face_tgi.request.validation.duration.bucket,count,,,,Request validation duration distribution,0,hugging_face_tgi,validation duration bucket,,upper_bound:1.0
+hugging_face_tgi.request.validation.duration.count,count,,,,Number of request validation duration measurements,0,hugging_face_tgi,validation duration count,,
+hugging_face_tgi.request.validation.duration.sum,count,,second,,Total request validation duration,0,hugging_face_tgi,validation duration sum,,

@@ -8,13 +8,20 @@ import click
 import markdown
 from bs4 import BeautifulSoup
 
-from ....fs import chdir, create_file
-from ....subprocess import run_command
-from ....utils import download_file
-from ...constants import get_root
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_readme_file, read_readme_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_display_queue, echo_failure, echo_info, echo_success
+from datadog_checks.dev.fs import chdir, create_file
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_readme_file, read_readme_file
+from datadog_checks.dev.utils import download_file
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
 

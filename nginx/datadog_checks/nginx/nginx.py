@@ -300,7 +300,7 @@ class Nginx(AgentCheck):
 
             self.log.debug("Nginx version `server`: %s", version)
         else:
-            self.log.debug(u"could not retrieve nginx version info")
+            self.log.debug("could not retrieve nginx version info")
 
     @classmethod
     def parse_text(cls, raw, tags=None):
@@ -309,13 +309,13 @@ class Nginx(AgentCheck):
         if tags is None:
             tags = []
         output = []
-        parsed = re.search(br'Active connections:\s+(\d+)', raw)
+        parsed = re.search(rb'Active connections:\s+(\d+)', raw)
         if parsed:
             connections = int(parsed.group(1))
             output.append(('nginx.net.connections', connections, tags, 'gauge'))
 
         # Requests per second
-        parsed = re.search(br'\s*(\d+)\s+(\d+)\s+(\d+)', raw)
+        parsed = re.search(rb'\s*(\d+)\s+(\d+)\s+(\d+)', raw)
         if parsed:
             conn = int(parsed.group(1))
             handled = int(parsed.group(2))
@@ -329,7 +329,7 @@ class Nginx(AgentCheck):
             )
 
         # Connection states, reading, writing or waiting for clients
-        parsed = re.search(br'Reading: (\d+)\s+Writing: (\d+)\s+Waiting: (\d+)', raw)
+        parsed = re.search(rb'Reading: (\d+)\s+Writing: (\d+)\s+Waiting: (\d+)', raw)
         if parsed:
             reading, writing, waiting = parsed.groups()
             output.extend(

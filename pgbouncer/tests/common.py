@@ -14,6 +14,7 @@ PASS = 'd@tadog'
 DB = 'datadog_test'
 
 DEFAULT_INSTANCE = {'host': HOST, 'port': PORT, 'username': USER, 'password': PASS, 'tags': ['optional:tag1']}
+INSTANCE_NO_PASS = {'host': 'localhost', 'port': PORT, 'username': USER, 'tags': ['optional:tag1']}
 
 INSTANCE_URL = {
     'database_url': 'postgresql://{}:d%40tadog@{}:{}/pgbouncer'.format(USER, HOST, PORT),

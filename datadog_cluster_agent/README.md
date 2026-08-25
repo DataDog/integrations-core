@@ -4,6 +4,8 @@
 
 This check monitors the [Datadog Cluster Agent][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.30.2
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.

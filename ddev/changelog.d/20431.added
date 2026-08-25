@@ -1,2 +1,0 @@
-- Adds the required logic to upload historical size metrics to a specified Datadog organization.
-- Updates the CI pipeline to send metrics to Datadog on pushes to the master branch. Note that the metrics may not be fully accurate yet, as dependency sizes could be outdated since the lockfile updates are handled in a separate PR.

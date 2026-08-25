@@ -1,0 +1,9 @@
+{
+  "jobId": "fail:001",
+  "numberOfRuns": 1,
+  "ctm": "srv1",
+  "name": "fail_job",
+  "folder": "nightly",
+  "type": "Command",
+  "status": "Ended Not OK"
+}

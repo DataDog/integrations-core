@@ -37,19 +37,19 @@ def instance():
 
 @pytest.fixture
 def mocked_request():
-    with patch('requests.get', new=requests_get_mock):
+    with patch('requests.Session.get', new=requests_get_mock):
         yield
 
 
 @pytest.fixture
 def mocked_metadata_request():
-    with patch('requests.get', new=requests_metadata_mock):
+    with patch('requests.Session.get', new=requests_metadata_mock):
         yield
 
 
 @pytest.fixture
 def mocked_auth_request():
-    with patch('requests.get', new=requests_auth_mock):
+    with patch('requests.Session.get', new=requests_auth_mock):
         yield
 
 

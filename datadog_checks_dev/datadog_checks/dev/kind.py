@@ -1,8 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from contextlib import contextmanager
+from dataclasses import dataclass
 from shutil import which
+from typing import Any, Callable, ContextManager, Protocol, runtime_checkable
 
 import pytest
 
@@ -13,36 +17,48 @@ from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
 
 
+def _setup_conditions(conditions: list[Callable[[], Any]] | None, cluster_config: ClusterConfig):
+    if not conditions:
+        return
+
+    for condition in conditions:
+        if isinstance(condition, ClusterCondition):
+            condition.add_cluster_info(cluster_config)
+
+
+@dataclass
+class ClusterConfig:
+    cluster_name: str
+
+
+@runtime_checkable
+class ClusterCondition(Protocol):
+    def add_cluster_info(self, cluster_config: ClusterConfig): ...
+
+
 @contextmanager
 def kind_run(
-    sleep=None,
-    endpoints=None,
-    conditions=None,
-    env_vars=None,
-    wrappers=None,
-    kind_config=None,
-    attempts=None,
-    attempts_wait=1,
+    sleep: float | None = None,
+    endpoints: str | list[str] | None = None,
+    conditions: list[Callable[[], Any]] | None = None,
+    env_vars: dict[str, str] | None = None,
+    wrappers: list[ContextManager] | None = None,
+    kind_config: str | None = None,
+    attempts: int | None = None,
+    attempts_wait: int = 1,
 ):
     """
     This utility provides a convenient way to safely set up and tear down Kind environments.
 
     :param sleep: Number of seconds to wait before yielding.
-    :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
                       ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
-    :type endpoints: ``list`` of ``str``, or a single ``str``
     :param conditions: A list of callable objects that will be executed before yielding to check for errors.
-    :type conditions: ``callable``
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
-    :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
     :param kind_config: A path to a yaml file that contains the configuration for creating the kind cluster.
-    :type kind_config: ``str``
     :param attempts: Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI.
-    :type attempts: ``int``
     :param attempts_wait: Time to wait between attempts.
-    :type attempts_wait: ``int``
     """
     if not which('kind'):
         pytest.skip('Kind not available')
@@ -63,6 +79,8 @@ def kind_run(
             set_up = KindUp(cluster_name, kind_config)
             tear_down = KindDown(cluster_name)
 
+            _setup_conditions(conditions, ClusterConfig(cluster_name))
+
             with environment_run(
                 up=set_up,
                 down=tear_down,
@@ -82,7 +100,7 @@ class KindUp(LazyFunction):
     `kind create cluster --name <integration>-cluster`
     """
 
-    def __init__(self, cluster_name, kind_config):
+    def __init__(self, cluster_name: str, kind_config: str | None):
         self.cluster_name = cluster_name
         self.kind_config = kind_config
 
@@ -100,8 +118,35 @@ class KindUp(LazyFunction):
 class KindDown(LazyFunction):
     """Delete the kind cluster, calling `delete cluster`."""
 
-    def __init__(self, cluster_name):
+    def __init__(self, cluster_name: str):
         self.cluster_name = cluster_name
 
     def __call__(self):
         run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)
+
+
+class KindLoad(LazyFunction):
+    """Condition for loading Docker images into a Kind cluster.
+
+    This condition should be passed to the conditions argument in environment_run
+    to load images into the Kind cluster after it's created.
+
+    Example:
+        with kind_run(conditions=[KindLoad("my-image:latest")]):
+            # The image is now loaded in the kind cluster
+            pass
+    """
+
+    def __init__(self, image: str):
+        self.image = image
+        self.cluster_name: str | None = None
+
+    def __call__(self):
+        if self.cluster_name is None:
+            raise RuntimeError("cluster_name must be set before calling KindLoad")
+
+        load_cmd = ['kind', 'load', 'docker-image', self.image, '--name', self.cluster_name]
+        run_command(load_cmd, check=True)
+
+    def add_cluster_info(self, cluster_config: ClusterConfig):
+        self.cluster_name = cluster_config.cluster_name

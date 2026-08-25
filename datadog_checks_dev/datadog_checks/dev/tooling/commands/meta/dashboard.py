@@ -8,10 +8,10 @@ import re
 import click
 import requests
 
-from ....fs import ensure_dir_exists, path_join, write_file
-from ...manifest_utils import Manifest
-from ...utils import get_valid_integrations, write_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_success
+from datadog_checks.dev.fs import ensure_dir_exists, path_join, write_file
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_success
+from datadog_checks.dev.tooling.manifest_utils import Manifest
+from datadog_checks.dev.tooling.utils import get_valid_integrations, write_manifest
 
 BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)'
 DASHBOARD_API = 'https://api.{site}/api/v1/dashboard/{board_id}'

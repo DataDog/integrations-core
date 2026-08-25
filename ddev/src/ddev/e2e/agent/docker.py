@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import os
-import re
 import sys
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from functools import cache, cached_property, partial
@@ -12,6 +11,7 @@ from typing import TYPE_CHECKING, Callable, Type
 
 import stamina
 
+from ddev.e2e.agent.image import normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
 from ddev.utils.structures import EnvVars
 
@@ -20,7 +20,11 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
-AGENT_VERSION_REGEX = r'^datadog/agent:\d+(?:$|\.(\d+\.\d(?:$|-jmx$)|$))'
+# The Agent image pins its apt mirror to a single cloud region. When the host runs in a different
+# cloud, package downloads crawl (~40 kB/s versus ~8 MB/s in CI), which is slow enough for
+# `start_commands` to exhaust the job timeout. Point apt at the generic archive instead.
+APT_MIRRORLIST_FILE = '/etc/apt/mirrorlist.main'
+APT_MIRROR = 'http://archive.ubuntu.com/ubuntu'
 
 
 @contextmanager
@@ -38,6 +42,8 @@ def disable_integration_before_install(config_file):
 
 
 class DockerAgent(AgentInterface):
+    build_config_key = 'docker'
+
     @cached_property
     def _isatty(self) -> bool:
         isatty: Callable[[], bool] | None = getattr(sys.stdout, 'isatty', None)
@@ -77,10 +83,12 @@ class DockerAgent(AgentInterface):
             else f'/opt/datadog-agent/embedded/bin/python{self.python_version[0]}'
         )
 
-    def _format_command(self, command: list[str]) -> list[str]:
+    def _format_command(self, command: list[str], *, env_vars: dict[str, str] | None = None) -> list[str]:
         cmd = ['docker', 'exec']
         if self._isatty:
             cmd.append('-it')
+        for key, value in (env_vars or {}).items():
+            cmd.extend(['-e', f'{key}={value}'])
         cmd.append(self._container_name)
 
         if command[0] == 'pip':
@@ -99,30 +107,62 @@ class DockerAgent(AgentInterface):
         with EnvVars({'DOCKER_CLI_HINTS': 'false'}):
             return self.platform.run_command(command, **kwargs)
 
-    def _show_logs(self) -> None:
-        self._run_command(['docker', 'logs', self._container_name])
+    def _execute_lifecycle_command(
+        self, command: list[str], start_message: str, end_message_prefix: str, error_message: str
+    ) -> None:
+        """
+        Execute a lifecycle command and display status messages.
+
+        :param command: The command to execute.
+        :param start_message: The message to display before the command starts.
+        :param end_message_prefix: The prefix for the message displayed after the command finishes.
+                                   The full message will be "{prefix} {status} (code: {code})".
+        :param error_message: The error message to raise if the command fails.
+        """
+        self.app.display_header(start_message)
+        process = self._run_command(command)
+        return_code = process.returncode
+
+        text_style = self.app._style_level_error if return_code else self.app._style_level_success
+        status_text = 'failed' if return_code else 'succeeded'
+        self.app.display_header(
+            f'{end_message_prefix} {status_text} (code: {return_code})',
+            text_style=text_style,
+            characters='.',
+        )
+
+        if return_code:
+            self._show_logs()
+            raise RuntimeError(error_message)
+
+    def _reset_apt_mirror(self) -> None:
+        """
+        Replace the Agent image's region-pinned apt mirror with the generic Ubuntu archive.
+
+        Best effort: images that ship no mirrorlist are left untouched and failures are ignored,
+        since this only affects how fast packages download.
+        """
+        self._captured_process(
+            self._format_command(
+                ['sh', '-c', f'test -f {APT_MIRRORLIST_FILE} && echo {APT_MIRROR} > {APT_MIRRORLIST_FILE}']
+            )
+        )
+
+    def _show_logs(self, *, check: bool = False) -> None:
+        self._run_command(['docker', 'logs', self._container_name], check=check)
+
+    def show_logs(self) -> None:
+        self._show_logs(check=True)
 
     def get_id(self) -> str:
         return self._container_name
 
-    def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
+    def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         from ddev.e2e.agent.constants import AgentEnvVars
 
-        if not agent_build:
-            agent_build = 'datadog/agent-dev:master'
-
-        if agent_build.startswith("datadog/"):
-            # Add a potentially missing `py` suffix for default non-RC builds
-            if (
-                'rc' not in agent_build
-                and 'py' not in agent_build
-                and 'fips' not in agent_build
-                and not re.match(AGENT_VERSION_REGEX, agent_build)
-            ):
-                agent_build = f'{agent_build}-py{self.python_version[0]}'
-
-            if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
-                agent_build += '-jmx'
+        agent_build = normalize_agent_image_name(
+            agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
+        )
 
         env_vars = env_vars.copy()
 
@@ -137,12 +177,12 @@ class DockerAgent(AgentInterface):
         # Run API on a random free port
         env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
 
-        # Disable trace Agent
-        env_vars[AgentEnvVars.APM_ENABLED] = 'false'
+        # Disable trace Agent by default (can be overridden by user-provided env_vars)
+        env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
 
         # Set up telemetry
-        env_vars[AgentEnvVars.TELEMETRY_ENABLED] = '1'
-        env_vars[AgentEnvVars.EXPVAR_PORT] = '5000'
+        env_vars.setdefault(AgentEnvVars.TELEMETRY_ENABLED, '1')
+        env_vars.setdefault(AgentEnvVars.EXPVAR_PORT, '5000')
 
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
@@ -215,6 +255,9 @@ class DockerAgent(AgentInterface):
         for key, value in sorted(env_vars.items()):
             command.extend(['-e', f'{key}={value}'])
 
+        for cap in self.metadata.get('cap_add', []):
+            command.extend(['--cap-add', cap])
+
         # The docker `--add-host` command will reliably create entries in the `/etc/hosts` file,
         # otherwise, edits to that file will be overwritten on container restarts
         for host, ip in self.metadata.get('custom_hosts', []):
@@ -241,13 +284,18 @@ class DockerAgent(AgentInterface):
                 f'Unable to start Agent container `{self._container_name}`: {process.stdout.decode("utf-8")}'
             )
 
+        if not self._is_windows_container and (start_commands or post_install_commands):
+            self._reset_apt_mirror()
+
         if start_commands:
             for start_command in start_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(start_command))
-                process = self._run_command(formatted_command)
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(f'Unable to run start-up command in Agent container `{self._container_name}`')
+                self._execute_lifecycle_command(
+                    formatted_command,
+                    f'Running start-up command: {start_command}',
+                    'Start-up command',
+                    f'Unable to run start-up command in Agent container `{self._container_name}`\n',
+                )
 
         if local_packages:
             base_pip_command = self._format_command(
@@ -255,33 +303,33 @@ class DockerAgent(AgentInterface):
             )
             for local_package, features in local_packages.items():
                 package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
-                process = self._run_command([*base_pip_command, package_mount])
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(
-                        f'Unable to install package `{local_package.name}` in Agent container '
-                        f'`{self._container_name}`'
-                    )
+                self._execute_lifecycle_command(
+                    [*base_pip_command, package_mount],
+                    f'Installing local package: {local_package.name}{features}',
+                    'Package installation',
+                    f'Unable to install package `{local_package.name}` in Agent container `{self._container_name}`',
+                )
 
         if post_install_commands:
             for post_install_command in post_install_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(post_install_command))
-                process = self._run_command(formatted_command)
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(
-                        f'Unable to run post-install command in Agent container `{self._container_name}`'
-                    )
+                self._execute_lifecycle_command(
+                    formatted_command,
+                    f'Running post-install command: {post_install_command}',
+                    'Post-install command',
+                    f'Unable to run post-install command in Agent container `{self._container_name}`',
+                )
 
     def stop(self) -> None:
-        stop_commands = self.metadata.get('stop_commands', [])
-        if stop_commands:
+        if stop_commands := self.metadata.get('stop_commands', []):
             for stop_command in stop_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(stop_command))
-                process = self._run_command(formatted_command)
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(f'Unable to run stop command in Agent container `{self._container_name}`')
+                self._execute_lifecycle_command(
+                    formatted_command,
+                    f'Running stop command: {stop_command}',
+                    'Stop command',
+                    f'Unable to run stop command in Agent container `{self._container_name}`',
+                )
 
         for command in (
             ['docker', 'stop', '-t', '0', self._container_name],
@@ -302,11 +350,11 @@ class DockerAgent(AgentInterface):
                 f'Unable to restart Agent container `{self._container_name}`: {process.stdout.decode("utf-8")}'
             )
 
-    def invoke(self, args: list[str]) -> None:
-        self.run_command(['agent', *args])
+    def invoke(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
+        self.run_command(['agent', *args], env_vars=env_vars)
 
-    def run_command(self, args: list[str]) -> None:
-        self._run_command(self._format_command([*args]), check=True)
+    def run_command(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
+        self._run_command(self._format_command([*args], env_vars=env_vars), check=True)
 
     def enter_shell(self) -> None:
         self._run_command(self._format_command(['cmd' if self._is_windows_container else 'bash']), check=True)

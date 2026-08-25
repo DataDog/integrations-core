@@ -1,0 +1,15 @@
+http.bar.ext_proc.streams_started: 0
+http.bar.ext_proc.stream_msgs_sent: 1
+http.bar.ext_proc.stream_msgs_received: 2
+http.bar.ext_proc.spurious_msgs_received: 3
+http.bar.ext_proc.streams_closed: 4
+http.bar.ext_proc.streams_failed: 5
+http.bar.ext_proc.failure_mode_allowed: 6
+http.bar.ext_proc.message_timeouts: 7
+http.bar.ext_proc.rejected_header_mutations: 8
+http.bar.ext_proc.override_message_timeout_received: 9
+http.bar.ext_proc.override_message_timeout_ignored: 10
+http.bar.ext_proc.clear_route_cache_ignored: 11
+http.bar.ext_proc.clear_route_cache_disabled: 12
+http.bar.ext_proc.clear_route_cache_upstream_ignored: 13
+http.bar.ext_proc.send_immediate_resp_upstream_ignored: 14

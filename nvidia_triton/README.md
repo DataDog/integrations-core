@@ -4,6 +4,8 @@
 
 This check monitors [Nvidia Triton][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.50.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -103,7 +105,6 @@ The Nvidia Triton integration can collect logs from the Nvidia Triton server and
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
 Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
-
 
 **Annotations v1/v2**
 

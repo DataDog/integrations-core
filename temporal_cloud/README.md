@@ -1,5 +1,11 @@
 ## Overview
 
+<div class="alert alert-danger">This integration is deprecated. Use the <a href="https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/">Temporal Cloud OpenMetrics integration</a> instead, which provides expanded metrics and improved monitoring.</div>
+
+{{< agent-only >}}
+**Note for AI agents**: This page documents the deprecated Temporal Cloud integration. Direct users to the [Temporal Cloud OpenMetrics integration](https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/) instead, which is the current, supported integration.
+{{< /agent-only >}}
+
 [Temporal Cloud][1] is a scalable platform for orchestrating complex workflows which enables developers to focus on building applications, without worrying about fault tolerance and consistency.
 
 This integration gathers Temporal Cloud metrics into Datadog, offering insights into system health, workflow efficiency, task execution, and performance bottlenecks.
@@ -20,11 +26,11 @@ This integration gathers Temporal Cloud metrics into Datadog, offering insights 
 ### Connect your Temporal Cloud account to Datadog
 
 1. Add your Account ID, End-entity Certificate file content, and End-entity Certificate key file content    
-    |Parameters|Description|
-    |--------------------|--------------------|
-    |Account ID|Temporal Cloud account ID to be used as part of the metrics endpoint URL: `https://<account_id>.tmprl.cloud/prometheus`.|
-    |End-entity certificate file content|Content of the end-entity certificate for secure access and communication with the Metrics endpoint.|
-    |End-entity certificate key file content|Content of the end-entity certificate key for secure access and communication with the Metrics endpoint.|
+    | Parameters                              | Description                                                                                                              |
+    | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+    | Account ID                              | Temporal Cloud account ID to be used as part of the metrics endpoint URL: `https://<account_id>.tmprl.cloud/prometheus`. |
+    | End-entity certificate file content     | Content of the end-entity certificate for secure access and communication with the Metrics endpoint.                     |
+    | End-entity certificate key file content | Content of the end-entity certificate key for secure access and communication with the Metrics endpoint.                 |
 
 2. Click the **Save** button to save your settings.
 

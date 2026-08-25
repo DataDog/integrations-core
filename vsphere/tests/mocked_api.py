@@ -193,10 +193,10 @@ class MockResponse(Response):
         return self.json_data
 
 
-def mock_http_rest_api_v6(method, url, *args, **kwargs):
+def mock_http_rest_api_v6(self, method, url, **kwargs):
     if '/api/' in url:
         return MockResponse({}, 404)
-    if method == 'get':
+    if method.lower() == 'get':
         if re.match(r'.*/category/id:.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
@@ -227,7 +227,7 @@ def mock_http_rest_api_v6(method, url, *args, **kwargs):
                 },
                 200,
             )
-    elif method == 'post':
+    elif method.lower() == 'post':
         assert kwargs['headers']['Content-Type'] == 'application/json'
         if re.match(r'.*/session$', url):
             return MockResponse(
@@ -248,8 +248,8 @@ def mock_http_rest_api_v6(method, url, *args, **kwargs):
     raise Exception("Rest api mock request not matched: method={}, url={}".format(method, url))
 
 
-def mock_http_rest_api_v7(method, url, *args, **kwargs):
-    if method == 'get':
+def mock_http_rest_api_v7(self, method, url, **kwargs):
+    if method.lower() == 'get':
         if re.match(r'.*/category/.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
@@ -277,7 +277,7 @@ def mock_http_rest_api_v7(method, url, *args, **kwargs):
                 },
                 200,
             )
-    elif method == 'post':
+    elif method.lower() == 'post':
         assert kwargs['headers']['Content-Type'] == 'application/json'
         if re.match(r'.*/session$', url):
             return MockResponse(

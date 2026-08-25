@@ -119,6 +119,33 @@ instances:
     #
     # collect_response_time: true
 
+    ## @param enable_http_outcome_tag - boolean - optional - default: false
+    ## When enabled, the Agent adds the `http_outcome` tag to the `network.http.can_connect`,
+    ## `network.http.cant_connect`, and `network.http.response_time` metrics.
+    ##
+    ## The value is the HTTP status code of the response, such as `http_outcome:200`. When no
+    ## response is received, the value is one of the following instead:
+    ##
+    ##   - `ssl_error`: The TLS connection failed, such as when a certificate cannot be verified.
+    ##   - `timeout`: The request timed out while connecting or while waiting for the response.
+    ##   - `connection_error`: The connection could not be established, such as when there is a
+    ##     refused connection, a DNS failure, or a proxy error.
+    ##   - `socket_error`: A socket error occurred that does not fall into the categories above.
+    ##
+    ## Only `network.http.can_connect` and `network.http.cant_connect` are submitted when no
+    ## response is received, so those are the only metrics where the tag can have a non-numeric
+    ## value. The Agent submits `network.http.response_time` only when a response is received, so
+    ## on that metric the tag is always a status code.
+    ##
+    ## Enabling this option splits each metric into one context per value. Monitors that
+    ## aggregate these metrics without grouping by `http_outcome` evaluate an average across
+    ## those contexts rather than across individual data points, which can change when the
+    ## monitors trigger. Review existing monitors before you enable the option, and use the
+    ## `http.can_connect` service check for binary up or down alerting. Service checks do not
+    ## include the tag.
+    #
+    # enable_http_outcome_tag: false
+
     ## @param check_certificate_expiration - boolean - optional - default: true
     ## The check_certificate_expiration will instruct the check
     ## to create a service check that checks the expiration of the
@@ -267,7 +294,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -290,7 +317,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

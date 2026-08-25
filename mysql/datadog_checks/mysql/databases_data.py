@@ -5,7 +5,7 @@
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
 from collections import defaultdict
@@ -31,7 +31,6 @@ DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
-
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._base_event = base_event
@@ -55,6 +54,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self._columns_count = 0
         self.db_info.clear()
+        self.db_to_tables.clear()
         self.any_tables_found = False
 
     def store_db_infos(self, db_infos):
@@ -116,7 +116,6 @@ def agent_check_getter(self):
 
 
 class DatabasesData:
-
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -132,7 +131,7 @@ class DatabasesData:
         base_event = {
             "host": None,
             "agent_version": datadog_agent.get_version(),
-            "dbms": "mysql",
+            "dbms": self._check.dbms,
             "kind": "mysql_databases",
             "collection_interval": collection_interval,
             "dbms_version": None,
@@ -145,15 +144,14 @@ class DatabasesData:
             config.schemas_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
         )
 
-    def shut_down(self):
-        self._data_submitter.submit()
-
     def _cursor_run(self, cursor, query, params=None):
-        """
-        Run and log the query. If provided, obfuscated params are logged in place of the regular params.
-        """
+        """Run the query, log it, and emit a metric on database error."""
+        cancel_event = getattr(self._metadata, '_cancel_event', None)
+        if cancel_event is not None and cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         try:
-            self._log.debug("Running query [{}] params={}".format(query, params))
+            params_repr = "({} params)".format(len(params)) if isinstance(params, list) else params
+            self._log.debug("Running query [{}] params={}".format(query, params_repr))
             cursor.execute(query, params)
         except pymysql.DatabaseError as e:
             self._check.count(
@@ -185,7 +183,7 @@ class DatabasesData:
         self._data_submitter.submit()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_databases_data(self, tags):
+    def collect_databases_data(self, tags):
         """
         Collects database information and schemas and submits them to the agent's queue as dictionaries.
 
@@ -249,22 +247,25 @@ class DatabasesData:
                             - data_length (int): The data length of the partition in bytes. If partition has
                                                  subpartitions, this is the sum of all subpartitions data_length.
         """
-        self._data_submitter.reset()
+        self._data_submitter.reset()  # Ensure we start fresh
         self._tags = tags
-        with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            self._data_submitter.set_base_event_data(
-                self._check.reported_hostname,
-                self._check.database_identifier,
-                self._tags,
-                self._check._config.cloud_metadata,
-                self._check.version.version,
-                self._check.version.flavor,
-            )
-            db_infos = self._query_db_information(cursor)
-            self._data_submitter.store_db_infos(db_infos)
-            self._fetch_for_databases(db_infos, cursor)
-            self._data_submitter.submit()
-            self._log.debug("Finished collect_schemas_data")
+        self._data_submitter.set_base_event_data(
+            self._check.reported_hostname,
+            self._check.database_identifier,
+            self._tags,
+            self._check._config.cloud_metadata,
+            self._check.version.version,
+            self._check.version.flavor,
+        )
+        try:
+            with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+                db_infos = self._query_db_information(cursor)
+                self._data_submitter.store_db_infos(db_infos)
+                self._fetch_for_databases(db_infos, cursor)
+                self._data_submitter.submit()
+        finally:
+            self._data_submitter.reset()  # Ensure we reset in case of errors
+        self._log.debug("Finished collect_databases_data")
 
     def _fetch_for_databases(self, db_infos, cursor):
         start_time = time.time()
@@ -273,14 +274,14 @@ class DatabasesData:
                 self._fetch_database_data(cursor, start_time, db_info['name'])
             except StopIteration as e:
                 self._log.error(
-                    "While executing fetch database data for database {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occurred {}".format(
                         db_info['name'], e
                     )
                 )
                 return
-            except Exception as e:
+            except pymysql.DatabaseError as e:
                 self._log.error(
-                    "While executing fetch database data for database {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occurred {}".format(
                         db_info['name'], e
                     )
                 )
@@ -313,28 +314,36 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):
-
         if len(table_list) == 0:
             return 0, []
 
         table_name_to_table_index = {}
         for i, table in enumerate(table_list):
             table_name_to_table_index[table["name"]] = i
-        table_names = ','.join(f'"{str(table["name"])}"' for table in table_list)
+        table_name_list = [str(table["name"]) for table in table_list]
+        placeholders = ','.join(['%s'] * len(table_name_list))
         total_columns_number = self._populate_with_columns_data(
-            table_name_to_table_index, table_list, table_names, db_name, cursor
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
         )
-        self._populate_with_partitions_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
-        self._populate_with_foreign_keys_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
-        self._populate_with_index_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
+        self._populate_with_partitions_data(
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+        )
+        self._populate_with_foreign_keys_data(
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+        )
+        self._populate_with_index_data(
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+        )
         return total_columns_number, table_list
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
+    def _populate_with_columns_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
         self._cursor_run(
             cursor,
-            query=SQL_COLUMNS.format(table_names),
-            params=db_name,
+            query=SQL_COLUMNS.format(placeholders),
+            params=[db_name] + table_name_list,
         )
         rows = cursor.fetchall()
         for row in rows:
@@ -353,9 +362,11 @@ class DatabasesData:
         return len(rows)
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        query = get_indexes_query(self._check.version, self._check.is_mariadb, table_names)
-        self._cursor_run(cursor, query=query, params=db_name)
+    def _populate_with_index_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
+        query = get_indexes_query(self._check.version, self._check.is_mariadb, placeholders)
+        self._cursor_run(cursor, query=query, params=[db_name] + table_name_list)
         rows = cursor.fetchall()
         if not rows:
             return
@@ -368,7 +379,10 @@ class DatabasesData:
 
             # Update index-level info
             index_data["name"] = index_name
-            index_data["cardinality"] = int(row["cardinality"])
+
+            # in-memory table BTREE indexes have no cardinality apparently, so we default to 0
+            # https://bugs.mysql.com/bug.php?id=58520
+            index_data["cardinality"] = int(row["cardinality"]) if row["cardinality"] is not None else 0
             index_data["index_type"] = str(row["index_type"])
             index_data["non_unique"] = bool(row["non_unique"])
             if row["expression"]:
@@ -390,8 +404,10 @@ class DatabasesData:
             table_list[table_name_to_table_index[table_name]]["indexes"] = list(index_dict.values())
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
+    def _populate_with_foreign_keys_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
+        self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(placeholders), params=[db_name] + table_name_list)
         rows = cursor.fetchall()
         for row in rows:
             table_name = row["table_name"]
@@ -399,8 +415,10 @@ class DatabasesData:
             table_list[table_name_to_table_index[table_name]]["foreign_keys"].append(row)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
+    def _populate_with_partitions_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
+        self._cursor_run(cursor, query=SQL_PARTITION.format(placeholders), params=[db_name] + table_name_list)
         rows = cursor.fetchall()
         if not rows:
             return

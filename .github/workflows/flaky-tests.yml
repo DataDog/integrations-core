@@ -2,6 +2,12 @@ name: Daily Flaky Tests (every 8 hours)
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Skip committing the test-results badge."
+        required: false
+        default: false
+        type: boolean
   schedule:
   # 4 AM, 12 PM, 8 PM UTC
   - cron: "0 4,12,20 * * *"
@@ -19,21 +25,21 @@ jobs:
       repo: core
 
       # Options
-      standard: true
-      # Because -m starts with a dash, 
-      # click (the library used to build the CLI) will 
+      # Because -m starts with a dash,
+      # click (the library used to build the CLI) will
       # interpret it as an option, not as an argument.
-      # To avoid this, using -- syntax, 
-      # which tells the command that everything following it 
+      # To avoid this, using -- syntax,
+      # which tells the command that everything following it
       # should be treated as positional arguments, not options
       pytest-args: '-m flaky'
+      context: "flaky-tests"
     secrets: inherit
 
     permissions:
-       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
-       id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts in test-target.yml
+       id-token: write
 
   publish-test-results:
     needs:
@@ -46,14 +52,8 @@ jobs:
       checks: write # Needed for test-results-master
       contents: write # Needed for test-results-master
       pull-requests: write # Needed for test-results-master
-      
+
     uses: ./.github/workflows/test-results-master.yml
-    secrets: inherit
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
+    with:
+      dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "39640d5e-54be-48ff-abf1-8871499e2fd3",
   "app_id": "kafka",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -74,7 +75,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "kafka": "assets/dashboards/kafka_dashboard.json"
+      "kafka": "assets/dashboards/kafka_dashboard.json",
+      "kafka_kraft": "assets/dashboards/kafka_kraft_dashboard.json"
     },
     "monitors": {
       "Produce latency is high": "assets/monitors/broker_produce_latency.json",

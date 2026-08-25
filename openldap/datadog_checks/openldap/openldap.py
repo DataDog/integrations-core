@@ -12,6 +12,12 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 class OpenLDAP(AgentCheck):
     METRIC_PREFIX = 'openldap'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
+    DEFAULT_SEARCH_SCOPE = ldap3.SUBTREE
+    SEARCH_SCOPE_MAPPING = {
+        "base": ldap3.BASE,
+        "level": ldap3.LEVEL,
+        "subtree": ldap3.SUBTREE,
+    }
 
     SEARCH_BASE = 'cn=Monitor'
     SEARCH_FILTER = '(objectClass=*)'
@@ -155,6 +161,15 @@ class OpenLDAP(AgentCheck):
                 self.log.error("`search_filter` field is required for custom query #%s", name)
                 continue
             attrs = query.get("attributes")
+            search_scope_str = query.get("search_scope", self.DEFAULT_SEARCH_SCOPE).lower()
+            search_scope = self.SEARCH_SCOPE_MAPPING.get(search_scope_str)
+
+            if search_scope is None:
+                self.log.error(
+                    "`search_scope` field needs to be one of 'base', 'level' or 'subtree'. Value provided: '%s'",
+                    search_scope_str,
+                )
+                continue
             if "username" in query:
                 username = query.get("username")
                 password = query.get("password")
@@ -181,7 +196,7 @@ class OpenLDAP(AgentCheck):
 
             try:
                 # Perform the search query
-                conn.search(search_base, search_filter, attributes=attrs)
+                conn.search(search_base, search_filter, search_scope=search_scope, attributes=attrs)
             except ldap3.core.exceptions.LDAPException:
                 self.log.exception("Unable to perform search query for %s", name)
                 continue

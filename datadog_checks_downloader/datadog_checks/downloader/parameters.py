@@ -11,6 +11,7 @@ parameter values, so that in-toto can substitute these parameters in
 order to perform a successful inspection.
 The module is expected to live here.
 """
+
 import os.path
 
 from packaging.utils import canonicalize_name

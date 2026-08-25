@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List, Optional, Tuple  # noqa: F401
 
-from ... import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+
 from .sampler import WMISampler
 from .types import TagQuery, WMIFilter, WMIMetric, WMIObject, WMIProperties  # noqa: F401
 
@@ -68,14 +69,14 @@ class WinWMICheck(AgentCheck):
             target_property = tag_query[3]
         except IndexError:
             self.log.error(
-                u"Wrong `tag_queries` parameter format. " "Please refer to the configuration file for more information."
+                "Wrong `tag_queries` parameter format. Please refer to the configuration file for more information."
             )
             raise
         except TypeError:
             wmi_property = tag_query[0]
             wmi_class = sampler.class_name
             self.log.error(
-                u"Incorrect 'link source property' in `tag_queries` parameter: `%s` is not a property of `%s`",
+                "Incorrect 'link source property' in `tag_queries` parameter: `%s` is not a property of `%s`",
                 wmi_property,
                 wmi_class,
             )
@@ -94,7 +95,7 @@ class WinWMICheck(AgentCheck):
                 message = "multiple results returned (one expected)"
 
             self.log.warning(
-                u"Failed to extract a tag from `tag_queries` parameter: %s. wmi_object=%s - query=%s",
+                "Failed to extract a tag from `tag_queries` parameter: %s. wmi_object=%s - query=%s",
                 message,
                 wmi_obj,
                 tag_query,
@@ -103,20 +104,20 @@ class WinWMICheck(AgentCheck):
 
         if sampler[0][target_property] is None:
             self.log.error(
-                u"Incorrect 'target property' in `tag_queries` parameter: `%s` is empty or is not a property of `%s`",
+                "Incorrect 'target property' in `tag_queries` parameter: `%s` is empty or is not a property of `%s`",
                 target_property,
                 target_class,
             )
             raise TypeError
 
-    def _get_tag_query_tag(self, sampler, wmi_obj, tag_query):
-        # type: (WMISampler, WMIObject, TagQuery) -> str
+    def _get_tag_query_tag(self, sampler, wmi_obj, tag_query, alias):
+        # type: (WMISampler, WMIObject, TagQuery, str) -> str
         """
         Design a query based on the given WMIObject to extract a tag.
 
         Returns: tag or TagQueryUniquenessFailure exception.
         """
-        self.log.debug(u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query)
+        self.log.debug("`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query)
 
         # Extract query information
         target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
@@ -132,13 +133,14 @@ class WinWMICheck(AgentCheck):
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
-        tag = "{tag_name}:{tag_value}".format(tag_name=target_property.lower(), tag_value="_".join(link_value.split()))
+        tag_name = alias.lower()
+        tag = "{tag_name}:{tag_value}".format(tag_name=tag_name, tag_value="_".join(link_value.split()))
 
-        self.log.debug(u"Extracted `tag_queries` tag: '%s'", tag)
+        self.log.debug("Extracted `tag_queries` tag: '%s'", tag)
         return tag
 
-    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags):
-        # type: (WMISampler, str, List[List[str]], List[str]) -> List[WMIMetric]
+    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags, tag_by_aliases, tag_queries_aliases):
+        # type: (WMISampler, str, List[List[str]], List[str], Dict[str, str], List[str]) -> List[WMIMetric]
         """
         Extract and tag metrics from the WMISampler.
 
@@ -154,7 +156,7 @@ class WinWMICheck(AgentCheck):
         """
         if len(wmi_sampler) > 1 and not tag_by:
             raise MissingTagBy(
-                u"WMI query returned multiple rows but no `tag_by` value was given."
+                "WMI query returned multiple rows but no `tag_by` value was given."
                 " class={wmi_class} - properties={wmi_properties} - filters={filters}".format(
                     wmi_class=wmi_sampler.class_name,
                     wmi_properties=wmi_sampler.property_names,
@@ -169,9 +171,9 @@ class WinWMICheck(AgentCheck):
             tags = list(constant_tags) if constant_tags else []
 
             # Tag with `tag_queries` parameter
-            for query in tag_queries:
+            for index, query in enumerate(tag_queries):
                 try:
-                    tags.append(self._get_tag_query_tag(wmi_sampler, wmi_obj, query))
+                    tags.append(self._get_tag_query_tag(wmi_sampler, wmi_obj, query, tag_queries_aliases[index]))
                 except TagQueryUniquenessFailure:
                     continue
 
@@ -192,28 +194,28 @@ class WinWMICheck(AgentCheck):
                     continue
                 # Tag with `tag_by` parameter
                 for t in tag_by.split(','):
-                    t = t.strip()
-                    if wmi_property == t:
+                    if normalized_wmi_property == t:
                         tag_value = str(wmi_value).lower()
                         if tag_queries and tag_value.find("#") > 0:
                             tag_value = tag_value[: tag_value.find("#")]
 
-                        tags.append("{name}:{value}".format(name=t, value=tag_value))
+                        alias = tag_by_aliases.get(t)
+                        tags.append("{name}:{value}".format(name=alias, value=tag_value))
                         continue
 
                 # No metric extraction on 'Name' and properties in tag_by
-                if wmi_property == 'name' or normalized_wmi_property in tag_by.lower():
+                if normalized_wmi_property == 'name' or normalized_wmi_property in tag_by.lower():
                     continue
 
                 try:
                     extracted_metrics.append(WMIMetric(wmi_property, float(wmi_value), tags))
                 except ValueError:
                     self.log.warning(
-                        u"When extracting metrics with WMI, found a non digit value for property '%s'.", wmi_property
+                        "When extracting metrics with WMI, found a non digit value for property '%s'.", wmi_property
                     )
                     continue
                 except TypeError:
-                    self.log.warning(u"When extracting metrics with WMI, found a missing property '%s'", wmi_property)
+                    self.log.warning("When extracting metrics with WMI, found a missing property '%s'", wmi_property)
                     continue
         return extracted_metrics
 
@@ -241,7 +243,7 @@ class WinWMICheck(AgentCheck):
             try:
                 func = getattr(self, metric_type.lower())
             except AttributeError:
-                raise Exception(u"Invalid metric type: {0}".format(metric_type))
+                raise Exception("Invalid metric type: {0}".format(metric_type))
 
             func(metric_name, metric.value, metric.tags)
 
@@ -259,6 +261,7 @@ class WinWMICheck(AgentCheck):
     def get_running_wmi_sampler(self, properties, filters, **kwargs):
         # type: (List[str], List[Dict[str, WMIFilter]], **Any) -> WMISampler
         tag_by = kwargs.pop('tag_by', "")
+
         return self._get_running_wmi_sampler(
             instance_key=None,
             wmi_class=self.wmi_class,
@@ -270,7 +273,7 @@ class WinWMICheck(AgentCheck):
             username=self.username,
             password=self.password,
             tag_by=tag_by,
-            **kwargs
+            **kwargs,
         )
 
     def _get_running_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
@@ -301,6 +304,49 @@ class WinWMICheck(AgentCheck):
             self._wmi_props = (metric_name_by_property, properties)
 
         return self._wmi_props
+
+    def parse_tag_queries_aliases(self, tag_queries):
+        # type: (List[TagQuery]) -> None
+        """
+        Validate tag_queries configuration to ensure aliases are provided when 'AS' is used.
+        return parsed_tag_queries and aliases
+        """
+        aliases = []  # type: list[str]
+        parsed_tag_queries = []  # type: list[TagQuery]
+        for tag_query in tag_queries:
+            if len(tag_query) < 4:
+                continue
+            target_property_str = tag_query[3]
+            property, alias = self.parse_alias(target_property_str)
+            aliases.append(alias)
+            tag_query[3] = property
+            parsed_tag_queries.append(tag_query)
+        return parsed_tag_queries, aliases
+
+    def parse_alias(self, property):
+        # type: (str) -> Tuple[str, Optional[str]]
+        """
+        Parse an alias from a string.
+        """
+        property = property.strip().lower()
+        if ' as ' in property:
+            # Valid format: property AS alias (with spaces around AS)
+            property_split = property.split(' as ')
+            property = property_split[0].strip()
+            alias = property_split[1].strip()
+            self.log.debug("Parsed alias: {%s} for property: {%s}", alias, property)
+            if alias == "":
+                self.log.warning("No alias provided after 'AS' for property: %s. Using property for tag", property)
+                alias = property
+        elif ' as' in property:
+            # Invalid format: AS found but without proper spacing
+            raise InvalidWMIQuery(
+                "Invalid alias syntax in property '{}'. "
+                "Expected format: 'property AS alias' with spaces around 'AS'".format(property)
+            )
+        else:
+            alias = property
+        return property, alias
 
 
 def from_time(

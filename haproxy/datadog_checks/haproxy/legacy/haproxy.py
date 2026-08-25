@@ -19,7 +19,6 @@ from .version_utils import get_version_from_http, get_version_from_socket
 
 
 class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
-
     SHOWTABLE_RE = re.compile(
         r"# table: (?P<name>[^ ,]+), type: (?P<type>[^ ,]+), size:(?P<size>[0-9]+), used:(?P<used>[0-9]+)$"
     )
@@ -38,7 +37,6 @@ class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
 
 
 class HAProxyCheckLegacy(AgentCheck):
-
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 

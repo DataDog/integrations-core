@@ -8,7 +8,9 @@ The Postgres integration provides health and performance metrics for your Postgr
 
 Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
-Postgres versions 9.6-16 are supported.
+Postgres versions 9.6-18 are supported.
+
+**Minimum Agent version:** 6.0.0
 
 ## Setup
 
@@ -172,8 +174,6 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. See the PostgreSQL documentation on[Error Reporting and Logging][7] for more information.
 
 1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`. For regular log results, including statement outputs, uncomment the following parameters in the log section:
@@ -282,8 +282,11 @@ Then, [instrument your application container that makes requests to Postgres][11
 To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
+**Note**: The `<container-name>.check_names` must match the container name where the integration needs to collect metrics. In the example, we are using `postgres.check_names` because the container name is postgres.
 
-Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][14].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][14].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -293,9 +296,9 @@ kind: Pod
 metadata:
   name: postgres
   annotations:
-    ad.datadoghq.com/postgresql.check_names: '["postgres"]'
-    ad.datadoghq.com/postgresql.init_configs: '[{}]'
-    ad.datadoghq.com/postgresql.instances: |
+    ad.datadoghq.com/postgres.check_names: '["postgres"]'
+    ad.datadoghq.com/postgres.init_configs: '[{}]'
+    ad.datadoghq.com/postgres.instances: |
       [
         {
           "host": "%%host%%",
@@ -335,6 +338,32 @@ spec:
   containers:
     - name: postgres
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <POSTGRESQL_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: postgres
+        containerName: postgres
+        initConfig: {}
+        instances:
+          - host: "%%host%%"
+            port: "5432"
+            username: "datadog"
+            password: "<PASSWORD>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 ##### Log collection
 
@@ -520,6 +549,7 @@ Additional helpful documentation, links, and articles:
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [27]: https://docs.datadoghq.com/agent/docker/apm/
-[28]: https://docs.datadoghq.com/database_monitoring/
+[28]: https://docs.datadoghq.com/database_monitoring/setup_postgres/
 [29]: https://docs.datadoghq.com/database_monitoring/#postgres
 [30]: https://docs.datadoghq.com/integrations/postgres/?tab=host#faq
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

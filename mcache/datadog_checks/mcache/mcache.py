@@ -19,7 +19,6 @@ class InvalidConfigError(ConfigurationError):
 
 
 class Memcache(AgentCheck):
-
     SOURCE_TYPE_NAME = 'memcached'
 
     DEFAULT_PORT = 11211
@@ -302,8 +301,19 @@ class Memcache(AgentCheck):
                 message="Unable to fetch stats from server",
             )
             raise ConfigurationError(
-                "Unable to retrieve stats from memcache instance: {}:{}."
-                "Please check your configuration. ({})".format(server, port, e)
+                "Unable to retrieve stats from memcache instance: {}:{}. Please check your configuration. ({})".format(
+                    server, port, e
+                )
+            )
+        except AssertionError:
+            self.warning(
+                "Received malformed response from memcache instance %s:%s, skipping this check run", server, port
+            )
+            self.service_check(
+                self.SERVICE_CHECK,
+                AgentCheck.WARNING,
+                tags=service_check_tags,
+                message="Malformed binary protocol response",
             )
         else:
             client.disconnect_all()

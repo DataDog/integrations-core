@@ -73,6 +73,10 @@ def get_dynamic_tags(columns):
 def get_value_from_path(value, path):
     result = value
 
+    # An empty or missing path targets the root of the response
+    if not path:
+        return result
+
     # Traverse the nested dictionaries
     for key in re.split(REGEX, path):
         if result is not None:
@@ -98,6 +102,7 @@ class ESCheck(AgentCheck):
     SERVICE_CHECK_CONNECT_NAME = 'elasticsearch.can_connect'
     SERVICE_CHECK_CLUSTER_STATUS = 'elasticsearch.cluster_health'
     CAT_ALLOC_PATH = '/_cat/allocation?v=true&format=json&bytes=b'
+    CAT_SHARDS_PATH = '/_cat/shards?format=json&bytes=b'
     SOURCE_TYPE_NAME = 'elasticsearch'
 
     def __init__(self, name, init_config, instances):
@@ -272,7 +277,6 @@ class ESCheck(AgentCheck):
         self._get_index_search_stats(admin_forwarder, base_tags)
 
     def _get_template_metrics(self, admin_forwarder, base_tags):
-
         try:
             template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
         except requests.exceptions.RequestException as e:
@@ -498,15 +502,83 @@ class ESCheck(AgentCheck):
 
         # we need to remap metric names because the ones from elastic
         # contain dots and that would confuse `_process_metric()` (sic)
-        data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
+        if self._config.detailed_shard_metrics:
+            # when detailed metrics are enabled, only collect disk metrics from _cat/allocation
+            data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent'}
+        else:
+            data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
+
         for dic in cat_allocation_data:
             cat_allocation_dic = {
                 k.replace('.', '_'): v for k, v in dic.items() if k in data_to_collect and v is not None
             }
             tags = base_tags + ['node_name:' + dic.get('node').lower()]
             for metric in CAT_ALLOCATION_METRICS:
+                # skip shards metric if detailed metrics are enabled (we'll get it from _cat/shards)
+                if metric == 'elasticsearch.shards' and self._config.detailed_shard_metrics:
+                    continue
                 desc = CAT_ALLOCATION_METRICS[metric]
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
+
+        if self._config.detailed_shard_metrics:
+            self.log.debug("Collecting detailed shard placement metrics")
+            cat_shards_url = self._join_url(self.CAT_SHARDS_PATH, admin_forwarder)
+            try:
+                cat_shards_data = self._get_data(cat_shards_url)
+            except requests.ReadTimeout as e:
+                self.log.error("Timed out reading cat shards stats from servers (%s) - stats will be missing", e)
+                return
+
+            from collections import Counter
+
+            shard_counts = Counter()
+
+            for shard in cat_shards_data:
+                node = shard.get('node')
+                index = shard.get('index')
+                prirep_raw = shard.get('prirep')
+                state = shard.get('state')
+
+                # skip unassigned shards (they have no node)
+                if node is None or node == 'UNASSIGNED':
+                    continue
+
+                if index is None or prirep_raw is None:
+                    continue
+
+                # when in RELOCATING state, the reported node is: "source-node -> ip uuid target-node"
+                # try extracting the source node to count the shard towards it until relocation is over
+                if state == 'RELOCATING':
+                    if ' -> ' in node:
+                        source_node = node.split(' -> ')[0].strip()
+                        if source_node and ' ' not in source_node:
+                            node = source_node
+                        else:
+                            self.log.debug(
+                                "invalid source node for RELOCATING shard, got: %s, parsed: %s", node, source_node
+                            )
+                            continue
+                    else:
+                        self.log.debug(
+                            "unexpected format for RELOCATING shard (expected 'source -> target'), got: %s", node
+                        )
+                        continue
+                elif state != 'STARTED':
+                    continue
+
+                # better readability: p->primary and r->replica
+                prirep = 'primary' if prirep_raw == 'p' else 'replica'
+
+                key = (node, index, prirep)
+                shard_counts[key] += 1
+
+            for (node, index, prirep), count in shard_counts.items():
+                tags = base_tags + [
+                    'node_name:{}'.format(node.lower()),
+                    'index_name:{}'.format(index),
+                    'prirep:{}'.format(prirep),
+                ]
+                self.gauge('elasticsearch.shards', count, tags=tags)
 
     def _process_custom_metric(
         self,
@@ -529,7 +601,7 @@ class ESCheck(AgentCheck):
         """
 
         tags_to_submit = deepcopy(tags)
-        path = '{}.{}'.format(data_path, value_path)
+        path = '.'.join(part for part in (data_path, value_path) if part)
 
         # Collect the value of tags first, and then append to tags_to_submit
         for dynamic_tag_path, dynamic_tag_name in dynamic_tags:

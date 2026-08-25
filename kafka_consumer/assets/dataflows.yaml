@@ -1,0 +1,9 @@
+provides:
+  - id: kafka-consumer-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: kafka-consumer-events
+    always_on: true
+    data_type: events
+    direction: inbound

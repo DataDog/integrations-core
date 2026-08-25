@@ -6,6 +6,8 @@
 
 The ZooKeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

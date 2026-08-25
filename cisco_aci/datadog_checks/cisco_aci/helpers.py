@@ -113,33 +113,6 @@ def _get_value_from_dn(regex, dn):
         return None
 
 
-def get_event_tags_from_dn(dn):
-    """
-    This grabs the event tags from the dn designator. They look like this:
-    uni/tn-DataDog/ap-DtDg-AP1-EcommerceApp/epg-DtDg-Ecomm/HDl2IngrPktsAg1h
-    """
-    tags = []
-    node = get_node_from_dn(dn)
-    if node:
-        tags.append("node:" + node)
-    app = get_app_from_dn(dn)
-    if app:
-        tags.append("app:" + app)
-    bd = get_bd_from_dn(dn)
-    if bd:
-        tags.append("bd:" + bd)
-    cep = get_cep_from_dn(dn)
-    if cep:
-        tags.append("mac:" + cep)
-    ip = get_ip_from_dn(dn)
-    if ip:
-        tags.append("ip:" + ip)
-    epg = get_epg_from_dn(dn)
-    if epg:
-        tags.append("epg:" + epg)
-    return tags
-
-
 def get_hostname_from_dn(dn):
     """
     This parses the hostname from a dn designator. They look like this:
@@ -151,21 +124,6 @@ def get_hostname_from_dn(dn):
         return "pod-{}-node-{}".format(pod, node)
     else:
         return None
-
-
-def get_fabric_hostname(obj):
-    """
-    This grabs the hostname from the object
-    The object looks something like this:
-    {
-    "dn": "topology/pod-1/node-101/sys/phys-[eth1/6]/CDeqptMacsectxpkts5min"
-    ...
-    }
-    """
-    attrs = get_attributes(obj)
-    dn = attrs['dn']
-
-    return get_hostname_from_dn(dn)
 
 
 def get_attributes(obj):

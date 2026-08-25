@@ -6,10 +6,10 @@ from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer  # noqa: F401
 
-from ...config import is_affirmative
-from ..containers import iter_unique
 from .query import Query
 from .transform import COLUMN_TRANSFORMERS, EXTRA_TRANSFORMERS
 from .utils import SUBMISSION_METHODS, create_submission_transformer, tracked_query
@@ -84,9 +84,9 @@ class QueryExecutor(object):
             try:
                 if self.track_operation_time:
                     with tracked_query(check=self.submitter, operation=query_name):
-                        rows = self.execute_query(query.query)
+                        rows = self.execute_query(query.query, query.params)
                 else:
-                    rows = self.execute_query(query.query)
+                    rows = self.execute_query(query.query, query.params)
             except Exception as e:
                 if self.error_handler:
                     self.logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))
@@ -158,12 +158,12 @@ class QueryExecutor(object):
             return False
         return True
 
-    def execute_query(self, query):
+    def execute_query(self, query, params=None):
         """
         Called by `execute`, this triggers query execution to check for errors immediately in a way that is compatible
         with any library. If there are no errors, this is guaranteed to return an iterator over the result set.
         """
-        rows = self.executor(query)
+        rows = self.executor(query, params=params) if params else self.executor(query)
         if rows is None:
             return iter([])
         else:

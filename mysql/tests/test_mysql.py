@@ -8,7 +8,6 @@ import mock
 import pytest
 from packaging.version import parse as parse_version
 
-from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.__about__ import __version__
@@ -29,7 +28,15 @@ from datadog_checks.mysql.const import (
 )
 
 from . import common, tags, variables
-from .common import HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
+from .common import (
+    HOST,
+    MYSQL_FLAVOR,
+    MYSQL_REPLICATION,
+    MYSQL_VERSION_PARSED,
+    PORT,
+    requires_hybrid_replication,
+    requires_static_version,
+)
 
 
 @pytest.mark.integration
@@ -50,7 +57,13 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         + variables.COMMON_PERFORMANCE_VARS
         + variables.INDEX_SIZE_VARS
         + variables.INDEX_USAGE_VARS
+        + [variables.OPERATION_TIME_METRIC_NAME]
     )
+
+    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
+        testable_metrics.extend(variables.INNODB_MUTEX_VARS)
+    else:
+        testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
 
     operation_time_metrics = (
         variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS
@@ -65,24 +78,14 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
             and MYSQL_VERSION_PARSED >= parse_version('10.8')
         ):
             continue
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
         else:
             aggregator.assert_metric(mname, at_least=1)
 
-    optional_metrics = (
-        variables.COMPLEX_STATUS_VARS
-        + variables.COMPLEX_VARIABLES_VARS
-        + variables.COMPLEX_INNODB_VARS
-        + variables.SYSTEM_METRICS
-        + variables.SYNTHETIC_VARS
-    )
+    optional_metrics = variables.SYSTEM_METRICS
+
+    # Query cache and synthetic variables are not available in MySQL/Percona 8+
+    if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
+        optional_metrics += variables.QCACHE_VARS
 
     _test_optional_metrics(aggregator, optional_metrics)
 
@@ -101,7 +104,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     dd_run_check(mysql_check)
 
     expected_metric_tags = tags.metrics_tags_with_resource(mysql_check)
-    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+    if (MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic') or MYSQL_FLAVOR.lower() == 'percona':
         expected_metric_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
 
     _assert_complex_config(
@@ -112,7 +115,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME],
     )
 
 
@@ -129,14 +132,14 @@ def test_mysql_version_set(aggregator, dd_run_check, instance_basic):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
-    aggregator = dd_agent_check(instance_complex)
+    aggregator = dd_agent_check(instance_complex, check_rate=True)
 
     expected_metric_tags = tags.METRIC_TAGS + (
         f'database_hostname:{dd_default_hostname}',
         f'database_instance:{dd_default_hostname}',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR == 'mysql':
+    if MYSQL_FLAVOR in ('mysql', 'percona'):
         with root_conn.cursor() as cursor:
             cursor.execute("SELECT @@server_uuid")
             server_uuid = cursor.fetchone()[0]
@@ -153,11 +156,18 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        exclude=['alice.age', 'bob.age'] + variables.E2E_OPERATION_TIME_METRIC_NAME + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age'] + variables.E2E_OPERATION_TIME_METRIC_NAME,
     )
 
 
-def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname', e2e=False):
+def _assert_complex_config(
+    aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname', e2e=False, is_replica=False
+):
+    # Set replication mode once for reuse
+    replication_mode = 'source' if not is_replica else 'replica'
+
+    expected_counts = 2 if e2e else 1
+
     # Test service check
     aggregator.assert_service_check(
         'mysql.can_connect',
@@ -170,46 +180,56 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         aggregator.assert_service_check(
             'mysql.replication.slave_running',
             status=MySql.OK,
-            tags=service_check_tags + ('replication_mode:source',),
+            tags=service_check_tags + (f'replication_mode:{replication_mode}',),
             hostname=hostname,
             at_least=1,
         )
     testable_metrics = (
         variables.STATUS_VARS
-        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
-        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
-        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
-        + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
-        + variables.SYNTHETIC_VARS
-        + variables.STATEMENT_VARS
         + variables.TABLE_VARS
-        + variables.ROW_TABLE_STATS_VARS
-        + variables.INDEX_SIZE_VARS
-        + variables.INDEX_USAGE_VARS
     )
 
-    operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
+    if MYSQL_FLAVOR.lower() in ('mariadb', 'percona'):
+        testable_metrics.extend(variables.ROW_TABLE_STATS_VARS)
 
-    if MYSQL_REPLICATION == 'group':
+    # Query cache and synthetic variables are not available in MySQL/Percona 8+
+    if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
+        testable_metrics.extend(variables.QCACHE_VARS)
 
+    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
+        testable_metrics.extend(variables.INNODB_MUTEX_VARS)
+    else:
+        testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
+
+    operation_time_metrics = (
+        variables.SIMPLE_OPERATION_TIME_METRICS
+        + variables.COMPLEX_OPERATION_TIME_METRICS
+        + variables.REPLICATION_OPERATION_TIME_METRICS
+    )
+
+    if MYSQL_REPLICATION in ('group', 'hybrid'):
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
-        additional_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
+        group_replication_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
         if MYSQL_VERSION_PARSED >= parse_version('8.0'):
             testable_metrics.extend(variables.GROUP_REPLICATION_VARS_8_0_2)
-            additional_tags += ('member_role:PRIMARY',)
+            group_replication_tags += ('member_role:PRIMARY',)
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
-            tags=service_check_tags + additional_tags,
+            tags=service_check_tags + group_replication_tags,
             count=1,
         )
         operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
-    else:
-        testable_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
+
+        if MYSQL_REPLICATION == 'group':
+            for metric in variables.TRADITIONAL_REPLICATION_METRICS:
+                aggregator.assert_metric(metric, count=0)
+            aggregator.assert_service_check('mysql.replication.slave_running', count=0)
+            aggregator.assert_service_check('mysql.replication.replica_running', count=0)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
@@ -219,14 +239,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
 
     # Test metrics
     for mname in testable_metrics:
-        # These three are currently not guaranteed outside of a Linux
-        # environment.
-        if mname == 'mysql.performance.user_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.kernel_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
-            continue
         # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
         # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
         if (
@@ -235,23 +247,88 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             and MYSQL_VERSION_PARSED >= parse_version('10.8')
         ):
             continue
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:mysql',), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=expected_counts)
+            if not is_replica:
+                aggregator.assert_metric(mname, tags=metric_tags + ('schema:mysql',), count=expected_counts)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=1)
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=1)
-        else:
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=expected_counts)
+            if not is_replica:
+                aggregator.assert_metric(
+                    mname, tags=metric_tags + ('schema:information_schema',), count=expected_counts
+                )
+                aggregator.assert_metric(
+                    mname, tags=metric_tags + ('schema:performance_schema',), count=expected_counts
+                )
+        elif mname in variables.TABLE_VARS:
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + (
+                    'schema:testdb',
+                    'table:users',
+                ),
+                count=expected_counts,
+            )
+            if not is_replica:
+                aggregator.assert_metric(
+                    mname,
+                    tags=metric_tags
+                    + (
+                        'schema:information_schema',
+                        'table:VIEWS',
+                    ),
+                    count=expected_counts,
+                )
+                aggregator.assert_metric(
+                    mname,
+                    tags=metric_tags
+                    + (
+                        'schema:performance_schema',
+                        'table:users',
+                    ),
+                    count=expected_counts,
+                )
+        elif mname == 'mysql.replication.slave_running':
+            aggregator.assert_metric(
+                mname, tags=metric_tags + (f'replication_mode:{replication_mode}',), count=expected_counts
+            )
+        elif mname == 'mysql.performance.user_connections':
+            if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0'):
+                processlist_state = "executing"
+            else:
+                processlist_state = "Sending data"
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + (
+                    'processlist_state:{}'.format(processlist_state),
+                    'processlist_user:dog',
+                    'processlist_db:None',
+                ),
+                at_least=0,  # TODO this metric includes processlist_host tag which contains a random IP address
+            )
+        elif mname == 'mysql.replication.group.member_status':
+            aggregator.assert_metric(mname, tags=metric_tags + group_replication_tags, count=expected_counts)
+        elif mname in variables.GROUP_REPLICATION_VARS + variables.GROUP_REPLICATION_VARS_8_0_2:
+            aggregator.assert_metric(
+                mname, tags=metric_tags + ('channel_name:group_replication_applier',), count=expected_counts
+            )
+        elif mname in variables.ROW_TABLE_STATS_VARS:
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + (
+                    'schema:testdb',
+                    'table:users',
+                ),
+                at_least=1,
+            )
+        elif mname == 'mysql.performance.qcache.utilization.instant':
+            # This metric will only be collected if query_cache_type is enabled and on a second check run
             aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
+        else:
+            aggregator.assert_metric(mname, tags=metric_tags, at_least=1)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -262,13 +339,14 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
-    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
+    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags, e2e=e2e)
     # test optional metrics
     optional_metrics = (
-        variables.OPTIONAL_REPLICATION_METRICS
+        variables.TRADITIONAL_REPLICATION_METRICS
         + variables.OPTIONAL_INNODB_VARS
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
+        + variables.SYSTEM_METRICS  # Can only be collected when Postgres is running locally to tests
     )
     # Note, this assertion will pass even if some metrics are not present.
     # Manual testing is required for optional metrics
@@ -309,121 +387,149 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 
     dd_run_check(mysql_check)
 
-    # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, count=1)
-
-    # Travis MySQL not running replication - FIX in flavored test.
-    aggregator.assert_service_check(
-        'mysql.replication.slave_running',
-        status=MySql.OK,
-        tags=tags.SC_TAGS_REPLICA + ('replication_mode:replica',),
-        at_least=1,
-    )
-
-    testable_metrics = (
-        variables.STATUS_VARS
-        + variables.COMPLEX_STATUS_VARS
-        + variables.VARIABLES_VARS
-        + variables.COMPLEX_VARIABLES_VARS
-        + variables.INNODB_VARS
-        + variables.COMPLEX_INNODB_VARS
-        + variables.BINLOG_VARS
-        + variables.SYSTEM_METRICS
-        + variables.SCHEMA_VARS
-        + variables.SYNTHETIC_VARS
-        + variables.STATEMENT_VARS
-        + variables.TABLE_VARS
-        + variables.ROW_TABLE_STATS_VARS
-        + variables.INDEX_SIZE_VARS
-    )
-
-    operation_time_metrics = (
-        variables.SIMPLE_OPERATION_TIME_METRICS
-        + variables.COMPLEX_OPERATION_TIME_METRICS
-        + variables.REPLICATION_OPERATION_TIME_METRICS
-    )
-
-    if MYSQL_VERSION_PARSED >= parse_version('5.6') and MYSQL_FLAVOR != 'mariadb':
-        testable_metrics.extend(
-            variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS + variables.INDEX_USAGE_VARS
-        )
-        operation_time_metrics.extend(
-            variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
+    expected_metric_tags = tags.metrics_tags_with_resource(mysql_check)
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
+        expected_metric_tags += ("cluster_uuid:{}".format(mysql_check.cluster_uuid), "replication_role:replica")
+        assert mysql_check.server_uuid != mysql_check.cluster_uuid, (
+            "Server UUID and cluster UUID should not be the same for replica"
         )
 
-    expected_tags = tags.metrics_tags_with_resource(mysql_check)
-    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
-        expected_tags += ("cluster_uuid:{}".format(mysql_check.cluster_uuid), "replication_role:replica")
-        assert (
-            mysql_check.server_uuid != mysql_check.cluster_uuid
-        ), "Server UUID and cluster UUID should not be the same for replica"
-
-    # Test metrics
-    for mname in testable_metrics:
-        # These two are currently not guaranteed outside of a Linux
-        # environment.
-        if mname == 'mysql.performance.user_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.kernel_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
-            continue
-        if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=expected_tags + ('schema:testdb',), at_least=1)
-
-        # Adding condition to no longer test for os_log_fsyncs in mariadb 10.8+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
-        if (
-            mname == 'mysql.innodb.os_log_fsyncs'
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.8')
-        ):
-            continue
-
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
-
-        elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=expected_tags + ('schema:testdb',), count=1)
-            aggregator.assert_metric(mname, tags=expected_tags + ('schema:information_schema',), count=1)
-            aggregator.assert_metric(mname, tags=expected_tags + ('schema:performance_schema',), count=1)
-        else:
-            aggregator.assert_metric(mname, tags=expected_tags, at_least=0)
-
-    # test custom query metrics
-    aggregator.assert_metric('alice.age', value=25)
-    aggregator.assert_metric('bob.age', value=20)
-
-    # test optional metrics
-    optional_metrics = (
-        variables.OPTIONAL_REPLICATION_METRICS
-        + variables.OPTIONAL_INNODB_VARS
-        + variables.OPTIONAL_STATUS_VARS
-        + variables.OPTIONAL_STATUS_VARS_5_6_6
+    _assert_complex_config(
+        aggregator,
+        tags.SC_TAGS_REPLICA,
+        expected_metric_tags,
+        is_replica=True,
     )
-    # Note, this assertion will pass even if some metrics are not present.
-    # Manual testing is required for optional metrics
-    _test_optional_metrics(aggregator, optional_metrics)
-
-    _test_operation_time_metrics(aggregator, operation_time_metrics, mysql_check.debug_stats_kwargs()['tags'])
-
-    # Raises when coverage < 100%
-    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME],
     )
 
     # Make sure group replication is not detected
     with mysql_check._connect() as db:
         assert mysql_check._is_group_replication_active(db) is False
+
+
+@requires_hybrid_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_hybrid_replication_primary(aggregator, dd_run_check, instance_hybrid_primary):
+    """Test that the hybrid primary reports both group replication and traditional replication metrics."""
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_hybrid_primary])
+    dd_run_check(mysql_check)
+
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is True
+
+    service_check_tags = tags.SC_TAGS_HYBRID_PRIMARY
+
+    group_replication_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE', 'member_role:PRIMARY')
+    aggregator.assert_service_check(
+        'mysql.replication.group.status',
+        status=MySql.OK,
+        tags=service_check_tags + group_replication_tags,
+        count=1,
+    )
+
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=service_check_tags + ('replication_mode:source',),
+        at_least=1,
+    )
+
+    for metric in variables.GROUP_REPLICATION_VARS:
+        aggregator.assert_metric(metric, at_least=1)
+
+    if MYSQL_VERSION_PARSED >= parse_version('8.0'):
+        for metric in variables.GROUP_REPLICATION_VARS_8_0_2:
+            aggregator.assert_metric(metric, at_least=1)
+
+    aggregator.assert_metric('mysql.replication.replicas_connected', at_least=1)
+    aggregator.assert_metric('mysql.replication.slaves_connected', at_least=1)
+
+
+@common.requires_classic_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_classic_replication_source_with_replica_offline(aggregator, dd_run_check, instance_complex, root_conn):
+    """Test that a source emits WARNING when all replicas go offline (replica-loss detection)."""
+    import os
+
+    from datadog_checks.dev.docker import temporarily_stop_service
+
+    compose_file = os.path.join(common.HERE, 'compose', os.getenv('COMPOSE_FILE'))
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+
+    dd_run_check(mysql_check)
+
+    slave_running_checks = [
+        sc
+        for sc in aggregator.service_checks('mysql.replication.slave_running')
+        if 'replication_mode:source' in sc.tags
+    ]
+    assert len(slave_running_checks) >= 1, "Expected at least one service check with replication_mode:source"
+    assert slave_running_checks[0].status == MySql.OK
+    aggregator.assert_metric('mysql.replication.replicas_connected', value=1, at_least=1)
+    aggregator.reset()
+
+    with temporarily_stop_service('mysql-slave', compose_file):
+        # Kill binlog dump threads via root to force immediate disconnect
+        with root_conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT PROCESSLIST_ID FROM performance_schema.threads WHERE PROCESSLIST_COMMAND LIKE 'Binlog dump%'"
+            )
+            for (thread_id,) in cursor.fetchall():
+                cursor.execute(f"KILL {thread_id}")
+
+        dd_run_check(mysql_check)
+
+        slave_running_checks = [
+            sc
+            for sc in aggregator.service_checks('mysql.replication.slave_running')
+            if 'replication_mode:source' in sc.tags
+        ]
+
+        assert len(slave_running_checks) >= 1, (
+            "Expected service check with replication_mode:source after replica offline"
+        )
+        assert slave_running_checks[0].status == MySql.WARNING
+
+        replicas_metrics = aggregator.metrics('mysql.replication.replicas_connected')
+        assert len(replicas_metrics) >= 1
+        assert replicas_metrics[0].value == 0
+
+
+@requires_hybrid_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_hybrid_replication_traditional_replica(aggregator, dd_run_check, instance_hybrid_traditional_replica):
+    """Test that the traditional replica reports only traditional replication metrics, not group replication."""
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_hybrid_traditional_replica])
+    dd_run_check(mysql_check)
+
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is False
+
+    service_check_tags = tags.SC_TAGS_HYBRID_TRADITIONAL_REPLICA
+
+    aggregator.assert_service_check('mysql.replication.group.status', count=0)
+
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=service_check_tags + ('replication_mode:replica',),
+        at_least=1,
+    )
+
+    for metric in variables.GROUP_REPLICATION_VARS:
+        aggregator.assert_metric(metric, count=0)
+
+    aggregator.assert_metric('mysql.replication.seconds_behind_master', at_least=1)
+    aggregator.assert_metric('mysql.replication.seconds_behind_source', at_least=1)
+    aggregator.assert_metric('mysql.replication.slave_running', at_least=1)
 
 
 @pytest.mark.integration
@@ -464,6 +570,12 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     )
 
     testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
+
+    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
+        testable_metrics.extend(variables.INNODB_MUTEX_VARS)
+    else:
+        testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
+
     for mname in testable_metrics:
         # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
         # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
@@ -473,50 +585,49 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
             and MYSQL_VERSION_PARSED >= parse_version('10.8')
         ):
             continue
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
         aggregator.assert_metric(mname, hostname=expected_hostname, count=1)
 
     optional_metrics = (
-        variables.COMPLEX_STATUS_VARS
-        + variables.COMPLEX_VARIABLES_VARS
-        + variables.COMPLEX_INNODB_VARS
-        + variables.SYSTEM_METRICS
-        + variables.SYNTHETIC_VARS
+        variables.SYSTEM_METRICS  # Can only be collected when Postgres is running locally to tests
     )
+
+    # Query cache and synthetic variables are not available in MySQL/Percona 8+
+    if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
+        optional_metrics += variables.QCACHE_VARS
 
     for mname in optional_metrics:
         aggregator.assert_metric(mname, hostname=expected_hostname, at_least=0)
 
 
-def _test_index_metrics(aggregator, index_metrics, metric_tags):
+def _test_index_metrics(aggregator, index_metrics, metric_tags, e2e=False):
+    # In E2E, monotonic_count metrics with collection_interval=300 aren't emitted:
+    # check_rate=True runs the check twice but the second run skips the query (interval not elapsed),
+    # so no delta is ever flushed. Use at_least=0 to avoid false failures in E2E.
+    usage_count = 0 if e2e else 1
     for mname in index_metrics:
         if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:testdb', 'table:users', 'index:id'),
-                count=1,
+                at_least=usage_count,
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags
                 + (
                     'db:datadog_test_schemas',
                     'table:cities',
                     'index:single_column_index',
                 ),
-                count=1,
+                at_least=usage_count,
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'),
-                count=1,
+                at_least=usage_count,
             )
         if mname == 'mysql.index.size':
             aggregator.assert_metric(mname, tags=metric_tags + ('db:testdb', 'table:users', 'index:id'), count=1)
@@ -539,13 +650,17 @@ def _test_optional_metrics(aggregator, optional_metrics):
 
     before = len(aggregator.not_asserted())
 
+    # If there are no metrics to assert, return early
+    if before == 0:
+        return
+
     for mname in optional_metrics:
         aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
 
     # Compute match rate
     after = len(aggregator.not_asserted())
 
-    assert before > after
+    assert before > after, aggregator.not_asserted()
 
 
 def _test_operation_time_metrics(aggregator, operation_time_metrics, tags, e2e=False):
@@ -555,7 +670,7 @@ def _test_operation_time_metrics(aggregator, operation_time_metrics, tags, e2e=F
                 aggregator.assert_metric(
                     metric_name,
                     tags=list(tags) + ['operation:{}'.format(operation_time_metric)],
-                    count=1,
+                    count=2,
                 )
         else:
             aggregator.assert_metric(
@@ -683,7 +798,7 @@ def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_
 @pytest.mark.usefixtures('dd_environment')
 def test_additional_status_already_queried(aggregator, dd_run_check, instance_status_already_queried, caplog):
     caplog.clear()
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING)
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_status_already_queried])
     dd_run_check(mysql_check)
 
@@ -834,7 +949,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
 
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
         if MYSQL_REPLICATION == 'classic':
             expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
@@ -847,6 +962,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     assert event['database_instance'] == expected_database_instance
     assert event['database_hostname'] == expected_database_hostname
     assert event['dbms'] == "mysql"
+    assert event['ddagenthostname'] == "stubbed.hostname"
     assert sorted(event['tags']) == sorted(expected_tags)
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
@@ -920,3 +1036,80 @@ def test_propagate_agent_tags(
                 status=MySql.OK,
                 tags=expected_tags,
             )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [
+        pytest.param(True, id="dbm_enabled"),
+        pytest.param(False, id="dbm_disabled"),
+    ],
+)
+def test_errors_raised_metric_with_dbm(aggregator, dd_run_check, instance_basic, dbm_enabled):
+    """
+    Test that the mysql.performance.errors_raised metric is only emitted when DBM is enabled
+    and MySQL version is 8.0+.
+    """
+    instance_basic['dbm'] = dbm_enabled
+    if dbm_enabled:
+        # Disable DBM features to avoid unnecessary collection overhead during test
+        instance_basic['collect_settings'] = {'enabled': False}
+        instance_basic['query_activity'] = {'enabled': False}
+        instance_basic['query_samples'] = {'enabled': False}
+        instance_basic['query_metrics'] = {'enabled': False}
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    dd_run_check(mysql_check)
+
+    # Verify service check succeeded
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, count=1)
+
+    # The metric should only be present when MySQL/Percona >= 8.0 AND DBM is enabled
+    if MYSQL_FLAVOR.lower() != 'mariadb' and MYSQL_VERSION_PARSED >= parse_version('8.0') and dbm_enabled:
+        aggregator.assert_metric('mysql.performance.errors_raised', at_least=1)
+    else:
+        # In all other cases the metric should not be present
+        aggregator.assert_metric('mysql.performance.errors_raised', count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [
+        pytest.param(True, id="dbm_enabled"),
+        pytest.param(False, id="dbm_disabled"),
+    ],
+)
+def test_wait_event_summary_metrics_with_dbm(aggregator, dd_run_check, instance_basic, dbm_enabled):
+    instance_basic['dbm'] = dbm_enabled
+    if dbm_enabled:
+        instance_basic['collect_settings'] = {'enabled': False}
+        instance_basic['query_activity'] = {'enabled': False}
+        instance_basic['query_samples'] = {'enabled': False}
+        instance_basic['query_metrics'] = {'enabled': False}
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, count=1)
+
+    wait_event_metrics = [
+        'mysql.performance.wait_event.count',
+        'mysql.performance.wait_event.time',
+        'mysql.performance.wait_event.avg_time',
+        'mysql.performance.wait_event.max_time',
+    ]
+    if dbm_enabled:
+        for metric in wait_event_metrics:
+            aggregator.assert_metric(metric, at_least=1)
+        # Verify wait_event tag is present on submitted metrics
+        for metric in wait_event_metrics:
+            for m in aggregator.metrics(metric):
+                wait_event_tags = [t for t in m.tags if t.startswith('wait_event:')]
+                assert len(wait_event_tags) == 1, "Expected exactly one wait_event tag on {}".format(metric)
+    else:
+        for metric in wait_event_metrics:
+            aggregator.assert_metric(metric, count=0)

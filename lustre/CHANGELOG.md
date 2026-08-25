@@ -1,0 +1,68 @@
+# CHANGELOG - Lustre
+
+<!-- towncrier release notes start -->
+
+## 1.5.1 / 2026-08-05
+
+***Fixed***:
+
+* Fix silent client metric gaps on Lustre 2.15.x clients (e.g. AWS FSx for Lustre): use `lctl get_param -n` instead of `-ny` (the `-y` YAML flag was only added in Lustre 2.16) so llite/mdc/osc/ldlm stats are collected, and run `lctl dl` with sudo so device.health/refcount are collected. Command failures are now logged at WARNING instead of DEBUG so future gaps are visible. ([#24504](https://github.com/DataDog/integrations-core/pull/24504))
+
+## 1.5.0 / 2026-04-01 / Agent 7.78.1
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 1.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+
+## 1.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 1.2.1 / 2025-11-19 / Agent 7.73.0
+
+***Fixed***:
+
+* Fix device discovery for older versions of Lustre (<2.15.5) ([#21901](https://github.com/DataDog/integrations-core/pull/21901))
+
+## 1.2.0 / 2025-10-31
+
+***Security***:
+
+* Switch from using shell=True to shell=False in subprocess command ([#21690](https://github.com/DataDog/integrations-core/pull/21690))
+
+***Added***:
+
+* Add histogram bucket metrics for `lustre.jobstats.read_bytes` and `lustre.jobstats.write_bytes` ([#21589](https://github.com/DataDog/integrations-core/pull/21589))
+
+## 1.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add `filesystem`, `jobid_var` and `jobid_name` tags ([#21270](https://github.com/DataDog/integrations-core/pull/21270))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 1.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve error handling implementation with enhanced debug logs and refined logic ([#20727](https://github.com/DataDog/integrations-core/pull/20727))
+* Fix typo in OSS parameter ([#20857](https://github.com/DataDog/integrations-core/pull/20857))
+
+## 1.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Initial Release ([#20146](https://github.com/DataDog/integrations-core/pull/20146))

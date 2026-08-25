@@ -6,14 +6,20 @@ import re
 
 import click
 
-from ...codeowners import CodeOwners
-from ...constants import get_root
-from ...utils import get_codeowners, get_codeowners_file, get_valid_integrations
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_success
+from datadog_checks.dev.tooling.codeowners import CodeOwners
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_failure,
+    echo_success,
+)
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.utils import get_codeowners, get_codeowners_file, get_valid_integrations
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
-LOGS_TEAM = '@DataDog/logs-backend'
+LOGS_TEAM = '@DataDog/logs-integrations-reviewers'
 
 # Integrations that are known to be tiles and have email-based codeowners
 IGNORE_TILES = {

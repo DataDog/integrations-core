@@ -1,2 +1,0 @@
-- Added `ddev size create-dashboard` to visualize size metrics on the Datadog platform
-- Added `--to-dd-org` option to `ddev size status` to send metrics to Datadog

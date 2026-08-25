@@ -14,7 +14,7 @@ init_config:
 instances:
 
     ## @param varnishstat - string - required
-    ## The full path to the varnishstat binary and can contain additional arguments.
+    ## The full path to the varnishstat binary, and it can contain additional arguments.
     ## In order to support monitoring a Varnish instance which is running as a Docker
     ## container you need to wrap commands (varnishstat) with scripts which
     ## perform a docker exec on the running container.  Passing along template variables
@@ -38,14 +38,14 @@ instances:
 
     ## @param name - string - optional
     ## The name used in the varnishstat command for the
-    ## -n argument which will add a name:<INSTANCE_NAME> tag to all metrics.
+    ## -n argument, which will add a name:<INSTANCE_NAME> tag to all metrics.
     #
     # name: <INSTANCE_NAME>
 
     ## @param varnishadm - string - optional
     ## The path to the varnishadm binary signals the check to
     ## emit a service check status on backend health using `debug.health`.
-    ## Similar to the varnishstat command this path can contain additional arguments
+    ## Similar to the varnishstat command, this path can contain additional arguments
     ## in order to support service discovery.
     ##
     ## The service check is tagged by backend.
@@ -58,13 +58,13 @@ instances:
     # secretfile: /etc/varnish/secret
 
     ## @param daemon_host - string - optional - default: localhost
-    ## The parameters for specifying the host to connect to varnishadm.
+    ## The parameter for specifying the host to connect to varnishadm.
     ## Used in version 4.1.0 and above.
     #
     # daemon_host: localhost
 
     ## @param daemon_port - integer - optional - default: 6082
-    ## The parameters for specifying the port to connect to varnishadm.
+    ## The parameter for specifying the port to connect to varnishadm.
     ## Used in version 4.1.0 and above.
     #
     # daemon_port: 6082

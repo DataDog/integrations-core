@@ -13,7 +13,7 @@ from packaging.version import Version
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 
-from .common import HOST, PASSWORD, PORT, REDIS_VERSION
+from .common import HOST, PASSWORD, PORT, REDIS_VERSION, redis_client
 from .utils import requires_static_version
 
 # Following metrics are tagged by db
@@ -33,7 +33,7 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         redis_check = Redis('redisdb', {}, [redis_instance])
         conn = redis.return_value
         conn.config_get.return_value = {}
-        conn.info = lambda *args: (
+        conn.info = lambda *args, **kwargs: (
             []
             if args
             else {
@@ -61,7 +61,7 @@ def test_aof_loading_metrics(aggregator, redis_instance):
 
 
 def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instance):
-    db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
+    db = redis_client(port=PORT, db=14, password=PASSWORD, host=HOST)
     db.flushdb()
     db.lpush("test_list", 1)
     db.lpush("test_list", 2)
@@ -147,7 +147,7 @@ def test_metadata(dd_run_check, check, master_instance, datadog_agent):
 
 
 def test_redis_command_stats(aggregator, dd_run_check, check, redis_instance):
-    db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
+    db = redis_client(port=PORT, db=14, password=PASSWORD, host=HOST)
     version = db.info().get('redis_version')
     if Version(version) < Version('2.6.0'):
         # Command stats only works with Redis >= 2.6.0

@@ -4,16 +4,19 @@
 import fnmatch
 import inspect
 import re
+from collections.abc import Generator
 from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.checks.openmetrics import parser_optimizations
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
 from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer
 from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransformer
@@ -190,8 +193,10 @@ class OpenMetricsScraper:
         # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
         ignore_tags = config.get('ignore_tags', [])
         if ignore_tags:
-            ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
-            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
+            self.ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+            custom_tags = [tag for tag in custom_tags if not self.ignored_tags_re.search(tag)]
+        else:
+            self.ignored_tags_re = None
 
         self.static_tags = copy(custom_tags)
         if is_affirmative(self.config.get('tag_by_endpoint', True)):
@@ -228,6 +233,8 @@ class OpenMetricsScraper:
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
+        parser_optimizations.init_from_agent_config()
+
         # Used for monotonic counts
         self.flush_first_value = None
 
@@ -237,18 +244,20 @@ class OpenMetricsScraper:
         """
         runtime_data = {'flush_first_value': bool(self.flush_first_value), 'static_tags': self.static_tags}
 
-        # Determine which consume method to use based on target_info config
-        if self.target_info:
-            consume_method = self.consume_metrics_w_target_info
-        else:
-            consume_method = self.consume_metrics
-
-        for metric in consume_method(runtime_data):
+        for metric in self.yield_metrics(runtime_data):
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
 
             transformer(metric, self.generate_sample_data(metric), runtime_data)
+
+    def yield_metrics(self, runtime_data: dict) -> Generator[Metric]:
+        if self.target_info:
+            consume_method = self.consume_metrics_w_target_info
+        else:
+            consume_method = self.consume_metrics
+
+        yield from consume_method(runtime_data)
 
     def scrape(self):
         try:
@@ -465,6 +474,8 @@ class OpenMetricsScraper:
         """
         Set dynamic tags.
         """
+        if self.ignored_tags_re is not None:
+            tags = [tag for tag in tags if not self.ignored_tags_re.search(tag)]
 
         self.tags = tuple(chain(self.static_tags, tags))
 

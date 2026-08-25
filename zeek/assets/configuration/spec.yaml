@@ -1,4 +1,5 @@
 name: zeek
+fleet_configurable: true
 files:
 - name: zeek.yaml
   options:

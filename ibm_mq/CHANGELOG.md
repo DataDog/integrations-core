@@ -2,6 +2,84 @@
 
 <!-- towncrier release notes start -->
 
+## 8.11.0 / 2026-08-05
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Fixed***:
+
+* Fix a ZeroDivisionError in the queue depth percent calculation when a queue's max depth is configured as 0. ([#24663](https://github.com/DataDog/integrations-core/pull/24663))
+
+## 8.10.0 / 2026-06-10 / Agent 7.81.0
+
+***Added***:
+
+* Added config `filter_queue_statistics_metrics`  so `ibm_mq.stats.queue.*` metrics can be limited to queues discovered with `queue_patterns` or `queue_regex`. ([#23933](https://github.com/DataDog/integrations-core/pull/23933))
+
+## 8.9.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Fix UnicodeDecodeError when IBM MQ queue manager returns channel or queue description fields in non-UTF-8 encoding. ([#23130](https://github.com/DataDog/integrations-core/pull/23130))
+
+## 8.9.0 / 2026-03-18 / Agent 7.78.0
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 8.8.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Fix crash when encountering defunct processes. ([#22543](https://github.com/DataDog/integrations-core/pull/22543))
+
+## 8.7.0 / 2025-12-23 / Agent 7.75.0
+
+***Added***:
+
+* Add collecting channel and queue desc fields as tags for metrics ([#21948](https://github.com/DataDog/integrations-core/pull/21948))
+
+## 8.6.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 8.5.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.4.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Make queue discovery logic more resilient and add new metric to track broken queues ([#20549](https://github.com/DataDog/integrations-core/pull/20549))
+
+***Fixed***:
+
+* Lift `pymqi` dependency exclusion for macOS on AArch64/ARM64 ([#20815](https://github.com/DataDog/integrations-core/pull/20815))
+
+## 8.3.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Add ibm_mq.channel.conn_status and ibm_mq.channel.connections_active metrics with channel and connection metric tests ([#20519](https://github.com/DataDog/integrations-core/pull/20519))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
 ## 8.2.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "52179e9d-9012-4478-b1db-08e4d21d1181",
   "app_id": "system",
+  "owner": "agent-runtimes",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

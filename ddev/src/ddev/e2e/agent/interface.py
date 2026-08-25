@@ -8,24 +8,34 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from ddev.cli.application import Application
     from ddev.integration.core import Integration
     from ddev.utils.fs import Path
     from ddev.utils.platform import Platform
 
 
 class AgentInterface(ABC):
+    build_config_key: str | None = None
+    supports_ci = True
+
     def __init__(
-        self, platform: Platform, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
+        self, app: Application, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
     ) -> None:
-        self.__platform = platform
+        self.__app = app
         self.__integration = integration
         self.__env = env
         self.__metadata = metadata
         self.__config_file = config_file
 
     @property
+    def app(self) -> Application:
+        return self.__app
+
+    @property
     def platform(self) -> Platform:
-        return self.__platform
+        return self.app.platform
 
     @property
     def integration(self) -> Integration:
@@ -58,6 +68,12 @@ class AgentInterface(ABC):
     def get_id(self) -> str:
         return f'{self.integration.name}_{self.env}'
 
+    def get_configured_build(self, config: Mapping[str, str]) -> str | None:
+        if self.build_config_key is None:
+            return None
+
+        return config.get(self.build_config_key)
+
     @abstractmethod
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None: ...
 
@@ -68,7 +84,14 @@ class AgentInterface(ABC):
     def restart(self) -> None: ...
 
     @abstractmethod
-    def invoke(self, args: list[str]) -> None: ...
+    def invoke(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None: ...
 
     @abstractmethod
     def enter_shell(self) -> None: ...
+
+    def sync_config(self) -> None:
+        """Synchronize the persisted host configuration with the Agent."""
+
+    def show_logs(self) -> None:
+        """Show backend-specific diagnostics for the running Agent."""
+        self.invoke(['status'])

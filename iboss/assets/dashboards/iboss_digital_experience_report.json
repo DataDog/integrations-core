@@ -1,0 +1,1720 @@
+{
+    "title": "iboss - Digital Experience Metrics Report",
+    "description": "This dashboard provides insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets.\n",
+    "widgets": [
+        {
+            "id": 4051130684011850,
+            "definition": {
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/iboss_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/iboss_reversed_large.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7698910360951864,
+            "definition": {
+                "type": "note",
+                "content": "This dashboard provides insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "green",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 4170769601123385,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using metrics. Please follow the Configuration steps [here](/integrations/iboss) to enable metrics collection. Ensure the `Collect Digital Experience metrics` option is enabled to collect these metrics.\n- All digital experience metrics are collected once per day, once the complete daily iboss report is available. Please ensure to set the dashboard time range to at least `Past 1 Day` to view the data.\n- Filters:\n  - `reporter_node` applies to all widgets\n  - `user_name` applies to widgets in `Users` group\n  - `resource_name` applies to widgets in `Resources` group\n  - `asset_name` applies to widgets in `Assets` group\n  - `source_country` applies to widgets in `Countries` group",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 351918285443102,
+            "definition": {
+                "title": "Average Application Peer Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:iboss.digital_experience.server_peer_time_avg{$reporter_node}.rollup(avg, 300)",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "custom_bg",
+                                "custom_bg_color": "#2cab63"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 8933713299272288,
+            "definition": {
+                "title": "Average Application Peer Connection Time Trend",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Average Time",
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:iboss.digital_experience.server_peer_time_avg{$reporter_node}.rollup(avg, 300)"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 6,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 3221558284172762,
+            "definition": {
+                "title": "Average Client Peer Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:iboss.digital_experience.client_peer_time_avg{$reporter_node}.rollup(avg, 300)",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "custom_bg",
+                                "custom_bg_color": "#2cab63"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7293355260354459,
+            "definition": {
+                "title": "Average Client Peer Connection Time Trend",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Average Time",
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:iboss.digital_experience.client_peer_time_avg{$reporter_node}.rollup(avg, 300)"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 8264911360572272,
+            "definition": {
+                "title": "Average DNS Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:iboss.digital_experience.proxy_dns_time_avg{$reporter_node}.rollup(avg, 300)",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "custom_bg",
+                                "custom_bg_color": "#2cab63"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 4079454414082576,
+            "definition": {
+                "title": "Average DNS Connection Time Trend",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Average Time",
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:iboss.digital_experience.proxy_dns_time_avg{$reporter_node}.rollup(avg, 300)"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 12,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 1012139953625745,
+            "definition": {
+                "title": "Users",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1854270047583317,
+                        "definition": {
+                            "title": "Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:iboss.digital_experience.users.server_peer_time_avg{$user_name,$reporter_node} by {user_name}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:iboss.digital_experience.users.client_peer_time_avg{$user_name,$reporter_node} by {user_name}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:iboss.digital_experience.users.proxy_dns_time_avg{$user_name,$reporter_node} by {user_name}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Application",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Client",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "DNS",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8385756310588357,
+                        "definition": {
+                            "title": "Users by Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.users.server_peer_time_avg{$user_name,$reporter_node} by {user_name}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.users.client_peer_time_avg{$user_name,$reporter_node} by {user_name}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.users.proxy_dns_time_avg{$user_name,$reporter_node} by {user_name}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Application",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Client",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "DNS",
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "specification": {
+                                "type": "vega-lite",
+                                "contents": {
+                                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                                    "description": "Bar chart with labels inside the top of each bar.",
+                                    "data": {
+                                        "name": "table1"
+                                    },
+                                    "transform": [
+                                        {
+                                            "fold": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ],
+                                            "as": [
+                                                "query",
+                                                "time_ms"
+                                            ]
+                                        },
+                                        {
+                                            "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                            "as": "range"
+                                        }
+                                    ],
+                                    "layer": [
+                                        {
+                                            "data": {
+                                                "values": [
+                                                    {
+                                                        "range": "0-5"
+                                                    },
+                                                    {
+                                                        "range": "5-15"
+                                                    },
+                                                    {
+                                                        "range": "15-150"
+                                                    },
+                                                    {
+                                                        "range": "150-1000"
+                                                    },
+                                                    {
+                                                        "range": "1000+"
+                                                    }
+                                                ]
+                                            },
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "y": {
+                                                    "value": 0
+                                                },
+                                                "opacity": {
+                                                    "value": 0.2
+                                                },
+                                                "color": {
+                                                    "value": "#ccc"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ],
+                                                    "title": "Average Time (In milliseconds)"
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative",
+                                                    "title": "Users"
+                                                },
+                                                "color": {
+                                                    "field": "query",
+                                                    "type": "nominal",
+                                                    "title": "",
+                                                    "scale": {
+                                                        "domain": [
+                                                            "Application",
+                                                            "Client",
+                                                            "DNS"
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": {
+                                                "type": "text",
+                                                "dy": -5,
+                                                "align": "center",
+                                                "color": "#1f5495",
+                                                "fontWeight": "bold"
+                                            },
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                },
+                                                "text": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "wildcard"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 4908747426452964,
+            "definition": {
+                "title": "Resources",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2891526034376977,
+                        "definition": {
+                            "title": "Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:iboss.digital_experience.resources.server_peer_time_avg{$resource_name,$reporter_node} by {resource_name,resource_id}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:iboss.digital_experience.resources.client_peer_time_avg{$resource_name,$reporter_node} by {resource_name,resource_id}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:iboss.digital_experience.resources.proxy_dns_time_avg{$resource_name,$reporter_node} by {resource_name,resource_id}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Application",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Client",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "DNS",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3521939912347114,
+                        "definition": {
+                            "title": "Resources by Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.resources.server_peer_time_avg{$resource_name,$reporter_node} by {resource_id}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.resources.client_peer_time_avg{$resource_name,$reporter_node} by {resource_id}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.resources.proxy_dns_time_avg{$resource_name,$reporter_node} by {resource_id}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Application",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Client",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "DNS",
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "specification": {
+                                "type": "vega-lite",
+                                "contents": {
+                                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                                    "description": "Bar chart with labels inside the top of each bar.",
+                                    "data": {
+                                        "name": "table1"
+                                    },
+                                    "transform": [
+                                        {
+                                            "fold": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ],
+                                            "as": [
+                                                "query",
+                                                "time_ms"
+                                            ]
+                                        },
+                                        {
+                                            "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                            "as": "range"
+                                        }
+                                    ],
+                                    "layer": [
+                                        {
+                                            "data": {
+                                                "values": [
+                                                    {
+                                                        "range": "0-5"
+                                                    },
+                                                    {
+                                                        "range": "5-15"
+                                                    },
+                                                    {
+                                                        "range": "15-150"
+                                                    },
+                                                    {
+                                                        "range": "150-1000"
+                                                    },
+                                                    {
+                                                        "range": "1000+"
+                                                    }
+                                                ]
+                                            },
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "y": {
+                                                    "value": 0
+                                                },
+                                                "opacity": {
+                                                    "value": 0.2
+                                                },
+                                                "color": {
+                                                    "value": "#ccc"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ],
+                                                    "title": "Average Time (In milliseconds)"
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative",
+                                                    "title": "Resources"
+                                                },
+                                                "color": {
+                                                    "field": "query",
+                                                    "type": "nominal",
+                                                    "title": "",
+                                                    "scale": {
+                                                        "domain": [
+                                                            "Application",
+                                                            "Client",
+                                                            "DNS"
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": {
+                                                "type": "text",
+                                                "dy": -5,
+                                                "align": "center",
+                                                "color": "#1f5495",
+                                                "fontWeight": "bold"
+                                            },
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                },
+                                                "text": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "wildcard"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 20,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 3151064567341417,
+            "definition": {
+                "title": "Assets",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 444151105681529,
+                        "definition": {
+                            "title": "Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:iboss.digital_experience.assets.server_peer_time_avg{$asset_name,$reporter_node} by {asset_name,asset_id,asset_type}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:iboss.digital_experience.assets.client_peer_time_avg{$asset_name,$reporter_node} by {asset_name,asset_id,asset_type}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:iboss.digital_experience.assets.proxy_dns_time_avg{$asset_name,$reporter_node} by {asset_name,asset_id,asset_type}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Application",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Client",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "DNS",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1405420068531498,
+                        "definition": {
+                            "title": "Assets by Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.assets.server_peer_time_avg{$asset_name,$reporter_node} by {asset_id}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.assets.client_peer_time_avg{$asset_name,$reporter_node} by {asset_id}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.assets.proxy_dns_time_avg{$asset_name,$reporter_node} by {asset_id}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Application",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Client",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "DNS",
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "specification": {
+                                "type": "vega-lite",
+                                "contents": {
+                                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                                    "description": "Bar chart with labels inside the top of each bar.",
+                                    "data": {
+                                        "name": "table1"
+                                    },
+                                    "transform": [
+                                        {
+                                            "fold": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ],
+                                            "as": [
+                                                "query",
+                                                "time_ms"
+                                            ]
+                                        },
+                                        {
+                                            "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                            "as": "range"
+                                        }
+                                    ],
+                                    "layer": [
+                                        {
+                                            "data": {
+                                                "values": [
+                                                    {
+                                                        "range": "0-5"
+                                                    },
+                                                    {
+                                                        "range": "5-15"
+                                                    },
+                                                    {
+                                                        "range": "15-150"
+                                                    },
+                                                    {
+                                                        "range": "150-1000"
+                                                    },
+                                                    {
+                                                        "range": "1000+"
+                                                    }
+                                                ]
+                                            },
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "y": {
+                                                    "value": 0
+                                                },
+                                                "opacity": {
+                                                    "value": 0.2
+                                                },
+                                                "color": {
+                                                    "value": "#ccc"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ],
+                                                    "title": "Average Time (In milliseconds)"
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative",
+                                                    "title": "Assets"
+                                                },
+                                                "color": {
+                                                    "field": "query",
+                                                    "type": "nominal",
+                                                    "title": "",
+                                                    "scale": {
+                                                        "domain": [
+                                                            "Application",
+                                                            "Client",
+                                                            "DNS"
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": {
+                                                "type": "text",
+                                                "dy": -5,
+                                                "align": "center",
+                                                "color": "#1f5495",
+                                                "fontWeight": "bold"
+                                            },
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                },
+                                                "text": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "wildcard"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 25,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 296051286745924,
+            "definition": {
+                "title": "Countries",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2550287087185027,
+                        "definition": {
+                            "title": "Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:iboss.digital_experience.countries.server_peer_time_avg{$source_country,$reporter_node} by {source_country}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:iboss.digital_experience.countries.client_peer_time_avg{$source_country,$reporter_node} by {source_country}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:iboss.digital_experience.countries.proxy_dns_time_avg{$source_country,$reporter_node} by {source_country}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Application",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Client",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "DNS",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8878804524025366,
+                        "definition": {
+                            "title": "Countries by Average Connection Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.countries.server_peer_time_avg{$source_country,$reporter_node} by {source_country}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.countries.client_peer_time_avg{$source_country,$reporter_node} by {source_country}.rollup(avg, 300)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "avg",
+                                            "query": "avg:iboss.digital_experience.countries.proxy_dns_time_avg{$source_country,$reporter_node} by {source_country}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Application",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Client",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "DNS",
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "specification": {
+                                "type": "vega-lite",
+                                "contents": {
+                                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                                    "description": "Bar chart with labels inside the top of each bar.",
+                                    "data": {
+                                        "name": "table1"
+                                    },
+                                    "transform": [
+                                        {
+                                            "fold": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ],
+                                            "as": [
+                                                "query",
+                                                "time_ms"
+                                            ]
+                                        },
+                                        {
+                                            "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                            "as": "range"
+                                        }
+                                    ],
+                                    "layer": [
+                                        {
+                                            "data": {
+                                                "values": [
+                                                    {
+                                                        "range": "0-5"
+                                                    },
+                                                    {
+                                                        "range": "5-15"
+                                                    },
+                                                    {
+                                                        "range": "15-150"
+                                                    },
+                                                    {
+                                                        "range": "150-1000"
+                                                    },
+                                                    {
+                                                        "range": "1000+"
+                                                    }
+                                                ]
+                                            },
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "y": {
+                                                    "value": 0
+                                                },
+                                                "opacity": {
+                                                    "value": 0.2
+                                                },
+                                                "color": {
+                                                    "value": "#ccc"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": "bar",
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ],
+                                                    "title": "Average Time (In milliseconds)"
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative",
+                                                    "title": "Countries"
+                                                },
+                                                "color": {
+                                                    "field": "query",
+                                                    "type": "nominal",
+                                                    "title": "",
+                                                    "scale": {
+                                                        "domain": [
+                                                            "Application",
+                                                            "Client",
+                                                            "DNS"
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mark": {
+                                                "type": "text",
+                                                "dy": -5,
+                                                "align": "center",
+                                                "color": "#1f5495",
+                                                "fontWeight": "bold"
+                                            },
+                                            "encoding": {
+                                                "x": {
+                                                    "field": "range",
+                                                    "type": "ordinal",
+                                                    "sort": [
+                                                        "0-5",
+                                                        "5-15",
+                                                        "15-150",
+                                                        "150-1000",
+                                                        "1000+"
+                                                    ]
+                                                },
+                                                "xOffset": {
+                                                    "field": "query",
+                                                    "type": "nominal"
+                                                },
+                                                "y": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                },
+                                                "text": {
+                                                    "aggregate": "count",
+                                                    "type": "quantitative"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "wildcard"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "reporter_node",
+            "prefix": "reporting_node_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user_name",
+            "prefix": "user_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "resource_name",
+            "prefix": "resource_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "asset_name",
+            "prefix": "asset_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "source_country",
+            "prefix": "source_country",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

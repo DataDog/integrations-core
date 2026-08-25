@@ -4,6 +4,8 @@
 
 This check monitors [Milvus][1] through the Datadog Agent. It provides insights into your Milvus deployment's performance by collecting information about the latency and number of executions of individual operations. This integration also allows for monitoring the size and ressource allocation of your deployment.
 
+**Minimum Agent version:** 7.62.0
+
 ## Setup
 
 ### Installation

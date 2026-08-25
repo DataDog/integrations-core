@@ -1,4 +1,5 @@
 name: Kubernetes Controller Manager
+fleet_configurable: true
 files:
 - name: kube_controller_manager.yaml
   options:
@@ -10,30 +11,36 @@ files:
     - name: leader_election
       description: |
         Monitor the leader-election process on the kube-system:kube-controller-manager.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
     - name: leader_election_kind
       description: |
         The kind of object to look at for the leader election.
+
         Options:
           * auto
           * lease
           * endpoints
           * configmap
         The `auto` option makes the check try `lease` first and fallback to endpoints if `lease` isn't available.
+      fleet_configurable: true
       value:
         type: string
         example: auto
     - name: health_url
       description: |
         The URL for the kube-controller-manager health endpoint.
+      fleet_configurable: true
+      formats: ["url"]
       value:
         type: string
         example: http://localhost:10252/healthz
     - name: ignore_deprecated
       description: |
         Filter deprecated metrics from the kube-controller-manager /metrics endpoints payload.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -42,6 +49,7 @@ files:
         Monitor additional queues, in addition to the default ones.
         **NOTE**: `{WorkQueueName}_*` metrics were deprecated in Kubernetes v1.14 
         in favor of `workqueue_*` metrics.
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -52,6 +60,7 @@ files:
     - name: extra_limiters
       description: |
         Monitor additional rate limiters, in addition to the default ones.
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -90,6 +99,7 @@ files:
           - https://localhost:10257/metrics
           - http://%%host%%:10252/metrics
           - http://localhost:10252/metrics
+      fleet_configurable: false
     - name: prometheus_url
       description: |
         The URL where your application metrics are exposed by Prometheus.
@@ -97,6 +107,7 @@ files:
       value:
         example: http://%%host%%:10252/metrics
         type: string
+      fleet_configurable: false
     - name: bearer_token_auth
       description: |
         Used if you are using RBACs and need the Agent to authenticate
@@ -108,6 +119,7 @@ files:
         anyOf:
         - type: boolean
         - type: string
+      fleet_configurable: false
     - name: ssl_verify
       description: Used to verify self signed certificates.
       enabled: true
@@ -115,3 +127,4 @@ files:
         type: boolean
         example: false
         display_default: true
+      fleet_configurable: false

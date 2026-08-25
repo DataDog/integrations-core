@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3a3fc186-af02-48e5-8b68-ee9ef37ea566",
   "app_id": "kubernetes-cluster-autoscaler",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

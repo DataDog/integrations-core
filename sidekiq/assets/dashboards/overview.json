@@ -208,7 +208,7 @@
 		"definition": {
 			"type": "timeseries",
 			"requests": [{
-				"q": "avg:sidekiq.jobs.perform.median{*}, avg:sidekiq.jobs.perform.avg{*}, avg:sidekiq.jobs.perform.count{*}, avg:sidekiq.jobs.perform.max{*}",
+				"q": "avg:sidekiq.jobs.perform.median{*}, avg:sidekiq.jobs.perform.avg{*}, avg:sidekiq.jobs.perform.max{*}",
 				"display_type": "area",
 				"style": {
 					"palette": "dog_classic",

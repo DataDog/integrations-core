@@ -37,7 +37,7 @@ def get_local_driver():
     we need to define the 'FreeTDS' driver in odbcinst.ini
     """
     if ON_MACOS:
-        return '/opt/homebrew/Cellar/freetds/1.4.26/lib/libtdsodbc.so'
+        return '/opt/homebrew/lib/libtdsodbc.so'
     elif ON_WINDOWS:
         return '{ODBC Driver 18 for SQL Server}'
     else:
@@ -63,9 +63,9 @@ SERVER_METRICS = [
     'sqlserver.server.virtual_memory',
 ]
 
+SQLSERVER_YEAR = int(os.environ.get('SQLSERVER_YEAR'))
+SQLSERVER_ENGINE_EDITION = os.environ.get('SQLSERVER_ENGINE_EDITION')
 SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
-SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
-
 
 EXPECTED_FILE_STATS_METRICS = [
     'sqlserver.files.io_stall',
@@ -254,9 +254,7 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 OPERATION_TIME_METRICS = [
-    'simple_metrics',
-    'fraction_metrics',
-    'incr_fraction_metrics',
+    'perf_counter_metrics',
 ]
 
 OPERATION_TIME_METRIC_NAME = 'dd.sqlserver.operation.time'

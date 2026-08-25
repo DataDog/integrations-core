@@ -9,7 +9,8 @@ from tempfile import gettempdir
 import click
 import yaml
 
-from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+
 from .constants import MIB_COMPILED_URL, MIB_SOURCE_URL
 
 
@@ -269,7 +270,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
     from pysmi.codegen import JsonCodeGen
     from pysmi.compiler import MibCompiler
     from pysmi.parser import SmiV1CompatParser
-    from pysmi.reader import getReadersFromUrls
+    from pysmi.reader import get_readers_from_urls
     from pysmi.searcher import AnyFileSearcher, StubSearcher
     from pysmi.writer import FileWriter
 
@@ -281,22 +282,22 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
 
     code_generator = JsonCodeGen()
 
-    file_writer = FileWriter(destination_directory).setOptions(suffix='.json')
+    file_writer = FileWriter(destination_directory).set_options(suffix='.json')
 
     mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
 
     # use source_mib_directories as mibs source
     sources = [source]
     sources.extend(source_mib_directories)
-    mib_compiler.addSources(*getReadersFromUrls(*sources, **{'fuzzyMatching': True}))
+    mib_compiler.add_sources(*get_readers_from_urls(*sources, fuzzy_matching=True))
 
-    searchers = [AnyFileSearcher(destination_directory).setOptions(exts=['.json']), StubSearcher(*mib_stubs)]
-    mib_compiler.addSearchers(*searchers)
+    searchers = [AnyFileSearcher(destination_directory).set_options(exts=['.json']), StubSearcher(*mib_stubs)]
+    mib_compiler.add_searchers(*searchers)
 
     # borrowers, aka compiled mibs source
     borrowers = [
-        AnyFileBorrower(borrower_reader, genTexts=True).setOptions(exts=['.json'])
-        for borrower_reader in getReadersFromUrls(*[compiled_mibs_path], **{'lowcaseMatching': False})
+        AnyFileBorrower(borrower_reader, genTexts=True).set_options(exts=['.json'])
+        for borrower_reader in get_readers_from_urls(*[compiled_mibs_path], lowcase_matching=False)
     ]
     mib_compiler.addBorrowers(*borrowers)
 
@@ -311,7 +312,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
             'textFilter': False and (lambda symbol, text: text) or None,
             'writeMibs': True,
             'ignoreErrors': False,
-        }
+        },
     )
 
     return processed
@@ -638,17 +639,17 @@ def _add_profile_row_node(
             oid_name = alias['name']
 
         index = {'MIB': mib, 'tag': oid_name}
-        column = {'name': oid_name}
+        symbol = {'name': oid_name}
         index_oid = _find_oid_by_name(mib, oid_name, mibs_directories, json_mib_directory, source, compiled_mibs_path)
         if index_oid is not None:
-            column['OID'] = index_oid
+            symbol['OID'] = index_oid
             index_table_oid = '.'.join(index_oid.split('.')[:-2])
             index_table_name = _find_name_by_oid(
                 mib, index_table_oid, mibs_directories, json_mib_directory, source, compiled_mibs_path
             )
             if index_table_name is not None:
                 index['table'] = index_table_name
-        index['column'] = column
+        index['symbol'] = symbol
         metric_tags.append(index)
 
     profile_oid_collection[table_oid]['metric_tags'] = metric_tags

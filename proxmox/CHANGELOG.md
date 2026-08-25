@@ -1,0 +1,91 @@
+# CHANGELOG - Proxmox
+
+<!-- towncrier release notes start -->
+
+## 2.6.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add infra_mode tag to proxmox metrics. ([#24008](https://github.com/DataDog/integrations-core/pull/24008))
+
+## 2.5.2 / 2026-05-14 / Agent 7.80.0
+
+***Fixed***:
+
+* Re-order configuration fields by usage frequency. ([#23320](https://github.com/DataDog/integrations-core/pull/23320))
+
+## 2.5.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 2.4.1 / 2026-03-18
+
+***Fixed***:
+
+* Handle non-200 HTTP response from /cluster/metrics/export when Proxmox Metric Server is not configured to prevent AttributeError. ([#22698](https://github.com/DataDog/integrations-core/pull/22698))
+
+## 2.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+
+## 2.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 2.2.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add additional `proxmox_type` tag to nodes. ([#21581](https://github.com/DataDog/integrations-core/pull/21581))
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+* Handle AttributeError when Qemu Agent is not available ([#21399](https://github.com/DataDog/integrations-core/pull/21399))
+
+## 2.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 2.0.0 / 2025-08-07 / Agent 7.70.0
+
+***Changed***:
+
+* Set `empty_default_hostname` true by default. ([#20780](https://github.com/DataDog/integrations-core/pull/20780))
+
+***Added***:
+
+* Add failover support with Agent High Availability feature. ([#20755](https://github.com/DataDog/integrations-core/pull/20755))
+* Add HA metrics. ([#20763](https://github.com/DataDog/integrations-core/pull/20763))
+* Add support for sending tasks as events. ([#20849](https://github.com/DataDog/integrations-core/pull/20849))
+* Add support for filtering metrics and events by resource. ([#20933](https://github.com/DataDog/integrations-core/pull/20933))
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 1.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Initial Release ([#20428](https://github.com/DataDog/integrations-core/pull/20428))
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))

@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from ..fs import file_exists, path_join
+from datadog_checks.dev.fs import file_exists, path_join
+
 from .commands.console import abort
 from .constants import get_root
 from .datastructures import JSONDict
@@ -17,15 +18,6 @@ NON_INTEGRATION_PATHS = [
     "datadog_checks_downloader",
     "ddev",
 ]
-
-# The manifest.json file can contain the source_type_name field that the validation uses to validate different parts
-# of the integration. For example Zabbix was renamed to Zabbix (Community Version) in the manifest.json file, so we
-# need to map it back to Zabbix for validations to pass.
-EXCEPTION_MAPPER = {
-    'Zabbix (Community Version)': 'Zabbix',
-    'Scalr (Community Version)': 'Scalr',
-    'Zscaler (Community Version)': 'Zscaler',
-}
 
 
 class Manifest:
@@ -148,7 +140,6 @@ class ManifestV2:
 
     def get_display_name(self):
         display_name = self._manifest_json.get_path("/assets/integration/source_type_name")
-        display_name = EXCEPTION_MAPPER.get(display_name, display_name)
         return display_name
 
     def get_app_id(self):

@@ -1,0 +1,9 @@
+provides:
+  - id: gitlab-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: gitlab-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

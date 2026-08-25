@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -77,6 +78,8 @@ def build_macos():
                         help='Path to a folder where things will be installed during builder setup.')
     parser.add_argument('--skip-setup', default=False, action='store_true',
                         help='Skip builder setup, assuming it has already been set up.')
+    parser.add_argument('--constraints',
+                        help='Path to a pip constraints file for pinning transitive dependency versions.')
     args = parser.parse_args()
 
     image: str = args.image
@@ -107,6 +110,11 @@ def build_macos():
         shutil.copy(HERE / 'deps' / 'build_dependencies.txt', mount_dir)
         shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
         shutil.copytree(HERE / 'patches', mount_dir / 'patches')
+
+        if args.constraints:
+            constraints_path = Path(args.constraints)
+            if constraints_path.is_file():
+                shutil.copy(constraints_path, mount_dir / 'constraints.txt')
 
         prefix_path = builder_root / 'prefix'
         env = {
@@ -153,6 +161,10 @@ def build_macos():
         final_requirements = mount_dir / 'frozen.txt'
         shutil.move(final_requirements, output_dir)
 
+        # Move the dependency sizes to the output directory
+        dependency_sizes_dir = mount_dir / 'sizes.json'
+        shutil.move(dependency_sizes_dir, output_dir)
+
 
 def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
@@ -163,6 +175,8 @@ def build_image():
     parser.add_argument('--no-run', action='store_true')
     parser.add_argument('-a', '--build-arg', dest='build_args', nargs='+')
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('--constraints',
+                        help='Path to a pip constraints file for pinning transitive dependency versions.')
     args = parser.parse_args()
 
     image: str = args.image
@@ -210,6 +224,11 @@ def build_image():
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
+            if args.constraints:
+                constraints_path = Path(args.constraints)
+                if constraints_path.is_file():
+                    shutil.copy(constraints_path, mount_dir / 'constraints.txt')
+
             # Create outputs on the host so they can be removed
             wheels_dir = mount_dir / 'wheels'
             wheels_dir.mkdir()
@@ -245,6 +264,9 @@ def build_image():
 
             # Move the final requirements file to the output directory
             shutil.move(final_requirements, output_dir)
+
+            # Move the dependency sizes to the output directory
+            shutil.move(mount_dir / 'sizes.json', output_dir)
 
 
 def main():

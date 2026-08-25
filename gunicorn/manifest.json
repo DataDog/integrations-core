@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "49687997-bbf2-45db-9b4f-223cf7c492ed",
   "app_id": "gunicorn",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

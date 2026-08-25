@@ -37,6 +37,11 @@ instances:
     #
   - host: localhost
 
+    ## @param port - number - optional - default: 3306
+    ## Port to use when connecting to MySQL.
+    #
+    port: 3306
+
     ## @param username - string - optional
     ## Username used to connect to MySQL.
     #
@@ -47,10 +52,32 @@ instances:
     #
     password: <PASSWORD>
 
-    ## @param port - number - optional - default: 3306
-    ## Port to use when connecting to MySQL.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
     #
-    port: 3306
+    # dbm: false
+
+    ## Configure the Data Observability async job, which executes monitoring
+    ## queries delivered via Remote Configuration.
+    ## Enabling Data Observability with Database Monitoring uses one additional
+    ## connection. Increase MAX_USER_CONNECTIONS from 5 to 6 for the monitoring user.
+    #
+    # data_observability:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the Data Observability job.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## How often (in seconds) the job wakes up to check which queries are
+        ## due. Individual queries define when they are due using either
+        ## interval_seconds or a cron schedule. Set this value no greater than
+        ## the shortest query interval or the shortest gap between scheduled
+        ## executions. Longer collection intervals delay queries and can skip
+        ## earlier cron ticks when several become due between collection cycles.
+        #
+        # collection_interval: 10
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
@@ -69,8 +96,10 @@ instances:
     #
     # exclude_hostname: false
 
-    ## Controls how the database is identified. The default value is the resolved hostname for the instance,
-    ## which respects the `reported_hostname` option.
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
     ##
     ## This value will be used as-is for the display name of the instance but will be normalized
     ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -91,7 +120,7 @@ instances:
 
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
-    ## If you specify a socket you dont need to specify a host.
+    ## If you specify a socket you don't need to specify a host.
     #
     # sock: <SOCK>
 
@@ -133,84 +162,6 @@ instances:
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
     #   check_hostname: true
-
-    ## @param only_custom_queries - boolean - optional - default: false
-    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
-    ## Only metrics specified in `custom_queries` will be collected.
-    #
-    # only_custom_queries: false
-
-    ## @param use_global_custom_queries - string - optional - default: true
-    ## How `global_custom_queries` should be used for this instance. There are 3 options:
-    ##
-    ## 1. true - `global_custom_queries` override `custom_queries`.
-    ## 2. false - `custom_queries` override `global_custom_queries`.
-    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-    #
-    # use_global_custom_queries: 'true'
-
-    ## @param custom_queries - list of mappings - optional
-    ## Each query must have 2 fields, and can have a third optional field:
-    ##
-    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##            Use the pipe `|` if you require a multi-line script.
-    ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##              The number of columns must equal the number of columns returned in the query.
-    ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is a `tag` type, this column is
-    ##                          considered a tag and applied to every
-    ##                          metric collected by this particular query.
-    ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to the following `tag` types to
-    ##                          tag each metric in the row with the name and value
-    ##                          of the item in this column:
-    ##                           i. tag           - This is the default tag type
-    ##                           ii. tag_list     - This allows multiple values to be attached
-    ##                                             to the tag name. For example: 
-    ##
-    ##                                             query = {
-    ##                                               "name": "example",
-    ##                                               "query": "...",
-    ##                                               "columns": [
-    ##                                                 {"name": "server_tag", "type": "tag_list"},
-    ##                                                 {"name": "foo", "type": "gauge"},
-    ##                                               ]
-    ##                                             }
-    ##
-    ##                                             May result in:
-    ##                                             gauge("foo", tags=[
-    ##                                                                 "server_tag:us",
-    ##                                                                 "server_tag:primary",
-    ##                                                                 "server_tag:default"
-    ##                                                               ])
-    ##                                             gauge("foo", tags=["server_tag:eu"])
-    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
-    ##                          You can use the `count` type to perform aggregation
-    ##                          for queries that return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored. To skip a column, enter:
-    ##                - {}
-    ## 3. tags (optional) - A list of tags to apply to each metric.
-    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
-    ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, 
-    ##     the query will be run every check run.
-    ##     If the collection interval is greater than check collection interval, 
-    ##     the query will NOT BE RUN exactly at the collection interval.
-    ##     The query will be run at the next check run after the collection interval has passed.
-    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
-    #
-    # custom_queries:
-    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
-    #     columns:
-    #     - name: foo
-    #       type: tag
-    #     - name: event.total
-    #       type: gauge
-    #     tags:
-    #     - test:mysql
-    #     metric_prefix: mysql
 
     ## @param additional_status - list of mappings - optional
     ## Set this parameter to collect additional MySQL status variables as metrics
@@ -315,6 +266,16 @@ instances:
         #
         # disable_innodb_metrics: false
 
+        ## @param binlog_size_metrics - boolean - optional - default: true
+        ## Set to `false` to disable the collection of binary log size metrics.
+        ##
+        ## When binary logging is enabled, the check runs `SHOW BINARY LOGS;` to compute the
+        ## `mysql.binlog.disk_use` metric. This query relies on binary log mutexes and can be slower on
+        ## high traffic MySQL databases and Aurora instances, due to the number of binary log files to
+        ## load and iterate. Set this to `false` to skip that query if it impacts your database performance.
+        #
+        # binlog_size_metrics: true
+
         ## @param schema_size_metrics - boolean - optional - default: false
         ## Set to `true` to collect schema size metrics.
         ##
@@ -379,19 +340,14 @@ instances:
         #
         # extra_performance_metrics: false
 
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` enable Database Monitoring.
-    #
-    # dbm: false
-
     ## Configure collection of performance_schema.global_variables.
     #
     # collect_settings:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of performance_schema.global_variables. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -402,10 +358,40 @@ instances:
     ## Configure collection of schemas (databases).
     ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
     #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+        ## Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 60
+        ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
+        ## Capped by `collect_schemas.collection_interval`
+        #
+        # max_execution_time: 60
+
+    ## DEPRECATED: Use `collect_schemas` instead.
+    ## Configure collection of schemas (databases).
+    ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.69.0
+    ## Migration: Use `collect_schemas` instead.
+    #
     # schemas_collection:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        ## Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+        ## Defaults to false.
         #
         # enabled: false
 
@@ -747,6 +733,81 @@ instances:
         ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
         #
         # keep_identifier_quotation: false
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
+    ## @param custom_queries - list of mappings - optional
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##     Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##     The number of columns must equal the number of columns returned in the query.
+    ##     There are 2 required pieces of data:
+    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
+    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
+    ##           to every metric collected by this particular query.
+    ##       2. type - The submission method (gauge, monotonic_count, etc.).
+    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
+    ##           and value of the item in this column:
+    ##             1. tag - This is the default tag type
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##                 ```
+    ##                 query = {
+    ##                   "name": "example",
+    ##                   "query": "...",
+    ##                   "columns": [
+    ##                     {"name": "server_tag", "type": "tag_list"},
+    ##                     {"name": "foo", "type": "gauge"},
+    ##                   ]
+    ##                 }
+    ##                 ```
+    ##                 May result in:
+    ##                 ```
+    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+    ##                 gauge("foo", tags=["server_tag:eu"])
+    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                 ```
+    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
+    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
+    ##           the same or no tags.
+    ##     Columns without a name are ignored. To skip a column, enter:
+    ##     ```
+    ##       - {}
+    ##     ```
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
+    ##     If collection_interval is not set, the query will be run every check run.
+    ##     If the collection interval is less than check collection interval, the query will be run every check
+    ##     run.
+    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
+    ##     exactly at the collection interval.
+    ##     The query will be run at the next check run after the collection interval has passed.
+    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:mysql
+    #     metric_prefix: mysql
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

@@ -1,0 +1,5 @@
+provides:
+  - id: nginx-ingress-controller-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

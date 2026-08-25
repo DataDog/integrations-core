@@ -5,6 +5,8 @@
 
 This integration provides enrichment and visulization for admin and audit logs. It helps to visualize detailed insights into admin and audit log analysis using out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 ### Installation
@@ -60,7 +62,7 @@ Linux command
 
 ### Logs
 
-The Ping Federate integration collects the following log types.
+The PingFederate integration collects the following log types.
 
 | Format     | Event Types    |
 | ---------  | -------------- |
@@ -93,15 +95,15 @@ Additional field log format:
 
 ### Metrics
 
-The Ping Federate does not include any metrics.
+The PingFederate does not include any metrics.
 
 ### Events
 
-The Ping Federate integration does not include any events.
+The PingFederate integration does not include any events.
 
 ### Service Checks
 
-The Ping Federate integration does not include any service checks.
+The PingFederate integration does not include any service checks.
 
 ## Troubleshooting
 

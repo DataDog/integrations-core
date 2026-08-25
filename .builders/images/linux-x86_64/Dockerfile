@@ -16,11 +16,11 @@ ENV CXXFLAGS="${CFLAGS}"
 ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 
 # openssl
-RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
+RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.4.1" \
- SHA256="002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3" \
+ VERSION="3.6.3" \
+ SHA256="243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -35,11 +35,11 @@ RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.12.10
+ENV PYTHON3_VERSION=3.13.15
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="15d9c623abfd2165fe816ea1fb385d6ed8cf3c664661ab357f1782e3036a6dac" \
+ SHA256="c28d9d213c09b5b5ab2c29812950e12f746999e099b82894231be954b26baed9" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh --prefix=/opt/python/${PYTHON3_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON3_VERSION}/bin:${PATH}"
@@ -49,7 +49,7 @@ RUN /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-l
  && /opt/python/${PYTHON3_VERSION}/bin/python3 -m virtualenv /py3
 
 # Rust toolchain (needed for cryptography)
-ENV RUST_VERSION="1.76"
+ENV RUST_VERSION="1.91.0"
 ENV RUSTC_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
 ARG RUSTUP_VERSION="1.26.0"
 ARG RUSTUP_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
@@ -72,7 +72,7 @@ RUN mkdir -p /opt/mqm \
 
 # krb5 for dependencies that require kerberos support
 RUN \
- DOWNLOAD_URL="https://kerberos.org/dist/krb5/1.20/krb5-{{version}}.tar.gz" \
+ DOWNLOAD_URL="https://web.mit.edu/kerberos/dist/krb5/1.20/krb5-1.20.1.tar.gz" \
  VERSION="1.20.1" \
  SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851" \
  RELATIVE_PATH="krb5-{{version}}/src" \
@@ -80,9 +80,9 @@ RUN \
 
 # libxml & libxslt for lxml
 RUN \
- DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
- VERSION="2.12.6" \
- SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.14/libxml2-{{version}}.tar.xz" \
+ VERSION="2.14.5" \
+ SHA256="03d006f3537616833c16c53addcdc32a0eb20e55443cba4038307e3fa7d8d44b" \
  RELATIVE_PATH="libxml2-{{version}}" \
  bash install-from-source.sh \
  --without-iconv \
@@ -98,8 +98,8 @@ RUN \
 
 RUN \
  DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
- VERSION="1.1.39" \
- SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
+ VERSION="1.1.43" \
+ SHA256="5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a" \
  RELATIVE_PATH="libxslt-{{version}}" \
  bash install-from-source.sh \
  --without-python \
@@ -108,13 +108,13 @@ RUN \
  --without-debugger \
  --disable-static
 
-# libpq and pg_config as needed by psycopg2
-RUN \
+# libpq and pg_config as needed by psycopg
+RUN yum install -y flex && \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
- VERSION="16.0" \
- SHA256="df9e823eb22330444e1d48e52cc65135a652a6fdb3ce325e3f08549339f51b99" \
+ VERSION="18.3" \
+ SHA256="d95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f" \
  RELATIVE_PATH="postgresql-{{version}}" \
- bash install-from-source.sh --without-readline --with-openssl --without-icu
+ bash install-from-source.sh --without-readline --with-openssl --without-icu --with-gssapi
 # Add paths to pg_config and to the library
 ENV PATH="/usr/local/pgsql/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/pgsql/lib/:${LD_LIBRARY_PATH}"
@@ -128,6 +128,9 @@ RUN \
  bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install \
  # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
  --sysconfdir=/opt/datadog-agent/embedded/etc
+
+# zstd for librdkafka compression support
+RUN yum install -y epel-release && yum install -y libzstd-devel
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
@@ -158,8 +161,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.14.0" \
- SHA256="5eba3ec2d898919a4b34cc89ace0068d9d09420b8643f265aebac59f8d126203" \
+ VERSION="8.21.0" \
+ SHA256="d9b327997999045a24cda50f3983e69e51c516bd8be6ef9842fc7f99135e33bb" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

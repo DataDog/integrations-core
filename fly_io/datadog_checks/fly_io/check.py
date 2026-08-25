@@ -46,7 +46,6 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.check_initializations.append(self.configure_additional_transformers)
 
     def get_default_config(self):
-
         return {
             'openmetrics_endpoint': self.openmetrics_endpoint,
             'metrics': [METRICS],

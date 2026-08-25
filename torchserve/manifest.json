@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d5400c22-0f0a-4ce4-894d-c3cda48140e9",
   "app_id": "torchserve",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

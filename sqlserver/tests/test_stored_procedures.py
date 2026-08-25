@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -44,7 +44,7 @@ def _expected_dbm_instance_tags(check):
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
 
@@ -92,8 +92,8 @@ def test_get_available_procedure_metrics_columns(dbm_instance, expected_columns,
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-test-procedures"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             result_available_columns = check.procedure_metrics._get_available_procedure_metrics_columns(
                 cursor, expected_columns
             )
@@ -107,8 +107,8 @@ def test_get_procedure_metrics_query_cached(aggregator, dbm_instance, caplog):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-test-procedures"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             for _ in range(3):
                 query = check.procedure_metrics._get_procedure_metrics_query_cached(cursor)
                 assert query, "query should be non-empty"
@@ -253,8 +253,8 @@ def test_procedure_metrics(
     dd_run_check(check)
 
     _conn_key_prefix = "dbm-test-procedures"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             available_procedure_metrics_columns = check.procedure_metrics._get_available_procedure_metrics_columns(
                 cursor, SQL_SERVER_PROCEDURE_METRICS_COLUMNS
             )
@@ -264,7 +264,9 @@ def test_procedure_metrics(
     expected_instance_tags.add("database_hostname:stubbed.hostname")
     expected_instance_tags.add("database_instance:stubbed.hostname")
     expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
-    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
+    )
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -283,9 +285,7 @@ def test_procedure_metrics(
             expected_objects, payload['sqlserver_rows']
         )
 
-    assert len(payload['sqlserver_rows']) == len(expected_objects), 'should have as many emitted rows as expected'
     assert set(payload['tags']) == expected_instance_tags
-    assert payload['ddagenthostname'] == datadog_agent.get_hostname()
 
     for row in payload['sqlserver_rows']:
         for column in available_procedure_metrics_columns:

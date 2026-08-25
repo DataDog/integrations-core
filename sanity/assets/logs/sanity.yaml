@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: sanity
 metric_id: sanity
 backend_only: false

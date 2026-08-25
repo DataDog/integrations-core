@@ -8,11 +8,29 @@ from contextlib import suppress
 import click
 from semver import VersionInfo, finalize_version
 
-from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
-from ...git import get_current_branch, git_commit
-from ...release import get_agent_requirement_line, update_agent_requirements, update_version_module
-from ...utils import complete_valid_checks, get_bump_function, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_debug,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
+from datadog_checks.dev.tooling.git import get_current_branch, git_commit
+from datadog_checks.dev.tooling.release import (
+    get_agent_requirement_line,
+    update_agent_requirements,
+    update_version_module,
+)
+from datadog_checks.dev.tooling.utils import (
+    complete_valid_checks,
+    get_bump_function,
+    get_valid_checks,
+    get_version_string,
+)
+
 from . import changelog
 from .show import changes
 
@@ -55,7 +73,7 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
       - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
     """
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
-    from ...signing import YubikeyException, update_link_metadata
+    from datadog_checks.dev.tooling.signing import YubikeyException, update_link_metadata
 
     releasing_all = 'all' in checks
 
@@ -172,11 +190,15 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
         updated_checks.append(check)
         # update the list of integrations to be shipped with the Agent
         if repo_choice == 'core' and check not in NOT_CHECKS:
-            req_file = get_agent_release_requirements()
-            commit_targets.append(os.path.basename(req_file))
-            echo_waiting('Updating the Agent requirements file... ', nl=False)
-            update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
-            echo_success('success!')
+            requirement_line = get_agent_requirement_line(check, version, ctx.obj)
+            if requirement_line is not None:
+                req_file = get_agent_release_requirements()
+                commit_targets.append(os.path.basename(req_file))
+                echo_waiting('Updating the Agent requirements file... ', nl=False)
+                update_agent_requirements(req_file, check, requirement_line)
+                echo_success('success!')
+            else:
+                echo_info(f'Skipping Agent requirements update for {check}: no supported platforms to include.')
 
         echo_waiting('Committing files...')
 

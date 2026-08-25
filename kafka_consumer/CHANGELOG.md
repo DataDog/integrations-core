@@ -2,6 +2,224 @@
 
 <!-- towncrier release notes start -->
 
+## 9.0.0 / 2026-08-05
+
+***Changed***:
+
+* Redact Kafka Connect connector configuration with a known-safe allowlist instead of a sensitive-key denylist. Configuration keys not on the allowlist are now hidden in Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Add connector failure trace and tracked topics to Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Emit a `consumer_membership` data-streams-message per consumer group with the Kafka cluster id, group id and current member ids. ([#24601](https://github.com/DataDog/integrations-core/pull/24601))
+
+***Fixed***:
+
+* Reduce cluster-check-runner memory churn by persisting the DSM broker timestamps cache in a compact binary format (marshal) instead of serializing it as JSON on every run. ([#24471](https://github.com/DataDog/integrations-core/pull/24471))
+* Cap the total DSM broker timestamps history per cluster with a memory budget that scales the per-partition depth by partition count, bounding cluster-check-runner memory on large clusters. ([#24508](https://github.com/DataDog/integrations-core/pull/24508))
+
+## 8.1.2 / 2026-07-23 / Agent 7.82.0
+
+***Fixed***:
+
+* Call malloc_trim after each run to return librdkafka's per-arena free memory to the OS and curb agent memory growth. ([#24553](https://github.com/DataDog/integrations-core/pull/24553))
+* Keep the DSM broker_timestamps cache in memory and persist it at most every 5 minutes to reduce per-run allocation churn and memory growth. ([#24554](https://github.com/DataDog/integrations-core/pull/24554))
+
+## 8.1.1 / 2026-07-17
+
+***Fixed***:
+
+* Cache the earliest (log-start) offset used for `kafka.topic.size` and `kafka.partition.size` across collection intervals instead of refetching it from the broker on every run. ([#24515](https://github.com/DataDog/integrations-core/pull/24515))
+* Allow reusing the Kafka AdminClient and Consumer across check runs (via close_admin_client: false) to avoid unbounded agent memory growth from librdkafka thread churn. ([#24552](https://github.com/DataDog/integrations-core/pull/24552))
+
+## 8.1.0 / 2026-07-08
+
+***Added***:
+
+* Add consumer group rebalance detection and membership-change counting metrics, plus partition assignor, group type, simple-group, and static-membership tags, when cluster monitoring is enabled. (DSM only) ([#23915](https://github.com/DataDog/integrations-core/pull/23915))
+* Add Kafka Connect connector monitoring via the Kafka Connect REST API, including connector health metrics and configuration events. ([#24013](https://github.com/DataDog/integrations-core/pull/24013))
+* Support monitoring Confluent Cloud managed connectors by pointing kafka_connect_url at the Confluent Cloud Connect REST API. ([#24033](https://github.com/DataDog/integrations-core/pull/24033))
+
+***Fixed***:
+
+* Fix kafka.broker_offset and kafka.topic.message_rate not being collected when enable_cluster_monitoring is true and the consumer context count exceeds max_partition_contexts. ([#24149](https://github.com/DataDog/integrations-core/pull/24149))
+* Improve the accuracy of ``estimated_consumer_lag`` for consumers that are far behind: cap interpolation for offsets older than the cached broker history, use the low watermark as a floor for the lag offset when cluster monitoring is enabled, and retain a longer broker-timestamp history by compacting the cache (Visvalingam-Whyatt) and pruning samples below the lowest readable offset (the low watermark, or the earliest consumer offset when cluster monitoring is disabled) instead of evicting the oldest one. ([#24167](https://github.com/DataDog/integrations-core/pull/24167))
+* Continue collecting high-watermark offsets for healthy partitions when an individual partition's offset lookup fails, instead of aborting the check. ([#24263](https://github.com/DataDog/integrations-core/pull/24263))
+
+## 8.0.0 / 2026-06-09 / Agent 7.81.0
+
+***Removed***:
+
+* Remove the Data Streams live messages reading feature, which has moved to the kafka_actions integration. ([#23842](https://github.com/DataDog/integrations-core/pull/23842))
+
+***Added***:
+
+* Schema Registry: emit per-subject and global compatibility on the Data Streams schema payload, and stop emitting Datadog Events for broker, topic, and schema registry configurations (those payloads continue to flow to the Data Streams intake). ([#23778](https://github.com/DataDog/integrations-core/pull/23778))
+* Add broker list to the cluster monitoring heartbeat payload. ([#23898](https://github.com/DataDog/integrations-core/pull/23898))
+* Emit connection_error DSM event when the integration cannot connect to Kafka. ([#23902](https://github.com/DataDog/integrations-core/pull/23902))
+
+## 7.3.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add an `out_of_sync_broker_id` tag to the `kafka.partition.*` metrics (when `enable_cluster_monitoring` is true) identifying each assigned replica that is not in the partition's ISR. Use it to attribute under-replicated partitions to specific broker IDs. ([#23428](https://github.com/DataDog/integrations-core/pull/23428))
+* Include `bootstrap_servers` in the Kafka consumer cluster monitoring heartbeat payload. ([#23475](https://github.com/DataDog/integrations-core/pull/23475))
+
+***Fixed***:
+
+* Filter out errored partitions from offsets_for_times results to prevent invalid offset reporting ([#23242](https://github.com/DataDog/integrations-core/pull/23242))
+* Lower log level from WARN to DEBUG for the message emitted when a consumer group has offsets for a partition but no stored highwater offset (typically during leader failover). ([#23388](https://github.com/DataDog/integrations-core/pull/23388))
+* When a topic's highwater offset decreases (retention wipe, topic recreation, or offset reset), purge cached (offset, timestamp) pairs whose offset is above the new highwater and switch eviction to oldest-timestamp instead of smallest-offset. Previously, stale pre-reset entries poisoned interpolation and pinned `kafka.estimated_consumer_lag` to a wall-clock value equal to how long ago the reset happened. ([#23409](https://github.com/DataDog/integrations-core/pull/23409))
+
+## 7.2.1 / 2026-05-12 / Agent 7.79.0
+
+***Fixed***:
+
+* Switch cluster monitoring's earliest-offset fetch to AdminClient.list_offsets(earliest), and isolate its failures so an earliest-offset error no longer drops topic.message_rate, partition.isr, topic.config.*, and other unrelated topic-metadata metrics. ([#23580](https://github.com/DataDog/integrations-core/pull/23580))
+
+## 7.2.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Send cluster monitoring heartbeat via data streams messages with context count and limit. ([#23281](https://github.com/DataDog/integrations-core/pull/23281))
+
+***Fixed***:
+
+* Fix consumer leak when offsets_for_times() times out, preventing a potential librdkafka crash ([#23241](https://github.com/DataDog/integrations-core/pull/23241))
+
+## 7.1.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 7.0.0 / 2026-03-18
+
+***Changed***:
+
+* Broker configurations, topic configurations, and schema registry version checks are now collected in batches across multiple agent runs instead of all at once. This reduces load on large clusters but means that not all metrics are emitted in every check run. The batch sizes and refresh interval are controlled by the `kafka_configs_refresh_interval` configuration option. ([#22721](https://github.com/DataDog/integrations-core/pull/22721))
+
+***Added***:
+
+* Support IAM authentication for MSK clusters ([#22660](https://github.com/DataDog/integrations-core/pull/22660))
+* Support oauth for schema registry ([#22665](https://github.com/DataDog/integrations-core/pull/22665))
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+* Add kafka_cluster_id_override parameter to allow overriding the auto-detected cluster ID. ([#22768](https://github.com/DataDog/integrations-core/pull/22768))
+* Bump `confluent-kafka` to 2.13.2 ([#22829](https://github.com/DataDog/integrations-core/pull/22829))
+
+***Fixed***:
+
+* Don't report negative lag when data is dropped (broker offset goes down). ([#22679](https://github.com/DataDog/integrations-core/pull/22679))
+* URL-encode subject names in Schema Registry API calls to fix 404 errors for Protobuf reference subjects containing slashes. ([#22924](https://github.com/DataDog/integrations-core/pull/22924))
+
+## 6.14.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Support oauth scope and extensions ([#22560](https://github.com/DataDog/integrations-core/pull/22560))
+* Kafka consumer connects to oauth provider with ca certificate in custom path ([#22602](https://github.com/DataDog/integrations-core/pull/22602))
+* Bump confluent-kafka to 2.13.0 ([#22630](https://github.com/DataDog/integrations-core/pull/22630))
+
+## 6.13.0 / 2026-02-04 / Agent 7.76.0
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 6.12.0 / 2026-02-04 / Agent 7.75.3
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 6.11.0 / 2026-01-21
+
+***Added***:
+
+* Collect kafka configuration events. ([#22378](https://github.com/DataDog/integrations-core/pull/22378))
+
+***Fixed***:
+
+* Fix caching logic when collecting cluster monitoring events ([#22375](https://github.com/DataDog/integrations-core/pull/22375))
+
+## 6.10.2 / 2026-01-06 / Agent 7.75.0
+
+***Fixed***:
+
+* Fix Kafka message decoding when using Protobuf with schema registry. ([#22265](https://github.com/DataDog/integrations-core/pull/22265))
+
+## 6.10.1 / 2025-12-19
+
+***Fixed***:
+
+* Support Protobuf messages with schema registry ([#22020](https://github.com/DataDog/integrations-core/pull/22020))
+
+## 6.10.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Add Kafka Cluster Monitoring ([#21736](https://github.com/DataDog/integrations-core/pull/21736))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 6.9.1 / 2025-10-31 / Agent 7.73.0
+
+***Fixed***:
+
+* Correctly support schema registry bytes in Avro & Protobuf messages ([#21632](https://github.com/DataDog/integrations-core/pull/21632))
+
+## 6.9.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump `confluent-kafka` to 2.11.1 ([#21259](https://github.com/DataDog/integrations-core/pull/21259))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo. ([#21206](https://github.com/DataDog/integrations-core/pull/21206))
+
+## 6.8.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+***Fixed***:
+
+* Improve kafka consumer highwater offset collection time ([#20716](https://github.com/DataDog/integrations-core/pull/20716))
+* Improve check efficiency with many topics or partitions per consumer group when `collect_consumer_group_state` is enabled. ([#21221](https://github.com/DataDog/integrations-core/pull/21221))
+* Fix undercount of contexts for the max_partition_contexts configuration option. ([#21223](https://github.com/DataDog/integrations-core/pull/21223))
+
+## 6.7.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Add support for Avro and Protobuf formats for Data Streams messages feature. ([#20862](https://github.com/DataDog/integrations-core/pull/20862))
+
+***Fixed***:
+
+* data streams: Don't retrieve messages for untracked topics and cleanup consumer groups used for Data Streams messages feature. ([#20948](https://github.com/DataDog/integrations-core/pull/20948))
+
+## 6.6.1 / 2025-07-25 / Agent 7.69.0
+
+***Fixed***:
+
+* Lowercase Kafka cluster in data streams messages feature. ([#20842](https://github.com/DataDog/integrations-core/pull/20842))
+
+## 6.6.0 / 2025-07-10
+
+***Added***:
+
+* kafka_consumer check can retrieve messages from Kafka and log them. ([#20512](https://github.com/DataDog/integrations-core/pull/20512))
+
 ## 6.5.2 / 2025-05-15 / Agent 7.67.0
 
 ***Fixed***:

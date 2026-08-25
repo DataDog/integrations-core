@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f6177896-da1e-4bc4-ab19-fd32e8868647",
   "app_id": "mysql",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -50,7 +51,8 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "mysqld"
+        "mysqld",
+        "mariadbd"
       ],
       "source_type_id": 18,
       "auto_install": true

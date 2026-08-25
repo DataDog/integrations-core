@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .utils import compact_query
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-metrics
+# https://clickhouse.com/docs/operations/system-tables/metrics
 SystemMetrics = {
     'name': 'system.metrics',
     'query': 'SELECT value, metric FROM system.metrics',
@@ -181,6 +181,7 @@ SystemMetrics = {
                 'LocalThreadScheduled': {'name': 'thread.local.scheduled', 'type': 'gauge'},
                 'MMappedFileBytes': {'name': 'mmapped.file.size', 'type': 'gauge'},
                 'MMappedFiles': {'name': 'mmapped.file.current', 'type': 'gauge'},
+                'MarkCacheBytes': {'name': 'table.mergetree.storage.mark.cache', 'type': 'gauge'},
                 'MarksLoaderThreads': {'name': 'threads.marks_loader.total', 'type': 'gauge'},
                 'MarksLoaderThreadsActive': {'name': 'threads.marks_loader.active', 'type': 'gauge'},
                 'MarksLoaderThreadsScheduled': {'name': 'threads.marks_loader.scheduled', 'type': 'gauge'},
@@ -435,7 +436,7 @@ SystemMetrics = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-events
+# https://clickhouse.com/docs/operations/system-tables/events
 SystemEvents = {
     'name': 'system.events',
     'query': 'SELECT value, event FROM system.events',
@@ -1102,7 +1103,7 @@ SystemEvents = {
                 'KeeperSnapshotApplys': {'name': 'keeper.snapshot.apply', 'type': 'monotonic_gauge'},
                 'KeeperSnapshotApplysFailed': {'name': 'keeper.snapshot.apply.failed', 'type': 'monotonic_gauge'},
                 'KeeperSnapshotCreations': {'name': 'keeper.snapshot.create', 'type': 'monotonic_gauge'},
-                'KeeperSnapshotCreationsFailed': {'name': 'keerper.snapshot.create.failed', 'type': 'monotonic_gauge'},
+                'KeeperSnapshotCreationsFailed': {'name': 'keeper.snapshot.create.failed', 'type': 'monotonic_gauge'},
                 'LeaderElectionAcquiredLeadership': {
                     'name': 'table.mergetree.replicated.leader.elected',
                     'type': 'monotonic_gauge',
@@ -1895,8 +1896,26 @@ SystemEvents = {
     ],
 }
 
+SystemEventsToDeprecate = {
+    'name': 'system.events',
+    'query': 'SELECT value, event FROM system.events',
+    'columns': [
+        {'name': 'value', 'type': 'source'},
+        {
+            'name': 'event',
+            'type': 'match',
+            'source': 'value',
+            'items': {
+                'KeeperSnapshotCreationsFailed': {
+                    'name': 'keerper.snapshot.create.failed',
+                    'type': 'monotonic_gauge',
+                },  ## to deprecate - typo
+            },
+        },
+    ],
+}
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-asynchronous_metrics
+# https://clickhouse.com/docs/operations/system-tables/asynchronous_metrics
 SystemAsynchronousMetrics = {
     'name': 'system.asynchronous_metrics',
     'query': 'SELECT value, metric FROM system.asynchronous_metrics',
@@ -1949,7 +1968,7 @@ SystemAsynchronousMetrics = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-parts
+# https://clickhouse.com/docs/operations/system-tables/parts
 SystemParts = {
     'name': 'system.parts',
     'query': compact_query(
@@ -1977,7 +1996,7 @@ SystemParts = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-replicas
+# https://clickhouse.com/docs/operations/system-tables/replicas
 SystemReplicas = {
     'name': 'system.replicas',
     'query': compact_query(
@@ -2021,7 +2040,7 @@ SystemReplicas = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system-dictionaries
+# https://clickhouse.com/docs/operations/system-tables/dictionaries
 SystemDictionaries = {
     'name': 'system.dictionaries',
     'query': compact_query(

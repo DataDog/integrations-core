@@ -14,6 +14,8 @@ Identify busy buckets, track cache miss ratios, and more. This Agent check colle
 
 And many more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

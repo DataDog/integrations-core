@@ -23,7 +23,6 @@ def dd_environment():
         endpoints='{}/rpc/report'.format(URL),
         mount_logs=True,
     ):
-
         # Generate a test database
         data = {'dddd': 'dddd'}
         headers = {'X-Kt-Mode': 'set'}

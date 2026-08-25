@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ctypes
 import re
+import time
 
+import psutil
 import pywintypes
 import win32service
 import winerror
@@ -13,6 +15,23 @@ from datadog_checks.base import AgentCheck
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
 SERVICE_CONFIG_TRIGGER_INFO = 8
+
+# Per-user service instance flag (SERVICE_USERSERVICE_INSTANCE in winsvc.h). Set on the
+# per-session instances of a per-user service (named <template>_<LUID>), not on the template.
+SERVICE_USERSERVICE_INSTANCE = 0x80
+USER_SERVICE_LUID_SUFFIX_RE = re.compile(r'_[0-9A-Fa-f]+$')
+
+
+def _is_per_user_service(service_type: int) -> bool:
+    """True for per-user service instances (named <template>_<LUID>)."""
+    return bool(service_type & SERVICE_USERSERVICE_INSTANCE)
+
+
+def _group_per_user_service_name(name: str, service_type: int) -> str:
+    """Strip the per-user LUID suffix so instances group under their template name."""
+    if _is_per_user_service(service_type):
+        return USER_SERVICE_LUID_SUFFIX_RE.sub('', name)
+    return name
 
 
 def QueryServiceConfig2W(*args):
@@ -28,10 +47,11 @@ class TriggerInfo(ctypes.Structure):
 
 
 class ServiceFilter(object):
-    def __init__(self, name=None, startup_type=None, trigger_start=None):
+    def __init__(self, name=None, startup_type=None, trigger_start=None, per_user=None):
         self.name = name
         self.startup_type = startup_type
         self.trigger_start = trigger_start
+        self.per_user = per_user
 
         self._init_patterns()
 
@@ -46,6 +66,9 @@ class ServiceFilter(object):
     def match(self, service_view):
         if self.name is not None:
             if not self._name_re.match(service_view.name):
+                return False
+        if self.per_user is not None:
+            if self.per_user != _is_per_user_service(service_view.service_type):
                 return False
         if self.startup_type is not None:
             if self.startup_type.lower() != service_view.startup_type_string().lower():
@@ -65,6 +88,8 @@ class ServiceFilter(object):
             vals.append('startup_type={}'.format(self.startup_type))
         if self.trigger_start is not None:
             vals.append('trigger_start={}'.format(self.trigger_start))
+        if self.per_user is not None:
+            vals.append('per_user={}'.format(self.per_user))
         # Example:
         #   - ServiceFilter(name=EventLog)
         #   - ServiceFilter(startup_type=automatic)
@@ -99,7 +124,8 @@ class ServiceFilter(object):
                 name = cls._wmi_compat_name(name)
             startup_type = item.get('startup_type', None)
             trigger_start = item.get('trigger_start', None)
-            obj = cls(name=name, startup_type=startup_type, trigger_start=trigger_start)
+            per_user = item.get('per_user', None)
+            obj = cls(name=name, startup_type=startup_type, trigger_start=trigger_start, per_user=per_user)
         else:
             raise Exception("Invalid type '{}' for service".format(type(item).__name__))
         return obj
@@ -116,7 +142,7 @@ class ServiceView(object):
     STARTUP_TYPE_UNKNOWN = "unknown"
     DISPLAY_NAME_UNKNOWN = "Not_Found"
 
-    def __init__(self, scm_handle, name):
+    def __init__(self, scm_handle, name, service_type=None):
         self.scm_handle = scm_handle
         self.name = name
 
@@ -125,11 +151,14 @@ class ServiceView(object):
         self._service_config = None
         self._is_delayed_auto = None
         self._trigger_count = None
+        self._service_type = service_type
 
     def __str__(self):
         vals = []
         if self.name is not None:
             vals.append('name={}'.format(self.name))
+        if self._service_type is not None:
+            vals.append('service_type=0x{:X}'.format(self._service_type))
         if self._startup_type is not None:
             vals.append('startup_type={}'.format(self.startup_type_string()))
         if self._trigger_count is not None:
@@ -142,6 +171,8 @@ class ServiceView(object):
     @property
     def hSvc(self):
         if self._hSvc is None:
+            # Handle will automatically be closed by pywin32
+            # https://mhammond.github.io/pywin32/PySC_HANDLE.html
             self._hSvc = win32service.OpenService(self.scm_handle, self.name, win32service.SERVICE_QUERY_CONFIG)
         return self._hSvc
 
@@ -150,6 +181,12 @@ class ServiceView(object):
         if self._service_config is None:
             self._service_config = win32service.QueryServiceConfig(self.hSvc)
         return self._service_config
+
+    @property
+    def service_type(self):
+        if self._service_type is None:
+            self._service_type = self.service_config[0]
+        return self._service_type
 
     @property
     def startup_type(self):
@@ -204,25 +241,58 @@ class ServiceView(object):
         return startup_type_string
 
 
+def _build_process_cache() -> dict[int, "psutil.Process"]:
+    process_cache_dict = {}
+    for proc in psutil.process_iter(attrs=['pid', 'create_time']):
+        process_cache_dict[proc.pid] = proc
+    return process_cache_dict
+
+
+def _get_process_uptime_from_cache(pid: int, process_cache: dict[int, "psutil.Process"]) -> int:
+    process = process_cache.get(pid)
+    if process is None:
+        return 0
+
+    return int(time.time() - process.create_time())
+
+
 class WindowsService(AgentCheck):
     SERVICE_CHECK_NAME = 'windows_service.state'
     # https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status_process
     STATE_TO_STATUS = {
-        # STOPPED
-        1: AgentCheck.CRITICAL,
-        # START_PENDING
-        2: AgentCheck.WARNING,
-        # STOP_PENDING
-        3: AgentCheck.WARNING,
-        # RUNNING
-        4: AgentCheck.OK,
-        # CONTINUE_PENDING
-        5: AgentCheck.WARNING,
-        # PAUSE_PENDING
-        6: AgentCheck.WARNING,
-        # PAUSED
-        7: AgentCheck.WARNING,
+        win32service.SERVICE_STOPPED: AgentCheck.CRITICAL,
+        win32service.SERVICE_START_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_STOP_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_RUNNING: AgentCheck.OK,
+        win32service.SERVICE_CONTINUE_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_PAUSE_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_PAUSED: AgentCheck.WARNING,
     }
+    STATE_TO_STRING = {
+        win32service.SERVICE_STOPPED: "stopped",
+        win32service.SERVICE_START_PENDING: "start_pending",
+        win32service.SERVICE_STOP_PENDING: "stop_pending",
+        win32service.SERVICE_RUNNING: "running",
+        win32service.SERVICE_CONTINUE_PENDING: "continue_pending",
+        win32service.SERVICE_PAUSE_PENDING: "pause_pending",
+        win32service.SERVICE_PAUSED: "paused",
+    }
+    UNKNOWN_LITERAL = "unknown"
+
+    def __init__(self, name, init_config, instances):
+        super().__init__(name, init_config, instances)
+        self._service_pid_cache: dict[str, int] = {}
+
+    def _get_service_restarts(self, service_name: str, current_pid: int) -> int:
+        if current_pid == 0:
+            return 0
+        prev_pid = self._service_pid_cache.get(service_name, None)
+        restarts = 0
+        if prev_pid is not None and prev_pid != current_pid:
+            restarts = 1
+        # only store the last running pid for the service
+        self._service_pid_cache[service_name] = current_pid
+        return restarts
 
     def check(self, instance):
         services = instance.get('services', [])
@@ -241,14 +311,21 @@ class WindowsService(AgentCheck):
         services_unseen = {f.name for f in service_filters if f.name is not None}
 
         try:
+            # Handle will automatically be closed by pywin32
+            # https://mhammond.github.io/pywin32/PySC_HANDLE.html
             scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ENUMERATE_SERVICE)
         except Exception as e:  # no cov
             raise Exception('Unable to open SCManager: {}'.format(e))
 
-        type_filter = win32service.SERVICE_WIN32
-        state_filter = win32service.SERVICE_STATE_ALL
+        service_status_process_enums = win32service.EnumServicesStatusEx(
+            scm_handle,
+            win32service.SERVICE_WIN32,
+            win32service.SERVICE_STATE_ALL,
+            None,
+            win32service.SC_ENUM_PROCESS_INFO,
+        )
 
-        service_statuses = win32service.EnumServicesStatus(scm_handle, type_filter, state_filter)
+        process_cache = _build_process_cache()
 
         # Sort service filters in reverse order on the regex pattern so more specific (longer)
         # regex patterns are tested first. This is to handle cases when a pattern is a prefix of
@@ -259,8 +336,38 @@ class WindowsService(AgentCheck):
         # See test_name_regex_order()
         service_filters = sorted(service_filters, reverse=True, key=lambda x: len(x.name or ""))
 
-        for short_name, display_name, service_status in service_statuses:
-            service_view = ServiceView(scm_handle, short_name)
+        group_per_user_services = instance.get('group_per_user_services', False)
+
+        # Exclusion (per_user: false) takes precedence over grouping; excluded services are never
+        # collected, so they can't be grouped.
+        if group_per_user_services and any(f.per_user is False for f in service_filters):
+            self.warning(
+                "group_per_user_services is enabled but a services filter excludes per-user services "
+                "(per_user: false); excluded services are not collected and will not be grouped."
+            )
+
+        for service_status_process_enum in service_status_process_enums:
+            service_name = service_status_process_enum["ServiceName"]
+            display_name = service_status_process_enum["DisplayName"]
+            state = service_status_process_enum["CurrentState"]
+            service_pid = service_status_process_enum["ProcessId"]
+            service_type = service_status_process_enum.get("ServiceType", 0)
+
+            service_view = ServiceView(scm_handle, service_name, service_type)
+
+            # Names used for tags; for per-user services these collapse the per-session LUID suffix
+            # so all instances report under their template name.
+            # The full instance name is kept for service handles and the restart PID cache.
+            # Multiple instances thus collapse into a single series; if they are in different states
+            # the reported state reflects whichever instance is emitted last.
+            # We generally expect multiple per-user instances per host to be rare (terminal service
+            # sessions only); the main win is grouping the windows_service tag across hosts (and thus
+            # service checks) for easier monitoring.
+            reported_name = service_name
+            reported_display_name = display_name
+            if group_per_user_services:
+                reported_name = _group_per_user_service_name(service_name, service_type)
+                reported_display_name = _group_per_user_service_name(display_name, service_type)
 
             if 'ALL' not in services:
                 for service_filter in service_filters:
@@ -274,19 +381,26 @@ class WindowsService(AgentCheck):
                     except (pywintypes.error, OSError) as e:
                         self.log.exception("Exception at service match for %s", service_filter)
                         self.warning(
-                            "Failed to query %s service config for filter %s: %s", short_name, service_filter, str(e)
+                            "Failed to query %s service config for filter %s: %s", service_name, service_filter, str(e)
                         )
                 else:
                     continue
 
-            state = service_status[1]
-            status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
+            service_uptime = 0
+            # If service_pid is 0, the service is not running
+            if service_pid != 0:
+                service_uptime = _get_process_uptime_from_cache(service_pid, process_cache)
 
-            tags = ['windows_service:{}'.format(short_name)]
+            service_restarts = self._get_service_restarts(service_name, service_pid)
+
+            status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
+            state_string = self.STATE_TO_STRING.get(state, self.UNKNOWN_LITERAL)
+
+            tags = ['windows_service:{}'.format(reported_name), 'windows_service_state:{}'.format(state_string)]
             tags.extend(custom_tags)
 
             if instance.get('collect_display_name_as_tag', False):
-                tags.append('display_name:{}'.format(display_name))
+                tags.append('display_name:{}'.format(reported_display_name))
 
             if instance.get('windows_service_startup_type_tag', False):
                 try:
@@ -294,22 +408,27 @@ class WindowsService(AgentCheck):
                 except pywintypes.error as e:
                     self.log.exception("Exception at windows_service_startup_type tag for %s", service_filter)
                     self.warning(
-                        "Failed to query %s service config for filter %s: %s", short_name, service_filter, str(e)
+                        "Failed to query %s service config for filter %s: %s", service_name, service_filter, str(e)
                     )
 
             if not instance.get('disable_legacy_service_tag', False):
                 self._log_deprecation('service_tag', 'windows_service')
-                tags.append('service:{}'.format(short_name))
+                tags.append('service:{}'.format(reported_name))
 
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
-            self.log.debug('service state for %s %s', short_name, status)
+            self.log.debug('service state for %s %s', service_name, status)
+            self.gauge('windows_service.uptime', service_uptime, tags=tags)
+            # Send 1 for windows_service.state so the user can sum by the windows_service_state tag
+            # to filter services by state. e.g. sum:windows_service.state{*} by windows_service_state
+            self.gauge('windows_service.state', 1, tags=tags)
+            self.count('windows_service.restarts', service_restarts, tags=tags)
 
         if 'ALL' not in services:
             for service in services_unseen:
                 # if a name doesn't match anything (wrong name or no permission to access the service), report UNKNOWN
                 status = self.UNKNOWN
 
-                tags = ['windows_service:{}'.format(service)]
+                tags = ['windows_service:{}'.format(service), 'windows_service_state:{}'.format(self.UNKNOWN_LITERAL)]
 
                 tags.extend(custom_tags)
 
@@ -325,3 +444,6 @@ class WindowsService(AgentCheck):
 
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
                 self.log.debug('service state for %s %s', service, status)
+                self.gauge('windows_service.uptime', 0, tags=tags)
+                self.gauge('windows_service.state', 1, tags=tags)
+                self.count('windows_service.restarts', 0, tags=tags)

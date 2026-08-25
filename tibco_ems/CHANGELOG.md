@@ -2,6 +2,55 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.1 / 2026-08-05
+
+***Fixed***:
+
+* Aggregate metrics per (destination, user, component_type, conn) ([#24685](https://github.com/DataDog/integrations-core/pull/24685))
+
+## 2.6.0 / 2026-06-09 / Agent 7.81.0
+
+***Added***:
+
+* Add new config ``use_ssl`` to connect via SSL instead of TCP. ([#23732](https://github.com/DataDog/integrations-core/pull/23732))
+
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 2.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 2.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 2.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 2.1.2 / 2025-09-05 / Agent 7.71.0
+
+***Fixed***:
+
+* Fix collection of queues with a `none` prefetch value ([#21039](https://github.com/DataDog/integrations-core/pull/21039))
+
+## 2.1.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Fix leak of tags across check runs. ([#20859](https://github.com/DataDog/integrations-core/pull/20859))
+
 ## 2.1.0 / 2024-10-18 / Agent 7.59.0
 
 ***Added***:

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "de5b5443-5038-46cf-a052-0484348776d6",
   "app_id": "istio",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -14,6 +15,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Network",
+      "Category::Security",
       "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::Windows",

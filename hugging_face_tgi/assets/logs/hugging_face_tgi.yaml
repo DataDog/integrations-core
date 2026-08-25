@@ -1,0 +1,272 @@
+id: hugging_face_tgi
+metric_id: hugging-face-tgi
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Hugging Face TGI
+  enabled: true
+  filter:
+    query: source:hugging_face_tgi
+  processors:
+    - type: grok-parser
+      name: Non JSON and no color
+      enabled: true
+      source: message
+      samples:
+        - '2025-09-09T11:29:51.795563Z  INFO
+          generate_stream{parameters=GenerateParameters { best_of: None,
+          temperature: None, repetition_penalty: None, frequency_penalty: None,
+          top_k: None, top_p: None, typical_p: None, do_sample: false,
+          max_new_tokens: Some(20), return_full_text: None, stop: [], truncate:
+          None, watermark: false, details: false, decoder_input_details: false,
+          seed: None, top_n_tokens: None, grammar: None, adapter_id: None }
+          total_time="1.194364886s" validation_time="204.821µs"
+          queue_time="53.525µs" inference_time="1.194106715s"
+          time_per_token="59.705335ms" seed="None"}:
+          text_generation_router::server: router/src/server.rs:637: Success'
+        - '2025-09-09T11:28:03.840209Z ERROR
+          chat_completions{parameters="GenerateParameters { best_of: None,
+          temperature: None, repetition_penalty: None, frequency_penalty: None,
+          top_k: None, top_p: None, typical_p: None, do_sample: true,
+          max_new_tokens: Some(20), return_full_text: None, stop: [], truncate:
+          None, watermark: false, details: true, decoder_input_details: false,
+          seed: None, top_n_tokens: None, grammar: None, adapter_id: None
+          }"}:async_stream:generate_stream: text_generation_router::infer:
+          router/src/infer/mod.rs:126: `inputs` tokens + `max_new_tokens` must
+          be <= 512. Given: 1864 `inputs` tokens and 20 `max_new_tokens`'
+        - "2025-09-08T15:41:01.566464Z  WARN text_generation_router::server:
+          router/src/server.rs:1906: Invalid hostname, defaulting to 0.0.0.0"
+        - "2025-09-08T15:38:42.366067Z  INFO download: text_generation_launcher:
+          Starting check and download process for
+          teknium/OpenHermes-2.5-Mistral-7B"
+        - |-
+          2025-09-08T15:38:40.500145Z  INFO text_generation_launcher: Args {
+              model_id: "teknium/OpenHermes-2.5-Mistral-7B",
+              revision: None,
+              validation_workers: 2,
+              sharded: None,
+              num_shard: None,
+              quantize: None,
+              speculate: None,
+              dtype: None,
+              kv_cache_dtype: None,
+              trust_remote_code: false,
+              max_concurrent_requests: 128,
+              max_best_of: 2,
+              max_stop_sequences: 4,
+              max_top_n_tokens: 5,
+              max_input_tokens: None,
+              max_input_length: None,
+              max_total_tokens: None,
+              waiting_served_ratio: 0.3,
+              max_batch_prefill_tokens: Some(
+                  512,
+              ),
+              max_batch_total_tokens: None,
+              max_waiting_tokens: 20,
+              max_batch_size: None,
+              cuda_graphs: None,
+              hostname: "ip-172-31-21-18",
+              port: 80,
+              prometheus_port: 9000,
+              shard_uds_path: "/tmp/text-generation-server",
+              master_addr: "localhost",
+              master_port: 29500,
+              huggingface_hub_cache: None,
+              weights_cache_override: None,
+              disable_custom_kernels: false,
+              cuda_memory_fraction: 1.0,
+              rope_scaling: None,
+              rope_factor: None,
+              json_output: false,
+              otlp_endpoint: None,
+              otlp_service_name: "text-generation-inference.router",
+              cors_allow_origin: [],
+              api_key: None,
+              watermark_gamma: None,
+              watermark_delta: None,
+              ngrok: false,
+              ngrok_authtoken: None,
+              ngrok_edge: None,
+              tokenizer_config_path: None,
+              disable_grammar_support: false,
+              env: false,
+              max_client_batch_size: 4,
+              lora_adapters: None,
+              usage_stats: On,
+              payload_limit: 2000000,
+              enable_prefill_logprobs: false,
+              graceful_termination_timeout: 90,
+          }
+      grok:
+        supportRules: >-
+          tgi_date %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"):date}
+
+          success_params (\s+total_time="%{regex("(?<=\")[A-z0-9.µ]*(?=\")"):hugging_face_tgi.total_time}")?(\s+validation_time="%{regex("(?<=\")[A-z0-9.µ]*(?=\")"):hugging_face_tgi.validation_time}")?(\s+queue_time="%{regex("(?<=\")[A-z0-9.µ]*(?=\")"):hugging_face_tgi.queue_time}")?(\s+inference_time="%{regex("(?<=\")[A-z0-9.µ]*(?=\")"):hugging_face_tgi.inference_time}")?(\s+time_per_token="%{regex("(?<=\")[A-z0-9.µ]*(?=\")"):hugging_face_tgi.time_per_token}")?(\s+seed="%{regex("(?<=\")[A-z0-9.µ]*(?=\")"):hugging_face_tgi.seed}")?
+
+          log_tail %{word:hugging_face_tgi.component}(::%{word:hugging_face_tgi.sub_component})?:\s+(%{regex("[A-z0-9/\\.:]*(?=: )"):hugging_face_tgi.file}:\s+)?%{data:message}
+
+          general_params parameters="?%{regex(".*\\s+}"):hugging_face_tgi.parameters}
+
+          color (%{regex("\\[0-9]*m")})?
+        matchRules: >-
+          full_log
+          %{tgi_date}\s+%{notSpace:status}\s+%{word:hugging_face_tgi.operation_type}\{%{general_params}"?%{success_params}\s*\}(:%{regex("[A-z0-9/\\.:]*(?=:
+          )"):hugging_face_tgi.operation_sub_type})?:\s+%{log_tail}
+
+
+          init_log %{tgi_date}\s+%{notSpace:status}\s+%{word:hugging_face_tgi.component}:\s+Args\s+\{%{data:hugging_face_tgi:keyvalue(": ","()\\[\\]",""," ,")}\s+\}
+
+
+          short_log %{tgi_date}\s+%{notSpace:status}\s+(download:\s+)?%{log_tail}
+    - type: status-remapper
+      name: Status Remapper
+      enabled: true
+      sources:
+        - status
+    - type: date-remapper
+      name: Date Remapper
+      enabled: true
+      sources:
+        - date
+    - type: attribute-remapper
+      name: Span
+      enabled: true
+      sources:
+        - span
+      sourceType: attribute
+      target: hugging_face_tgi
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Spans
+      enabled: true
+      sources:
+        - spans
+      sourceType: attribute
+      target: hugging_face_tgi.spans
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Filename
+      enabled: true
+      sources:
+        - filename
+      sourceType: attribute
+      target: hugging_face_tgi.filename
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Line number
+      enabled: true
+      sources:
+        - line_number
+      sourceType: attribute
+      target: hugging_face_tgi.line_number
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Target
+      enabled: true
+      sources:
+        - target
+      sourceType: attribute
+      target: hugging_face_tgi.target
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: message-remapper
+      name: Message Remapper
+      enabled: true
+      sources:
+        - message
+        - fields.message
+    - type: grok-parser
+      name: JSON init
+      enabled: true
+      source: message
+      samples:
+        - |-
+          Args {
+              model_id: "teknium/OpenHermes-2.5-Mistral-7B",
+              revision: None,
+              validation_workers: 2,
+              sharded: None,
+              num_shard: None,
+              quantize: None,
+              speculate: None,
+              dtype: None,
+              kv_cache_dtype: None,
+              trust_remote_code: false,
+              max_concurrent_requests: 128,
+              max_best_of: 2,
+              max_stop_sequences: 4,
+              max_top_n_tokens: 5,
+              max_input_tokens: None,
+              max_input_length: None,
+              max_total_tokens: None,
+              waiting_served_ratio: 0.3,
+              max_batch_prefill_tokens: Some(
+                  512,
+              ),
+              max_batch_total_tokens: None,
+              max_waiting_tokens: 20,
+              max_batch_size: None,
+              cuda_graphs: None,
+              hostname: "ip-172-31-21-18",
+              port: 80,
+              prometheus_port: 9000,
+              shard_uds_path: "/tmp/text-generation-server",
+              master_addr: "localhost",
+              master_port: 29500,
+              huggingface_hub_cache: None,
+              weights_cache_override: None,
+              disable_custom_kernels: false,
+              cuda_memory_fraction: 1.0,
+              rope_scaling: None,
+              rope_factor: None,
+              json_output: true,
+              otlp_endpoint: None,
+              otlp_service_name: "text-generation-inference.router",
+              cors_allow_origin: [],
+              api_key: None,
+              watermark_gamma: None,
+              watermark_delta: None,
+              ngrok: false,
+              ngrok_authtoken: None,
+              ngrok_edge: None,
+              tokenizer_config_path: None,
+              disable_grammar_support: false,
+              env: false,
+              max_client_batch_size: 4,
+              lora_adapters: None,
+              usage_stats: On,
+              payload_limit: 2000000,
+              enable_prefill_logprobs: false,
+              graceful_termination_timeout: 90,
+          }
+      grok:
+        supportRules: ""
+        matchRules: 'rule Args\s+\{\s+%{data:hugging_face_tgi:keyvalue(":
+          ","()\\[\\]",""," ,")}\s+\}'
+    - type: grok-parser
+      name: Parameters
+      enabled: true
+      source: hugging_face_tgi.parameters
+      samples:
+        - "GenerateParameters { best_of: None, temperature: None,
+          repetition_penalty: None, frequency_penalty: None, top_k: None, top_p:
+          None, typical_p: None, do_sample: false, max_new_tokens: Some(20),
+          return_full_text: None, stop: [], truncate: None, watermark: false,
+          details: false, decoder_input_details: false, seed: None,
+          top_n_tokens: None, grammar: None, adapter_id: None }"
+      grok:
+        supportRules: ""
+        matchRules: 'rule
+          %{word:hugging_face_tgi.parameters.type}\s*\{\s+%{data:hugging_face_tgi.parameters:keyvalue(":
+          ","()\\[\\]",""," ,")}\s+\}'

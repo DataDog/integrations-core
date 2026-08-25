@@ -3,19 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import ast
 import re
 import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
+from datadog_checks.base import is_affirmative
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
+from datadog_checks.base.utils import constants
+from datadog_checks.base.utils.common import compute_percent, total_time_to_temporal_percent
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
+from datadog_checks.base.utils.time import ensure_aware_datetime
 
-from ... import is_affirmative
-from ...constants import ServiceCheck
-from .. import constants
-from ..common import compute_percent, total_time_to_temporal_percent
-from ..time import ensure_aware_datetime
 from .utils import create_extra_transformer
 
 # Used for the user-defined `expression`s
@@ -29,6 +30,70 @@ ALLOWED_GLOBALS = {
 
 # Simple heuristic to not mistake a source for part of a string (which we also transform it into)
 SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
+
+
+_ALLOWED_AST_NODES = frozenset(
+    {
+        ast.Expression,
+        # Literals
+        ast.Constant,
+        ast.Tuple,
+        ast.List,
+        ast.Dict,
+        ast.Set,
+        # Variables and access
+        ast.Name,
+        ast.Load,
+        ast.Subscript,
+        ast.Slice,
+        ast.Attribute,
+        # Operators
+        ast.BinOp,
+        ast.UnaryOp,
+        ast.BoolOp,
+        ast.Compare,
+        ast.IfExp,
+        ast.Add,
+        ast.Sub,
+        ast.Mult,
+        ast.Div,
+        ast.FloorDiv,
+        ast.Mod,
+        ast.Pow,
+        ast.USub,
+        ast.UAdd,
+        ast.Not,
+        ast.Invert,
+        ast.And,
+        ast.Or,
+        ast.Eq,
+        ast.NotEq,
+        ast.Lt,
+        ast.LtE,
+        ast.Gt,
+        ast.GtE,
+        ast.Is,
+        ast.IsNot,
+        ast.In,
+        ast.NotIn,
+        # Function calls
+        ast.Call,
+        ast.keyword,
+    }
+)
+
+
+def _validate_expression_ast(tree: ast.Expression, name: str) -> None:
+    for node in ast.walk(tree):
+        node_type = type(node)
+        if node_type not in _ALLOWED_AST_NODES:
+            raise ValueError('expression for {} contains unsupported syntax `{}`'.format(name, node_type.__name__))
+        if node_type is ast.Attribute and node.attr.startswith('__'):
+            raise ValueError(
+                'expression for {} accesses reserved attribute `{}`; reference source columns by name directly'.format(
+                    name, node.attr
+                )
+            )
 
 
 def get_tag(transformers, column_name, **modifiers):
@@ -85,9 +150,7 @@ def get_monotonic_gauge(transformers, column_name, **modifiers):
     Send the result as both a `gauge` suffixed by `.total` and a `monotonic_count` suffixed by `.count`.
     """
     gauge = transformers['gauge'](transformers, '{}.total'.format(column_name), **modifiers)  # type: Callable
-    monotonic_count = transformers['monotonic_count'](
-        transformers, '{}.count'.format(column_name), **modifiers
-    )  # type: Callable
+    monotonic_count = transformers['monotonic_count'](transformers, '{}.count'.format(column_name), **modifiers)  # type: Callable
 
     def monotonic_gauge(_, value, **kwargs):
         # type: (List, str, Dict[str, Any]) -> None
@@ -407,7 +470,9 @@ def get_expression(transformers, name, **modifiers):
             expression,
         )
 
-    expression = compile(expression, filename=name, mode='eval')
+    tree = ast.parse(expression, filename=name, mode='eval')
+    _validate_expression_ast(tree, name)
+    expression = compile(tree, filename=name, mode='eval')
 
     del available_sources
 

@@ -4,14 +4,16 @@
 
 import logging
 import re
+from typing import Dict, List, Optional, Tuple
 
-import psycopg2
+import psycopg
 
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.postgres.cursor import CommenterDictCursor
 
 from .util import DBExplainError
 from .version_utils import V12
+
+PARAMETERIZED_QUERY_PATTERN = re.compile(r"(?<!')\$(?!'\$')[\d]+(?!')")
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +25,26 @@ SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd
 
 EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}{parameters}'
 
-EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
+EXPLAIN_QUERY = 'SELECT {explain_function}(%s)'
+
+# Errors raised when PostgreSQL can't resolve a parameter's type while preparing or explaining a parameterized
+# query (e.g. untyped NULL parameters from ORMs using the extended query protocol: "operator does not exist:
+# bigint = text"). The parameter types that made the original query valid aren't available in pg_stat_activity,
+# so these queries can't be explained and the failure is deterministic for a given query signature.
+EXPECTED_PARAMETER_TYPE_ERRORS = (
+    psycopg.errors.IndeterminateDatatype,
+    psycopg.errors.UndefinedFunction,
+    psycopg.errors.DatatypeMismatch,
+    psycopg.errors.AmbiguousFunction,
+)
+
+
+class ExtendedProtocolUnavailable(Exception):
+    """Raised when a sampled statement can't be prepared over the extended query protocol.
+
+    Preparing it over the simple protocol instead would execute every statement in the sampled text, so
+    the query goes unexplained rather than being sent in a way that could run a planted separator.
+    """
 
 
 def agent_check_getter(self):
@@ -70,81 +91,132 @@ class ExplainParameterizedQueries:
         self._check = check
         self._config = config
         self._explain_function = explain_function
+        # Checked once here rather than per statement: it only depends on the libpq this agent was built
+        # against. See _execute_prepare for why a pipeline is required to explain a parameterized query.
+        self._can_use_pipeline = psycopg.capabilities.has_pipeline(check=False)
+        if not self._can_use_pipeline:
+            logger.warning(
+                "Parameterized queries cannot be explained: this build links libpq %s, and pipeline mode "
+                "(libpq 14+) is required to send the prepared statement safely",
+                psycopg.pq.version(),
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def explain_statement(self, dbname, statement, obfuscated_statement, query_signature):
+    def explain_statement(
+        self, dbname: str, statement: str, obfuscated_statement: str, query_signature: str
+    ) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]:
         if self._check.version < V12:
             # if pg version < 12, skip explaining parameterized queries because
             # plan_cache_mode is not supported
-            e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
+            e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
             logger.debug(
                 "Unable to explain parameterized query. Postgres version %s does not support plan_cache_mode",
                 self._check.version,
             )
             return None, DBExplainError.parameterized_query, '{}'.format(type(e))
-        self._set_plan_cache_mode(dbname)
-
-        try:
-            self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
-        except psycopg2.errors.IndeterminateDatatype as e:
-            return None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
-        except psycopg2.errors.UndefinedFunction as e:
-            return None, DBExplainError.undefined_function, '{}'.format(type(e))
-        except Exception as e:
-            # if we fail to create a prepared statement, we cannot explain the query
-            return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
-
-        try:
-            result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
-            if result:
-                plan = result[0][0][0]
-                return plan, DBExplainError.explained_with_prepared_statement, None
-            else:
-                # the explain function was executed but no plan was returned
-                logger.debug(
-                    "Unable to explain parameterized query. "
-                    "The explain function %s was executed but no plan was returned",
-                    self._explain_function,
+        with self._check.db_pool.get_connection(dbname) as conn:
+            try:
+                self._set_plan_cache_mode(conn)
+                prepared_statement_error = self._create_prepared_statement(
+                    conn, statement, obfuscated_statement, query_signature
                 )
-                return None, DBExplainError.no_plan_returned_with_prepared_statement, None
-        except Exception as e:
-            return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
-        finally:
-            self._deallocate_prepared_statement(dbname, query_signature)
+            except Exception as e:
+                # an unexpected failure creating the prepared statement means we cannot explain the query
+                return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
 
-    def _set_plan_cache_mode(self, dbname):
-        self._execute_query(dbname, "SET plan_cache_mode = force_generic_plan")
+            if prepared_statement_error is not None:
+                # an expected, deterministic parameter type-resolution failure (e.g. untyped NULL parameters).
+                error_code, err_msg = prepared_statement_error
+                return None, error_code, err_msg
+
+            try:
+                result, explain_error = self._explain_prepared_statement(
+                    conn, statement, obfuscated_statement, query_signature
+                )
+                if explain_error is not None:
+                    # an expected, deterministic parameter type-resolution failure surfaced during EXPLAIN EXECUTE
+                    error_code, err_msg = explain_error
+                    return None, error_code, err_msg
+                elif result:
+                    plan = result[0][0][0]
+                    return plan, DBExplainError.explained_with_prepared_statement, None
+                else:
+                    # the explain function was executed but no plan was returned
+                    logger.debug(
+                        "Unable to explain parameterized query. "
+                        "The explain function %s was executed but no plan was returned",
+                        self._explain_function,
+                    )
+                    return None, DBExplainError.no_plan_returned_with_prepared_statement, None
+            except Exception as e:
+                return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
+            finally:
+                self._deallocate_prepared_statement(conn, query_signature)
+
+    def _set_plan_cache_mode(self, conn):
+        self._execute_query(conn, "SET plan_cache_mode = force_generic_plan")
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _create_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
+    def _create_prepared_statement(
+        self, conn, statement: str, obfuscated_statement: str, query_signature: str
+    ) -> Optional[Tuple[DBExplainError, str]]:
+        # Returns None on success, or a (DBExplainError, err_msg) tuple when the query can't be prepared because
+        # a parameter's type can't be resolved. Other unexpected errors are re-raised.
         try:
-            self._execute_query(
-                dbname,
+            self._execute_prepare(
+                conn,
                 PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
             )
-        except Exception as e:
-            logged_statement = obfuscated_statement
-            if self._config.log_unobfuscated_plans:
-                logged_statement = statement
-            logger.debug(
+            return None
+        except EXPECTED_PARAMETER_TYPE_ERRORS as e:
+            # The parameter types can't be resolved, so this query can't be prepared (and therefore can't be
+            # explained). Map the failure to the corresponding explain error code.
+            self._log_failed_statement(
                 'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
                 query_signature,
-                logged_statement,
+                e,
+            )
+            return self._map_parameter_type_error(e)
+        except Exception as e:
+            self._log_failed_statement(
+                'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
+                query_signature,
                 e,
             )
             raise
 
+    def _map_parameter_type_error(self, e: Exception) -> Tuple[DBExplainError, str]:
+        # Map an unresolved parameter-type error to its specific explain error code so cached responses
+        # and emitted error tags reflect the actual failure rather than a generic one.
+        if isinstance(e, psycopg.errors.IndeterminateDatatype):
+            return DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+        if isinstance(e, psycopg.errors.DatatypeMismatch):
+            return DBExplainError.datatype_mismatch, '{}'.format(type(e))
+        return DBExplainError.undefined_function, '{}'.format(type(e))
+
+    def _log_failed_statement(
+        self, message: str, statement: str, obfuscated_statement: str, query_signature: str, e: Exception
+    ) -> None:
+        # Logs the obfuscated statement by default, falling back to the raw statement only when explicitly
+        # configured. The message is expected to interpolate (query_signature, statement, error) in that order.
+        logged_statement = obfuscated_statement
+        if self._config.log_unobfuscated_plans:
+            logged_statement = statement
+        logger.debug(message, query_signature, logged_statement, e)
+
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _get_number_of_parameters_for_prepared_statement(self, dbname, query_signature):
-        rows = self._execute_query_and_fetch_rows(
-            dbname, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
-        )
+    def _get_number_of_parameters_for_prepared_statement(self, conn, query_signature):
+        rows = self._execute_query_and_fetch_rows(conn, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature))
         return rows[0][0] if rows else 0
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _generate_prepared_statement_query(self, dbname: str, query_signature: str) -> str:
+    def _generate_prepared_statement_query(self, conn, query_signature: str) -> str:
         parameters = ""
-        num_params = self._get_number_of_parameters_for_prepared_statement(dbname, query_signature)
+        num_params = self._get_number_of_parameters_for_prepared_statement(conn, query_signature)
 
         if num_params > 0:
             null_parameters = ','.join('null' for _ in range(num_params))
@@ -153,33 +225,42 @@ class ExplainParameterizedQueries:
         return EXECUTE_PREPARED_STATEMENT_QUERY.format(prepared_statement=query_signature, parameters=parameters)
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
-        prepared_statement_query = self._generate_prepared_statement_query(dbname, query_signature)
+    def _explain_prepared_statement(
+        self, conn, statement: str, obfuscated_statement: str, query_signature: str
+    ) -> Tuple[Optional[List], Optional[Tuple[DBExplainError, str]]]:
+        # Returns (rows, None) on success, or (None, (DBExplainError, err_msg)) when a parameter's type can't be
+        # resolved during EXPLAIN EXECUTE. Other unexpected errors are re-raised.
         try:
-            return self._execute_query_and_fetch_rows(
-                dbname,
-                EXPLAIN_QUERY.format(
-                    explain_function=self._explain_function,
-                    statement=prepared_statement_query,
-                ),
+            prepared_statement_query = self._generate_prepared_statement_query(conn, query_signature)
+            rows = self._execute_query_and_fetch_rows(
+                conn,
+                EXPLAIN_QUERY.format(explain_function=self._explain_function),
+                (prepared_statement_query,),
             )
-        except Exception as e:
-            logged_statement = obfuscated_statement
-            if self._config.log_unobfuscated_plans:
-                logged_statement = statement
-            logger.debug(
+            return rows, None
+        except EXPECTED_PARAMETER_TYPE_ERRORS as e:
+            # The parameter types couldn't be resolved during EXPLAIN EXECUTE, so the query can't be explained.
+            self._log_failed_statement(
                 'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
                 query_signature,
-                logged_statement,
+                e,
+            )
+            return None, self._map_parameter_type_error(e)
+        except Exception as e:
+            self._log_failed_statement(
+                'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
+                query_signature,
                 e,
             )
             raise
 
-    def _deallocate_prepared_statement(self, dbname, query_signature):
+    def _deallocate_prepared_statement(self, conn, query_signature):
         try:
-            self._execute_query(
-                dbname, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature)
-            )
+            self._execute_query(conn, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature))
         except Exception as e:
             logger.debug(
                 'Failed to deallocate prepared statement query_signature=[%s] | err=[%s]',
@@ -187,24 +268,31 @@ class ExplainParameterizedQueries:
                 e,
             )
 
-    def _execute_query(self, dbname, query):
-        # Psycopg2 connections do not get closed when context ends;
-        # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
-        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                logger.debug('Executing query=[%s]', query)
-                cursor.execute(query, ignore_query_metric=True)
+    def _execute_prepare(self, conn, query):
+        # The PREPARE is the one place sampled query text becomes SQL, so it goes out over the extended query
+        # protocol, where the server rejects a multi-command string ("cannot insert multiple commands into a
+        # prepared statement") rather than executing every statement in it as the monitoring user. psycopg
+        # leaves the simple protocol only for a query with parameters, one requesting binary results (which
+        # the client-side cursors this pool uses refuse) or one inside a pipeline, so a pipeline is the only
+        # route available here.
+        if not self._can_use_pipeline:
+            raise ExtendedProtocolUnavailable("cannot prepare a sampled statement without pipeline support (libpq 14+)")
+        with conn.pipeline():
+            self._execute_query(conn, query)
 
-    def _execute_query_and_fetch_rows(self, dbname, query):
-        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                cursor.execute(query, ignore_query_metric=True)
-                return cursor.fetchall()
+    def _execute_query(self, conn, query):
+        with conn.cursor() as cursor:
+            logger.debug('Executing query=[%s]', query)
+            cursor.execute(query, ignore_query_metric=True)
+
+    def _execute_query_and_fetch_rows(self, conn, query, params=None):
+        with conn.cursor() as cursor:
+            cursor.execute(query, params, ignore_query_metric=True)
+            return cursor.fetchall()
 
     def _is_parameterized_query(self, statement: str) -> bool:
         # Use regex to match $1 to determine if a query is parameterized
         # BUT single quoted string '$1' should not be considered as a parameter
         # e.g. SELECT * FROM products WHERE id = $1; -- $1 is a parameter
         # e.g. SELECT * FROM products WHERE id = '$1'; -- '$1' is not a parameter
-        parameterized_query_pattern = r"(?<!')\$(?!'\$')[\d]+(?!')"
-        return re.search(parameterized_query_pattern, statement) is not None
+        return PARAMETERIZED_QUERY_PATTERN.search(statement) is not None

@@ -6,7 +6,6 @@ from datadog_checks.base import AgentCheck
 
 
 class TestAssertMetric:
-
     def test_assert_metric_hostname(self, aggregator):
         check = AgentCheck()
 

@@ -8,10 +8,15 @@ from collections import namedtuple
 import click
 from semver import VersionInfo
 
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_info,
+    run_or_abort,
+    validate_check_arg,
+)
 from datadog_checks.dev.tooling.constants import get_root
-
-from ...utils import complete_testable_checks, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_info, run_or_abort, validate_check_arg
+from datadog_checks.dev.tooling.utils import complete_testable_checks, get_valid_checks, get_version_string
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 

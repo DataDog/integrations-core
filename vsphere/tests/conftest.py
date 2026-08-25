@@ -101,8 +101,9 @@ def mock_type():
 
 @pytest.fixture
 def mock_threadpool():
-    with patch('datadog_checks.vsphere.vsphere.ThreadPoolExecutor') as pool, patch(
-        'datadog_checks.vsphere.vsphere.as_completed', side_effect=lambda x: x
+    with (
+        patch('datadog_checks.vsphere.vsphere.ThreadPoolExecutor') as pool,
+        patch('datadog_checks.vsphere.vsphere.as_completed', side_effect=lambda x: x),
     ):
         pool.return_value.submit = lambda f, args: MagicMock(
             done=MagicMock(return_value=True), result=MagicMock(return_value=f(args)), exception=lambda: None
@@ -235,9 +236,11 @@ def service_instance(
     mock_si.content.perfManager.QueryPerfCounterByLevel = MagicMock(side_effect=query_perf_counter_by_level)
     mock_si.content.perfManager.QueryPerf = MagicMock(side_effect=query_perf)
     mock_si.content.propertyCollector.RetrievePropertiesEx = MagicMock(side_effect=retrieve_properties_ex)
-    with patch('pyVmomi.vmodl.query.PropertyCollector.ObjectSpec', return_value=MagicMock()), patch(
-        'pyVmomi.vmodl.query.PropertyCollector.FilterSpec', return_value=MagicMock()
-    ), patch('pyVim.connect.SmartConnect', return_value=mock_si):
+    with (
+        patch('pyVmomi.vmodl.query.PropertyCollector.ObjectSpec', return_value=MagicMock()),
+        patch('pyVmomi.vmodl.query.PropertyCollector.FilterSpec', return_value=MagicMock()),
+        patch('pyVim.connect.SmartConnect', return_value=mock_si),
+    ):
         yield mock_si
 
 
@@ -247,16 +250,28 @@ def mock_http_api(monkeypatch):
         http = MockHttpV7()
     else:
         http = MockHttpV6()
-    monkeypatch.setattr('requests.get', MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', MagicMock(side_effect=http.post))
+
+    def mock_get(*args, **kwargs):
+        return http.get(*args, **kwargs)
+
+    def mock_post(*args, **kwargs):
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.warning(args)
+
+        return http.post(*args, **kwargs)
+
+    monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=mock_get))
+    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=mock_post))
     yield http
 
 
 @pytest.fixture
 def mock_rest_api():
     if VSPHERE_VERSION.startswith('7.'):
-        with patch('requests.api.request', mock_http_rest_api_v7):
+        with patch('requests.Session.request', mock_http_rest_api_v7):
             yield
     else:
-        with patch('requests.api.request', mock_http_rest_api_v6):
+        with patch('requests.Session.request', mock_http_rest_api_v6):
             yield

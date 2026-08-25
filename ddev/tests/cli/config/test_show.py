@@ -23,11 +23,11 @@ marketplace = "{MARKETPLACE_PATH}"
 agent = "{AGENT_PATH}"
 
 [agents.dev]
-docker = "datadog/agent-dev:master"
+docker = "registry.datadoghq.com/agent-dev:master-py3"
 local = "latest"
 
 [agents.7]
-docker = "datadog/agent:7"
+docker = "registry.datadoghq.com/agent:7"
 local = "7"
 
 [orgs.default]
@@ -57,6 +57,10 @@ warning = "bold yellow"
 waiting = "bold magenta"
 debug = "bold"
 spinner = "simpleDotsScrolling"
+
+[ai]
+flow_dirs = []
+anthropic_api_key = "*****"
 """
 
 EXPECTED_NON_SCRUBBED_OUTPUT = f"""
@@ -71,11 +75,11 @@ marketplace = "{MARKETPLACE_PATH}"
 agent = "{AGENT_PATH}"
 
 [agents.dev]
-docker = "datadog/agent-dev:master"
+docker = "registry.datadoghq.com/agent-dev:master-py3"
 local = "latest"
 
 [agents.7]
-docker = "datadog/agent:7"
+docker = "registry.datadoghq.com/agent:7"
 local = "7"
 
 [orgs.default]
@@ -105,6 +109,10 @@ warning = "bold yellow"
 waiting = "bold magenta"
 debug = "bold"
 spinner = "simpleDotsScrolling"
+
+[ai]
+flow_dirs = []
+anthropic_api_key = "sk-test"
 """
 
 
@@ -114,6 +122,7 @@ def valid_config_file(config_file):
     config_file.model.orgs['default']['api_key'] = 'foo'
     config_file.model.orgs['default']['app_key'] = 'bar'
     config_file.model.github = {'user': '', 'token': ''}
+    config_file.model.ai.anthropic_api_key = 'sk-test'
     config_file.save()
 
 
@@ -182,6 +191,10 @@ def build_expected_output_with_line_sources(expected: str, config_file: ConfigFi
         42: 'GlobalConfig:43',
         43: 'GlobalConfig:44',
         44: 'GlobalConfig:45',
+        # Blank line
+        46: 'GlobalConfig:47',
+        47: 'GlobalConfig:48',
+        48: 'GlobalConfig:49',
     }
 
     # Add a blank line at the end to match the expected output

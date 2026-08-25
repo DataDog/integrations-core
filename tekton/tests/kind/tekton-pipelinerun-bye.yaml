@@ -1,0 +1,7 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: bye-pipeline-run
+spec:
+  pipelineRef:
+    name: bye-pipeline

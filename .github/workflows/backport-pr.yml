@@ -6,34 +6,95 @@ on:
       - labeled
 
 jobs:
-  backport:
-    name: Backport PR
+  check:
+    name: Check for backport labels
     runs-on: ubuntu-latest
+    # Cheap event filter: only merged PRs, and only the `closed` event or a freshly-added
+    # `backport/*` label. `should_run` below is the label-presence semaphore that gates the
+    # expensive backport job.
     if: >
       github.event.pull_request.merged
       && (
         github.event.action == 'closed'
         || (
           github.event.action == 'labeled'
-          && contains(github.event.label.name, 'backport')
+          && startsWith(github.event.label.name, 'backport/')
         )
       )
+    permissions:
+      contents: read
+    outputs:
+      should_run: ${{ steps.gate.outputs.should_run }}
     steps:
-      - name: Create token
-        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
-        id: token-generator
-        with:
-          app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-          private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY_2 }}
-          repositories: integrations-core
-      - uses: tibdex/backport@9565281eda0731b1d20c4025c43339fb0a23812e # v2.0.4
-        with:
-          label_pattern: "^backport/(?<base>([^ ]+))$"
-          labels_template: "[\"backport\", \"bot\"]"
-          body_template: |
-            Backport <%= mergeCommitSha %> from #<%= number %>.
+      - name: Detect backport labels
+        id: gate
+        env:
+          PR_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+          if printf '%s' "${PR_LABELS_JSON}" | jq -e 'any(.[]; startswith("backport/"))' >/dev/null; then
+            echo "should_run=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "should_run=false" >> "${GITHUB_OUTPUT}"
+          fi
 
-            ___
+  backport:
+    name: Backport PR
+    needs: check
+    if: needs.check.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # OIDC token federation with dd-octo-sts
+      # Writes use the scoped octo-sts token; ambient GITHUB_TOKEN stays read-only (pull_request_target).
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.backport.pull-request-target
 
-            <%= body %>
-          github_token: ${{ steps.token-generator.outputs.token }}
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Pin to master so the locally installed ddev always has `--from-pr`. Under
+          # `pull_request_target` the default ref is the PR's base branch, which for a PR merged into
+          # an older release branch would install a ddev lacking this command.
+          ref: master
+          # Full history reaches the merged commit and every release branch; octo-sts token authenticates the push.
+          fetch-depth: 0
+          token: ${{ steps.octo-sts.outputs.token }}
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+
+      - name: Install ddev
+        uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure ddev
+        run: |
+          ddev config set upgrade_check false
+          ddev config override
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "dd-agent-integrations-bot[bot]"
+          git config --global user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
+
+      - name: Backport merged PR to labelled branches
+        env:
+          # ddev reads the token/user from these; the same token authenticates git push via checkout.
+          DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          DD_GITHUB_USER: dd-agent-integrations-bot
+        run: |
+          ddev --no-interactive release port-commit --from-pr "${{ github.event.pull_request.number }}" \
+            --branch-prefix backport \
+            --pr-labels backport,bot

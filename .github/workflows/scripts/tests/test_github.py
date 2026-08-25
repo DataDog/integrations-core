@@ -1,0 +1,42 @@
+"""Tests for _release.github."""
+import pytest
+from _release.github import parse_bool_env, set_outputs, write_summary
+
+
+class TestParseBoolEnv:
+    @pytest.mark.parametrize("val", ["true", "True", "TRUE", "1", "yes", "YES"])
+    def test_true_values(self, monkeypatch, val):
+        monkeypatch.setenv("MY_FLAG", val)
+        assert parse_bool_env("MY_FLAG") is True
+
+    @pytest.mark.parametrize("val", ["false", "False", "FALSE", "0", "no", "NO"])
+    def test_false_values(self, monkeypatch, val):
+        monkeypatch.setenv("MY_FLAG", val)
+        assert parse_bool_env("MY_FLAG") is False
+
+    def test_missing_or_empty_uses_default(self, monkeypatch):
+        monkeypatch.delenv("MY_FLAG", raising=False)
+        assert parse_bool_env("MY_FLAG", default=False) is False
+        monkeypatch.setenv("MY_FLAG", "")
+        assert parse_bool_env("MY_FLAG", default=True) is True
+
+
+class TestSetOutputs:
+    def test_writes_key_value_pairs(self, tmp_path, monkeypatch):
+        out = tmp_path / "output"
+        out.write_text("")
+        monkeypatch.setenv("GITHUB_OUTPUT", str(out))
+        set_outputs(foo="bar", baz="qux")
+        content = out.read_text()
+        assert "foo=bar\n" in content
+        assert "baz=qux\n" in content
+
+
+class TestWriteSummary:
+    def test_appends_content(self, tmp_path, monkeypatch):
+        summary = tmp_path / "summary.md"
+        summary.write_text("# Existing\n")
+        monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
+        write_summary("## New Section")
+        assert "## New Section" in summary.read_text()
+        assert "# Existing" in summary.read_text()

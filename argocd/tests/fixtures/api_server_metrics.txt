@@ -1711,3 +1711,20 @@ process_virtual_memory_bytes 8.8727552e+08
 # HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
 # TYPE process_virtual_memory_max_bytes gauge
 process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP argocd_login_request_total Number of login requests.
+# TYPE argocd_login_request_total counter
+argocd_login_request_total{status="success"} 150
+argocd_login_request_total{status="failure"} 10
+# HELP argocd_proxy_extension_request_total Number of requests sent to proxy extensions.
+# TYPE argocd_proxy_extension_request_total counter
+argocd_proxy_extension_request_total{extension="my-extension",status="200"} 100
+argocd_proxy_extension_request_total{extension="my-extension",status="500"} 5
+# HELP argocd_proxy_extension_request_duration_seconds Request duration to proxy extension backend.
+# TYPE argocd_proxy_extension_request_duration_seconds histogram
+argocd_proxy_extension_request_duration_seconds_bucket{extension="my-extension",le="0.01"} 50
+argocd_proxy_extension_request_duration_seconds_bucket{extension="my-extension",le="0.1"} 80
+argocd_proxy_extension_request_duration_seconds_bucket{extension="my-extension",le="0.5"} 95
+argocd_proxy_extension_request_duration_seconds_bucket{extension="my-extension",le="1"} 100
+argocd_proxy_extension_request_duration_seconds_bucket{extension="my-extension",le="+Inf"} 105
+argocd_proxy_extension_request_duration_seconds_sum{extension="my-extension"} 12.5
+argocd_proxy_extension_request_duration_seconds_count{extension="my-extension"} 105

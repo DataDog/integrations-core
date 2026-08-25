@@ -57,6 +57,7 @@ nav:
     - OpenMetrics: base/openmetrics.md
     - Log Crawlers: base/logs-crawlers.md
     - Metadata: base/metadata.md
+    - Persistent Cache: base/persistent-cache.md
     - API: base/api.md
   - Dev Package:
     - What's in the box?: ddev/about.md

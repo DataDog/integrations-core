@@ -16,6 +16,8 @@ This integration ingests the following types of logs:
 
 Visualize detailed insights into these logs through the out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 ### Installation

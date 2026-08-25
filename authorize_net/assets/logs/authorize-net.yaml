@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: authorize-net
 metric_id: authorize-net
 backend_only: false

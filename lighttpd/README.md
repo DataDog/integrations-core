@@ -6,6 +6,8 @@
 
 The Agent's lighttpd check tracks uptime, bytes served, requests per second, response codes, and more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

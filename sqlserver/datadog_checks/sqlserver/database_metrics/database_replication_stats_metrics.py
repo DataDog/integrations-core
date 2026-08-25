@@ -5,18 +5,18 @@
 from .base import SqlserverDatabaseMetricsBase
 
 DATABASE_REPLICATION_STATS_METRICS_QUERY = {
-    "name": "sys.dm_hadr_database_replica_states",
+    "name": "sys.dm_hadr_availability_replica_states",
     "query": """SELECT
         resource_group_id,
         name,
         replica_server_name,
-        synchronization_state_desc,
-        synchronization_state
-        from sys.dm_hadr_database_replica_states as dhdrs
+        synchronization_health_desc as synchronization_state_desc,
+        synchronization_health as replica_sync_state
+        from sys.dm_hadr_availability_replica_states as dhars
         inner join sys.availability_groups as ag
-        on ag.group_id = dhdrs.group_id
+        on ag.group_id = dhars.group_id
         inner join sys.availability_replicas as ar
-        on dhdrs.replica_id = ar.replica_id
+        on dhars.replica_id = ar.replica_id
     """.strip(),
     "columns": [
         {"name": "availability_group", "type": "tag"},
@@ -53,11 +53,14 @@ class SqlserverDatabaseReplicationStatsMetrics(SqlserverDatabaseMetricsBase):
         query = DATABASE_REPLICATION_STATS_METRICS_QUERY.copy()
         if self.availability_group or self.only_emit_local:
             where_clauses = []
+            params = []
             if self.availability_group:
-                where_clauses.append(f"resource_group_id = '{self.availability_group}'")
+                where_clauses.append("resource_group_id = ?")
+                params.append(self.availability_group)
             if self.only_emit_local:
                 where_clauses.append("is_local = 1")
             query['query'] += f" where {' and '.join(where_clauses)}"
+            query['params'] = tuple(params)
         return [query]
 
     def __repr__(self) -> str:

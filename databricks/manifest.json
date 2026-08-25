@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f99b6e79-f50a-479d-b916-955a577e4f41",
   "app_id": "databricks",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,11 @@
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
+      "Category::AI/ML",
       "Category::Cloud",
       "Category::Cost Management",
       "Category::Log Collection",
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
+      "Category::Metrics",
       "Offering::Integration"
     ],
     "resources": [
@@ -32,6 +32,10 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/"
+      },
+      {
+        "url": "https://docs.datadoghq.com/integrations/databricks",
+        "resource_type": "documentation"
       }
     ]
   },
@@ -46,7 +50,7 @@
       "source_type_name": "Databricks",
       "configuration": {},
       "events": {
-        "creates_events": false
+        "creates_events": true
       },
       "metrics": {
         "prefix": "databricks.model_serving.",

@@ -56,6 +56,10 @@ def instance_enable_health_service_check():
     return True
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_histogram_buckets_as_distributions():
     return False
 
@@ -94,6 +98,14 @@ def instance_persist_connections():
 
 def instance_rabbitmq_api_url():
     return 'http://localhost:15672/api/'
+
+
+def instance_rabbitmq_pass():
+    return 'guest'
+
+
+def instance_rabbitmq_user():
+    return 'guest'
 
 
 def instance_request_size():

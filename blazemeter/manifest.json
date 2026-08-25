@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8c52001a-e57a-4979-a50b-cda6252050e4",
   "app_id": "blazemeter",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -13,17 +14,7 @@
     "media": [
         {
             "caption": "BlazeMeter - Functional Test Results",
-            "image_url": "images/blazemeter_functional_test_results_1.png",
-            "media_type": "image"
-          },
-          {
-            "caption": "BlazeMeter - Functional Test Results",
-            "image_url": "images/blazemeter_functional_test_results_2.png",
-            "media_type": "image"
-          },
-          {
-            "caption": "BlazeMeter - Functional Test Results",
-            "image_url": "images/blazemeter_functional_test_results_3.png",
+            "image_url": "images/blazemeter_functional_test_results.png",
             "media_type": "image"
           },
           {

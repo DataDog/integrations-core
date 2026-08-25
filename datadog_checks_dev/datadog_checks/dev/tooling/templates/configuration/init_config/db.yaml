@@ -1,4 +1,6 @@
 - name: global_custom_queries
+  display_priority: 0
+  fleet_configurable: true
   description: |
     See `custom_queries` defined below.
 

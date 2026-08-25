@@ -1,0 +1,26 @@
+{
+    "version": 2,
+    "created_at": "2025-08-08",
+    "last_updated_at": "2025-08-08",
+    "title": "ECS Fargate network sent error rate exceeds threshold",
+    "description": "Network sent error rate represents the percentage of network packets that failed to be transmitted successfully. This monitor tracks when the error rate exceeds the configured threshold to identify network connectivity issues that could lead to data transmission failures and service degradation.",
+    "definition": {
+        "name": "[ECS Fargate] Network sent error rate is high for service: {{ecs_service.name}} in cluster: {{ecs_cluster.name}}",
+        "type": "query alert",
+        "query": "sum(last_5m):sum:ecs.fargate.net.sent_errors{*} by {ecs_service,ecs_cluster} / sum:ecs.fargate.net.bytes_sent{*} by {ecs_service,ecs_cluster} * 100 > 5",
+        "message": "ECS Fargate service {{ecs_service.name}} in cluster {{ecs_cluster.name}} has a network sent error rate of {{value}}%, which exceeds the 5% threshold.\n\nThis indicates potential network connectivity issues. To investigate further, view the affected service in the [ECS Explorer](/orchestration/explorer/ecsService?query=ecs_service:{{ecs_service.name}}+ecs_cluster:{{ecs_cluster.name}})",
+        "tags": ["integration:ecs_fargate"],
+        "options": {
+            "thresholds": {
+                "critical": 5
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60
+        }
+    },
+    "tags": [
+        "integration:aws-fargate"
+    ]
+}

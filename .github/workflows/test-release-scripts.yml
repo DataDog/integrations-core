@@ -1,0 +1,36 @@
+name: Test release pipeline scripts
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/scripts/**"
+      - ".github/workflows/release-dispatch.yml"
+      - ".github/workflows/release-trigger.yml"
+      - ".github/workflows/test-release-scripts.yml"
+  pull_request:
+    paths:
+      - ".github/workflows/scripts/**"
+      - ".github/workflows/release-dispatch.yml"
+      - ".github/workflows/release-trigger.yml"
+      - ".github/workflows/test-release-scripts.yml"
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install pytest
+        run: pip install pytest==9.1.1
+
+      - name: Run tests
+        working-directory: .github/workflows/scripts
+        run: pytest tests/ -v

@@ -9,7 +9,7 @@
 
 
 def shared_gstatus_path():
-    return '/opt/datadog-agent/embedded/sbin/gstatus'
+    return '<datadog-agent>/embedded/sbin/gstatus'
 
 
 def instance_disable_generic_tags():
@@ -18,6 +18,10 @@ def instance_disable_generic_tags():
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_enable_legacy_tags_normalization():
+    return True
 
 
 def instance_min_collection_interval():

@@ -31,6 +31,7 @@ def test_e2e_profile_meraki(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
         'snmp_host:dashboard.meraki.com',
         'device_hostname:dashboard.meraki.com',
         'snmp_profile:meraki',
@@ -55,6 +56,7 @@ def test_e2e_profile_meraki(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.29671.2.1',
         'tags': [
             'device_id:default:' + ip_address,
+            'agent_host:' + common.get_agent_hostname(),
             'device_ip:' + ip_address,
             'device_namespace:default',
             'device_vendor:meraki',

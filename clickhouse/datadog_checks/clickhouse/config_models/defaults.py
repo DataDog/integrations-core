@@ -16,12 +16,20 @@ def instance_db():
     return 'default'
 
 
+def instance_dbm():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_enable_legacy_tags_normalization():
+    return True
 
 
 def instance_min_collection_interval():
@@ -32,20 +40,36 @@ def instance_only_custom_queries():
     return False
 
 
+def instance_password():
+    return ''
+
+
 def instance_port():
-    return 9000
+    return 8123
 
 
 def instance_read_timeout():
     return 10
 
 
+def instance_single_endpoint_mode():
+    return False
+
+
 def instance_tls_verify():
     return False
 
 
+def instance_use_advanced_queries():
+    return True
+
+
 def instance_use_global_custom_queries():
     return 'true'
+
+
+def instance_use_legacy_queries():
+    return True
 
 
 def instance_username():

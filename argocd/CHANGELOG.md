@@ -2,6 +2,84 @@
 
 <!-- towncrier release notes start -->
 
+## 4.8.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add opt-in streaming of Argo CD Application changes for near real-time generic resource collection, configurable per-resource-type collection intervals, and a `collect_openmetrics` option to collect generic resources without scraping metrics. ([#24288](https://github.com/DataDog/integrations-core/pull/24288))
+
+## 4.7.0 / 2026-06-18 / Agent 7.81.0
+
+***Added***:
+
+* Add more fields for metadata collection ([#24091](https://github.com/DataDog/integrations-core/pull/24091))
+
+## 4.6.0 / 2026-06-15
+
+***Added***:
+
+* Add a collector that submits ArgoCD applications, clusters, and repositories to Datadog as generic resources. ([#23917](https://github.com/DataDog/integrations-core/pull/23917))
+
+## 4.5.0 / 2026-04-15 / Agent 7.79.0
+
+***Added***:
+
+* Add support for new ArgoCD metrics including kubectl, OCI, GitHub API, login, and proxy extension metrics. ([#22960](https://github.com/DataDog/integrations-core/pull/22960))
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 4.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 4.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 4.2.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Add a new metric for [application sync duration time](https://github.com/argoproj/argo-cd/issues/11675). ([#21882](https://github.com/DataDog/integrations-core/pull/21882))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 4.1.1 / 2025-10-31 / Agent 7.73.0
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 4.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 4.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 4.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+## 3.4.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Add functionality to collect metrics from [commit server](https://argo-cd.readthedocs.io/en/latest/operator-manual/metrics/#commit-server-metrics) ([#20412](https://github.com/DataDog/integrations-core/pull/20412))
+
 ## 3.3.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

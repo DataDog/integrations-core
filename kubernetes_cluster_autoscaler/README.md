@@ -4,6 +4,8 @@
 
 This check monitors [Kubernetes Cluster Autoscaler][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.54.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -22,7 +24,7 @@ No additional installation is needed on your server.
 #### Metric collection
 
 Make sure that the Prometheus-formatted metrics are exposed in your `kubernetes_cluster_autoscaler` cluster. 
-For the Agent to start collecting metrics, the `kubernetes_cluster_autoscaler` pods need to be annotated.
+Configure the `kubernetes_cluster_autoscaler` workload with one of the Kubernetes Autodiscovery options below.
 
 [Kubernetes Cluster Autoscaler][11] has metrics and livenessProbe endpoints that can be accessed on port `8085`. These endpoints are located under `/metrics` and `/health-check` and provide valuable information about the state of your cluster during scaling operations.
 
@@ -52,6 +54,9 @@ The only parameters required for configuring the `kubernetes_cluster_autoscaler`
 * `openmetrics_endpoint`
   This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8085`. To configure a different port, use the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -76,6 +81,35 @@ spec:
     - name: '<CONTAINER_NAME>'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the Cluster Autoscaler Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cluster-autoscaler
+  config:
+    checks:
+      - integration: kubernetes_cluster_autoscaler
+        containerName: cluster-autoscaler
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8085/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][12].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 
 ### Validation
@@ -103,7 +137,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: https://docs.datadoghq.com/integrations/kubernetes_cluster_autoscaler/
+[1]: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
 [2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler/data/conf.yaml.example
@@ -114,3 +148,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
 [11]: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-monitor-cluster-autoscaler
+[12]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

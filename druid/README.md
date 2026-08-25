@@ -8,6 +8,8 @@ The Datadog Agent collects metrics from Druid using [DogStatsD][2]. DogStatsD co
 
 In addition to collecting metrics, the Agent also sends a Service Check related to Druid's health.
 
+**Minimum Agent version:** 6.15.0
+
 ## Setup
 
 ### Prerequisite

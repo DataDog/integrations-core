@@ -4,15 +4,54 @@
 from __future__ import annotations
 
 import json
+import re
 from functools import cached_property
 from time import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, overload
+
+from ddev.utils.github_errors import (
+    GITHUB_AUTHENTICATION_STATUS_CODES,
+    GitHubAuthenticationError,
+    github_secondary_rate_limit_wait,
+)
+
+MAX_SECONDARY_RATE_LIMIT_RETRIES = 2
+MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS = 3600
+
+PULL_REQUEST_NUMBER_PATTERN = re.compile(r'^\d+$')
+PULL_REQUEST_URL_PATTERN = re.compile(r'^https?://github\.com/[^/]+/[^/]+/pull/(\d+)(?:[/?#].*)?$', re.IGNORECASE)
 
 if TYPE_CHECKING:
+    from typing import Any, Literal
+
     from httpx import Client
 
+    from ddev.cli.application import Application
     from ddev.cli.terminal import BorrowedStatus
     from ddev.repo.core import Repository
+
+
+def resolve_owner_repo(app: Application, repository: str | None = None) -> tuple[str, str]:
+    """Split `owner/name`, defaulting to the active repository and the `DataDog` organization."""
+    full_name = repository or app.repo.full_name
+    owner, separator, name = full_name.partition('/')
+    if not separator:
+        return 'DataDog', full_name
+    return owner, name
+
+
+def parse_pull_request_reference(value: str) -> int | None:
+    """Return the pull-request number in *value*, or None when it is neither shape.
+
+    Accepts a bare number or a GitHub pull-request URL, so a command can take whichever one the
+    user has at hand.
+    """
+    reference = value.strip()
+    if PULL_REQUEST_NUMBER_PATTERN.match(reference):
+        return int(reference)
+
+    match = PULL_REQUEST_URL_PATTERN.match(reference)
+    return int(match.group(1)) if match else None
 
 
 class PullRequest:
@@ -69,6 +108,27 @@ class GitHubManager:
     # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#create-a-label
     LABELS_API = 'https://api.github.com/repos/{repo_id}/labels'
 
+    # https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#create-a-milestone
+    MILESTONES_API = 'https://api.github.com/repos/{repo_id}/milestones'
+
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#create-a-pull-request
+    PULLS_API = 'https://api.github.com/repos/{repo_id}/pulls'
+
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests-files
+    PULL_REQUEST_FILES_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}/files'
+
+    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
+    COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
+
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#get-a-pull-request
+    PULL_REQUEST_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}'
+
+    # https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
+    WORKFLOW_DISPATCH_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/dispatches'
+
+    # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
+    ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
+
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
@@ -89,29 +149,75 @@ class GitHubManager:
         return client
 
     def get_pull_request(self, sha: str) -> PullRequest | None:
-        from json import loads
-
         response = self.__api_get(
             self.ISSUE_SEARCH_API,
             # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
-            params={'q': f'sha:{sha} repo:{self.repo_id}'},
+            params={'q': f'sha:{sha} repo:{self.repo_id} is:pull-request'},
         )
-        data = loads(response.text)
+        data = json.loads(response.text)
+        if not data['items']:
+            return None
+
+        return PullRequest(data['items'][0])
+
+    def list_open_pull_requests_targeting_base(self, base_branch: str, *, limit: int = 100) -> list[PullRequest]:
+        """
+        List open pull requests targeting the given base branch. Limit to 100 by default.
+        """
+        if limit < 1:
+            return []
+
+        prs: list[PullRequest] = []
+        max_per_page = 100
+        page = 1
+
+        # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
+        query = f'repo:{self.repo_id} is:pull-request is:open base:{base_branch}'
+
+        while len(prs) < limit:
+            requested_count = min(max_per_page, limit - len(prs))
+            response = self.__api_get(
+                self.ISSUE_SEARCH_API,
+                params={
+                    'q': query,
+                    'sort': 'updated',
+                    'order': 'desc',
+                    'per_page': requested_count,
+                    'page': page,
+                },
+            )
+            data = json.loads(response.text)
+            items = data.get('items', [])
+            if not items:
+                break
+
+            prs.extend(PullRequest(item) for item in items)
+            if len(items) < requested_count:
+                break
+
+            page += 1
+
+        return prs[:limit]
+
+    def get_pull_request_by_number(self, number: str) -> PullRequest | None:
+        response = self.__api_get(
+            self.ISSUE_SEARCH_API,
+            params={'q': f'{number} repo:{self.repo_id} is:pull-request'},
+        )
+        data = json.loads(response.text)
         if not data['items']:
             return None
 
         return PullRequest(data['items'][0])
 
     def get_next_issue_number(self) -> int:
-        from json import loads
-
         number = 1
 
         response = self.__api_get(
             self.ISSUE_LIST_API.format(repo_id=self.repo_id),
             params={'state': 'all', 'sort': 'created', 'direction': 'desc', 'per_page': 1},
         )
-        data = loads(response.text)
+        data = json.loads(response.text)
         if data:
             number += data[0]['number']
 
@@ -121,10 +227,114 @@ class GitHubManager:
         response = self.__api_get(pr.diff_url, follow_redirects=True)
         return response.text
 
+    def get_changed_files_by_pr(self, pr: PullRequest) -> list[str]:
+        response = self.__api_get(self.PULL_REQUEST_FILES_API.format(repo_id=self.repo_id, pr_number=pr.number))
+        return [file_data['filename'] for file_data in response.json()]
+
+    def get_changed_files_by_commit_sha(self, sha: str) -> list[str] | None:
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
+        except GitHubAuthenticationError:
+            raise
+        except HTTPStatusError:
+            return None
+        return [file_data['filename'] for file_data in response.json().get('files', [])]
+
+    def get_pr_head(self, pr_number: int) -> tuple[str, str]:
+        """Return the (head SHA, head branch ref) of a pull request."""
+        response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        data = response.json()
+        return data['head']['sha'], data['head']['ref']
+
+    def get_pull_request_labels(self, pr_number: int) -> list[str] | None:
+        """Return the label names on the given PR, or None if it could not be fetched."""
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except GitHubAuthenticationError:
+            raise
+        except HTTPStatusError:
+            return None
+        return [label['name'] for label in response.json().get('labels', [])]
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[False] = False,
+    ) -> None: ...
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[True],
+    ) -> dict[str, Any]: ...
+
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: bool = False,
+    ) -> dict[str, Any] | None:
+        """Trigger a workflow_dispatch event.
+
+        When ``return_run_details`` is true, request the new run's details from
+        the API and return the parsed JSON response (``workflow_run_id``,
+        ``run_url``, ``html_url``). The default keeps the prior fire-and-forget
+        behavior and returns ``None``.
+        """
+        payload: dict[str, Any] = {'ref': ref, 'inputs': inputs}
+        if return_run_details:
+            payload['return_run_details'] = True
+        response = self.__api_post(
+            self.WORKFLOW_DISPATCH_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
+            content=json.dumps(payload),
+        )
+        if not return_run_details:
+            return None
+        return response.json()
+
+    def get_pull_request_comments(self, pr_number: int) -> list[dict]:
+        response = self.__api_get(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+        )
+        return response.json()
+
+    def delete_comment(self, comment_id: int) -> None:
+        self.__api_call(
+            'delete',
+            f'https://api.github.com/repos/{self.repo_id}/issues/comments/{comment_id}',
+        )
+
+    def post_pull_request_comment(self, pr_number: int, body: str) -> None:
+        self.__api_post(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+            content=json.dumps({'body': body}),
+        )
+
     def create_label(self, name, color):
         self.__api_post(
             self.LABELS_API.format(repo_id=self.repo_id), content=json.dumps({'name': name, 'color': color})
         )
+
+    def create_milestone(self, title: str) -> None:
+        self.__api_post(self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title}))
+
+    def create_pull_request(self, title: str, head: str, base: str, body: str = '') -> str:
+        response = self.__api_post(
+            self.PULLS_API.format(repo_id=self.repo_id),
+            content=json.dumps({'title': title, 'head': head, 'base': base, 'body': body}),
+        )
+        return response.json()['html_url']
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')
@@ -136,16 +346,29 @@ class GitHubManager:
         return self.__api_call('get', *args, **kwargs)
 
     def __api_call(self, method, *args, **kwargs):
-        from httpx import HTTPError
+        from httpx import HTTPError, HTTPStatusError
 
         retry_wait = 2
+        secondary_rate_limit_retries = 0
         while True:
             try:
                 response = getattr(self.client, method)(*args, auth=self.__auth, **kwargs)
 
+                secondary_rate_limit_wait = github_secondary_rate_limit_wait(response)
+                if secondary_rate_limit_wait is not None:
+                    if (
+                        secondary_rate_limit_retries < MAX_SECONDARY_RATE_LIMIT_RETRIES
+                        and secondary_rate_limit_wait <= MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS
+                    ):
+                        secondary_rate_limit_retries += 1
+                        self.__status.wait_for(
+                            secondary_rate_limit_wait + 1,
+                            context='GitHub API secondary rate limit reached',
+                        )
+                        continue
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits
-                if response.status_code == 403 and response.headers['X-RateLimit-Remaining'] == '0':  # noqa: PLR2004
+                elif response.status_code == 403 and response.headers.get('X-RateLimit-Remaining') == '0':  # noqa: PLR2004
                     self.__status.wait_for(
                         float(response.headers['X-RateLimit-Reset']) - time() + 1,
                         context='GitHub API rate limit reached',
@@ -156,5 +379,12 @@ class GitHubManager:
                 retry_wait *= 2
                 continue
 
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except HTTPStatusError as e:
+                if github_secondary_rate_limit_wait(e.response) is not None:
+                    raise
+                if e.response.status_code in GITHUB_AUTHENTICATION_STATUS_CODES:
+                    raise GitHubAuthenticationError.from_http_status_error(e) from e
+                raise
             return response

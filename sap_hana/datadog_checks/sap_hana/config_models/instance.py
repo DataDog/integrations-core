@@ -20,6 +20,24 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(['tls_ca_cert', 'tls_cert', 'tls_private_key'])
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
+    max_columns: Optional[int] = None
+    max_tables: Optional[int] = None
+    max_views: Optional[int] = None
+    run_sync: Optional[bool] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -30,6 +48,72 @@ class CustomQuery(BaseModel):
     metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+
+
+class CustomSqlSelectFields(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    entity_id: Optional[str] = None
+    metric_config_id: Optional[int] = None
+
+
+class Entity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    account: Optional[str] = None
+    database: Optional[str] = None
+    platform: Optional[str] = None
+    schema_: Optional[str] = Field(None, alias='schema')
+    table: Optional[str] = None
+
+
+class Query(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
+    dbname: Optional[str] = None
+    entity: Optional[Entity] = None
+    interval_seconds: Optional[int] = Field(
+        None,
+        description='How often (in seconds) to run this query. Ignored when schedule is set\n(see schedule for the precedence rule).\n',
+    )
+    monitor_id: Optional[int] = None
+    query: str
+    query_timeout: Optional[int] = Field(
+        None,
+        description='Statement timeout for this query in milliseconds. Applied as a connection-level\nstatementTimeout when executing the query.\n',
+    )
+    schedule: Optional[str] = Field(
+        None,
+        description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
+    )
+    type: Optional[str] = None
+
+
+class DataObservability(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    config_id: Optional[str] = None
+    enabled: Optional[bool] = None
+    queries: Optional[tuple[Query, ...]] = None
+    run_sync: Optional[bool] = None
+
+
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
 
 
 class MetricPatterns(BaseModel):
@@ -48,10 +132,14 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     batch_size: Optional[int] = None
+    collect_schemas: Optional[CollectSchemas] = None
     connection_properties: Optional[MappingProxyType[str, Any]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    data_observability: Optional[DataObservability] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None
@@ -85,6 +173,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

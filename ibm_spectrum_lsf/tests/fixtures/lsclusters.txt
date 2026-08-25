@@ -1,0 +1,2 @@
+CLUSTER_NAME   STATUS   MASTER_HOST                          ADMIN    HOSTS  SERVERS
+test-cluster       ok       ip-11-21-111-198.ec2.internal     ec2-user        1        1

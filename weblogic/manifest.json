@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "80a8d9e2-48dd-4242-be78-0d929ea1a492",
   "app_id": "weblogic",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

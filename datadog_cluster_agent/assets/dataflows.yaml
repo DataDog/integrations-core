@@ -1,0 +1,5 @@
+provides:
+  - id: datadog-cluster-agent-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

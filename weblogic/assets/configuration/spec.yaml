@@ -1,4 +1,5 @@
 name: WebLogic
+fleet_configurable: true
 files:
 - name: weblogic.yaml
   options:

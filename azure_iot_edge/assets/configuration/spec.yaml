@@ -1,4 +1,5 @@
 name: Azure IoT Edge
+fleet_configurable: true
 files:
   - name: azure_iot_edge.yaml
     options:
@@ -10,6 +11,7 @@ files:
           - name: edge_hub_prometheus_url
             description: |
               The URL where Edge Hub metrics are exposed via Prometheus.
+            fleet_configurable: true
             required: true
             value:
               type: string
@@ -17,6 +19,7 @@ files:
           - name: edge_agent_prometheus_url
             description: |
               The URL where Edge Agent metrics are exposed via Prometheus.
+            fleet_configurable: true
             required: true
             value:
               type: string

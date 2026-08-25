@@ -11,6 +11,8 @@ Capture CouchDB data in Datadog to:
 
 For performance reasons, the CouchDB version you're using is cached, so you cannot monitor CouchDB instances with different versions with the same agent instance.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

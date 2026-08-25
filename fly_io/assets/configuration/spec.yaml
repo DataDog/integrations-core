@@ -1,4 +1,5 @@
 name: Fly.io
+fleet_configurable: true
 files:
 - name: fly_io.yaml
   options:
@@ -18,10 +19,14 @@ files:
           for authentication for both the OpenMetrics endpoint and REST API.
           You can alternatively use the `auth_token` option.
 
-          You can create an access token with this command:
-            `TOKEN=$(flyctl auth token)`
+          You can create a read-only token with this command:
+            `fly tokens create readonly`
+
+          Alternatively, you can use the `flyctl auth token` command to create a token. If using this
+          type of token, the header value should be: `Authorization: "Bearer <FLY_ACCESS_TOKEN>"`. Note this
+          option is no longer recommended: https://fly.io/docs/security/tokens/.
         headers.value.example:
-          Authorization: "Bearer <FLY_ACCESS_TOKEN>"
+          Authorization: "FlyV1 <FLY_ACCESS_TOKEN>"
         auth_token.display_priority: 2
         empty_default_hostname.display_priority: 1
         empty_default_hostname.required: true
@@ -32,6 +37,7 @@ files:
           (and the host tags) to the metrics. It is especially important to leave this parameter set to "true" when you are
           running the Agent inside a Fly.io app, because in this scenario the host tags are unrelated to other metrics.
     - name: org_slug
+      fleet_configurable: true
       display_priority: 5
       enabled: true
       required: true
@@ -43,6 +49,7 @@ files:
         example: <ORG_SLUG>
         type: string
     - name: machines_api_endpoint
+      fleet_configurable: true
       display_priority: 3
       enabled: true
       description: |
@@ -55,6 +62,7 @@ files:
         example: http://_api.internal:4280
         type: string
     - name: match_string
+      fleet_configurable: true
       display_priority: 1
       description: |
         Match string used to filter the Prometheus data requested from Fly.io.

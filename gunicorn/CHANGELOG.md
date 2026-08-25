@@ -2,6 +2,41 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 4.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Fix `NoSuchProcess` crash in `_get_master_proc_by_name` when a process disappears during scanning. The exception handler was calling `p.name()` on the disappeared process, which itself throws `NoSuchProcess`. Use `p.pid` instead since it is a simple attribute that does not require reading `/proc`. ([#22649](https://github.com/DataDog/integrations-core/pull/22649))
+
+## 4.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 4.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 4.1.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Avoid logging noise while searching for the Gunicorn master process ([#19310](https://github.com/DataDog/integrations-core/pull/19310))
+
 ## 4.1.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:

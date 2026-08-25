@@ -2,6 +2,67 @@
 
 <!-- towncrier release notes start -->
 
+## 6.9.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 6.8.0 / 2026-06-25 / Agent 7.81.0
+
+***Added***:
+
+* Add the `group_per_user_services` option to report Windows per-user service instances under their template name, reducing `windows_service` tag cardinality. ([#24087](https://github.com/DataDog/integrations-core/pull/24087))
+* Add a `per_user` services filter criterion to select or exclude Windows per-user services (use `per_user: false` to exclude them from collection). ([#24088](https://github.com/DataDog/integrations-core/pull/24088))
+
+## 6.7.2 / 2026-06-26 / Agent 7.80.4
+_Backported from 6.8.0_
+
+***Added***:
+
+* Add the `group_per_user_services` option to report Windows per-user service instances under their template name, reducing `windows_service` tag cardinality. ([#24087](https://github.com/DataDog/integrations-core/pull/24087))
+* Add a `per_user` services filter criterion to select or exclude Windows per-user services (use `per_user: false` to exclude them from collection). ([#24088](https://github.com/DataDog/integrations-core/pull/24088))
+
+## 6.7.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 6.7.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 6.6.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Add uptime metric to Windows services ([#21778](https://github.com/DataDog/integrations-core/pull/21778))
+* Add state metric to Windows services ([#21830](https://github.com/DataDog/integrations-core/pull/21830))
+* Add restarts metric to Windows services ([#21840](https://github.com/DataDog/integrations-core/pull/21840))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 6.5.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add state tag to windows services ([#21709](https://github.com/DataDog/integrations-core/pull/21709))
+
+## 6.4.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 6.3.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
 ## 6.2.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:

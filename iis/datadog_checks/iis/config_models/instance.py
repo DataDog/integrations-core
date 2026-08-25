@@ -61,6 +61,7 @@ class ExtraMetrics(BaseModel):
     counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
+    include_total: Optional[bool] = None
     instance_counts: Optional[InstanceCounts] = None
     name: str
     tag_name: Optional[str] = None
@@ -84,6 +85,7 @@ class Metrics(BaseModel):
     counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
+    include_total: Optional[bool] = None
     instance_counts: Optional[InstanceCounts] = None
     name: str
     tag_name: Optional[str] = None
@@ -111,6 +113,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_health_service_check: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     extra_metrics: Optional[MappingProxyType[str, ExtraMetrics]] = None
     host: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None

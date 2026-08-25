@@ -109,6 +109,7 @@ def channel_status_metrics():
         'batches': pymqi.CMQCFC.MQIACH_BATCHES,
         'current_msgs': pymqi.CMQCFC.MQIACH_CURRENT_MSGS,
         'indoubt_status': pymqi.CMQCFC.MQIACH_INDOUBT_STATUS,
+        'conn_status': pymqi.CMQCFC.MQCACH_CONNECTION_NAME,
     }
 
 
@@ -159,6 +160,9 @@ def depth_percent(queue_info):
 
     depth_current = queue_info[pymqi.CMQC.MQIA_CURRENT_Q_DEPTH]
     depth_max = queue_info[pymqi.CMQC.MQIA_MAX_Q_DEPTH]
+
+    if depth_max == 0:
+        return None
 
     depth_fraction = depth_current / depth_max
     depth_as_percent = depth_fraction * 100

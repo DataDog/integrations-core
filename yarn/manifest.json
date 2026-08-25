@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "427f8f08-00a1-455a-a0e5-9b2ec7ffb0a5",
   "app_id": "yarn",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

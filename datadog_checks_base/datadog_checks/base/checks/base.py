@@ -10,51 +10,36 @@ import logging
 import os
 import re
 from collections import deque
+from collections.abc import Iterable
 from os.path import basename
-from typing import (  # noqa: F401
+from pathlib import Path
+from typing import (
     TYPE_CHECKING,
     Any,
-    AnyStr,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
+    Deque,  # noqa: F401
 )
 
 import lazy_loader
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.agent.utils import should_profile_memory
+from datadog_checks.base.utils.common import ensure_bytes, to_native_string
+from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.models import validation
+from datadog_checks.base.utils.tagging import GENERIC_TAGS
+from datadog_checks.base.utils.tracing import traced_class
 
-from ..config import is_affirmative
-from ..constants import ServiceCheck
-from ..errors import ConfigurationError
-from ..types import (
-    AgentConfigType,  # noqa: F401
-    Event,  # noqa: F401
-    ExternalTagType,  # noqa: F401
-    InitConfigType,  # noqa: F401
-    InstanceType,  # noqa: F401
-    ProxySettings,  # noqa: F401
-    ServiceCheckStatus,  # noqa: F401
-)
-from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, to_native_string
-from ..utils.fips import enable_fips
-from ..utils.tagging import GENERIC_TAGS
-from ..utils.tracing import traced_class
 from ._config_ast import parse as _parse_ast_config
 
 if AGENT_RUNNING:
-    from ..log import CheckLoggingAdapter, init_logging
+    from datadog_checks.base.log import CheckLoggingAdapter, init_logging
 
 else:
-    from ..stubs.log import CheckLoggingAdapter, init_logging
+    from datadog_checks.base.stubs.log import CheckLoggingAdapter, init_logging
 
 init_logging()
 
@@ -81,6 +66,7 @@ if TYPE_CHECKING:
     import unicodedata as _module_unicodedata
 
     from datadog_checks.base.utils.diagnose import Diagnosis
+    from datadog_checks.base.utils.discovery import Service
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
 
@@ -91,6 +77,65 @@ unicodedata: _module_unicodedata = lazy_loader.load('unicodedata')
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
+
+
+# Global list of secure fields that require trusted provider validation.
+# This provides a fallback security check for integrations that haven't
+# regenerated their models with require_trusted_provider in the spec.
+GLOBAL_SECURE_FIELDS = frozenset(
+    [
+        'tls_cert',
+        'tls_private_key',
+        'tls_ca_cert',
+        'kerberos_keytab',
+        'kerberos_cache',
+        'bearer_token_path',
+        'auth_token',
+        'private_key_path',
+        'java_bin_path',
+        'trust_store_path',
+        'key_store_path',
+        'tools_jar_path',
+        # Legacy ssl_* aliases remapped to tls_* fields (via HTTP_CONFIG_REMAPPER or
+        # read directly from the raw instance by kafka_consumer/kafka_actions). Gate
+        # them like their tls_* equivalents so an alias cannot bypass the
+        # trusted-provider check on the canonical field.
+        'ssl_cert',
+        'ssl_certfile',
+        'ssl_key',
+        'ssl_keyfile',
+        'ssl_private_key',
+        'ssl_ca_cert',
+        'ssl_ca_certs',
+        'ssl_cafile',
+        'ssl_crlfile',
+        # Legacy raw-instance path aliases read directly from the instance dict rather
+        # than declared as spec/model fields, so only this raw-key fallback can gate
+        # them. nagios reads nagios_perf_cfg/nagios_log and opens them for parsing and
+        # tailing; http_check falls back to ca_certs for tls_ca_cert and passes it to
+        # SSLContext.load_verify_locations.
+        'nagios_perf_cfg',
+        'nagios_log',
+        'ca_certs',
+        # Legacy HTTP_CONFIG_REMAPPER cert/key aliases remapped to tls_* fields. They are
+        # raw instance keys rather than model fields, so only this fallback can gate them:
+        # http_check reads client_cert/client_key, consul reads client_cert_file/
+        # private_key_file/ca_bundle_file, and riak reads cacert, each loaded as a cert or
+        # key file for the TLS connection.
+        'client_cert',
+        'client_key',
+        'client_cert_file',
+        'private_key_file',
+        'ca_bundle_file',
+        'cacert',
+        # custom_queries (instance) and global_custom_queries (init_config) are read straight from the
+        # raw config by QueryManager and executed as raw SQL. Gate them here so an untrusted provider
+        # (e.g. Kubernetes pod annotations) cannot inject arbitrary queries; unlike the path fields
+        # above they have no allowlist escape, so any list value from an untrusted provider is blocked.
+        'custom_queries',
+        'global_custom_queries',
+    ]
+)
 
 
 @traced_class
@@ -147,12 +192,14 @@ class AgentCheck(object):
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
 
-    FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
-    ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
-    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
-    TAG_REPLACEMENT = re.compile(br'[,\+\*\-/()\[\]{}\s]')
-    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(br'__+')
-    DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
+    FIRST_CAP_RE = re.compile(rb'(.)([A-Z][a-z]+)')
+    ALL_CAP_RE = re.compile(rb'([a-z0-9])([A-Z])')
+    METRIC_REPLACEMENT = re.compile(rb'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    TAG_REPLACEMENT = re.compile(rb'[,\+\*\-/()\[\]{}\s]')
+    # Preserves hyphens (-) which are allowed in Datadog tags
+    TAG_REPLACEMENT_PRESERVE_HYPHENS = re.compile(rb'[,\+\*/()\[\]{}\s]')
+    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(rb'__+')
+    DOT_UNDERSCORE_CLEANUP = re.compile(rb'_*\._*')
 
     # allows to set a limit on the number of metric name and tags combination
     # this check can send per run. This is useful for checks that have an unbounded
@@ -171,6 +218,33 @@ class AgentCheck(object):
             return traced_class(cls)
         except Exception:
             return cls
+
+    @classmethod
+    def generate_configs(cls, service: Service) -> Iterable[dict[str, Any]]:
+        """
+        Yield candidate full configurations for service discovery.
+
+        Integrations can opt into config discovery by declaring a discovery
+        stanza in their spec and generating config_models.discovery.
+        """
+        from datadog_checks.base.utils.discovery.probe import generated_discovery_candidates
+
+        return generated_discovery_candidates(cls, service)
+
+    @classmethod
+    def discover_config(cls, service_json: str) -> str:
+        """
+        Return discovered configurations for an AD service payload.
+
+        The Agent calls this classmethod through rtloader. Candidate configs
+        are generated by ``generate_configs`` and accepted only when the real
+        check can run against their metric instances successfully. Returns the
+        first accepted candidate only (first-match-wins); remaining candidates
+        are not evaluated.
+        """
+        from datadog_checks.base.utils.discovery.probe import run_discovery
+
+        return run_discovery(cls, service_json)
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
@@ -210,8 +284,17 @@ class AgentCheck(object):
         # everywhere just yet. It's complicated... See: https://github.com/DataDog/integrations-core/pull/5573
         instance = instances[0] if instances else None
 
-        self.check_id = ''
+        self.provider = ''
         self.name = name  # type: str
+
+        # Built before `check_id` is assigned below, because its setter forwards the value here.
+        # Held separately from `self.log` because subclasses are free to replace that with a logger
+        # of their own, as `PrometheusScraperMixin` does.
+        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
+        self._log_adapter = CheckLoggingAdapter(logger)
+        self.log = self._log_adapter
+
+        self.check_id = ''
         self.init_config = init_config  # type: InitConfigType
         self.agentConfig = agentConfig  # type: AgentConfigType
         self.instance = instance  # type: InstanceType
@@ -219,6 +302,9 @@ class AgentCheck(object):
         self.warnings = []  # type: List[str]
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
+        )
+        self.enable_legacy_tags_normalization = (
+            is_affirmative(self.instance.get('enable_legacy_tags_normalization', True)) if instance else True
         )
         self.debug_metrics = {}
         if self.init_config is not None:
@@ -228,9 +314,6 @@ class AgentCheck(object):
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
-
-        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
-        self.log = CheckLoggingAdapter(logger, self)
 
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
         if not isinstance(metric_patterns, dict):
@@ -303,10 +386,17 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
-        self.check_initializations.append(self.load_configuration_models)
+        self.check_initializations.extend(
+            [
+                self.load_configuration_models,
+                self.__initialize_persistent_cache_key_prefix,
+            ]
+        )
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__security_config = None
+        self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
@@ -383,6 +473,21 @@ class AgentCheck(object):
         return limit
 
     @property
+    def check_id(self) -> str:
+        """
+        The Agent's identifier for this check instance, in the form ``<name>:<instance hash>``.
+
+        Empty until the Agent assigns it, which happens after construction and before the first run.
+        """
+        return self._check_id
+
+    @check_id.setter
+    def check_id(self, value: str) -> None:
+        self._check_id = value
+        # The adapter tags every log record with the id, so it needs the value as soon as we have it.
+        self._log_adapter.set_check_id(value)
+
+    @property
     def http(self) -> RequestsWrapper:
         """
         Provides logic to yield consistent network behavior based on user configuration.
@@ -407,6 +512,28 @@ class AgentCheck(object):
             self.__logs_enabled = bool(datadog_agent.get_config('logs_enabled'))
 
         return self.__logs_enabled
+
+    @property
+    def security_config(self) -> "validation.security.SecurityConfig":
+        """
+        Returns the integration security configuration, loaded once and cached.
+
+        The security config controls file path validation for untrusted providers.
+        """
+        if self.__security_config is None:
+            trusted_providers = datadog_agent.get_config('integration_trusted_providers')
+            self.__security_config = validation.security.SecurityConfig(
+                check_name=self.name,
+                provider=self.provider,
+                ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
+                file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
+                trusted_providers=trusted_providers
+                if trusted_providers is not None
+                else list(validation.security.DEFAULT_TRUSTED_PROVIDERS),
+                excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
+            )
+
+        return self.__security_config
 
     @property
     def formatted_tags(self):
@@ -494,11 +621,48 @@ class AgentCheck(object):
 
         return self._check_version
 
+    def _get_package_dir(self) -> Path:
+        """Return the package directory of the concrete check subclass.
+
+        Resolves the filesystem path of the top-level package for the check
+        (e.g., ``datadog_checks/krakend/``). This is useful for locating
+        data files shipped alongside the check code.
+
+        The method follows the same ``__module__`` + ``importlib`` pattern
+        used by :attr:`check_version`.
+        """
+        if not hasattr(self, '_package_dir'):
+            module_parts = self.__module__.split('.')
+            package_path = '.'.join(module_parts[:2])
+            package = importlib.import_module(package_path)
+            if package.__file__ is not None:
+                self._package_dir = Path(package.__file__).parent
+            elif hasattr(package, '__path__') and package.__path__:
+                self._package_dir = Path(package.__path__[0])
+            else:
+                raise RuntimeError(
+                    f"Cannot determine package directory for {package_path}: "
+                    f"package has no __file__ or __path__ attribute"
+                )
+        return self._package_dir
+
     @property
     def in_developer_mode(self):
         # type: () -> bool
         self._log_deprecation('in_developer_mode')
         return False
+
+    def persistent_cache_id(self) -> str:
+        """
+        Returns the ID that identifies this check instance in the Agent persistent cache.
+
+        Overriding this method modifies the default behavior of the AgentCheck and can
+        be used to customize when the persistent cache is invalidated. The default behavior
+        defines the persistent cache ID as the digest of the full check configuration.
+
+        Some per-check isolation is still applied to avoid different checks with the same ID to share the same keys.
+        """
+        return self.check_id.split(":")[-1]
 
     def log_typos_in_options(self, user_config, models_config, level):
         # See Performance Optimizations in this package's README.md.
@@ -599,10 +763,27 @@ class AgentCheck(object):
 
                 raise ConfigurationError('\n'.join(message_lines)) from None
             else:
+                # Fallback security validation for fields in GLOBAL_SECURE_FIELDS.
+                # This catches secure fields in integrations that haven't regenerated
+                # their models with require_trusted_provider in the spec.
+                try:
+                    security_config = context.get('security_config')
+                    configured_fields = context.get('configured_fields', frozenset())
+                    for field_name in GLOBAL_SECURE_FIELDS & configured_fields:
+                        value = config.get(field_name)
+                        if value is not None:
+                            validation.security.check_field_trusted_provider(field_name, value, security_config)
+                except ValueError as e:
+                    raise ConfigurationError(str(e)) from None
                 return config_model
 
     def _get_config_model_context(self, config):
-        return {'logger': self.log, 'warning': self.warning, 'configured_fields': frozenset(config)}
+        return {
+            'logger': self.log,
+            'warning': self.warning,
+            'configured_fields': frozenset(config),
+            'security_config': self.security_config,
+        }
 
     def register_secret(self, secret: str) -> None:
         """
@@ -658,7 +839,7 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        aggregator.submit_histogram_bucket(
+        self._aggregator().submit_histogram_bucket(
             self,
             self.check_id,
             self._format_namespace(name, raw),
@@ -676,42 +857,194 @@ class AgentCheck(object):
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
+        self._aggregator().submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
 
     def database_monitoring_query_metrics(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
+        self._aggregator().submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def database_monitoring_query_activity(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
+        self._aggregator().submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
     def database_monitoring_metadata(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
+        self._aggregator().submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
     def event_platform_event(self, raw_event, event_track_type):
-        # type: (str, str) -> None
+        # type: (str | bytes, str) -> None
         """Send an event platform event.
 
         Parameters:
-            raw_event (str):
-                JSON formatted string representing the event to send
+            raw_event (str | bytes):
+                JSON formatted string representing the event to send, or
+                pre-encoded bytes for proto tracks such as ``genresources``
             event_track_type (str):
                 type of event ingested and processed by the event platform
         """
         if raw_event is None:
             return
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+        if isinstance(raw_event, (bytearray, memoryview)):
+            raw_event = bytes(raw_event)
+        elif not isinstance(raw_event, bytes):
+            raw_event = to_native_string(raw_event)
+        self._aggregator().submit_event_platform_event(self, self.check_id, raw_event, event_track_type)
+
+    def submit_generic_resource(self, *, type, key, fields, include, seen_at=None, expire_at=None):
+        # type: (str, str, dict | None, dict, int | None, int | None) -> None
+        """Ship a resource on the ``genresources`` event-platform track.
+
+        ``fields`` is the resource body. ``include`` chooses what to keep from it:
+        ``{"paths": [...], "map_paths": [...], "annotation_keys": [...]}``. Evaluated against ``fields``,
+        ``paths`` select individual values, ``map_paths`` select whole flat maps (e.g.
+        ``metadata.labels``), and ``annotation_keys`` glob ``metadata.annotations`` keys. A path that
+        resolves to a structured object is dropped. Pass ``include=INCLUDE_ALL`` to ship ``fields``
+        as-is — only safe when your code constructed every value, never for a raw upstream object.
+        ``seen_at`` / ``expire_at`` are optional ``int`` unix-seconds.
+        """
+        if fields is None:
+            return
+
+        # stdlib json on purpose: module-level json is the orjson wrapper, which coerces datetime instead of failing.
+        import json as _json
+
+        # Lazy import: avoids loading the protobuf runtime for every check that imports base.py.
+        from datadog_checks.base.utils.genresources import (
+            GENRESOURCES_TRACK,
+            INCLUDE_ALL,
+            INTEGRATIONS_CORE_SOURCE,
+            MAX_FIELDS_JSON_BYTES,
+            GenericResource,
+            GenericResourceEvent,
+            apply_allow_list,
+            find_invalid_include,
+        )
+
+        integration = self.name
+
+        def _emit_dropped(count=1):
+            datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.dropped", count, "count")
+
+        if not key:
+            self.log.warning("genresources: dropping resource with empty key for type=%s", type)
+            _emit_dropped()
+            return
+
+        if not type:
+            self.log.warning("genresources: dropping resource with empty type for key=%s", key)
+            _emit_dropped()
+            return
+
+        if not isinstance(fields, dict):
+            self.log.warning(
+                "genresources: dropping resource with non-dict fields type=%s key=%s actual_type=%s",
+                type,
+                key,
+                fields.__class__.__name__,
+            )
+            _emit_dropped()
+            return
+
+        if include is INCLUDE_ALL:
+            # Caller built `fields` in code and owns its contents; ship as-is, no allow-list.
+            included = fields
+        else:
+            if not isinstance(include, dict):
+                self.log.warning(
+                    "genresources: dropping resource with non-dict include type=%s key=%s actual_type=%s",
+                    type,
+                    key,
+                    include.__class__.__name__,
+                )
+                _emit_dropped()
+                return
+
+            paths = include.get("paths", [])
+            map_paths = include.get("map_paths", [])
+            annotation_keys = include.get("annotation_keys", [])
+
+            def _is_str_list(value):
+                return isinstance(value, list) and all(isinstance(item, str) for item in value)
+
+            if not (_is_str_list(paths) and _is_str_list(map_paths) and _is_str_list(annotation_keys)):
+                self.log.warning("genresources: dropping resource with malformed include type=%s key=%s", type, key)
+                _emit_dropped()
+                return
+
+            if any(not pattern.strip("*?") for pattern in annotation_keys):
+                self.log.warning(
+                    "genresources: dropping resource with catch-all annotation pattern type=%s key=%s", type, key
+                )
+                _emit_dropped()
+                return
+
+            invalid = find_invalid_include(fields, paths, map_paths)
+            if invalid is not None:
+                offending_path, reason = invalid
+                self.log.warning(
+                    "genresources: dropping resource (%s) path=%s type=%s key=%s", reason, offending_path, type, key
+                )
+                _emit_dropped()
+                return
+
+            included = apply_allow_list(fields, paths=paths, map_paths=map_paths, annotation_keys=annotation_keys)
+
+        if not included:
+            self.log.warning("genresources: dropping resource with empty inclusion type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        try:
+            fields_json = _json.dumps(included, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+        except (TypeError, ValueError):
+            self.log.exception("genresources: failed to encode fields for type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        if len(fields_json) > MAX_FIELDS_JSON_BYTES:
+            self.log.warning(
+                "genresources: dropping oversize resource type=%s key=%s size=%d",
+                type,
+                key,
+                len(fields_json),
+            )
+            _emit_dropped()
+            return
+
+        resource = GenericResource(type=type, key=key, fields_json=fields_json)
+
+        def _set_seconds(ts, value, label):
+            if value is None:
+                return
+            if isinstance(value, int) and not isinstance(value, bool):
+                ts.seconds = value
+            else:
+                self.log.warning(
+                    "genresources: ignoring non-int %s for type=%s key=%s value=%r", label, type, key, value
+                )
+
+        _set_seconds(resource.seen_at, seen_at, "seen_at")
+        _set_seconds(resource.expire_at, expire_at, "expire_at")
+
+        event = GenericResourceEvent(source=INTEGRATIONS_CORE_SOURCE, resource=resource)
+        try:
+            payload = event.SerializeToString()
+        except Exception:
+            self.log.exception("genresources: failed to serialize type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        self.event_platform_event(payload, GENRESOURCES_TRACK)
+        datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.emitted", 1, "count")
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
@@ -727,6 +1060,10 @@ class AgentCheck(object):
             return False
 
         return self.exclude_metrics_pattern.search(metric_name) is not None
+
+    def _aggregator(self) -> Any:
+        """Return the active aggregator: proxy during a discovery probe, module singleton otherwise."""
+        return getattr(self, '_discovery_aggregator', None) or aggregator
 
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
@@ -766,7 +1103,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
+        self._aggregator().submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -987,7 +1324,7 @@ class AgentCheck(object):
 
         message = self.sanitize(message)
 
-        aggregator.submit_service_check(
+        self._aggregator().submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
@@ -1018,13 +1355,15 @@ class AgentCheck(object):
             attributes['timestamp'] = int(timestamp * 1000)
 
         datadog_agent.send_log(json.encode(attributes), self.check_id)
+
         if cursor is not None:
-            self.write_persistent_cache('log_cursor_{}'.format(stream), json.encode(cursor))
+            self.write_persistent_cache(f'log_cursor_{stream}', json.encode(cursor))
 
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
-        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        data = self.read_persistent_cache(f'log_cursor_{stream}')
+
         return json.decode(data) if data else None
 
     def _log_deprecation(self, deprecation_key, *args):
@@ -1091,9 +1430,12 @@ class AgentCheck(object):
 
         return entrypoint
 
-    def _persistent_cache_id(self, key):
-        # type: (str) -> str
-        return '{}_{}'.format(self.check_id, key)
+    def __initialize_persistent_cache_key_prefix(self):
+        if self.__persistent_cache_key_prefix:
+            return
+
+        namespace = ':'.join(self.check_id.split(':')[:-1])
+        self.__persistent_cache_key_prefix = f'{namespace}:{self.persistent_cache_id()}_'
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
@@ -1103,9 +1445,9 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}")
 
-    def write_persistent_cache(self, key, value):
+    def write_persistent_cache(self, key: str, value: str):
         # type: (str, str) -> None
         """Stores `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
@@ -1119,7 +1461,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
+        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}", value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
@@ -1146,10 +1488,10 @@ class AgentCheck(object):
         And substitute illegal metric characters
         """
         name = ensure_bytes(name)
-        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', name)
-        metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
-        metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
-        return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
+        metric_name = self.FIRST_CAP_RE.sub(rb'\1_\2', name)
+        metric_name = self.ALL_CAP_RE.sub(rb'\1_\2', metric_name).lower()
+        metric_name = self.METRIC_REPLACEMENT.sub(rb'_', metric_name)
+        return self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', metric_name).strip(b'_')
 
     def warning(self, warning_message, *args, **kwargs):
         # type: (str, *Any, **Any) -> None
@@ -1243,10 +1585,10 @@ class AgentCheck(object):
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = self.METRIC_REPLACEMENT.sub(br'_', metric)
-            name = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', name).strip(b'_')
+            name = self.METRIC_REPLACEMENT.sub(rb'_', metric)
+            name = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', name).strip(b'_')
 
-        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', name)
+        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', name)
 
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
@@ -1257,14 +1599,23 @@ class AgentCheck(object):
         # type: (Union[str, bytes]) -> str
         """Normalize tag values.
 
-        This happens for legacy reasons, when we cleaned up some characters (like '-')
-        which are allowed in tags.
+        When `enable_legacy_tags_normalization` is True (default), this normalizes
+        characters like '-' which are actually allowed in Datadog tags. This legacy
+        behavior is preserved for backward compatibility.
+
+        When `enable_legacy_tags_normalization` is False, hyphens are preserved in
+        tag values, making it consistent with Datadog's official tag rules.
         """
         if isinstance(tag, str):
             tag = tag.encode('utf-8', 'ignore')
-        tag = self.TAG_REPLACEMENT.sub(br'_', tag)
-        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
-        tag = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', tag).strip(b'_')
+
+        if self.enable_legacy_tags_normalization:
+            tag = self.TAG_REPLACEMENT.sub(rb'_', tag)
+        else:
+            tag = self.TAG_REPLACEMENT_PRESERVE_HYPHENS.sub(rb'_', tag)
+
+        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', tag)
+        tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)
 
     def check(self, instance):
@@ -1287,26 +1638,20 @@ class AgentCheck(object):
             self._clear_diagnosis()
             # Ignore check initializations if running in a separate process
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
-                from ..utils.replay.execute import run_with_isolation
+                from datadog_checks.base.utils.replay.execute import run_with_isolation
 
                 run_with_isolation(self, aggregator, datadog_agent)
             else:
-                while self.check_initializations:
-                    initialization = self.check_initializations.popleft()
-                    try:
-                        initialization()
-                    except Exception:
-                        self.check_initializations.appendleft(initialization)
-                        raise
+                self.run_check_initializations()
 
                 instance = copy.deepcopy(self.instances[0])
 
                 if 'set_breakpoint' in self.init_config:
-                    from ..utils.agent.debug import enter_pdb
+                    from datadog_checks.base.utils.agent.debug import enter_pdb
 
                     enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
                 elif self.should_profile_memory():
-                    # self.init_config.get('profile_memory') could be `/tmp/datadog-agent-memory-profiler*`
+                    # The 'profile_memory' key in self.init_config could be `/tmp/datadog-agent-memory-profiler*`
                     # that is generated by Datadog Agent.
                     # If we use `--m-dir` for `agent check` command, a hidden flag, it should be same as a given value.
                     namespaces = [self.init_config.get('profile_memory')]
@@ -1336,6 +1681,15 @@ class AgentCheck(object):
                 self.metric_limiter.reset()
 
         return error_report
+
+    def run_check_initializations(self):
+        while self.check_initializations:
+            initialization = self.check_initializations.popleft()
+            try:
+                initialization()
+            except Exception:
+                self.check_initializations.appendleft(initialization)
+                raise
 
     def event(self, event):
         # type: (Event) -> None
@@ -1386,7 +1740,7 @@ class AgentCheck(object):
         if self.__NAMESPACE__:
             event.setdefault('source_type_name', self.__NAMESPACE__)
 
-        aggregator.submit_event(self, self.check_id, event)
+        self._aggregator().submit_event(self, self.check_id, event)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         # type: (Sequence[Union[None, str, bytes]], str, str) -> List[str]
@@ -1457,7 +1811,7 @@ class AgentCheck(object):
 
     def profile_memory(self, func, namespaces=None, args=(), kwargs=None, extra_tags=None):
         # type: (Callable[..., Any], Optional[Sequence[str]], Sequence[Any], Optional[Dict[str, Any]], Optional[List[str]]) -> None  # noqa: E501
-        from ..utils.agent.memory import profile_memory
+        from datadog_checks.base.utils.agent.memory import profile_memory
 
         if namespaces is None:
             namespaces = self.check_id.split(':', 1)
@@ -1479,14 +1833,91 @@ class AgentCheck(object):
         import subprocess
         import sys
 
+        # Force UTF-8 encoding for subprocess
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+
         process = subprocess.Popen(
             [sys.executable, '-c', 'import sys, yaml; print(yaml.safe_load(sys.stdin.read()))'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            env=env,
         )
-        stdout, stderr = process.communicate(yaml_str.encode())
+        # Explicitly encode as UTF-8 to match PYTHONIOENCODING
+        stdout, stderr = process.communicate(yaml_str.encode('utf-8'))
         if process.returncode != 0:
-            raise ValueError(f'Failed to load config: {stderr.decode()}')
+            raise ValueError(f'Failed to load config: {stderr.decode("utf-8", errors="replace")}')
 
-        return _parse_ast_config(stdout.strip().decode())
+        return _parse_ast_config(stdout.strip().decode('utf-8'))
+
+    # Issue is defined here: https://github.com/DataDog/agent-payload/blob/master/healthplatform/healthplatform.pb.go#L131
+    # Types are copied here for convenience and should be relatively stable
+    # // ID is the unique identifier for the issue
+    # Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+    # // IssueName is the human-readable name for the issue
+    # IssueName string `protobuf:"bytes,2,opt,name=issue_name,json=issueName,proto3" json:"issue_name,omitempty"`
+    # // Title is the short title/headline of the issue
+    # Title string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+    # // Description is the detailed description of the issue
+    # Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+    # // Category indicates the category of the issue (e.g., permissions, connectivity, etc.)
+    # Category string `protobuf:"bytes,5,opt,name=category,proto3" json:"category,omitempty"`
+    # // Location indicates where the issue occurred (e.g., core agent, log agent, etc.)
+    # Location string `protobuf:"bytes,6,opt,name=location,proto3" json:"location,omitempty"`
+    # // Severity indicates the impact level of the issue
+    # Severity IssueSeverity `protobuf:"varint,7,opt,name=severity,proto3,enum=datadog.healthplatform.IssueSeverity"
+    #  json:"severity,omitempty"`
+    # // Source is the sub-agent or product that reported the issue
+    # // (e.g., "logs", "apm", "error-tracking", "network-monitoring")
+    # Source string `protobuf:"bytes,9,opt,name=source,proto3" json:"source,omitempty"`
+    # // Extra is optional complementary structured information
+    # Extra *structpb.Struct `protobuf:"bytes,10,opt,name=extra,proto3" json:"extra,omitempty"`
+    # // Remediation provides steps to fix the issue
+    # Remediation *Remediation `protobuf:"bytes,11,opt,name=remediation,proto3" json:"remediation,omitempty"`
+    # // Tags are additional labels for the issue
+    # Tags []string `protobuf:"bytes,12,rep,name=tags,proto3" json:"tags,omitempty"`
+
+    # Remediation should be a dict with the following keys:
+    # - summary: str
+    # - steps: list[step]
+    # Step should be a dict with the following keys:
+    # - order: int
+    # - text: str
+
+    IssueSeverity = {'UNSPECIFIED': 0, 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3}
+
+    def report_issue(
+        self,
+        id: str,
+        issue_name: str,
+        title: str = None,
+        description: str = None,
+        category: str = None,
+        severity: int = 0,
+        extra: dict = None,
+        remediation: dict = None,
+        tags: list = None,
+    ):
+        # Issue ID and Name are required
+        if not id:
+            raise ValueError("Issue ID is required")
+        if not issue_name:
+            raise ValueError("Issue Name is required")
+        issue = {
+            'id': id,
+            'issue_name': issue_name,
+            'title': title,
+            'description': description,
+            'category': category,
+            'location': "integrations",
+            'severity': severity,
+            'source': self.name,
+            'extra': extra,
+            'remediation': remediation,
+            'tags': tags,
+        }
+        datadog_agent.report_issue(self.name, json.encode(issue))
+
+    def resolve_issue(self, issue_id):
+        datadog_agent.resolve_issue(issue_id)

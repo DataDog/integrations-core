@@ -20,6 +20,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_host():
     return 'localhost'
 
@@ -30,3 +34,7 @@ def instance_min_collection_interval():
 
 def instance_port():
     return 7222
+
+
+def instance_use_ssl():
+    return False

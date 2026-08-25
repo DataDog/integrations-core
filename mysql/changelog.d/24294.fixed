@@ -1,0 +1,1 @@
+Pin ``explain_json_format_version`` to 1 so that collected execution plans keep the version 1 JSON format on MySQL 9.5 and later, where version 2 became the default.

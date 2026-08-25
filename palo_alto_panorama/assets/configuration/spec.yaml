@@ -1,4 +1,5 @@
 name: palo-alto-panorama
+fleet_configurable: true
 files:
 - name: palo_alto_panorama.yaml
   options:

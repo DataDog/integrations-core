@@ -1,0 +1,10 @@
+snapshot_time             1749630169.472437000 secs.nsecs
+start_time                1748613451.984630687 secs.nsecs
+elapsed_time              1016717.487806313 secs.nsecs
+granted                   992888 samples [locks] 0 0 0
+grant_rate                992888 samples [locks/s] 0 0 0
+cancel_rate               992888 samples [locks/s] 0 0 0
+grant_plan                992888 samples [locks/s] 113460 113460 112653072480
+slv                       992888 samples [lock.secs] 0 0 0
+recalc_freed              992888 samples [locks] 0 0 0
+recalc_timing             101274 samples [secs] 10 11 1016711

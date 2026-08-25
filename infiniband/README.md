@@ -10,6 +10,8 @@ Get visibility into your high-performance networking infrastructure to help iden
 
 Key metrics collected include port counters like bytes/packets transmitted and received, error counts, and RDMA hardware-specific metrics - giving operators the data needed to ensure optimal performance of their high-speed networking infrastructure.
 
+**Minimum Agent version:** 7.65.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. The check collects metrics by reading and submitting counters by default from [`/sys/class/infiniband/<device>/ports/*/counters/` and `/sys/class/infiniband/<device>/ports/*/hw_counters/`][3] directories. To ensure that this integration works, ensure that the Agent has the appropriate permissions to access and read the counters from these directories.
@@ -85,6 +87,23 @@ instances:
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
+
+This integration reads counters from the Linux RDMA/InfiniBand sysfs interface
+at `/sys/class/infiniband`. Linux exposes RDMA devices through this interface
+even when the port is using Ethernet/RoCE instead of native InfiniBand, so the
+check can collect metrics from compatible RDMA NICs in either mode. Use the
+`link_layer`, `netdev`, and `gid_type` tags to distinguish native InfiniBand
+ports from Ethernet/RoCE-backed ports.
+
+All metrics are tagged with `device` and `port`. When the kernel exposes the
+corresponding sysfs files, metrics are also tagged with:
+
+- `link_layer`, for example `link_layer:infiniband` or `link_layer:ethernet`
+- `netdev` and `gid_type` from `gid_attrs`, for example `netdev:ens5f0` and `gid_type:roce_v2`
+- `firmware_version`, `hca_type`, `board_id`, and `node_type` from device metadata
+
+The check also submits `infiniband.port.rate` from each port's negotiated link
+rate.
 
 ### Events
 

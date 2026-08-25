@@ -1,4 +1,5 @@
 name: Cacti
+fleet_configurable: true
 files:
   - name: cacti.yaml
     options:
@@ -8,6 +9,7 @@ files:
       - template: instances
         options:
           - name: mysql_host
+            fleet_configurable: true
             required: true
             description: URL of your MySQL database
             value:
@@ -18,13 +20,17 @@ files:
             value:
               example: 3306
               type: integer
+            fleet_configurable: false
           - name: mysql_user
+            fleet_configurable: true
             required: true
             description: User to use to connect to MySQL in order to gather metrics.
             value:
               type: string
           - name: mysql_password
             description: Password to use to connect to MySQL in order to gather metrics.
+            fleet_configurable: true
+            secret: true
             value:
               type: string
           - name: mysql_db
@@ -32,7 +38,9 @@ files:
             value:
               example: cacti
               type: string
+            fleet_configurable: false
           - name: rrd_path
+            fleet_configurable: true
             required: true
             description: |
               The Cacti checks requires access to the Cacti DB in MySQL and to the RRD
@@ -44,6 +52,7 @@ files:
             value:
               example: <CACTI_RRA_PATH>
               type: string
+              require_trusted_provider: true
           - name: field_names
             description: |
               The `field_names` specifies which field_names should be used
@@ -69,6 +78,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: rrd_whitelist
             description: |
               The `rrd_whitelist` is a path to a text file that has a list of file patterns,
@@ -77,6 +87,8 @@ files:
             value:
               example: <RRD_WHITELIST_FILE_PATH>
               type: string
+              require_trusted_provider: true
+            fleet_configurable: false
           - template: instances/default
       - template: logs
         example:

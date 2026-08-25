@@ -17,7 +17,6 @@ CONTROLLER_READINESS = '/api/status/readiness'
 
 
 class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
-
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'traefik_mesh'
 
@@ -85,7 +84,7 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         return node_status
 
-    def get_version(self, url):
+    def get_version(self):
         """Fetches Traefik Proxy version from the Proxy API"""
 
         version_url = urljoin(self.traefik_proxy_api_endpoint, PROXY_VERSION)

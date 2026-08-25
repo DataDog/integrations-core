@@ -1,1 +1,0 @@
-Added a configuration option to support SQL_ASCII encoded Postgres databases with clients making requests in other encodings

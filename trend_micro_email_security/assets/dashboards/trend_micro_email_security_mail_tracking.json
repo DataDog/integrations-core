@@ -1,12 +1,12 @@
 {
-    "title": "Trend Micro Email Security - Mail Tracking",
+    "title": "TrendAI Email Security - Mail Tracking",
     "description": "- This provides comprehensive overview of email activity, allowing you to track email messages that have passed through the system and monitor their delivery status.",
     "widgets": [
         {
             "id": 8607320274851034,
             "definition": {
                 "title": "",
-                "banner_img": "https://www.trendmicro.com/content/dam/trendmicro/global/en/global/logo/trend-micro-logo.png",
+                "banner_img": "https://static.datadoghq.com/static/images/logos/trend-micro-email-security_large.svg",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -15,7 +15,7 @@
                         "id": 6434863284708092,
                         "definition": {
                             "type": "note",
-                            "content": "This dashboard provides a detailed overview of email activity monitored by Trend Micro Email Security. \n\nIt offers insights into key data such as the total number of incoming and outgoing emails, acceptance and blocking rates, and detailed information on senders, recipients and subjects. By visualizing aspects like email size, blocked reasons, and sender locations, the dashboard enables a deeper understanding of email flows within your organization.\n\nThis holistic approach enhances your ability to track, analyze, and respond to email-related security incidents, improving overall email security and threat prevention efforts.\n\nFor more information, see the [Trend Micro Email Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_email_security).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                            "content": "This dashboard provides a detailed overview of email activity monitored by TrendAI Email Security. \n\nIt offers insights into key data such as the total number of incoming and outgoing emails, acceptance and blocking rates, and detailed information on senders, recipients and subjects. By visualizing aspects like email size, blocked reasons, and sender locations, the dashboard enables a deeper understanding of email flows within your organization.\n\nThis holistic approach enhances your ability to track, analyze, and respond to email-related security incidents, improving overall email security and threat prevention efforts.\n\nFor more information, see the [TrendAI Email Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_email_security).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -72,7 +72,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -124,7 +124,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @direction:incoming $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) @direction:incoming $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -176,7 +176,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @direction:outgoing $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) @direction:outgoing $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -250,7 +250,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -347,7 +347,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:critical $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:critical $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -398,7 +398,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:high $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:high $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -454,7 +454,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:critical $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:critical $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -519,7 +519,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:medium $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:medium $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -570,7 +570,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:low $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:low $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -621,7 +621,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:info $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:info $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -674,7 +674,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:high $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:high $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -741,7 +741,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking status:medium $Direction $Traffic-Type $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security status:medium $Direction $Traffic-Type $Sender $Recipient"
                                             }
                                         }
                                     ],
@@ -812,7 +812,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:accepted_traffic $Traffic-Type $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) traffic_type:accepted_traffic $Traffic-Type $Direction $Sender $Recipient"
                                             },
                                             "storage": "hot"
                                         }
@@ -864,7 +864,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -916,7 +916,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         },
@@ -931,7 +931,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1010,7 +1010,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         },
@@ -1026,7 +1026,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1096,7 +1096,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1149,7 +1149,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) @action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1202,7 +1202,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking -@action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) -@action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1271,7 +1271,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) @action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         },
@@ -1287,7 +1287,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking -@action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) -@action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1344,7 +1344,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1426,7 +1426,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1495,7 +1495,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1564,7 +1564,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1632,7 +1632,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1700,7 +1700,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1768,7 +1768,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1837,7 +1837,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1885,7 +1885,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-email-security service:mail-tracking traffic_type:accepted_traffic $Direction $Sender $Recipient $Traffic-Type",
+                                        "query_string": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) traffic_type:accepted_traffic $Direction $Sender $Recipient $Traffic-Type",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -1961,7 +1961,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type",
+                                        "query_string": "source:trend-micro-email-security (service:mail-tracking OR @vendor.endpoint:mail-tracking) traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {

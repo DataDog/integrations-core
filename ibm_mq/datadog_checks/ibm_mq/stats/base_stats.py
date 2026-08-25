@@ -6,7 +6,7 @@ import datetime as dt
 from dateutil.tz import UTC
 from pymqi.CMQCFC import MQCAMO_START_DATE, MQCAMO_START_TIME
 
-from ..utils import sanitize_strings
+from datadog_checks.ibm_mq.utils import sanitize_strings
 
 try:
     import pymqi

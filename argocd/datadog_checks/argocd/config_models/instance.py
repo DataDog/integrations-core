@@ -13,11 +13,17 @@ from types import MappingProxyType
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+SECURE_FIELD_NAMES = frozenset(
+    ['auth_token', 'kerberos_cache', 'kerberos_keytab', 'tls_ca_cert', 'tls_cert', 'tls_private_key']
+)
 
 
 class AuthToken(BaseModel):
@@ -95,17 +101,33 @@ class InstanceConfig(BaseModel):
     cache_metric_wildcards: Optional[bool] = None
     cache_shared_labels: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
+    collect_genresources: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_openmetrics: Optional[bool] = None
     commit_server_endpoint: Optional[str] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_health_service_check: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     exclude_metrics: Optional[tuple[str, ...]] = None
     exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
+    genresources_application_full_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_application_poll_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_auth_token: Optional[str] = None
+    genresources_cluster_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_endpoint: Optional[str] = None
+    genresources_exclude_paths: Optional[tuple[str, ...]] = None
+    genresources_extra_include_paths: Optional[tuple[str, ...]] = None
+    genresources_max_resources_per_cycle: Optional[int] = Field(None, ge=1)
+    genresources_repository_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_stream_applications_enabled: Optional[bool] = None
+    genresources_stream_backoff_max_seconds: Optional[int] = Field(None, ge=1)
+    genresources_stream_read_timeout_seconds: Optional[int] = Field(None, ge=1)
+    genresources_ttl_seconds: Optional[int] = Field(None, ge=1)
     headers: Optional[MappingProxyType[str, Any]] = None
     histogram_buckets_as_distributions: Optional[bool] = None
     hostname_format: Optional[str] = None
@@ -113,7 +135,7 @@ class InstanceConfig(BaseModel):
     ignore_connection_errors: Optional[bool] = None
     ignore_tags: Optional[tuple[str, ...]] = None
     include_labels: Optional[tuple[str, ...]] = None
-    kerberos_auth: Optional[str] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None
@@ -168,6 +190,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

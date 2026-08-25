@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -25,8 +25,9 @@ from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_he
 from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
 )
+from datadog_checks.sqlserver.utils import construct_use_statement
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_YEAR
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -136,7 +137,7 @@ def test_collect_load_activity(
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE [{}]".format(database))
+        cur.execute(construct_use_statement(database))
         # 0xFF can't be decoded to Unicode, which makes it good test data,
         # since Unicode is a default format
         cur.execute("SET CONTEXT_INFO 0xff")
@@ -190,7 +191,9 @@ def test_collect_load_activity(
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
+    )
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -271,7 +274,7 @@ def test_collect_load_activity(
 
 
 @pytest.mark.flaky
-@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_YEAR == 2019, reason='Test flakes on this set up')
 @pytest.mark.skipif(running_on_windows_ci(), reason="Test disabled due to failure impacting master pipeline")
 def test_activity_nested_blocking_transactions(
     aggregator,
@@ -296,9 +299,7 @@ def test_activity_nested_blocking_transactions(
             id int,
             name varchar(10),
             city varchar(20)
-        )""".format(
-            TABLE_NAME
-        ),
+        )""".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),
@@ -318,7 +319,7 @@ def test_activity_nested_blocking_transactions(
 
     def run_queries(conn, queries):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute("BEGIN TRANSACTION")
         for q in queries:
             try:
@@ -455,7 +456,7 @@ def test_activity_metadata(
 
     def _run_test_query(conn, q):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute(q)
 
     def _obfuscate_sql(sql_query, options=None):
@@ -646,6 +647,72 @@ def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "procedure_name,schema_name,expected_procedure_name",
+    [
+        pytest.param(
+            None,
+            None,
+            "myproc",
+            id="no_connect_permission_falls_back_to_text",
+        ),
+        pytest.param(
+            "myProc",
+            "dbo",
+            "dbo.myproc",
+            id="connect_permission_granted_uses_object_name",
+        ),
+    ],
+)
+def test_activity_procedure_name_fallback_without_connect_permission(
+    dbm_instance, datadog_agent, procedure_name, schema_name, expected_procedure_name
+):
+    """When the monitoring user lacks CONNECT on the target database, OBJECT_NAME() returns NULL
+    and procedure_name is None. The procedure SQL text from sys.dm_exec_sql_text is still
+    available in `text` and should be used as a fallback to extract the procedure name via
+    obfuscator metadata, mirroring the fallback logic in statement metrics."""
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    statement_text = "SELECT * FROM ϑings WHERE id = @P1"
+    procedure_text = "CREATE PROCEDURE dbo.myProc AS BEGIN SELECT * FROM ϑings WHERE id = @P1 END;"
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': [],
+                    'procedures': ['myProc'],
+                },
+            }
+        )
+
+    row = {
+        "user_name": "testuser",
+        "id": 1,
+        "statement_text": statement_text,
+        "text": procedure_text,
+        "query_start": new_time(),
+        "procedure_name": procedure_name,
+        "schema_name": schema_name,
+        "query_hash": b'\x01\x02\x03\x04',
+        "query_plan_hash": b'\x05\x06\x07\x08',
+    }
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result_rows = check.activity._normalize_queries_and_filter_rows([row], 10000)
+
+    assert len(result_rows) == 1
+    result_row = result_rows[0]
+    assert result_row['is_proc'] is True, "should identify the row as a stored procedure"
+    assert result_row.get('procedure_name') == expected_procedure_name
+    assert result_row.get('procedure_signature'), "should have a procedure_signature"
+
+
+@pytest.mark.unit
 def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_agent):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -808,10 +875,11 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
     sleep_time = 1
     time.sleep(sleep_time)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
+    max_collections = int(sleep_time / collection_interval) + 1
+    min_collections = sleep_time  # at minimum, one collection per second
     check.cancel()
     metrics = aggregator.metrics("dd.sqlserver.activity.collect_activity.payload_size")
-    assert max_collections / 2.0 <= len(metrics) <= max_collections
+    assert min_collections <= len(metrics) <= max_collections
 
 
 def _load_test_activity_json(filename):
@@ -834,7 +902,7 @@ def _expected_dbm_instance_tags(check):
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
 
@@ -988,3 +1056,87 @@ def test_sanitize_activity_row(dbm_instance, row):
     row = check.activity._obfuscate_and_sanitize_row(row)
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
+
+
+@pytest.mark.unit
+def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(dbm_instance, datadog_agent):
+    comment = "/*dddbs='orders-service',dde='prod'*/"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
+    row = {
+        # sp_executesql includes the RPC parameter declaration and leading comment in the full
+        # batch text, but SQL Server's statement offsets exclude both from statement_text.
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == [comment]
+    assert not row.get('is_proc')
+    assert 'procedure_signature' not in row
+    assert mock_agent.call_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'text,statement_text,expected_comments',
+    [
+        pytest.param(
+            '(@P1 int)SELECT * FROM orders WHERE customer_id = @P1',
+            'SELECT * FROM orders WHERE customer_id = @P1',
+            [],
+            id='rpc_parameter_prefix',
+        ),
+        pytest.param(
+            'SELECT ' + 'x' * 493,
+            'SELECT ' + 'x' * 493 + ' FROM orders',
+            [],
+            id='full_text_truncated_at_500_characters',
+        ),
+        pytest.param(
+            'SELECT 1; SELECT * FROM orders',
+            'SELECT * FROM orders',
+            [],
+            id='multi_statement_batch',
+        ),
+        pytest.param(
+            "/*dddbs='orders-service'*/ SELECT " + 'x' * 466,
+            "/*dddbs='orders-service'*/ SELECT " + 'x' * 466 + ' FROM blocked_orders',
+            ["/*dddbs='orders-service'*/"],
+            id='idle_blocker_full_statement',
+        ),
+    ],
+)
+def test_sanitize_activity_row_skips_unneeded_full_text_obfuscation(
+    dbm_instance, datadog_agent, text, statement_text, expected_comments
+):
+    row = {
+        'statement_text': statement_text,
+        'text': text,
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comment = "/*dddbs='orders-service'*/"
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == expected_comments
+    assert mock_agent.call_count == 1

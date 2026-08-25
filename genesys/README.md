@@ -57,7 +57,7 @@ The Genesys integration collects and forwards audit logs to Datadog.
 
 ### Metrics
 
-The Genesys integration collects and forwards conversation analytics metrics to Datadog. See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 

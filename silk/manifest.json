@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1f436ae6-e063-408f-ad35-37ee37fa2183",
   "app_id": "silk",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

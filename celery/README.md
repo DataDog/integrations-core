@@ -10,6 +10,8 @@ The Celery integration provides valuable insights into your task queue system by
 - Providing visibility into worker performance and task distribution
 - Helping identify bottlenecks and optimize task processing efficiency
 
+**Minimum Agent version:** 7.66.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

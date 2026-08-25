@@ -23,12 +23,12 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery
 
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
@@ -141,6 +141,7 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
+    {database_name_column}
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
@@ -236,7 +237,8 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
     """
-    tree = ET.fromstring(raw_plan)
+    parser = ET.XMLParser(resolve_entities=False, load_dtd=False, no_network=True)
+    tree = ET.fromstring(raw_plan, parser=parser)
     for e in tree.iter():
         if e.text:
             e.text = e.text.strip()
@@ -269,7 +271,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(self._config.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
             shutdown_callback=self._close_db_conn,
@@ -290,6 +292,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._last_stats_query_time = None
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
 
+        self._collect_execution_plans = is_affirmative(self._config.statement_metrics_config.get('collect_plans', True))
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
 
     def _init_caches(self):
@@ -328,10 +331,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             return self._statement_metrics_query
         available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
 
+        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+        database_name_column = ""
         if self.disable_secondary_tags:
             # If disable_secondary_tags is enabled, we need to use the query without aggregates
             statements_query = STATEMENT_METRICS_QUERY_NO_AGGREGATES
-        elif is_azure_sql_database(self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")):
+            if is_azure_sql_database(engine_edition):
+                # This query does not group by database, so elsewhere a row can span several. Azure SQL Database
+                # connects to one, so DB_NAME() names it. Keep it argument-less: resolving a dbid needs
+                # sys.dm_exec_plan_attributes, admin-only on the Basic/S0/S1 tiers this setting works around.
+                database_name_column = "DB_NAME() as database_name,"
+        elif is_azure_sql_database(engine_edition):
             # If the database is Azure SQL Database, we need to use the Azure SQL Database specific query
             statements_query = STATEMENT_METRICS_QUERY_AZURE_SQL_DATABASE
         else:
@@ -343,6 +353,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=self._config.stored_procedure_characters_limit,
+            database_name_column=database_name_column,
         )
         return self._statement_metrics_query
 
@@ -393,7 +404,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if not self._should_include_query_metrics_row(row):
                 continue
             # Attempt to obfuscate SQL statement with metadata
-            procedure_statement = None
             try:
                 statement = obfuscate_sql_with_metadata(
                     row['statement_text'], self._config.obfuscator_options, replace_null_character=True
@@ -421,40 +431,42 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             procedure_signature = None
             procedure_content = None
             row['is_proc'] = bool(row.get('procedure_name'))
-            if (row['is_proc'] and row['text']) or self.disable_secondary_tags:
+            has_sproc_context = row['is_proc'] or bool(row.get('sproc_object_id'))
+            needs_procedure_metadata = has_sproc_context or self.disable_secondary_tags
+            should_recover_comments = needs_comment_recovery(row.get('text'), comments)
+            if row.get('text') and (needs_procedure_metadata or should_recover_comments):
                 try:
-                    procedure_statement = obfuscate_sql_with_metadata(
+                    full_text_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
-                    procedure_content = procedure_statement['query']
-                    procedure_signature = compute_sql_signature(procedure_statement['query'])
-                    procedure_comments = procedure_statement['metadata'].get('comments', [])
-                    if procedure_comments:
-                        comments = list(set(comments + procedure_comments))
-                    if self.disable_secondary_tags and not row.get('procedure_name'):
-                        # Extract procedure name from the statement text when disable_secondary_tags is enabled
-                        procedures = procedure_statement['metadata'].get('procedures')
-                        if procedures:
-                            row['procedure_name'] = procedures[0].lower()
-                            row['is_proc'] = True
+                    full_text_comments = full_text_statement['metadata'].get('comments', [])
+                    if full_text_comments:
+                        comments = list(dict.fromkeys(comments + full_text_comments))
+                    if needs_procedure_metadata:
+                        procedure_content = full_text_statement['query']
+                        procedure_signature = compute_sql_signature(full_text_statement['query'])
+                        if not row.get('procedure_name'):
+                            procedures = full_text_statement['metadata'].get('procedures')
+                            if procedures:
+                                row['procedure_name'] = procedures[0].lower()
+                                row['is_proc'] = True
                 except Exception as e:
-                    procedure_signature = '__procedure_obfuscation_error__'
-                    procedure_content = '__procedure_obfuscation_error__'
+                    if needs_procedure_metadata:
+                        procedure_signature = '__procedure_obfuscation_error__'
+                        procedure_content = '__procedure_obfuscation_error__'
                     if self._config.log_unobfuscated_queries:
-                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
+                        self.log.warning("Failed to obfuscate query text=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug(
-                            "Failed to obfuscate stored procedure for query_signature=[%s] | err=[%s]",
-                            query_signature,
-                            e,
+                            "Failed to obfuscate query text for query_signature=[%s] | err=[%s]", query_signature, e
                         )
-                    self._check.count(
-                        "dd.sqlserver.statements.error",
-                        1,
-                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))]),
-                    )
-                    # If we can't obfuscate the stored procedure, we don't need to give up for this row,
-                    # we just won't have the association with the stored procedure in the metrics payload
+                    if needs_procedure_metadata:
+                        self._check.count(
+                            "dd.sqlserver.statements.error",
+                            1,
+                            **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))]),
+                        )
+                    # If we can't obfuscate the full text, keep the row using the obfuscated statement text.
 
             if procedure_content:
                 row['procedure_text'] = procedure_content
@@ -517,7 +529,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
-            'ddagenthostname': self._check.agent_hostname,
             'service': self._config.service,
         }
 
@@ -532,8 +543,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
         # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 rows = self._collect_metrics_rows(cursor)
                 if not rows:
                     return
@@ -541,9 +552,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                 payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-                for event in self._collect_plans(rows, cursor, deadline):
-                    self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-                    plans_submitted += 1
+                if self._collect_execution_plans:
+                    for event in self._collect_plans(rows, cursor, deadline):
+                        self._check.database_monitoring_query_sample(
+                            json.dumps(event, default=default_json_event_encoding)
+                        )
+                        plans_submitted += 1
 
         self._check.count(
             "dd.sqlserver.statements.plans_submitted.count", plans_submitted, **self._check.debug_stats_kwargs()
@@ -626,7 +640,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
-                obfuscated_plan, collection_errors = None, None
+                obfuscated_plan = None
+                collection_errors = []
 
                 try:
                     if raw_plan:
@@ -639,13 +654,21 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
-                    collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
+                    collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
                     )
                 tags = self._check.tag_manager.get_tags()
+
+                if is_plan_encrypted:
+                    collection_errors.append({'code': "plan_encrypted", 'message': "cannot collect encrypted plan"})
+
+                # Do not submit plan events if no plan is available and there is no collection error.
+                # This avoids sending empty plan events when a plan is not available in the cache.
+                if not raw_plan and not collection_errors:
+                    continue
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
@@ -677,7 +700,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "plan": {
                             "definition": obfuscated_plan,
                             "signature": row['query_plan_hash'],
-                            "collection_errors": collection_errors,
+                            "collection_errors": collection_errors if collection_errors else None,
                         },
                         "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),

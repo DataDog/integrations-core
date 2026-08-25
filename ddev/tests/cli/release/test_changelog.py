@@ -1,12 +1,37 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import shutil
+from collections.abc import Callable
 from functools import partial
 
 import pytest
 
 from ddev.repo.core import Repository
+from tests.helpers.changelog import reset_fragments_dir
+
+
+def git_capture(changed: list[str], *, subject: str = 'Foo') -> Callable[..., str]:
+    """Return a `GitRepository.capture` replacement that answers by command rather than call order.
+
+    Every changed path is reported as modified by any diff, so a test does not have to know how
+    many comparisons `IntegrationRegistry.changed_paths` makes.
+    """
+    sha = '0' * 40
+
+    def capture(*args: str) -> str:
+        match args[0]:
+            case 'merge-base':
+                return f'{sha}\n'
+            case 'diff':
+                return '\n'.join(f'M\t{path}' for path in changed)
+            case 'ls-files':
+                return ''
+            case 'log':
+                return f'{sha}\n{subject}'
+            case _:
+                raise AssertionError(f'unexpected git command: {args}')
+
+    return capture
 
 
 class TestFix:
@@ -175,79 +200,6 @@ class TestFix:
         )
 
 
-@pytest.fixture
-def repo_with_towncrier(repository, helpers):
-    (repository.path / 'towncrier.toml').write_text(
-        helpers.dedent(
-            r'''
-            [tool.towncrier]
-            # If you change the values for directory or filename, make sure to look for them in the code as well.
-            directory = "changelog.d"
-            filename = "CHANGELOG.md"
-            start_string = "<!-- towncrier release notes start -->\n"
-            underlines = ["", "", ""]
-            template = "changelog_template.jinja"
-            title_format = "## {version} / {project_date}"
-            # We automatically link to PRs, but towncrier only has an issue template so we abuse that.
-            issue_format = "([#{issue}](https://github.com/DataDog/integrations-core/pull/{issue}))"
-
-            # The order of entries matters! It controls the order in which changelog sections are displayed.
-            # https://towncrier.readthedocs.io/en/stable/configuration.html#use-a-toml-array-defined-order
-            [[tool.towncrier.type]]
-            directory="removed"
-            name = "Removed"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="changed"
-            name = "Changed"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="security"
-            name = "Security"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="deprecated"
-            name = "Deprecated"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="added"
-            name = "Added"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="fixed"
-            name = "Fixed"
-            showcontent = true
-            '''
-        )
-    )
-    (repository.path / 'changelog_template.jinja').write_text(
-        helpers.dedent(
-            '''
-            {% if sections[""] %}
-            {% for category, val in definitions.items() if category in sections[""] %}
-            ***{{ definitions[category]['name'] }}***:
-
-            {% for text, values in sections[""][category].items() %}
-            * {{ text }} {{ values|join(', ') }}
-            {% endfor %}
-
-            {% endfor %}
-            {% else %}
-            No significant changes.
-
-
-            {% endif %}
-            '''
-        )
-    )
-    return repository
-
-
 class TestNew:
     @pytest.fixture
     def fragments_dir(self, repo_with_towncrier, network_replay, mocker):
@@ -255,18 +207,8 @@ class TestNew:
         repo = Repository(repo_with_towncrier.path.name, str(repo_with_towncrier.path))
         repo.git.capture('add', '.')
         repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitRepository.capture',
-            side_effect=[
-                'M ddev/pyproject.toml',
-                '',
-                '',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-                '0000000000000000000000000000000000000000\nFoo',
-            ],
-        )
+        mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=git_capture(['ddev/pyproject.toml']))
+        mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
         return repo_with_towncrier.path / 'ddev' / 'changelog.d'
 
     def test_start(self, ddev, fragments_dir, helpers, mocker):
@@ -316,15 +258,7 @@ class TestNew:
         assert fragment_file.read_text() == "Foo"
 
     def test_start_no_changelog(self, ddev, fragments_dir, helpers, mocker):
-        mocker.patch(
-            'ddev.utils.git.GitRepository.capture',
-            side_effect=[
-                'M tests/conftest.py',
-                '',
-                '',
-                '0000000000000000000000000000000000000000\nFoo',
-            ],
-        )
+        mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=git_capture(['tests/conftest.py']))
         edit_patch = mocker.patch('click.edit', return_value=None)
         result = ddev('release', 'changelog', 'new', 'added')
 
@@ -389,10 +323,7 @@ class TestBuild:
                 '''
             )
         )
-        fragments_dir = repo_with_towncrier.path / 'ddev' / 'changelog.d'
-        if fragments_dir.exists():
-            shutil.rmtree(fragments_dir)
-        fragments_dir.mkdir(parents=True)
+        fragments_dir = reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
         return changelog, fragments_dir
 
     def test_build(self, setup_changelog_build, helpers, build_changelog):
@@ -445,18 +376,15 @@ class TestBuild:
 
         assert result.exit_code == 0, result.output
         # The new changelog entry should appear in command output.
-        assert (
-            helpers.dedent(
-                '''
+        assert helpers.dedent(
+            '''
                 ## 3.4.0 / 2023-10-11
 
                 ***Added***:
 
                 * Foo ([#1](https://github.com/DataDog/integrations-core/pull/1))
                 '''
-            )
-            in helpers.remove_trailing_spaces(result.output)
-        )
+        ) in helpers.remove_trailing_spaces(result.output)
         # Make sure that we don't write anything to the changelog.
         assert changelog.read_text() == helpers.dedent(
             '''

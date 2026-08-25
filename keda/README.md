@@ -4,6 +4,8 @@
 
 This check monitors [KEDA][1] through the Datadog Agent. For more information, see [KEDA monitoring][10].
 
+**Minimum Agent version:** 7.62.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -33,12 +35,15 @@ prometheus:
     enabled: true
 ```
 
-For the Agent to start collecting metrics, the KEDA controller pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample keda.d/conf.yaml][4]. 
+Configure each KEDA controller with one of the Kubernetes Autodiscovery options below. You can find additional configuration options by reviewing the [sample keda.d/conf.yaml][4].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `keda.scaler.detail_errors.count` metric is exposed only after a scaler encountered an error.
 
 The only parameter required for configuring the KEDA check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8080`. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -92,11 +97,40 @@ spec:
     - name: keda-operator
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+This example targets the KEDA Operator Deployment. Create a separate resource for each additional KEDA controller that you monitor:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: keda-operator
+  config:
+    checks:
+      - integration: keda
+        containerName: keda-operator
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8080/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][12].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 #### Log collection
 
 _Available for Agent versions >6.0_
 
-Kyverno logs can be collected from the different KEDA pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
+KEDA logs can be collected from the different KEDA pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
@@ -140,3 +174,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://keda.sh/docs/2.16/integrations/prometheus/
 [11]: https://github.com/kedacore/charts/blob/main/keda/README.md#operations
+[12]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

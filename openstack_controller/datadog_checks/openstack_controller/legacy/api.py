@@ -123,7 +123,7 @@ class OpenstackSDKApi(AbstractApi):
 
         if service_name not in self.endpoints:
             try:
-                service_filter = {u'service_id': self._get_service(service_name)[u'id']}
+                service_filter = {'service_id': self._get_service(service_name)['id']}
                 endpoints_list = self.connection.search_endpoints(filters=service_filter)
 
                 if not endpoints_list:
@@ -132,10 +132,10 @@ class OpenstackSDKApi(AbstractApi):
                 self.endpoints[service_name] = None
                 # Get the public or the internal endpoint
                 for endpoint in endpoints_list:
-                    if endpoint[u'interface'] == u'public':
+                    if endpoint['interface'] == 'public':
                         self.endpoints[service_name] = endpoint
                         return self.endpoints[service_name]
-                    elif endpoint[u'interface'] == u'internal':
+                    elif endpoint['interface'] == 'internal':
                         self.endpoints[service_name] = endpoint
             except Exception as e:
                 self.logger.debug("Error contacting openstack endpoint with openstacksdk: %s", e)
@@ -143,25 +143,25 @@ class OpenstackSDKApi(AbstractApi):
         return self.endpoints[service_name]
 
     def get_keystone_endpoint(self):
-        keystone_endpoint = self._get_endpoint(u'keystone')
+        keystone_endpoint = self._get_endpoint('keystone')
 
         if keystone_endpoint is None:
             raise KeystoneUnreachable()
-        return keystone_endpoint[u'links'][u'self']
+        return keystone_endpoint['links']['self']
 
     def get_nova_endpoint(self):
-        nova_endpoint = self._get_endpoint(u'nova')
+        nova_endpoint = self._get_endpoint('nova')
 
         if nova_endpoint is None:
             raise MissingNovaEndpoint()
-        return nova_endpoint[u'links'][u'self']
+        return nova_endpoint['links']['self']
 
     def get_neutron_endpoint(self):
-        neutron_endpoint = self._get_endpoint(u'neutron')
+        neutron_endpoint = self._get_endpoint('neutron')
 
         if neutron_endpoint is None:
             raise MissingNeutronEndpoint()
-        return neutron_endpoint[u'links'][u'self']
+        return neutron_endpoint['links']['self']
 
     def get_projects(self):
         self._check_authentication()

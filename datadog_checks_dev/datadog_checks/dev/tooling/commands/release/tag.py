@@ -3,10 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...git import git_fetch, git_tag, git_tag_list
-from ...release import get_release_tag_string
-from ...utils import complete_valid_checks, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_debug,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.git import git_fetch, git_tag, git_tag_list
+from datadog_checks.dev.tooling.release import get_release_tag_string
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_valid_checks, get_version_string
 
 # 0.0.1 is the initial pre-release version that is generated from the integration's template.
 # Releasing any version > 0.0.1 for a core integration requires a tag.*.link file to be updated in the PR
@@ -51,7 +59,8 @@ def tag(check, version, push, dry_run, skip_prerelease, fetch):
         checks = [check]
 
     # Check for any new tags
-    tagged = False
+    tagged = 0
+    skipped = 0
     # Fetch all tags from the remote
     if fetch:
         echo_info('Fetching all tags from remote...')
@@ -62,28 +71,30 @@ def tag(check, version, push, dry_run, skip_prerelease, fetch):
     existing_tags = git_tag_list()
 
     for check in checks:
-        echo_info(f'{check}:')
-
         # get the current version
         if not version:
             version = get_version_string(check)
 
         if skip_prerelease and version == PRERELEASE:
-            echo_warning('skipping prerelease version')
+            echo_debug(f'{check}: skipping prerelease version {version}')
             version = None
             continue
 
         # get the tag name
         release_tag = get_release_tag_string(check, version)
+
+        if release_tag in existing_tags:
+            echo_debug(f'{check}: {release_tag} already exists')
+            skipped += 1
+            version = None
+            continue
+
+        echo_info(f'{check}:')
         echo_waiting(f'Tagging HEAD with {release_tag}... ', indent=True, nl=False)
 
         if dry_run:
-            # Get latest tag for check
-            if release_tag in existing_tags:
-                echo_warning('already exists (dry-run)')
-            else:
-                tagged = True
-                echo_success("success! (dry-run)")
+            tagged += 1
+            echo_success("success! (dry-run)")
             version = None
             continue
 
@@ -94,11 +105,13 @@ def tag(check, version, push, dry_run, skip_prerelease, fetch):
         elif result.code != 0:
             abort(f'\n{result.stdout}{result.stderr}', code=result.code)
         else:
-            tagged = True
+            tagged += 1
             echo_success('success!')
 
         # Reset version
         version = None
+
+    echo_info(f'Tagged {tagged} release(s), skipped {skipped} already-tagged release(s).')
 
     if not tagged:
         abort(code=2)

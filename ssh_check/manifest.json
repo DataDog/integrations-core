@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "66833cbe-1bfc-4104-9d77-7b828219470b",
   "app_id": "ssh",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

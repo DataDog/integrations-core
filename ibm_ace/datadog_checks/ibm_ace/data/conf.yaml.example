@@ -53,6 +53,12 @@ instances:
     #
     # message_flows: true
 
+    ## @param max_message_length - integer - optional - default: 65536
+    ## Maximum buffer size in bytes for messages received from MQ subscriptions.
+    ## Increase this if you see MQRC_TRUNCATED_MSG_FAILED warnings in the logs.
+    #
+    # max_message_length: 65536
+
     ## @param persist_connections - boolean - optional - default: false
     ## Whether to keep connections open rather than disconnecting after every check run.
     #

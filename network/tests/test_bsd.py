@@ -23,8 +23,8 @@ def test_returns_the_right_instance(is_bsd, is_linux, is_windows, check):
 def ss_subprocess_mock(*args, **kwargs):
     if ['netstat', '-i', '-b'] == args[0]:
         fixture = os.path.join(FIXTURE_DIR, 'bsd', 'netstat_i_b')
-    elif ["netstat", "-s", "-ptcp"] == args[0]:
-        fixture = os.path.join(FIXTURE_DIR, 'bsd', 'netstat_s_ptcp')
+    elif ["netstat", "-s", "-p", "tcp"] == args[0]:
+        fixture = os.path.join(FIXTURE_DIR, 'bsd', 'netstat_s_p_tcp')
     elif ["netstat", "-n", "-a", "-p", "tcp"] == args[0]:
         fixture = os.path.join(FIXTURE_DIR, 'bsd', 'netstat_n_a_p_tcp')
     elif ["netstat", "-n", "-a", "-p", "udp"] == args[0]:

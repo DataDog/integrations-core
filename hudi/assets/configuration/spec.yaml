@@ -1,4 +1,5 @@
 name: Hudi
+fleet_configurable: true
 files:
 - name: hudi.yaml
   options:

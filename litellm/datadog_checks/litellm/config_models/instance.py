@@ -13,11 +13,17 @@ from types import MappingProxyType
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+SECURE_FIELD_NAMES = frozenset(
+    ['auth_token', 'kerberos_cache', 'kerberos_keytab', 'tls_ca_cert', 'tls_cert', 'tls_private_key']
+)
 
 
 class AuthToken(BaseModel):
@@ -97,6 +103,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_health_service_check: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     exclude_metrics: Optional[tuple[str, ...]] = None
     exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
@@ -109,13 +116,14 @@ class InstanceConfig(BaseModel):
     ignore_connection_errors: Optional[bool] = None
     ignore_tags: Optional[tuple[str, ...]] = None
     include_labels: Optional[tuple[str, ...]] = None
-    kerberos_auth: Optional[str] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
+    litellm_health_endpoint: Optional[str] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
@@ -123,7 +131,7 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = Field(None, pattern='\\w*')
     non_cumulative_histogram_buckets: Optional[bool] = None
     ntlm_domain: Optional[str] = None
-    openmetrics_endpoint: str
+    openmetrics_endpoint: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     proxy: Optional[Proxy] = None
@@ -162,6 +170,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

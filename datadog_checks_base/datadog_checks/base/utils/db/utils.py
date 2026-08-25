@@ -12,7 +12,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum, auto
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
 from cachetools import TTLCache
@@ -20,11 +20,11 @@ from cachetools import TTLCache
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.health import DEFAULT_COOLDOWN, HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
-
-from ..common import to_native_string
 
 logger = logging.getLogger(__file__)
 
@@ -108,21 +108,33 @@ class ConstantRateLimiter:
     Basic rate limiter that sleeps long enough to ensure the rate limit is not exceeded. Not thread safe.
     """
 
-    def __init__(self, rate_limit_s):
+    def __init__(self, rate_limit_s, max_sleep_chunk_s=5):
         """
-        :param rate_limit_s: rate limit in seconds
+        :param rate_limit_s: rate limit in executions per second
+        :param max_sleep_chunk_s: maximum size of each sleep chunk while waiting for the next period
         """
         self.rate_limit_s = max(rate_limit_s, 0)
         self.period_s = 1.0 / self.rate_limit_s if self.rate_limit_s > 0 else 0
         self.last_event = 0
+        self.max_sleep_chunk_s = max(0, max_sleep_chunk_s)
 
-    def update_last_time_and_sleep(self):
+    def update_last_time_and_sleep(self, cancel_event: Optional[threading.Event] = None):
         """
         Sleeps long enough to enforce the rate limit
         """
-        elapsed_s = time.time() - self.last_event
-        sleep_amount = max(self.period_s - elapsed_s, 0)
-        time.sleep(sleep_amount)
+        if self.period_s <= 0:
+            self.update_last_time()
+            return
+
+        deadline = self.last_event + self.period_s
+        while True:
+            now = time.time()
+            remaining = deadline - now
+            if remaining <= 0:
+                break
+            if cancel_event is not None and cancel_event.is_set():
+                break
+            time.sleep(min(remaining, self.max_sleep_chunk_s if self.max_sleep_chunk_s > 0 else remaining))
         self.update_last_time()
 
     def shall_execute(self):
@@ -150,25 +162,40 @@ class RateLimitingTTLCache(TTLCache):
         return True
 
 
+def _try_parse_db_host_ip(db_host: str) -> IPv4Address | IPv6Address | None:
+    """Try to parse db_host as an IP address."""
+    try:
+        return ip_address(db_host.strip())
+    except ValueError:
+        return None
+
+
+def _is_local_db_host(db_host: str | None) -> bool:
+    """Return True when the DB is reached via localhost, a unix socket, or a loopback IP."""
+    if not db_host or db_host == 'localhost' or db_host.startswith('/'):
+        return True
+    addr = _try_parse_db_host_ip(db_host)
+    return addr is not None and addr.is_loopback
+
+
 def resolve_db_host(db_host):
     if db_host and db_host.endswith('.local'):
         return db_host
 
     agent_hostname = datadog_agent.get_hostname()
-    if not db_host or db_host in {'localhost', '127.0.0.1'} or db_host.startswith('/'):
+    if _is_local_db_host(db_host):
         return agent_hostname
 
     try:
         host_ip = socket.gethostbyname(db_host)
     except (socket.gaierror, UnicodeError) as e:
-        # could be connecting via a unix domain socket
         logger.debug(
-            "failed to resolve DB host '%s' due to %r. falling back to agent hostname: %s",
+            "failed to resolve DB host '%s' due to %r. falling back to: %s",
             db_host,
             e,
-            agent_hostname,
+            db_host,
         )
-        return agent_hostname
+        return db_host
 
     try:
         agent_host_ip = socket.gethostbyname(agent_hostname)
@@ -276,15 +303,26 @@ class DBMAsyncJob(object):
         min_collection_interval=15,
         dbms="TODO",
         rate_limit=1,
+        max_sleep_chunk_s=1,
         run_sync=False,
         enabled=True,
         expected_db_exceptions=(),
         shutdown_callback=None,
         job_name=None,
+        # Some users may want to disable the missed collection event,
+        # for example if they set the collection interval intentionally low
+        # to effectively run the job in a loop
+        enable_missed_collection_event=True,
+        # List of features depenedent on the job running
+        # Defaults to [None] during init so that if no features are specified there will
+        # still be health events submitted for the job
+        features=None,
     ):
         self._check = check
         self._config_host = config_host
+        # The min_collection_interval is the expected collection interval for the main check
         self._min_collection_interval = min_collection_interval
+        self._expected_collection_interval = 1 / rate_limit if rate_limit > 0 else 0
         # map[dbname -> psycopg connection]
         self._log = get_check_logger()
         self._job_loop_future = None
@@ -296,17 +334,36 @@ class DBMAsyncJob(object):
         self._last_check_run = 0
         self._shutdown_callback = shutdown_callback
         self._dbms = dbms
-        self._rate_limiter = ConstantRateLimiter(rate_limit)
+        self._rate_limiter = ConstantRateLimiter(rate_limit, max_sleep_chunk_s=max_sleep_chunk_s)
+        self._max_sleep_chunk_s = max_sleep_chunk_s
         self._run_sync = run_sync
         self._enabled = enabled
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
+        self._enable_missed_collection_event = enable_missed_collection_event
+        self._features = features
+        if self._features is None:
+            self._features = [None]
+
+    @property
+    def job_name(self) -> Optional[str]:
+        """The job's name"""
+        return self._job_name
 
     def cancel(self):
         """
         Send a signal to cancel the job loop asynchronously.
         """
         self._cancel_event.set()
+
+    def wait_for_completion(self) -> None:
+        """
+        Block until the job loop has finished running, then clear its future. No-op if the loop is
+        not running. Typically called after :meth:`cancel` to wait for the loop to stop.
+        """
+        if self._job_loop_future:
+            self._job_loop_future.result()
+            self._job_loop_future = None
 
     def run_job_loop(self, tags):
         """
@@ -329,13 +386,46 @@ class DBMAsyncJob(object):
         elif self._job_loop_future is None or not self._job_loop_future.running():
             self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
+            if (
+                hasattr(self._check, 'health')
+                and self._enable_missed_collection_event
+                and self._expected_collection_interval >= 1
+                and self._last_run_start
+            ):
+                # Assume a collection interval of less than 1 second is an attempt to run the job in a loop
+                elapsed_time = time.time() - self._last_run_start
+                if elapsed_time > self._expected_collection_interval:
+                    # Missed a collection interval, submit a health event for each feature that depends on this job
+                    for feature in self._features:
+                        self._check.health.submit_health_event(
+                            name=HealthEvent.MISSED_COLLECTION,
+                            status=HealthStatus.WARNING,
+                            tags=self._job_tags,
+                            # Use a cooldown to avoid spamming if the job is missing the collection interval
+                            # in a flappy manner
+                            cooldown_time=DEFAULT_COOLDOWN,
+                            cooldown_values=[self._dbms, self._job_name],
+                            data={
+                                "dbms": self._dbms,
+                                "job_name": self._job_name,
+                                # send in ms for consistency with other metrics
+                                "last_run_start": self._last_run_start * 1000,
+                                "elapsed_time": elapsed_time * 1000,
+                                "expected_collection_interval": self._expected_collection_interval * 1000,
+                                "feature": feature,
+                            },
+                        )
+                    self._check.count(
+                        "dd.{}.async_job.missed_collection".format(self._dbms), 1, tags=self._job_tags, raw=True
+                    )
+
             self._log.debug("Job loop already running. job=%s", self._job_name)
 
     def _job_loop(self):
         try:
             self._log.info("[%s] Starting job loop", self._job_tags_str)
             while True:
-                if self._cancel_event.isSet():
+                if self._cancel_event.is_set():
                     self._log.info("[%s] Job loop cancelled", self._job_tags_str)
                     self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
                     break
@@ -354,7 +444,7 @@ class DBMAsyncJob(object):
                 else:
                     self._run_job_rate_limited()
         except Exception as e:
-            if self._cancel_event.isSet():
+            if self._cancel_event.is_set():
                 # canceling can cause exceptions if the connection is closed the middle of the check run
                 # in this case we still want to report it as a cancellation instead of a crash
                 self._log.debug("[%s] Job loop error after cancel: %s", self._job_tags_str, e)
@@ -381,14 +471,24 @@ class DBMAsyncJob(object):
                     tags=self._job_tags + ["error:crash-{}".format(type(e))],
                     raw=True,
                 )
+
+                if hasattr(self._check, 'health'):
+                    try:
+                        self._check.health.submit_exception_health_event(e, data={"job_name": self._job_name})
+                    except Exception as health_error:
+                        self._log.exception(
+                            "[%s] Failed to submit error health event", self._job_tags_str, health_error
+                        )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
+            # Runs on every loop exit, including the inactivity stop above, after which the loop may
+            # restart on the next check run. For one-time teardown on unschedule, override shutdown().
             if self._shutdown_callback:
                 self._shutdown_callback()
 
     def _set_rate_limit(self, rate_limit):
         if self._rate_limiter.rate_limit_s != rate_limit:
-            self._rate_limiter = ConstantRateLimiter(rate_limit)
+            self._rate_limiter = ConstantRateLimiter(rate_limit, max_sleep_chunk_s=self._max_sleep_chunk_s)
 
     def _run_sync_job_rate_limited(self):
         if self._rate_limiter.shall_execute():
@@ -397,12 +497,13 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         try:
+            self._last_run_start = time.time()
             self._run_job_traced()
         except:
             raise
         finally:
-            if not self._cancel_event.isSet():
-                self._rate_limiter.update_last_time_and_sleep()
+            if not self._cancel_event.is_set():
+                self._rate_limiter.update_last_time_and_sleep(cancel_event=self._cancel_event)
             else:
                 self._rate_limiter.update_last_time()
 
@@ -412,6 +513,19 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
+
+    def shutdown(self) -> None:
+        """
+        Release resources the job holds for its whole lifetime, such as dedicated DB connections or
+        clients.
+
+        Called once when the owning check is unscheduled, after the loop has stopped. The default
+        is a no-op; override to close long-lived resources, and keep the implementation idempotent.
+
+        Unlike ``shutdown_callback``, which runs on every loop exit and may be followed by a
+        restart, this runs only during final teardown.
+        """
+        pass
 
 
 @contextlib.contextmanager
@@ -450,20 +564,43 @@ class TagType(Enum):
     KEYLESS = auto()
 
 
+# Tags under keys with this prefix are internal resource tags (e.g. "dd.internal.resource") that are
+# consumed by the agent's metric submission pipeline. They should be excluded from payloads that don't
+# go through that pipeline, such as DBM metadata events.
+INTERNAL_TAG_PREFIX = "dd.internal"
+
+# Key used for the per-database tag. DBM checks exclude this from instance-level views because
+# the data is collected across all databases and the `db` tag is re-applied during ingestion.
+DB_TAG_KEY = "db"
+
+
 class TagManager:
     """
     Manages tags for a check. Tags are stored as a dictionary of key-value pairs
     for key-value tags and as a list of values for keyless tags useful for easy update and deletion.
-    There's an internal cache of the tag list to avoid generating the list of tag strings
+    There's an internal cache of the rendered tag lists to avoid generating the tag strings
     multiple times.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, normalizer: Optional[Callable[[Union[str, bytes]], str]] = None) -> None:
         self._tags: Dict[Union[str, TagType], List[str]] = {}
-        self._cached_tag_list: Optional[tuple[str, ...]] = None
+        # Rendered tag strings split into three disjoint buckets. Each tag string is stored exactly
+        # once, and a single render pass populates all three:
+        #   - _internal_tags: keys prefixed with "dd.internal"
+        #   - _db_tags: the per-database "db" key
+        #   - _base_tags: everything else (including keyless tags)
+        # get_tags() returns _base_tags merged with the requested optional buckets.
+        self._base_tags: tuple[str, ...] = ()
+        self._internal_tags: tuple[str, ...] = ()
+        self._db_tags: tuple[str, ...] = ()
+        self._cache_valid: bool = False
         self._keyless: TagType = TagType.KEYLESS
+        self._normalizer = normalizer
 
-    def set_tag(self, key: Optional[str], value: str, replace: bool = False) -> None:
+    def _invalidate_cache(self) -> None:
+        self._cache_valid = False
+
+    def set_tag(self, key: Optional[str], value: str, replace: bool = False, normalize: bool = False) -> None:
         """
         Set a tag with the given key and value.
         If key is None or empty, the value is stored as a keyless tag.
@@ -472,39 +609,49 @@ class TagManager:
             value (str): The tag value
             replace (bool): If True, replaces all existing values for this key
                            If False, appends the value if it doesn't exist
+            normalize (bool): If True, applies tag normalization using the configured normalizer
         """
+        if normalize and self._normalizer:
+            value = self._normalizer(value)
+
         if not key:
             key = self._keyless
 
         if replace or key not in self._tags:
+            # Skip the cache invalidation if the value is unchanged. Dynamic tags (e.g. version,
+            # replication_role) are re-set with replace=True every check run but rarely change, so
+            # this lets the cached tag lists survive across runs.
+            if self._tags.get(key) == [value]:
+                return
             self._tags[key] = [value]
-            # Invalidate the cache since tags have changed
-            self._cached_tag_list = None
+            # Invalidate the caches since tags have changed
+            self._invalidate_cache()
         elif value not in self._tags[key]:
             self._tags[key].append(value)
-            # Invalidate the cache since tags have changed
-            self._cached_tag_list = None
+            # Invalidate the caches since tags have changed
+            self._invalidate_cache()
 
-    def set_tags_from_list(self, tag_list: List[str], replace: bool = False) -> None:
+    def set_tags_from_list(self, tag_list: List[str], replace: bool = False, normalize: bool = False) -> None:
         """
         Set multiple tags from a list of strings.
         Strings can be in "key:value" format or just "value" format.
         Args:
             tag_list (List[str]): List of tags in "key:value" format or just "value"
             replace (bool): If True, replaces all existing tags with the new tags list
+            normalize (bool): If True, applies tag normalization using the configured normalizer
         """
         if replace:
             self._tags.clear()
-            self._cached_tag_list = None
+            self._invalidate_cache()
 
         for tag in tag_list:
             if ':' in tag:
                 key, value = tag.split(':', 1)
-                self.set_tag(key, value)
+                self.set_tag(key, value, normalize=normalize)
             else:
-                self.set_tag(None, tag)
+                self.set_tag(None, tag, normalize=normalize)
 
-    def delete_tag(self, key: Optional[str], value: Optional[str] = None) -> bool:
+    def delete_tag(self, key: Optional[str], value: Optional[str] = None, normalize: bool = False) -> bool:
         """
         Delete a tag or specific value for a tag.
         For keyless tags, use None or empty string as the key.
@@ -512,9 +659,13 @@ class TagManager:
             key (str): The tag key to delete, or None/empty for keyless tags
             value (str, optional): If provided, only deletes this specific value for the key.
                                  If None, deletes all values for the key.
+            normalize (bool): If True, applies tag normalization to the value for lookup
         Returns:
             bool: True if something was deleted, False otherwise
         """
+        if normalize and self._normalizer and value:
+            value = self._normalizer(value)
+
         if not key:
             key = self._keyless
 
@@ -524,8 +675,8 @@ class TagManager:
         if value is None:
             # Delete the entire key
             del self._tags[key]
-            # Invalidate the cache
-            self._cached_tag_list = None
+            # Invalidate the caches
+            self._invalidate_cache()
             return True
         else:
             # Delete specific value if it exists
@@ -534,36 +685,62 @@ class TagManager:
                 # Clean up empty lists
                 if not self._tags[key]:
                     del self._tags[key]
-                # Invalidate the cache
-                self._cached_tag_list = None
+                # Invalidate the caches
+                self._invalidate_cache()
                 return True
         return False
 
-    def _generate_tag_strings(self, tags_dict: Dict[Union[str, TagType], List[str]]) -> tuple[str, ...]:
+    def _rebuild_cache(self) -> None:
         """
-        Generate a tuple of tag strings from a tags dictionary.
-        Args:
-            tags_dict (Dict[Union[str, TagType], List[str]]): Dictionary of tags to convert to strings
-        Returns:
-            tuple[str, ...]: Tuple of tag strings
+        Render the tags dict into the three disjoint buckets (base, internal, db) in a single pass.
+        For key-value tags the rendered form is "key:value"; for keyless tags it's just the value.
         """
-        return tuple(
-            value if key == self._keyless else f"{key}:{value}" for key, values in tags_dict.items() for value in values
-        )
+        base: List[str] = []
+        internal: List[str] = []
+        db: List[str] = []
+        for key, values in self._tags.items():
+            if key == self._keyless:
+                base.extend(values)
+                continue
+            if isinstance(key, str) and key.startswith(INTERNAL_TAG_PREFIX):
+                bucket = internal
+            elif key == DB_TAG_KEY:
+                bucket = db
+            else:
+                bucket = base
+            bucket.extend("{}:{}".format(key, value) for value in values)
+        self._base_tags = tuple(base)
+        self._internal_tags = tuple(internal)
+        self._db_tags = tuple(db)
+        self._cache_valid = True
 
-    def get_tags(self) -> List[str]:
+    def get_tags(self, include_internal: bool = True, include_db: bool = True) -> List[str]:
         """
         Get a list of tag strings.
         For key-value tags, returns "key:value" format.
         For keyless tags, returns just the value.
-        The returned list is always sorted alphabetically.
+        Args:
+            include_internal (bool): If False, excludes internal resource tags (keys prefixed with
+                "dd.internal"). Useful for payloads that don't go through the agent's metric
+                submission pipeline, such as DBM metadata events.
+            include_db (bool): If False, excludes the per-database tag (the "db" key). Useful for
+                instance-level metrics and DBM events where the database is determined per-row or
+                during ingestion.
         Returns:
-            list: Sorted list of tag strings
+            list: List of tag strings
         """
-        # Return cached list if available
-        if self._cached_tag_list is not None:
-            return list(self._cached_tag_list)
+        if not self._cache_valid:
+            self._rebuild_cache()
+        tags = list(self._base_tags)
+        if include_internal:
+            tags.extend(self._internal_tags)
+        if include_db:
+            tags.extend(self._db_tags)
+        return tags
 
-        # Generate and cache regular tags
-        self._cached_tag_list = self._generate_tag_strings(self._tags)
-        return list(self._cached_tag_list)
+
+def now_ms() -> int:
+    """
+    Get the current time in whole milliseconds.
+    """
+    return int(time.time() * 1000)

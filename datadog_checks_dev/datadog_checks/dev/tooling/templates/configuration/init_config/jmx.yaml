@@ -1,17 +1,22 @@
 - name: is_jmx
+  display_priority: 0
   required: true
   description: Whether or not this file is a configuration for a JMX integration.
   value:
     example: true
     type: boolean
+  fleet_configurable: true
 - name: collect_default_metrics
+  display_priority: 0
   description: Whether or not the check should collect all default metrics.
   enabled: true
   value:
     display_default: false
     example: true
     type: boolean
+  fleet_configurable: true
 - name: new_gc_metrics
+  display_priority: 0
   description: |
     Set to true to use better metric names for garbage collection metrics.
     jvm.gc.cms.count   => jvm.gc.minor_collection_count
@@ -24,18 +29,23 @@
     display_default: false
     example: true
     type: boolean
+  fleet_configurable: true
 - name: service_check_prefix
+  display_priority: 0
   description: |
     Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
     If not set, the default service check used is the integration name.
   value:
     type: string
+  fleet_configurable: true
 - name: conf
+  display_priority: 0
   description: |
     The list of metrics to be collected by the integration
     Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
     The default metrics to be collected are kept in metrics.yaml, but you can still
     add your own metrics here.
+  fleet_configurable: true
   value:
     example:
      - include:

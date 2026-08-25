@@ -14,7 +14,7 @@ import pytest
 import requests
 from packaging import version
 
-from datadog_checks.dev import TempDir, WaitFor, docker_run
+from datadog_checks.dev import TempDir, WaitFor, docker_run, get_e2e_discovery_metadata
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
@@ -22,11 +22,11 @@ from .common import (
     ENDPOINT_PROMETHEUS,
     HAPROXY_LEGACY,
     HAPROXY_VERSION,
+    HAPROXY_VERSION_IS_LATEST,
     HAPROXY_VERSION_RAW,
     HERE,
     INSTANCE,
     INSTANCEV2,
-    requires_static_version,
 )
 from .legacy.common import (
     CHECK_CONFIG,
@@ -49,7 +49,7 @@ def dd_environment():
             yield e
     else:
         with docker_run(compose_file=os.path.join(HERE, 'docker', 'haproxy.yaml'), endpoints=[ENDPOINT_PROMETHEUS]):
-            yield INSTANCE
+            yield INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')
@@ -153,7 +153,6 @@ def legacy_environment():
             service_name="haproxy-open",
             conditions=[WaitFor(wait_for_haproxy_open)],
         ):
-
             if platform_supports_sockets:
                 with docker_run(
                     compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
@@ -210,7 +209,7 @@ def haproxy_mock():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
+    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
 
@@ -228,7 +227,7 @@ def haproxy_mock_evil():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
+    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
 
@@ -238,13 +237,14 @@ def haproxy_mock_enterprise_version_info():
     filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
     with open(filepath, 'rb') as f:
         data = f.read()
-    with mock.patch('requests.get', return_value=mock.Mock(content=data)) as p:
+    with mock.patch('requests.Session.get', return_value=mock.Mock(content=data)) as p:
         yield p
 
 
-@requires_static_version
 @pytest.fixture(scope="session")
 def version_metadata():
+    if HAPROXY_VERSION_IS_LATEST:
+        pytest.skip('Version `latest` is ever-changing, skipping')
     # some version has release info
     parts = HAPROXY_VERSION_RAW.split('-')
     if len(parts) > 1:

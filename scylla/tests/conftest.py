@@ -6,7 +6,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -20,7 +20,7 @@ def dd_environment(instance):
 
     with docker_run(compose_file, log_patterns=[r'init - Scylla version \S* initialization completed.']):
         instances = {'instances': [instance]}
-        yield instances
+        yield instances, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope="session")
@@ -45,7 +45,7 @@ def mock_db_data():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),

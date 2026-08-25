@@ -1,4 +1,5 @@
 name: Tenable
+fleet_configurable: true
 files:
 - name: tenable.yaml
   options:

@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from ..._env import E2E_FIXTURE_NAME, deserialize_data
+from datadog_checks.dev._env import E2E_FIXTURE_NAME, deserialize_data
 
 CONFIG_MESSAGE_PATTERN = 'DDEV_E2E_START_MESSAGE (.+) DDEV_E2E_END_MESSAGE'
 

@@ -24,12 +24,24 @@ def instance_auth_type():
     return 'basic'
 
 
+def instance_connect_timeout():
+    return 8
+
+
 def instance_disable_generic_tags():
     return False
 
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
+def instance_host():
+    return 'localhost'
 
 
 def instance_kerberos_auth():
@@ -64,6 +76,14 @@ def instance_persist_connections():
     return False
 
 
+def instance_port():
+    return 21212
+
+
+def instance_procedure_timeout():
+    return 60
+
+
 def instance_request_size():
     return 16
 
@@ -88,9 +108,17 @@ def instance_tls_verify():
     return True
 
 
+def instance_url():
+    return 'http://localhost:8080'
+
+
 def instance_use_global_custom_queries():
     return 'true'
 
 
 def instance_use_legacy_auth_encoding():
     return True
+
+
+def instance_use_ssl():
+    return False

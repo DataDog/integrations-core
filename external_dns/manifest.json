@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b41539a6-8222-4d6e-92f9-0a9f8496acdd",
   "app_id": "external-dns",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -20,12 +20,14 @@ from datadog_checks.postgres.util import (
     QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
+    QUERY_PG_WAIT_EVENT_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
+    STAT_WAL_METRICS_LT_18,
     SUBSCRIPTION_STATE_METRICS,
     WAL_FILE_METRICS,
 )
@@ -44,13 +46,16 @@ DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
 POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
+POSTGRES_IMAGE_TAG = os.environ.get('POSTGRES_IMAGE_TAG', None)
 
-REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
-REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
-REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
+REPLICA_CONTAINER_1_NAME = 'postgres-postgres_replica-1'
+REPLICA_CONTAINER_2_NAME = 'postgres-postgres_replica2-1'
+REPLICA_LOGICAL_1_NAME = 'postgres-postgres_logical_replica-1'
 USING_LATEST = False
 
-if POSTGRES_VERSION is not None:
+if POSTGRES_IMAGE_TAG is not None:
+    POSTGRES_IMAGE = POSTGRES_IMAGE_TAG + "-alpine"
+elif POSTGRES_VERSION is not None:
     USING_LATEST = POSTGRES_VERSION.endswith('latest')
     POSTGRES_IMAGE = POSTGRES_VERSION + "-alpine"
 
@@ -105,8 +110,14 @@ COMMON_BGW_METRICS = [
 
 COMMON_BGW_METRICS_PG_ABOVE_94 = ['postgresql.archiver.archived_count', 'postgresql.archiver.failed_count']
 COMMON_BGW_METRICS_PG_BELOW_17 = ['postgresql.bgwriter.buffers_backend', 'postgresql.bgwriter.buffers_backend_fsync']
+
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
-CONNECTION_METRICS_DB = ['postgresql.connections']
+CONNECTION_METRICS_BY_DB = [
+    'postgresql.connections',
+    'postgresql.database_connections',
+    'postgresql.percent_database_usage_connections',
+]
+
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 
 CHECK_PERFORMANCE_METRICS = [
@@ -162,6 +173,8 @@ def _get_expected_tags(
     )
     if role:
         base_tags.append(f'replication_role:{role}')
+        if check.is_aurora:
+            base_tags.append(f'aurora_role:{"reader" if role == "standby" else "writer"}')
     if with_db:
         base_tags.append(f'db:{pg_instance["dbname"]}')
     if with_host:
@@ -205,9 +218,9 @@ def assert_metric_at_least(
             found_values += 1
 
     if count:
-        assert (
-            found_values == count
-        ), f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+        assert found_values == count, (
+            f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+        )
     if min_count:
         assert found_values >= min_count, (
             f'Expected to have at least {min_count} with tags {expected_tags} values for metric {metric_name},'
@@ -242,7 +255,7 @@ def check_db_count(aggregator, expected_tags, count=1):
         count=count,
         tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public'],
     )
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=15, count=1)
 
 
 def check_connection_metrics(aggregator, expected_tags, count=1):
@@ -250,7 +263,7 @@ def check_connection_metrics(aggregator, expected_tags, count=1):
         aggregator.assert_metric(name, count=count, tags=expected_tags)
     for db in COMMON_DBS:
         db_tags = expected_tags + ['db:{}'.format(db)]
-        for name in CONNECTION_METRICS_DB:
+        for name in CONNECTION_METRICS_BY_DB:
             aggregator.assert_metric(name, count=count, tags=db_tags)
 
 
@@ -358,6 +371,13 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
+def check_wait_event_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10.0:
+        return
+    for metric_name in _iterate_metric_name(QUERY_PG_WAIT_EVENT_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
     for metric_name in _iterate_metric_name(replication_metrics):
@@ -446,9 +466,12 @@ def check_file_wal_metrics(aggregator, expected_tags, count=1):
 def check_stat_wal_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14.0:
         return
-
-    for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
-        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+    if float(POSTGRES_VERSION) < 18.0:
+        for metric_name in _iterate_metric_name(STAT_WAL_METRICS_LT_18):
+            aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+    else:
+        for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
+            aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):
@@ -515,4 +538,4 @@ def check_stat_io_metrics(aggregator, expected_tags, count=1):
 
 def check_metrics_metadata(aggregator):
     exclude = ['dd.postgres.operation.time']
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude, check_submission_type=True)

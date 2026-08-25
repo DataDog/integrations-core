@@ -1,0 +1,3025 @@
+# bypass-global-no-service-config-checks
+id: zscaler-private-access
+metric_id: zscaler-private-access
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Method
+    path: http.method
+    source: log
+  - groups:
+      - Web Access
+    name: Status Code
+    path: http.status_code
+    source: log
+  - groups:
+      - Web Access
+    name: URL Path
+    path: http.url
+    source: log
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Web Access
+    name: Version
+    path: http.version
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Port
+    path: network.destination.port
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Product Name
+    path: ocsf.metadata.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Vendor Name
+    path: ocsf.metadata.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Destination IP Address
+    path: ocsf.dst_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: HTTP Method
+    path: ocsf.http_request.http_method
+    source: log
+  - groups:
+      - OCSF
+    name: Request URL String
+    path: ocsf.http_request.url.url_string
+    source: log
+  - groups:
+      - OCSF
+    name: Response Code
+    path: ocsf.http_response.code
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Device Name
+    path: ocsf.device.name
+    source: log
+
+pipeline:
+  type: pipeline
+  name: Zscaler Private Access
+  enabled: true
+  filter:
+    query: source:zscaler-private-access
+  processors:
+    - type: service-remapper
+      name: Define `EventType` as the official service of the log
+      enabled: true
+      sources:
+        - EventType
+    - type: pipeline
+      name: Audit Logs
+      enabled: true
+      filter:
+        query: service:audit-logs
+      processors:
+        - type: attribute-remapper
+          name: Map `CreationTime` to `timestamp`
+          enabled: true
+          sources:
+            - CreationTime
+          sourceType: attribute
+          target: timestamp
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ModifiedBy` to `usr.id`
+          enabled: true
+          sources:
+            - ModifiedBy
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `User` to `usr.email`
+          enabled: true
+          sources:
+            - User
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: User Status
+      enabled: true
+      filter:
+        query: service:user-status
+      processors:
+        - type: attribute-remapper
+          name: Map `PublicIP` to `network.client.ip`
+          enabled: true
+          sources:
+            - PublicIP
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Username` to `usr.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Set `PosturesMissCount` as the array length of `PosturesMisses`
+          enabled: true
+          operation:
+            source: PosturesMisses
+            target: PosturesMissCount
+            type: length
+        - type: array-processor
+          name: Set `PosturesHitCount` as the array length of `PosturesHit`
+          enabled: true
+          operation:
+            source: PosturesHit
+            target: PosturesHitCount
+            type: length
+    - type: pipeline
+      name: App Protection
+      enabled: true
+      filter:
+        query: service:app-protection
+      processors:
+        - type: attribute-remapper
+          name: Map `ClientPublicIp` to `network.client.ip`
+          enabled: true
+          sources:
+            - ClientPublicIp
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ClientPort` to `network.client.port`
+          enabled: true
+          sources:
+            - ClientPort
+          sourceType: attribute
+          target: network.client.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `UserID` to `usr.id`
+          enabled: true
+          sources:
+            - UserID
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `URL` to `http.url`
+          enabled: true
+          sources:
+            - URL
+          sourceType: attribute
+          target: http.url
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `UserAgent` to `http.useragent`
+          enabled: true
+          sources:
+            - UserAgent
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: user-agent-parser
+          name: Extracting useragent details from htttp.useragent
+          enabled: true
+          sources:
+            - http.useragent
+          target: http.useragent_details
+          encoded: false
+          combineVersionDetails: false
+        - type: attribute-remapper
+          name: Map `Method` to `http.method`
+          enabled: true
+          sources:
+            - Method
+          sourceType: attribute
+          target: http.method
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ProtocolVersion` to `http.version`
+          enabled: true
+          sources:
+            - ProtocolVersion
+          sourceType: attribute
+          target: http.version
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `StatusCode` to `http.status_code`
+          enabled: true
+          sources:
+            - StatusCode
+          sourceType: attribute
+          target: http.status_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: Browser Access
+      enabled: true
+      filter:
+        query: service:browser-access
+      processors:
+        - type: attribute-remapper
+          name: Map `ClientPublicIp` to `network.client.ip`
+          enabled: true
+          sources:
+            - ClientPublicIp
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `URL` to `http.url`
+          enabled: true
+          sources:
+            - URL
+          sourceType: attribute
+          target: http.url
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `UserAgent` to `http.useragent`
+          enabled: true
+          sources:
+            - UserAgent
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: user-agent-parser
+          name: Extracting useragent details from htttp.useragent
+          enabled: true
+          sources:
+            - http.useragent
+          target: http.useragent_details
+          encoded: false
+          combineVersionDetails: false
+        - type: attribute-remapper
+          name: Map `Method` to `http.method`
+          enabled: true
+          sources:
+            - Method
+          sourceType: attribute
+          target: http.method
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `StatusCode` to `http.status_code`
+          enabled: true
+          sources:
+            - StatusCode
+          sourceType: attribute
+          target: http.status_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `NameID` to `usr.id`
+          enabled: true
+          sources:
+            - NameID
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: User Activity
+      enabled: true
+      filter:
+        query: service:user-activity
+      processors:
+        - type: attribute-remapper
+          name: Map `ClientPublicIP` to `network.client.ip`
+          enabled: true
+          sources:
+            - ClientPublicIP
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ServerIP` to `network.destination.ip`
+          enabled: true
+          sources:
+            - ServerIP
+          sourceType: attribute
+          target: network.destination.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: GeoIp Parser for `network.destination.ip`
+          enabled: true
+          sources:
+            - network.destination.ip
+          target: network.destination.geoip
+          ip_processing_behavior: do-nothing
+        - type: attribute-remapper
+          name: Map `ServerPort` to `network.destination.port`
+          enabled: true
+          sources:
+            - ServerPort
+          sourceType: attribute
+          target: network.destination.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Username` to `usr.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - name: Lookup for `IPProtocol` to `IPProtocolName` field
+          enabled: true
+          source: IPProtocol
+          target: IPProtocolName
+          lookupTable: |-
+            0,HOPOPT
+            1,ICMP
+            2,IGMP
+            3,GGP
+            4,IPv4
+            5,ST
+            6,TCP
+            7,CBT
+            8,EGP
+            9,IGP
+            10,BBN-RCC-MON
+            11,NVP-II
+            12,PUP
+            14,EMCON
+            15,XNET
+            16,CHAOS
+            17,UDP
+            18,MUX
+            19,DCN-MEAS
+            20,HMP
+            21,PRM
+            22,XNS-IDP
+            23,TRUNK-1
+            24,TRUNK-2
+            25,LEAF-1
+            26,LEAF-2
+            27,RDP
+            28,IRTP
+            29,ISO-TP4
+            30,NETBLT
+            31,MFE-NSP
+            32,MERIT-INP
+            33,DCCP
+            34,3PC
+            35,IDPR
+            36,XTP
+            37,DDP
+            38,IDPR-CMTP
+            39,TP++
+            40,IL
+            41,IPv6
+            42,SDRP
+            43,IPv6-Route
+            44,IPv6-Frag
+            45,IDRP
+            46,RSVP
+            47,GRE
+            48,DSR
+            49,BNA
+            50,ESP
+            51,AH
+            52,I-NLSP
+            54,NARP
+            55,Min-IPv4
+            56,TLSP
+            57,SKIP
+            58,IPv6-ICMP
+            59,IPv6-NoNxt
+            60,IPv6-Opts
+            62,CFTP
+            64,SAT-EXPAK
+            65,KRYPTOLAN
+            66,RVD
+            67,IPPC
+            69,SAT-MON
+            70,VISA
+            71,IPCV
+            72,CPNX
+            73,CPHB
+            74,WSN
+            75,PVP
+            76,BR-SAT-MON
+            77,SUN-ND
+            78,WB-MON
+            79,WB-EXPAK
+            80,ISO-IP
+            81,VMTP
+            82,SECURE-VMTP
+            83,VINES
+            84,IPTM
+            85,NSFNET-IGP
+            86,DGP
+            87,TCF
+            88,EIGRP
+            89,OSPFIGP
+            90,Sprite-RPC
+            91,LARP
+            92,MTP
+            93,AX.25
+            94,IPIP
+            96,SCC-SP
+            97,ETHERIP
+            98,ENCAP
+            100,GMTP
+            101,IFMP
+            102,PNNI
+            103,PIM
+            104,ARIS
+            105,SCPS
+            106,QNX
+            107,A/N
+            108,IPComp
+            109,SNP
+            110,Compaq-Peer
+            111,IPX-in-IP
+            112,VRRP
+            113,PGM
+            115,L2TP
+            116,DDX
+            117,IATP
+            118,STP
+            119,SRP
+            120,UTI
+            121,SMP
+            123,PTP
+            124,ISIS over IPv4
+            125,FIRE
+            126,CRTP
+            127,CRUDP
+            128,SSCOPMCE
+            129,IPLT
+            130,SPS
+            131,PIPE
+            132,SCTP
+            133,FC
+            134,RSVP-E2E-IGNORE
+            135,Mobility Header
+            136,UDPLite
+            137,MPLS-in-IP
+            138,manet
+            139,HIP
+            140,Shim6
+            141,WESP
+            142,ROHC
+            143,Ethernet
+            144,AGGFRAG
+            145,NSH
+            146,Homa
+            147,BIT-EMU
+          type: lookup-processor
+    - type: pipeline
+      name: Microsegmentation
+      enabled: true
+      filter:
+        query: service:microsegmentation
+      processors:
+        - type: attribute-remapper
+          name: Map `DestinationIP` to `network.destination.ip`
+          enabled: true
+          sources:
+            - DestinationIP
+          sourceType: attribute
+          target: network.destination.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: GeoIp Parser for `network.destination.ip`
+          enabled: true
+          sources:
+            - network.destination.ip
+          target: network.destination.geoip
+          ip_processing_behavior: do-nothing
+        - name: Lookup for `Protocol` to `ProtocolName` field
+          enabled: true
+          source: Protocol
+          target: ProtocolName
+          lookupTable: |-
+            0,HOPOPT
+            1,ICMP
+            2,IGMP
+            3,GGP
+            4,IPv4
+            5,ST
+            6,TCP
+            7,CBT
+            8,EGP
+            9,IGP
+            10,BBN-RCC-MON
+            11,NVP-II
+            12,PUP
+            14,EMCON
+            15,XNET
+            16,CHAOS
+            17,UDP
+            18,MUX
+            19,DCN-MEAS
+            20,HMP
+            21,PRM
+            22,XNS-IDP
+            23,TRUNK-1
+            24,TRUNK-2
+            25,LEAF-1
+            26,LEAF-2
+            27,RDP
+            28,IRTP
+            29,ISO-TP4
+            30,NETBLT
+            31,MFE-NSP
+            32,MERIT-INP
+            33,DCCP
+            34,3PC
+            35,IDPR
+            36,XTP
+            37,DDP
+            38,IDPR-CMTP
+            39,TP++
+            40,IL
+            41,IPv6
+            42,SDRP
+            43,IPv6-Route
+            44,IPv6-Frag
+            45,IDRP
+            46,RSVP
+            47,GRE
+            48,DSR
+            49,BNA
+            50,ESP
+            51,AH
+            52,I-NLSP
+            54,NARP
+            55,Min-IPv4
+            56,TLSP
+            57,SKIP
+            58,IPv6-ICMP
+            59,IPv6-NoNxt
+            60,IPv6-Opts
+            62,CFTP
+            64,SAT-EXPAK
+            65,KRYPTOLAN
+            66,RVD
+            67,IPPC
+            69,SAT-MON
+            70,VISA
+            71,IPCV
+            72,CPNX
+            73,CPHB
+            74,WSN
+            75,PVP
+            76,BR-SAT-MON
+            77,SUN-ND
+            78,WB-MON
+            79,WB-EXPAK
+            80,ISO-IP
+            81,VMTP
+            82,SECURE-VMTP
+            83,VINES
+            84,IPTM
+            85,NSFNET-IGP
+            86,DGP
+            87,TCF
+            88,EIGRP
+            89,OSPFIGP
+            90,Sprite-RPC
+            91,LARP
+            92,MTP
+            93,AX.25
+            94,IPIP
+            96,SCC-SP
+            97,ETHERIP
+            98,ENCAP
+            100,GMTP
+            101,IFMP
+            102,PNNI
+            103,PIM
+            104,ARIS
+            105,SCPS
+            106,QNX
+            107,A/N
+            108,IPComp
+            109,SNP
+            110,Compaq-Peer
+            111,IPX-in-IP
+            112,VRRP
+            113,PGM
+            115,L2TP
+            116,DDX
+            117,IATP
+            118,STP
+            119,SRP
+            120,UTI
+            121,SMP
+            123,PTP
+            124,ISIS over IPv4
+            125,FIRE
+            126,CRTP
+            127,CRUDP
+            128,SSCOPMCE
+            129,IPLT
+            130,SPS
+            131,PIPE
+            132,SCTP
+            133,FC
+            134,RSVP-E2E-IGNORE
+            135,Mobility Header
+            136,UDPLite
+            137,MPLS-in-IP
+            138,manet
+            139,HIP
+            140,Shim6
+            141,WESP
+            142,ROHC
+            143,Ethernet
+            144,AGGFRAG
+            145,NSH
+            146,Homa
+            147,BIT-EMU
+          type: lookup-processor
+        - type: attribute-remapper
+          name: Map `SourceIP` to `network.client.ip`
+          enabled: true
+          sources:
+            - SourceIP
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `SourcePorts` to `network.client.port`
+          enabled: true
+          sources:
+            - SourcePorts
+          sourceType: attribute
+          target: network.client.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `DestinationPort` to `network.destination.port`
+          enabled: true
+          sources:
+            - DestinationPort
+          sourceType: attribute
+          target: network.destination.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: App Connector or Private Service Edge or Private Cloud Controller Status
+      enabled: true
+      filter:
+        query: service:app-connector-status OR service:private-service-edge-status OR
+          service:private-cloud-controller-status
+      processors:
+        - type: attribute-remapper
+          name: Map `PublicIP` to `network.client.ip`
+          enabled: true
+          sources:
+            - PublicIP
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: geo-ip-parser
+      name: GeoIp Parser for `network.client.ip`
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: grok-parser
+      name: Extract the `LogTimestamp` value from logs
+      enabled: true
+      source: LogTimestamp
+      samples:
+        - Wed Jul 30 10:06:01 2025
+        - Fri May 6 11:40:00 2022
+      grok:
+        supportRules: ""
+        matchRules: |-
+          date_1 %{date("EEE MMM dd HH:mm:ss yyyy"):timestamp}
+          date_2 %{date("EEE MMM d HH:mm:ss yyyy"):timestamp}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: 'service:(user-status OR user-activity OR microsegmentation OR app-protection OR browser-access OR app-connector-status OR private-service-edge-status OR private-cloud-controller-status) OR (service:audit-logs AND @AuditOperationType:("Sign In" OR "Sign Out" OR "Sign In Failure" OR "Client Session Revoked" OR "Session Time Out" OR "Create" OR "Update" OR "Delete" OR "Download" OR "Nonce MaxUsage Increment"))'
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: "Zscaler Private Access"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: "Zscaler"
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `EventType` to `ocsf.metadata.event_code`
+          enabled: true
+          sources:
+            - EventType
+          sourceType: attribute
+          target: ocsf.metadata.event_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+    - type: pipeline
+      name: OCSF sub pipeline for class Authentication [3002] for audit-logs
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: 'service:audit-logs @AuditOperationType:("Sign In" OR "Sign Out" OR "Sign In Failure" OR "Client Session Revoked" OR "Session Time Out")'
+      processors:
+        - type: grok-parser
+          name: Parse ModifiedTime to ocsf.time
+          enabled: true
+          source: ModifiedTime
+          samples:
+            - "2025-08-28T07:02:15.000Z"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              date_iso_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):ocsf.time}
+        - type: string-builder-processor
+          name: Add auth protocol
+          enabled: true
+          template: "ZPA"
+          target: ocsf.auth_protocol
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 3002
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `AuditOperationType` to `ocsf.metadata.event_code`
+              sources:
+                - AuditOperationType
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.auth_protocol` to `ocsf.auth_protocol`
+              sources:
+                - ocsf.auth_protocol
+              target: ocsf.auth_protocol
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `RequestID` to `ocsf.metadata.uid`
+              sources:
+                - RequestID
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `CreationTime` to `ocsf.metadata.original_time`
+              sources:
+                - CreationTime
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `User` to `ocsf.actor.user.name`
+              sources:
+                - User
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ModifiedBy` to `ocsf.actor.user.uid`
+              sources:
+                - ModifiedBy
+              target: ocsf.actor.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `CustomerID` to `ocsf.actor.user.account.uid`
+              sources:
+                - CustomerID
+              target: ocsf.actor.user.account.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `AuditOperationType` to `ocsf.status_detail`
+              sources:
+                - AuditOperationType
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `User` to `ocsf.user.name`
+              sources:
+                - User
+              target: ocsf.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ModifiedBy` to `ocsf.user.uid`
+              sources:
+                - ModifiedBy
+              target: ocsf.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@AuditOperationType:("Sign In" OR "Sign In Failure")'
+                  name: Logon
+                  id: 1
+                - filter:
+                    query: '@AuditOperationType:("Sign Out" OR "Client Session Revoked" OR "Session Time Out")'
+                  name: Logoff
+                  id: 2
+                - filter:
+                    query: "@AuditOperationType:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - AuditOperationType
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: '@AuditOperationType:("Sign In" OR "Sign Out" OR "Client Session Revoked" OR "Session Time Out")'
+                  name: Success
+                  id: 1
+                - filter:
+                    query: '@AuditOperationType:"Sign In Failure"'
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@AuditOperationType:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - AuditOperationType
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ObjectName` to `ocsf.dst_endpoint.name`
+              sources:
+                - ObjectName
+              target: ocsf.dst_endpoint.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ObjectID` to `ocsf.dst_endpoint.uid`
+              sources:
+                - ObjectID
+              target: ocsf.dst_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Authentication
+            classUid: 3002
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class Entity Management [3004]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: 'service:audit-logs @AuditOperationType:("Create" OR "Update" OR "Delete" OR "Download" OR "Nonce MaxUsage Increment")'
+      processors:
+        - type: grok-parser
+          name: Parse `CreationTime` to `ocsf.time`
+          enabled: true
+          source: CreationTime
+          samples:
+            - "2025-09-15T14:30:22.000Z"
+          grok:
+            supportRules: ""
+            matchRules: parse_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+        - type: grok-parser
+          name: Parse `ModifiedTime` to `ocsf.metadata.modified_time`
+          enabled: true
+          source: ModifiedTime
+          samples:
+            - "2025-09-15T14:30:22.000Z"
+          grok:
+            supportRules: ""
+            matchRules: parse_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.metadata.modified_time}
+        - type: schema-processor
+          name: Apply OCSF schema for 3004
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.metadata.logged_time`
+              sources:
+                - ocsf.time
+              target: ocsf.metadata.logged_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.modified_time` to `ocsf.metadata.modified_time`
+              sources:
+                - ocsf.metadata.modified_time
+              target: ocsf.metadata.modified_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `CreationTime` to `ocsf.metadata.original_time`
+              sources:
+                - CreationTime
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `AuditOperationType` to `ocsf.message`
+              sources:
+                - AuditOperationType
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `RequestID` to `ocsf.metadata.uid`
+              sources:
+                - RequestID
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ObjectID` to `ocsf.entity.uid`
+              sources:
+                - ObjectID
+              target: ocsf.entity.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ObjectName` to `ocsf.entity.name`
+              sources:
+                - ObjectName
+              target: ocsf.entity.name
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ObjectType` to `ocsf.entity.type`
+              sources:
+                - ObjectType
+              target: ocsf.entity.type
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ObjectID` to `ocsf.entity_result.uid`
+              sources:
+                - ObjectID
+              target: ocsf.entity_result.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ObjectName` to `ocsf.entity_result.name`
+              sources:
+                - ObjectName
+              target: ocsf.entity_result.name
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ObjectType` to `ocsf.entity_result.type`
+              sources:
+                - ObjectType
+              target: ocsf.entity_result.type
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `User` to `ocsf.actor.user.name`
+              sources:
+                - User
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `User` to `ocsf.actor.user.email_addr`
+              sources:
+                - User
+              target: ocsf.actor.user.email_addr
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ModifiedBy` to `ocsf.actor.user.uid`
+              sources:
+                - ModifiedBy
+              target: ocsf.actor.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `CustomerID` to `ocsf.actor.user.account.uid`
+              sources:
+                - CustomerID
+              target: ocsf.actor.user.account.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@AuditOperationType:Create"
+                  name: Create
+                  id: 1
+                - filter:
+                    query: "@AuditOperationType:Download"
+                  name: Read
+                  id: 2
+                - filter:
+                    query: '@AuditOperationType:("Update" OR "Nonce MaxUsage Increment")'
+                  name: Update
+                  id: 3
+                - filter:
+                    query: "@AuditOperationType:Delete"
+                  name: Delete
+                  id: 4
+                - filter:
+                    query: "@AuditOperationType:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - AuditOperationType
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Admin
+                  id: 2
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Entity Management
+            classUid: 3004
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class Network Activity [4001] for user-activity
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:user-activity"
+      processors:
+        - type: grok-parser
+          name: Parse LogTimestamp to ocsf.time
+          enabled: true
+          source: LogTimestamp
+          samples:
+            - "Fri Aug 29 05:40:42 2025"
+            - "Wed Jul 30 10:06:01 2025"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              date_1 %{date("EEE MMM dd HH:mm:ss yyyy"):ocsf.time}
+              date_2 %{date("EEE MMM d HH:mm:ss yyyy"):ocsf.time}
+        - type: schema-processor
+          name: Apply OCSF schema for 4001
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionStatus` to `ocsf.metadata.event_code`
+              sources:
+                - ConnectionStatus
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `PRAConnectionID`, `SessionID` to `ocsf.metadata.uid`
+              sources:
+                - PRAConnectionID
+                - SessionID
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionID` to `ocsf.connection_info.uid`
+              sources:
+                - ConnectionID
+              target: ocsf.connection_info.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `IPProtocolName` to `ocsf.connection_info.protocol_name`
+              sources:
+                - IPProtocolName
+              target: ocsf.connection_info.protocol_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `IPProtocol` to `ocsf.connection_info.protocol_num`
+              sources:
+                - IPProtocol
+              target: ocsf.connection_info.protocol_num
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `PRAConnectionID` to `ocsf.connection_info.session.uid`
+              sources:
+                - PRAConnectionID
+              target: ocsf.connection_info.session.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Idp` to `ocsf.connection_info.session.issuer`
+              sources:
+                - Idp
+              target: ocsf.connection_info.session.issuer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ClientPublicIP` to `ocsf.src_endpoint.ip`
+              sources:
+                - ClientPublicIP
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Username` to `ocsf.src_endpoint.owner.name`
+              sources:
+                - Username
+              target: ocsf.src_endpoint.owner.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Customer` to `ocsf.src_endpoint.owner.org.name`
+              sources:
+                - Customer
+              target: ocsf.src_endpoint.owner.org.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ClientCity` to `ocsf.src_endpoint.location.city`
+              sources:
+                - ClientCity
+              target: ocsf.src_endpoint.location.city
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ClientCountryCode` to `ocsf.src_endpoint.location.country`
+              sources:
+                - ClientCountryCode
+              target: ocsf.src_endpoint.location.country
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Connector` to `ocsf.src_endpoint.proxy_endpoint.name`
+              sources:
+                - Connector
+              target: ocsf.src_endpoint.proxy_endpoint.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ClientZEN` to `ocsf.src_endpoint.zone`
+              sources:
+                - ClientZEN
+              target: ocsf.src_endpoint.zone
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ServerIP` to `ocsf.dst_endpoint.ip`
+              sources:
+                - ServerIP
+              target: ocsf.dst_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ServerPort` to `ocsf.dst_endpoint.port`
+              sources:
+                - ServerPort
+              target: ocsf.dst_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Hostname` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - Hostname
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Platform` to `ocsf.dst_endpoint.os.name`
+              sources:
+                - Platform
+              target: ocsf.dst_endpoint.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `PRACredentialUserName` to `ocsf.dst_endpoint.owner.name`
+              sources:
+                - PRACredentialUserName
+              target: ocsf.dst_endpoint.owner.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionStatus` to `ocsf.status_detail`
+              sources:
+                - ConnectionStatus
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Outbound
+                  id: 2
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.dst_endpoint.os.type_id
+              categories:
+                - filter:
+                    query: "@Platform:windows"
+                  name: Windows
+                  id: 100
+                - filter:
+                    query: "@Platform:linux"
+                  name: Linux
+                  id: 200
+                - filter:
+                    query: "@Platform:macos"
+                  name: macOS
+                  id: 300
+                - filter:
+                    query: "@Platform:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.dst_endpoint.os.type
+                id: ocsf.dst_endpoint.os.type_id
+              fallback:
+                values:
+                  ocsf.dst_endpoint.os.type: Other
+                  ocsf.dst_endpoint.os.type_id: "99"
+                sources:
+                  ocsf.dst_endpoint.os.type:
+                    - Platform
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@ConnectionStatus:(open OR active)"
+                  name: Open
+                  id: 1
+                - filter:
+                    query: "@ConnectionStatus:close"
+                  name: Close
+                  id: 2
+                - filter:
+                    query: "@ConnectionStatus:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - ConnectionStatus
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@ConnectionStatus:(open OR active OR close)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@ConnectionStatus:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - ConnectionStatus
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Network Activity
+            classUid: 4001
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class Network Activity [4001] for microsegmentation
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:microsegmentation"
+      processors:
+        - type: grok-parser
+          name: Parse LogTimestamp to ocsf.time
+          enabled: true
+          source: LogTimestamp
+          samples:
+            - "Fri Aug 29 05:40:42 2025"
+            - "Wed Jul 30 10:06:01 2025"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              date_1 %{date("EEE MMM dd HH:mm:ss yyyy"):ocsf.time}
+              date_2 %{date("EEE MMM d HH:mm:ss yyyy"):ocsf.time}
+        - type: schema-processor
+          name: Apply OCSF schema for 4001
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `EnforcementAction` to `ocsf.metadata.event_code`
+              sources:
+                - EnforcementAction
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Customer` to `ocsf.metadata.tenant_uid`
+              sources:
+                - Customer
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `AppName` to `ocsf.app_name`
+              sources:
+                - AppName
+              target: ocsf.app_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ProtocolName` to `ocsf.connection_info.protocol_name`
+              sources:
+                - ProtocolName
+              target: ocsf.connection_info.protocol_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Protocol` to `ocsf.connection_info.protocol_num`
+              sources:
+                - Protocol
+              target: ocsf.connection_info.protocol_num
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `SourceIP` to `ocsf.src_endpoint.ip`
+              sources:
+                - SourceIP
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `SourcePorts` to `ocsf.src_endpoint.port`
+              sources:
+                - SourcePorts
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ResourceName` to `ocsf.src_endpoint.hostname`
+              sources:
+                - ResourceName
+              target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ResourceID` to `ocsf.src_endpoint.uid`
+              sources:
+                - ResourceID
+              target: ocsf.src_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `AppZoneName` to `ocsf.src_endpoint.zone`
+              sources:
+                - AppZoneName
+              target: ocsf.src_endpoint.zone
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `DestinationIP` to `ocsf.dst_endpoint.ip`
+              sources:
+                - DestinationIP
+              target: ocsf.dst_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `DestinationPort` to `ocsf.dst_endpoint.port`
+              sources:
+                - DestinationPort
+              target: ocsf.dst_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `EnforcementReason` to `ocsf.status_detail`
+              sources:
+                - EnforcementReason
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "@Direction:INBOUND"
+                  name: Inbound
+                  id: 1
+                - filter:
+                    query: "@Direction:OUTBOUND"
+                  name: Outbound
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@EnforcementAction:ALLOW"
+                  name: Open
+                  id: 1
+                - filter:
+                    query: "@EnforcementAction:(BLOCK OR SIMBLOCK) OR @EnforcementDisposition:REJECTED"
+                  name: Fail
+                  id: 4
+                - filter:
+                    query: "@EnforcementAction:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - EnforcementAction
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@EnforcementDisposition:(ALLOWED OR ACCEPTED)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@EnforcementDisposition:REJECTED"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@EnforcementDisposition:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - EnforcementDisposition
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@EnforcementAction:ALLOW"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@EnforcementDisposition:REJECTED"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@EnforcementAction:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - EnforcementAction
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Network Activity
+            classUid: 4001
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class HTTP Activity [4002] for app-protection
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:app-protection"
+      processors:
+        - type: grok-parser
+          name: Parse LogTimestamp to ocsf.time
+          enabled: true
+          source: LogTimestamp
+          samples:
+            - "Sun Aug 28 07:02:11 2025"
+            - "Wed Jul 30 10:06:01 2025"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              date_1 %{date("EEE MMM dd HH:mm:ss yyyy"):ocsf.time}
+              date_2 %{date("EEE MMM d HH:mm:ss yyyy"):ocsf.time}
+        - type: schema-processor
+          name: Apply OCSF schema for 4002
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Method` to `ocsf.metadata.event_code`
+              sources:
+                - Method
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionID` to `ocsf.metadata.uid`
+              sources:
+                - ConnectionID
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Customer` to `ocsf.metadata.tenant_uid`
+              sources:
+                - Customer
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionID` to `ocsf.connection_info.uid`
+              sources:
+                - ConnectionID
+              target: ocsf.connection_info.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Method` to `ocsf.http_request.http_method`
+              sources:
+                - Method
+              target: ocsf.http_request.http_method
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `URL` to `ocsf.http_request.url.path`
+              sources:
+                - URL
+              target: ocsf.http_request.url.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Host` to `ocsf.http_request.url.hostname`
+              sources:
+                - Host
+              target: ocsf.http_request.url.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Domain` to `ocsf.http_request.url.domain`
+              sources:
+                - Domain
+              target: ocsf.http_request.url.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `UserAgent` to `ocsf.http_request.user_agent`
+              sources:
+                - UserAgent
+              target: ocsf.http_request.user_agent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Protocol` to `ocsf.http_request.version`
+              sources:
+                - Protocol
+              target: ocsf.http_request.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `RequestBodySize` to `ocsf.http_request.body_length`
+              sources:
+                - RequestBodySize
+              target: ocsf.http_request.body_length
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `StatusCode` to `ocsf.http_response.code`
+              sources:
+                - StatusCode
+              target: ocsf.http_response.code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ResponseBodySize` to `ocsf.http_response.body_length`
+              sources:
+                - ResponseBodySize
+              target: ocsf.http_response.body_length
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ContentType` to `ocsf.http_response.content_type`
+              sources:
+                - ContentType
+              target: ocsf.http_response.content_type
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `HTTPError` to `ocsf.http_response.message`
+              sources:
+                - HTTPError
+              target: ocsf.http_response.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `HTTPError` to `ocsf.status_detail`
+              sources:
+                - HTTPError
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `StatusCode` to `ocsf.status_code`
+              sources:
+                - StatusCode
+              target: ocsf.status_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ClientPublicIp` to `ocsf.src_endpoint.ip`
+              sources:
+                - ClientPublicIp
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ClientPort` to `ocsf.src_endpoint.port`
+              sources:
+                - ClientPort
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `UserID` to `ocsf.src_endpoint.owner.name`
+              sources:
+                - UserID
+              target: ocsf.src_endpoint.owner.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Host` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - Host
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Domain` to `ocsf.dst_endpoint.domain`
+              sources:
+                - Domain
+              target: ocsf.dst_endpoint.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Inbound
+                  id: 1
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@Method:CONNECT"
+                  name: Connect
+                  id: 1
+                - filter:
+                    query: "@Method:DELETE"
+                  name: Delete
+                  id: 2
+                - filter:
+                    query: "@Method:GET"
+                  name: Get
+                  id: 3
+                - filter:
+                    query: "@Method:HEAD"
+                  name: Head
+                  id: 4
+                - filter:
+                    query: "@Method:OPTIONS"
+                  name: Options
+                  id: 5
+                - filter:
+                    query: "@Method:POST"
+                  name: Post
+                  id: 6
+                - filter:
+                    query: "@Method:PUT"
+                  name: Put
+                  id: 7
+                - filter:
+                    query: "@Method:TRACE"
+                  name: Trace
+                  id: 8
+                - filter:
+                    query: "@Method:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - Method
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@StatusCode:[200 TO 399]"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@StatusCode:[400 TO 599]"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@StatusCode:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - StatusCode
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@StatusCode:[200 TO 299]"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@StatusCode:[300 TO 399]"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "@StatusCode:[400 TO 499]"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@StatusCode:[500 TO 599]"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@StatusCode:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "-@StatusCode:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - StatusCode
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: HTTP Activity
+            classUid: 4002
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class HTTP Activity [4002] for browser-access
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:browser-access"
+      processors:
+        - type: grok-parser
+          name: Parse LogTimestamp to ocsf.time
+          enabled: true
+          source: LogTimestamp
+          samples:
+            - "Thu August 28 07:12:25 2025"
+            - "Thu Aug 28 07:12:25 2025"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              date_long %{date("EEE MMMM dd HH:mm:ss yyyy"):ocsf.time}
+              date_short %{date("EEE MMM dd HH:mm:ss yyyy"):ocsf.time}
+        - type: schema-processor
+          name: Apply OCSF schema for 4002
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Method` to `ocsf.metadata.event_code`
+              sources:
+                - Method
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionID` to `ocsf.metadata.uid`
+              sources:
+                - ConnectionID
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionID` to `ocsf.connection_info.uid`
+              sources:
+                - ConnectionID
+              target: ocsf.connection_info.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Protocol` to `ocsf.connection_info.protocol_name`
+              sources:
+                - Protocol
+              target: ocsf.connection_info.protocol_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Method` to `ocsf.http_request.http_method`
+              sources:
+                - Method
+              target: ocsf.http_request.http_method
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `URL` to `ocsf.http_request.url.path`
+              sources:
+                - URL
+              target: ocsf.http_request.url.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Host` to `ocsf.http_request.url.hostname`
+              sources:
+                - Host
+              target: ocsf.http_request.url.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ApplicationPort` to `ocsf.http_request.url.port`
+              sources:
+                - ApplicationPort
+              target: ocsf.http_request.url.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `UserAgent` to `ocsf.http_request.user_agent`
+              sources:
+                - UserAgent
+              target: ocsf.http_request.user_agent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Origin` to `ocsf.http_request.referrer`
+              sources:
+                - Origin
+              target: ocsf.http_request.referrer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `RequestSize` to `ocsf.http_request.length`
+              sources:
+                - RequestSize
+              target: ocsf.http_request.length
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `StatusCode` to `ocsf.http_response.code`
+              sources:
+                - StatusCode
+              target: ocsf.http_response.code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ResponseSize` to `ocsf.http_response.length`
+              sources:
+                - ResponseSize
+              target: ocsf.http_response.length
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectionStatus` to `ocsf.http_response.status`
+              sources:
+                - ConnectionStatus
+              target: ocsf.http_response.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `StatusCode` to `ocsf.status_code`
+              sources:
+                - StatusCode
+              target: ocsf.status_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ConnectionStatus` to `ocsf.status_detail`
+              sources:
+                - ConnectionStatus
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ClientPublicIp` to `ocsf.src_endpoint.ip`
+              sources:
+                - ClientPublicIp
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ClientPublicPort` to `ocsf.src_endpoint.port`
+              sources:
+                - ClientPublicPort
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `NameID` to `ocsf.src_endpoint.owner.name`
+              sources:
+                - NameID
+              target: ocsf.src_endpoint.owner.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `NameID` to `ocsf.src_endpoint.owner.uid`
+              sources:
+                - NameID
+              target: ocsf.src_endpoint.owner.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Customer` to `ocsf.src_endpoint.owner.org.name`
+              sources:
+                - Customer
+              target: ocsf.src_endpoint.owner.org.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Host` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - Host
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ApplicationPort` to `ocsf.dst_endpoint.port`
+              sources:
+                - ApplicationPort
+              target: ocsf.dst_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Inbound
+                  id: 1
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@Method:CONNECT"
+                  name: Connect
+                  id: 1
+                - filter:
+                    query: "@Method:DELETE"
+                  name: Delete
+                  id: 2
+                - filter:
+                    query: "@Method:GET"
+                  name: Get
+                  id: 3
+                - filter:
+                    query: "@Method:HEAD"
+                  name: Head
+                  id: 4
+                - filter:
+                    query: "@Method:OPTIONS"
+                  name: Options
+                  id: 5
+                - filter:
+                    query: "@Method:POST"
+                  name: Post
+                  id: 6
+                - filter:
+                    query: "@Method:PUT"
+                  name: Put
+                  id: 7
+                - filter:
+                    query: "@Method:TRACE"
+                  name: Trace
+                  id: 8
+                - filter:
+                    query: "@Method:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - Method
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@StatusCode:[200 TO 399]"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@StatusCode:[400 TO 599]"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@StatusCode:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - StatusCode
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@StatusCode:[200 TO 299]"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@StatusCode:[300 TO 399]"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "@StatusCode:[400 TO 499]"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@StatusCode:[500 TO 599]"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@StatusCode:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "-@StatusCode:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - StatusCode
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: HTTP Activity
+            classUid: 4002
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class Device Inventory Info [5001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:(app-connector-status OR private-service-edge-status OR private-cloud-controller-status)"
+      processors:
+        - type: grok-parser
+          name: Parse LogTimestamp to ocsf.time
+          enabled: true
+          source: LogTimestamp
+          samples:
+            - "2025-08-28T08:15:42Z"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              date_iso %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
+        - type: schema-processor
+          name: Apply OCSF schema for 5001
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `SessionStatus` to `ocsf.metadata.event_code`
+              sources:
+                - SessionStatus
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `SessionID` to `ocsf.metadata.uid`
+              sources:
+                - SessionID
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `MicroTenantID` to `ocsf.metadata.tenant_uid`
+              sources:
+                - MicroTenantID
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Connector`, `ServiceEdge`, `PrivateCloudController` to `ocsf.device.name`
+              sources:
+                - Connector
+                - ServiceEdge
+                - PrivateCloudController
+              target: ocsf.device.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `SessionID` to `ocsf.device.uid`
+              sources:
+                - SessionID
+              target: ocsf.device.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `PublicIP` to `ocsf.device.ip`
+              sources:
+                - PublicIP
+              target: ocsf.device.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ZEN` to `ocsf.device.region`
+              sources:
+                - ZEN
+              target: ocsf.device.region
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `CountryCode` to `ocsf.device.location.country`
+              sources:
+                - CountryCode
+              target: ocsf.device.location.country
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Platform` to `ocsf.device.os.name`
+              sources:
+                - Platform
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Version` to `ocsf.device.os.version`
+              sources:
+                - Version
+              target: ocsf.device.os.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ConnectorGroup` to `ocsf.device.groups.name`
+              sources:
+                - ConnectorGroup
+              target: ocsf.device.groups.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `SessionStatus` to `ocsf.status_code`
+              sources:
+                - SessionStatus
+              target: ocsf.status_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `SessionStatus` to `ocsf.status_detail`
+              sources:
+                - SessionStatus
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Log
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "@Platform:windows*"
+                  name: Windows
+                  id: 100
+                - filter:
+                    query: "@Platform:(el* OR rhel* OR centos* OR ubuntu* OR debian* OR linux*)"
+                  name: Linux
+                  id: 200
+                - filter:
+                    query: "@Platform:(macos* OR darwin*)"
+                  name: macOS
+                  id: 300
+                - filter:
+                    query: "@Platform:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values:
+                  ocsf.device.os.type: Other
+                  ocsf.device.os.type_id: "99"
+                sources:
+                  ocsf.device.os.type:
+                    - Platform
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Server
+                  id: 1
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@SessionStatus:ZPN_STATUS_AUTHENTICATED"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@SessionStatus:(ZPN_STATUS_DISCONNECTED OR ZPN_STATUS_AUTH_FAILED)"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@SessionStatus:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - SessionStatus
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Device Inventory Info
+            classUid: 5001
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class User Inventory Info [5003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:user-status"
+      processors:
+        - type: grok-parser
+          name: Parse `LogTimestamp` to `ocsf.time`
+          enabled: true
+          source: LogTimestamp
+          samples:
+            - "2025-08-28T08:15:42Z"
+          grok:
+            supportRules: ""
+            matchRules: parse_time %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+        - type: grok-parser
+          name: Parse `TimestampAuthentication` to `ocsf.time`
+          enabled: true
+          source: TimestampAuthentication
+          samples:
+            - "2019-06-03T08:11:40.000Z"
+          grok:
+            supportRules: ""
+            matchRules: parse_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+        - type: schema-processor
+          name: Apply OCSF schema for 5003
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.metadata.logged_time`
+              sources:
+                - ocsf.time
+              target: ocsf.metadata.logged_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `SessionID` to `ocsf.metadata.uid`
+              sources:
+                - SessionID
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `MicroTenantID` to `ocsf.metadata.tenant_uid`
+              sources:
+                - MicroTenantID
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `Version` to `ocsf.metadata.product.version`
+              sources:
+                - Version
+              target: ocsf.metadata.product.version
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `SessionStatus` to `ocsf.status_detail`
+              sources:
+                - SessionStatus
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `Username` to `ocsf.user.name`
+              sources:
+                - Username
+              target: ocsf.user.name
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `Username` to `ocsf.user.uid`
+              sources:
+                - Username
+              target: ocsf.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Collect
+                  id: 2
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@SessionStatus:ZPN_STATUS_AUTHENTICATED"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@SessionStatus:(ZPN_STATUS_AUTH_FAILED OR ZPN_STATUS_DISCONNECTED OR ZPN_STATUS_ERROR OR ZPN_STATUS_FAILED)"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@SessionStatus:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - SessionStatus
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.user.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.user.type
+                id: ocsf.user.type_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: User Inventory Info
+            classUid: 5003
+            extensions: []
+            profiles: []

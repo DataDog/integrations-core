@@ -4,7 +4,6 @@ falco.cpu.usage.ratio,gauge,,,,CPU usage percentage of the Falco process (equiva
 falco.duration.seconds.count,count,,second,,Total duration in seconds that Falco has been running,0,falco,,,
 falco.evt.hostname,gauge,,,,Hostname information,0,falco,,,
 falco.evt.source,gauge,,,,Event source information (e.g. syscall or plugin-based sources),0,falco,,,
-falco.host.boot.timestamp,gauge,,nanosecond,,Timestamp in nanoseconds when the host system was booted,0,falco,,,
 falco.host.cpu.usage.ratio,gauge,,,,Overall CPU usage percentage of all running processes on the host system,0,falco,,,
 falco.host.memory.used,gauge,,byte,,Overall memory usage in bytes of all running processes on the host system,0,falco,,,
 falco.host.num.cpus,gauge,,cpu,,Total number of CPUs on the host system,0,falco,,,
@@ -50,4 +49,3 @@ falco.scap.n.stored.evts.count,count,,,,Total number of events successfully stor
 falco.scap.n.threads,gauge,,thread,,Current number of threads stored in internal tracking tables,0,falco,,,
 falco.sha256.config.files,gauge,,,,SHA256 hash information of Falco configuration files,0,falco,,,
 falco.sha256.rules.files,gauge,,,,SHA256 hash information of Falco rules files,0,falco,,,
-falco.start.timestamp,gauge,,nanosecond,,Timestamp in nanoseconds when Falco started,0,falco,,,

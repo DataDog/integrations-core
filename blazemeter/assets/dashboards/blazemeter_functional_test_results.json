@@ -6,7 +6,7 @@
             "id": 6029219956940210,
             "definition": {
                 "type": "image",
-                "url": "https://www.blazemeter.com/sites/default/themes/custom/blazemeter/logo.svg",
+                "url": "/static/images/logos/blazemeter_large.svg",
                 "url_dark_theme": "",
                 "sizing": "contain",
                 "margin": "sm",

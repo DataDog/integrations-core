@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+import fnmatch
 import json
 import os
 import re
@@ -10,19 +13,23 @@ import tempfile
 import zipfile
 import zlib
 from datetime import date
-from pathlib import Path
 from types import TracebackType
-from typing import Literal, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
 
-import matplotlib.pyplot as plt
 import requests
 import squarify
 from datadog import api, initialize
-from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.common_params import WheelsStorageTier
+from ddev.utils.fs import Path
+from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.patches import Patch
 
 
 class FileDataEntry(TypedDict):
@@ -63,6 +70,7 @@ class CLIParameters(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
+    wheels_storage: WheelsStorageTier  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class CLIParametersTimeline(TypedDict):
@@ -72,6 +80,7 @@ class CLIParametersTimeline(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
+    wheels_storage: WheelsStorageTier  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
@@ -90,7 +99,7 @@ def get_valid_platforms(repo_path: Path | str, versions: set[str]) -> set[str]:
     """
     Extracts the platforms we support from the .deps/resolved file names.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
     platforms = []
     for file in os.listdir(resolved_path):
         if any(version in file for version in versions):
@@ -102,20 +111,56 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
     """
     Extracts the Python versions we support from the .deps/resolved file names.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
     versions = []
+    pattern = re.compile(r"\d+\.\d+")
     for file in os.listdir(resolved_path):
-        match = re.search(r"\d+\.\d+", file)
+        match = pattern.search(file)
         if match:
             versions.append(match.group())
     return set(versions)
 
 
 def is_correct_dependency(platform: str, version: str, name: str) -> bool:
-    return platform in name and version in name
+    # The name of the dependency file is in the format of {platform}_{version}.txt e.g. linux-aarch64_3.12.txt
+    _platform, _version = name.rsplit(".", 1)[0].rsplit("_", 1)
+    return platform == _platform and version == _version
 
 
-def is_valid_integration(path: str, included_folder: str, ignored_files: set[str], git_ignore: list[str]) -> bool:
+def is_valid_integration_file(
+    path: str,
+    repo_path: str,
+    ignored_files: set[str] | None = None,
+    included_folder: str | None = None,
+    git_ignore: list[str] | None = None,
+) -> bool:
+    """
+    Check if a file would be packaged with an integration.
+
+    Used to estimate integration package size by excluding:
+    - Hidden files (starting with ".")
+    - Files outside "datadog_checks"
+    - Helper/test-only packages (e.g. datadog_checks_dev)
+    - Files ignored by .gitignore
+
+    Args:
+        path (str): File path to check.
+        repo_path (str): Repository root, for loading .gitignore rules.
+
+    Returns:
+        bool: True if the file would be packaged, False otherwise.
+    """
+    if ignored_files is None:
+        ignored_files = {
+            "datadog_checks_dev",
+            "datadog_checks_tests_helper",
+        }
+
+    if included_folder is None:
+        included_folder = "datadog_checks" + os.sep
+
+    if git_ignore is None:
+        git_ignore = get_gitignore_files(Path(repo_path))
     # It is not an integration
     if path.startswith("."):
         return False
@@ -126,24 +171,38 @@ def is_valid_integration(path: str, included_folder: str, ignored_files: set[str
     elif any(ignore in path for ignore in ignored_files):
         return False
     # This file is contained in .gitignore
-    elif any(ignore in path for ignore in git_ignore):
+    elif _matches_gitignore(path, git_ignore):
         return False
     else:
         return True
 
 
-def get_gitignore_files(repo_path: str | Path) -> list[str]:
-    gitignore_path = os.path.join(repo_path, ".gitignore")
-    with open(gitignore_path, "r", encoding="utf-8") as file:
-        gitignore_content = file.read()
-        ignored_patterns = [
-            line.strip() for line in gitignore_content.splitlines() if line.strip() and not line.startswith("#")
-        ]
-        return ignored_patterns
+def _matches_gitignore(path: str, patterns: list[str]) -> bool:
+    parts = path.replace(os.sep, "/").split("/")
+    for pattern in patterns:
+        norm = pattern.rstrip("/")
+        if fnmatch.fnmatch(path, norm):
+            return True
+        if fnmatch.fnmatch(os.path.basename(path), norm):
+            return True
+        if any(fnmatch.fnmatch(part, norm) for part in parts):
+            return True
+    return False
+
+
+def get_gitignore_files(repo_path: Path) -> list[str]:
+    gitignore_path = repo_path / ".gitignore"
+    if not gitignore_path.is_file():
+        return []
+
+    with gitignore_path.open(mode="r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f.read().splitlines() if line.strip() and not line.startswith("#")]
+
+    return lines
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:
-    for unit in [" B", " KB", " MB", " GB"]:
+    for unit in [" B", " KiB", " MiB", " GiB"]:
         if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
         size_bytes /= 1024
@@ -162,28 +221,32 @@ def compress(file_path: str) -> int:
     return compressed_size
 
 
-def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
+def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[FileDataEntry]:
     """
     Calculates integration file sizes and versions from a repository.
+    Only takes into account integrations with a valid version looking at the pyproject.toml file
+    The pyproject.toml file should have a classifier with this format:
+        classifiers = [
+            ...
+            "Programming Language :: Python :: 3.13",
+            ...
+        ]
     """
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
-
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
+    py_major_version = py_version.split(".")[0]
 
     for root, _, files in os.walk(repo_path):
+        integration_name = str(os.path.relpath(root, repo_path).split(os.sep)[0])
+
+        if not check_python_version(str(repo_path), integration_name, py_major_version):
+            continue
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
-
-            if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
+            if not is_valid_integration_file(relative_path, str(repo_path)):
                 continue
-            path = Path(relative_path)
-            parts = path.parts
-
-            integration_name = parts[0]
+            integration_name = Path(relative_path).parts[0]
 
             size = compress(file_path) if compressed else os.path.getsize(file_path)
             integration_sizes[integration_name] = integration_sizes.get(integration_name, 0) + size
@@ -204,6 +267,23 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
     ]
 
 
+def check_python_version(repo_path: str, integration_name: str, py_major_version: str) -> bool:
+    pyproject_path = os.path.join(repo_path, integration_name, "pyproject.toml")
+    if os.path.exists(pyproject_path):
+        pyproject = load_toml_file(pyproject_path)
+        if "project" not in pyproject or "classifiers" not in pyproject["project"]:
+            return False
+        classifiers = pyproject["project"]["classifiers"]
+        integration_py_version = ""
+        pattern = re.compile(r"Programming Language :: Python :: (\d+)")
+        for classifier in classifiers:
+            match = pattern.match(classifier)
+            if match:
+                integration_py_version = match.group(1)
+                return integration_py_version == py_major_version
+    return False
+
+
 def extract_version_from_about_py(path: str) -> str:
     """
     Extracts the __version__ string from a given __about__.py file.
@@ -219,33 +299,100 @@ def extract_version_from_about_py(path: str) -> str:
     return ""
 
 
-def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> list[FileDataEntry]:
+WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
+WHEELS_STORAGE_TIERS: tuple[WheelsStorageTier, ...] = get_args(WheelsStorageTier)
+
+
+def resolve_wheel_url(url: str, wheels_storage: WheelsStorageTier) -> str:
+    """Substitute the wheels storage tier into a lockfile URL."""
+    return url.replace(WHEELS_STORAGE_PLACEHOLDER, wheels_storage)
+
+
+def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[str]:
+    """
+    Returns the URL resolved against the preferred tier first, then the remaining tiers.
+
+    A wheel is the same object whichever tier serves it, but the tiers have different retention:
+    older builds are pruned from dev while stable keeps them. Falling back therefore lets commits
+    old enough to have aged out of dev still be measured.
+    """
+    if WHEELS_STORAGE_PLACEHOLDER not in url:
+        return [url]
+
+    tiers = [wheels_storage, *(tier for tier in WHEELS_STORAGE_TIERS if tier != wheels_storage)]
+    return [resolve_wheel_url(url, tier) for tier in tiers]
+
+
+def request_wheel(
+    app: Application, url: str, wheels_storage: WheelsStorageTier, head: bool = False
+) -> requests.Response:
+    """
+    Fetches a wheel by trying each storage tier in order, returning the first successful response.
+
+    Both 404 and 403 are treated as "not found" and trigger a fallback to the next tier, since the
+    dev/stable S3 buckets return 403 instead of 404 for a missing key when the caller can't list the
+    bucket. Any other error status aborts immediately instead of retrying. If every tier fails, the
+    raised error lists all tried tiers, since the URL alone wouldn't reveal that a fallback was
+    attempted.
+    """
+    candidates = wheel_url_candidates(url, wheels_storage)
+    tried: list[str] = []
+    for index, candidate in enumerate(candidates):
+        response = requests.head(candidate) if head else requests.get(candidate, stream=True)
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            response.close()
+            tried.append(f"{candidate} ({response.status_code})")
+            is_last = index == len(candidates) - 1
+            if is_last or response.status_code not in (403, 404):
+                app.display_debug(f"Wheel request failed for all tried tiers: {', '.join(tried)}")
+                raise requests.HTTPError(f"{e}. Tried: {', '.join(tried)}", response=response) from e
+            app.display_debug(f"Wheel not found at {candidate}, falling back to the next tier")
+            continue
+        return response
+
+    raise RuntimeError(f"No wheels storage tier served {url}")
+
+
+def get_dependencies(
+    app: Application,
+    repo_path: str | Path,
+    platform: str,
+    version: str,
+    compressed: bool,
+    wheels_storage: WheelsStorageTier,
+) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
     Name, Version, Size_Bytes, Size, and Type.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
 
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)
 
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
             deps, download_urls, versions = get_dependencies_list(file_path)
-            return get_dependencies_sizes(deps, download_urls, versions, compressed)
+            return get_dependencies_sizes(app, deps, download_urls, versions, compressed, wheels_storage)
     return []
 
 
 def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
+
+    URLs keep their storage tier placeholder; it is resolved when the wheel is requested so a
+    missing wheel can fall back to another tier.
     """
     download_urls = []
     deps = []
     versions = []
     with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
+        pattern = re.compile(r"([\w\-\d\.]+) @ (https?://[^\s#]+)")
         for line in file_content.splitlines():
-            match = re.search(r"([\w\-\d\.]+) @ (https?://[^\s#]+)", line)
+            match = pattern.search(line)
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
@@ -263,7 +410,12 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
 
 
 def get_dependencies_sizes(
-    deps: list[str], download_urls: list[str], versions: list[str], compressed: bool
+    app: Application,
+    deps: list[str],
+    download_urls: list[str],
+    versions: list[str],
+    compressed: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> list[FileDataEntry]:
     """
     Calculates the sizes of dependencies, either compressed or uncompressed.
@@ -277,8 +429,7 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        with requests.get(url, stream=True) as response:
-            response.raise_for_status()
+        with request_wheel(app, url, wheels_storage) as response:
             wheel_data = response.content
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -287,11 +438,7 @@ def get_dependencies_sizes(
                 f.write(wheel_data)
             if compressed:
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
-                    size = sum(
-                        zinfo.compress_size
-                        for zinfo in zip_ref.infolist()
-                        if not is_excluded_from_wheel(zinfo.filename)
-                    )
+                    size = sum(zinfo.compress_size for zinfo in zip_ref.infolist())
             else:
                 extract_path = Path(tmpdir) / "extracted"
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
@@ -299,14 +446,8 @@ def get_dependencies_sizes(
 
                 size = 0
                 for dirpath, _, filenames in os.walk(extract_path):
-                    rel_dir = os.path.relpath(dirpath, extract_path)
-                    if is_excluded_from_wheel(rel_dir):
-                        continue
                     for name in filenames:
                         file_path = os.path.join(dirpath, name)
-                        rel_file = os.path.relpath(file_path, extract_path)
-                        if is_excluded_from_wheel(rel_file):
-                            continue
                         size += os.path.getsize(file_path)
 
         file_data.append(
@@ -320,63 +461,6 @@ def get_dependencies_sizes(
         )
 
     return file_data
-
-
-def is_excluded_from_wheel(path: str) -> bool:
-    '''
-    These files are excluded from the wheel in the agent build:
-    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
-    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
-    the wheels still include them.
-    '''
-    excluded_test_paths = [
-        os.path.normpath(path)
-        for path in [
-            'idlelib/idle_test',
-            'bs4/tests',
-            'Cryptodome/SelfTest',
-            'gssapi/tests',
-            'keystoneauth1/tests',
-            'openstack/tests',
-            'os_service_types/tests',
-            'pbr/tests',
-            'pkg_resources/tests',
-            'psutil/tests',
-            'securesystemslib/_vendor/ed25519/test_data',
-            'setuptools/_distutils/tests',
-            'setuptools/tests',
-            'simplejson/tests',
-            'stevedore/tests',
-            'supervisor/tests',
-            'test',  # cm-client
-            'vertica_python/tests',
-            'websocket/tests',
-        ]
-    ]
-
-    type_annot_libraries = [
-        'krb5',
-        'Cryptodome',
-        'ddtrace',
-        'pyVmomi',
-        'gssapi',
-    ]
-    rel_path = Path(path).as_posix()
-
-    # Test folders
-    for test_folder in excluded_test_paths:
-        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
-            return True
-
-    # Python type annotations
-    path_parts = Path(rel_path).parts
-    if path_parts:
-        dependency_name = path_parts[0]
-        if dependency_name in type_annot_libraries:
-            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
-                return True
-
-    return False
 
 
 def format_modules(
@@ -514,41 +598,22 @@ def export_format(
     compressed: bool,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
+    name = f"{mode}_{size_type}"
+    if platform:
+        name += f"_{platform}"
+    if version:
+        name += f"_{version}"
     for output_format in format:
         if output_format == "csv":
-            csv_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.csv"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.csv"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
-                )
-            )
+            csv_filename = f"{name}.csv"
             save_csv(app, modules, csv_filename)
 
         elif output_format == "json":
-            json_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.json"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.json"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
-                )
-            )
+            json_filename = f"{name}.json"
             save_json(app, json_filename, modules)
 
         elif output_format == "markdown":
-            markdown_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.md"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.md"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
-                )
-            )
+            markdown_filename = f"{name}.md"
             save_markdown(app, "Status", modules, markdown_filename)
 
 
@@ -560,6 +625,8 @@ def plot_treemap(
     mode: Literal["status", "diff"],
     path: Optional[str] = None,
 ) -> None:
+    import matplotlib.pyplot as plt
+
     if modules == []:
         return
 
@@ -598,6 +665,9 @@ def plot_treemap(
 def plot_status_treemap(
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
     # Calculate the area of the rectangles
     sizes = [mod["Size_Bytes"] for mod in modules]
     norm_sizes = squarify.normalize_sizes(sizes, 100, 100)
@@ -629,6 +699,9 @@ def plot_status_treemap(
 def plot_diff_treemap(
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
     # Define the colors for each type
     cmap_pos = plt.get_cmap("Oranges")
     cmap_neg = plt.get_cmap("Blues")
@@ -689,11 +762,13 @@ def scale_colors_treemap(area: float, max_area: float) -> float:
 
 
 def draw_treemap_rects_with_labels(
-    ax: plt.Axes,
+    ax: Axes,
     rects: list[dict],
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
     colors: list[tuple[float, float, float, float]],
 ) -> None:
+    from matplotlib.patches import Rectangle
+
     """
     Draw treemap rectangles with their assigned colors and optional text labels.
 
@@ -707,7 +782,7 @@ def draw_treemap_rects_with_labels(
         x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
 
         # Draw the rectangle with a white border
-        ax.add_patch(plt.Rectangle((x, y), dx, dy, color=color, ec="white"))
+        ax.add_patch(Rectangle((x, y), dx, dy, color=color, ec="white"))
 
         # Determine font size based on rectangle area
         MIN_FONT_SIZE = 6
@@ -762,24 +837,23 @@ def draw_treemap_rects_with_labels(
 
 def send_metrics_to_dd(
     app: Application,
+    commit: str,
     modules: list[FileDataEntryPlatformVersion],
-    org: str,
-    key: str,
+    org: str | None,
+    key: str | None,
     compressed: bool,
 ) -> None:
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
-    config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
-    if not is_everything_committed():
-        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
+
     if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
     if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
-    message, tickets, prs = get_last_commit_data()
-    timestamp = get_last_commit_timestamp()
+    timestamp, message, tickets, prs = get_commit_data(commit)
 
     metrics = []
     n_integrations_metrics = []
@@ -787,6 +861,8 @@ def send_metrics_to_dd(
 
     n_integrations: dict[tuple[str, str], int] = {}
     n_dependencies: dict[tuple[str, str], int] = {}
+
+    sizes: dict[str, dict[str, int]] = {}
 
     for item in modules:
         metrics.append(
@@ -810,6 +886,15 @@ def send_metrics_to_dd(
                 ],
             }
         )
+
+        # Creating variables for debugging
+        if item['Platform'] not in sizes:
+            sizes[item['Platform']] = {}
+        if item['Python_Version'] not in sizes[item['Platform']]:
+            sizes[item['Platform']][item['Python_Version']] = 0
+
+        sizes[item['Platform']][item['Python_Version']] += item['Size_Bytes']
+
         key_count = (item['Platform'], item['Python_Version'])
         if key_count not in n_integrations:
             n_integrations[key_count] = 0
@@ -854,63 +939,54 @@ def send_metrics_to_dd(
         api_host=f"https://api.{config_file_info['site']}",
     )
 
+    # Format the sizes dictionary into a human-readable summary
+    summary_lines = []
+    for platform, py_versions in sizes.items():
+        for py_version, size_bytes in py_versions.items():
+            summary_lines.append(
+                f"Platform: {platform}, Python: {py_version}, Size: "
+                f"{convert_to_human_readable_size(size_bytes)} ({size_bytes} bytes)"
+            )
+    summary = "\n".join(summary_lines)
+
+    total_metrics = len(metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics)
+    app.display(f"Sending {total_metrics} metrics to Datadog...")
+
+    app.display("\nMetric summary:")
+    app.display(summary)
+
+    app.display_debug(f"Sending Metrics: {metrics}")
     api.Metric.send(metrics=metrics)
+
+    app.display_debug(f"Sending N integrations metrics: {n_integrations_metrics}")
     api.Metric.send(metrics=n_integrations_metrics)
+
+    app.display_debug(f"Sending N dependencies metrics: {n_dependencies_metrics}")
     api.Metric.send(metrics=n_dependencies_metrics)
 
 
-def get_org(app: Application, org: str) -> dict[str, str]:
-    config_path: Path = app.config_file.path
+def get_commit_data(commit: str) -> tuple[int, str, list[str], list[str]]:
+    '''
+    Gets the timestamp, message, tickets and PRs of a given commit. If no commit is provided, it uses the last commit.
+    '''
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%ct,%s", commit],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
 
-    current_section = None
-    org_data = {}
-
-    with open(config_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-
-            # Detect section header
-            if line.startswith("[") and line.endswith("]"):
-                current_section = line[1:-1]
-                continue
-
-            if current_section == f"orgs.{org}":
-                if "=" in line:
-                    key, value = line.split("=", 1)
-                    key = key.strip()
-                    value = value.strip().strip('"')
-                    org_data[key] = value
-    if not org_data:
-        raise ValueError(f"Organization '{org}' not found in config")
-    return org_data
-
-
-def is_everything_committed() -> bool:
-    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
-    return result.stdout.strip() == ""
-
-
-def get_last_commit_timestamp() -> int:
-    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
-    return int(result.stdout.strip())
-
-
-def get_last_commit_data() -> tuple[str, list[str], list[str]]:
-    result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
+    timestamp, message = result.stdout.strip().split(',', 1)
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
 
-    message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
     prs = re.findall(pr_pattern, message)
-
     if not tickets:
         tickets = [""]
     if not prs:
         prs = [""]
-    return message, tickets, prs
+    return int(timestamp), message, tickets, prs
 
 
 class WrongDependencyFormat(Exception):

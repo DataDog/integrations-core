@@ -306,15 +306,22 @@ def mock_get_coord_nodes_benchmark(num_nodes):
     return nodes
 
 
+def mock_get_health_check_with_warning(_):
+    checks = mock_get_health_check(_)
+    checks[0]["Status"] = "warning"
+    checks[0]["Output"] = "disk usage high"
+    return checks
+
+
 def mock_get_health_check(_):
     return [
         {
             "ModifyIndex": 75214492,
             "CreateIndex": 75214492,
-            "Node": "node-1",
+            "Node": "node-2",
             "CheckID": "server-loadbalancer",
             "Name": "Service 'server-loadbalancer' check",
-            "Status": "critical",
+            "Status": "passing",
             "Notes": "",
             "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
             "ServiceID": "server-loadbalancer",
@@ -323,10 +330,10 @@ def mock_get_health_check(_):
         {
             "ModifyIndex": 75214492,
             "CreateIndex": 75214492,
-            "Node": "node-2",
+            "Node": "node-1",
             "CheckID": "server-loadbalancer",
             "Name": "Service 'server-loadbalancer' check",
-            "Status": "passing",
+            "Status": "critical",
             "Notes": "",
             "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
             "ServiceID": "server-loadbalancer",

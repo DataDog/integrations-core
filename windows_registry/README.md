@@ -7,6 +7,8 @@ Watch for changes in Windows Registry keys and forward them to Datadog. Enable t
 - Understand system and application level health and state through Windows Registry values.
 - Monitor for unexpected changes impacting security and compliance requirements.
 
+**Minimum Agent version:** 7.50.0
+
 ## Setup
 
 ### Installation

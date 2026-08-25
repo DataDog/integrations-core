@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "28c9684a-678b-4bcf-8994-9c4c60e6f130",
   "app_id": "hdfs-datanode",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

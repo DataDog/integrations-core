@@ -1,8 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datamodel_code_generator.format import CodeFormatter
-
+from datadog_checks.dev.tooling.configuration.consumers.model.code_formatter import format_with_ruff
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 
 
@@ -11,14 +10,12 @@ def build_model_file(
     model_id: str,
     section_name: str,
     model_info: ModelInfo,
-    code_formatter: CodeFormatter,
 ):
     """
     :param parsed_document: OpenApi parsed document
     :param model_id: instance or shared
     :param section_name: init or instances
     :param model_info: Information to build the model file
-    :param code_formatter:
     """
     # Whether or not there are options with default values
     options_with_defaults = len(model_info.defaults_file_lines) > 0
@@ -26,10 +23,16 @@ def build_model_file(
     _add_imports(model_file_lines, options_with_defaults, len(model_info.deprecation_data))
     _fix_types(model_file_lines)
 
+    # Add constant for secure fields requiring trusted provider validation
+    if model_info.require_trusted_providers:
+        _add_secure_fields_constant(model_file_lines, model_info.require_trusted_providers)
+
     if model_id in model_info.deprecation_data:
         model_file_lines += _define_deprecation_functions(model_id, section_name)
 
-    model_file_lines += _define_validator_functions(model_id, model_info.validator_data, options_with_defaults)
+    model_file_lines += _define_validator_functions(
+        model_id, model_info.validator_data, options_with_defaults, bool(model_info.require_trusted_providers)
+    )
 
     config_lines = []
     for i, line in enumerate(model_file_lines):
@@ -48,7 +51,7 @@ def build_model_file(
     model_file_lines.append('')
     model_file_contents = '\n'.join(model_file_lines)
     if any(len(line) > 120 for line in model_file_lines):
-        model_file_contents = code_formatter.apply_black(model_file_contents)
+        model_file_contents = format_with_ruff(model_file_contents)
     return model_file_contents
 
 
@@ -103,27 +106,56 @@ def _add_imports(model_file_lines, need_defaults, need_deprecations):
 
 
 def _fix_types(model_file_lines):
-    for i, line in enumerate(model_file_lines):
-        line = model_file_lines[i] = line.replace('dict[', 'MappingProxyType[')
-        if 'list[' not in line:
-            continue
+    # Operate on the joined document (as UTF-8 bytes) so the bracket-tracking
+    # pass below works even when the upstream parser pre-wraps `list[...]`
+    # across multiple lines. Iterating bytes keeps the algorithm safe for
+    # non-ASCII content (descriptions, examples) since `[`, `]`, and `list`
+    # are all single-byte ASCII while UTF-8 continuation bytes never collide
+    # with them.
+    content = '\n'.join(model_file_lines).replace('dict[', 'MappingProxyType[')
+    if 'list[' not in content:
+        model_file_lines[:] = content.split('\n')
+        return
 
-        buffer = bytearray()
-        containers = []
+    encoded = content.encode('utf-8')
+    buffer = bytearray()
+    containers = []
+    open_bracket = ord(b'[')
+    close_bracket = ord(b']')
+    whitespace = (ord(b' '), ord(b'\t'), ord(b'\n'))
 
-        for char in line:
-            if char == '[':
-                if buffer[-4:] == b'list':
-                    containers.append(True)
-                    buffer[-4:] = b'tuple'
-                else:
-                    containers.append(False)
-            elif char == ']' and containers.pop():
-                buffer.extend(b', ...')
+    for byte in encoded:
+        if byte == open_bracket:
+            if buffer[-4:] == b'list':
+                containers.append(True)
+                buffer[-4:] = b'tuple'
+            else:
+                containers.append(False)
+        elif byte == close_bracket and containers and containers.pop():
+            # Insert `, ...` after the last non-whitespace byte already in the
+            # buffer so the sentinel sits on the same line as the previous
+            # content (`tuple[X], ...` style) even when the parser wrapped the
+            # closing `]` onto its own line.
+            insert_at = len(buffer)
+            while insert_at > 0 and buffer[insert_at - 1] in whitespace:
+                insert_at -= 1
+            buffer[insert_at:insert_at] = b', ...'
 
-            buffer.append(ord(char))
+        buffer.append(byte)
 
-        model_file_lines[i] = buffer.decode('utf-8')
+    model_file_lines[:] = buffer.decode('utf-8').split('\n')
+
+
+def _add_secure_fields_constant(model_file_lines, require_trusted_providers):
+    """Add SECURE_FIELD_NAMES constant before the first class definition."""
+    class_line_index = next((i for i, line in enumerate(model_file_lines) if line.startswith('class ')), None)
+    if class_line_index is not None:
+        fields_str = ', '.join(f'{name!r}' for name in sorted(require_trusted_providers))
+        model_file_lines[class_line_index:class_line_index] = [
+            '',
+            f'SECURE_FIELD_NAMES = frozenset([{fields_str}])',
+            '',
+        ]
 
 
 def _define_deprecation_functions(model_id, section_name):
@@ -139,7 +171,7 @@ def _define_deprecation_functions(model_id, section_name):
     return model_file_lines
 
 
-def _define_validator_functions(model_id, validator_data, need_defaults):
+def _define_validator_functions(model_id, validator_data, need_defaults, has_require_trusted_providers=False):
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
     model_file_lines.append('    def _initial_validation(cls, values):')
@@ -162,7 +194,16 @@ def _define_validator_functions(model_id, validator_data, need_defaults):
         model_file_lines.append('')
         model_file_lines.append(f'            if info.field_name == {option_name!r}:')
         for import_path in import_paths:
-            model_file_lines.append(f'                value = validation.{import_path}(value, field=field)')
+            model_file_lines.append(f'                value = validators.{import_path}(value, field=field)')
+
+    # Add security validation for fields requiring trusted provider
+    if has_require_trusted_providers:
+        model_file_lines.append('')
+        model_file_lines.append('            if info.field_name in SECURE_FIELD_NAMES:')
+        model_file_lines.append(
+            "                validation.security.check_field_trusted_provider("
+            "info.field_name, value, info.context.get('security_config'))"
+        )
 
     if need_defaults:
         model_file_lines.append('        else:')

@@ -8,8 +8,9 @@ import os
 import re
 from collections import OrderedDict, defaultdict
 
-from ..constants import ServiceCheck
-from ..utils.common import ensure_unicode, to_native_string
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.common import ensure_unicode, to_native_string
+
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
 
@@ -425,10 +426,19 @@ class AggregatorStub(object):
         assert condition, msg
 
     def assert_metrics_using_metadata(
-        self, metadata_metrics, check_metric_type=True, check_submission_type=False, exclude=None
+        self,
+        metadata_metrics,
+        check_metric_type=True,
+        check_submission_type=False,
+        exclude=None,
+        check_symmetric_inclusion=False,
     ):
         """
-        Assert metrics using metadata.csv
+        Assert metrics using metadata.csv. The assertion fails if there are metrics emitted that are
+        not in metadata.csv. Metrics passed in the `exclude` parameter are ignored.
+
+        Pass `check_symmetric_inclusion=True` to assert that both set of metrics, those submitted and
+        those in metadata.csv, are the same.
 
         Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
         asserting this type make sense for e2e (metrics collected from agent).
@@ -444,6 +454,7 @@ class AggregatorStub(object):
 
         exclude = exclude or []
         errors = set()
+        submitted_metrics = set()
         for metric_name, metric_stubs in self._metrics.items():
             if metric_name in exclude:
                 continue
@@ -455,6 +466,8 @@ class AggregatorStub(object):
                 # Note: all Openmetrics histogram and summary metrics are actually separately submitted
                 if check_submission_type and actual_metric_type in ['histogram', 'historate']:
                     metric_stub_name += '.count'
+
+                submitted_metrics.add(metric_stub_name)
 
                 # Checking the metric is in `metadata.csv`
                 if metric_stub_name not in metadata_metrics:
@@ -477,6 +490,10 @@ class AggregatorStub(object):
                                 metric_stub_name, expected_metric_type, actual_metric_type
                             )
                         )
+
+        if check_symmetric_inclusion:
+            missing_metrics = metadata_metrics.keys() - submitted_metrics
+            errors.update(f"Expect `{m}` from metadata.csv but not submitted." for m in missing_metrics)
 
         assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
 

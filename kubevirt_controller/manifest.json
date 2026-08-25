@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f213050d-a54c-4a72-bf51-e9290a7d050c",
   "app_id": "kubevirt-controller",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

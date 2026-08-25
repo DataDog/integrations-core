@@ -52,6 +52,10 @@ def instance_enable_health_service_check():
     return True
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_histogram_buckets_as_distributions():
     return False
 
@@ -82,6 +86,10 @@ def instance_min_collection_interval():
 
 def instance_non_cumulative_histogram_buckets():
     return False
+
+
+def instance_openmetrics_endpoint():
+    return 'http://localhost:4000/metrics'
 
 
 def instance_persist_connections():

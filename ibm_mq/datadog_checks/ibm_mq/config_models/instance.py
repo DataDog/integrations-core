@@ -20,6 +20,9 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(['ssl_key_repository_location'])
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -35,21 +38,27 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    add_description_tags: Optional[bool] = None
     auto_discover_channels: Optional[bool] = None
     auto_discover_queues: Optional[bool] = None
+    auto_discover_queues_via_names: Optional[bool] = None
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[MappingProxyType[str, Any]] = None
     channels: Optional[tuple[str, ...]] = None
+    collect_connection_metrics: Optional[bool] = None
     collect_reset_queue_metrics: Optional[bool] = None
     collect_statistics_metrics: Optional[bool] = None
     connection_name: Optional[str] = Field(None, min_length=1)
     convert_endianness: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
+    filter_queue_statistics_metrics: Optional[bool] = None
     host: Optional[str] = Field(None, min_length=1)
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     mqcd_version: Optional[float] = Field(None, ge=1.0)
+    normalize_description_tags: Optional[bool] = None
     override_hostname: Optional[bool] = None
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int] = None
@@ -81,6 +90,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

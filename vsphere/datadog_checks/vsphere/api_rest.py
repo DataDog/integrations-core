@@ -80,9 +80,7 @@ class VSphereRestAPI(object):
         self.log.debug("Fetched tag associations: %s", tag_associations)
 
         # Initialise resource_tags
-        resource_tags = {
-            resource_type: defaultdict(list) for resource_type in ALL_RESOURCES_WITH_METRICS
-        }  # type: ResourceTags
+        resource_tags = {resource_type: defaultdict(list) for resource_type in ALL_RESOURCES_WITH_METRICS}  # type: ResourceTags
 
         all_tag_ids = set()
         for tag_asso in tag_associations:

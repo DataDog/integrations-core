@@ -6,6 +6,7 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.etcd import Etcd
 
 from .common import ETCD_VERSION, REMAPED_DEBUGGING_METRICS, URL
@@ -30,6 +31,8 @@ def test_check(aggregator, instance, openmetrics_metrics, dd_run_check):
 
     for metric in REMAPED_DEBUGGING_METRICS:
         aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     aggregator.assert_all_metrics_covered()
 
@@ -78,7 +81,8 @@ def test_config(instance, test_case, extra_config, expected_http_kwargs, dd_run_
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         dd_run_check(check)

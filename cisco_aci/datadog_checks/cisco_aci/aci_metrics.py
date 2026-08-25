@@ -63,6 +63,7 @@ ENDPOINT_GROUP_PREFIX = APPLICATION_PREFIX + ".endpoint"
 
 def make_tenant_metrics():
     metrics = {
+        "healthInst": {"cur": "{}.health"},
         "fvOverallHealth": {"healthAvg": "{}.overall_health", "healthLast": "{}.health"},
         "fvFltCounter": {"warncountAvg": "{}.fault_counter"},
     }

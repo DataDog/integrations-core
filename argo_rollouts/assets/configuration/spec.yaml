@@ -1,4 +1,5 @@
 name: Argo Rollouts
+fleet_configurable: true
 files:
 - name: argo_rollouts.yaml
   options:

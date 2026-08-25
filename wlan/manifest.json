@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "dbf0f387-cef7-4694-9001-b7bb5c1c1274",
   "app_id": "wlan",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

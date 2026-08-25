@@ -1,0 +1,32 @@
+# Policy for: .github/workflows/labeler-reusable.yml in DataDog/integrations-core
+# Used by labeler.yml (pull_request) and labeler-community.yml (pull_request_target)
+#
+# Naming convention:
+#   self:          Only this repository (DataDog/integrations-core) can use this policy
+#   labeler:       Grants permissions for PR labeling
+#   pull-request:  Intended for both pull_request and pull_request_target events
+#
+# Security model:
+#   - Workflow runs on pull_request (internal) and pull_request_target (external) events
+#   - job_workflow_ref constrains to the reusable workflow committed to master
+#
+# Permissions granted:
+#   - pull_requests: write  - Apply labels and add team labels to PRs
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.labeler.pull-request
+
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:pull_request
+
+claim_pattern:
+  event_name: (pull_request|pull_request_target)
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/labeler-reusable\.yml@.*
+  repository: DataDog/integrations-core
+
+permissions:
+  pull_requests: write

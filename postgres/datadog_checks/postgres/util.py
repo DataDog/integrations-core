@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import math
 import re
 import string
 from enum import Enum
@@ -36,6 +37,235 @@ class DatabaseConfigurationError(Enum):
     high_pg_stat_statements_max = 'high-pg-stat-statements-max-configuration'
     autodiscovered_databases_exceeds_limit = 'autodiscovered-databases-exceeds-limit'
     autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
+    # New codes used by the `agent diagnose` pre-flight checks.
+    connection_failure = 'connection-failure'
+    postgres_version_unsupported = 'postgres-version-unsupported'
+    shared_preload_libraries_missing_pg_stat_statements = 'shared-preload-libraries-missing-pg-stat-statements'
+    track_activity_query_size_too_small = 'track-activity-query-size-too-small'
+    track_io_timing_disabled = 'track-io-timing-disabled'
+    missing_pg_monitor_role = 'missing-pg-monitor-role'
+    insufficient_privilege_on_pg_stat_activity = 'insufficient-privilege-on-pg-stat-activity'
+    missing_datadog_schema = 'missing-datadog-schema'
+    missing_schema_usage_grant = 'missing-schema-usage-grant'
+    pg_stat_statements_not_readable = 'pg-stat-statements-not-readable'
+    pg_stat_database_not_readable = 'pg-stat-database-not-readable'
+    config_validation = 'config-validation'
+    column_statistics_function_undefined = 'column-statistics-function-undefined'
+    column_statistics_function_insufficient_privilege = 'column-statistics-function-insufficient-privilege'
+
+
+# Docs anchor is appended to the troubleshooting URL to land the user on the right section.
+TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting/"
+
+
+# Central map of diagnostic metadata for every DatabaseConfigurationError code. Used by both the
+# runtime `record_warning` path (so `agent diagnose` sees the same remediation text as `agent status`)
+# and the explicit pre-flight diagnostics in `diagnose.py`.
+DIAGNOSTIC_METADATA = {
+    DatabaseConfigurationError.pg_stat_statements_not_created: {
+        "description": "pg_stat_statements must be installed as an extension in {dbname}.",
+        "remediation": "Run `CREATE EXTENSION pg_stat_statements;` while connected to {dbname}.",
+        "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_created.value,
+    },
+    DatabaseConfigurationError.pg_stat_statements_not_loaded: {
+        "description": "pg_stat_statements must be pre-loaded via shared_preload_libraries.",
+        "remediation": (
+            "Add `pg_stat_statements` to `shared_preload_libraries` in postgresql.conf and restart the server."
+        ),
+        "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+    },
+    DatabaseConfigurationError.undefined_explain_function: {
+        "description": "The `{explain_function}` function is required to collect execution plans.",
+        "remediation": (
+            "Create the `{explain_function}` function in every monitored database as documented in the "
+            "Postgres DBM setup guide."
+        ),
+        "docs_anchor": DatabaseConfigurationError.undefined_explain_function.value,
+    },
+    DatabaseConfigurationError.undefined_activity_view: {
+        "description": "The pg_stat_activity view (or datadog.pg_stat_activity function on PG 9.6) must be readable.",
+        "remediation": (
+            "Grant `pg_monitor` to the datadog user (PG >= 10), or create the `datadog.pg_stat_activity` "
+            "security-definer function for PG 9.6."
+        ),
+        "docs_anchor": DatabaseConfigurationError.undefined_activity_view.value,
+    },
+    DatabaseConfigurationError.high_pg_stat_statements_max: {
+        "description": "pg_stat_statements.max is set high enough to impact collection performance.",
+        "remediation": (
+            "Lower pg_stat_statements.max in postgresql.conf, or raise "
+            "`query_metrics.pg_stat_statements_max_warning_threshold` in the agent config to silence this."
+        ),
+        "docs_anchor": DatabaseConfigurationError.high_pg_stat_statements_max.value,
+    },
+    DatabaseConfigurationError.autodiscovered_databases_exceeds_limit: {
+        "description": "Database autodiscovery matched more databases than max_databases.",
+        "remediation": (
+            "Increase `max_databases` under `database_autodiscovery` in the agent config, or tighten the "
+            "include/exclude patterns."
+        ),
+        "docs_anchor": DatabaseConfigurationError.autodiscovered_databases_exceeds_limit.value,
+    },
+    DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval: {
+        "description": "A single metric collection pass exceeded the configured min_collection_interval.",
+        "remediation": "Raise `min_collection_interval` or narrow the set of autodiscovered databases.",
+        "docs_anchor": DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval.value,
+    },
+    DatabaseConfigurationError.connection_failure: {
+        "description": "The agent could not open a Postgres connection with the configured credentials.",
+        "remediation": (
+            "Verify host/port are reachable and that the datadog user exists with the right password. "
+            "If using SSL, check that ssl_mode and the ssl_* files are correct."
+        ),
+        "docs_anchor": DatabaseConfigurationError.connection_failure.value,
+    },
+    DatabaseConfigurationError.postgres_version_unsupported: {
+        "description": "The Postgres server version is outside the range the integration supports.",
+        "remediation": "Upgrade Postgres to a supported major version (>= 9.6).",
+        "docs_anchor": DatabaseConfigurationError.postgres_version_unsupported.value,
+    },
+    DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements: {
+        "description": "pg_stat_statements is not present in shared_preload_libraries.",
+        "remediation": (
+            "Set `shared_preload_libraries = 'pg_stat_statements'` in postgresql.conf and restart the server."
+        ),
+        "docs_anchor": DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+    },
+    DatabaseConfigurationError.track_activity_query_size_too_small: {
+        "description": "track_activity_query_size is below the recommended value of 4096 bytes.",
+        "remediation": (
+            "Set `track_activity_query_size = 4096` (or higher) in postgresql.conf and restart the server."
+        ),
+        "docs_anchor": DatabaseConfigurationError.track_activity_query_size_too_small.value,
+    },
+    DatabaseConfigurationError.track_io_timing_disabled: {
+        "description": "track_io_timing is off, so I/O timing columns will not be collected.",
+        "remediation": "Set `track_io_timing = on` in postgresql.conf (or at runtime via ALTER SYSTEM).",
+        "docs_anchor": DatabaseConfigurationError.track_io_timing_disabled.value,
+    },
+    DatabaseConfigurationError.missing_pg_monitor_role: {
+        "description": "The datadog user is not a member of pg_monitor and will miss other users' activity.",
+        "remediation": "Run `GRANT pg_monitor TO <datadog_user>;` as a superuser.",
+        "docs_anchor": DatabaseConfigurationError.missing_pg_monitor_role.value,
+    },
+    DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity: {
+        "description": "pg_stat_activity rows are being masked as `<insufficient privilege>`.",
+        "remediation": "Grant pg_monitor to the datadog user so activity rows are visible across users.",
+        "docs_anchor": DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value,
+    },
+    DatabaseConfigurationError.missing_datadog_schema: {
+        "description": "The `datadog` schema does not exist in the monitored database.",
+        "remediation": (
+            "Create the schema and grant usage: `CREATE SCHEMA datadog;"
+            " GRANT USAGE ON SCHEMA datadog TO <datadog_user>;`"
+        ),
+        "docs_anchor": DatabaseConfigurationError.missing_datadog_schema.value,
+    },
+    DatabaseConfigurationError.missing_schema_usage_grant: {
+        "description": (
+            "The datadog user does not have USAGE on schema `{schema}`; query samples cannot resolve "
+            "objects in this schema."
+        ),
+        "remediation": "Run `GRANT USAGE ON SCHEMA {schema} TO <datadog_user>;` in every monitored database.",
+        "docs_anchor": DatabaseConfigurationError.missing_schema_usage_grant.value,
+    },
+    DatabaseConfigurationError.pg_stat_statements_not_readable: {
+        "description": (
+            "pg_stat_statements is installed but the datadog user cannot SELECT from it — typically a search_path "
+            "or privilege issue."
+        ),
+        "remediation": (
+            "Add the schema that contains pg_stat_statements to the datadog user's search_path, e.g. "
+            "`ALTER ROLE <datadog_user> SET search_path = \"$user\",public,<schema>;`."
+        ),
+        "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_readable.value,
+    },
+    DatabaseConfigurationError.pg_stat_database_not_readable: {
+        "description": (
+            "The datadog user cannot SELECT from pg_stat_database; deadlock, conflict, and connection metrics "
+            "will not be collected."
+        ),
+        "remediation": (
+            "Run `GRANT pg_monitor TO <datadog_user>;` (preferred), or "
+            "`GRANT SELECT ON pg_stat_database TO <datadog_user>;` for a narrower grant."
+        ),
+        "docs_anchor": DatabaseConfigurationError.pg_stat_database_not_readable.value,
+    },
+    DatabaseConfigurationError.config_validation: {
+        "description": "The Postgres integration configuration failed validation.",
+        "remediation": (
+            "Resolve the errors and warnings by editing the Postgres integration configuration for this instance, "
+            "then restart the agent."
+        ),
+        "docs_anchor": DatabaseConfigurationError.config_validation.value,
+    },
+    DatabaseConfigurationError.column_statistics_function_undefined: {
+        "description": "The `datadog.column_statistics` function is required to collect column statistics.",
+        "remediation": (
+            "Create the `datadog.column_statistics` function in every monitored database as documented in the "
+            "Postgres DBM setup guide."
+        ),
+        "docs_anchor": DatabaseConfigurationError.column_statistics_function_undefined.value,
+    },
+    DatabaseConfigurationError.column_statistics_function_insufficient_privilege: {
+        "description": "The datadog user lacks EXECUTE on `datadog.column_statistics`.",
+        "remediation": (
+            "Run `GRANT EXECUTE ON FUNCTION datadog.column_statistics() TO <datadog_user>;` in every monitored "
+            "database."
+        ),
+        "docs_anchor": DatabaseConfigurationError.column_statistics_function_insufficient_privilege.value,
+    },
+}
+
+
+def parse_shared_preload_libraries(value):
+    """Split a `shared_preload_libraries` GUC value into a set of loaded library names.
+
+    Postgres stores this GUC as a comma-separated list; callers need to check membership
+    (`'pg_stat_statements' in ...`) to decide whether the extension is loaded. An empty or
+    missing value yields an empty set.
+    """
+    if not value:
+        return set()
+    return {part.strip() for part in value.split(",") if part.strip()}
+
+
+def build_description(code, **kwargs):
+    """Return the formatted description string for a DatabaseConfigurationError."""
+    meta = DIAGNOSTIC_METADATA.get(code, {})
+    return _format_diagnostic_text(meta.get("description"), **_diagnostic_context(code, **kwargs))
+
+
+def build_remediation(code, **kwargs):
+    """Return the full remediation string (prose + docs URL) for a DatabaseConfigurationError."""
+    meta = DIAGNOSTIC_METADATA.get(code, {})
+    parts = []
+    remediation = _format_diagnostic_text(meta.get("remediation"), **_diagnostic_context(code, **kwargs))
+    if remediation:
+        parts.append(remediation)
+    anchor = meta.get("docs_anchor")
+    if anchor:
+        parts.append("See {url}#{anchor} for details.".format(url=TROUBLESHOOTING_DOC_URL, anchor=anchor))
+    else:
+        parts.append("See {url} for details.".format(url=TROUBLESHOOTING_DOC_URL))
+    return " ".join(parts)
+
+
+def _diagnostic_context(code, **kwargs):
+    context = dict(kwargs)
+    context.setdefault("dbname", "the monitored database")
+    if code == DatabaseConfigurationError.undefined_explain_function:
+        context.setdefault("explain_function", "datadog.explain_statement")
+    return context
+
+
+_diagnostic_fmt = PartialFormatter()
+
+
+def _format_diagnostic_text(template, **kwargs):
+    if not template:
+        return template
+    return _diagnostic_fmt.format(template, **kwargs)
 
 
 class DBExplainError(Enum):
@@ -47,7 +277,7 @@ class DBExplainError(Enum):
     # not able to access the required function
     database_error = 'database_error'
 
-    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    # datatype mismatch occurs when the return type of the EXPLAIN function is not json
     datatype_mismatch = 'datatype_mismatch'
 
     # this could be the result of a missing EXPLAIN function
@@ -91,6 +321,8 @@ class DBExplainError(Enum):
     # PostgreSQL cannot determine the data type of a parameter in the query
     indeterminate_datatype = 'indeterminate_datatype'
 
+    unknown_error = 'unknown_error'
+
 
 class DatabaseHealthCheckError(Exception):
     pass
@@ -129,6 +361,11 @@ def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+def collection_interval_gcd(*intervals: float | int) -> int:
+    """GCD of collection intervals (seconds); outer-loop tick for jobs with multiple sub-schedules."""
+    return math.gcd(*(int(i) for i in intervals))
 
 
 SET_TRIM_PATTERN = re.compile(
@@ -448,19 +685,27 @@ QUERY_PG_REPLICATION_STATS_METRICS = {
     'name': 'replication_stats_metrics',
     'query': """
 SELECT
-    pg_stat_replication.application_name,
-    pg_stat_replication.state,
-    pg_stat_replication.sync_state,
-    pg_stat_replication.client_addr,
-    pg_stat_replication_slot.slot_name,
-    pg_stat_replication_slot.slot_type,
-    GREATEST (0, age(pg_stat_replication.backend_xmin)) as backend_xmin_age,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) as flush_lag,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag
-FROM pg_stat_replication as pg_stat_replication
-LEFT JOIN pg_replication_slots as pg_stat_replication_slot
-ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
+    rep.application_name,
+    rep.state,
+    rep.sync_state,
+    rep.client_addr,
+    slot.slot_name,
+    slot.slot_type,
+    GREATEST (0, age(rep.backend_xmin)) as backend_xmin_age,
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, sent_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, write_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, flush_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, replay_lsn),
+    GREATEST (0, EXTRACT(epoch from rep.write_lag)) as write_lag,
+    GREATEST (0, EXTRACT(epoch from rep.flush_lag)) as flush_lag,
+    GREATEST (0, EXTRACT(epoch from rep.replay_lag)) AS replay_lag
+FROM pg_stat_replication as rep
+LEFT JOIN pg_replication_slots as slot
+ON rep.pid = slot.active_pid;
 """.strip(),
     'columns': [
         {'name': 'wal_app_name', 'type': 'tag'},
@@ -470,6 +715,10 @@ ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
         {'name': 'slot_name', 'type': 'tag_not_null'},
         {'name': 'slot_type', 'type': 'tag_not_null'},
         {'name': 'replication.backend_xmin_age', 'type': 'gauge'},
+        {'name': 'replication.sent_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.write_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.flush_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.replay_lsn_delay', 'type': 'gauge'},
         {'name': 'replication.wal_write_lag', 'type': 'gauge'},
         {'name': 'replication.wal_flush_lag', 'type': 'gauge'},
         {'name': 'replication.wal_replay_lag', 'type': 'gauge'},
@@ -555,6 +804,46 @@ SELECT
 FROM pg_stat_replication_slots AS stat
 JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
 """.strip(),
+}
+
+QUERY_PG_WAIT_EVENT_METRICS = {
+    'name': 'wait_event_stats',
+    'columns': [
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'user', 'type': 'tag_not_null'},
+        {'name': 'wait_event', 'type': 'tag'},
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'activity.wait_event', 'type': 'gauge'},
+    ],
+    'query': """
+SELECT application_name, datname, usename, COALESCE(wait_event, 'NoWaitEvent'), backend_type, COUNT(*)
+FROM pg_stat_activity
+GROUP BY application_name, datname, usename, backend_type, wait_event
+""".strip(),
+}
+
+CONNECTION_METRICS_BY_DB = {
+    'descriptors': [('database_name', 'db')],
+    'metrics': {
+        'connections': ('database_connections', AgentCheck.gauge),
+        'pct_connections': ('percent_database_usage_connections', AgentCheck.gauge),
+    },
+    'relation': False,
+    'query': """
+WITH max_con AS (
+    SELECT setting::float
+    FROM pg_settings
+    WHERE name = 'max_connections'
+)
+SELECT datname,
+    numbackends,
+    SUM(numbackends)/MAX(setting)
+    FROM pg_stat_database, max_con
+WHERE datname IS NOT NULL {ignore_database_filter}
+GROUP BY datname, numbackends
+""",
+    'name': 'connections_by_database',
 }
 
 CONNECTION_METRICS = {
@@ -772,7 +1061,7 @@ EXTRACT (EPOCH FROM now() - min(modification))
     ],
 }
 
-STAT_WAL_METRICS = {
+STAT_WAL_METRICS_LT_18 = {
     'name': 'stat_wal_metrics',
     'query': """
 SELECT wal_records, wal_fpi,
@@ -790,6 +1079,22 @@ SELECT wal_records, wal_fpi,
         {'name': 'wal.sync', 'type': 'monotonic_count'},
         {'name': 'wal.write_time', 'type': 'monotonic_count'},
         {'name': 'wal.sync_time', 'type': 'monotonic_count'},
+    ],
+}
+
+# TODO: Handle missing wal IO metrics for PG18
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'wal.records', 'type': 'monotonic_count'},
+        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
     ],
 }
 
@@ -1064,5 +1369,47 @@ LIMIT 200
         {'name': 'io.reads', 'type': 'monotonic_count'},
         {'name': 'io.write_time', 'type': 'monotonic_count'},
         {'name': 'io.writes', 'type': 'monotonic_count'},
+    ],
+}
+
+# Measures the age (in seconds) of idle-in-transaction sessions holding exclusive relation locks.
+# Limits result set to 10 rows to avoid tag explosion.
+IDLE_TX_LOCK_AGE_METRICS = {
+    'name': 'idle_tx_lock_age_metrics',
+    'query': (
+        """
+SELECT
+    l.pid,
+    a.datname,
+    a.usename             AS session_user,
+    a.application_name,
+    a.client_hostname,
+    l.mode,
+    c.oid::regclass       AS relation,
+    r.rolname             AS relation_owner,
+    EXTRACT(EPOCH FROM (now() - a.xact_start)) AS xact_age
+FROM pg_locks l
+JOIN pg_stat_activity a ON a.pid = l.pid
+JOIN pg_class c         ON c.oid = l.relation
+JOIN pg_roles r         ON r.oid = c.relowner
+WHERE l.locktype = 'relation'
+  AND l.granted = true
+  AND l.mode like '%Exclusive%'
+  AND a.state = 'idle in transaction'
+  AND a.state_change IS NOT NULL
+  AND now() - a.state_change > interval '60 seconds'
+ORDER BY xact_age DESC
+LIMIT {max_rows} ;        """
+    ).strip(),
+    'columns': [
+        {'name': 'pid', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'session_user', 'type': 'tag'},
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'client_hostname', 'type': 'tag_not_null'},
+        {'name': 'lock_mode', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'relation_owner', 'type': 'tag'},
+        {'name': 'locks.idle_in_transaction_age', 'type': 'gauge'},
     ],
 }

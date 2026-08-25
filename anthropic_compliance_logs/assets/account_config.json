@@ -1,0 +1,16 @@
+{
+  "additional_config_fields": [
+    {
+      "key": "api_key",
+      "label": "Admin API key",
+      "editable": true,
+      "required": true,
+      "password": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "anthropic-compliance-logs"
+    }
+  ]
+}

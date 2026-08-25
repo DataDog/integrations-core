@@ -1,0 +1,9 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-files = [
+  "datadog_checks/ibm_spectrum_lsf",
+  "tests/",
+]
+
+[[envs.default.matrix]]
+python = ["3.13"]

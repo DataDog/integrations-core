@@ -1,0 +1,203 @@
+name: Dispatch Release
+
+# Reusable workflow — intended to be called by a release-trigger workflow in an
+# integration repository (integrations-core, integrations-extras, marketplace).
+
+on:
+  workflow_call:
+    inputs:
+      source-repo:
+        description: "Source repository name (e.g. integrations-core, integrations-extras, marketplace)"
+        required: false
+        type: string
+      packages:
+        description: >-
+          Packages to release. Accepts a JSON array (e.g. '["postgres","datadog_checks_base"]'),
+          or omit to auto-detect from tags pointing at the specified ref.
+        required: false
+        type: string
+      source-repo-ref:
+        description: "Commit SHA or ref to build from"
+        required: false
+        type: string
+      source-repo-branch:
+        description: "Branch that contains source-repo-ref, used to determine stable vs pre-release behavior"
+        required: false
+        type: string
+      create-tags:
+        description: "Create and push release tags before dispatching; disable when the legacy pipeline already created tags"
+        required: false
+        type: boolean
+        default: true
+      dry-run:
+        description: >-
+          When true, print what would be released and where without pushing tags
+          or triggering downstream wheel builds.
+        required: false
+        type: boolean
+        default: false
+      ddev-version:
+        description: "ddev version, pinned by default."
+        required: false
+        type: string
+      is-stable-release:
+        description: "'true' for master/X.X.x (blocks pre-releases), 'false' for alpha/beta/rc (blocks stable). Unset defaults to stable behavior."
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  # Default ddev version when callers don't pass `ddev-version`. Tracked by Renovate.
+  # renovate: datasource=pypi depName=ddev
+  DEFAULT_DDEV_VERSION: "17.0.1"
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  prepare:
+    name: Prepare releases and build dispatch batches
+    runs-on: ubuntu-latest
+
+    outputs:
+      has_packages: ${{ steps.prepare.outputs.has_packages }}
+      batches: ${{ steps.release-dispatch.outputs.batches }}
+
+    steps:
+      # Workflow tooling (composite actions + release scripts) always comes from
+      # integrations-core at the workflow's own commit. When called from another
+      # repo we don't have that commit available locally, so we fall back to
+      # master. This is decoupled from inputs.source-repo-ref on purpose so the
+      # release pipeline can build older refs without losing recent tooling.
+      - name: Checkout workflow tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: DataDog/integrations-core
+          ref: ${{ github.repository == 'DataDog/integrations-core' && github.sha || 'master' }}
+          fetch-depth: 1
+          sparse-checkout: .github
+          path: tooling
+
+      # Source tree to detect and validate. When tag creation is enabled, ddev
+      # release tag operates on HEAD, so this must be the requested release ref.
+      - name: Checkout source repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source-repo-ref || github.sha }}
+          fetch-depth: 0 # ddev needs full tag history
+          path: source
+
+      - name: Verify source ref is on release branch
+        if: inputs.source-repo-branch != ''
+        working-directory: source
+        env:
+          SOURCE_REF: ${{ inputs.source-repo-ref || github.sha }}
+          SOURCE_BRANCH: ${{ inputs.source-repo-branch }}
+        run: |
+          branch="${SOURCE_BRANCH#refs/heads/}"
+          git fetch --no-tags origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"
+          if ! git merge-base --is-ancestor HEAD "refs/remotes/origin/${branch}"; then
+            echo "::error::source-repo-ref '${SOURCE_REF}' is not contained in source-repo-branch '${SOURCE_BRANCH}'"
+            exit 1
+          fi
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: Install ddev
+        uses: ./tooling/.github/actions/setup-ddev
+        with:
+          install-mode: pypi
+          ddev-version: "==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
+
+      - name: Configure ddev
+        working-directory: source
+        env:
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+        run: |
+          REPO_SHORT="${SOURCE_REPO#integrations-}"
+          ddev config set upgrade_check false
+          ddev config set repos.${REPO_SHORT} "$PWD"
+          ddev config set repo ${REPO_SHORT}
+
+      - name: Prepare dispatch
+        id: prepare
+        working-directory: source
+        env:
+          CREATE_TAGS: ${{ inputs.create-tags }}
+          DRY_RUN: ${{ inputs.dry-run }}
+          SELECTED_PACKAGES: ${{ inputs.packages }}
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+          REF: ${{ inputs.source-repo-ref || github.sha }}
+          IS_STABLE_RELEASE: ${{ inputs.is-stable-release }}
+        run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_prepare.py"
+
+      # Only mint a write token when validated local tags need to be pushed.
+      # Dry runs and no-op reruns therefore do not consume App token quota.
+      - name: Get source tag token via dd-octo-sts
+        if: inputs.create-tags && steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        id: source-octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        with:
+          scope: DataDog/${{ inputs.source-repo || 'integrations-core' }}
+          policy: self.release.tag-push
+
+      - name: Configure source tag credentials
+        if: inputs.create-tags && steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source-repo-ref || github.sha }}
+          fetch-depth: 1 # An all-tags fetch would prune locally prepared tags
+          fetch-tags: false
+          path: source
+          token: ${{ steps.source-octo-sts.outputs.token }}
+          persist-credentials: true
+          clean: false # Preserve the local tags created during preparation
+
+      - name: Push release tags
+        if: inputs.create-tags && steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        working-directory: source
+        env:
+          NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
+        run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_push_tags.py"
+
+      - name: Build dispatch batches
+        id: release-dispatch
+        if: steps.prepare.outputs.has_packages == 'true'
+        working-directory: source
+        env:
+          PACKAGES: ${{ steps.prepare.outputs.packages }}
+          NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+          REF: ${{ inputs.source-repo-ref || github.sha }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_dispatch.py"
+
+  dispatch:
+    name: Dispatch wheel builds (batch ${{ strategy.job-index }})
+    needs: prepare
+    if: needs.prepare.outputs.has_packages == 'true' && !inputs.dry-run
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        payload: ${{ fromJson(needs.prepare.outputs.batches) }}
+
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        id: octo-sts
+        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
+        with:
+          scope: DataDog/agent-integration-wheels-release
+          policy: ${{ inputs.source-repo || 'integrations-core' }}.dispatch-wheel-builds
+
+      - name: Dispatch release
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
+        with:
+          token: ${{ steps.octo-sts.outputs.token }}
+          repository: DataDog/agent-integration-wheels-release
+          event-type: build-wheels
+          client-payload: ${{ toJson(matrix.payload) }}

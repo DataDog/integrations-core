@@ -26,7 +26,6 @@ def filter_list(items, include_patterns, exclude_patterns):
     if not include_patterns:
         return dict.fromkeys((item for item in items if item not in excluded_items), None)
     else:
-
         filtered_items = {}
         for include_pattern in include_patterns:
             filtered_items.update(

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "05a49675-62bb-4fa7-be6a-a03e13213640",
   "app_id": "mesos",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -1,0 +1,130 @@
+peer:
+-     primary nid: 172.31.16.218@tcp
+      Multi-Rail: true
+      peer state: 1048849
+      peer ni:
+      -     nid: 172.31.16.218@tcp
+            state: NA
+            max_ni_tx_credits: 8
+            available_tx_credits: 8
+            min_tx_credits: 6
+            tx_q_num_of_buf: 0
+            available_rtr_credits: 8
+            min_rtr_credits: 8
+            refcount: 1
+            statistics:
+                  send_count: 192919
+                  recv_count: 192919
+                  drop_count: 0
+            sent_stats:
+                  put: 192917
+                  get: 2
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            received_stats:
+                  put: 192916
+                  get: 1
+                  reply: 1
+                  ack: 1
+                  hello: 0
+            dropped_stats:
+                  put: 0
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            health stats:
+                  health value: 1000
+                  dropped: 0
+                  timeout: 0
+                  error: 0
+                  network timeout: 4
+                  ping_count: 0
+                  next_ping: 0
+-     primary nid: 172.31.38.176@tcp
+      Multi-Rail: true
+      peer state: 273
+      peer ni:
+      -     nid: 172.31.38.176@tcp
+            state: NA
+            max_ni_tx_credits: 8
+            available_tx_credits: 8
+            min_tx_credits: 5
+            tx_q_num_of_buf: 0
+            available_rtr_credits: 8
+            min_rtr_credits: 8
+            refcount: 1
+            statistics:
+                  send_count: 293
+                  recv_count: 293
+                  drop_count: 0
+            sent_stats:
+                  put: 290
+                  get: 3
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            received_stats:
+                  put: 289
+                  get: 1
+                  reply: 2
+                  ack: 1
+                  hello: 0
+            dropped_stats:
+                  put: 0
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            health stats:
+                  health value: 1000
+                  dropped: 0
+                  timeout: 0
+                  error: 0
+                  network timeout: 0
+                  ping_count: 0
+                  next_ping: 0
+-     primary nid: 10.0.0.123@tcp
+      Multi-Rail: false
+      peer state: 0
+      peer ni:
+      -     nid: 10.0.0.123@tcp
+            state: NA
+            max_ni_tx_credits: 8
+            available_tx_credits: 8
+            min_tx_credits: 7
+            tx_q_num_of_buf: 0
+            available_rtr_credits: 8
+            min_rtr_credits: 8
+            refcount: 1
+            statistics:
+                  send_count: 0
+                  recv_count: 0
+                  drop_count: 0
+            sent_stats:
+                  put: 0
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            received_stats:
+                  put: 0
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            dropped_stats:
+                  put: 0
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            health stats:
+                  health value: 1000
+                  dropped: 0
+                  timeout: 0
+                  error: 0
+                  network timeout: 3
+                  ping_count: 0
+                  next_ping: 0

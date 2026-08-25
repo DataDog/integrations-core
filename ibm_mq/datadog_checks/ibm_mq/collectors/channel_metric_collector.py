@@ -5,9 +5,9 @@ from typing import Callable, Dict, List  # noqa: F401
 
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
-
-from .. import metrics
-from ..config import IBMMQConfig  # noqa: F401
+from datadog_checks.ibm_mq import metrics
+from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
+from datadog_checks.ibm_mq.utils import decode_mq_description, normalize_desc_tag
 
 try:
     import pymqi
@@ -51,6 +51,15 @@ class ChannelMetricCollector(object):
         self.service_check = service_check
         self.gauge = gauge
 
+    def _add_channel_description_tag(self, channel_info, channel_tags):
+        # Add channel description as a tag, normalizing if configured.
+        channel_desc = decode_mq_description(channel_info[pymqi.CMQCFC.MQCACH_DESC], self.log).strip()
+        if channel_desc:
+            if self.config.normalize_description_tags:
+                channel_desc = normalize_desc_tag(channel_desc)
+            if channel_desc:
+                channel_tags.append("channel_desc:{}".format(channel_desc))
+
     def get_pcf_channel_metrics(self, queue_manager):
         discovered_channels = self._discover_channels(queue_manager)
         if discovered_channels:
@@ -61,6 +70,9 @@ class ChannelMetricCollector(object):
             for channel_info in discovered_channels:
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
+                if self.config.add_description_tags and pymqi.CMQCFC.MQCACH_DESC in channel_info:
+                    self._add_channel_description_tag(channel_info, channel_tags)
+
                 self._submit_metrics_from_properties(
                     channel_info, channel_name, metrics.channel_metrics(), channel_tags
                 )
@@ -147,11 +159,15 @@ class ChannelMetricCollector(object):
                 )
                 self.log.warning("Error getting CHANNEL status for channel %s: %s", search_channel_name, e)
         else:
+            # Count active connections per channel
+            channel_active_counts = {}
             for channel_info in response:
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
+                if self.config.add_description_tags and pymqi.CMQCFC.MQCACH_DESC in channel_info:
+                    self._add_channel_description_tag(channel_info, channel_tags)
 
                 self._submit_metrics_from_properties(
                     channel_info, channel_name, metrics.channel_status_metrics(), channel_tags
@@ -160,6 +176,18 @@ class ChannelMetricCollector(object):
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
                 self._submit_status_check(channel_name, channel_status, channel_tags)
+
+                # Count as active connection if status is MQCHS_RUNNING
+                if channel_status == pymqi.CMQCFC.MQCHS_RUNNING:
+                    channel_active_counts[channel_name] = channel_active_counts.get(channel_name, 0) + 1
+            # Submit the total active connections for each channel
+            for channel_name, active_count in channel_active_counts.items():
+                self.gauge(
+                    '{}.channel.connections_active'.format(metrics.METRIC_PREFIX),
+                    active_count,
+                    tags=tags + ["channel:{}".format(channel_name)],
+                    hostname=self.config.hostname,
+                )
         finally:
             if pcf is not None:
                 pcf.disconnect()
@@ -171,6 +199,19 @@ class ChannelMetricCollector(object):
             if pymqi_type not in channel_info:
                 self.log.debug("metric '%s' not found in channel: %s", metric_name, channel_name)
                 continue
+
+            # Special handling for connection metric
+            if metric_name == 'conn_status':
+                if not self.config.collect_connection_metrics:
+                    continue
+                connection_name = to_string(channel_info[pymqi_type]).strip()
+                if not connection_name:
+                    continue
+                connection_tags = tags + ["connection:{}".format(connection_name)]
+                self.gauge(metric_full_name, 1, tags=connection_tags, hostname=self.config.hostname)
+                continue
+
+            # Regular metric handling
             metric_value = int(channel_info[pymqi_type])
             self.gauge(metric_full_name, metric_value, tags=tags, hostname=self.config.hostname)
 

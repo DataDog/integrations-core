@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import click
 
-from ...console import CONTEXT_SETTINGS, echo_info
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_info
 
 # https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-performance-counter-types
 # https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.performancecountertype

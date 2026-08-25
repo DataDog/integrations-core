@@ -1,0 +1,11 @@
+provides:
+  - id: supabase-cloud-metrics
+    always_on: false
+    granular: false
+    data_type: metrics
+    direction: inbound
+  - id: supabase-cloud-logs
+    always_on: false
+    granular: false
+    data_type: logs
+    direction: inbound

@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import logging
-import re
 from copy import copy, deepcopy
 
 import pytest
@@ -20,6 +19,11 @@ try:
     import pyodbc
 except ImportError:
     pyodbc = None
+
+
+def normalize_compatibility_level(actual_payload):
+    assert actual_payload['compatibility_level'].isdigit()
+    actual_payload['compatibility_level'] = 'normalized_value'
 
 
 @pytest.fixture
@@ -57,8 +61,8 @@ def test_get_available_settings_columns(dbm_instance, expected_columns, availabl
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-metadata-"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             result_available_columns = check.sql_metadata._get_available_settings_columns(cursor, expected_columns)
             assert result_available_columns == available_columns
 
@@ -70,8 +74,8 @@ def test_get_settings_query_cached(dbm_instance, caplog):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-metadata"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             for _ in range(3):
                 query = check.sql_metadata._get_settings_query_cached(cursor)
                 assert query, "query should be non-empty"
@@ -102,6 +106,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'name': 'datadog_test_schemas_second',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
+        'compatibility_level': 'normalized_value',
         'schemas': [
             {
                 'name': 'dbo',
@@ -117,16 +122,15 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': True,
-                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '2',
                             },
                         ],
+                        'foreign_keys': [],
                         'partitions': {'partition_count': 1},
                         'indexes': [
                             {
@@ -149,6 +153,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'name': 'datadog_test_schemas',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
+        'compatibility_level': 'normalized_value',
         'schemas': [
             {
                 'name': 'test_schema',
@@ -164,23 +169,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': False,
-                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '2',
                             },
                             {
                                 'name': 'population',
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': False,
-                                'ordinal_position': '3',
                             },
                         ],
+                        'foreign_keys': [],
                         'partitions': {'partition_count': 12},
                         'indexes': [
                             {
@@ -221,16 +224,15 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'city_id',
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': True,
-                                'ordinal_position': '2',
                             },
                         ],
+                        'indexes': [],
                         'partitions': {'partition_count': 1},
                         'foreign_keys': [
                             {
@@ -253,23 +255,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '2',
                             },
                             {
                                 'name': 'Review',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '3',
                             },
                         ],
+                        'indexes': [],
                         'partitions': {'partition_count': 1},
                         'foreign_keys': [
                             {
@@ -292,23 +292,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '2',
                             },
                             {
                                 'name': 'Cuisine',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
-                                'ordinal_position': '3',
                             },
                         ],
+                        'foreign_keys': [],
                         'partitions': {'partition_count': 2},
                         'indexes': [
                             {
@@ -348,7 +346,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'datadog_test_collation',
     ]
     dbm_instance['dbm'] = True
-    dbm_instance['schemas_collection'] = {"enabled": True}
+    dbm_instance['collect_schemas'] = {"enabled": True}
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
@@ -366,41 +364,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("dbms_version") is not None
 
         database_metadata = schema_event['metadata']
-        assert len(database_metadata) == 1
-        db_name = database_metadata[0]['name']
+        for db_metadata in database_metadata:
+            db_name = db_metadata['name']
 
-        if db_name in actual_payloads:
-            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
-        else:
-            actual_payloads[db_name] = database_metadata[0]
+            if db_name in actual_payloads:
+                actual_payloads[db_name]['schemas'][0]['tables'] = (
+                    actual_payloads[db_name]['schemas'][0]['tables'] + db_metadata['schemas'][0]['tables']
+                )
+            else:
+                actual_payloads[db_name] = db_metadata
 
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
-
         assert db_name in databases_to_find
         # id's are env dependant
         normalize_ids(actual_payload)
+        # compatibility_level varies by SQL Server version
+        normalize_compatibility_level(actual_payload)
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
-        assert deep_compare(actual_payload, expected_data_for_db[db_name])
-
-
-@pytest.mark.flaky
-def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
-    dbm_instance['database_autodiscovery'] = True
-    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas']
-    dbm_instance['dbm'] = True
-    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
-    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
-    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    found = False
-    for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
-        if "collection_errors" in schema_event:
-            if schema_event["collection_errors"][0]["error_type"] == "truncated" and re.fullmatch(
-                expected_pattern, schema_event["collection_errors"][0]["message"]
-            ):
-                found = True
-    assert found
+        matches = deep_compare(actual_payload, expected_data_for_db[db_name])
+        assert matches

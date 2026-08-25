@@ -20,6 +20,36 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(
+    [
+        'kafka_connect_tls_ca_cert',
+        'kafka_connect_tls_cert',
+        'kafka_connect_tls_key',
+        'sasl_kerberos_keytab',
+        'schema_registry_tls_ca_cert',
+        'schema_registry_tls_cert',
+        'schema_registry_tls_key',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_crlfile',
+        'tls_private_key',
+    ]
+)
+
+
+class KafkaConnectOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    custom_headers: Optional[MappingProxyType[str, str]] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -34,8 +64,26 @@ class SaslOauthTokenProvider(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aws_region: Optional[str] = None
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
+    extensions: Optional[str] = None
+    method: Optional[str] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
+
+
+class SchemaRegistryOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    custom_headers: Optional[MappingProxyType[str, str]] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
     url: Optional[str] = None
 
 
@@ -53,8 +101,20 @@ class InstanceConfig(BaseModel):
     data_streams_enabled: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_cluster_monitoring: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     kafka_client_api_version: Optional[str] = None
+    kafka_cluster_id_override: Optional[str] = None
+    kafka_configs_refresh_interval: Optional[int] = None
+    kafka_connect_oauth_token_provider: Optional[KafkaConnectOauthTokenProvider] = None
+    kafka_connect_password: Optional[str] = None
     kafka_connect_str: Union[str, tuple[str, ...]]
+    kafka_connect_tls_ca_cert: Optional[str] = None
+    kafka_connect_tls_cert: Optional[str] = None
+    kafka_connect_tls_key: Optional[str] = None
+    kafka_connect_tls_verify: Optional[bool] = None
+    kafka_connect_url: Optional[Union[str, tuple[str, ...]]] = None
+    kafka_connect_username: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     monitor_all_broker_highwatermarks: Optional[bool] = None
@@ -67,6 +127,14 @@ class InstanceConfig(BaseModel):
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
+    schema_registry_oauth_token_provider: Optional[SchemaRegistryOauthTokenProvider] = None
+    schema_registry_password: Optional[str] = None
+    schema_registry_tls_ca_cert: Optional[str] = None
+    schema_registry_tls_cert: Optional[str] = None
+    schema_registry_tls_key: Optional[str] = None
+    schema_registry_tls_verify: Optional[bool] = None
+    schema_registry_url: Optional[str] = None
+    schema_registry_username: Optional[str] = None
     security_protocol: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
@@ -89,6 +157,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

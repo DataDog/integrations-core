@@ -91,7 +91,6 @@ class SquidCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
 
     def check(self, instance):
-
         name, host, port, custom_tags = self.parse_instance(instance)
         tags = ["name:%s" % name]
         # Get the squid counters values

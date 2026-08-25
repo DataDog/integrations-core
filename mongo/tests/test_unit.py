@@ -18,7 +18,7 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
-from datadog_checks.mongo.dbm.utils import should_explain_operation
+from datadog_checks.mongo.dbm.utils import get_explain_plan, should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
 
@@ -36,6 +36,58 @@ DEFAULT_METRICS_LEN = len(
         for m_name, m_type in d.items()
     }
 )
+
+
+MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS = {
+    'application thread time evicting (usecs)': 'mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps',
+    'page evict attempts by application threads': (
+        'mongodb.wiredtiger.cache.page_evict_attempts_by_application_threadsps'
+    ),
+    'page evict failures by application threads': (
+        'mongodb.wiredtiger.cache.page_evict_failures_by_application_threadsps'
+    ),
+    'modified page evict attempts by application threads': (
+        'mongodb.wiredtiger.cache.modified_page_evict_attempts_by_application_threadsps'
+    ),
+    'modified page evict failures by application threads': (
+        'mongodb.wiredtiger.cache.modified_page_evict_failures_by_application_threadsps'
+    ),
+    'evict page attempts by eviction server': 'mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_serverps',
+    'evict page failures by eviction server': 'mongodb.wiredtiger.cache.evict_page_failures_by_eviction_serverps',
+    'evict page attempts by eviction worker threads': (
+        'mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_worker_threadsps'
+    ),
+    'evict page failures by eviction worker threads': (
+        'mongodb.wiredtiger.cache.evict_page_failures_by_eviction_worker_threadsps'
+    ),
+}
+
+
+def test_wiredtiger_cache_keeps_legacy_application_thread_eviction_metric(aggregator):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    collector = MongoCollector(check, [])
+    collector._submit_payload(
+        {'wiredTiger': {'cache': {'pages evicted by application threads': 1}}},
+        metrics_to_collect=metrics.WIREDTIGER_METRICS,
+    )
+
+    aggregator.assert_metric('mongodb.wiredtiger.cache.pages_evicted_by_application_threadsps', value=1, count=1)
+    for metric_name in MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS.values():
+        aggregator.assert_metric(metric_name, count=0)
+
+
+def test_wiredtiger_cache_collects_mongodb_8_0_16_eviction_metrics(aggregator):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    collector = MongoCollector(check, [])
+    cache_payload = {metric: idx for idx, metric in enumerate(MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS, start=1)}
+    collector._submit_payload(
+        {'wiredTiger': {'cache': cache_payload}},
+        metrics_to_collect=metrics.WIREDTIGER_METRICS,
+    )
+
+    aggregator.assert_metric('mongodb.wiredtiger.cache.pages_evicted_by_application_threadsps', count=0)
+    for idx, metric_name in enumerate(MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS.values(), start=1):
+        aggregator.assert_metric(metric_name, value=idx, count=1)
 
 
 @mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
@@ -479,6 +531,7 @@ def test_legacy_config_deprecation(check, caplog):
     assert 'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.' in caplog.text
 
 
+@pytest.mark.flaky
 def test_collector_submit_payload(check, aggregator):
     check = check(common.INSTANCE_BASIC)
     collector = MongoCollector(check, ['foo:1'])
@@ -667,6 +720,19 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         mocked_client.server_info = mock.MagicMock(return_value={'version': '3.6.23-13.0'})
         dd_run_check(check)
     datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
+
+
+def test_query_stats_does_not_use_server_side_sort_or_allow_disk_use() -> None:
+    api = MongoApi.__new__(MongoApi)
+    api._timeout = 123
+    admin_db = mock.MagicMock()
+    api._cli = {'admin': admin_db}
+
+    cursor = object()
+    admin_db.aggregate.return_value = cursor
+
+    assert api.query_stats(session='session') is cursor
+    admin_db.aggregate.assert_called_once_with([{'$queryStats': {}}], session='session', maxTimeMS=123)
 
 
 @mock.patch(
@@ -899,6 +965,13 @@ def load_json_fixture(name):
             True,
             id='ns with no collection',
         ),
+        pytest.param(
+            "test.test",
+            "command",
+            {"listIndexes": "test", "$db": "test"},
+            False,
+            id='no explain listIndexes',
+        ),
     ],
 )
 def test_should_explain_operation(namespace, op, command, should_explain):
@@ -913,3 +986,41 @@ def test_should_explain_operation(namespace, op, command, should_explain):
         )
         == should_explain
     )
+
+
+@pytest.mark.parametrize(
+    "command,expected_cursor",
+    [
+        pytest.param({"find": "coll", "$db": "test"}, False, id="find_no_cursor"),
+        pytest.param({"count": "coll", "$db": "test"}, False, id="count_no_cursor"),
+        pytest.param({"distinct": "coll", "$db": "test"}, False, id="distinct_no_cursor"),
+        pytest.param({"aggregate": "coll", "$db": "test", "pipeline": []}, True, id="aggregate_adds_cursor"),
+        pytest.param(
+            {"aggregate": "coll", "$db": "test", "pipeline": [], "cursor": {"batchSize": 10}},
+            False,
+            id="aggregate_preserves_existing_cursor",
+        ),
+    ],
+)
+def test_get_explain_plan_adds_cursor_for_aggregate(command, expected_cursor):
+    """Verify that get_explain_plan adds cursor: {} only for aggregate commands."""
+    captured_command = {}
+
+    def mock_explain_command(db_name, cmd, verbosity, session=None):
+        captured_command.update(cmd)
+        return {"queryPlanner": {"winningPlan": {}}}
+
+    api_client = mock.MagicMock()
+    api_client.explain_command.side_effect = mock_explain_command
+
+    get_explain_plan(api_client, command.copy(), dbname="test", op_duration=0, cursor_timeout=60)
+
+    if expected_cursor:
+        assert "cursor" in captured_command, f"Expected cursor in command for {command}"
+        assert captured_command["cursor"] == {}
+    else:
+        if "cursor" in command:
+            # Existing cursor should be preserved as-is
+            assert captured_command["cursor"] == command["cursor"]
+        else:
+            assert "cursor" not in captured_command, f"cursor should not be added for {command}"

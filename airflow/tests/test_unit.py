@@ -31,11 +31,11 @@ def test_service_checks_healthy_exp(aggregator, json_resp, expected_healthy_stat
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value=None):
-
-        with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        mock_session = mock.MagicMock()
+        with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=mock_session):
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [json_resp]
-            req.get.return_value = mock_resp
+            mock_session.get.return_value = mock_resp
 
             check.check(None)
 
@@ -60,14 +60,14 @@ def test_service_checks_healthy_stable(
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
-
-        with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        mock_session = mock.MagicMock()
+        with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=mock_session):
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [
                 {'metadatabase': {'status': metadb_status}, 'scheduler': {'status': scheduler_status}},
                 {'status': 'OK'},
             ]
-            req.get.return_value = mock_resp
+            mock_session.get.return_value = mock_resp
 
             check.check(None)
 
@@ -82,7 +82,8 @@ def test_dag_total_tasks(aggregator, task_instance):
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
-        with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        req = mock.MagicMock()
+        with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [
                 {'metadatabase': {'status': 'healthy'}, 'scheduler': {'status': 'healthy'}},
@@ -100,8 +101,8 @@ def test_dag_task_ongoing_duration(aggregator, task_instance):
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
-
-        with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        req = mock.MagicMock()
+        with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [
                 {'metadatabase': {'status': 'healthy'}, 'scheduler': {'status': 'healthy'}},
@@ -145,7 +146,8 @@ def test_config_collect_ongoing_duration(collect_ongoing_duration, should_call_m
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
-        with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        req = mock.MagicMock()
+        with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [
                 {'metadatabase': {'status': 'healthy'}, 'scheduler': {'status': 'healthy'}},

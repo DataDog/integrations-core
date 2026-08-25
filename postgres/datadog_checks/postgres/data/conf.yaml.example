@@ -31,21 +31,22 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
-    ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
-    ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
+  -
+    ## @param host - string - optional - default: localhost
+    ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
+    ## e.g. `/var/run/postgresql`.
     #
-  - host: localhost
+    # host: <HOST>
 
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
-    # port: 5432
+    # port: <PORT>
 
-    ## @param username - string - required
+    ## @param username - string - optional - default: datadog
     ## The Datadog username created to connect to PostgreSQL.
     #
-    username: datadog
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.
@@ -53,133 +54,24 @@ instances:
     # password: <PASSWORD>
 
     ## @param dbname - string - optional - default: postgres
-    ## The name of the PostgresSQL database to monitor.
+    ## The name of the PostgreSQL database to monitor.
     ## Note: If omitted, the default system Postgres database is queried.
     #
     # dbname: <DBNAME>
 
-    ## @param reported_hostname - string - optional
-    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
-    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
     #
-    # reported_hostname: <REPORTED_HOSTNAME>
+    # dbm: false
 
-    ## @param exclude_hostname - boolean - optional - default: false
-    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
-    #
-    # exclude_hostname: false
-
-    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
-    ## which respects the `reported_hostname` option.
-    ##
-    ## This value will be used as-is for the display name of the instance but will be normalized
-    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
-    ## for more details on Datadog tag normalization.
-    #
-    # database_identifier:
-
-        ## @param template - string - optional - default: $resolved_hostname
-        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
-        ## You can use the following variables, prefixed by `$` in the template:
-        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
-        ## - host: The provided host of the instance.
-        ## - port: The port number of the instance.
-        ## In addition, you can use any key from the `tags` section of the configuration.
-        #
-        # template: $env-$resolved_hostname:$port
-
-    ## @param dbstrict - boolean - optional - default: false
-    ## Whether to restrict the scope of the check to just the database in question.
-    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
-    #
-    # dbstrict: false
-
-    ## @param ignore_databases - list of strings - optional
-    ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
-    ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
-    ## set collect_default_database to false in addition to adding it to this array.
-    ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
-    #
-    # ignore_databases:
-    #   - template0
-    #   - template1
-    #   - rdsadmin
-    #   - azure_maintenance
-    #   - cloudsqladmin
-    #   - alloydbadmin
-    #   - alloydbmetadata
-
-    ## @param ignore_schemas_owned_by - list of strings - optional
-    ## A list of database users which own schemas to ignore.
-    ## No metrics or statement samples will be collected for these schemas.
-    ## Each value can be a plain string or a Postgres pattern.
-    #
-    # ignore_schemas_owned_by:
-    #   - rds_superuser
-    #   - rdsadmin
-    #   - user123
-    #   - dev_%_owner
-
-    ## @param ssl - string - optional - default: allow
-    ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
-    ## is negotiated with the server. There are six modes:
-    ## - `disable`: Only tries a non-SSL connection.
-    ## - `allow`: First tries a non-SSL connection; if if fails, tries an SSL connection.
-    ## - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
-    ## - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
-    ##              the same way as if verify-ca was specified.
-    ## - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
-    ##                trusted certificate authority (CA).
-    ## - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
-    ##                  trusted CA and that the requested server host name matches the one in the certificate.
-    ##
-    ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl: allow
-
-    ## @param ssl_root_cert - string - optional
-    ## The path to the ssl root certificate.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_root_cert: <SSL_ROOT_CERT>
-
-    ## @param ssl_cert - string - optional
-    ## The path to the ssl certificate.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_cert: <SSL_CERT>
-
-    ## @param ssl_key - string - optional
-    ## The path to the ssl client key.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_key: <SSL_KEY>
-
-    ## @param ssl_password - string - optional
-    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
-    ## in encrypted form on disk.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_password: <SSL_PASSWORD>
-
-    ## @param query_timeout - integer - optional - default: 5000
-    ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
-    ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
-    ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
-    ## Cancelled queries won't log any metrics.
-    #
-    # query_timeout: 5000
-
-    ## @param relations - (list of string or mapping) - optional
-    ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
+    ## @param relations - (list of string or mapping) - optional - default: []
+    ## The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
     ## If enabled, `dbname` should be specified to collect database-specific relations metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
     ## from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
-    ## Each relation generates many metrics (10 + 10 per index).
+    ## Each relation generates many metrics (dozens per relation, plus several more for each index).
+    ## Be mindful of the metric volume this can produce: on large instances, broad `relation_regex`
+    ## patterns that match many relations can emit metrics in the thousands.
     ##
     ## By default all schemas are included. To track relations from specific schemas only,
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
@@ -211,33 +103,170 @@ instances:
     #     - r
     #     - p
 
-    ## @param max_relations - integer - optional - default: 300
-    ## Determines the maximum number of relations to fetch.
-    #
-    # max_relations: 300
-
-    ## @param collect_function_metrics - boolean - optional - default: false
-    ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
-    #
-    # collect_function_metrics: false
-
-    ## @param collect_count_metrics - boolean - optional - default: true
-    ## Collect count of user tables from pg_class.
-    #
-    # collect_count_metrics: true
-
-    ## @param collect_checksum_metrics - boolean - optional - default: false
-    ## Collect counts of database failed checksums. Only supported on versions >= 12.
-    #
-    # collect_checksum_metrics: false
-
     ## @param collect_activity_metrics - boolean - optional - default: false
     ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
     ## has sufficient privileges to read from pg_stat_activity before enabling this option.
     #
     # collect_activity_metrics: false
 
-    ## @param activity_metrics_excluded_aggregations - list of strings - optional
+    ## @param collect_function_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
+    #
+    # collect_function_metrics: false
+
+    ## @param collect_database_size_metrics - boolean - optional - default: true
+    ## Collect database size metrics.
+    #
+    # collect_database_size_metrics: true
+
+    ## @param collect_bloat_metrics - boolean - optional - default: false
+    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    #
+    collect_bloat_metrics: false
+
+    ## @param collect_count_metrics - boolean - optional - default: true
+    ## Collect count of user tables from pg_class.
+    #
+    # collect_count_metrics: true
+
+    ## @param max_relations - integer - optional - default: 300
+    ## Determines the maximum number of relations to fetch.
+    #
+    # max_relations: 300
+
+    ## @param ssl - string - optional - default: allow
+    ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
+    ## is negotiated with the server.
+    ##
+    ## There are six modes:
+    ## - `disable`: Only tries a non-SSL connection.
+    ## - `allow`: First tries a non-SSL connection; if it fails, tries an SSL connection.
+    ## - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
+    ## - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
+    ##              the same way as if verify-ca was specified.
+    ## - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
+    ##                trusted certificate authority (CA).
+    ## - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
+    ##                  trusted CA and that the requested server host name matches the one in the certificate.
+    ##
+    ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl: allow
+
+    ## @param collect_default_database - boolean - optional - default: true
+    ## Include statistics from the default database 'postgres' in the check metrics.
+    #
+    # collect_default_database: true
+
+    ## @param query_timeout - integer - optional - default: 5000
+    ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+    ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
+    ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
+    ## Cancelled queries won't log any metrics.
+    #
+    # query_timeout: 5000
+
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
+    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+    ## A list of databases to ignore. No metrics or statement samples will be collected for these databases.
+    ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
+    ## set collect_default_database to false in addition to adding it to this array.
+    ## This setting does not apply to schema collection, column statistics, or autodiscovery; instead use
+    ## the specific include/exclude settings nested under those configurations.
+    ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+    #
+    # ignore_databases:
+    #   - template0
+    #   - template1
+    #   - rdsadmin
+    #   - azure_maintenance
+    #   - cloudsqladmin
+    #   - alloydbadmin
+    #   - alloydbmetadata
+
+    ## @param exclude_hostname - boolean - optional - default: false
+    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+    #
+    # exclude_hostname: false
+
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
+    ## @param dbstrict - boolean - optional - default: false
+    ## Whether to restrict the scope of the check to just the database in question.
+    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
+    #
+    # dbstrict: false
+
+    ## @param ignore_schemas_owned_by - list of strings - optional - default: ['rds_superuser', 'rdsadmin']
+    ## A list of database users which own schemas to ignore.
+    ## No metrics will be collected for these schemas.
+    ## Each value can be a plain string or a Postgres pattern.
+    #
+    # ignore_schemas_owned_by:
+    #   - rds_superuser
+    #   - rdsadmin
+    #   - user123
+    #   - dev_%_owner
+
+    ## @param ssl_root_cert - string - optional
+    ## The path to the ssl root certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_root_cert: <SSL_ROOT_CERT>
+
+    ## @param ssl_cert - string - optional
+    ## The path to the ssl certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_cert: <SSL_CERT>
+
+    ## @param ssl_key - string - optional
+    ## The path to the ssl client key.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_key: <SSL_KEY>
+
+    ## @param ssl_password - string - optional
+    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+    ## in encrypted form on disk.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_password: <SSL_PASSWORD>
+
+    ## @param collect_checksum_metrics - boolean - optional - default: false
+    ## Collect counts of database failed checksums. Only supported on versions >= 12.
+    #
+    # collect_checksum_metrics: false
+
+    ## @param activity_metrics_excluded_aggregations - list of strings - optional - default: []
     ## A list of columns to remove from the pg_stat_activity aggregation.
     ## By default, datname, usename and application_name will be used.
     ## If applications with different application_name are creating a lot of short-lived queries,
@@ -253,117 +282,27 @@ instances:
     #
     # collect_buffercache_metrics: false
 
-    ## @param collect_database_size_metrics - boolean - optional - default: true
-    ## Collect database size metrics.
-    #
-    # collect_database_size_metrics: true
-
-    ## @param collect_default_database - boolean - optional - default: true
-    ## Include statistics from the default database 'postgres' in the check metrics.
-    #
-    # collect_default_database: true
-
-    ## @param collect_bloat_metrics - boolean - optional - default: false
-    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
-    #
-    collect_bloat_metrics: false
-
-    ## @param collect_wal_metrics - boolean - optional - default: false
+    ## @param collect_wal_metrics - boolean - optional
     ## Collect metrics about WAL file age.
-    ## NOTE:
-    ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
-    ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
+    ##
+    ## When unset, this defaults to `true` for Postgres 10+ (uses `pg_ls_waldir` via SQL) and `false` for
+    ## Postgres 9.6 and below (requires local filesystem access to the WAL directory).
+    ##
+    ## Set to `true` explicitly for Postgres 9.6 and below only if the Agent runs on the same host as the
+    ## database and has read access to the WAL directory. You must also configure `data_directory`.
     #
-    # collect_wal_metrics: false
+    # collect_wal_metrics: true
 
     ## @param data_directory - string - optional - default: /usr/local/pgsql/data
-    ## The data directory of your postgres installation
-    ## Required when collecting WAL metrics.
+    ## The data directory of your postgres installation.
+    ## Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
     #
     # data_directory: /usr/local/pgsql/data
 
     ## @param table_count_limit - integer - optional - default: 200
     ## The maximum number of tables to collect metrics from.
     #
-    # table_count_limit: 200
-
-    ## @param only_custom_queries - boolean - optional - default: false
-    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
-    ## Only metrics specified in `custom_queries` will be collected.
-    #
-    # only_custom_queries: false
-
-    ## @param use_global_custom_queries - string - optional - default: true
-    ## How `global_custom_queries` should be used for this instance. There are 3 options:
-    ##
-    ## 1. true - `global_custom_queries` override `custom_queries`.
-    ## 2. false - `custom_queries` override `global_custom_queries`.
-    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-    #
-    # use_global_custom_queries: 'true'
-
-    ## @param custom_queries - list of mappings - optional
-    ## Each query must have 2 fields, and can have a third optional field:
-    ##
-    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##            Use the pipe `|` if you require a multi-line script.
-    ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##              The number of columns must equal the number of columns returned in the query.
-    ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is a `tag` type, this column is
-    ##                          considered a tag and applied to every
-    ##                          metric collected by this particular query.
-    ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to the following `tag` types to
-    ##                          tag each metric in the row with the name and value
-    ##                          of the item in this column:
-    ##                           i. tag           - This is the default tag type
-    ##                           ii. tag_list     - This allows multiple values to be attached
-    ##                                             to the tag name. For example: 
-    ##
-    ##                                             query = {
-    ##                                               "name": "example",
-    ##                                               "query": "...",
-    ##                                               "columns": [
-    ##                                                 {"name": "server_tag", "type": "tag_list"},
-    ##                                                 {"name": "foo", "type": "gauge"},
-    ##                                               ]
-    ##                                             }
-    ##
-    ##                                             May result in:
-    ##                                             gauge("foo", tags=[
-    ##                                                                 "server_tag:us",
-    ##                                                                 "server_tag:primary",
-    ##                                                                 "server_tag:default"
-    ##                                                               ])
-    ##                                             gauge("foo", tags=["server_tag:eu"])
-    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
-    ##                          You can use the `count` type to perform aggregation
-    ##                          for queries that return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored. To skip a column, enter:
-    ##                - {}
-    ## 3. tags (optional) - A list of tags to apply to each metric.
-    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
-    ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, 
-    ##     the query will be run every check run.
-    ##     If the collection interval is greater than check collection interval, 
-    ##     the query will NOT BE RUN exactly at the collection interval.
-    ##     The query will be run at the next check run after the collection interval has passed.
-    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
-    #
-    # custom_queries:
-    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
-    #     columns:
-    #     - name: foo
-    #       type: tag
-    #     - name: event.total
-    #       type: gauge
-    #     tags:
-    #     - test:postgresql
-    #     metric_prefix: postgresql
+    # table_count_limit: <TABLE_COUNT_LIMIT>
 
     ## Define the configuration for database autodiscovery.
     ## Complete this section if you want to auto-discover databases on this host
@@ -399,7 +338,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional - default: ['cloudsqladmin']
+        ## @param exclude - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -424,10 +363,24 @@ instances:
     #
     # application_name: datadog-agent
 
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` to enable Database Monitoring.
+    ## Configure the Data Observability async job, which executes monitoring
+    ## queries delivered via Remote Configuration.
     #
-    # dbm: false
+    # data_observability:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the Data Observability job.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## How often (in seconds) the job wakes up to check which queries are
+        ## due. Individual queries have their own interval_seconds. This value
+        ## must be less than or equal to the smallest interval_seconds across
+        ## all configured queries (i.e. the least common denominator), otherwise
+        ## queries with short intervals will be delayed.
+        #
+        # collection_interval: 10
 
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
@@ -436,7 +389,7 @@ instances:
     #
     # pg_stat_statements_view: show_pg_stat_statements()
 
-    ## @param query_encodings - list of strings - optional
+    ## @param query_encodings - list of strings - optional - default: ['utf8']
     ## Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
     ## When attempting to decode stored query text for query metrics, samples and activity, the agent will use these
     ## values in order and return the first successful decoding. Only supported for Postgres 10 and above.
@@ -464,33 +417,33 @@ instances:
         #
         # collection_interval: 10
 
-    ## Configure collection of query samples
+    ## Configure collection of explain plan samples
     #
     # query_samples:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query samples. Requires `dbm: true`.
+        ## Enable collection of explain plans. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 1
-        ## Set the query sample collection interval (in seconds). Each collection involves a single query to
+        ## Set the explain plan collection interval (in seconds). Each collection involves a single query to
         ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
         #
         # collection_interval: 1
 
         ## @param explain_function - string - optional - default: datadog.explain_statement
-        ## Override the default function used to collect execution plans for queries.
+        ## Override the default function used to collect explain plans for queries.
         #
         # explain_function: datadog.explain_statement
 
         ## @param explained_queries_per_hour_per_query - integer - optional - default: 60
-        ## Set the rate limit for how many execution plans will be collected per hour per normalized query.
+        ## Set the rate limit for how many explain plans will be collected per hour per normalized query.
         #
         # explained_queries_per_hour_per_query: 60
 
         ## @param samples_per_hour_per_query - integer - optional - default: 15
-        ## Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+        ## Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
         ## plan.
         #
         # samples_per_hour_per_query: 15
@@ -504,7 +457,7 @@ instances:
 
         ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
         ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-        ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+        ## for databases with a very large number of unique normalized explain plans which exceed the cache's limit.
         #
         # seen_samples_cache_maxsize: 10000
 
@@ -514,17 +467,17 @@ instances:
         #
         # explain_parameterized_queries: true
 
-    ## Configure collection of query activity
+    ## Configure collection of in-flight query samples
     #
     # query_activity:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query activity. Requires `dbm: true`.
+        ## Enable collection of in-flight query samples. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param payload_row_limit - number - optional - default: 3500
-        ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+        ## Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
         ## than the maximum rows set, then the top N longest running transactions will be reported.
         #
         # payload_row_limit: 3500
@@ -533,10 +486,10 @@ instances:
     #
     # collect_settings:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of pg_settings. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -544,8 +497,8 @@ instances:
         #
         # collection_interval: 600
 
-        ## @param ignored_settings_patterns - list of strings - optional
-        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will
+        ## @param ignored_settings_patterns - list of strings - optional - default: ['plpgsql%']
+        ## A list of setting patterns to ignore. Any setting key matching one of the values in this list will
         ## not be collected. This uses the traditional LIKE pattern-matching approach.
         #
         # ignored_settings_patterns:
@@ -557,15 +510,20 @@ instances:
     #
     # collect_schemas:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of database schemas. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param max_tables - number - optional - default: 300
         ## Maximum amount of tables the Agent collects from the instance.
         #
         # max_tables: 300
+
+        ## @param max_query_duration - number - optional - default: 60
+        ## Maximum duration of the query to collect schema information in seconds.
+        #
+        # max_query_duration: <MAX_QUERY_DURATION>
 
         ## @param max_columns - number - optional - default: 50
         ## Maximum amount of columns the Agent collects per table.
@@ -585,8 +543,8 @@ instances:
         # include_databases:
         #   - mydb
 
-        ## @param exclude_databases - list of strings - optional
-        ## A list of regex patterns to exclude databases. 
+        ## @param exclude_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+        ## A list of regex patterns to exclude databases.
         ## Any database whose name matches any one of these patterns will be excluded.
         ## If empty, all databases matching other filters are included.
         #
@@ -625,6 +583,74 @@ instances:
         # exclude_tables:
         #   - customer.*
 
+    ## Enable collection of column statistics from pg_stats.
+    ## Requires the `datadog.column_statistics()` function to be created in the database.
+    #
+    # collect_column_statistics:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of column statistics. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 3600
+        ## Set the column statistics collection interval (in seconds).
+        #
+        # collection_interval: 3600
+
+        ## @param max_tables - number - optional - default: 500
+        ## Maximum number of tables to collect column statistics for.
+        #
+        # max_tables: 500
+
+        ## @param include_databases - list of strings - optional
+        ## A list of regex patterns to include databases.
+        ## Any database whose name matches any one of these patterns will be included.
+        ## If empty, all databases matching other filters are included.
+        #
+        # include_databases:
+        #   - mydb
+
+        ## @param exclude_databases - list of strings - optional
+        ## A list of regex patterns to exclude databases.
+        ## Any database whose name matches any one of these patterns will be excluded.
+        ## If empty, all databases matching other filters are included.
+        #
+        # exclude_databases:
+        #   - privatedb.*
+
+        ## @param include_schemas - list of strings - optional
+        ## A list of regex patterns to include schemas.
+        ## Any schema whose name matches any one of these patterns will be included.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # include_schemas:
+        #   - myschema
+
+        ## @param exclude_schemas - list of strings - optional
+        ## A list of regex patterns to exclude schemas.
+        ## Any schema whose name matches any one of these patterns will be excluded.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # exclude_schemas:
+        #   - privateschema.*
+
+        ## @param include_tables - list of strings - optional
+        ## A list of regex patterns to include tables.
+        ## Any table whose name matches any one of these patterns will be included.
+        ## If empty, all tables matching other filters are included.
+        #
+        # include_tables:
+        #   - users.*
+
+        ## @param exclude_tables - list of strings - optional
+        ## A list of regex patterns to exclude tables.
+        ## Any table whose name matches any one of these patterns will be excluded.
+        ## If empty, all tables matching other filters are included.
+        #
+        # exclude_tables:
+        #   - temp_.*
+
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
     ## Complete this section if you have installed the Datadog AWS Integration
@@ -636,8 +662,10 @@ instances:
     # aws:
 
         ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
-        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ## Set to the Endpoint.Address of the instance the agent is connecting to.
+        ## Use this value to allow association of RDS metrics with the instance when 
+        ## connecting to the instance through a proxy or CNAME, or if you set `reported_hostname`
+        ## to a different value from the instance endpoint.
         ##
         ## For more information on instance endpoints,
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
@@ -728,7 +756,10 @@ instances:
         ## @param managed_authentication - mapping - optional
         ## Configuration section used for Azure AD Authentication.
         ##
-        ## This supports using System or User assigned managed identities.
+        ## This supports using System or User assigned managed identities, as well as
+        ## workload identity federation (e.g. on AKS).
+        ##
+        ## If enabled, the `password` field will be ignored.
         ##
         ## For more information on configuration, see
         ## https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
@@ -736,40 +767,20 @@ instances:
         ## For more information on Managed Identities, see the Azure docs
         ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
         ##
-        ## To enable Azure AD Authentication, set `azure.managed_authentication.enabled` to `true`.
-        ## If `azure.managed_authentication.enabled` is set, then the `password` fields will be ignored.
-        ## `azure.managed_authentication.client_id` is required to enable Azure AD Authentication.
+        ## For more information on Workload Identity, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview
         ##
-        ## For more information on scopes, see the Azure docs
-        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        ## The following fields are supported:
+        ##
+        ## enabled: Set to `true` to enable Azure AD authentication.
+        ## auth_type: The authentication method. Use `managed_identity` (default) or `workload_identity` for AKS.
+        ## client_id: The client ID of the managed identity or app registration. Required for `managed_identity`.
+        ##   Optional for `workload_identity` (defaults to the `AZURE_CLIENT_ID` environment variable).
+        ## tenant_id: The Azure AD tenant ID. Only used for `workload_identity`
+        ##   (defaults to the `AZURE_TENANT_ID` environment variable).
+        ## identity_scope: The permission scope for the identity token.
         #
         # managed_authentication: {}
-
-    ## DEPRECATED: Please use `azure.managed_authentication` instead.
-    ##
-    ## Configuration section used for Azure AD Authentication.
-    ##
-    ## This supports using System or User assigned managed identities.
-    ## If this section is set, then the `username` and `password` fields will be ignored.
-    ##
-    ## For more information on Managed Identities, see the Azure docs
-    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
-    #
-    # managed_identity:
-
-        ## @param client_id - string - optional
-        ## Client ID of the Managed Identity.
-        #
-        # client_id: <CLIENT_ID>
-
-        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
-        ## The permission scope from where to access the identity token. This value is optional if using the default
-        ## identity scope for Azure managed databases.
-        ##
-        ## For more information on scopes, see the Azure docs
-        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
-        #
-        # identity_scope: https://ossrdbms-aad.database.windows.net/.default
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
@@ -819,7 +830,7 @@ instances:
         # collect_comments: true
 
         ## @param keep_sql_alias - boolean - optional - default: true
-        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## Set to `true` to keep SQL aliases in obfuscated SQL statements. Examples of aliases are
         ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
         ## When `true` these aliases will not be removed.
         #
@@ -867,14 +878,13 @@ instances:
         #
         # keep_json_path: false
 
-    ## Configure the collection of raw query statements in query activity and execution plans.
-    ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+    ## Configure the collection of raw query statements in query samples and explain plans.
+    ## Raw query statements and explain plans may contain sensitive information (e.g., passwords)
     ## or personally identifiable information in query text.
     ## Enabling this option will allow the collection and ingestion of raw query statements and 
-    ## execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+    ## explain plans into Datadog, which can then become viewable in query samples or explain plans. 
     ## This option is disabled by default.
     ## Note: Collection of raw query statements is currently in preview.
-    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
     ## This option only applies when dbm is enabled.
     #
     # collect_raw_query_statement:
@@ -886,10 +896,86 @@ instances:
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ##
     ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
     ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
     #
     # propagate_agent_tags: false
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
+    ## @param custom_queries - list of mappings - optional
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##     Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##     The number of columns must equal the number of columns returned in the query.
+    ##     There are 2 required pieces of data:
+    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
+    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
+    ##           to every metric collected by this particular query.
+    ##       2. type - The submission method (gauge, monotonic_count, etc.).
+    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
+    ##           and value of the item in this column:
+    ##             1. tag - This is the default tag type
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##                 ```
+    ##                 query = {
+    ##                   "name": "example",
+    ##                   "query": "...",
+    ##                   "columns": [
+    ##                     {"name": "server_tag", "type": "tag_list"},
+    ##                     {"name": "foo", "type": "gauge"},
+    ##                   ]
+    ##                 }
+    ##                 ```
+    ##                 May result in:
+    ##                 ```
+    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+    ##                 gauge("foo", tags=["server_tag:eu"])
+    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                 ```
+    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
+    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
+    ##           the same or no tags.
+    ##     Columns without a name are ignored. To skip a column, enter:
+    ##     ```
+    ##       - {}
+    ##     ```
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
+    ##     If collection_interval is not set, the query will be run every check run.
+    ##     If the collection interval is less than check collection interval, the query will be run every check
+    ##     run.
+    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
+    ##     exactly at the collection interval.
+    ##     The query will be run at the next check run after the collection interval has passed.
+    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:postgresql
+    #     metric_prefix: postgresql
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

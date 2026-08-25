@@ -170,6 +170,9 @@ MESH_METRICS = {
     'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_http': (
         'agent.pilot.conflict.outbound_listener.tcp_over_current_http'
     ),
+    'istio_agent_cert_expiry_seconds': 'agent.cert_expiry_seconds',
+    'istio_agent_dns_requests_total': 'agent.dns_requests_total',
+    'istio_agent_dns_upstream_request_duration_seconds': 'agent.dns_upstream_request_duration_seconds',
 }
 
 
@@ -255,6 +258,55 @@ PILOT_METRICS = {
     'pilot_xds_eds_reject': 'pilot.xds.eds_reject',
     'pilot_xds_cds_reject': 'pilot.xds.cds_reject',
     'pilot_xds_lds_reject': 'pilot.xds.lds_reject',
+}
+
+
+ZTUNNEL_METRICS = {
+    # Ztunnel-specific metrics for Istio Ambient Mode
+    # Available in Istio >= 1.24 (ambient mode GA release)
+    # Ztunnel is a Rust-based L4 proxy that provides zero-trust tunneling for ambient mesh
+    # Core TCP metrics (stable) - overlap with MESH_METRICS
+    'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
+    'istio_tcp_connections_closed_total': 'tcp.connections_closed.total',
+    'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+    'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
+    # DNS metrics (unstable)
+    'istio_dns_requests_total': 'dns.requests.total',
+    'istio_dns_upstream_requests_total': 'dns.upstream_requests.total',
+    'istio_dns_upstream_failures_total': 'dns.upstream_failures.total',
+    'istio_dns_upstream_request_duration_seconds': 'dns.upstream_request_duration_seconds',
+    'istio_on_demand_dns_total': 'on_demand_dns.total',
+    # In-pod proxy management metrics (unstable). Ztunnel exposes these under the
+    # workload_manager_* family, not istio_*.
+    'workload_manager_active_proxy_count': 'active_proxy_count',
+    'workload_manager_pending_proxy_count': 'pending_proxy_count',
+    'workload_manager_proxies_started_total': 'proxies_started.total',
+    'workload_manager_proxies_stopped_total': 'proxies_stopped.total',
+    # XDS metrics (unstable)
+    'istio_xds_connection_terminations_total': 'xds.connection_terminations.total',
+    'istio_xds_message_total': 'xds.message.total',
+    'istio_xds_message_bytes_total': 'xds.message_bytes.total',
+}
+
+
+WAYPOINT_METRICS = {
+    # Waypoint proxy metrics for Istio Ambient Mode
+    # Available in Istio >= 1.24 (ambient mode GA release)
+    # Waypoint proxies are Envoy-based L7 proxies for advanced traffic management
+    # They expose the full set of Istio metrics, similar to sidecar proxies
+    # HTTP/gRPC metrics
+    'istio_requests_total': 'request.count',
+    'istio_request_duration_milliseconds': 'request.duration.milliseconds',
+    'istio_request_duration_seconds': 'request.duration',
+    'istio_request_bytes': 'request.size',
+    'istio_response_bytes': 'response.size',
+    'istio_request_messages_total': 'request.messages.total',
+    'istio_response_messages_total': 'response.messages.total',
+    # TCP metrics (for TCP traffic through waypoint)
+    'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
+    'istio_tcp_connections_closed_total': 'tcp.connections_closed.total',
+    'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+    'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
 }
 
 
@@ -445,12 +497,28 @@ NON_CONFORMING_METRICS = [
 # Helper function that will strip _total from both the raw metric name and the metric name
 def construct_metrics_config(metric_map):
     metrics = []
+
+    # Metrics where both gauge (X) and counter (X_total) exist must use native_dynamic
+    # to avoid the OpenMetrics V2 parser locking to the wrong type after stripping _total.
+    dynamic_metrics = {
+        name
+        for name in metric_map
+        if not name.endswith('_total')
+        and '{}_total'.format(name) in metric_map
+        and '{}_total'.format(name) not in NON_CONFORMING_METRICS
+    }
+
     for raw_metric_name, metric_name in metric_map.items():
         if raw_metric_name.endswith('_total') and raw_metric_name not in NON_CONFORMING_METRICS:
-            raw_metric_name = raw_metric_name[:-6]
+            base_name = raw_metric_name[:-6]
+            if base_name in dynamic_metrics:
+                continue
+            raw_metric_name = base_name
             metric_name = metric_name[:-6]
 
         config = {raw_metric_name: {'name': metric_name}}
+        if raw_metric_name in dynamic_metrics:
+            config[raw_metric_name]['type'] = 'native_dynamic'
         metrics.append(config)
 
     return metrics

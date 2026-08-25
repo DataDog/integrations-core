@@ -11,15 +11,15 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.12"]
-version = ["9.6", "10.0", "11.0", "12.17", "13.0", "14.0", "15.0", "16.0", "17.0"]
+python = ["3.13"]
+version = ["9.6", "10.0", "11.0", "12.17", "13.0", "14.0", "15.0", "16.0", "17.0", "18.0"]
 locale = ["UTF8"]
 
 
 # We only support SQLASCII encoding in 10+
 [[envs.default.matrix]]
-python = ["3.12"]
-version = ["10.0", "11.0", "12.17", "13.0", "14.0", "15.0", "16.0", "17.0"]
+python = ["3.13"]
+version = ["10.0", "11.0", "12.17", "13.0", "14.0", "15.0", "16.0", "17.0", "18.0"]
 locale = ["C"]
 
 [envs.default.overrides]
@@ -32,6 +32,7 @@ matrix.version.env-vars = [
   { key = "POSTGRES_VERSION", value = "15", if = ["15.0"] },
   { key = "POSTGRES_VERSION", value = "16", if = ["16.0"] },
   { key = "POSTGRES_VERSION", value = "17", if = ["17.0"] },
+  { key = "POSTGRES_VERSION", value = "18", if = ["18.0"] },
 ]
 matrix.locale.env-vars = [
   { key = "POSTGRES_LOCALE", value = "C", if = ["C"] },

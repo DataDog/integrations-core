@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: microsoft-dns
 metric_id: microsoft-dns
 backend_only: false

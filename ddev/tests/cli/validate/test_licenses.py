@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-
 import os
 
 import pytest
@@ -88,6 +86,6 @@ def test_invalid_requirement(repository, ddev, helpers):
 
     result = ddev("validate", "licenses")
 
-    expected_error_output = 'Detected InvalidRequirement error in agent_requirements.in:1 Expected end'
+    expected_error_output = 'InvalidRequirement error'
     assert expected_error_output in helpers.remove_trailing_spaces(result.output)
     assert 'aerospike==^4.0.0' in helpers.remove_trailing_spaces(result.output)

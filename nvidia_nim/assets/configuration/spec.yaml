@@ -1,4 +1,5 @@
 name: nvidia_nim
+fleet_configurable: true
 files:
 - name: nvidia_nim.yaml
   options:

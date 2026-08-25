@@ -1,4 +1,5 @@
 name: Ambari
+fleet_configurable: true
 files:
 - name: ambari.yaml
   options:
@@ -9,16 +10,20 @@ files:
         value:
           example: true
           type: boolean
+        fleet_configurable: false
       - name: collect_service_status
         description: Change to `true` to collect services status
         value:
           example: false
           type: boolean
+        fleet_configurable: false
       - template: init_config/http
       - template: init_config/default
   - template: instances
     options:
     - name: url
+      fleet_configurable: true
+      formats: ["url"]
       required: true
       description: The URL of the Ambari Server, include http:// or https://
       value:
@@ -45,6 +50,7 @@ files:
             <COMPONENT_NAME_1>: []
             <COMPONENT_NAME_2>: []
       display_priority: 5
+      fleet_configurable: false
     - template: instances/http
       overrides:
         username.display_priority: 9

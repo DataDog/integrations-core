@@ -2,6 +2,50 @@
 
 <!-- towncrier release notes start -->
 
+## 4.8.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 4.7.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Expose the `include_total` option in the perf-counter spec, allowing the `_Total` aggregate instance to be collected for selected performance objects. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+
+## 4.6.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 4.5.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 4.4.1 / 2025-10-10 / Agent 7.72.0
+
+***Fixed***:
+
+* Fix AD metric types and metadata.csv ([#21610](https://github.com/DataDog/integrations-core/pull/21610))
+
+## 4.4.0 / 2025-10-02
+
+***Added***:
+
+* Add Netlogon, Security, DHCP Server, DFSR metrics and expand NTDS metrics. ([#20894](https://github.com/DataDog/integrations-core/pull/20894))
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 4.3.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
 ## 4.2.0 / 2025-04-09 / Agent 7.66.0
 
 ***Added***:

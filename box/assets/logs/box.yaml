@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: box
 metric_id: box
 backend_only: false

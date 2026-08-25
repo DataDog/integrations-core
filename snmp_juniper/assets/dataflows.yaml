@@ -1,0 +1,5 @@
+provides:
+  - id: snmp-juniper-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

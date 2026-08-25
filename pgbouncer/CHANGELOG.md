@@ -2,6 +2,79 @@
 
 <!-- towncrier release notes start -->
 
+## 8.11.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 8.10.0 / 2026-04-15 / Agent 7.79.0
+
+***Added***:
+
+* Add filtering databases by regex capability. ([#23111](https://github.com/DataDog/integrations-core/pull/23111))
+
+## 8.9.0 / 2026-03-18 / Agent 7.78.0
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 8.8.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 8.7.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 8.6.1 / 2025-10-15 / Agent 7.72.0
+
+***Fixed***:
+
+* Always connect to pgbouncer using ClientCursor and simple query protocol. ([#21649](https://github.com/DataDog/integrations-core/pull/21649))
+
+## 8.6.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.5.1 / 2025-09-24 / Agent 7.71.0
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
+## 8.5.0 / 2025-09-04 / Agent 7.70.1
+
+***Added***:
+
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+
+## 8.4.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Revert upgrade to psycopg3 ([#20884](https://github.com/DataDog/integrations-core/pull/20884))
+
+## 8.3.0 / 2025-07-29 / Agent 7.69.0
+
+***Added***:
+
+* Revert upgrade to psycopg3 ([#20884](https://github.com/DataDog/integrations-core/pull/20884))
+
+## 8.2.0 / 2025-07-10
+
+***Added***:
+
+* Upgrade to psycopg3 ([#20550](https://github.com/DataDog/integrations-core/pull/20550))
+
 ## 8.1.2 / 2025-03-19 / Agent 7.65.0
 
 ***Fixed***:

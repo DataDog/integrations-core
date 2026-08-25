@@ -6,10 +6,9 @@
             "id": 6349081350559276,
             "definition": {
                 "type": "image",
-                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Avast_logo_2021.svg/2560px-Avast_logo_2021.svg.png",
-                "url_dark_theme": "https://static3.avast.com/10003963/web/i/v3/components/avast-logos/avast-logo-inverse.svg",
+                "url": "https://static.datadoghq.com/static/images/logos/avast_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/avast_reversed_large.svg",
                 "sizing": "contain",
-                "margin": "md",
                 "has_background": true,
                 "has_border": true,
                 "vertical_align": "center",
@@ -175,11 +174,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -207,6 +201,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -216,9 +218,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -310,11 +309,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -342,6 +336,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -351,9 +353,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -729,11 +728,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -761,6 +755,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -770,9 +772,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -864,11 +863,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -898,6 +892,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -907,9 +909,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -1296,7 +1295,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 32,
                 "width": 12,
                 "height": 17,
                 "is_column_break": true
@@ -1815,7 +1814,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 33,
+                "y": 49,
                 "width": 12,
                 "height": 10
             }

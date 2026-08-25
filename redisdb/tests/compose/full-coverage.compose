@@ -1,0 +1,138 @@
+# Full metric-coverage environment for the redisdb check and the OpenTelemetry
+# redisreceiver.
+#
+# A real master/replica pair produces every INFO field that OSS Redis can emit
+# (memory, clients, cpu, stats, persistence, keyspace, replication, AOF,
+# eviction, expiry, commandstats, slowlog). The `info-proxy` sits in front of
+# the master and augments the `INFO all` reply with the fields OSS Redis never
+# emits on its own (managed-service, cluster, sentinel, and RediSearch fields),
+# and serves a canned `CLUSTER INFO`. Both scrapers read those fields the same
+# way, so a single injection point covers both. See ../proxy for details.
+services:
+  redis-master:
+    image: "redis:${REDIS_VERSION:-7.4}"
+    networks:
+      - network1
+    # No config file here on purpose: the managed-service simulation config
+    # renames CONFIG/CLIENT/CLUSTER, which the check needs for its side-channel
+    # collections. Enable AOF, a small memory ceiling with LRU eviction (so
+    # evicted_keys is non-zero after the seed overfills), and full slowlog
+    # capture so slowlog metrics are populated.
+    command: >
+      redis-server
+      --requirepass devops-best-friend
+      --appendonly yes
+      --maxmemory 16mb
+      --maxmemory-policy allkeys-lru
+      --slowlog-log-slower-than 0
+      --latency-monitor-threshold 1
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a devops-best-friend ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  redis-replica:
+    image: "redis:${REDIS_VERSION:-7.4}"
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    networks:
+      - network1
+    command: >
+      redis-server
+      --requirepass devops-best-friend
+      --masterauth devops-best-friend
+      --replicaof redis-master 6379
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a devops-best-friend ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  # Populates the master with typed keys, TTL keys, keyspace hits/misses, an
+  # eviction-inducing overfill, benchmark traffic (commandstats + net.commands),
+  # and a slow command, so the naturally derived INFO fields are all non-trivial.
+  seed:
+    image: "redis:${REDIS_VERSION:-7.4}"
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    networks:
+      - network1
+    restart: "no"
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        R="redis-cli -h redis-master -a devops-best-friend --no-auth-warning"
+        $$R SET string:1 hello >/dev/null
+        $$R RPUSH list:1 a b c d e >/dev/null
+        $$R SADD set:1 x y z >/dev/null
+        $$R HSET hash:1 f1 v1 f2 v2 f3 v3 >/dev/null
+        $$R ZADD zset:1 1 a 2 b 3 c >/dev/null
+        $$R XADD stream:1 '*' field val >/dev/null
+        i=1; while [ $$i -le 50 ]; do $$R SETEX ttl:$$i 300 v >/dev/null; i=$$((i+1)); done
+        $$R GET string:1 >/dev/null
+        $$R GET does:not:exist >/dev/null
+        echo "seeding traffic (benchmark + overfill for eviction)..."
+        redis-benchmark -h redis-master -a devops-best-friend -q -n 100000 -r 100000 -d 512 -t set,get,incr,lpush,rpush,sadd,hset,zadd,spop,lpop >/dev/null 2>&1 || true
+        $$R DEBUG SLEEP 0.05 >/dev/null 2>&1 || true
+        # Drive expired_keys: the 300s ttl:* keys above are evicted by the LRU
+        # overfill long before they expire, so create short-TTL keys after the
+        # overfill, wait past the TTL, then read them to force lazy expiry (the
+        # active-expiry cycle also counts them). Without this expired_keys stays 0.
+        i=1; while [ $$i -le 20 ]; do $$R SETEX exp:$$i 1 v >/dev/null; i=$$((i+1)); done
+        sleep 2
+        i=1; while [ $$i -le 20 ]; do $$R GET exp:$$i >/dev/null; i=$$((i+1)); done
+        echo "evicted_keys=$$($$R INFO stats | grep evicted_keys || true)"
+        echo "expired_keys=$$($$R INFO stats | grep expired_keys || true)"
+        echo "seed-done"
+
+  info-proxy:
+    build:
+      context: ../proxy
+      dockerfile: Dockerfile
+    # info-proxy is the fixture entrypoint (published as redis-full). Gate it on
+    # the whole environment being ready so a single dependency on the proxy pulls
+    # up everything a scraper needs:
+    #   - redis-replica healthy, so INFO replication reports a connected slave
+    #     (connected_slaves/slave0) and the with-replica code path is exercised;
+    #   - seed completed, so the naturally derived counters (keyspace hits/misses,
+    #     evicted/expired keys, commands, net bytes, commandstats) are non-zero
+    #     before the first scrape rather than starting at 0.
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    environment:
+      LISTEN_ADDR: ":6379"
+      BACKEND_ADDR: "redis-master:6379"
+      INJECT_FILE: "/etc/info-proxy/inject.conf"
+      CLUSTER_INFO_FILE: "/etc/info-proxy/cluster_info.txt"
+    volumes:
+      - ../proxy/inject.conf:/etc/info-proxy/inject.conf:ro
+      - ../proxy/cluster_info.txt:/etc/info-proxy/cluster_info.txt:ro
+    # No host-port publish: the sole consumer is the evalya `redis-full` task,
+    # whose other services reach the proxy over the managed network via the
+    # DB_HOST label. Publishing 6379 to the host only invites conflicts with a
+    # local Redis or a concurrent scenario. A developer inspecting the fixture
+    # by hand can add `--publish 6379:6379` or a compose override as needed.
+    networks:
+      - network1
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a devops-best-friend ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+networks:
+  network1:
+    name: full-coverage_default

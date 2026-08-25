@@ -14,6 +14,8 @@ And many more.
 
 This check also creates a service check for every executor task.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -63,7 +65,7 @@ If you are not using DC/OS, use the Marathon web UI or post to the API URL the f
       }
     ],
     "docker": {
-      "image": "datadog/agent:latest",
+      "image": "registry.datadoghq.com/agent:latest",
       "network": "BRIDGE",
       "portMappings": [
         {

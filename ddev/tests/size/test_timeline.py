@@ -22,8 +22,8 @@ def test_get_compressed_files():
         ),
         patch("ddev.cli.size.timeline.os.path.relpath", return_value=os.path.join("datadog_checks", "__about__.py")),
         patch("ddev.cli.size.timeline.os.path.exists", return_value=True),
-        patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.timeline.is_valid_integration", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.timeline.is_valid_integration_file", return_value=True),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
         patch("ddev.cli.size.timeline.extract_version_from_about_py", return_value='1.1.1'),
     ):
@@ -50,7 +50,7 @@ def test_get_compressed_files_deleted_only():
     message = "deleted module"
 
     with (
-        patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.os.walk", return_value=[]),
         patch(
             "ddev.cli.size.timeline.os.path.relpath",
@@ -122,8 +122,9 @@ def make_mock_response(size):
 
 def test_get_dependency_size():
     mock_response = make_mock_response("45678")
-    with patch("ddev.cli.size.timeline.requests.head", return_value=mock_response):
+    with patch("ddev.cli.size.timeline.request_wheel", return_value=mock_response):
         info = get_dependency_size(
+            MagicMock(),
             "https://example.com/dep1/dep1-1.1.1-.whl",
             "1.1.1",
             "abc1234",
@@ -131,6 +132,7 @@ def test_get_dependency_size():
             "auth",
             "Fixed bug",
             True,
+            "dev",
         )
         assert info == {
             "Size_Bytes": 45678,
@@ -152,10 +154,19 @@ def test_get_compressed_dependencies():
             "ddev.cli.size.timeline.get_dependency_data",
             return_value=("https://example.com/dep1/dep1-1.1.1-.whl", '1.1.1'),
         ),
-        patch("ddev.cli.size.timeline.requests.head", return_value=make_mock_response("12345")),
+        patch("ddev.cli.size.timeline.request_wheel", return_value=make_mock_response("12345")),
     ):
         result = get_dependencies(
-            "fake_repo", "dep1", "linux-x86_64", "abc1234", datetime(2025, 4, 4).date(), "auth", "Added dep1", True
+            MagicMock(),
+            "fake_repo",
+            "dep1",
+            "linux-x86_64",
+            "abc1234",
+            datetime(2025, 4, 4).date(),
+            "auth",
+            "Added dep1",
+            True,
+            "stable",
         )
         assert result == {
             "Size_Bytes": 12345,

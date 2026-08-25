@@ -1,4 +1,5 @@
 name: fluentd
+fleet_configurable: true
 files:
 - name: fluentd.yaml
   options:
@@ -7,15 +8,18 @@ files:
     - name: fluentd
       description: |
         Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
-        Can be overwritten on an instance.
+        Can be overridden per instance.
+      fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: fluentd
     - template: init_config/http
     - template: init_config/default
   - template: instances
     options:
     - name: monitor_agent_url
+      fleet_configurable: true
       required: true
       description: Monitor Agent URL to connect to.
       value:
@@ -25,11 +29,14 @@ files:
       description: |
         Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
         Overrides `fluentd` in init_config.
+      fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: fluentd
     - name: plugin_ids
       description: Enter your Plugin IDs to monitor a specific scope of plugins.
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -39,6 +46,7 @@ files:
           - <PLUGIN_ID_2>
     - name: tag_by
       description: Set 'tag_by' to specify how to tag metrics. Valid options are `type` and `plugin_id`.
+      fleet_configurable: true
       value:
         type: string
         example: plugin_id

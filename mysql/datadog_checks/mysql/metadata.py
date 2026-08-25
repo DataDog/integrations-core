@@ -10,12 +10,12 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 
-from .util import connect_with_session_variables
+from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
@@ -40,19 +40,19 @@ FROM
 """
 
 
-class MySQLMetadata(DBMAsyncJob):
+class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
     Collects database metadata. Supports:
     1. collection of performance_schema.global_variables
     2. collection of databases(schemas) data
     """
 
-    def __init__(self, check, config, connection_args):
+    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._databases_data_collection_interval = config.schemas_config.get(
             "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
         )
-        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
+        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
 
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
@@ -73,7 +73,7 @@ class MySQLMetadata(DBMAsyncJob):
             run_sync=is_affirmative(config.settings_config.get('run_sync', False)),
             enabled=self.enabled,
             min_collection_interval=config.min_collection_interval,
-            dbms="mysql",
+            dbms=check.dbms,
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             job_name="database-metadata",
             shutdown_callback=self._close_db_conn,
@@ -81,7 +81,9 @@ class MySQLMetadata(DBMAsyncJob):
         self._check = check
         self._config = config
         self._version_processed = False
-        self._connection_args = connection_args
+        self._connection_args_provider = connection_args_provider
+        self._uses_managed_auth = uses_managed_auth
+        self._db_created_at = 0
         self._db = None
         self._databases_data = DatabasesData(self, check, config)
         self._last_settings_collection_time = 0
@@ -89,20 +91,30 @@ class MySQLMetadata(DBMAsyncJob):
 
     def get_db_connection(self):
         """
-        lazy reconnect db
-        pymysql connections are not thread safe so we can't reuse the same connection from the main check
-        :return:
+        Get database connection with metadata-specific ping() logic.
+
+        Overrides the mixin's _get_db_connection() to add ping() support.
+        Metadata checks run far less frequently than other checks, and there are reports
+        that unused pymysql connections sometimes end up being closed unexpectedly.
         """
+        if self._should_reconnect_for_managed_auth():
+            self._close_db_conn()
+
         if not self._db:
-            self._db = connect_with_session_variables(**self._connection_args)
+            conn_args = self._connection_args_provider()
+            self._db = connect_with_session_variables(mysql_version=self._check.version, **conn_args)
+            if self._uses_managed_auth:
+                self._db_created_at = time.time()
         else:
-            # Metadata checks runs far less frequently than other checks, and there are reports
-            # that unused pymysql connections sometimes end up being closed unexpectedly.
-            # This is a simple attempt to ensure that the connection is still valid before
-            # returning it. ping() will by default automatically reconnect
-            # if the connection is lost.
+            # ping() will by default automatically reconnect if the connection is lost
             self._db.ping()
         return self._db
+
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
+        self._databases_data = None
 
     def _close_db_conn(self):
         if self._db:
@@ -117,6 +129,7 @@ class MySQLMetadata(DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)
@@ -138,26 +151,19 @@ class MySQLMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting database settings.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
         if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
             self._last_databases_collection_time = time.time()
             try:
-                self._databases_data._collect_databases_data(self._tags)
+                self._databases_data.collect_databases_data(self._tags)
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
-
-    def shut_down(self):
-        self._databases_data.shut_down()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
@@ -177,8 +183,9 @@ class MySQLMetadata(DBMAsyncJob):
             settings = [dict(row) for row in rows]
         event = {
             "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
-            "dbms": "mysql",
+            "dbms": self._check.dbms,
             "kind": "mysql_variables",
             "collection_interval": self.collection_interval,
             'dbms_version': self._check.version.version + '+' + self._check.version.build,

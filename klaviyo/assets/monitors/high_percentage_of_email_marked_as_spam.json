@@ -1,0 +1,88 @@
+{
+  "version": 2,
+  "created_at": "2025-07-28",
+  "last_updated_at": "2025-07-28",
+  "title": "High percentage of email marked as spam",
+  "description": "Alert when percentage of email marked as spam exceeds threshold.",
+  "definition": {
+	"id": 177258435,
+	"name": "High percentage of email marked as spam",
+	"type": "log alert",
+	"query": "formula(\"query / (query + query1)\").last(\"1d\") > 5",
+	"message": "The percentage of email marked as spam has exceeded the {{#is_warning}} warning {{/is_warning}} {{#is_alert}} alert  {{/is_alert}} threshold.",
+	"tags": [
+		"source:klaviyo",
+		"service:marketing-events"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 5,
+			"warning": 2
+		},
+		"enable_logs_sample": false,
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"new_group_delay": 0,
+		"variables": [
+			{
+				"name": "query",
+				"data_source": "logs",
+				"search": {
+					"query": "source:klaviyo service:marketing-events @metric_name:\"Marked Email as Spam\""
+				},
+				"indexes": [
+					"*"
+				],
+				"group_by": [
+					{
+						"facet": "@klaviyo.campaign_name",
+						"limit": 10,
+						"sort": {
+							"aggregation": "count",
+							"order": "desc",
+							"metric": "count"
+						},
+						"should_exclude_missing": true
+					}
+				],
+				"compute": {
+					"aggregation": "count"
+				},
+				"storage": "hot"
+			},
+			{
+				"name": "query1",
+				"data_source": "logs",
+				"search": {
+					"query": "source:klaviyo service:marketing-events @metric_name:\"Received Email\""
+				},
+				"indexes": [
+					"*"
+				],
+				"group_by": [
+					{
+						"facet": "@klaviyo.campaign_name",
+						"limit": 10,
+						"sort": {
+							"aggregation": "count",
+							"order": "desc",
+							"metric": "count"
+						},
+						"should_exclude_missing": true
+					}
+				],
+				"compute": {
+					"aggregation": "count"
+				},
+				"storage": "hot"
+			}
+		],
+		"groupby_simple_monitor": false
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:klaviyo"
+  ]
+}

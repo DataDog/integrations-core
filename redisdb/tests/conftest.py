@@ -11,7 +11,7 @@ from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.redisdb import Redis
 
-from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
+from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT, redis_client
 
 
 class CheckCluster(LazyFunction):
@@ -23,8 +23,8 @@ class CheckCluster(LazyFunction):
 
     def __call__(self):
         """Wait for the slave to connect to the master"""
-        master = redis.Redis(**self.master_data)
-        replica = redis.Redis(**self.replica_data)
+        master = redis_client(**self.master_data)
+        replica = redis_client(**self.replica_data)
 
         for _ in range(self.attempts):
             try:
@@ -45,7 +45,7 @@ class CheckCluster(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError('Redis cluster boot timed out!\n' 'Master: {}\n' 'Replica: {}'.format(master, replica))
+            raise RetryError('Redis cluster boot timed out!\nMaster: {}\nReplica: {}'.format(master, replica))
 
 
 @pytest.fixture(scope='session')

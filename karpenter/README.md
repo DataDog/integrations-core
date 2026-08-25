@@ -4,6 +4,8 @@
 
 This check monitors [Karpenter][1] through the Datadog Agent. For more information, see [Karpenter monitoring][10].
 
+**Minimum Agent version:** 7.50.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running in your Kubernetes environment. For more information about configuration in containerized environments, see the [Autodiscovery Integration Templates][3] for guidance.
@@ -18,12 +20,15 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 #### Metric collection
 
-Make sure that the Prometheus-formatted metrics are exposed in your Karpenter cluster and on which port. You can configure the port by following the instructions on the [Metrics][10] page in the Karpenter documentation. For the Agent to start collecting metrics, the Karpenter pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample karpenter.d/conf.yaml][4].
+Make sure that the Prometheus-formatted metrics are exposed in your Karpenter cluster and on which port. You can configure the port by following the instructions on the [Metrics][10] page in the Karpenter documentation. Configure the check with one of the Kubernetes Autodiscovery options below. You can find additional configuration options by reviewing the [sample karpenter.d/conf.yaml][4].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `karpenter.nodes.terminated` metric is exposed only after a node is terminated.
 
 The only parameter required for configuring the Karpenter check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8080`, but it can be configured using the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -49,6 +54,35 @@ spec:
     - name: 'controller'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the Karpenter controller Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: karpenter
+  config:
+    checks:
+      - integration: karpenter
+        containerName: controller
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8080/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][13].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### Log collection
 
@@ -103,3 +137,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://karpenter.sh/docs/reference/metrics/
 [11]: https://docs.datadoghq.com/agent/kubernetes/log/
 [12]: https://www.datadoghq.com/blog/container-native-integrations/#autoscaling-and-resource-utilization-with-karpenter
+[13]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

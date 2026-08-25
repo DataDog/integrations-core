@@ -4,6 +4,8 @@
 
 Monitor the up and down status of local or remote HTTP endpoints. The HTTP check can detect bad response codes (such as 404), identify soon-to-expire SSL certificates, search responses for specific text, and much more. The check also submits HTTP response times as a metric.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -45,6 +47,7 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | `http_response_status_code`      | A string or Python regular expression for an HTTP status code. This check reports DOWN for any status code that does not match. This defaults to 1xx, 2xx and 3xx HTTP status codes. For example: `401` or `4\d\d`.                              |
 | `include_content`                | When set to `true`, the check includes the first 500 characters of the HTTP response body in notifications. The default value is `false`.                                                                                                        |
 | `collect_response_time`          | By default, the check collects the response time (in seconds) as the metric `network.http.response_time`. To disable, set this value to `false`.                                                                                                 |
+| `enable_http_outcome_tag`        | When set to `true`, adds an `http_outcome` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. The default is `false`. See the [Metrics](#metrics) section for the values and for the effect on existing monitors. |
 | `tls_verify`                     | Instructs the check to validate the TLS certificate of services when reaching to `url`.                                                                                                                                                          |
 | `tls_ignore_warning`             | If `tls_verify` is set to `true`, it disables any security warnings from the SSL connection.                                                                                                                                                     |
 | `tls_ca_cert`                    | This setting allows you to override the default certificate path as specified in `init_config`                                                                                                                                                   |
@@ -68,6 +71,22 @@ When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent]
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
+
+**Note**: If you set `enable_http_outcome_tag` to `true`, the Agent adds an `http_outcome` tag to `network.http.can_connect`, `network.http.cant_connect`, and `network.http.response_time`. The value is one of the following:
+
+| `http_outcome` value | Meaning |
+| -------------------- | ------- |
+| An HTTP status code, such as `200` or `502` | The endpoint returned a response. |
+| `ssl_error` | The TLS connection failed, such as when a certificate cannot be verified. |
+| `timeout` | The request timed out while connecting or while waiting for the response. |
+| `connection_error` | The connection could not be established, such as when there is a refused connection, a DNS failure, or a proxy error. |
+| `socket_error` | A socket error occurred that does not fall into the categories above. |
+
+Only `network.http.can_connect` and `network.http.cant_connect` are submitted when no response is received, so those are the only metrics where the tag can have a non-numeric value. The Agent submits `network.http.response_time` only when a response is received, so the tag on that metric is always a status code.
+
+`http_outcome` describes the HTTP response. The metric value carries the verdict of the check. For example, `network.http.can_connect` is `0` with `http_outcome:200` when the endpoint returns `200` but the response fails the `content_match` check. The same applies when `200` falls outside the codes allowed by `http_response_status_code`.
+
+Enabling this option splits each metric into one context per value. Monitors that aggregate these metrics without grouping by `http_outcome` then evaluate an average across those contexts instead of across individual data points, which can change when the monitors trigger. Review existing monitors before you enable the option. The `http.can_connect` service check does not include the tag and is unaffected.
 
 ### Events
 

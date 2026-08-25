@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b6c2b71b-38c9-4769-86ad-516953849236",
   "app_id": "datadog-cluster-agent",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

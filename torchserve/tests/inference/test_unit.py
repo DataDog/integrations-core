@@ -13,7 +13,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_check(dd_run_check, aggregator, check, mocked_inference_instance, mocker):
-    mocker.patch('requests.get', wraps=mock_http_responses())
+    mocker.patch('requests.Session.get', wraps=mock_http_responses())
     dd_run_check(check(mocked_inference_instance))
 
     aggregator.assert_service_check(

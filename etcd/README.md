@@ -10,6 +10,8 @@ Collect Etcd metrics to:
 - Know when host configurations may be out of sync.
 - Correlate the performance of Etcd with the rest of your applications.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

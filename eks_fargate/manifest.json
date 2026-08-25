@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f5919a4b-4142-4889-b9c0-6ecdab299ebb",
   "app_id": "eks-fargate",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

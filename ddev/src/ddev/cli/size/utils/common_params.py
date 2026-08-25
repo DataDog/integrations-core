@@ -1,7 +1,10 @@
 import functools
 from collections.abc import Callable
+from typing import Literal, get_args
 
 import click
+
+WheelsStorageTier = Literal["dev", "stable"]
 
 
 def common_params(func: Callable) -> Callable:
@@ -12,6 +15,7 @@ def common_params(func: Callable) -> Callable:
     @click.option("--compressed", is_flag=True, help="Measure compressed size")
     @click.option(
         "--format",
+        show_default=True,
         help="Format of the output (comma-separated values: png, csv, markdown, json)",
         callback=lambda _, __, v: v.split(",") if v else [],
     )
@@ -20,14 +24,36 @@ def common_params(func: Callable) -> Callable:
         is_flag=True,
         help="Display a pop-up window with a treemap showing the current size distribution of modules.",
     )
+    # An option rather than a positional argument so it can bind to the
+    # INTEGRATIONS_WHEELS_STORAGE env var (Click only supports envvar on options).
+    # This keeps CI invocations aligned with the GitLab variable of the same name.
+    @click.option(
+        "--wheels-storage",
+        type=click.Choice(get_args(WheelsStorageTier)),
+        default='dev',  # 'dev' is a strict superset of 'stable', so we're more likely to find wheels there.
+        envvar="INTEGRATIONS_WHEELS_STORAGE",
+        help=(
+            "Which wheel storage tier to prefer when resolving dependency URLs. "
+            "If the preferred tier doesn't have a wheel, the other tier is used instead. "
+            "Can also be set via the INTEGRATIONS_WHEELS_STORAGE env var."
+        ),
+    )
     @click.pass_context
     def wrapper(
-        ctx: click.Context, platform: str, compressed: bool, format: list[str], show_gui: bool, *args, **kwargs
+        ctx: click.Context,
+        platform: str,
+        compressed: bool,
+        format: list[str],
+        show_gui: bool,
+        wheels_storage: WheelsStorageTier,
+        *args,
+        **kwargs,
     ):
         kwargs["platform"] = platform
         kwargs["compressed"] = compressed
         kwargs["format"] = format
         kwargs["show_gui"] = show_gui
+        kwargs["wheels_storage"] = wheels_storage
         return ctx.invoke(func, *args, **kwargs)
 
     return wrapper

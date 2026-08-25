@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "cacc2ad1-f88b-4306-af8e-90c76e0478a0",
   "app_id": "intercom",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -51,7 +52,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 26100804,
       "source_type_name": "Intercom",
       "events": {

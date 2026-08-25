@@ -4,6 +4,8 @@
 
 This integration provides enrichment and visualization for Alert, Anomaly, HTTP, DNS, FTP, FTP_DATA, TLS, TFTP, SMB, SSH, Flow, RDP, DHCP, and ARP log types. It helps to visualize detailed insights into Alerts, Anomaly, network connections, DNS, and DHCP activity, as well as detailed network protocol analysis in the integration's out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 ### Installation

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fbf81df6-a556-4ee7-9c50-764bf129b0ec",
   "app_id": "adyen",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -36,11 +37,17 @@
       "Category::Log Collection",
       "Submitted Data Type::Logs",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-adyen-payments/"
+      }
     ]
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 27052339,
       "source_type_name": "Adyen",
       "events": {

@@ -33,6 +33,7 @@ def test_e2e_profile_fortinet_fortiswitch(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'fs_sys_serial:their acted quaintly Jaded zombies forward oxen but driving',
         'fs_sys_version:but forward quaintly zombies forward kept quaintly',

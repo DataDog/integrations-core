@@ -77,10 +77,12 @@ metrics:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.11
           name: devNetworkName
         tag: network
+      # Device-level status (online/offline). Use device_status to avoid confusion with
+      # uplink/component status (connected/not_connected) per Cisco Meraki API semantics.
       - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.3
           name: devStatus
-        tag: status
+        tag: device_status
         mapping:
           0: offline
           1: online

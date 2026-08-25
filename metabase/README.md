@@ -4,7 +4,11 @@
 
 [Metabase][1] is a business intelligence analytics platform that can be used to ask questions about your data, or can be embedded in your apps to let your customers explore their data on their own.
 
-Integrate Metabase with Datadog to gain insights into activity event logs, view logs, and query logs through the Metabase API. The data is normalized and enriched before ingestion. Pre-built dashboard visualizations provide immediate insights into Metabase logs.
+Integrate Metabase with Datadog for:
+
+**Log Collection**: Gain insights into activity event logs, view logs, and query logs through the Metabase API. The data is normalized and enriched before ingestion. Pre-built dashboard visualizations provide immediate insights into Metabase logs.
+
+**Data Lineage**: View end-to-end lineage across Metabase collections, dashboards, and cards to understand dependencies and downstream impact.
 
 ## Setup
 
@@ -39,7 +43,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 ### Get self-hosted instance domain of Metabase (required for self-hosted instances only)
 
-**Note**: Your self-hosted Metabase instance must be accessible from the internet via HTTPS only.
+**Note**: Your self-hosted Metabase instance must be accessible from the internet via HTTPS only, and ensure that the API is not being intercepted by SAML/SSO at the proxy/network level.
 1. Log in to your Metabase instance as an administrator.
 2. Click on the gear icon in the upper right corner.
 3. Select **Admin settings**.

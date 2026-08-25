@@ -1,0 +1,28 @@
+{
+	"version": 2,
+	"created_at": "2025-07-25",
+	"last_updated_at": "2025-07-25",
+	"title": "CPU Usage is High on Proxmox Node",
+	"description": "CPU usage measures the percentage of processing capacity that is in use and provides insights into the overall health and efficiency of the Node. High CPU usage can lead to degraded performance of your Proxmox Node.",
+	"definition": {
+		"name": "[Proxmox] CPU Usage is High on Node {{host.name}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:proxmox.cpu{proxmox_type:node} by {host} > 0.9",
+		"message": "{{#is_alert}}Node {{host.name}} is reporting high CPU usage (at or above 90%).{{/is_alert}}{{#is_warning}}Node {{host.name}} is reporting higher CPU usage (at or above 80%).{{/is_warning}}{{#is_recovery}}CPU usage for Node {{host.name}} is back to normal.{{/is_recovery}}",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 0.9,
+				"warning": 0.8
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60
+		},
+		"priority": null
+	},
+	"tags": [
+		"integration:proxmox"
+	]
+}

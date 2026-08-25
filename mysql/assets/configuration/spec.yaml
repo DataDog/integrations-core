@@ -1,13 +1,16 @@
 name: MySQL
+fleet_configurable: true
 files:
   - name: mysql.yaml
     options:
       - template: init_config
         options:
           - name: propagate_agent_tags
+            display_priority: 0
             description: |
               Set to `true` to propagate the tags from `datadog.yaml` to the check.
               When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -22,19 +25,34 @@ files:
       - template: instances
         options:
           - name: host
+            display_priority: 7
             description: |
               MySQL host to connect to.
               NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
               provide a value for the sock key (below).
+            fleet_configurable: true
             enabled: true
             value:
               type: string
               example: localhost
               display_default: null
 
+          - name: port
+            display_priority: 6
+            description: |
+              Port to use when connecting to MySQL.
+            fleet_configurable: true
+            enabled: true
+            formats: ["port"]
+            value:
+              type: number
+              example: 3306
+
           - name: username
+            display_priority: 5
             description: |
               Username used to connect to MySQL.
+            fleet_configurable: true
             enabled: true
             value:
               type: string
@@ -42,45 +60,178 @@ files:
               display_default: null
 
           - name: password
+            display_priority: 4
             description: |
               Password associated to the MySQL user.
+            fleet_configurable: true
             enabled: true
+            secret: true
             value:
               type: string
 
-          - name: port
+          - name: dbm
+            display_priority: 0
+            fleet_configurable: true
             description: |
-              Port to use when connecting to MySQL.
-            enabled: true
+              Set to `true` to enable Database Monitoring.
+            enabled: false
             value:
-              type: number
-              example: 3306
-
+              type: boolean
+              example: false
+              display_default: false
+          - name: data_observability
+            display_priority: 0
+            fleet_configurable: true
+            description: |
+              Configure the Data Observability async job, which executes monitoring
+              queries delivered via Remote Configuration.
+              Enabling Data Observability with Database Monitoring uses one additional
+              connection. Increase MAX_USER_CONNECTIONS from 5 to 6 for the monitoring user.
+            options:
+              - name: enabled
+                fleet_configurable: true
+                description: Enable the Data Observability job.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: collection_interval
+                fleet_configurable: true
+                description: |
+                  How often (in seconds) the job wakes up to check which queries are
+                  due. Individual queries define when they are due using either
+                  interval_seconds or a cron schedule. Set this value no greater than
+                  the shortest query interval or the shortest gap between scheduled
+                  executions. Longer collection intervals delay queries and can skip
+                  earlier cron ticks when several become due between collection cycles.
+                value:
+                  type: number
+                  example: 10
+                  display_default: 10
+              - name: run_sync
+                hidden: true
+                description: Run the job synchronously (for testing).
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+                fleet_configurable: false
+              - name: config_id
+                hidden: true
+                description: |
+                  Unique identifier of the Remote Configuration payload that populated
+                  this data_observability block. Set automatically by the Datadog Agent
+                  Go RC handler when it delivers query configuration; do not set this
+                  field manually. It is forwarded as-is on every emitted event so that
+                  the intake can correlate results back to the originating RC config.
+                value:
+                  type: string
+                fleet_configurable: false
+              - name: queries
+                hidden: true
+                description: |
+                  List of monitor queries to execute. Populated automatically by the
+                  Datadog Agent Go RC handler when Remote Configuration delivers a
+                  DO_QUERY_ACTIONS payload; do not set this field manually. Each entry
+                  describes one SQL monitoring query along with its scheduling
+                  parameters and entity metadata.
+                value:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - monitor_id
+                      - dbname
+                      - query
+                      - query_timeout
+                      - entity
+                    properties:
+                      - name: monitor_id
+                        type: integer
+                      - name: dbname
+                        type: string
+                      - name: type
+                        type: string
+                      - name: query
+                        type: string
+                      - name: interval_seconds
+                        description: |
+                          How often (in seconds) to run this query. Ignored when schedule is set
+                          (see schedule for the precedence rule).
+                        type: integer
+                      - name: schedule
+                        description: |
+                          A standard 5-field cron expression (minute hour dom month dow) specifying
+                          when to run this query. When both schedule and interval_seconds are set,
+                          schedule wins and interval_seconds is ignored. If neither is set, the
+                          query is skipped at runtime with a warning.
+                        type: string
+                      - name: query_timeout
+                        description: |
+                          Statement timeout for this query in milliseconds. Overrides the instance-level
+                          query_timeout for this query only.
+                        type: integer
+                      - name: entity
+                        type: object
+                        required:
+                          - platform
+                          - account
+                          - database
+                          - schema
+                          - table
+                        properties:
+                          - name: platform
+                            type: string
+                          - name: account
+                            type: string
+                          - name: database
+                            type: string
+                          - name: schema
+                            type: string
+                          - name: table
+                            type: string
+                      - name: custom_sql_select_fields
+                        type: object
+                        properties:
+                          - name: metric_config_id
+                            type: integer
+                          - name: entity_id
+                            type: string
+                fleet_configurable: false
           - name: propagate_agent_tags
+            display_priority: 0
             description: |
               Set to `true` to propagate the tags from `datadog.yaml` to the check.
               When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
             value:
               example: false
               type: boolean
+            fleet_configurable: false
 
           - name: reported_hostname
+            display_priority: 0
             description: |
               Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
               and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+            fleet_configurable: true
             value:
               type: string
           - name: exclude_hostname
+            display_priority: 0
             description: |
               Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
             value:
               type: boolean
               example: false
-            default: false
+              default: false
+            fleet_configurable: false
           - name: database_identifier
+            display_priority: 0
             description: |
-              Controls how the database is identified. The default value is the resolved hostname for the instance,
-              which respects the `reported_hostname` option.
+              Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+              billable instance.
+              
+              The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
 
               This value will be used as-is for the display name of the instance but will be normalized
               when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -89,7 +240,7 @@ files:
               - name: template
                 value:
                   type: string
-                  display_default: "$resolved_hostname"
+                  default: "$resolved_hostname"
                   example: "$env-$resolved_hostname:$port"
                 description: |
                   The template to use for the database identifier. The default value is `$resolved_hostname`.
@@ -99,44 +250,57 @@ files:
                   - port: The port number of the instance.
                   - mysql_sock: The socket path of the instance.
                   In addition, you can use any key from the `tags` section of the configuration.
-                default: "$resolved_hostname"
+                fleet_configurable: false
           - name: sock
+            display_priority: 0
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
-              If you specify a socket you dont need to specify a host.
+              If you specify a socket you don't need to specify a host.
+            fleet_configurable: true
             value:
               type: string
+              require_trusted_provider: true
           - name: charset
+            display_priority: 0
             description: Charset you want to use.
+            fleet_configurable: true
             value:
               type: string
               example: utf8
               display_default: null
           - name: defaults_file
+            display_priority: 0
             description: |
               Path to an alternative configuration mechanism file.
               If providing this then there is no need to specify host, port, user, pass or socket.
             value:
               type: string
+              require_trusted_provider: true
+            fleet_configurable: false
 
           - name: connect_timeout
+            display_priority: 0
             description: |
               Maximum number of seconds to wait before timing out when connecting to MySQL.
               The default connection timeout is 10 seconds.
+            fleet_configurable: true
             value:
               type: number
               example: 10
 
           - name: read_timeout
+            display_priority: 0
             description: |
               The timeout for reading from the connection in seconds.
               By default, no read timeout is set.
+            fleet_configurable: true
             value:
               type: number
               example: 10
               display_default: null
 
           - name: ssl
+            display_priority: 0
             description: |
               Use this section to configure a TLS connection between the Agent and MySQL.
 
@@ -151,10 +315,13 @@ files:
               properties:
                 - name: key
                   type: string
+                  formats: ["path"]
                 - name: cert
                   type: string
+                  formats: ["path"]
                 - name: ca
                   type: string
+                  formats: ["path"]
                 - name: check_hostname
                   type: boolean
               example:
@@ -162,19 +329,9 @@ files:
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
                 check_hostname: true
-          - template: instances/db
-            overrides:
-              custom_queries.value.example:
-                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
-                  columns:
-                    - name: foo
-                      type: tag
-                    - name: event.total
-                      type: gauge
-                  tags:
-                    - test:mysql
-                  metric_prefix: mysql
+            fleet_configurable: false
           - name: additional_status
+            display_priority: 0
             description: |
               Set this parameter to collect additional MySQL status variables as metrics
               from "SHOW GLOBAL STATUS"
@@ -185,6 +342,7 @@ files:
               name : MySQL status name on "SHOW GLOBAL STATUS"
               metric_name : metric name
               type : gauge | rate | count | ...
+            fleet_configurable: true
             value:
               type: array
               items:
@@ -195,6 +353,7 @@ files:
                   type: rate
 
           - name: additional_variable
+            display_priority: 0
             description: |
               Set this parameter to collect additional MySQL variables as metrics
               from "SHOW GLOBAL VARIABLES"
@@ -213,8 +372,10 @@ files:
                 - name: long_query_time
                   metric_name: mysql.performance.long_query_time
                   type: gauge
+            fleet_configurable: false
 
           - name: max_custom_queries
+            display_priority: 0
             description: |
               Set the maximum number of custom queries to execute with this integration.
 
@@ -222,8 +383,10 @@ files:
             value:
               type: integer
               example: 20
+            fleet_configurable: false
 
           - name: queries
+            display_priority: 0
             description: |
               Define custom queries to collect custom metrics from your MySQL database.
 
@@ -242,8 +405,10 @@ files:
                     - <METRIC_TAG_KEY>:<METRIC_TAG_VALUE>
                   type: <METRIC_TYPE>
                   field: <FIELD_NAME>
+            fleet_configurable: false
 
           - name: options
+            display_priority: 0
             description: |
               Enable options to collect extra metrics from your MySQL integration.
 
@@ -260,12 +425,14 @@ files:
                   type: boolean
                   example: false
                   display_default: null
+                fleet_configurable: false
 
               - name: replication_channel
                 description: |
                   If using multiple sources, set the channel name to monitor.
                 value:
                   type: string
+                fleet_configurable: false
 
               - name: galera_cluster
                 description: |
@@ -273,6 +440,7 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
 
               - name: extra_status_metrics
                 description: |
@@ -284,6 +452,7 @@ files:
                   type: boolean
                   example: false
                   display_default: null
+                fleet_configurable: false
 
               - name: extra_innodb_metrics
                 description: |
@@ -293,6 +462,7 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
 
               - name: disable_innodb_metrics
                 description: |
@@ -305,6 +475,20 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
+
+              - name: binlog_size_metrics
+                description: |
+                  Set to `false` to disable the collection of binary log size metrics.
+
+                  When binary logging is enabled, the check runs `SHOW BINARY LOGS;` to compute the
+                  `mysql.binlog.disk_use` metric. This query relies on binary log mutexes and can be slower on
+                  high traffic MySQL databases and Aurora instances, due to the number of binary log files to
+                  load and iterate. Set this to `false` to skip that query if it impacts your database performance.
+                value:
+                  type: boolean
+                  example: true
+                fleet_configurable: false
 
               - name: schema_size_metrics
                 description: |
@@ -319,6 +503,7 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
 
               - name: table_size_metrics
                 description: |
@@ -331,6 +516,7 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
 
               - name: system_table_size_metrics
                 description: |
@@ -343,6 +529,7 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
 
               - name: table_rows_stats_metrics
                 description: |
@@ -358,6 +545,7 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
               - name: extra_performance_metrics
                 description: |
                   These metrics are reported if `performance_schema` is enabled in the MySQL instance
@@ -378,16 +566,10 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
 
-          - name: dbm
-            description: |
-              Set to `true` enable Database Monitoring.
-            enabled: false
-            value:
-              type: boolean
-              example: false
-              display_default: false
           - name: collect_settings
+            display_priority: 0
             description: Configure collection of performance_schema.global_variables.
             options:
               - name: enabled
@@ -395,7 +577,8 @@ files:
                   Enable collection of performance_schema.global_variables. Requires `dbm: true`.
                 value:
                   type: boolean
-                  example: false
+                  example: true
+                fleet_configurable: false
               - name: collection_interval
                 description: |
                   Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -403,23 +586,61 @@ files:
                 value:
                   type: number
                   example: 600
-          - name: schemas_collection
+                fleet_configurable: false
+          - name: collect_schemas
+            display_priority: 0
             description: |
               Configure collection of schemas (databases).
               Only tables and schemas for which the user has been granted SELECT privileges are collected.
             options:
               - name: enabled
                 description: |
-                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                  Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+                  Defaults to false.
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
               - name: collection_interval
                 description: |
                   Set the database schema collection interval (in seconds). Defaults to 600 seconds.
                 value:
                   type: number
                   example: 600
+                fleet_configurable: false
+              - name: max_execution_time
+                description: |
+                  Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
+                  Capped by `collect_schemas.collection_interval`
+                value:
+                  type: number
+                  example: 60
+                fleet_configurable: false
+          - name: schemas_collection
+            display_priority: 0
+            deprecation:
+              Agent version: 7.69.0
+              Migration: Use `collect_schemas` instead.
+            description: |
+              DEPRECATED: Use `collect_schemas` instead.
+              Configure collection of schemas (databases).
+              Only tables and schemas for which the user has been granted SELECT privileges are collected.
+            options:
+              - name: enabled
+                description: |
+                  Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+                  Defaults to false.
+                value:
+                  type: boolean
+                  example: false
+                fleet_configurable: false
+              - name: collection_interval
+                description: |
+                  Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+                value:
+                  type: number
+                  example: 600
+                fleet_configurable: false
               - name: max_execution_time
                 description: |
                   Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
@@ -427,16 +648,21 @@ files:
                 value:
                   type: number
                   example: 60
+                fleet_configurable: false
           - name: query_metrics
+            display_priority: 0
             description: Configure collection of query metrics
+            fleet_configurable: true
             options:
               - name: enabled
+                fleet_configurable: true
                 description: |
                   Enable collection of query metrics. Requires `dbm: true`.
                 value:
                   type: boolean
                   example: true
               - name: collection_interval
+                fleet_configurable: true
                 description: |
                   Set the query metric collection interval (in seconds). Each collection involves a single query to
                   `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
@@ -445,6 +671,7 @@ files:
                   type: number
                   example: 10
               - name: only_query_recent_statements
+                fleet_configurable: true
                 description: |
                   Enable querying only for statements that have been run since last collection. This may improve agent
                   performance and reduce database load. Enabling this option should not alter the total number of query
@@ -453,17 +680,31 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+              - name: collect_prepared_statements
+                hidden: true
+                fleet_configurable: true
+                description: |
+                  Enable collection of prepared statements metrics. Prerequisites: `only_query_recent_statements: false`.
+                  Defaults to true.
+                value:
+                  type: boolean
+                  example: true
+                  display_default: true
 
           - name: query_samples
+            display_priority: 0
             description: Configure collection of query samples
+            fleet_configurable: true
             options:
               - name: enabled
+                fleet_configurable: true
                 description: |
                   Enables collection of query samples. Requires `dbm: true`.
                 value:
                   type: boolean
                   example: true
               - name: collection_interval
+                fleet_configurable: true
                 description: |
                   Sets the query sample collection interval (in seconds). Each collection involves a single query to one
                   of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
@@ -472,12 +713,14 @@ files:
                   type: number
                   example: 1
               - name: explained_queries_per_hour_per_query
+                fleet_configurable: true
                 description: |
                   Sets the rate limit for how many execution plans will be collected per hour per normalized query.
                 value:
                   type: integer
                   example: 60
               - name: samples_per_hour_per_query
+                fleet_configurable: true
                 description: |
                   Sets the rate limit for how many statement sample events will be ingested per hour per normalized
                   execution plan.
@@ -485,6 +728,7 @@ files:
                   type: integer
                   example: 15
               - name: explained_queries_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This
                   should be increased for databases with a very large number of unique normalized queries which exceed the
@@ -493,6 +737,7 @@ files:
                   type: integer
                   example: 5000
               - name: seen_samples_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
                   increased for databases with a very large number of unique normalized execution plans which exceed the
@@ -501,6 +746,7 @@ files:
                   type: integer
                   example: 10000
               - name: events_statements_row_limit
+                fleet_configurable: true
                 description: |
                   Sets the maximum number of rows to read out from a `performance_schema.events_statements_*` table during
                   a single collection.
@@ -508,6 +754,7 @@ files:
                   type: integer
                   example: 5000
               - name: explain_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default procedure used for collecting execution plans. The agent will use this
                   procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
@@ -515,6 +762,7 @@ files:
                   type: string
                   example: explain_statement
               - name: fully_qualified_explain_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default fully qualified explain procedure used for collecting execution plans for
                   statements sent from connections that do not have a default schema configured.
@@ -522,12 +770,14 @@ files:
                   type: string
                   example: datadog.explain_statement
               - name: events_statements_enable_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default procedure used for enabling events statements consumers.
                 value:
                   type: string
                   example: datadog.enable_events_statements_consumers
               - name: events_statements_temp_table_name
+                fleet_configurable: true
                 description: |
                   Overrides the default fully qualified name for the temp table the agent creates while collecting
                   samples.
@@ -535,6 +785,7 @@ files:
                   type: string
                   example: datadog.temp_events
               - name: collection_strategy_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for caching collection strategies. This value should be increased
                   to be at least as many as the number of unique schemas that are being monitored.
@@ -542,6 +793,7 @@ files:
                   type: integer
                   example: 1000
               - name: collection_strategy_cache_ttl
+                fleet_configurable: true
                 description: |
                   Sets how long to cache collection strategies. This should only be decreased if the set of enabled
                   `events_statements_*` tables changes frequently enough to cause stale strategies to return empty
@@ -550,6 +802,7 @@ files:
                   type: integer
                   example: 300
           - name: query_activity
+            display_priority: 0
             description: Configure collection of active sessions monitoring
             options:
               - name: enabled
@@ -558,6 +811,7 @@ files:
                 value:
                   type: boolean
                   example: true
+                fleet_configurable: false
               - name: collection_interval
                 description: |
                   Set the activity collection interval (in seconds).
@@ -565,6 +819,7 @@ files:
                   type: number
                   example: 10
                 hidden: true
+                fleet_configurable: false
               - name: collect_blocking_queries
                 description: |
                   Enable collection of blocking queries.
@@ -572,7 +827,9 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+                fleet_configurable: false
           - name: index_metrics
+            display_priority: 0
             description: |
               Configure collection of index metrics.
               Metrics provided by the options:
@@ -590,6 +847,7 @@ files:
                 value:
                   type: boolean
                   example: true
+                fleet_configurable: false
               - name: collection_interval
                 hidden: true
                 description: |
@@ -597,6 +855,7 @@ files:
                 value:
                   type: number
                   example: 300
+                fleet_configurable: false
               - name: limit
                 description: |
                   Set the maximum number of unique (by combination of database, table, and index name)
@@ -604,7 +863,9 @@ files:
                 value:
                   type: integer
                   example: 1000
+                fleet_configurable: false
           - name: aws
+            display_priority: 0
             description: |
               This block defines the configuration for AWS RDS and Aurora instances.
 
@@ -624,6 +885,7 @@ files:
                 value:
                   type: string
                   example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+                fleet_configurable: false
               - name: region
                 description: |
                   Equal to the region of the instance the agent is connecting to.
@@ -631,6 +893,7 @@ files:
                 value:
                   type: string
                   example: us-east-1
+                fleet_configurable: false
               - name: managed_authentication
                 description: |
                   Configure section used for AWS IAM Authentication with RDS.
@@ -658,7 +921,9 @@ files:
                   - name: role_arn
                     type: string
                     example: arn:aws:iam::123456789012:role/MyRole
+                fleet_configurable: false
           - name: gcp
+            display_priority: 0
             description: |
               This block defines the configuration for Google Cloud SQL instances.
 
@@ -677,6 +942,7 @@ files:
                 value:
                   type: string
                   example: foo-project
+                fleet_configurable: false
               - name: instance_id
                 description: |
                   Equal to the GCP resource's instance ID.
@@ -686,8 +952,10 @@ files:
                 value:
                   type: string
                   example: foo-database
+                fleet_configurable: false
 
           - name: azure
+            display_priority: 0
             description: |
               This block defines the configuration for Azure Database for MySQL.
 
@@ -711,6 +979,7 @@ files:
                 value:
                   type: string
                   example: flexible_server
+                fleet_configurable: false
               - name: fully_qualified_domain_name
                 description: |
                   Equal to the full qualified domain name of the Azure MySQL database.
@@ -719,8 +988,10 @@ files:
                 value:
                   type: string
                   example: mysql-database.database.windows.net
+                fleet_configurable: false
 
           - name: obfuscator_options
+            display_priority: 0
             description: |
               Configure how the SQL obfuscator behaves.
               Note: This option only applies when `dbm` is enabled.
@@ -735,6 +1006,7 @@ files:
                   type: string
                   example: obfuscate_and_normalize
                   display_default: obfuscate_and_normalize
+                fleet_configurable: false
               - name: replace_digits
                 description: |
                   Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -742,6 +1014,7 @@ files:
                 value:
                   type: boolean
                   example: false
+                fleet_configurable: false
               - name: collect_metadata
                 description: |
                   Set to `false` to disable the collection of metadata in your SQL statements.
@@ -749,6 +1022,7 @@ files:
                 value:
                   type: boolean
                   example: true
+                fleet_configurable: false
               - name: collect_tables
                 description: |
                   Set to `false` to disable the collection of tables in your SQL statements.
@@ -756,6 +1030,7 @@ files:
                 value:
                   type: boolean
                   example: true
+                fleet_configurable: false
               - name: collect_commands
                 description: |
                   Set to `false` to disable the collection of commands in your SQL statements.
@@ -765,6 +1040,7 @@ files:
                 value:
                   type: boolean
                   example: true
+                fleet_configurable: false
               - name: collect_comments
                 description: |
                   Set to `false` to disable the collection of comments in your SQL statements.
@@ -774,6 +1050,7 @@ files:
                 value:
                   type: boolean
                   example: true
+                fleet_configurable: false
               - name: keep_sql_alias
                 description: |
                   Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
@@ -783,6 +1060,7 @@ files:
                   type: boolean
                   example: true
                   display_default: true
+                fleet_configurable: false
               - name: remove_space_between_parentheses
                 description: |
                   Set to `true` to remove spaces between parentheses in your normalized SQL statements.
@@ -790,6 +1068,7 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+                fleet_configurable: false
               - name: keep_null
                 description: |
                   Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
@@ -797,6 +1076,7 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+                fleet_configurable: false
               - name: keep_boolean
                 description: |
                   Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
@@ -804,6 +1084,7 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+                fleet_configurable: false
               - name: keep_positional_parameter
                 description: |
                   Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
@@ -811,6 +1092,7 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+                fleet_configurable: false
               - name: keep_trailing_semicolon
                 description: |
                   Set to `true` to keep trailing semicolons in your normalized SQL statements.
@@ -818,6 +1100,7 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+                fleet_configurable: false
               - name: keep_identifier_quotation
                 description: |
                   Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
@@ -825,7 +1108,9 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+                fleet_configurable: false
           - name: log_unobfuscated_queries
+            display_priority: 0
             hidden: true
             description: |
               Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
@@ -835,7 +1120,9 @@ files:
               type: boolean
               example: false
               display_default: false
+            fleet_configurable: false
           - name: log_unobfuscated_plans
+            display_priority: 0
             hidden: true
             description: |
               Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
@@ -845,7 +1132,9 @@ files:
               type: boolean
               example: false
               display_default: false
+            fleet_configurable: false
           - name: database_instance_collection_interval
+            display_priority: 0
             hidden: true
             description: |
               Set the database instance collection interval (in seconds). The database instance collection sends
@@ -855,6 +1144,20 @@ files:
               type: number
               example: 1800
               display_default: false
+            fleet_configurable: false
+          - template: instances/db
+            overrides:
+              custom_queries.value.example:
+                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+                  columns:
+                    - name: foo
+                      type: tag
+                    - name: event.total
+                      type: gauge
+                  tags:
+                    - test:mysql
+                  metric_prefix: mysql
+              custom_queries.display_priority: 0
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
@@ -863,6 +1166,7 @@ files:
                 Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
                 other integrations tags.
 
+              tags.display_priority: 0
       - template: logs
         example:
           - type: file

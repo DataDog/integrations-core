@@ -15,7 +15,7 @@ interactions:
       x-github-api-version:
       - '2022-11-28'
     method: GET
-    uri: https://api.github.com/search/issues?q=sha%3A0000000000000000000000000000000000000000%20repo%3ADataDog/integrations-core
+    uri: https://api.github.com/search/issues?q=sha%3A0000000000000000000000000000000000000000%20repo%3ADataDog/integrations-core%20is%3Apull-request
   response:
     content: '{"total_count":0,"incomplete_results":false,"items":[]}'
     headers:

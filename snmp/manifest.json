@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4fc8e176-17ce-4346-9544-bec30ac47a00",
   "app_id": "snmp",
+  "owner": "network-device-monitoring-core",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

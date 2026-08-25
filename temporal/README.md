@@ -4,7 +4,9 @@
 
 This check monitors [Temporal][1] through the Datadog Agent. 
 
-**Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud integration documentation][13]. 
+**Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud - OpenMetrics integration documentation][13]. 
+
+**Minimum Agent version:** 7.45.0
 
 ## Setup
 
@@ -79,7 +81,9 @@ Note that when Temporal services in a cluster are deployed independently, every 
 
 **Example**
 
-The following Kubernetes annotation is applied to a pod under `metadata`, where `<CONTAINER_NAME>` is the name of your Temporal container (or a [custom identifier][16]):
+Choose one of the following Kubernetes Autodiscovery configurations, where `<CONTAINER_NAME>` is the name of your Temporal container:
+
+###### Kubernetes annotations
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
@@ -90,6 +94,31 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
     }
   } 
 ```
+###### DatadogInstrumentation CRD
+
+Temporal services are commonly deployed separately. Create one resource for each service workload that you monitor:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <TEMPORAL_SERVICE_NAME>
+  config:
+    checks:
+      - integration: temporal
+        containerName: <CONTAINER_NAME>
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "<LISTEN_ADDRESS>/<HANDLER_PATH>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
 
 ##### Log collection
 
@@ -166,9 +195,10 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.temporal.io/references/configuration#prometheus
 [11]: https://docs.temporal.io/references/configuration#log
 [12]: https://www.datadoghq.com/blog/temporal-server-integration/
-[13]: https://docs.datadoghq.com/integrations/temporal_cloud/
+[13]: https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/
 [14]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [15]: https://docs.datadoghq.com/containers/docker/integrations/
 [16]: https://docs.datadoghq.com/containers/guide/ad_identifiers/
 [17]: https://docs.datadoghq.com/agent/kubernetes/log/
 [18]: https://docs.datadoghq.com/containers/docker/log/
+[19]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

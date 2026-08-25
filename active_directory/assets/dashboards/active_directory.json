@@ -1,74 +1,542 @@
 {
   "title": "Active Directory",
   "author_name": "Datadog",
-  "description": "## Active Directory\n\nThis dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n\n- [Troubleshoot Active Directory Performance](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/active-directory-server/troubleshoot)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+  "description": "## Active Directory\n\nThis dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n\n- [Troubleshoot Active Directory Performance](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/active-directory-server/troubleshoot)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications. ",
   "widgets": [
     {
-      "id": 5958173007320266,
+      "id": 4902609369440623,
       "definition": {
-        "title": "Ldap",
+        "title": "",
+        "banner_img": "/static/images/logos/active-directory_small.svg",
+        "show_title": true,
         "type": "group",
-        "background_color": "blue",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 403324098763002,
+            "id": 7767833984445289,
             "definition": {
-              "title": "Search operations per second performed by LDAP clients",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [{ "formula": "query1", "alias": "Number of search operations" }],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "queries": [
-                    {
-                      "query": "avg:active_directory.ldap.searches_persec{$env,$host} by {host}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+              "type": "note",
+              "content": "This dashboard provides a comprehensive overview of **Microsoft Active Directory (AD)** health and performance, designed to help you monitor domain controllers, replication, and authentication activity in real time.\n\nIt visualizes key performance counters collected from **Windows Server’s NTDS, Netlogon, Security System-Wide Statistics, DFS Replication,** and **DHCP** services. By tracking these metrics, you can quickly detect replication bottlenecks, authentication latency, service degradation, and capacity constraints before they impact users or applications.\n\nEnable the Active Directory integration in your Datadog account to easily search, filter, and alert on all of these critical events in Datadog.\n\nFor configuration instructions, see:\n[Active Directory Integration Documentation](https://docs.datadoghq.com/integrations/active_directory/)\n",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
-          },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 7
+      }
+    },
+    {
+      "id": 7940281687668280,
+      "definition": {
+        "title": "Directory Replication Agent (DRA)",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "id": 6693916277956088,
+            "id": 1137404304731852,
             "definition": {
-              "title": "LDAP binding duration",
+              "title": "Inbound vs. Outbound Bytes Total",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
                       "formula": "query1",
-                      "alias": "Time required for the completion of the last successful LDAP binding"
+                      "alias": "Inbound"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Outbound"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:active_directory.dra.inbound.bytes.total{$env,$host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:active_directory.dra.outbound.bytes.total{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 4034674469455725,
+            "definition": {
+              "title": "Inbound vs. Outbound Objects",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Inbound",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Outbound",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:active_directory.dra.inbound.objects.persec{$env,$host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:active_directory.dra.outbound.objects.persec{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 388127489821942,
+            "definition": {
+              "title": "Inbound Objects Remaining",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:active_directory.dra.inbound.objects.remaining{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 526906059502250,
+            "definition": {
+              "title": "Sync Requests Made",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:active_directory.dra.sync_requests_made{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8333788003053042,
+            "definition": {
+              "title": "Pending Replication Synchronizations",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:active_directory.dra.replication.pending_synchronizations{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 11
+      }
+    },
+    {
+      "id": 528343624962139,
+      "definition": {
+        "title": "Active Directory Service Status",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5805539404023074,
+            "definition": {
+              "title": "NTDS",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "check_status",
+              "check": "windows_service.state",
+              "grouping": "cluster",
+              "group": "",
+              "group_by": [],
+              "tags": [
+                "$host",
+                "windows_service:ntds"
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5928243237593044,
+            "definition": {
+              "title": "Netlogon",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "check_status",
+              "check": "windows_service.state",
+              "grouping": "cluster",
+              "group": "",
+              "group_by": [],
+              "tags": [
+                "$host",
+                "windows_service:netlogon"
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 8792841234871970,
+            "definition": {
+              "title": "DHCP Server",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "check_status",
+              "check": "windows_service.state",
+              "grouping": "cluster",
+              "group": "",
+              "group_by": [],
+              "tags": [
+                "$host",
+                "windows_service:dhcp"
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 606693234534071,
+            "definition": {
+              "title": "DFSR",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "check_status",
+              "check": "windows_service.state",
+              "grouping": "cluster",
+              "group": "",
+              "group_by": [],
+              "tags": [
+                "$host",
+                "windows_service:dfsr"
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 1979621608655024,
+            "definition": {
+              "title": "ADWS",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "check_status",
+              "check": "windows_service.state",
+              "grouping": "cluster",
+              "group": "",
+              "group_by": [],
+              "tags": [
+                "$host",
+                "windows_service:adws"
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 6501013640238753,
+            "definition": {
+              "title": "KDC",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "check_status",
+              "check": "windows_service.state",
+              "grouping": "cluster",
+              "group": "",
+              "group_by": [],
+              "tags": [
+                "$host",
+                "windows_service:kdc"
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 2280519289909007,
+            "definition": {
+              "type": "note",
+              "content": "To enable service checks, see the [Service checks](https://docs.datadoghq.com/integrations/active-directory/#service-checks) section of the Active Directory docs.\nFor service states, see [Windows Service check states](https://docs.datadoghq.com/integrations/windows-service/#service-checks):\n- `OK`: Green\n- `CRITICAL`: Red\n- `UNKNOWN`: Gray\n- `WARNING`: Yellow\n",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 5958173007320266,
+      "definition": {
+        "title": "Lightweight Directory Access Protocol (LDAP)",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6693916277956088,
+            "definition": {
+              "title": "Binding Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
@@ -79,7 +547,6 @@
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -96,80 +563,54 @@
                 "max": "auto"
               },
               "markers": [
-                { "label": " <15ms ", "value": "0 < y < 15", "display_type": "ok dashed" },
                 {
-                  "label": " 15ms to 30ms ",
+                  "label": " <15ms ",
+                  "value": "0 < y < 15",
+                  "display_type": "ok dashed"
+                },
+                {
+                  "label": " 15ms to 30ms ",
                   "value": "15 < y < 30",
                   "display_type": "warning dashed"
                 },
-                { "label": " >30ms ", "value": "y > 30", "display_type": "error dashed" }
+                {
+                  "label": " >30ms ",
+                  "value": "y > 30",
+                  "display_type": "error dashed"
+                }
               ]
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
-          },
-          {
-            "id": 3701214856126876,
-            "definition": {
-              "title": "Number of sessions of connected LDAP clients",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    { "formula": "query1", "alias": "Number of sessions of connected LDAP clients" }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "queries": [
-                    {
-                      "query": "avg:active_directory.ldap.client_sessions{$env,$host} by {host}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 6848325894216022,
             "definition": {
-              "title": "Number of successful LDAP bindings",
+              "title": "Successful Bindings",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Number LDAP bindings that occurred successfully"
+                      "formula": "query1"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:active_directory.ldap.successful_binds_persec{$env,$host} by {host}",
@@ -182,7 +623,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "bars"
+                  "display_type": "line"
                 }
               ],
               "yaxis": {
@@ -194,44 +635,514 @@
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 3, "width": 6, "height": 2 }
-          }
-        ]
-      }
-    },
-    {
-      "id": 6884709400295612,
-      "definition": {
-        "title": "Replication",
-        "type": "group",
-        "background_color": "purple",
-        "layout_type": "ordered",
-        "widgets": [
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
           {
-            "id": 3088492298017520,
+            "id": 403324098763002,
             "definition": {
-              "title": "Number of sync requests to replication partner since computer was last restarted.",
+              "title": "Search vs. Write operations performed by LDAP clients",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Number of synchronization requests made to replication partners"
+                      "alias": "Searches",
+                      "number_format": {},
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Writes",
+                      "number_format": {},
+                      "formula": "query2"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:active_directory.dra.sync_requests_made{$env,$host} by {host}",
+                      "query": "avg:active_directory.ldap.searches_persec{$env,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
+                    },
+                    {
+                      "query": "avg:active_directory.ldap.writes_persec{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5843520814612144,
+            "definition": {
+              "title": "Active Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.ldap.active_threads{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 7714331298064157,
+      "definition": {
+        "title": "Core Directory Service (DS)",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 760538485876011,
+            "definition": {
+              "title": "Threads in Use",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.ds.threads_in_use{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5097218189095120,
+            "definition": {
+              "title": "Client Binds",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.ds.client_binds_persec{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 8617978708774895,
+      "definition": {
+        "title": "Authentication",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4133719299157471,
+            "definition": {
+              "title": "NTLM Authentications",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.security.ntlm_authentications{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 3121606764071257,
+            "definition": {
+              "title": "Kerberos Authentications",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.security.kerberos_authentications{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 3,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 1866726332671447,
+      "definition": {
+        "title": "Netlogon",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5462482755486021,
+            "definition": {
+              "title": "Semaphore Waiters vs. Holders",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Waiters",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Holders",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.netlogon.semaphore_waiters{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:active_directory.netlogon.semaphore_holders{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4497422896742787,
+            "definition": {
+              "title": "Semaphore Acquires vs. Timeouts",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Acquires",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Timeouts",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:active_directory.netlogon.semaphore_acquires{$env,$host} by {host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:active_directory.netlogon.semaphore_timeouts{$env,$host} by {host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
                     }
                   ],
                   "style": {
@@ -251,31 +1162,41 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
           },
           {
-            "id": 7100183879373558,
+            "id": 7205451583079946,
             "definition": {
-              "title": "Number of synchronizations queued",
+              "title": "Average Semaphore Hold Time",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Number of directory synchronizations that are queued for this server that are not yet processed"
+                      "alias": "Number of sessions of connected LDAP clients",
+                      "formula": "query1"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:active_directory.dra.replication.pending_synchronizations{$env,$host} by {host}",
+                      "query": "avg:active_directory.netlogon.semaphore_hold_time{$env,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -285,7 +1206,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "bars"
+                  "display_type": "line"
                 }
               ],
               "yaxis": {
@@ -297,201 +1218,514 @@
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 12,
+        "height": 6
       }
     },
     {
-      "id": 7940281687668280,
+      "id": 1671513135502186,
       "definition": {
-        "title": "Inbound",
+        "title": "DFS Replicated Folders (DFSR)",
+        "background_color": "vivid_blue",
+        "show_title": true,
         "type": "group",
-        "background_color": "green",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 1137404304731852,
+            "id": 6859048073675875,
             "definition": {
-              "title": "Size of inbound replication data from DSAs",
+              "title": "Staging Space In Use",
               "title_size": "16",
               "title_align": "left",
-              "type": "query_table",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
               "requests": [
                 {
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "q": "avg:active_directory.dra.inbound.bytes.total{$env,$host} by {host}",
-                  "alias": "Total bytes received",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:active_directory.dra.inbound.bytes.after_compression{$env,$host} by {host}",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Bytes compressed size"
-                },
-                {
-                  "q": "avg:active_directory.dra.inbound.bytes.not_compressed{$env,$host} by {host}",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Bytes uncompressed"
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dfsr.staging_space_in_use{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
                 }
-              ]
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "id": 5271031983458064,
+            "id": 7644334708308835,
             "definition": {
-              "title": "Objects and properties received from replication partners",
+              "title": "Conflict Space in Use",
               "title_size": "16",
               "title_align": "left",
-              "type": "query_table",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
               "requests": [
                 {
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "q": "avg:active_directory.dra.inbound.objects.applied_persec{$env,$host} by {host}",
-                  "alias": "Applied by directory service",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:active_directory.dra.inbound.objects.filtered_persec{$env,$host} by {host}",
-                  "alias": "No updates to apply",
-                  "cell_display_mode": ["bar"],
-                  "aggregator": "avg"
-                },
-                {
-                  "q": "avg:active_directory.dra.inbound.objects.remaining_in_packet{$env,$host} by {host}",
-                  "alias": "Remaining in packet",
-                  "cell_display_mode": ["bar"],
-                  "aggregator": "avg"
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dfsr.conflict_space_in_use{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
                 }
-              ]
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2962231833297679,
+            "definition": {
+              "title": "Deleted Space in Use",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dfsr.deleted_space_in_use{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 3409209191875255,
+            "definition": {
+              "title": "File Installs Retried",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dfsr.file_installs_retried{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 6, "height": 7, "is_column_break": true }
+      "layout": {
+        "x": 0,
+        "y": 9,
+        "width": 12,
+        "height": 5
+      }
     },
     {
-      "id": 6220753546683742,
+      "id": 4093599154333938,
       "definition": {
-        "title": "Outbound",
+        "title": "DHCP Server",
+        "background_color": "vivid_blue",
+        "show_title": true,
         "type": "group",
-        "background_color": "pink",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 1695684267459392,
+            "id": 2195117379128454,
             "definition": {
-              "title": "Size of outbound replication data to DSAs",
+              "title": "Failover Bind Updates Dropped",
               "title_size": "16",
               "title_align": "left",
-              "type": "query_table",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
               "requests": [
                 {
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "q": "avg:active_directory.dra.outbound.bytes.total{$env,$host} by {host}",
-                  "alias": "Total bytes received",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:active_directory.dra.outbound.bytes.after_compression{$env,$host} by {host}",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Bytes compressed size"
-                },
-                {
-                  "q": "avg:active_directory.dra.outbound.bytes.not_compressed{$env,$host} by {host}",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Bytes uncompressed"
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:active_directory.dhcp.failover.binding_updates_dropped{$env,$host} by {host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
                 }
-              ]
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "id": 7131306695522396,
+            "id": 1546765058921640,
             "definition": {
-              "title": "Object and properties sent to replication partners",
+              "title": "Failover Bind Updates Pending in Outbound Queue ",
               "title_size": "16",
               "title_align": "left",
-              "type": "query_table",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
               "requests": [
                 {
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "q": "avg:active_directory.dra.outbound.objects.filtered_persec{$env,$host} by {host}",
-                  "alias": "Objects acknowledged",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:active_directory.dra.outbound.objects.persec{$env,$host} by {host}",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Objects sent"
-                },
-                {
-                  "q": "avg:active_directory.dra.outbound.properties.persec{$env,$host} by {host}",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Properties"
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dhcp.failover.binding_updates_pending{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
                 }
-              ]
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7183557414851077,
+            "definition": {
+              "title": "Failover Bind Updates Received",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:active_directory.dhcp.failover.binding_updates_received{$env,$host} by {host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5421338835460894,
+            "definition": {
+              "title": "Failover Bind Updates Sent",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dhcp.failover.binding_updates_sent{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 7 }
-    },
-    {
-      "id": 6407289818729342,
-      "definition": {
-        "type": "note",
-        "content": "### Applied by directory service\n\nThis excludes changes that are received but not applied (for example, when the update is already made). This counter indicates how many replication updates are occurring on the server as a result of changes generated on other servers.\n\n### Remaining in packet\n\nThe number of object updates received in the current directory replication update packet that have not yet been applied to the local server. This counter tells you whether the monitored server is receiving changes, but is taking a long time applying them to the database.\n\n### Properties\n\nThe number of properties sent per second. This counter tells you whether a source server is returning objects or not. Sometimes, the server might stop working correctly and not return objects quickly or at all.\t",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "top"
-      },
-      "layout": { "x": 0, "y": 0, "width": 12, "height": 3 }
-    },
-    {
-      "id": 8824567418075250,
-      "definition": {
-        "title": "Log Events",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "log_stream",
-        "indexes": [],
-        "query": "source:(active_directory)",
-        "sort": { "column": "time", "order": "desc" },
-        "columns": ["host", "service"],
-        "show_date_column": true,
-        "show_message_column": true,
-        "message_display": "expanded-lg"
-      },
-      "layout": { "x": 0, "y": 3, "width": 12, "height": 5 }
+      "layout": {
+        "x": 0,
+        "y": 14,
+        "width": 12,
+        "height": 5
+      }
     }
   ],
   "template_variables": [
-    { "name": "env", "default": "*", "prefix": "env" },
-    { "name": "host", "default": "*", "prefix": "host" }
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    }
   ],
   "layout_type": "ordered",
-  "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed"
 }

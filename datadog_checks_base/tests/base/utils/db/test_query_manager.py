@@ -616,6 +616,52 @@ class TestTransformerCompilation:
         ):
             query_manager.compile_queries()
 
+    @pytest.mark.parametrize(
+        'expression, match',
+        [
+            pytest.param('f"total: {disk.total}"', r'contains unsupported syntax `JoinedStr`', id='f-string'),
+            pytest.param('sum(x for x in values)', r'contains unsupported syntax `GeneratorExp`', id='generator-expr'),
+            pytest.param('[x * 2 for x in values]', r'contains unsupported syntax `ListComp`', id='list-comp'),
+            pytest.param('{k: v for k, v in items}', r'contains unsupported syntax `DictComp`', id='dict-comp'),
+            pytest.param('(n := disk.total + disk.used)', r'contains unsupported syntax `NamedExpr`', id='walrus'),
+            pytest.param('lambda x: x + 1', r'contains unsupported syntax `Lambda`', id='lambda'),
+            pytest.param('result.__class__', r'accesses reserved attribute `__class__`', id='dunder-attr'),
+        ],
+    )
+    def test_expression_invalid_syntax(self, expression, match):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'result', 'type': 'expression', 'expression': expression, 'verbose': True}],
+                'tags': ['test:bar'],
+            }
+        )
+        with pytest.raises(ValueError, match=match):
+            query_manager.compile_queries()
+
+    @pytest.mark.parametrize(
+        'expression',
+        [
+            pytest.param('disk.total - disk.used', id='arithmetic'),
+            pytest.param('min(a, b)', id='function-call'),
+            pytest.param('tags[0]', id='subscript'),
+            pytest.param('a if condition else b', id='ternary'),
+        ],
+    )
+    def test_expression_valid_syntax(self, expression):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'result', 'type': 'expression', 'expression': expression, 'verbose': True}],
+                'tags': ['test:bar'],
+            }
+        )
+        query_manager.compile_queries()
+
     @pytest.mark.parametrize('expression', ['import os', 'raise Exception', 'foo = 5'])
     def test_expression_compile_error(self, expression):
         query_manager = create_query_manager(
@@ -718,8 +764,7 @@ class TestTransformerCompilation:
         with pytest.raises(
             ValueError,
             match=(
-                '^error compiling type `percent` for extra foo of test query: '
-                'the `total` parameter must be a string$'
+                '^error compiling type `percent` for extra foo of test query: the `total` parameter must be a string$'
             ),
         ):
             query_manager.compile_queries()
@@ -910,8 +955,7 @@ class TestTransformerCompilation:
         with pytest.raises(
             ValueError,
             match=(
-                '^error compiling type `log` for extra log of test query: '
-                'the `attributes` parameter must be a mapping$'
+                '^error compiling type `log` for extra log of test query: the `attributes` parameter must be a mapping$'
             ),
         ):
             query_manager.compile_queries()
@@ -934,8 +978,7 @@ class TestTransformerCompilation:
         with pytest.raises(
             ValueError,
             match=(
-                '^error compiling type `log` for extra log of test query: '
-                'the `attributes` parameter must not be empty$'
+                '^error compiling type `log` for extra log of test query: the `attributes` parameter must not be empty$'
             ),
         ):
             query_manager.compile_queries()
@@ -1114,9 +1157,9 @@ class TestSubmission:
         query_manager2 = QueryManager(check2, mock_executor(), [dummy_query])
         query_manager1.compile_queries()
         query_manager2.compile_queries()
-        assert not id(query_manager1.queries[0]) == id(
-            query_manager2.queries[0]
-        ), "QueryManager does not copy the queries"
+        assert not id(query_manager1.queries[0]) == id(query_manager2.queries[0]), (
+            "QueryManager does not copy the queries"
+        )
 
     def test_query_execution_error(self, caplog, aggregator):
         class Result(object):

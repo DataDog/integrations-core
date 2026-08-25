@@ -6,6 +6,8 @@ This check monitors Wireless LAN (WLAN) networks based on the [IEEE 802.11][1] s
 
 It collects key Wi-Fi metrics, including Access Point (AP) information such as [SSID][2] and [BSSID][3] (as tags), signal quality telemetry like [RSSI][4] and [Noise][5], transmission rate, and transitions count ([Roaming][6] and [Swapping][7] between APs, for example). These metrics help proactively identify overall wireless network issues, such as overloaded access points, as well as retrospective troubleshooting of poor network performance on individual hosts.
 
+**Minimum Agent version:** 7.64.2
+
 ## Setup
 
 ### Prerequisite
@@ -193,7 +195,7 @@ trap - ERR
 [7]: https://superuser.com/questions/122441/how-can-i-get-the-same-ssid-for-multiple-access-points
 [8]: https://app.datadoghq.com/account/settings/agent/latest
 [9]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
-[10]: https://github.com/DataDog/datadog-agent/blob/main/poc/cmd/agent/dist/conf.d/wlan.d/conf.yaml.example
+[10]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/wlan.d/conf.yaml.example
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [12]: https://docs.datadoghq.com/getting_started/tagging/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

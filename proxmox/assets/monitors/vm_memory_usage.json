@@ -1,0 +1,27 @@
+{
+	"version": 2,
+	"created_at": "2025-07-25",
+	"last_updated_at": "2025-07-25",
+	"title": "Memory Usage High on Proxmox VM",
+	"description": "Memory usage measures the percentage of memory used of the total available memory. High memory usage can lead to degraded performance of your Proxmox VM.",
+	"definition": {
+		"name": "Memory Usage High on Proxmox VM {{host.name}} on Node {{host.proxmox_node}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:proxmox.mem.used{proxmox_type:vm} by {host} / avg:proxmox.mem.total{proxmox_type:vm} by {host} * 100 > 90",
+		"message": "{{#is_alert}}VM {{host.name}} on Node {{host.proxmox_node}} is reporting high memory usage (at or above 90%).{{/is_alert}}{{#is_warning}}VM {{host.name}} on Node {{host.proxmox_node}} is reporting higher memory usage (at or above 80%).{{/is_warning}}{{#is_recovery}}Memory usage for VM {{host.name}} on Node {{host.proxmox_node}} is back to normal.{{/is_recovery}}",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 90,
+				"warning": 80
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60
+		}
+	},
+	"tags": [
+		"integration:proxmox"
+	]
+}

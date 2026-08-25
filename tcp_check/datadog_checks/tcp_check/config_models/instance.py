@@ -37,6 +37,7 @@ class InstanceConfig(BaseModel):
     collect_response_time: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     host: str
     ip_cache_duration: Optional[float] = None
     ipv4_only: Optional[bool] = None

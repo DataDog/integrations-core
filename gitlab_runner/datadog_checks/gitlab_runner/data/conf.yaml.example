@@ -12,9 +12,11 @@ init_config:
       - ci_runner_errors
       - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
       - ci_ssh_docker_machines_provider_machine_states
+      - gitlab_runner_api_request_duration_seconds
       - gitlab_runner_autoscaling_machine_creation_duration_seconds
       - gitlab_runner_autoscaling_machine_states
       - gitlab_runner_errors_total
+      - gitlab_runner_job_queue_duration_seconds
       - gitlab_runner_jobs
       - gitlab_runner_version_info
       - go_gc_duration_seconds
@@ -272,7 +274,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -295,7 +297,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

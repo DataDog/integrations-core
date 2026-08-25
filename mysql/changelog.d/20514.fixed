@@ -1,1 +1,0 @@
-Avoid querying INFORMATION_SCHEMA.COLUMNS in favor of a static version check

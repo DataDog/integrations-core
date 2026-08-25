@@ -36,6 +36,22 @@ SC_TAGS_REPLICA = (
     'database_hostname:stubbed.hostname',
     'database_instance:stubbed.hostname',
 )
+SC_TAGS_HYBRID_PRIMARY = (
+    'port:' + str(common.PORTS_HYBRID_GROUP[0]),
+    'tag1:value1',
+    'tag2:value2',
+    'dd.internal.resource:database_instance:stubbed.hostname',
+    'database_hostname:stubbed.hostname',
+    'database_instance:stubbed.hostname',
+)
+SC_TAGS_HYBRID_TRADITIONAL_REPLICA = (
+    'port:' + str(common.PORT_HYBRID_TRADITIONAL_REPLICA),
+    'tag1:value1',
+    'tag2:value2',
+    'dd.internal.resource:database_instance:stubbed.hostname',
+    'database_hostname:stubbed.hostname',
+    'database_instance:stubbed.hostname',
+)
 SC_FAILURE_TAGS = (
     'port:unix_socket',
     *database_instance_resource_tags('stubbed.hostname'),
@@ -44,6 +60,6 @@ SC_FAILURE_TAGS = (
 
 def metrics_tags_with_resource(mysql_check):
     _tags = METRIC_TAGS_WITH_RESOURCE
-    if common.MYSQL_FLAVOR.lower() == 'mysql':
+    if common.MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
     return _tags

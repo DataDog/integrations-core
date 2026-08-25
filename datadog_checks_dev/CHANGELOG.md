@@ -2,6 +2,200 @@
 
 <!-- towncrier release notes start -->
 
+## 40.0.1 / 2026-08-13
+
+***Fixed***:
+
+* Require Twine 7 for uploading distributions using core metadata 2.5. ([#24853](https://github.com/DataDog/integrations-core/pull/24853))
+
+## 40.0.0 / 2026-08-12
+
+***Changed***:
+
+* Stop declaring `black` as a direct dependency. The `apply_black` calls used to format auto-generated config-model files now go through `ruff format`, using the repo's centralized `[tool.ruff]` configuration. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+
+***Added***:
+
+* Add tooling support for generating configuration discovery files. ([#24126](https://github.com/DataDog/integrations-core/pull/24126))
+* Add process autodiscovery E2E testing helpers. ([#24238](https://github.com/DataDog/integrations-core/pull/24238))
+* Allow config discovery candidates to include literal arrays and mappings. ([#24488](https://github.com/DataDog/integrations-core/pull/24488))
+* Add backend-neutral Agent log retrieval for E2E test diagnostics. ([#24639](https://github.com/DataDog/integrations-core/pull/24639))
+* Validate the format-spec conversion character in discovery candidate templates. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
+***Fixed***:
+
+* Remove obsolete TokuMX-specific validation workarounds. ([#24145](https://github.com/DataDog/integrations-core/pull/24145))
+* Catch `ProcessLookupError` when killing port-forward processes during E2E teardown to handle already-exited processes gracefully. ([#24174](https://github.com/DataDog/integrations-core/pull/24174))
+* Compare license headers against the actual base branch instead of always against ``origin/master``, fixing false validation failures for files that exist on a release branch but were deleted from master. ([#24197](https://github.com/DataDog/integrations-core/pull/24197))
+* Default `COMPOSE_PROJECT_NAME` in `docker_run()` to the check's directory name to avoid Compose project-name collisions between concurrent E2E test runs. ([#24482](https://github.com/DataDog/integrations-core/pull/24482))
+* Fix false-positive discovery-candidate stability failures caused by incorrectly diffing concatenated stdout/stderr container logs. ([#24536](https://github.com/DataDog/integrations-core/pull/24536))
+* Fix test environments that mount logs (``mount_logs``) failing to start on macOS when Docker runs through Colima. ([#24593](https://github.com/DataDog/integrations-core/pull/24593))
+* Use Docker Compose labels to find containers during discovery stability tests without reparsing Compose files. ([#24638](https://github.com/DataDog/integrations-core/pull/24638))
+* Fix a bug where a malformed discovery candidate template crashed ``ddev validate config`` with a raw traceback instead of reporting a validation error. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
+## 39.0.0 / 2026-06-15
+
+***Changed***:
+
+* Make docker_run wait for Docker Compose service health by default. ([#23628](https://github.com/DataDog/integrations-core/pull/23628))
+* Legacy migration: remove `validate jmx-metrics` from the legacy CLI; the command is now provided natively by ddev. ([#23652](https://github.com/DataDog/integrations-core/pull/23652))
+
+***Added***:
+
+* Add `include_total` option to the Windows perf-counter spec template, allowing integrations to opt in to collecting the `_Total` aggregate instance. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+* Modernize the `ddev create -t check` scaffold template to use Python 3.13 idioms. ([#23705](https://github.com/DataDog/integrations-core/pull/23705))
+* Fail `ddev validate agent-reqs` when `requirements-agent-release.txt` pins a `datadog-*` package whose integration folder is no longer present in the repo. ([#23813](https://github.com/DataDog/integrations-core/pull/23813))
+
+***Fixed***:
+
+* Make `generate-profile-from-mibs` emit `symbol` instead of the deprecated `column` field on table metric tags, and accept `symbol` in `validate-profile`. ([#23543](https://github.com/DataDog/integrations-core/pull/23543))
+* Fix `get_agent_requirement_line` to ignore unknown OS platforms (e.g. `Supported OS::AIX`) when computing agent requirement lines. ([#23608](https://github.com/DataDog/integrations-core/pull/23608))
+* Restore the legacy `validate jmx-metrics` command file to keep the release pipeline's in-toto attestation valid; the command is still served by `ddev`. ([#23687](https://github.com/DataDog/integrations-core/pull/23687))
+* Keep registry.datadoghq.com Agent 6 and 7 builds from receiving a Python suffix. ([#23790](https://github.com/DataDog/integrations-core/pull/23790))
+
+## 38.0.0 / 2026-04-29
+
+***Changed***:
+
+* Legacy migration: remove the legacy `clean`, `config`, `test`, `validate all`, `validate licenses`, and `agent requirements` commands from `python -m datadog_checks.dev`. ddev provides native equivalents for the first five; `agent requirements` is unreachable and unsupported. ([#23478](https://github.com/DataDog/integrations-core/pull/23478))
+
+***Added***:
+
+* Suppress "already exists" noise in `ddev release tag` output. ([#22883](https://github.com/DataDog/integrations-core/pull/22883))
+
+***Fixed***:
+
+* Fix `apply_overrides` to support nested template references in spec.yaml overrides. ([#23348](https://github.com/DataDog/integrations-core/pull/23348))
+* Bump minimum virtualenv to 20.26.1 in the cli extras for compatibility with modern hatch. ([#23497](https://github.com/DataDog/integrations-core/pull/23497))
+
+## 37.0.0 / 2026-04-15
+
+***Changed***:
+
+* Bump pytest to 9.0.3 and update pytest plugins to latest versions. ([#23306](https://github.com/DataDog/integrations-core/pull/23306))
+
+***Fixed***:
+
+* Bump `requests` to `>=2.33.0` (CVE-2026-25645 / VULN-59770). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+
+## 36.1.0 / 2026-04-06
+
+***Added***:
+
+* Add support for require_trusted_provider security validation ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 36.0.0 / 2026-03-28
+
+***Changed***:
+
+* Bump pysmi from 0.3.4 to 1.6.2 for the `generate-traps-db` command. ([#22648](https://github.com/DataDog/integrations-core/pull/22648))
+
+***Added***:
+
+* Speed up MIB compilation with IndexedFileReader ([#22953](https://github.com/DataDog/integrations-core/pull/22953))
+
+***Fixed***:
+
+* Migrate integrations-core tests to the new Datadog Docker registry ([#22202](https://github.com/DataDog/integrations-core/pull/22202))
+* Update config templates. ([#22619](https://github.com/DataDog/integrations-core/pull/22619))
+* Validate and enforce allowed `formats` values in configuration spec validation, including nested object properties. ([#22714](https://github.com/DataDog/integrations-core/pull/22714))
+* Fix generate-traps-db silently dropping MIB variables with hyphenated names when using pysmi 1.x ([#22989](https://github.com/DataDog/integrations-core/pull/22989))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 35.6.0 / 2026-02-13
+
+***Added***:
+
+* Added validation for option and value level fields in the ddev validate command. ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add legacy field in spec for legacy options ([#22333](https://github.com/DataDog/integrations-core/pull/22333))
+* Add fixture to mock HTTP requests per endpoint ([#22396](https://github.com/DataDog/integrations-core/pull/22396))
+
+***Fixed***:
+
+* Validate that dependencies are in the correct section in pyproject.toml ([#21898](https://github.com/DataDog/integrations-core/pull/21898))
+* Mark the http auth_token as a secret in spec.yaml. ([#22489](https://github.com/DataDog/integrations-core/pull/22489))
+
+## 35.5.0 / 2025-12-12
+
+***Added***:
+
+* Add an exclusion for the mysql file that was deleted ([#22095](https://github.com/DataDog/integrations-core/pull/22095))
+
+## 35.4.0 / 2025-12-10
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+***Fixed***:
+
+* Mark TLS and JMX configuration template passwords as secrets. ([#21975](https://github.com/DataDog/integrations-core/pull/21975))
+* Fix release make all command when an integration does not have a manifest file ([#21977](https://github.com/DataDog/integrations-core/pull/21977))
+
+## 35.3.1 / 2025-11-19
+
+***Fixed***:
+
+* Add a fallback mechanism when mount_logs is True and no manifest is present in the integration ([#21784](https://github.com/DataDog/integrations-core/pull/21784))
+* Update event integration template. ([#21897](https://github.com/DataDog/integrations-core/pull/21897))
+
+## 35.3.0 / 2025-11-03
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+* Add KindLoad wrapper utility that allows to load Docker images into kind for testing ([#21288](https://github.com/DataDog/integrations-core/pull/21288))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+* Add helper method to get a list of N free ports ([#21662](https://github.com/DataDog/integrations-core/pull/21662))
+* Add new template for creating event integrations ([#21717](https://github.com/DataDog/integrations-core/pull/21717))
+
+***Fixed***:
+
+* Fix validate models error reporting which would not report an invalid schema in the config spec and just fail ([#20445](https://github.com/DataDog/integrations-core/pull/20445))
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+* Fix wait_for_health flag win docker_run ([#21209](https://github.com/DataDog/integrations-core/pull/21209))
+* Move KindLoad to a built-in condition instead of a wrapper ([#21292](https://github.com/DataDog/integrations-core/pull/21292))
+* Remove license validation overrides for `pycryptodomex` dependency. ([#21378](https://github.com/DataDog/integrations-core/pull/21378))
+* Fixes InstanceConfig model generation when validators functions are defined in spec.yaml ([#21409](https://github.com/DataDog/integrations-core/pull/21409))
+* Fix schema issue on `ignore_metrics_by_labels` field ([#21583](https://github.com/DataDog/integrations-core/pull/21583))
+
+## 35.2.0 / 2025-08-20
+
+***Added***:
+
+* Add option to specify container to check logs from and to wait for health when running docker compose up ([#21104](https://github.com/DataDog/integrations-core/pull/21104))
+
+***Fixed***:
+
+* Updating check_only to not have support_type = 'partner' ([#21109](https://github.com/DataDog/integrations-core/pull/21109))
+
+## 35.1.4 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in configuration templates ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Fix codeowners validation to use proper team ([#20974](https://github.com/DataDog/integrations-core/pull/20974))
+
+## 35.1.3 / 2025-07-30
+
+***Fixed***:
+
+* Update required owner of logs files ([#20817](https://github.com/DataDog/integrations-core/pull/20817))
+* Fail config validation if templates are missing. ([#20832](https://github.com/DataDog/integrations-core/pull/20832))
+
+## 35.1.2 / 2025-07-14
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors ([#20435](https://github.com/DataDog/integrations-core/pull/20435))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* [MINPROC-2319] remove the integration exception mapper ([#20697](https://github.com/DataDog/integrations-core/pull/20697))
+* Update new integration readme template. ([#20749](https://github.com/DataDog/integrations-core/pull/20749))
+
 ## 35.1.1 / 2025-06-04
 
 ***Fixed***:

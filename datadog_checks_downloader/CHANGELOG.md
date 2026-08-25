@@ -2,6 +2,54 @@
 
 <!-- towncrier release notes start -->
 
+## 9.3.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 9.2.2 / 2026-06-22 / Agent 7.81.0
+
+***Fixed***:
+
+* Use ``https://agent-integration-wheels.datadoghq.com`` (CloudFront) as the default v2 repository URL, replacing the direct S3 URL. The ``--repository`` flag still accepts any HTTPS base URL. ([#24084](https://github.com/DataDog/integrations-core/pull/24084))
+
+## 9.2.1 / 2026-06-15
+
+***Fixed***:
+
+* Use the versioned ``wheelsmith/v1`` v2 target namespace and tighten pointer validation. ([#23937](https://github.com/DataDog/integrations-core/pull/23937))
+
+## 9.2.0 / 2026-06-09
+
+***Added***:
+
+* Add v2 TUF pointer downloader support. ([#23144](https://github.com/DataDog/integrations-core/pull/23144))
+
+## 9.1.0 / 2026-03-18 / Agent 7.78.0
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 9.0.0 / 2025-12-17 / Agent 7.75.0
+
+***Changed***:
+
+* Update the root layout version to v8 (vault ceremony v18) ([#22089](https://github.com/DataDog/integrations-core/pull/22089))
+
+## 8.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+
+## 8.0.0 / 2025-06-12 / Agent 7.68.0
+
+***Changed***:
+
+* Update the root layout version to v7 (vault ceremony v17) ([#20477](https://github.com/DataDog/integrations-core/pull/20477))
+
 ## 7.2.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:

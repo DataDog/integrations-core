@@ -41,7 +41,7 @@ SHOW_METRIC_DATA = {
         'regex': re.compile(
             r'^\s*[*\s]*(?P<queue_name>\S+)\s+'
             r'(?P<snfgxibct>[-+*]*)\s+'
-            r'(?P<pre>\d+\*?)\s+'
+            r'(?P<pre>(?:\d+\*?|none))\s+'
             r'(?P<receivers>\d+)\s+'
             r'(?P<pending_messages>\d+)\s+'
             r'(?P<pending_messages_size>\d+\.?\d*\s*\S+)\s+'
@@ -98,7 +98,8 @@ SHOW_METRIC_DATA = {
             'messages_rate',
             'messages_rate_size',
         ],
-        'tags': ['destination', 'user', 'component_type', 'conn', 'destination'],
+        'tags': ['destination', 'user', 'component_type', 'conn'],
+        'aggregate': True,
     },
     'show stat producers': {
         'regex': re.compile(
@@ -118,7 +119,8 @@ SHOW_METRIC_DATA = {
             'messages_rate',
             'messages_rate_size',
         ],
-        'tags': ['destination', 'user', 'component_type', 'conn', 'destination'],
+        'tags': ['destination', 'user', 'component_type', 'conn'],
+        'aggregate': True,
     },
     'show connections full': {
         'regex': re.compile(

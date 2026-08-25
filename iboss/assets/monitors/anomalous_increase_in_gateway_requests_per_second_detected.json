@@ -1,0 +1,42 @@
+{
+	"version": 2,
+	"created_at": "2025-05-30",
+	"last_updated_at": "2025-05-30",
+	"title": "Anomalous increase in gateway requests per second detected",
+	"description": "It monitors for a sudden spike in gateway requests per second, which may signal abnormal usage, abuse, or misconfiguration. Persistent increases can strain system resources and impact network performance.",
+	"definition": {
+		"id": 173408479,
+		"name": "Anomalous increase in gateway requests per second detected",
+		"type": "query alert",
+		"query": "avg(last_1d):anomalies(throughput(sum:iboss.gateway_performance.total_request_count{!gateway_name:none,!gateway_name:all_gateways} by {gateway_name}), 'agile', 2, direction='above', interval=300, alert_window='last_1h', seasonality='hourly', timezone='utc', count_default_zero='true') >= 1",
+		"message": "{{#is_warning}}\n⚠️ **Warning**: Anomalous increase in **gateway requests per second** detected on **{{gateway_name.name}}**.\n\n📈 Recent values are **{{value}}**, breaching the warning threshold.\n\n{{/is_warning}}\n\n{{#is_alert}}\n🚨 **Alert**: Significant anomaly in **gateway requests per second** detected on **{{gateway_name.name}}**\n\n📈 Recent values are **{{value}}**, breaching the alert threshold.\n\n{{/is_alert}}\n\n\n@example@example.com",
+		"tags": [
+			"integration:iboss"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1,
+				"critical_recovery": 0,
+				"warning": 0.7
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"renotify_interval": 0,
+			"threshold_windows": {
+				"trigger_window": "last_1h",
+				"recovery_window": "last_15m"
+			},
+			"include_tags": true,
+			"on_missing_data": "default",
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:iboss"
+	]
+}

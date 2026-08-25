@@ -1,0 +1,39 @@
+{
+	"version": 2,
+	"created_at": "2025-08-17",
+	"last_updated_at": "2025-08-17",
+	"title": "Anthropic Token Usage Is Approaching Rate Limit",
+	"description": "Token usage is approaching rate limit",
+	"definition": {
+		"name": "Anthropic Usage is Approaching Rate Limit",
+		"type": "query alert",
+		"query": "sum(last_5m):sum:anthropic.messages.input_tokens{*} by {model,org_name,workspace_name}.as_count() + sum:anthropic.messages.output_tokens{*} by {model,org_name,workspace_name}.as_count() + sum:anthropic.messages.cache_read_input_tokens{*} by {model,org_name,workspace_name}.as_count() + sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{*} by {model,org_name,workspace_name}.as_count() + sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{*} by {model,org_name,workspace_name}.as_count() > 1500000",
+		"message": "## Anthropic Usage is Approaching Rate Limit\n\nThe rate limit thresholds in this monitor are common estimates, and may not be accurate for your organization. Please adjust the monitor as needed.\n\n{{#is_alert}}\n**WARNING**: Anthropic token usage is approaching rate limits.\n\n**Current Request Rate**: {{value}} tokens/5m\n**Rate Limit Threshold**: 1500000 tokens/5m (for most tiers)\n\n**Risk Assessment**:\n- At current rate, you may hit rate limits soon\n- Rate limiting will cause 429 errors and service disruptions\n- Users may experience failures or delays\n\n**Optimization Strategies**:\n- Enable request queuing and throttling\n- Implement exponential backoff for retries\n- Batch similar requests together\n- Use caching to reduce redundant requests\n- Consider upgrading your Anthropic tier for higher limits\n\n**Workspace**: {{workspace_name.name}}\n**Model**: {{model.name}}\n{{/is_alert}}\n\n{{#is_warning}}\n**WARNING**: Token usage is approaching rate limits.\nCurrent rate: {{value}} tokens/5 minutes\n{{/is_warning}}\n\n{{#is_recovery}}\n**RECOVERED**: Token usage rate has returned to safe levels.\n{{/is_recovery}}",
+		"tags": [
+			"integration:anthropic",
+			"alert_type:rate_limit"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1500000,
+				"warning": 1000000,
+				"critical_recovery": 500,
+				"warning_recovery": 400
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"timeout_h": 0,
+			"include_tags": true,
+			"renotify_interval": 0,
+			"escalation_message": "",
+			"evaluation_delay": 0,
+			"avalanche_window": 10,
+			"on_missing_data": "show_no_data",
+			"new_group_delay": 0
+		},
+		"priority": 1
+	},
+	"tags": [
+		"integration:anthropic-usage-and-costs"
+	]
+}

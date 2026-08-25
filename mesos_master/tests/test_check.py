@@ -152,7 +152,8 @@ def test_can_connect_service_check(
 ):
     check = MesosMaster('mesos_master', {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = request_mock_side_effects
 
         try:

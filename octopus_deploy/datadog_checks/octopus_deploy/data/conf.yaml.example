@@ -242,12 +242,12 @@ instances:
     #
     # paginated_limit: 30
 
-    ## @param collect_events - boolean - optional - default: true
+    ## @param collect_events - boolean - optional - default: false
     ## Whether or not to collect audit events about machines, deployments, and failed logins.
     #
     # collect_events: true
 
-    ## @param unified_service_tagging - boolean - optional - default: true
+    ## @param unified_service_tagging - boolean - optional - default: false
     ## Tags metrics, logs, and events with the project name as the `service`, and octopus environment as `env`,
     ## and release version as `version`.
     ## For more information, see https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging
@@ -327,7 +327,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -350,7 +350,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

@@ -48,6 +48,7 @@ files:
     - name: password
       description: The password for the Datadog user account.
       required: true
+      secret: true
       value:
         type: string
     - name: jdbc_driver_path
@@ -56,7 +57,9 @@ files:
         You can also add it to your $CLASSPATH instead.
       value:
         type: string
+        require_trusted_provider: true
         example: <DRIVER_PATH>.jar
+      fleet_configurable: false
     - name: jdbc_truststore_path
       description: |
         The JDBC truststore file path.
@@ -64,6 +67,8 @@ files:
         Note: This option is required if connecting with TCPS through JDBC.
       value:
         type: string
+        require_trusted_provider: true
+      fleet_configurable: false
     - name: jdbc_truststore_type
       description: |
         The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
@@ -71,10 +76,12 @@ files:
         Note: This option is required if connecting with TCPS through JDBC.
       value:
         type: string
+      fleet_configurable: false
     - name: jdbc_truststore_password
       description: |
         The password for the truststore when connecting through JDBC.
       value:
         type: string
+      fleet_configurable: false
     - template: instances/db
     - template: instances/default

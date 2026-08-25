@@ -45,7 +45,6 @@ def dd_environment():
             lab_username,
             lab_private_key,
         ) as socks:
-
             socks_ip, socks_port = socks
             print(f"socks: {socks}")
             instance = copy.deepcopy(VCSIM_INSTANCE)
@@ -123,7 +122,9 @@ def service_instance(
     mock_si.content.perfManager.QueryPerf = MagicMock(side_effect=query_perf)
     mock_si.content.propertyCollector.RetrievePropertiesEx = MagicMock(side_effect=retrieve_properties_ex)
 
-    with patch('pyVmomi.vmodl.query.PropertyCollector.ObjectSpec', return_value=MagicMock()), patch(
-        'pyVmomi.vmodl.query.PropertyCollector.FilterSpec', return_value=MagicMock()
-    ), patch('pyVim.connect.SmartConnect', return_value=mock_si):
+    with (
+        patch('pyVmomi.vmodl.query.PropertyCollector.ObjectSpec', return_value=MagicMock()),
+        patch('pyVmomi.vmodl.query.PropertyCollector.FilterSpec', return_value=MagicMock()),
+        patch('pyVim.connect.SmartConnect', return_value=mock_si),
+    ):
         yield mock_si

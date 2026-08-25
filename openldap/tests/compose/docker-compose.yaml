@@ -1,6 +1,6 @@
 services:
   openldap:
-    image: "bitnami/openldap:${OPENLDAP_VERSION}"
+    image: "bitnamilegacy/openldap:${OPENLDAP_VERSION}"
     platform: linux/amd64
     ports:
       - "1389:1389"

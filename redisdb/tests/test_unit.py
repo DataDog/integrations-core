@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 import mock
 import pytest
+import redis
 from redis.exceptions import ResponseError
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -84,7 +87,7 @@ def test__check_total_commands_processed_not_present(check, aggregator, redis_in
     conn.info.return_value = {}
 
     # Run the check
-    redis_check._check_total_commands_processed(conn.info(), [])
+    redis_check._check_info_fields(conn.info(), [])
 
     # Assert that no metrics were sent
     aggregator.assert_metric('redis.net.commands', count=0)
@@ -99,7 +102,7 @@ def test__check_total_commands_processed_present(check, aggregator, redis_instan
     conn.info.return_value = {'total_commands_processed': 1000}
 
     # Run the check
-    redis_check._check_total_commands_processed(conn.info(), ['test_total_commands_processed'])
+    redis_check._check_info_fields(conn.info(), ['test_total_commands_processed'])
 
     # Assert that the `redis.net.commands` metric was sent
     aggregator.assert_metric('redis.net.commands', value=1000, tags=['test_total_commands_processed'])
@@ -123,13 +126,16 @@ def test_check_all_available_config_options(check, aggregator, redis_instance, d
         'ssl_keyfile': '/path',
         'ssl_ca_certs': '/path',
         'ssl_cert_reqs': 0,
+        'ssl_check_hostname': True,
+        'client_name': 'datadog-agent',
     }
     redis_instance.update(connection_args)
 
     redis_check = check(redis_instance)
     with mock.patch('redis.Redis') as redis_conn:
         dd_run_check(redis_check)
-        assert redis_conn.call_args.kwargs == connection_args
+        # RESP2 is pinned by the check rather than taken from the client default
+        assert redis_conn.call_args.kwargs == connection_args | {'protocol': 2}
 
 
 def test_slowlog_quiet_failure(check, aggregator, redis_instance):
@@ -163,3 +169,91 @@ def test_slowlog_loud_failure(check, redis_instance):
     with mock.patch.object(redis_check, '_get_conn', return_value=mock_conn):
         with pytest.raises(RuntimeError, match='Some other error'):
             redis_check._check_slowlog()
+
+
+@pytest.mark.parametrize(
+    'cluster_state, expected_state_value',
+    [
+        pytest.param('ok', 1, id='cluster_state_ok'),
+        pytest.param('fail', 0, id='cluster_state_fail'),
+    ],
+)
+def test__check_cluster_info(check, aggregator, redis_instance, cluster_state, expected_state_value):
+    redis_check = check(redis_instance)
+    conn = mock.MagicMock()
+    conn.cluster.return_value = {
+        'cluster_state': cluster_state,
+        'cluster_slots_assigned': '16384',
+        'cluster_slots_ok': '16384',
+        'cluster_slots_pfail': '0',
+        'cluster_slots_fail': '0',
+        'cluster_known_nodes': '6',
+        'cluster_size': '3',
+        'cluster_current_epoch': '6',
+    }
+    redis_check._check_cluster_info(conn, ['foo:bar'])
+
+    conn.cluster.assert_called_once_with('info')
+    aggregator.assert_metric('redis.cluster.state', value=expected_state_value, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_assigned', value=16384, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_ok', value=16384, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_pfail', value=0, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_fail', value=0, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.known_nodes', value=6, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.size', value=3, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.current_epoch', value=6, count=1, tags=['foo:bar'])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test__check_cluster_info_disabled(check, aggregator, redis_instance):
+    """_check_cluster_info should swallow ResponseError (e.g. cluster support disabled)."""
+    redis_check = check(redis_instance)
+    conn = mock.MagicMock()
+    conn.cluster.side_effect = redis.ResponseError('ERR This instance has cluster support disabled')
+    redis_check._check_cluster_info(conn, ['foo:bar'])
+    conn.cluster.assert_called_once_with('info')
+    aggregator.assert_metric('redis.cluster.state', count=0)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test__check_cluster_info_invalid_value(check, aggregator, redis_instance):
+    redis_check = check(redis_instance)
+    conn = mock.MagicMock()
+    conn.cluster.return_value = {
+        'cluster_state': 'ok',
+        'cluster_slots_assigned': 'not_a_number',
+        'cluster_slots_ok': '16384',
+        'cluster_slots_pfail': '0',
+        'cluster_slots_fail': '0',
+        'cluster_known_nodes': '6',
+        'cluster_size': '3',
+        'cluster_current_epoch': '6',
+    }
+    redis_check._check_cluster_info(conn, ['foo:bar'])
+    conn.cluster.assert_called_once_with('info')
+    aggregator.assert_metric('redis.cluster.slots_assigned', count=0)
+    aggregator.assert_metric('redis.cluster.slots_ok', value=16384, count=1, tags=['foo:bar'])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_info_command_fallback(check, redis_instance, caplog):
+    """
+    The check should default to `INFO all` and fall back to `INFO`
+    """
+    redis_check = check(redis_instance)
+
+    def mock_info(*args, **kwargs):
+        if kwargs.get('section') == 'all':
+            raise redis.ResponseError()
+        else:
+            return {}
+
+    # Mock the connection object returned by _get_conn
+    mock_conn = mock.MagicMock()
+    mock_conn.info = mock.MagicMock(side_effect=mock_info)
+
+    with mock.patch.object(redis_check, '_get_conn', return_value=mock_conn):
+        with caplog.at_level(logging.DEBUG):
+            redis_check._check_db()
+    mock_conn.info.assert_has_calls((mock.call(section='all'), mock.call(), mock.call('keyspace')))
+    assert any(msg.startswith('`INFO all` command failed, falling back to `INFO`:') for msg in caplog.messages)

@@ -12,6 +12,7 @@ from time import time
 from dateutil import parser
 from lxml import etree
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -23,6 +24,8 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database
+
+from .xml_tools import extract_int_value, extract_value
 
 try:
     import datadog_agent
@@ -155,10 +158,10 @@ class XESessionBase(DBMAsyncJob):
 
         super(XESessionBase, self).__init__(
             check,
-            run_sync=True,
+            run_sync=is_affirmative(xe_config.get('run_sync', False)),
             enabled=True,
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(self.collection_interval),
             job_name=f"xe_{session_name}",
             shutdown_callback=self._close_db_conn,
@@ -201,8 +204,8 @@ class XESessionBase(DBMAsyncJob):
 
     def session_exists(self):
         """Check if this XE session exists and is running"""
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
                 level = ""
                 if self._is_azure_sql_database:
@@ -221,8 +224,8 @@ class XESessionBase(DBMAsyncJob):
         This avoids expensive server-side XML parsing for better performance.
         """
         raw_xml = None
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
                 level = ""
                 if self._is_azure_sql_database:
@@ -328,6 +331,25 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error processing ring buffer events: {e}")
             return []
+
+    def _process_action_elements(self, event, event_data):
+        """Process common action elements for all event types"""
+        for action in event.findall('./action'):
+            action_name = action.get('name')
+            if not action_name:
+                continue
+
+            if action_name == 'attach_activity_id':
+                event_data['activity_id'] = extract_value(action)
+            elif action_name == 'attach_activity_id_xfer':
+                event_data['activity_id_xfer'] = extract_value(action)
+            elif action_name == 'session_id' or action_name == 'request_id':
+                # These are numeric values in the actions
+                value = extract_int_value(action)
+                if value is not None:
+                    event_data[action_name] = value
+            else:
+                event_data[action_name] = extract_value(action)
 
     @abstractmethod
     def _normalize_event_impl(self, event):
@@ -447,7 +469,6 @@ class XESessionBase(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": self._determine_dbm_type(),
-            "event_source": self.session_name,
             "collection_interval": self.collection_interval,
             "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time() * 1000,
@@ -579,7 +600,6 @@ class XESessionBase(DBMAsyncJob):
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": self._determine_dbm_type(),
-                "event_source": self.session_name,
                 "collection_interval": self.collection_interval,
                 "ddtags": self._check.tag_manager.get_tags(),
                 "timestamp": time() * 1000,
@@ -778,7 +798,6 @@ class XESessionBase(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "rqt",
-            "event_source": self.session_name,
             "ddtags": ",".join(self._check.tag_manager.get_tags()),
             'service': self._config.service,
             "db": db_fields,

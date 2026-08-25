@@ -1,23 +1,22 @@
 {
   "title": "Redis - Overview",
-  "author_name": "Datadog",
-  "description": "This dashboard provides a high-level overview of key Redis metrics to help you monitor your Redis primary's performance and manage your Redis instance.\n\nFor more information, see:\n\n- Our [official Redis documentation](https://docs.datadoghq.com/integrations/redisdb/)\n\nOr our 3-part series blog post:\n\n- Part 1: [How to monitor Redis performance metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) \n- Part 2: [Collecting Redis metrics](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n- Part 3: [Monitoring Redis with Datadog](https://www.datadoghq.com/blog/monitor-redis-using-datadog/)",
+  "description": "This dashboard provides a high-level overview of key Redis metrics to help you monitor your Redis primary's performance and manage your Redis instance.\n\nFor more information, see:\n\n- Our [official Redis documentation](https://docs.datadoghq.com/integrations/redisdb/)\n\nOr our 3-part series blog post:\n\n- Part 1: [How to monitor Redis performance metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) \n- Part 2: [Collecting Redis metrics](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n- Part 3: [Monitoring Redis with Datadog](https://www.datadoghq.com/blog/monitor-redis-using-datadog/) (cloned)",
   "widgets": [
     {
       "id": 0,
       "definition": {
         "title": "About Redis",
         "title_align": "center",
-        "type": "group",
         "banner_img": "/static/images/integration_dashboard/redis_hero_1.png",
         "show_title": false,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
             "id": 8013519185925578,
             "definition": {
               "type": "note",
-              "content": "This dashboard shows latency information and slow query counts that summarize your Redis master's performance, as well as memory metrics to help you manage your Redis instance.\n\n##### [Official Datadog Redis documentation ↗](https://docs.datadoghq.com/integrations/redisdb/)",
+              "content": "This dashboard shows latency information and slow query counts that summarize your Redis master's performance, as well as memory metrics to help you manage your Redis instance.\n\n##### [Official Datadog Redis documentation \u2197](https://docs.datadoghq.com/integrations/redisdb/)",
               "background_color": "transparent",
               "font_size": "16",
               "text_align": "left",
@@ -27,13 +26,18 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 2021637053460700,
             "definition": {
               "type": "note",
-              "content": "**Our 3-part blog series**\n\n\n[How to monitor Redis performance metrics&nbsp;↗](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/)\n\n[Collecting Redis metrics&nbsp;↗](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n\n[Monitoring Redis with Datadog&nbsp;↗](https://www.datadoghq.com/blog/monitor-redis-using-datadog/)",
+              "content": "**Our 3-part blog series**\n\n\n[How to monitor Redis performance metrics&nbsp;\u2197](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/)\n\n[Collecting Redis metrics&nbsp;\u2197](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n\n[Monitoring Redis with Datadog&nbsp;\u2197](https://www.datadoghq.com/blog/monitor-redis-using-datadog/)",
               "background_color": "transparent",
               "font_size": "12",
               "text_align": "left",
@@ -42,19 +46,30 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 8, "height": 5 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 5
+      }
     },
     {
       "id": 1,
       "definition": {
         "title": "Overview",
         "title_align": "center",
+        "background_color": "pink",
+        "show_title": true,
         "type": "group",
-        "background_color": "white",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -64,8 +79,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "(avg:redis.stats.keyspace_hits{$scope,$host}/(avg:redis.stats.keyspace_hits{$scope,$host}+avg:redis.stats.keyspace_misses{$scope,$host}))*100",
-                  "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": "<",
@@ -82,6 +95,28 @@
                       "palette": "white_on_green",
                       "value": 90
                     }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:redis.stats.keyspace_hits{$scope,$host}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:redis.stats.keyspace_misses{$scope,$host}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "(query1 / (query1 + query2)) * 100"
+                    }
                   ]
                 }
               ],
@@ -90,7 +125,12 @@
               "text_align": "center",
               "precision": 0
             },
-            "layout": { "x": 0, "y": 0, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 4413414001262562,
@@ -101,8 +141,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:redis.clients.blocked{$scope,$host}",
-                  "aggregator": "max",
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -113,6 +151,16 @@
                       "comparator": "<",
                       "palette": "white_on_green",
                       "value": 1
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:redis.clients.blocked{$scope,$host}",
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -121,7 +169,12 @@
               "text_align": "center",
               "precision": 0
             },
-            "layout": { "x": 2, "y": 0, "width": 2, "height": 1 }
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 3774440462666086,
@@ -130,13 +183,21 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:redis.keys{$scope,$host}",
-                  "aggregator": "max",
                   "conditional_formats": [
                     {
                       "comparator": ">",
                       "palette": "white_on_green",
                       "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:redis.keys{$scope,$host}",
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -145,7 +206,12 @@
               "text_align": "left",
               "precision": 2
             },
-            "layout": { "x": 0, "y": 1, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 5886678624997982,
@@ -154,8 +220,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:redis.rdb.changes_since_last{$scope,$host}",
-                  "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -167,6 +231,16 @@
                       "palette": "white_on_green",
                       "value": 1073741824
                     }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:redis.rdb.changes_since_last{$scope,$host}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
                   ]
                 }
               ],
@@ -174,7 +248,12 @@
               "text_align": "left",
               "precision": 2
             },
-            "layout": { "x": 2, "y": 1, "width": 2, "height": 1 }
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 8493776400619900,
@@ -183,8 +262,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:redis.replication.master_link_down_since_seconds{$scope,$host}",
-                  "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -195,6 +272,16 @@
                       "comparator": "<",
                       "palette": "white_on_green",
                       "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:redis.replication.master_link_down_since_seconds{$scope,$host}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -204,13 +291,18 @@
               "text_align": "center",
               "precision": 0
             },
-            "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
           },
           {
             "id": 7896589211182748,
             "definition": {
               "type": "note",
-              "content": "This metric is only available when the connection between the primary and its replica has been lost. Ideally, this value should never exceed zero—the primary and the replica should be in constant communication to ensure the replica is not serving stale data.",
+              "content": "This metric is only available when the connection between the primary and its replica has been lost. Ideally, this value should never exceed zero\u2014the primary and the replica should be in constant communication to ensure the replica is not serving stale data.",
               "background_color": "white",
               "font_size": "12",
               "text_align": "left",
@@ -220,19 +312,30 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 2, "y": 2, "width": 2, "height": 2 }
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 8, "y": 0, "width": 4, "height": 5 }
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      }
     },
     {
       "id": 2,
       "definition": {
         "title": "Performance Metrics",
         "title_align": "center",
+        "background_color": "pink",
+        "show_title": true,
         "type": "group",
-        "background_color": "vivid_orange",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -241,7 +344,11 @@
               "title": "Latency by Host",
               "show_legend": true,
               "legend_layout": "vertical",
-              "legend_columns": ["avg", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -257,10 +364,13 @@
                     {
                       "query": "avg:redis.info.latency_ms{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
-                  "style": { "palette": "warm" },
+                  "style": {
+                    "palette": "warm"
+                  },
                   "display_type": "line"
                 }
               ],
@@ -273,14 +383,19 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
           },
           {
             "id": 18,
             "definition": {
               "type": "note",
               "content": "Latency measures the **time between a client request and the server response**, and monitoring it enables you to detect changes in Redis performance. The single-threaded nature of Redis means that a long response time for one request increases the latency for all subsequent requests, leading to serious bottlenecks.",
-              "background_color": "orange",
+              "background_color": "pink",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
@@ -289,28 +404,46 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 4, "y": 0, "width": 2, "height": 4 }
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
           },
           {
             "id": 19,
             "definition": {
-              "title": "Slowlog",
+              "title": "Slowlog duration",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "formula": "top(query1 / 1000, 10, \"mean\", \"desc\")" }
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "formula": "top(query1 / 1000, 10, 'mean', 'desc')"
+                    }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:redis.slowlog.micros.95percentile{$scope,$host} by {name,command}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -330,31 +463,104 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
           },
           {
-            "id": 22,
+            "id": 8558020471598403,
             "definition": {
-              "title": "Commands per second",
+              "title": "Slowlog query rates",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "query": "sum:redis.slowlog.micros.count{$host,$scope} by {command,name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "orange"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3029111733155793,
+            "definition": {
+              "title": "Average replication delay (offset)",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "formula": "query1", "alias": "Processed commands" }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "queries": [
                     {
-                      "query": "sum:redis.net.commands{$scope,$host}",
-                      "data_source": "metrics",
-                      "name": "query1"
+                      "alias": "Offsets",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit"
+                        }
+                      },
+                      "formula": "query1"
                     }
                   ],
-                  "style": { "palette": "orange" },
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:redis.replication.delay{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
                   "display_type": "line"
                 }
               ],
@@ -367,7 +573,72 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 6, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8261008667770670,
+            "definition": {
+              "title": "Average CPU usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:redis.cpu.sys{$host,$scope}",
+                      "semantic_mode": "combined"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:redis.cpu.user{$host,$scope}",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "System",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "User",
+                      "formula": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 20,
@@ -376,8 +647,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "(avg:redis.stats.keyspace_hits{$scope,$host}/(avg:redis.stats.keyspace_hits{$scope,$host}+avg:redis.stats.keyspace_misses{$scope,$host}))*100",
-                  "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": "<",
@@ -389,13 +658,40 @@
                       "palette": "black_on_light_green",
                       "value": 75
                     }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:redis.stats.keyspace_hits{$scope,$host}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:redis.stats.keyspace_misses{$scope,$host}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "(query1 / (query1 + query2)) * 100"
+                    }
                   ]
                 }
               ],
               "autoscale": true,
               "precision": 2
             },
-            "layout": { "x": 0, "y": 8, "width": 2, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 2,
+              "height": 2
+            }
           },
           {
             "id": 21,
@@ -403,7 +699,13 @@
               "title": "Cache hit rate",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -419,12 +721,14 @@
                     {
                       "query": "avg:redis.stats.keyspace_hits{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:redis.stats.keyspace_misses{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -455,19 +759,30 @@
                 }
               ]
             },
-            "layout": { "x": 2, "y": 8, "width": 4, "height": 2 }
+            "layout": {
+              "x": 2,
+              "y": 10,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 6, "height": 11 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 13
+      }
     },
     {
       "id": 3,
       "definition": {
         "title": "Memory Metrics",
         "title_align": "center",
+        "background_color": "pink",
+        "show_title": true,
         "type": "group",
-        "background_color": "vivid_yellow",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -476,7 +791,13 @@
               "title": "Percent Used Memory by Host",
               "show_legend": true,
               "legend_layout": "vertical",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -492,12 +813,14 @@
                     {
                       "query": "avg:redis.mem.used{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "max:redis.mem.maxmemory{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -517,25 +840,30 @@
               },
               "markers": [
                 {
-                  "label": " Max memory reached ",
+                  "label": "\u00a0Max memory reached\u00a0",
                   "value": "y = 100",
                   "display_type": "error dashed"
                 },
                 {
-                  "label": " 80% memory usage ",
+                  "label": "\u00a080% memory usage\u00a0",
                   "value": "y = 80",
                   "display_type": "warning dashed"
                 }
               ]
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
           },
           {
             "id": 24,
             "definition": {
               "type": "note",
-              "content": "Memory usage is a crucial performance factor. If `used_memory > total available system memory`, the OS will begin swapping old/unused sections of memory and writing them to disk. Writing or reading from disk is up to 100,000 times slower than writing or reading from memory (0.1 µs for memory vs. 10 ms for disk).",
-              "background_color": "yellow",
+              "content": "Memory usage is a crucial performance factor. If `used_memory > total available system memory`, the OS will begin swapping old/unused sections of memory and writing them to disk. Writing or reading from disk is up to 100,000 times slower than writing or reading from memory (0.1 \u00b5s for memory vs. 10 ms for disk).",
+              "background_color": "pink",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
@@ -544,7 +872,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 4, "y": 0, "width": 2, "height": 4 }
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
           },
           {
             "id": 25,
@@ -552,7 +885,13 @@
               "title": "Evictions",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -568,10 +907,13 @@
                     {
                       "query": "sum:redis.keys.evicted{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
-                  "style": { "palette": "dog_classic" },
+                  "style": {
+                    "palette": "dog_classic"
+                  },
                   "display_type": "bars"
                 }
               ],
@@ -584,50 +926,61 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "id": 29,
+            "id": 8528925087848645,
             "definition": {
-              "title": "Blocked clients",
+              "title": "Total allocated memory",
+              "title_size": "16",
+              "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query2",
-                      "alias": "Connections waiting on a blocking call"
-                    }
-                  ],
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:redis.clients.blocked{$scope,$host}",
+                      "name": "query1",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "query": "sum:redis.mem.rss{$scope,$host}",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "style": {
                     "palette": "dog_classic",
+                    "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
                   "display_type": "line"
                 }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+              ]
             },
-            "layout": { "x": 0, "y": 6, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 26,
@@ -636,8 +989,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:redis.mem.fragmentation_ratio{$scope,$host}",
-                  "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": "<",
@@ -649,13 +1000,28 @@
                       "palette": "black_on_light_green",
                       "value": 1.5
                     }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:redis.mem.fragmentation_ratio{$scope,$host}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
                   ]
                 }
               ],
               "autoscale": true,
               "precision": 2
             },
-            "layout": { "x": 0, "y": 8, "width": 2, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 2,
+              "height": 2
+            }
           },
           {
             "id": 27,
@@ -664,7 +1030,13 @@
               "show_legend": false,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -679,7 +1051,8 @@
                     {
                       "query": "avg:redis.mem.fragmentation_ratio{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -705,19 +1078,30 @@
                 }
               ]
             },
-            "layout": { "x": 2, "y": 8, "width": 4, "height": 2 }
+            "layout": {
+              "x": 2,
+              "y": 8,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 11 }
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 11
+      }
     },
     {
       "id": 4,
       "definition": {
         "title": "Base Activity Metrics",
         "title_align": "center",
+        "background_color": "pink",
+        "show_title": true,
         "type": "group",
-        "background_color": "blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -727,12 +1111,19 @@
               "show_legend": true,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": ["max", "avg", "min"],
+              "legend_columns": [
+                "max",
+                "avg",
+                "min"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "formula": "query1", "alias": "Connected clients" }
+                    {
+                      "formula": "query1",
+                      "alias": "Connected clients"
+                    }
                   ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
@@ -740,10 +1131,13 @@
                     {
                       "query": "sum:redis.net.clients{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
-                  "style": { "palette": "cool" },
+                  "style": {
+                    "palette": "cool"
+                  },
                   "display_type": "line"
                 }
               ],
@@ -756,14 +1150,19 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 12,
             "definition": {
               "type": "note",
               "content": "Redis has 10,000 client connections available by default, but you can adjust the maximum number of connections with the `maxclient` directive in redis.conf. New connection attempts will be refused if your Redis instance is currently at its maximum number of connections.",
-              "background_color": "blue",
+              "background_color": "pink",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
@@ -772,28 +1171,42 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
           },
           {
-            "id": 13,
+            "id": 29,
             "definition": {
-              "title": "Connected replicas",
-              "show_legend": false,
-              "legend_size": "0",
+              "title": "Blocked clients",
+              "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "formula": "query1", "alias": "Connected replicas" }
+                    {
+                      "formula": "query2",
+                      "alias": "Connections waiting on a blocking call"
+                    }
                   ],
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:redis.net.slaves{$scope,$host}",
+                      "query": "sum:redis.clients.blocked{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -813,34 +1226,50 @@
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
           },
           {
-            "id": 14,
+            "id": 13,
             "definition": {
-              "title": "Rejected connections",
+              "title": "Connected replicas",
               "show_legend": false,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "diff(query1)",
-                      "alias": "Rejected connections"
+                      "formula": "query1",
+                      "alias": "Connected replicas"
                     }
                   ],
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:redis.net.rejected{$scope,$host}",
+                      "query": "sum:redis.net.slaves{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
-                  "style": { "palette": "warm" },
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
                   "display_type": "line"
                 }
               ],
@@ -853,29 +1282,168 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 5,
+              "height": 2
+            }
           },
           {
-            "id": 16,
+            "id": 14,
             "definition": {
-              "title": "Keys",
-              "show_legend": true,
+              "title": "Rejected connections",
+              "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1", "alias": "Total keys" }],
+                  "formulas": [
+                    {
+                      "alias": "Rejected connections",
+                      "formula": "diff(query1)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:redis.net.rejected{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 5,
+              "y": 2,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 22,
+            "definition": {
+              "title": "Commands per second",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "unit_name": "command",
+                          "per_unit_name": "second",
+                          "type": "canonical_unit"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:redis.net.commands{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": false
+                }
+              }
+            },
+            "layout": {
+              "x": 10,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 3286140376470284,
+      "definition": {
+        "title": "Key Metrics",
+        "background_color": "pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 16,
+            "definition": {
+              "title": "Total keys",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total keys"
+                    }
+                  ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:redis.keys{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
-                  "style": { "palette": "cool" },
+                  "style": {
+                    "palette": "cool"
+                  },
                   "display_type": "area"
                 }
               ],
@@ -888,16 +1456,224 @@
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 2, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 1840397376605166,
+            "definition": {
+              "title": "Current total",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:redis.keys{$scope,$host}",
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 4351331682136830,
+            "definition": {
+              "type": "note",
+              "content": "Monitoring key length helps surface unexpectedly large or growing data structures (lists, sets, hashes, sorted sets), which can drive memory usage and cause performance issues. \n\nEnable in Agent's `redisdb.yaml` with the `keys` option.",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7595489265803660,
+            "definition": {
+              "title": "Expired keys",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Expired keys",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:redis.keys.expired{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 4565766774748375,
+            "definition": {
+              "title": "Keys with expiration",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:redis.expires{$scope,$host}",
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7861051565277545,
+            "definition": {
+              "title": "Key length distribution",
+              "show_legend": false,
+              "time": {},
+              "type": "distribution",
+              "xaxis": {
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto",
+                "include_zero": true
+              },
+              "yaxis": {
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto",
+                "include_zero": true
+              },
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:redis.key.length{$scope, $host, $key} by {key}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 16,
+        "y": 5,
         "width": 12,
-        "height": 5,
-        "is_column_break": true
+        "height": 5
       }
     },
     {
@@ -905,8 +1681,9 @@
       "definition": {
         "title": "Logs",
         "title_align": "center",
+        "background_color": "vivid_pink",
+        "show_title": true,
         "type": "group",
-        "background_color": "white",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -914,43 +1691,117 @@
             "definition": {
               "title": "Error Logs",
               "title_size": "16",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:redis $scope $host status:error",
-              "sort": { "column": "time", "order": "desc" },
-              "columns": [],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-md"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:redis $scope $host status:error",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 8 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 8
+            }
           },
           {
             "id": 5980709888086058,
             "definition": {
               "title": "All Logs",
               "title_size": "16",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:redis $scope $host",
-              "sort": { "column": "time", "order": "desc" },
-              "columns": [],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-md"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:redis $scope $host",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 8 }
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 8
+            }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 9
       }
     }
   ],
   "template_variables": [
-    { "name": "scope", "default": "*" },
-    { "name": "host", "default": "*", "prefix": "host" }
+    {
+      "name": "scope",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "key",
+      "prefix": "key",
+      "available_values": [],
+      "default": "*"
+    }
   ],
   "layout_type": "ordered",
-  "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed"
 }

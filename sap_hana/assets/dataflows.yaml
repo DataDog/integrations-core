@@ -1,0 +1,9 @@
+provides:
+  - id: sap-hana-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: sap-hana-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

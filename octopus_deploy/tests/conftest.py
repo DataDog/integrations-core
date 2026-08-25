@@ -214,5 +214,5 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         return CopyingMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
 
     mock_get = CopyingMock(side_effect=get)
-    monkeypatch.setattr('requests.get', mock_get)
+    monkeypatch.setattr('requests.Session.get', mock_get)
     return mock_get

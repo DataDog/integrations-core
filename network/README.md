@@ -6,6 +6,8 @@
 
 The network check collects TCP/IP stats from the host operating system.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.

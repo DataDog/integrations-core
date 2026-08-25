@@ -8,7 +8,7 @@ init_config:
     #
     # collect_apps_all_states: false
 
-    ## @param collect_apps_states_list - list of strings - optional
+    ## @param collect_apps_states_list - list of strings - optional - default: ['RUNNING']
     ## Configure the application states of which to collect application metrics.
     ## Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
     ## 'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
@@ -71,7 +71,7 @@ instances:
 
   -
     ## @param resourcemanager_uri - string - optional - default: http://localhost:8088
-    ## The YARN check retrieves metrics from YARNS's ResourceManager. This
+    ## The YARN check retrieves metrics from YARN's ResourceManager. This
     ## check must be run from the Master Node and the ResourceManager URI must
     ## be specified below. The ResourceManager URI is composed of the
     ## ResourceManager's hostname and port.
@@ -136,7 +136,7 @@ instances:
     #
     # collect_apps_all_states: false
 
-    ## @param collect_apps_states_list - list of strings - optional
+    ## @param collect_apps_states_list - list of strings - optional - default: ['RUNNING']
     ## Configure the application states of which to collect application metrics. 
     ## Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
     ## 'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
@@ -217,7 +217,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -240,7 +240,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

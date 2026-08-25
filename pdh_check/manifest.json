@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "75f6813c-934c-4f1a-b8f4-71f9f1911165",
   "app_id": "pdh",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -71,6 +71,9 @@ class TestKubeAPIServerMetrics:
         'flowcontrol_request_concurrency_limit',
         'flowcontrol_current_inqueue_requests',
         'flowcontrol_dispatched_requests_total',
+        'flowcontrol_nominal_limit_seats',
+        'flowcontrol_request_wait_duration_seconds.sum',
+        'flowcontrol_request_wait_duration_seconds.count',
     ]
     COUNT_METRICS = [
         'audit_event.count',

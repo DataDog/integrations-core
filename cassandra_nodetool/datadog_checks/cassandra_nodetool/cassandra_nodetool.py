@@ -29,7 +29,6 @@ TO_BYTES = {
 
 
 class CassandraNodetoolCheck(AgentCheck):
-
     datacenter_name_re = re.compile('^Datacenter: (.*)')
     # 1.
     # --  Address    Load       Tokens  Owns    Host ID                               Rack
@@ -88,7 +87,6 @@ class CassandraNodetoolCheck(AgentCheck):
             percent_total_by_dc = defaultdict(float)
             # Send the stats per node and compute the stats per datacenter
             for node in nodes:
-
                 node_tags = [
                     'node_address:%s' % node['address'],
                     'node_id:%s' % node['id'],

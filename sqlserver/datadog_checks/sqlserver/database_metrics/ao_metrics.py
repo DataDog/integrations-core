@@ -4,6 +4,7 @@
 
 from typing import List
 
+from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 from datadog_checks.sqlserver.utils import is_azure_database
 
 from .base import SqlserverDatabaseMetricsBase
@@ -66,9 +67,9 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
     def enabled(self) -> bool:
         if not self.include_ao_metrics:
             return False
-        if not self.major_version and not is_azure_database(self.engine_edition):
-            return False
-        if self.major_version > 2012 or is_azure_database(self.engine_edition):
+        if is_azure_database(self.engine_edition):
+            return True
+        if self.major_version > 11:
             return True
         return False
 
@@ -88,6 +89,10 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
             f"engine_edition={self.engine_edition}, "
             f"include_ao_metrics={self.include_ao_metrics})"
         )
+
+    def _supports_secondary_lag_seconds(self) -> bool:
+        # Managed Instance supports this DMV column while reporting a non-boxed ProductMajorVersion.
+        return self.major_version >= 13 or self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 
     def __get_query_ao_availability_groups(self) -> dict:
         """
@@ -168,12 +173,12 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
         }
 
         # Include metrics based on version
-        if self.major_version >= 2016:
+        if self._supports_secondary_lag_seconds():
             column_definitions_metrics["DRS.secondary_lag_seconds"] = {
                 "name": "ao.secondary_lag_seconds",
                 "type": "gauge",
             }
-        if self.major_version >= 2014:
+        if self.major_version >= 12:
             column_definitions_metrics["DRS.is_primary_replica"] = {
                 "name": "ao.is_primary_replica",
                 "type": "gauge",

@@ -339,21 +339,27 @@ def test_list_hosts(
     expected_host_healths,
     expected_metrics,
 ):
-    with mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        return_value=Version('7.0.0'),
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
-        return_value=[{'name': 'cluster_0', 'entity_status': 'GOOD_HEALTH'}],
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.query_time_series',
-        side_effect=query_time_series,
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
-        side_effect=[list_hosts],
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        return_value=[],
+    with (
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
+            return_value=Version('7.0.0'),
+        ),
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
+            return_value=[{'name': 'cluster_0', 'entity_status': 'GOOD_HEALTH'}],
+        ),
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.query_time_series',
+            side_effect=query_time_series,
+        ),
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
+            side_effect=[list_hosts],
+        ),
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
+            return_value=[],
+        ),
     ):
         check = cloudera_check(instance)
         dd_run_check(check)

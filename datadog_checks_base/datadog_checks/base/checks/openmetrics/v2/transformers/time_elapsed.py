@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .....utils.time import get_timestamp
+from datadog_checks.base.utils.time import get_timestamp
 
 
 def get_time_elapsed(check, metric_name, modifiers, global_options):

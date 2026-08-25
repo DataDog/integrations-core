@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "2c48a360-9fbb-4cd6-9316-0e9afd9926c8",
   "app_id": "tcp-queue-length",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

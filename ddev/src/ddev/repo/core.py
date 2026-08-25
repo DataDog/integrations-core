@@ -3,25 +3,100 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import re
 from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
 from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
 from ddev.utils.fs import Path
-from ddev.utils.git import GitRepository
+from ddev.utils.git import Comparison, GitRepository
 
 if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
 
 
+# Two questions, merged: what this branch changed against master, and what the working tree changed
+# against the last commit. They differ only when the working tree reverts something the branch
+# committed, in which case the first reports nothing and the second still reports the file. Asking
+# both keeps such a file selected. Narrow this to a single comparison with `IntegrationRegistry.comparing`.
+DEFAULT_COMPARISONS = (Comparison(), Comparison(base='HEAD'))
+
+
+GIT_REMOTE_PATTERNS = (
+    # SSH form: git@github.com:Org/repo(.git)?
+    re.compile(r'^(?:[^@]+@)?[^:/]+:(?P<org>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?/?$'),
+    # HTTP(S) / git:// form: scheme://[user[:pass]@]host[:port]/Org/repo(.git)?
+    re.compile(r'^[a-zA-Z][a-zA-Z0-9+.-]*://[^/]+/(?P<org>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?/?$'),
+)
+
+
+def parse_remote_url(url: str) -> str | None:
+    """Parse a git remote URL and return the bare repository name (without `.git`). Returns None if unrecognised."""
+    for pattern in GIT_REMOTE_PATTERNS:
+        match = pattern.match(url)
+        if match:
+            return match.group('repo')
+    return None
+
+
+def _read_origin_url_from_git_config(repo_path: Path) -> str | None:
+    """Read the `origin` remote URL from `.git/config`, following worktree pointers if needed.
+
+    Implemented as file IO (no subprocess) so it is invisible to test mocks that intercept
+    `subprocess.run` or `GitRepository.capture`.
+    """
+    import configparser
+
+    git_dir = repo_path / '.git'
+    try:
+        if git_dir.is_file():
+            content = git_dir.read_text()
+            for line in content.splitlines():
+                if line.startswith('gitdir:'):
+                    pointer = line.split(':', 1)[1].strip()
+                    git_dir = Path(pointer)
+                    if not git_dir.is_absolute():
+                        git_dir = (repo_path / git_dir).resolve()
+                    break
+            else:
+                return None
+        config_path = git_dir / 'config'
+        if not config_path.is_file():
+            common_pointer = git_dir / 'commondir'
+            if common_pointer.is_file():
+                common = common_pointer.read_text().strip()
+                common_dir = Path(common)
+                if not common_dir.is_absolute():
+                    common_dir = (git_dir / common_dir).resolve()
+                config_path = common_dir / 'config'
+        if not config_path.is_file():
+            return None
+        parser = configparser.ConfigParser(strict=False)
+        parser.read(config_path, encoding='utf-8')
+        section = 'remote "origin"'
+        if parser.has_option(section, 'url'):
+            return parser.get(section, 'url').strip() or None
+    except (OSError, configparser.Error):
+        return None
+    return None
+
+
 class Repository:
     def __init__(self, name: str, path: str):
         self.__name = name
-        self.__full_name = FULL_NAMES.get(name, name)
         self.__path = Path(path).expand()
         self.__git = GitRepository(self.__path)
+        self.__full_name = self.__derive_full_name()
         self.__integrations = IntegrationRegistry(self)
+
+    def __derive_full_name(self) -> str:
+        remote_url = _read_origin_url_from_git_config(self.__path)
+        if remote_url:
+            parsed = parse_remote_url(remote_url)
+            if parsed is not None:
+                return parsed
+        return FULL_NAMES.get(self.__name, self.__name)
 
     @property
     def name(self) -> str:
@@ -67,9 +142,39 @@ class Repository:
 
 
 class IntegrationRegistry:
-    def __init__(self, repo: Repository):
+    def __init__(
+        self,
+        repo: Repository,
+        *,
+        comparisons: tuple[Comparison, ...] = DEFAULT_COMPARISONS,
+        cache: Dict[str, Integration] | None = None,
+    ):
+        """
+        `comparisons` are the points a `changed` selection is resolved against, unioned so a path
+        counts as changed if any of them reports it. `cache` is shared between a registry and the
+        views `comparing` derives from it, since an `Integration` does not depend on which
+        comparison selected it.
+        """
         self.__repo = repo
-        self.__cache: Dict[str, Integration] = {}
+        self.__comparisons = comparisons
+        self.__cache: Dict[str, Integration] = {} if cache is None else cache
+
+    def comparing(self, *, base: str, head: str | None = None) -> IntegrationRegistry:
+        """Return a registry that resolves a `changed` selection between exactly two points.
+
+        Without a `head` the comparison runs against the working tree.
+        """
+        return IntegrationRegistry(self.__repo, comparisons=(Comparison(base=base, head=head),), cache=self.__cache)
+
+    @cached_property
+    def changed_paths(self) -> set[str]:
+        """Every path affected by a change, across all of this registry's comparisons."""
+        return {
+            path
+            for comparison in self.__comparisons
+            for changed_file in self.repo.git.changed_files(comparison.base, comparison.head)
+            for path in changed_file.affected_paths
+        }
 
     @property
     def repo(self) -> Repository:
@@ -80,7 +185,7 @@ class IntegrationRegistry:
             return self.__cache[name]
 
         path = self.repo.path / name
-        if not path.is_dir():
+        if not path.is_dir() or self.repo.git.is_worktree(path):
             raise OSError(f'Integration does not exist: {Path(self.repo.path.name, name)}')
 
         integration = Integration(path, self.repo.path, self.repo.config)
@@ -165,10 +270,8 @@ class IntegrationRegistry:
         Iterate over all integrations that have changes that could affect built distributions.
         """
         for integration in self.__iter_filtered(selection):
-            for relative_path in self.repo.git.changed_files():
-                if integration.requires_changelog_entry(self.repo.path / relative_path):
-                    yield integration
-                    break
+            if any(integration.requires_changelog_entry(self.repo.path / path) for path in self.changed_paths):
+                yield integration
 
     def __iter_filtered(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
         selected = self.__finalize_selection(selection)
@@ -176,7 +279,17 @@ class IntegrationRegistry:
             return
 
         for path in sorted(self.repo.path.iterdir()):
+            # Ignore any non-directory entries since integrations are always directories
+            # Hidden directories are also not integrations
+            if not path.is_dir() or path.name.startswith('.'):
+                continue
+
+            # Ignore any subdirectory that is a worktree
+            if self.repo.git.is_worktree(path):
+                continue
+
             integration = self.__get_from_path(path)
+
             if selected and integration.name not in selected:
                 continue
 
@@ -195,10 +308,7 @@ class IntegrationRegistry:
         if not selection or 'changed' in selection:
             return self.__get_changed_root_entries() or None
 
-        if 'all' in selection:
-            return set()
-
-        return set(selection)
+        return set() if 'all' in selection else set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
-        return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files()}
+        return {path.split('/', 1)[0] for path in self.changed_paths}

@@ -1,1 +1,0 @@
-Bump `redis` dependency to `6.0.0` and stop supporting `charset`, `connection_pool`, and `errors` configuration options.

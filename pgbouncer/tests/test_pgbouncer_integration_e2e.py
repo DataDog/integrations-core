@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import psycopg2
+import psycopg
 import pytest
 from packaging import version
 
@@ -13,51 +13,40 @@ from . import common
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check(instance, aggregator, datadog_agent, dd_run_check):
-    # add some stats
-    connection = psycopg2.connect(
-        host=common.HOST,
-        port=common.PORT,
-        user=common.USER,
-        password=common.PASS,
-        database=common.DB,
-        connect_timeout=1,
-    )
-    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-    cur = connection.cursor()
-    cur.execute('SELECT * FROM persons;')
-
-    # run the check
+def test_check(aggregator, instance, datadog_agent, dd_run_check):
     check = PgBouncer('pgbouncer', {}, [instance])
-    check.check_id = 'test:123'
     dd_run_check(check)
 
     env_version = common.get_version_from_env()
     assert_metric_coverage(env_version, aggregator)
 
-    version_metadata = {
-        'version.raw': str(env_version),
-        'version.scheme': 'semver',
-        'version.major': str(env_version.major),
-        'version.minor': str(env_version.minor),
-        'version.patch': str(env_version.micro),
-    }
-    datadog_agent.assert_metadata('test:123', version_metadata)
+    # SHOW VERSION; is only available on pgbouncer 1.12+
+    if env_version >= version.parse('1.12.0'):
+        version_metadata = {
+            'version.raw': str(env_version),
+            'version.scheme': 'semver',
+            'version.major': str(env_version.major),
+            'version.minor': str(env_version.minor),
+            'version.patch': str(env_version.micro),
+        }
+        datadog_agent.assert_metadata(check.check_id, version_metadata)
+    else:
+        # No version metadata expected for older versions
+        datadog_agent.assert_metadata(check.check_id, {})
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check_with_clients(instance, aggregator, datadog_agent, dd_run_check):
     # add some stats
-    connection = psycopg2.connect(
+    connection = psycopg.connect(
         host=common.HOST,
         port=common.PORT,
         user=common.USER,
         password=common.PASS,
-        database=common.DB,
+        dbname=common.DB,
         connect_timeout=1,
     )
-    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = connection.cursor()
     cur.execute('SELECT * FROM persons;')
 
@@ -80,15 +69,14 @@ def test_check_with_clients(instance, aggregator, datadog_agent, dd_run_check):
 @pytest.mark.usefixtures("dd_environment")
 def test_check_with_servers(instance, aggregator, datadog_agent, dd_run_check):
     # add some stats
-    connection = psycopg2.connect(
+    connection = psycopg.connect(
         host=common.HOST,
         port=common.PORT,
         user=common.USER,
         password=common.PASS,
-        database=common.DB,
+        dbname=common.DB,
         connect_timeout=1,
     )
-    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = connection.cursor()
     cur.execute('SELECT * FROM persons;')
 
@@ -127,14 +115,17 @@ def test_check_with_url(instance_with_url, aggregator, datadog_agent, dd_run_che
     env_version = common.get_version_from_env()
     assert_metric_coverage(env_version, aggregator)
 
-    version_metadata = {
-        'version.raw': str(env_version),
-        'version.scheme': 'semver',
-        'version.major': str(env_version.major),
-        'version.minor': str(env_version.minor),
-        'version.patch': str(env_version.micro),
-    }
-    datadog_agent.assert_metadata('test:123', version_metadata)
+    if env_version >= version.parse('1.12.0'):
+        version_metadata = {
+            'version.raw': str(env_version),
+            'version.scheme': 'semver',
+            'version.major': str(env_version.major),
+            'version.minor': str(env_version.minor),
+            'version.patch': str(env_version.micro),
+        }
+        datadog_agent.assert_metadata(check.check_id, version_metadata)
+    else:
+        datadog_agent.assert_metadata(check.check_id, {})
 
 
 @pytest.mark.e2e
@@ -177,6 +168,14 @@ def assert_metric_coverage(env_version, aggregator, include_clients=False, inclu
     aggregator.assert_metric('pgbouncer.stats.bytes_received_per_second')
     aggregator.assert_metric('pgbouncer.stats.bytes_sent_per_second')
 
+    if env_version >= version.parse('1.24.0'):
+        aggregator.assert_metric('pgbouncer.stats.client_parse_count_per_second')
+        aggregator.assert_metric('pgbouncer.stats.server_parse_count_per_second')
+        aggregator.assert_metric('pgbouncer.stats.bind_count_per_second')
+        aggregator.assert_metric('pgbouncer.stats.avg_client_parse_count')
+        aggregator.assert_metric('pgbouncer.stats.avg_server_parse_count')
+        aggregator.assert_metric('pgbouncer.stats.avg_bind_count')
+
     aggregator.assert_metric('pgbouncer.databases.pool_size', at_least=0)
     aggregator.assert_metric('pgbouncer.databases.max_connections', at_least=0)
     aggregator.assert_metric('pgbouncer.databases.current_connections', at_least=0)
@@ -189,10 +188,14 @@ def assert_metric_coverage(env_version, aggregator, include_clients=False, inclu
         if env_version >= version.parse('1.8.0'):
             aggregator.assert_metric('pgbouncer.clients.wait')
             aggregator.assert_metric('pgbouncer.clients.wait_us')
+        if env_version >= version.parse('1.21.0'):
+            aggregator.assert_metric('pgbouncer.clients.prepared_statements')
 
     if include_servers:
         aggregator.assert_metric('pgbouncer.servers.connect_time')
         aggregator.assert_metric('pgbouncer.servers.request_time')
+        if env_version >= version.parse('1.21.0'):
+            aggregator.assert_metric('pgbouncer.servers.prepared_statements')
 
     # Service checks
     sc_tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'db:pgbouncer', 'optional:tag1']

@@ -1,0 +1,32 @@
+{
+	"version": 2,
+	"created_at": "2025-08-22",
+	"last_updated_at": "2025-08-22",
+	"title": "SLA Breach PDU Loss Ratio >1%",
+	"description": "This monitor detects when the PDU loss ratio across an access circuit over the last 5 minutes is greater than 1%.",
+	"definition": {
+		"id": 183655427,
+		"name": "[Versa] SLA Breach {{forwarding_class.name}} PDU Loss Ratio >1% from {{local_site.name}} to {{remote_site.name}} on device {{device_hostname.name}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:versa.sla.pdu_loss_ratio{*} by {device_id,device_namespace,device_ip,local_site,remote_site,local_access_circuit,remote_access_circuit,forwarding_class,device_hostname} > 1",
+		"message": "{{#is_alert}}\nThe PDU loss ratio from {{local_site.name}} ({{local_access_circuit.name}}) to {{remote_site.name}} ({{remote_access_circuit.name}}) is >1%.\nForwarding Class: {{forwarding_class}}.\n\nPDU Loss Ratio > 1% over the last 5 minutes on device {{device_hostname.name}}\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nThe PDU loss ratio from {{local_site.name}} ({{local_access_circuit.name}}) to {{remote_site.name}} ({{remote_access_circuit.name}}) has recovered to <1% over 5 minutes.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_hostname.name}}](/devices?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:versa"
+	]
+}

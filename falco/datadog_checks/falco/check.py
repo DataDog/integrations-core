@@ -7,7 +7,6 @@ from datadog_checks.falco.metrics import METRIC_MAP, RENAME_LABELS
 
 
 class FalcoCheck(OpenMetricsBaseCheckV2):
-
     __NAMESPACE__ = 'falco'
 
     DEFAULT_METRIC_LIMIT = 0

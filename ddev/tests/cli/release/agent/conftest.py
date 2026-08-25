@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable
+
 import pytest
 
 from ddev.repo.core import Repository
+from ddev.utils.fs import Path
 
 
 @pytest.fixture
@@ -55,6 +58,16 @@ def repo_with_history(tmp_path_factory):
     yield repo
 
 
+@pytest.fixture
+def write_repo_config() -> Callable[[Path, str], None]:
+    def write_config(repo_path: Path, contents: str) -> None:
+        config_dir = repo_path / '.ddev'
+        config_dir.mkdir(exist_ok=True)
+        (config_dir / 'config.toml').write_text(contents)
+
+    return write_config
+
+
 def write_agent_requirements(repo_path, requirements):
     with open(repo_path / 'requirements-agent-release.txt', 'w') as req_file:
         req_file.write('\n'.join(requirements))
@@ -93,3 +106,51 @@ classifiers = [
 ]
     """
     )
+
+
+@pytest.fixture
+def repo_with_new_integration_patched(tmp_path_factory, config_file):
+    """
+    Sets up a repo where a new integration is released at version 1.0.1 (not 1.0.0).
+    This simulates the case where a new integration is added and then patched
+    before the final agent release (e.g., fixes made during RC cycle).
+    """
+    repo_path = tmp_path_factory.mktemp('integrations-core')
+    repo = Repository('integrations-core', str(repo_path))
+
+    def commit(msg):
+        repo.git.run('commit', '--no-verify', '-a', '-m', msg)
+
+    repo.git.run('init')
+    repo.git.run('config', 'user.email', 'you@example.com')
+    repo.git.run('config', 'user.name', 'Your Name')
+    repo.git.run('config', 'commit.gpgsign', 'false')
+    repo.git.run('config', 'tag.gpgsign', 'false')
+
+    # Agent 7.49.0: existing integration only
+    write_agent_requirements(repo.path, ['datadog-existingcheck==2.0.0'])
+    repo.git.run('add', '.')
+    commit('7.49.0 release')
+    repo.git.run('tag', '7.49.0')
+
+    # Agent 7.50.0-rc.1: new integration added at 1.0.0 (RC tag, should be ignored by changelog)
+    write_agent_requirements(repo.path, ['datadog-existingcheck==2.0.0', 'datadog-newcheck==1.0.0'])
+    commit('7.50.0-rc.1 release')
+    repo.git.run('tag', '7.50.0-rc.1')
+
+    # Agent 7.50.0-rc.2: newcheck patched to 1.0.1 (RC tag, should be ignored by changelog)
+    write_agent_requirements(repo.path, ['datadog-existingcheck==2.0.0', 'datadog-newcheck==1.0.1'])
+    commit('7.50.0-rc.2 release')
+    repo.git.run('tag', '7.50.0-rc.2')
+
+    # Agent 7.50.0: final release with newcheck at 1.0.1 (same content as rc.2)
+    # The changelog should compare this against 7.49.0 (not the RCs) and detect newcheck as NEW
+    repo.git.run('tag', '7.50.0')
+
+    write_dummy_manifest(repo.path, 'existingcheck')
+    write_dummy_manifest(repo.path, 'newcheck')
+
+    config_file.model.repos['core'] = str(repo.path)
+    config_file.save()
+
+    yield repo, None

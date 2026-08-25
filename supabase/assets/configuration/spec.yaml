@@ -1,4 +1,5 @@
 name: Supabase
+fleet_configurable: true
 files:
 - name: supabase.yaml
   options:
@@ -11,6 +12,7 @@ files:
       description: |
         Endpoint exposing Supabase customer metrics
         https://supabase.com/docs/guides/monitoring-troubleshooting/metrics#accessing-the-metrics-endpoint
+      fleet_configurable: true
       value:
         display_default: null
         example: https://<project-ref>.supabase.co/customer/v1/privileged/metrics
@@ -22,6 +24,7 @@ files:
         display_default: null
         example: http://%%host%%:5000/metrics
         type: string
+      fleet_configurable: false
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

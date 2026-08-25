@@ -1,0 +1,36 @@
+# Policy for: .github/workflows/update-agent-changelog.yml in DataDog/integrations-core
+# Triggered by pushing semver tags (e.g., 7.56.0)
+#
+# Naming convention:
+#   self:                    Only this repository (DataDog/integrations-core) can use this policy
+#   update-agent-changelog:  Specific workflow
+#   tag-push:                Triggered by release tag push
+#
+# Security model:
+#   - Workflow runs on push events for tags matching semver pattern
+#   - Workflow file must be committed at the tag ref
+#   - Tag creation is controlled by release process
+#
+# Permissions granted:
+#   - contents: write       - Create branches and push commits
+#   - pull_requests: write  - Create pull requests
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.update-agent-changelog.tag-push
+
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:ref:refs/tags/\d+\.\d+\.\d+
+
+claim_pattern:
+  event_name: push
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/update-agent-changelog\.yml@refs/tags/\d+\.\d+\.\d+
+  ref: refs/tags/\d+\.\d+\.\d+
+  repository: DataDog/integrations-core
+
+permissions:
+  contents: write
+  pull_requests: write

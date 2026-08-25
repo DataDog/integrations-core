@@ -1,23 +1,39 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import logging
 import os
+import re
+import sys
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import contextmanager
-from typing import Iterator  # noqa: F401
+from types import SimpleNamespace
+from typing import Any, Iterator  # noqa: F401
 from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .fs import create_file, file_exists
+from .fs import create_file, ensure_dir_exists, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import find_check_root
+from .utils import find_check_root, get_current_check_name
 
 try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
+
+
+CONTAINER_STABILITY_LOG_PATTERNS = (
+    r'error',
+    r'panic',
+    r'fatal',
+    r'segmentation fault',
+    r'core dumped',
+    r'Traceback',
+)
 
 
 def get_docker_hostname():
@@ -42,6 +58,232 @@ def get_container_ip(container_id_or_name):
     return run_command(command, capture='out', check=True).stdout.strip()
 
 
+def assert_all_discovery_candidates_stable(
+    dd_agent_check: Callable[..., Any],
+    check_cls: type[Any],
+    compose_file: str | os.PathLike[str] | None = None,
+    compose_service: str | None = None,
+    *,
+    project_name: str | None = None,
+    service_id: str | None = None,
+    dd_agent_check_kwargs: Mapping[str, Any] | None = None,
+    log_patterns: Sequence[str] = CONTAINER_STABILITY_LOG_PATTERNS,
+) -> None:
+    """Run generated discovery candidates directly and assert the target container stays stable."""
+    compose_service = compose_service or _get_default_compose_service()
+    container_id = _get_compose_container_id(compose_file, compose_service, project_name=project_name)
+    initial_state = _inspect_container(container_id)
+    previous_stdout, previous_stderr = _get_container_logs(container_id)
+
+    ports = tuple(SimpleNamespace(number=port, name='') for port in _get_container_ports(initial_state))
+    service = SimpleNamespace(
+        id=service_id or compose_service,
+        host=_get_container_ip_from_inspect(initial_state),
+        ports=ports,
+    )
+    candidates = tuple(check_cls.generate_configs(service))
+    if not candidates:
+        raise AssertionError(f'No discovery candidates generated for service {service.id!r}')
+
+    check_kwargs = {'check_rate': True}
+    if dd_agent_check_kwargs:
+        check_kwargs.update(dd_agent_check_kwargs)
+
+    for index, candidate in enumerate(candidates, 1):
+        logging.debug('Probing candidate #%d: %r', index, candidate)
+        try:
+            dd_agent_check(candidate, **check_kwargs)
+        except Exception:
+            logging.debug('Error probing candidate #%d: %r', index, candidate)
+            pass
+
+        current_container_id = _get_compose_container_id(compose_file, compose_service, project_name=project_name)
+        current_state = _inspect_container(current_container_id)
+        _assert_container_stable(initial_state, current_state, index)
+
+        current_stdout, current_stderr = _get_container_logs(current_container_id)
+        # Diffed separately: stdout/stderr interleaving varies across calls, breaking a combined diff.
+        new_stdout = _diff_logs(previous_stdout, current_stdout)
+        new_stderr = _diff_logs(previous_stderr, current_stderr)
+        new_logs = new_stdout + new_stderr
+        for line in new_logs.splitlines():
+            logging.debug('New log line: %s', line)
+        _assert_no_log_patterns(new_logs, log_patterns, index)
+        previous_stdout, previous_stderr = current_stdout, current_stderr
+
+
+def _get_compose_container_id(
+    compose_file: str | os.PathLike[str] | None, compose_service: str, *, project_name: str | None = None
+) -> str:
+    project_name = project_name or _get_default_compose_project_name()
+    if not project_name:
+        raise AssertionError(
+            'Could not determine the Compose project name. '
+            'Pass project_name explicitly or use docker_run with a Compose file.'
+        )
+
+    command = [
+        'docker',
+        'ps',
+        '--quiet',
+        '--filter',
+        f'label=com.docker.compose.project={project_name}',
+        '--filter',
+        f'label=com.docker.compose.service={compose_service}',
+        '--filter',
+        # Exclude temporary containers created by `docker compose run` for the same project and service.
+        'label=com.docker.compose.oneoff=False',
+    ]
+
+    container_id = run_command(command, capture='out', check=True).stdout.strip()
+    if not container_id:
+        raise AssertionError(f'No container found for compose service {compose_service!r}')
+
+    return container_id
+
+
+def _get_default_compose_service() -> str:
+    docker_metadata = get_state('docker_compose_metadata', {})
+    if docker_metadata.get('service_name'):
+        return docker_metadata['service_name']
+
+    return os.path.basename(find_check_root(depth=2))
+
+
+def _get_default_compose_project_name() -> str | None:
+    docker_metadata = get_state('docker_compose_metadata', {})
+    return docker_metadata.get('project_name') or os.getenv('COMPOSE_PROJECT_NAME')
+
+
+def _inspect_container(container_id: str) -> dict[str, Any]:
+    raw_inspect = run_command(['docker', 'inspect', container_id], capture='out', check=True).stdout
+    return json.loads(raw_inspect)[0]
+
+
+def _get_container_ip_from_inspect(inspect_data: Mapping[str, Any]) -> str:
+    networks = inspect_data.get('NetworkSettings', {}).get('Networks', {})
+    for network in networks.values():
+        ip_address = network.get('IPAddress')
+        if ip_address:
+            return ip_address
+
+    raise AssertionError(f"Could not determine container IP for {inspect_data.get('Name', '<unknown>')}")
+
+
+def _get_container_ports(inspect_data: Mapping[str, Any]) -> list[int]:
+    ports: set[int] = set()
+    exposed_ports = inspect_data.get('Config', {}).get('ExposedPorts') or {}
+    network_ports = inspect_data.get('NetworkSettings', {}).get('Ports') or {}
+
+    for raw_port in list(exposed_ports) + list(network_ports):
+        port, _, protocol = raw_port.partition('/')
+        if protocol and protocol != 'tcp':
+            continue
+        try:
+            ports.add(int(port))
+        except ValueError:
+            continue
+
+    if not ports:
+        raise AssertionError(f"No TCP ports found for container {inspect_data.get('Name', '<unknown>')}")
+
+    return sorted(ports)
+
+
+def _get_container_logs(container_id: str) -> tuple[str, str]:
+    result = run_command(['docker', 'logs', container_id], capture=True)
+    return result.stdout, result.stderr
+
+
+def _diff_logs(previous: str, current: str) -> str:
+    """Return the portion of `current` appended since `previous`."""
+    return current[len(previous) :] if current.startswith(previous) else current
+
+
+def _assert_container_stable(
+    initial_state: Mapping[str, Any], current_state: Mapping[str, Any], candidate_index: int
+) -> None:
+    initial_id = initial_state['Id']
+    current_id = current_state['Id']
+    if current_id != initial_id:
+        raise AssertionError(
+            f'Container changed while probing candidate #{candidate_index}: {initial_id} -> {current_id}'
+        )
+
+    state = current_state.get('State', {})
+    if not state.get('Running'):
+        raise AssertionError(f'Container is not running after probing candidate #{candidate_index}')
+
+    initial_restart_count = initial_state.get('RestartCount', 0)
+    current_restart_count = current_state.get('RestartCount', 0)
+    if current_restart_count != initial_restart_count:
+        raise AssertionError(
+            f'Container restart count changed while probing candidate #{candidate_index}: '
+            f'{initial_restart_count} -> {current_restart_count}'
+        )
+
+    health = state.get('Health')
+    if health and health.get('Status') != 'healthy':
+        raise AssertionError(f"Container health is {health.get('Status')!r} after probing candidate #{candidate_index}")
+
+
+def _assert_no_log_patterns(logs: str, patterns: Sequence[str], candidate_index: int) -> None:
+    for pattern in patterns:
+        match = re.search(pattern, logs, re.IGNORECASE)
+        if match:
+            raise AssertionError(
+                f'Container logs matched {pattern!r} after probing candidate #{candidate_index}: {match.group(0)!r}'
+            )
+
+
+def _get_auto_conf_volume(check_root: str | os.PathLike[str] | None = None) -> str:
+    check_root = os.fspath(check_root or find_check_root(depth=2))
+    check_name = os.path.basename(check_root)
+    check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
+    return f'{check_pkg}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro'
+
+
+def get_e2e_discovery_metadata(
+    check_root: str | os.PathLike[str] | None = None,
+    *,
+    process: bool = False,
+) -> dict[str, list[str] | dict[str, str]]:
+    """Return metadata for an e2e discovery run.
+
+    Mounts the integration's ``auto_conf.yaml`` into the agent container. Pass
+    ``process=True`` to also grant the capabilities needed for process-based
+    autodiscovery to see processes running in sibling containers (on top of the
+    container-based autodiscovery already enabled via the Docker socket mount).
+
+    Use ``dd_agent_check_discovery`` alongside this metadata so that the static
+    per-env config is temporarily replaced with an empty-instances file, leaving
+    ``auto_conf.yaml`` as the sole AD template driving config-discovery.
+    """
+    metadata: dict[str, list[str] | dict[str, str]] = {
+        'docker_volumes': [
+            _get_auto_conf_volume(check_root),
+            '/var/run/docker.sock:/var/run/docker.sock:ro',
+        ],
+    }
+
+    if process:
+        metadata['env_vars'] = {
+            # Reduce the default service collection interval and minimum process
+            # age to speed up tests. This needs to be set on the container
+            # instead of being passed in to `agent check` since it's read by the
+            # system-probe(-lite) daemon.
+            'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '5s',
+            'DD_DISCOVERY_SERVICE_COLLECTION_MIN_PROCESS_AGE': '1s',
+        }
+        # system-probe(-lite) needs these capabilities to read /proc entries of
+        # other processes for service discovery. Without them it falls back to
+        # only scanning the agent's own PID namespace, which finds no host
+        # processes.
+        metadata['cap_add'] = ['SYS_PTRACE', 'DAC_READ_SEARCH']
+
+    return metadata
+
+
 def compose_file_active(compose_file):
     """
     Returns a `bool` indicating whether or not a compose file has any active services.
@@ -60,6 +302,16 @@ def using_windows_containers():
     return os_type == 'windows'
 
 
+def shared_logs_base_dir():
+    # macOS runs the daemon in a VM; Colima shares only $HOME, so keep bind sources there.
+    if sys.platform != 'darwin':
+        return None
+
+    base = os.path.join(os.path.expanduser('~'), '.cache', 'datadog-checks-dev', 'shared-logs')
+    ensure_dir_exists(base)
+    return base
+
+
 @contextmanager
 def shared_logs(example_log_configs, mount_whitelist=None):
     log_source = example_log_configs[0].get('source', 'check')
@@ -70,6 +322,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
 
     env_vars = {}
     docker_volumes = get_state('docker_volumes', [])
+    base_directory = shared_logs_base_dir()
 
     with ExitStack() as stack:
         for i, example_log_config in enumerate(example_log_configs, 1):
@@ -77,7 +330,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
                 continue
 
             log_name = 'dd_log_{}'.format(i)
-            d = stack.enter_context(TempDir(log_name))
+            d = stack.enter_context(TempDir(log_name, base_directory=base_directory))
 
             # Create the file that will ultimately be shared by containers
             shared_log_file = os.path.join(d, '{}_{}.log'.format(log_source, log_name))
@@ -107,6 +360,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
 @contextmanager
 def docker_run(
     compose_file=None,
+    wait_for_health=True,
     build=False,
     service_name=None,
     up=None,
@@ -131,6 +385,8 @@ def docker_run(
         compose_file (str):
             A path to a Docker compose file. A custom tear
             down is not required when using this.
+        wait_for_health (bool):
+            Whether or not to wait for the health of the service to be healthy before yielding.
         build (bool):
             Whether or not to build images for when `compose_file` is provided
         service_name (str):
@@ -155,7 +411,10 @@ def docker_run(
         conditions (callable):
             A list of callable objects that will be executed before yielding to check for errors
         env_vars (dict[str, str]):
-            A dictionary to update `os.environ` with during execution
+            A dictionary to update `os.environ` with during execution. When `compose_file` is provided and
+            `COMPOSE_PROJECT_NAME` isn't set here, already in `os.environ`, or saved from a previous E2E
+            start run, it defaults to the check's directory name so that concurrent E2E runs sharing a
+            Docker daemon don't collide on Compose's own directory-basename-derived default project name.
         wrappers (list[callable]):
             A list of context managers to use during execution
         attempts (int):
@@ -170,9 +429,16 @@ def docker_run(
         if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
 
+        env_vars = dict(env_vars) if env_vars else {}
+        if not env_vars.get('COMPOSE_PROJECT_NAME') and not os.getenv('COMPOSE_PROJECT_NAME'):
+            docker_metadata = get_state('docker_compose_metadata', {})
+            # An extra level deep because of the context manager
+            env_vars['COMPOSE_PROJECT_NAME'] = docker_metadata.get('project_name') or get_current_check_name(depth=2)
+
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
             composeFileArgs['capture'] = capture
+        composeFileArgs['wait_for_health'] = wait_for_health
         set_up = ComposeFileUp(**composeFileArgs)
         if down is not None:
             tear_down = down
@@ -217,6 +483,16 @@ def docker_run(
                     'mount_logs: expected True, a list or a set, but got {}'.format(type(mount_logs).__name__)
                 )
 
+    if compose_file is not None:
+        save_state(
+            'docker_compose_metadata',
+            {
+                'compose_file': compose_file,
+                'project_name': env_vars.get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
+                'service_name': service_name,
+            },
+        )
+
     with environment_run(
         up=set_up,
         down=tear_down,
@@ -233,12 +509,23 @@ def docker_run(
 
 
 class ComposeFileUp(LazyFunction):
-    def __init__(self, compose_file, build=False, service_name=None, capture=None):
+    def __init__(
+        self,
+        compose_file: str,
+        build: bool = False,
+        service_name: str | None = None,
+        capture: str | None = None,
+        wait_for_health: bool = True,
+    ):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
         self.capture = capture
+        self.wait_for_health = wait_for_health
         self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
+
+        if wait_for_health:
+            self.command.append('--wait')
 
         if self.build:
             self.command.append('--build')

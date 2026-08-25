@@ -16,6 +16,14 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
+def instance_max_message_length():
+    return 65536
+
+
 def instance_message_flows():
     return True
 

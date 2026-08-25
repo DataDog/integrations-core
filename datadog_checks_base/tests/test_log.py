@@ -8,6 +8,7 @@ import warnings
 
 import mock
 import pytest
+from ddtrace import tracer
 
 from datadog_checks import log
 from datadog_checks.base import AgentCheck
@@ -18,9 +19,9 @@ def test_get_py_loglevel():
     # default value for invalid input
     assert log._get_py_loglevel(None) == logging.INFO
     # default value for valid unicode input encoding into an invalid key
-    assert log._get_py_loglevel(u'dèbùg') == logging.INFO
+    assert log._get_py_loglevel('dèbùg') == logging.INFO
     # check unicode works
-    assert log._get_py_loglevel(u'crit') == logging.CRITICAL
+    assert log._get_py_loglevel('crit') == logging.CRITICAL
     # check string works
     assert log._get_py_loglevel('crit') == logging.CRITICAL
 
@@ -92,12 +93,38 @@ class MockAgentLogHandler(logging.Handler):
         self.records.append(self.format(record))
 
 
+def test_check_id_is_stamped_on_records_once_the_agent_assigns_it(caplog):
+    """The Agent assigns `check_id` after constructing the check, so records logged before that
+    carry `unknown` and every record after it carries the real id."""
+    caplog.set_level(logging.INFO)
+    check = AgentCheck('test_check_id_stamping', {}, [{}])
+
+    check.log.info("before the id is assigned")
+    check.check_id = 'test:abc123'
+    check.log.info("after the id is assigned")
+
+    stamped = [record._check_id for record in caplog.records if 'the id is assigned' in record.getMessage()]
+    assert stamped == ['unknown', 'test:abc123']
+
+
+def test_check_id_can_be_assigned_when_a_subclass_replaces_the_logger():
+    """`PrometheusScraperMixin` swaps `self.log` for a plain logger once `AgentCheck.__init__` has
+    run, so assigning the id must not depend on `self.log` still being the adapter."""
+    from datadog_checks.base.checks.prometheus import PrometheusCheck
+
+    check = PrometheusCheck('test_replaced_logger', {}, {}, [{}])
+
+    check.check_id = 'test:abc123'
+
+    assert check.check_id == 'test:abc123'
+
+
 @pytest.mark.parametrize('integration_tracing_enabled', [False, True])
 def test_log_trace_context_injection(integration_tracing_enabled):
     def _tracing_enabled():
         return integration_tracing_enabled, False
 
-    with mock.patch('datadog_checks.base.log.tracing_enabled', _tracing_enabled):
+    with mock.patch('datadog_checks.base.log.tracing_enabled', side_effect=_tracing_enabled):
         logger = logging.getLogger("test_log_trace_context_injection")
         logger.handlers = []
         handler = MockAgentLogHandler()
@@ -105,12 +132,22 @@ def test_log_trace_context_injection(integration_tracing_enabled):
 
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
-        logger.info("hello", extra={'dd.trace_id': 1, 'dd.span_id': 2})
-
-        assert len(handler.records) == 1
-        record = handler.records[0]
 
         if integration_tracing_enabled:
-            assert "dd.trace_id=1 dd.span_id=2" in record
+            # ddtrace.auto patches the standard logging library to inject trace context.
+            # We import it here directly to ensure this test is self-contained and does not
+            # depend on test execution order or global state.
+            # This is also the behavior found on the AgentCheck when decorated with @traced_class
+            import ddtrace.auto  # noqa: F401
+
+            with tracer.trace("test") as span:
+                logger.info("hello")
+                assert len(handler.records) == 1
+                record = handler.records[0]
+                trace_id_hex = format(span.trace_id, 'x')
+                assert f"dd.trace_id={trace_id_hex} dd.span_id={span.span_id}" in record
         else:
+            logger.info("hello", extra={'dd.trace_id': 1, 'dd.span_id': 2})
+            assert len(handler.records) == 1
+            record = handler.records[0]
             assert "dd.trace_id=1 dd.span_id=2" not in record

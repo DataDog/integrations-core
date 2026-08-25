@@ -21,3 +21,6 @@ KAFKA_INTERNAL_TOPICS = {
 
 # https://github.com/confluentinc/confluent-kafka-python/issues/1329#issuecomment-1109627240
 OFFSET_INVALID = -1001
+
+# offsets_for_times sentinel for "latest"
+HIGH_WATERMARK = -1

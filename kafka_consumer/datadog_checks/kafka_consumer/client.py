@@ -3,8 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures import as_completed
 
-from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
-from confluent_kafka.admin import AdminClient
+from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, IsolationLevel, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient, OffsetSpec
+
+# AWS MSK IAM authentication support
+try:
+    import boto3
+    from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+
+    AWS_MSK_IAM_AVAILABLE = True
+except ImportError:
+    AWS_MSK_IAM_AVAILABLE = False
 
 
 class KafkaClient:
@@ -13,23 +22,29 @@ class KafkaClient:
         self.log = log
         self._kafka_client = None
         self._consumer = None
+        self._cluster_metadata = None
 
     @property
     def kafka_client(self):
         if self._kafka_client is None:
             config = {
                 "bootstrap.servers": self.config._kafka_connect_str,
-                "socket.timeout.ms": self.config._request_timeout_ms,
+                # Set socket timeout higher than operation timeout to allow broker to return
+                # actual error messages (e.g., SASL auth errors) before the socket is closed
+                "socket.timeout.ms": self.config._request_timeout_ms + 2000,
                 "client.id": "dd-agent",
                 "log_level": self.config._librdkafka_log_level,
             }
             config.update(self.__get_authentication_config())
 
-            self._kafka_client = AdminClient(config)
+            self._kafka_client = AdminClient(config, logger=self.log)
 
         return self._kafka_client
 
     def open_consumer(self, consumer_group):
+        if self._consumer is not None:
+            return
+
         config = {
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
@@ -43,8 +58,11 @@ class KafkaClient:
         self.log.debug("Consumer instance %s created for group %s", self._consumer, consumer_group)
 
     def close_consumer(self):
+        if self._consumer is None:
+            return
         self.log.debug("Closing consumer instance %s", self._consumer)
         self._consumer.close()
+        self._consumer = None
 
     def __get_authentication_config(self):
         config = {
@@ -68,12 +86,55 @@ class KafkaClient:
         }
 
         if self.config._sasl_mechanism == "OAUTHBEARER":
-            extras_parameters['sasl.oauthbearer.method'] = "oidc"
-            extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get("client_id")
-            extras_parameters["sasl.oauthbearer.token.endpoint.url"] = self.config._sasl_oauth_token_provider.get("url")
-            extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
-                "client_secret"
-            )
+            # Default to 'oidc' for backwards compatibility with existing configs
+            method = self.config._sasl_oauth_token_provider.get("method", "oidc")
+
+            if method == "aws_msk_iam":
+                if not AWS_MSK_IAM_AVAILABLE:
+                    raise Exception(
+                        "AWS MSK IAM authentication requires 'aws-msk-iam-sasl-signer-python' library. "
+                        "Install it with: pip install aws-msk-iam-sasl-signer-python"
+                    )
+
+                def _aws_msk_iam_oauth_cb(oauth_config):
+                    """OAuth callback that generates AWS MSK IAM authentication tokens."""
+                    try:
+                        region = self.config._sasl_oauth_token_provider.get("aws_region")
+                        if not region:
+                            region = boto3.session.Session().region_name
+
+                        if not region:
+                            raise Exception(
+                                "AWS region could not be determined. Please specify 'aws_region' in "
+                                "sasl_oauth_token_provider configuration."
+                            )
+
+                        auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
+                        self.log.debug("Generated AWS MSK IAM token for region %s, expires in %s ms", region, expiry_ms)
+                        return auth_token, expiry_ms / 1000  # Convert to seconds
+                    except Exception as e:
+                        self.log.error("Failed to generate AWS MSK IAM token: %s", e)
+                        raise
+
+                extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
+
+            elif method == "oidc":
+                extras_parameters['sasl.oauthbearer.method'] = "oidc"
+                extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get(
+                    "client_id"
+                )
+                extras_parameters["sasl.oauthbearer.token.endpoint.url"] = self.config._sasl_oauth_token_provider.get(
+                    "url"
+                )
+                extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
+                    "client_secret"
+                )
+                extras_parameters["sasl.oauthbearer.scope"] = self.config._sasl_oauth_token_provider.get("scope")
+                extras_parameters["sasl.oauthbearer.extensions"] = self.config._sasl_oauth_token_provider.get(
+                    "extensions"
+                )
+                if self.config._sasl_oauth_tls_ca_cert:
+                    extras_parameters["https.ca.location"] = self.config._sasl_oauth_tls_ca_cert
 
         for key, value in extras_parameters.items():
             # Do not add the value if it's not specified
@@ -92,32 +153,97 @@ class KafkaClient:
             return "", []
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
-    def consumer_offsets_for_times(self, partitions):
-        topicpartitions_for_querying = [
-            # Setting offset to -1 will return the latest highwater offset while calling offsets_for_times
-            #   Reference: https://github.com/fede1024/rust-rdkafka/issues/460
-            TopicPartition(topic=topic, partition=partition, offset=-1)
-            for topic, partition in partitions
-        ]
-        return [
-            (tp.topic, tp.partition, tp.offset)
-            for tp in self._consumer.offsets_for_times(
-                partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
+    def get_partition_offsets(self, partitions, offset=-1):
+        """Return (topic, partition, offset) tuples, skipping partitions that can't be queried.
+
+        A request-level failure (the batched list_offsets call itself raising, as opposed to an
+        individual partition's future) is not swallowed here: it propagates so the caller aborts
+        highwater collection instead of silently treating every partition as missing.
+        """
+        offset_spec = OffsetSpec.earliest() if offset == 0 else OffsetSpec.latest()
+        request = {TopicPartition(topic=topic, partition=partition): offset_spec for topic, partition in partitions}
+        if not request:
+            return []
+
+        futures = self.kafka_client.list_offsets(
+            request,
+            isolation_level=IsolationLevel.READ_UNCOMMITTED,
+            request_timeout=self.config._request_timeout,
+        )
+
+        results = []
+        negative = []
+        for tp, future in futures.items():
+            try:
+                partition_offset = future.result().offset
+            except Exception as e:
+                self.log.debug("Skipping offsets for %s/%s: %s", tp.topic, tp.partition, e)
+                continue
+            if partition_offset < 0:
+                negative.append((tp.topic, tp.partition, partition_offset))
+                continue
+            results.append((tp.topic, tp.partition, partition_offset))
+        if negative:
+            # A Kafka offset is never negative, so the client library mangled these: it narrows
+            # ListOffsets results through a C long, which is 32 bits wide on Windows x64.
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1696
+            self.log.warning(
+                "Discarding %d/%d negative offset(s): broker_offset and consumer_lag will be "
+                "missing for those partitions (up to 5 shown): %s",
+                len(negative),
+                len(request),
+                negative[:5],
             )
-        ]
+        return results
+
+    def _list_topics(self):
+        if self._cluster_metadata:
+            return self._cluster_metadata
+
+        try:
+            self.request_metadata_update()
+
+        except KafkaException as e:
+            self.log.error("Received exception when listing topics: %s", e)
+
+        return self._cluster_metadata
+
+    def get_topic_partitions(self):
+        topic_partitions = {}
+        try:
+            cluster_metadata = self._list_topics()
+            for topic in cluster_metadata.topics:
+                topic_metadata = cluster_metadata.topics[topic]
+                partitions = list(topic_metadata.partitions)
+                topic_partitions[topic] = partitions
+
+        except KafkaException as e:
+            self.log.error("Received exception when listing topics: %s", e)
+
+        return topic_partitions
 
     def get_partitions_for_topic(self, topic):
+        partitions = []
         try:
-            cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
+            cluster_metadata = self._list_topics()
         except KafkaException as e:
             self.log.error("Received exception when getting partitions for topic %s: %s", topic, e)
             return []
-        topic_metadata = cluster_metadata.topics[topic]
-        return list(topic_metadata.partitions)
+
+        if topic in cluster_metadata.topics:
+            topic_metadata = cluster_metadata.topics[topic]
+            partitions = list(topic_metadata.partitions)
+        return partitions
 
     def request_metadata_update(self):
         # https://github.com/confluentinc/confluent-kafka-python/issues/594
-        self.kafka_client.list_topics(None, timeout=self.config._request_timeout)
+        try:
+            self._cluster_metadata = self.kafka_client.list_topics(None, timeout=self.config._request_timeout)
+        except KafkaException:
+            # Flush pending log messages to surface the actual error details
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1699
+            self.kafka_client.poll(1)
+            raise
 
     def list_consumer_groups(self):
         groups = []

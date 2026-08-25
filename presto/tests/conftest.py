@@ -14,7 +14,6 @@ from datadog_checks.dev.utils import load_jmx_config
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-
     compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
     with docker_run(compose_file, conditions=[WaitFor(make_query), CheckDockerLogs(compose_file, 'SERVER STARTED')]):
         yield instance, {'use_jmx': True}
@@ -35,7 +34,6 @@ def make_query():
 
 
 @pytest.fixture(scope='session', autouse=True)
-@pytest.mark.usefixtures('dd_environment')
 def instance():
     inst = load_jmx_config()
     # Add presto coordinator to the configuration

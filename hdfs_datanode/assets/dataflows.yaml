@@ -1,0 +1,9 @@
+provides:
+  - id: hdfs-datanode-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: hdfs-datanode-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

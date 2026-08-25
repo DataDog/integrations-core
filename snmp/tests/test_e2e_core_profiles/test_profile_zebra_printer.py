@@ -32,6 +32,7 @@ def test_e2e_profile_zebra_printer(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + []
 
     # --- TEST EXTENDED METRICS ---

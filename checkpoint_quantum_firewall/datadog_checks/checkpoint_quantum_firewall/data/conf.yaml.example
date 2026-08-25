@@ -18,3 +18,5 @@
 #     port: <PORT>
 #     service: checkpoint-quantum-firewall
 #     source: checkpoint-quantum-firewall
+#     tags:
+#     - ndm_syslog:true

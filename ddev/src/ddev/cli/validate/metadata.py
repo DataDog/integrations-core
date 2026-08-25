@@ -90,7 +90,14 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         if current_check.name.startswith('datadog_checks_'):
             continue
 
-        metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "")
+        metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "") or app.repo.config.get(
+            f"/overrides/metrics-prefix/{current_check.name}", ""
+        )
+
+        if not metric_prefix and current_check.name not in metadata_utils.PROVIDER_INTEGRATIONS:
+            errors = True
+            error_message += f'{current_check.name}: metric_prefix does not exist in manifest or overrides.\n'
+
         metadata_file = current_check.metrics_file
 
         # To make logging less verbose, common errors are counted for current check
@@ -101,7 +108,6 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         duplicate_short_name_set: set = set()
         duplicate_description_set: set = set()
 
-        metric_prefix_error_shown = False
         if metadata_file.stat().st_size == 0:
             errors = True
 
@@ -173,12 +179,6 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                     'metric_name'
                 ].startswith(metric_prefix):
                     metric_prefix_count[prefix] += 1
-            else:
-                errors = True
-                if not metric_prefix_error_shown and current_check.name not in metadata_utils.PROVIDER_INTEGRATIONS:
-                    metric_prefix_error_shown = True
-
-                    error_message += f'{current_check.name}:{line} metric_prefix does not exist in manifest.\n'
 
             # metric_type header
             if row['metric_type'] and row['metric_type'] not in metadata_utils.VALID_METRIC_TYPE:
@@ -210,7 +210,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
 
             # integration header
             integration = row['integration']
-            normalized_integration = current_check.normalized_display_name
+            normalized_integration = current_check.metadata_integration_name
             if integration != normalized_integration and normalized_integration not in excluded:
                 errors = True
 
@@ -284,7 +284,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
             error_message += (
                 f"{current_check.name}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
             )
-            error_message += "defined in the manifest.\n"
+            error_message += f"defined for this integration: {metric_prefix=}.\n"
 
         unsorted = set(app.repo.config.get('/overrides/validate/metrics/unsorted', []))
 

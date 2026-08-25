@@ -15,6 +15,7 @@ def test_e2e(check, dd_agent_check, pg_instance):
     aggregator = dd_agent_check(pg_instance, rate=True)
 
     conn = _get_conn(pg_instance)
+    conn.execute("SET client_encoding TO 'UTF8'")
     with conn.cursor() as cur:
         cur.execute("SHOW server_version;")
         check.raw_version = cur.fetchone()[0]
@@ -27,6 +28,7 @@ def test_e2e(check, dd_agent_check, pg_instance):
 
     check._database_hostname = socket.gethostname().lower()
     check._database_identifier = socket.gethostname().lower()
+    check._agent_hostname = socket.gethostname().lower()
     expected_tags = _get_expected_tags(check, pg_instance, with_host=False)
     check_bgw_metrics(aggregator, expected_tags)
     check_common_metrics(aggregator, expected_tags=expected_tags, count=None)

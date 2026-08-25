@@ -208,9 +208,7 @@ class CactiCheck(AgentCheck):
                     AND dl.snmp_index = hsc.snmp_index
             WHERE dt.data_source_path IS NOT NULL
             AND dt.data_source_path != ''
-            AND ({} OR hsc.field_name is NULL) """.format(
-            and_parameters
-        )
+            AND ({} OR hsc.field_name is NULL) """.format(and_parameters)
 
         c.execute(rrd_query)
         res = []

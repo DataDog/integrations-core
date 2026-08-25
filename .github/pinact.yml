@@ -2,7 +2,17 @@
 # GitHub actions are left unpined: .github/workflows/validate-pinned-actions.yml
 # Used to exclude specific actions from the pin check
 version: 3
-ignore_actions:
-  # Lets keep static analyzer action updated as much as possible
-  - name: DataDog/datadog-static-analyzer-github-action
-    ref: .*
+
+# pinact requires a version comment next to every SHA pin. These two actions
+# cannot satisfy that check, so they are exempt from it.
+rules:
+  # Only publishes the `v1` tag; every other ref is a branch, so the pin tracks
+  # a `master` commit and there is no version to name.
+  - ignore: true
+    conditions:
+      - expr: ActionRepoFullName == "dtolnay/rust-toolchain"
+  # Tagged as `action/v2.0.3`, and pinact does not recognise prefixed tags as
+  # version comments.
+  - ignore: true
+    conditions:
+      - expr: ActionRepoFullName == "DataDog/commit-headless"

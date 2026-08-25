@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import json
 import re
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
+from datadog_checks.sqlserver.config_models.instance import DataObservability
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     DEFAULT_LONG_METRICS_COLLECTION_INTERVAL,
@@ -31,7 +33,9 @@ class SQLServerConfig:
         self.autodiscovery_exclude: list[str] = instance.get('autodiscovery_exclude', ['model']) or ['model']
         self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
-        self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
+        self.autodiscovery_interval: int = instance.get(
+            'database_autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL
+        )
         self.database_instance_collection_interval: int = instance.get(
             'database_instance_collection_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
         )
@@ -40,6 +44,7 @@ class SQLServerConfig:
 
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
+        self.only_custom_queries: bool = is_affirmative(instance.get('only_custom_queries', False))
         self.ignore_missing_database = is_affirmative(instance.get("ignore_missing_database", False))
         if self.ignore_missing_database:
             self.log.warning(
@@ -55,9 +60,10 @@ class SQLServerConfig:
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}
-        self.schema_config: dict = instance.get('schemas_collection', {}) or {}
-        self.deadlocks_config: dict = instance.get('deadlocks_collection', {}) or {}
-        self.xe_collection_config: dict = instance.get('xe_collection', {}) or {}
+        # Backward compatibility: check new names first, then fall back to old names
+        self.schema_config: dict = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
+        self.deadlocks_config: dict = instance.get('collect_deadlocks', instance.get('deadlocks_collection', {})) or {}
+        self.xe_collection_config: dict = instance.get('collect_xe', instance.get('xe_collection', {})) or {}
         self.cloud_metadata: dict = {}
         aws: dict = instance.get('aws', {}) or {}
         gcp: dict = instance.get('gcp', {}) or {}
@@ -103,6 +109,9 @@ class SQLServerConfig:
                     'keep_positional_parameter': is_affirmative(
                         obfuscator_options_config.get('keep_positional_parameter', False)
                     ),
+                    'replace_bind_parameter': is_affirmative(
+                        obfuscator_options_config.get('replace_bind_parameter', False)
+                    ),
                     'keep_trailing_semicolon': is_affirmative(
                         obfuscator_options_config.get('keep_trailing_semicolon', False)
                     ),
@@ -124,12 +133,17 @@ class SQLServerConfig:
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
+        self.data_observability: DataObservability = DataObservability.model_validate(
+            instance.get('data_observability') or {}
+        )
 
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
             additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
         )
+
+        self._validate_only_custom_queries(instance)
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []
@@ -270,3 +284,28 @@ class SQLServerConfig:
                 if value is not None:
                     config[key] = value
         return configurable_metrics
+
+    def _validate_only_custom_queries(self, instance):
+        # Warn about any metric-collecting options that are enabled
+        if self.only_custom_queries:
+            if self.dbm_enabled:
+                self.log.warning(
+                    "only_custom_queries is enabled with DBM. if you don't want to collect DBM metrics, set dbm: false"
+                )
+
+            if self.proc:
+                self.log.warning(
+                    "`stored_procedure` is deprecated. to run custom queries, add to the `custom_queries` configuration"
+                )
+
+            if instance.get('custom_queries', []) == []:
+                self.log.warning("only_custom_queries is enabled but no custom queries are defined")
+
+
+def sanitize(config: dict) -> dict:
+    """
+    Sanitize the config to remove sensitive information.
+    """
+    sanitized = copy.deepcopy(config)
+    sanitized['password'] = '***' if sanitized.get('password') else None
+    return sanitized

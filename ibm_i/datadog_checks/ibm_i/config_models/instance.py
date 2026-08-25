@@ -54,6 +54,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     driver: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     hostname: Optional[str] = Field(None, max_length=255, min_length=1)
     job_query_timeout: Optional[int] = Field(None, gt=0)
     message_queue_info: Optional[MessageQueueInfo] = None

@@ -6,6 +6,8 @@
 
 The PHP-FPM check monitors the state of your FPM pool and tracks request performance.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

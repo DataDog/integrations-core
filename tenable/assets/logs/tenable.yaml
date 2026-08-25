@@ -1,3 +1,5 @@
+# bypass-global-grok-parser-rules-checks
+# bypass-global-facets-path-checks
 id: tenable
 metric_id: tenable
 backend_only: false

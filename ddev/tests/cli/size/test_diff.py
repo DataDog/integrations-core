@@ -18,7 +18,7 @@ def mock_size_diff_dependencies():
     mock_git_repo.repo_dir = "fake_repo"
     mock_git_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
-    def get_compressed_files_side_effect(_, __):
+    def get_compressed_files_side_effect(*args, **kwargs):
         get_compressed_files_side_effect.counter += 1
         if get_compressed_files_side_effect.counter % 2 == 1:
             return [{"Name": "path1.py", "Version": "1.1.1", "Size_Bytes": 1000, "Type": "Integration"}]  # before
@@ -30,7 +30,7 @@ def mock_size_diff_dependencies():
 
     get_compressed_files_side_effect.counter = 0
 
-    def get_compressed_dependencies_side_effect(_, __, ___, ____):
+    def get_compressed_dependencies_side_effect(*args, **kwargs):
         get_compressed_dependencies_side_effect.counter += 1
         if get_compressed_dependencies_side_effect.counter % 2 == 1:
             return [{"Name": "dep1", "Version": "1.0.0", "Size_Bytes": 2000, "Type": "Dependency"}]  # before
@@ -45,11 +45,11 @@ def mock_size_diff_dependencies():
     with (
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
-            return_value=({'3.12'}),
+            return_value=({"3.12"}),
         ),
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
@@ -58,9 +58,6 @@ def mock_size_diff_dependencies():
         patch("ddev.cli.size.diff.get_files", side_effect=get_compressed_files_side_effect),
         patch("ddev.cli.size.diff.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
         patch("ddev.cli.size.diff.format_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.size.utils.common_funcs.plt.show"),
-        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
-        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
@@ -114,11 +111,11 @@ def test_diff_no_differences(ddev):
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
-            return_value=({'3.12'}),
+            return_value=({"3.12"}),
         ),
         patch.object(fake_repo, "checkout_commit"),
         patch("ddev.cli.size.utils.common_funcs.tempfile.mkdtemp", return_value="fake_repo"),
@@ -140,9 +137,6 @@ def test_diff_no_differences(ddev):
                 {"Name": "dep2.whl", "Version": "2.0.0", "Size_Bytes": 1000},
             ],
         ),
-        patch("ddev.cli.size.utils.common_funcs.plt.show"),
-        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
-        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
@@ -168,11 +162,11 @@ def test_diff_invalid_platform(ddev):
         patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
-            return_value=({'3.12'}),
+            return_value=({"3.12"}),
         ),
     ):
         result = ddev("size", "diff", "commit1", "commit2", "--platform", "linux", "--python", "3.12", "--compressed")
@@ -190,11 +184,11 @@ def test_diff_invalid_version(ddev):
         patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
-            return_value=({'3.12'}),
+            return_value=({"3.12"}),
         ),
     ):
         result = ddev(
@@ -221,11 +215,11 @@ def test_diff_invalid_platform_and_version(ddev):
         patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
-            return_value=({'3.12'}),
+            return_value=({"3.12"}),
         ),
     ):
         result = ddev("size", "diff", "commit1", "commit2", "--platform", "linux", "--python", "2.10", "--compressed")

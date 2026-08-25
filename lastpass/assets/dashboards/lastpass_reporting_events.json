@@ -72,7 +72,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:lastpass service:reporting-events @Data:\"LastPass via Website\" $IP_Address $Username"
+                        "query": "source:lastpass service:reporting-events @Data:LastPass\\ via\\ Website* $IP_Address $Username"
                       },
                       "storage": "hot"
                     }
@@ -130,7 +130,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:lastpass service:reporting-events @Data:\"LastPass via Website\" @evt.name:\"Log in\" $IP_Address $Username"
+                        "query": "source:lastpass service:reporting-events @Data:LastPass\\ via\\ Website* @evt.name:\"Log in\" $IP_Address $Username"
                       },
                       "storage": "hot"
                     }
@@ -187,7 +187,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:lastpass service:reporting-events @Data:\"LastPass via Website\" @evt.name:\"Failed login attempt\" $IP_Address $Username"
+                        "query": "source:lastpass service:reporting-events @Data:LastPass\\ via\\ Website* @evt.name:\"Failed login attempt\" $IP_Address $Username"
                       },
                       "storage": "hot"
                     }
@@ -262,7 +262,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:lastpass service:reporting-events @Data:\"LastPass via Website\" @evt.name:\"Log in\" $IP_Address $Username"
+                        "query": "source:lastpass service:reporting-events @Data:LastPass\\ via\\ Website* @evt.name:\"Log in\" $IP_Address $Username"
                       },
                       "storage": "hot"
                     },
@@ -277,7 +277,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:lastpass service:reporting-events @Data:\"LastPass via Website\" @evt.name:\"Failed login attempt\" $IP_Address $Username"
+                        "query": "source:lastpass service:reporting-events @Data:LastPass\\ via\\ Website* @evt.name:\"Failed login attempt\" $IP_Address $Username"
                       },
                       "storage": "hot"
                     }
@@ -1318,7 +1318,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:lastpass service:reporting-events @evt.name:\"Log in\" -@Data:\"Lastpass via website\" $IP_Address $Username"
+                        "query": "source:lastpass service:reporting-events @evt.name:\"Log in\" $IP_Address $Username"
                       },
                       "storage": "hot"
                     }

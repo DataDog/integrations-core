@@ -15,24 +15,16 @@ jobs:
     uses: ./.github/workflows/test-all.yml
 
     permissions:
-       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
-       id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts in test-target.yml
+       id-token: write
 
     with:
       repo: core
 
       # Options
-      standard: true
       minimum-base-package: true
-      test-py2: true
-    secrets: inherit
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
+      pytest-args: '-m "not flaky"'
+      context: "nightly-base-package"
     secrets: inherit

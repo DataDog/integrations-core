@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
 
@@ -45,9 +47,20 @@ class TestIsIntegration:
 
         assert integration.is_integration is True
 
-    def test_not_integration(self, local_repo):
+    @pytest.mark.parametrize(
+        "integration_name",
+        [
+            # These are all packages that can be returned by `get` but are not integrations
+            "datadog_checks_base",
+            "datadog_checks_dependency_provider",
+            "datadog_checks_dev",
+            "datadog_checks_downloader",
+            "ddev",
+        ],
+    )
+    def test_not_integration(self, local_repo, integration_name):
         repo = Repository(local_repo.name, str(local_repo))
-        integration = repo.integrations.get('datadog_checks_downloader')
+        integration = repo.integrations.get(integration_name)
 
         assert integration.is_integration is False
 
@@ -191,6 +204,22 @@ class TestPackageDirectory:
 
         assert integration.package_directory == local_repo / integration.name / 'datadog_checks' / 'go_metro'
 
+    def test_non_existent_package(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+
+        with pytest.raises(OSError):
+            repo.integrations.get('non_existent_package')
+
+    def test_non_existent_when_worktree(self, local_clone):
+        repo = Repository(local_clone.path.name, str(local_clone.path))
+
+        with pytest.raises(OSError):
+            repo.integrations.get('wt')
+
+    def test_worktree_not_in_package_iterator(self, local_clone):
+        repo = Repository(local_clone.path.name, str(local_clone.path))
+        assert 'wt' not in set(repo.integrations.iter_all())
+
 
 class TestPackageFiles:
     def test_base_package_file(self, local_repo):
@@ -227,6 +256,11 @@ class TestReleaseTagPattern:
 
 
 class TestMetrics:
+    @pytest.fixture(autouse=True)
+    def mock_worktrees(self, mocker):
+        # This fake repo is another different fake repo, so we need to mock the worktrees to avoid
+        mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
+
     def test_has_metrics(self, fake_repo):
         integration = fake_repo.integrations.get('dummy')
 
@@ -251,3 +285,28 @@ class TestMetrics:
     def test_has_no_metadata_file(self, fake_repo):
         integration = fake_repo.integrations.get('no_metadata_file')
         assert not list(integration.metrics)
+
+
+def test_example_config_path(local_repo):
+    repo = Repository(local_repo.name, str(local_repo))
+    integration = repo.integrations.get('postgres')
+
+    assert integration.example_config == integration.package_directory / 'data' / 'conf.yaml.example'
+
+
+@pytest.mark.parametrize(
+    'relative_path, expected',
+    [
+        pytest.param('datadog_checks/postgres/postgres.py', True, id='package_source_file'),
+        pytest.param('datadog_checks/postgres/data/conf.yaml.example', True, id='example_config'),
+        pytest.param('pyproject.toml', True, id='pyproject_toml'),
+        pytest.param('assets/configuration/spec.yaml', False, id='config_spec'),
+        pytest.param('README.md', False, id='readme'),
+        pytest.param('tests/test_postgres.py', False, id='test_file'),
+    ],
+)
+def test_requires_changelog_entry(local_repo, relative_path, expected):
+    repo = Repository(local_repo.name, str(local_repo))
+    integration = repo.integrations.get('postgres')
+
+    assert integration.requires_changelog_entry(integration.path / relative_path) is expected

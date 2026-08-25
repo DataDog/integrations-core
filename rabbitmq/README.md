@@ -12,6 +12,8 @@ This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 
 Consider [Data Streams Monitoring][24] to enhance your RabbitMQ integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -192,6 +194,7 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for RabbitMQ monitoring][15]
 - [Collecting metrics with RabbitMQ monitoring tools][16]
 - [Monitoring RabbitMQ performance with Datadog][17]
+- [How microservice architectures have shaped the usage of database technologies][25]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
@@ -217,3 +220,4 @@ Additional helpful documentation, links, and articles:
 [22]: https://www.rabbitmq.com/prometheus.html#detailed-endpoint
 [23]: https://docs.datadoghq.com/integrations/rabbitmq/?tab=host#metrics
 [24]: https://docs.datadoghq.com/data_streams/
+[25]: https://www.datadoghq.com/blog/datadog-database-research/

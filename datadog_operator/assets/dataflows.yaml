@@ -1,0 +1,5 @@
+provides:
+  - id: datadog-operator-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

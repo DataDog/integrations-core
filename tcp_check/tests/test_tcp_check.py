@@ -310,14 +310,17 @@ def test_multiple(aggregator):
     instance['ip_cache_duration'] = 0
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
-    with mock.patch(
-        'socket.getaddrinfo',
-        return_value=[
-            (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip1', 80)),
-            (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
-            (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
-        ],
-    ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
+    with (
+        mock.patch(
+            'socket.getaddrinfo',
+            return_value=[
+                (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip1', 80)),
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
+            ],
+        ),
+        mock.patch.object(check, 'connect', wraps=check.connect) as connect,
+    ):
         connect.side_effect = [None, Exception(), None] * 2
         expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:multiple']
 

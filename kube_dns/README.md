@@ -8,6 +8,8 @@ Get metrics from kube-dns service in real time to:
 
 See https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns for more information about kube-dns.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

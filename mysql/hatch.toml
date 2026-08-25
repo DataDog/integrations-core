@@ -5,6 +5,8 @@ mypy-args = [
   "--check-untyped-defs",
   "--follow-imports",
   "silent",
+]
+mypy-files = [
   "datadog_checks/mysql/statements.py",
 ]
 mypy-deps = [
@@ -14,35 +16,62 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = [
   "5.7",  # EOL October 21, 2023
+  "8.0.18", # Test for pre-json aggregation version
   "8.0.36",  # EOL April, 2026
   "8.4.0",
+  "9.7.2",  # latest 9.x innovation release
 ]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = ["8.0"]
 replication = ["group"]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
+version = ["8.0"]
+replication = ["hybrid"]
+
+[[envs.default.matrix]]
+python = ["3.13"]
 flavor = ["mariadb"]
 version = [
   "10.5",  # EOL 24 June 2025 (LTS version)
   "10.6",  # EOL 06 July 2026 (LTS version)
   "10.11", # EOL 16 Feb 2028 (LTS version)
   "11.4",  # EOL 29 May 2029 (LTS version)
+  "12.0",  # newest major on the bitnamilegacy image
+  "13",    # RC-only; official mariadb image, pinned to 13.0-rc (see overrides)
+]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+flavor = ["percona"]
+version = [
+  "8.0.42",
+  "8.4",
 ]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.36"] },
+  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.18", "8.0.36"] },
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
+  # MariaDB 13 is RC-only and not on the bitnamilegacy image: use the official
+  # `mariadb` image (routed in conftest) with an explicit RC tag + its own compose.
+  { key = "COMPOSE_FILE", value = "mariadb-official.yaml", if = ["13"] },
+  { key = "MYSQL_IMAGE_TAG", value = "13.0-rc", if = ["13"] },
+  # MySQL 9 uses the official `mysql` image (bitnamilegacy is deprecated), which needs
+  # its own compose with initdb-based replication.
+  { key = "COMPOSE_FILE", value = "mysql-official.yaml", if = ["9.7.2"] },
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
+]
+name."8.0-hybrid".env-vars = [
+  { key = "COMPOSE_FILE", value = "mysql8-hybrid.yaml" },
 ]
 
 

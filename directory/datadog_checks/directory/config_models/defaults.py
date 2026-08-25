@@ -24,6 +24,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_filegauges():
     return False
 
@@ -34,6 +38,10 @@ def instance_follow_symlinks():
 
 def instance_ignore_missing():
     return False
+
+
+def instance_max_filegauge_count():
+    return 20
 
 
 def instance_min_collection_interval():

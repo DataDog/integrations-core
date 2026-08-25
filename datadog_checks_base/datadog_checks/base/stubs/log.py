@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-from ..log import CheckLoggingAdapter as AgentLoggingAdapter
+from datadog_checks.base.log import CheckLoggingAdapter as AgentLoggingAdapter
 
 TRACE_LEVEL = 7
 

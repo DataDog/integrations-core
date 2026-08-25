@@ -1,4 +1,5 @@
 name: GlusterFS
+fleet_configurable: true
 files:
 - name: glusterfs.yaml
   options:
@@ -10,9 +11,11 @@ files:
 
         A version of the gstatus is shipped with the Agent binary.
         If you are using a source install, specify the location of gstatus.
+      fleet_configurable: true
       value:
         type: string
-        example: /opt/datadog-agent/embedded/sbin/gstatus
+        example: <datadog-agent>/embedded/sbin/gstatus
+        require_trusted_provider: true
     - template: init_config/default
   - template: instances
     options:
@@ -20,9 +23,10 @@ files:
       description: |
         GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
 
-        dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
+        dd-agent ALL=(ALL) NOPASSWD:<datadog-agent>/embedded/sbin/gstatus
 
         Enable the option for the check to run with sudo.
+      fleet_configurable: true
       value:
         type: boolean
         example: true

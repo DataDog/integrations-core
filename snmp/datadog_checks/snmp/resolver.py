@@ -11,7 +11,6 @@ from .types import OIDMatch
 
 
 class OIDTreeNode(object):
-
     __slots__ = ('name', 'children')
 
     def __init__(self):

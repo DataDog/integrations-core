@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: wazuh
 metric_id: wazuh
 backend_only: false

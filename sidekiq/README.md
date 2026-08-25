@@ -6,6 +6,8 @@ This integration monitors [Sidekiq][1] through [Dogstatsd][2]. It collects metri
 
 **Note** Only Sidekiq Pro (>= 3.6) or Enterprise (>= 1.1.0) users can collect metrics.
 
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 ### Installation

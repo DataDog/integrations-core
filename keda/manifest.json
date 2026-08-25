@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "961d21ab-c2c9-409f-8d2a-e54132004d1e",
   "app_id": "keda",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

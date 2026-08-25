@@ -6,10 +6,18 @@ import re
 
 import click
 
-from ....subprocess import run_command
-from ...constants import get_root
-from ...utils import complete_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, annotate_warning, echo_failure, echo_info, echo_success, echo_warning
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_warning,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.utils import complete_valid_checks
 
 FILE_PATH_REGEX = r'(.+\/[^\/]+)\:(\d+)\:\s+(\w+\s+\=\=\>\s+\w+)'
 

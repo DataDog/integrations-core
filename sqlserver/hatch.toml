@@ -2,15 +2,15 @@
 base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["linux"]
 driver = ["FreeTDS", "odbc"]
-version = ["2019", "2022"]
+version = ["2019", "2022", "2025"]
 setup = ["single", "ha"]
 
 # test the compatibility of sqlserver running on non-utc timezone
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["linux"]
 version = ["2022"]
 tz = ["newyork", "tokyo"]
@@ -20,10 +20,10 @@ tz = ["newyork", "tokyo"]
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["windows"]
 driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
-version = ["2019", "2022"]
+version = ["2019", "2022", "2025"]
 setup = ["single"]
 
 # The high cardinality environment is meant to be used for local dev/testing
@@ -57,11 +57,19 @@ matrix.setup.env-vars = [
   { key = "COMPOSE_FOLDER", value = "compose-ha", if = ["ha"] },
 ]
 matrix.version.env-vars = [
-  { key = "SQLSERVER_MAJOR_VERSION" },
-  { key = "SQLSERVER_ENGINE_EDITION" },
+  { key = "SQLSERVER_YEAR" },
+  { key = "SQLSERVER_ENGINE_EDITION", value = "express" },
+  # Map years to major versions
+  { key = "SQLSERVER_MAJOR_VERSION", value="17", if = ["2025"] },
+  { key = "SQLSERVER_MAJOR_VERSION", value="16", if = ["2022"] },
+  { key = "SQLSERVER_MAJOR_VERSION", value="15", if = ["2019"] },
+  { key = "SQLSERVER_MAJOR_VERSION", value="14", if = ["2017"] },
+
+  # 2017 does not work on CI but it can still be run locally so leave in for local testing
   { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU31-GDR2-ubuntu-18.04", if = ["2017"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU28-GDR1-ubuntu-20.04", if = ["2019"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2022-CU12-GDR1-ubuntu-20.04", if = ["2022"], platform = ["linux"] },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2025-CU2-ubuntu-24.04", if = ["2025"], platform = ["linux"] },
   { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },
 ]
 matrix.driver.env-vars = [
@@ -74,4 +82,5 @@ matrix.tz.env-vars = [
 ]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
+name.linux-odbc-2025-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.windows-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality-windows"

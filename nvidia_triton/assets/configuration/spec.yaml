@@ -1,4 +1,5 @@
 name: Nvidia Triton
+fleet_configurable: true
 files:
 - name: nvidia_triton.yaml
   options:
@@ -17,6 +18,7 @@ files:
           Endpoint exposing the Nvidia Triton's Prometheus metrics. For more information refer to:
           https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#metrics
     - name: collect_server_info
+      fleet_configurable: true
       display_priority: 1
       description: |
         Whether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
@@ -29,6 +31,7 @@ files:
       description: |
         The port exposing the HTTP Endpoint of the Nvidia Triton API.
         This will be ignored if `collect_server_info` is false.
+      fleet_configurable: true
       value:
         display_default: 8000
         type: integer

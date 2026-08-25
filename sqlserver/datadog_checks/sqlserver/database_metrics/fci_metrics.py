@@ -5,7 +5,6 @@
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
 )
-from datadog_checks.sqlserver.utils import is_azure_database
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -19,15 +18,17 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
             status,
             is_current_owner
         FROM sys.dm_os_cluster_nodes
-        -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-        -- `cluster_name` column to every row by multiplying all the rows in the left table against
-        -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
-        CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
+        -- `sys.dm_hadr_cluster` does not have a related column to join on. OUTER APPLY attaches the
+        -- `cluster_name` column to every row from `sys.dm_os_cluster_nodes`, preserving those rows
+        -- even when `sys.dm_hadr_cluster` returns no rows (e.g. when Always On is not enabled, in
+        -- which case `cluster_name` is NULL). Note, there will only be at most one row from
+        -- `sys.dm_hadr_cluster`.
+        OUTER APPLY (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
     "columns": [
         {"name": "node_name", "type": "tag"},
         {"name": "status", "type": "tag"},
-        {"name": "failover_cluster", "type": "tag"},
+        {"name": "failover_cluster", "type": "tag_not_null"},
         {"name": "fci.status", "type": "gauge"},
         {"name": "fci.is_current_owner", "type": "gauge"},
     ],
@@ -43,9 +44,9 @@ class SqlserverFciMetrics(SqlserverDatabaseMetricsBase):
     def enabled(self):
         if not self.include_fci_metrics:
             return False
-        if not self.major_version and not is_azure_database(self.engine_edition):
-            return False
-        if self.major_version > 2012 or self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
+        if self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
+            return True
+        if self.major_version > 11:
             return True
         return False
 

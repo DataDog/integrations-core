@@ -1,0 +1,5 @@
+provides:
+  - id: wincrashdetect-events
+    always_on: true
+    data_type: events
+    direction: inbound

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7d801e88-1fad-433e-81d9-07449fd45e13",
   "app_id": "aspdotnet",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -39,6 +40,10 @@
         "check": "aspdotnet.request.wait_time",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "aspnet_wp",
+        "aspnet_state"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },

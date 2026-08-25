@@ -22,12 +22,12 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.4.0",
+    "datadog-checks-base>=37.33.0",
 ]
 dynamic = [
     "version",
@@ -36,7 +36,9 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "confluent-kafka==2.8.0",
+    "aws-msk-iam-sasl-signer-python==1.0.2",
+    "boto3==1.43.67",
+    "confluent-kafka==2.13.2",
 ]
 
 [project.urls]
@@ -59,3 +61,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.ruff]
+extend = "../pyproject.toml"

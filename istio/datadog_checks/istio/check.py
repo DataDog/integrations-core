@@ -3,15 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import ChainMap
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2, is_affirmative
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .constants import ISTIOD_NAMESPACE
-from .metrics import ISTIOD_METRICS, ISTIOD_VERSION, MESH_METRICS, construct_metrics_config
+from .metrics import (
+    ISTIOD_METRICS,
+    ISTIOD_VERSION,
+    MESH_METRICS,
+    WAYPOINT_METRICS,
+    ZTUNNEL_METRICS,
+    construct_metrics_config,
+)
 
 
 class IstioCheckV2(OpenMetricsBaseCheckV2):
-
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -20,9 +26,29 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
 
     def _parse_config(self):
         self.scraper_configs = []
-        mesh_endpoint = self.instance.get("istio_mesh_endpoint")
         istiod_endpoint = self.instance.get("istiod_endpoint")
         istiod_namespace = self.instance.get("namespace", ISTIOD_NAMESPACE)
+
+        # Auto-detect istio_mode based on configured endpoints
+        ztunnel_endpoint = self.instance.get("ztunnel_endpoint")
+        waypoint_endpoint = self.instance.get("waypoint_endpoint")
+
+        # If istio_mode is not explicitly set and ambient endpoints are configured, auto-enable ambient mode
+        if "istio_mode" not in self.instance and (ztunnel_endpoint or waypoint_endpoint):
+            istio_mode = "ambient"
+        else:
+            istio_mode = self.instance.get("istio_mode", "sidecar")
+
+        if istio_mode == "ambient":
+            self._parse_ambient_config(istiod_endpoint, istiod_namespace)
+        elif istio_mode == "sidecar":
+            self._parse_sidecar_config(istiod_endpoint, istiod_namespace)
+        else:
+            raise ConfigurationError(f"Invalid istio_mode '{istio_mode}'. Must be either 'sidecar' or 'ambient'.")
+
+    def _parse_sidecar_config(self, istiod_endpoint, istiod_namespace):
+        """Parse configuration for sidecar mode (traditional Istio deployment)."""
+        mesh_endpoint = self.instance.get("istio_mesh_endpoint")
         mesh_namespace = istiod_namespace + ".mesh"
 
         if not mesh_endpoint and not istiod_endpoint:
@@ -35,15 +61,52 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         if istiod_endpoint:
             self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, istiod_namespace))
 
-    def _generate_config(self, endpoint, metrics, namespace):
+    def _parse_ambient_config(self, istiod_endpoint, istiod_namespace):
+        """Parse configuration for ambient mode (sidecar-less Istio deployment)."""
+        ztunnel_endpoint = self.instance.get("ztunnel_endpoint")
+        waypoint_endpoint = self.instance.get("waypoint_endpoint")
+
+        if not ztunnel_endpoint and not waypoint_endpoint and not istiod_endpoint:
+            raise ConfigurationError(
+                "In ambient mode, must specify at least one of: "
+                "`ztunnel_endpoint`, `waypoint_endpoint`, or `istiod_endpoint`."
+            )
+
+        # Ztunnel uses the modern OpenMetrics counter convention; force the v2 parser so counters are not dropped.
+        ztunnel_namespace = istiod_namespace + ".ztunnel"
+        if ztunnel_endpoint:
+            if not is_affirmative(self.instance.get("use_latest_spec", True)):
+                self.log.warning(
+                    "`use_latest_spec: false` is set with `ztunnel_endpoint` configured. "
+                    "ztunnel emits the modern OpenMetrics counter convention which the "
+                    "legacy parser silently drops, so every ztunnel counter metric will be "
+                    "missed. Remove `use_latest_spec: false` to restore ztunnel metrics."
+                )
+            self.scraper_configs.append(
+                self._generate_config(
+                    ztunnel_endpoint,
+                    ZTUNNEL_METRICS,
+                    ztunnel_namespace,
+                    scraper_defaults={'use_latest_spec': True},
+                )
+            )
+
+        # Waypoint provides L7 HTTP/gRPC metrics (optional in ambient mode)
+        waypoint_namespace = istiod_namespace + ".waypoint"
+        if waypoint_endpoint:
+            self.scraper_configs.append(self._generate_config(waypoint_endpoint, WAYPOINT_METRICS, waypoint_namespace))
+
+        # Control plane metrics are the same for both modes
+        if istiod_endpoint:
+            self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, istiod_namespace))
+
+    def _generate_config(self, endpoint, metrics, namespace, *, scraper_defaults=None):
         metrics = construct_metrics_config(metrics)
         metrics.append(ISTIOD_VERSION)
-        config = {
-            'openmetrics_endpoint': endpoint,
-            'metrics': metrics,
-            'namespace': namespace,
-        }
+        config = {**(scraper_defaults or {}), 'openmetrics_endpoint': endpoint, 'metrics': metrics}
+        # Instance keys override scraper_defaults; per-scraper namespace is restored on the next line.
         config.update(self.instance)
+        config['namespace'] = namespace
         return config
 
     def create_scraper(self, config):

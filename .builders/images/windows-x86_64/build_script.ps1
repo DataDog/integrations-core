@@ -12,7 +12,7 @@ Write-Host "Will build librdkafka $kafka_version"
 Get-RemoteFile `
   -Uri "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${kafka_version}.tar.gz" `
   -Path "librdkafka-${kafka_version}.tar.gz" `
-  -Hash '5bd1c46f63265f31c6bfcedcde78703f77d28238eadf23821c2b43fc30be3e25'
+  -Hash '14972092e4115f6e99f798a7cb420cbf6daa0c73502b3c52ae42fb5b418eea8f'
 7z x "librdkafka-${kafka_version}.tar.gz" -o"C:\"
 7z x "C:\librdkafka-${kafka_version}.tar" -o"C:\librdkafka"
 Remove-Item "librdkafka-${kafka_version}.tar.gz"
@@ -24,7 +24,7 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
-$desired_commit = "master" # Set the commit to master so we don't have to update manually
+$desired_commit = "667550429b1a7b35422380ae19078376d72b00e4"
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {

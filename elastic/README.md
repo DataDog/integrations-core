@@ -8,6 +8,8 @@ Stay up-to-date on the health of your Elasticsearch cluster, from its overall st
 
 The Datadog Agent's Elasticsearch check collects metrics for search and indexing performance, memory usage and garbage collection, node availability, shard statistics, disk space and performance, pending tasks, and many more. The Agent also sends events and service checks for the overall status of your cluster.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -96,7 +98,7 @@ The Elasticsearch integration allows you to collect custom metrics through custo
 Each custom query has the following parameters:
 
 - `endpoint` (required): The Elasticsearch API endpoint to query.
-- `data_path` (required): The JSON path up to (not including) the metric. Cannot contain wildcards. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `data_path` is `breakers.parent`.
+- `data_path` (optional): The JSON path up to (not including) the metric. Cannot contain wildcards. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `data_path` is `breakers.parent`. If omitted or empty, `value_path` is resolved against the root of the response, which is useful for flat responses such as `/<index>/_count`.
 - `columns` (required): A list representing the data to be collected from the JSON query. Each item in this list includes:
    - `value_path` (required): The JSON path from the `data_path` to the metric. This path can include string keys and list indices. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `value_path` is `estimated_size_in_bytes`.
    - `name` (required): The full metric name sent to Datadog. If you also set `type` to `tag`, then every metric collected by this query is tagged with this name.
@@ -273,7 +275,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][17] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][18].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][18].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -319,6 +323,29 @@ spec:
   containers:
     - name: elasticsearch
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <ELASTICSEARCH_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: elastic
+        containerName: elasticsearch
+        initConfig: {}
+        instances:
+          - url: "http://%%host%%:9200"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 ##### Log collection
 
@@ -486,3 +513,4 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 [28]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
 [29]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html
 [30]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

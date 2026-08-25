@@ -38,11 +38,33 @@ class Producer(StoppableThread):
         while not self._shutdown_event.is_set():
             for partition in PARTITIONS:
                 try:
-                    producer.produce('marvel', b"Peter Parker", partition=partition)
-                    producer.produce('marvel', b"Bruce Banner", partition=partition)
-                    producer.produce('marvel', b"Tony Stark", partition=partition)
-                    producer.produce('marvel', b"Johhny Blaze", partition=partition)
-                    producer.produce('marvel', b"\xc2BoomShakalaka", partition=partition)
+                    producer.produce(
+                        'marvel',
+                        b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+                        partition=partition,
+                    )
+                    producer.produce(
+                        'marvel',
+                        key=b'{"name": "Bruce Banner"}',
+                        value=b'\x00\x00\x00\x01\x5e{"name": "Bruce Banner",\
+ "age": 45, "transaction_amount": 456, "currency": "dollar"}',
+                        partition=partition,
+                    )
+                    producer.produce(
+                        'marvel',
+                        b'{"name": "Tony Stark", "age": 35, "transaction_amount": 789, "currency": "dollar"}',
+                        partition=partition,
+                    )
+                    producer.produce(
+                        'marvel',
+                        b'{"name": "Johnny Blaze", "age": 30, "transaction_amount": 321, "currency": "dollar"}',
+                        partition=partition,
+                    )
+                    producer.produce(
+                        'marvel',
+                        b'{"name": "BoomShakalaka", "age": 25, "transaction_amount": 654, "currency": "dollar"}',
+                        partition=partition,
+                    )
                     producer.produce('dc', b"Diana Prince", partition=partition)
                     producer.produce('dc', b"Bruce Wayne", partition=partition)
                     producer.produce('dc', b"Clark Kent", partition=partition)

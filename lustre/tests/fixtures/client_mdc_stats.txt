@@ -1,0 +1,23 @@
+snapshot_time             1749628869.786323838 secs.nsecs
+start_time                1748858812.989681708 secs.nsecs
+elapsed_time              770056.796642130 secs.nsecs
+req_waittime              31543 samples [usecs] 1113 37208 44430818 66263839664
+req_active                31543 samples [reqs] 1 2 31572 31630
+ldlm_ibits_enqueue        245 samples [reqs] 1 1 245 245
+ost_set_info              635 samples [usecs] 1252 4633 906487 1329134649
+mds_getattr               1 samples [usecs] 4728 4728 4728 22353984
+mds_getattr_lock          1 samples [usecs] 1481 1481 1481 2193361
+mds_close                 45 samples [usecs] 1174 2088 58948 78830640
+mds_readpage              8 samples [usecs] 2506 2771 20785 54062907
+mds_connect               1 samples [usecs] 6065 6065 6065 36784225
+mds_get_root              1 samples [usecs] 1249 1249 1249 1560001
+mds_statfs                10 samples [usecs] 1169 1543 13648 18763482
+mds_sync                  11 samples [usecs] 1167 3813 34262 115734592
+mds_getxattr              17 samples [usecs] 1210 1465 22952 31093668
+mds_hsm_state_set         11 samples [usecs] 1150 1679 13955 17922283
+ldlm_cancel               19 samples [usecs] 1148 1641 24904 32925518
+obd_ping                  30369 samples [usecs] 1194 37208 42714187 63406343829
+llog_origin_handle_open   23 samples [usecs] 1146 4718 35235 71056443
+llog_origin_handle_next_block 40 samples [usecs] 1165 1625 50175 63170997
+llog_origin_handle_read_header 23 samples [usecs] 1177 1427 29030 36724246
+seq_query                 1 samples [usecs] 1291 1291 1291 1666681

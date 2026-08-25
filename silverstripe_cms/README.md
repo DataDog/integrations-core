@@ -6,6 +6,8 @@ Silverstripe CMS is an open-source platform for creating and managing websites a
 
 The SilverStripe CMS integration collects metrics for files, pages, and failed login attempts, and sends them to Datadog for analysis and monitoring.
 
+**Minimum Agent version:** 7.65.0
+
 ## Setup
 
 ### Installation

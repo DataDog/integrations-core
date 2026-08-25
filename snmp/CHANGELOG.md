@@ -2,6 +2,114 @@
 
 <!-- towncrier release notes start -->
 
+## 13.3.0 / 2026-08-21
+
+***Security***:
+
+* Bump pyasn1 from 0.6.3 to 0.6.4 to remediate CVE-2026-59884, CVE-2026-59885, CVE-2026-59886, and PYSEC-2026-3455 (denial-of-service in BER/CER/DER decoding). ([#24727](https://github.com/DataDog/integrations-core/pull/24727))
+
+## 13.2.0 / 2026-08-05
+
+***Added***:
+
+* Add NetScout switch SNMP profile for CPU and memory metrics. ([#24283](https://github.com/DataDog/integrations-core/pull/24283))
+* Add the `use_remote_config_profiles` option to the SNMP configuration spec so it is accepted by config validation and Remote Configuration. ([#24528](https://github.com/DataDog/integrations-core/pull/24528))
+
+## 13.1.1 / 2026-07-23 / Agent 7.82.0
+
+***Fixed***:
+
+* Rename mem_pool_index tag to mem in cisco-firepower-asa profile. ([#24582](https://github.com/DataDog/integrations-core/pull/24582))
+
+## 13.1.0 / 2026-07-08
+
+***Added***:
+
+* Route Cisco Catalyst 1200/1300/1300X and Cisco Business 350 (CBS350) devices to the ``cisco-sb`` SNMP profile, and add ``serial_number`` device metadata for them through ``entPhysicalSerialNum.67109120``. ([#23939](https://github.com/DataDog/integrations-core/pull/23939))
+
+***Fixed***:
+
+* Fix Cisco ASAv memory coverage in the `cisco-firepower-asa` SNMP profile by replacing hardcoded single-pool scalar OIDs with a full table walk of `cempMemPoolTable` tagged by pool name. ([#24107](https://github.com/DataDog/integrations-core/pull/24107))
+
+## 13.0.0 / 2026-06-09 / Agent 7.81.0
+
+***Changed***:
+
+* Breaking change: Fixed metric type for `snmp.cppmSystemMemoryFree`, `snmp.cppmSystemMemoryTotal`, `snmp.cppmSystemDiskSpaceFree`, and `snmp.cppmSystemDiskSpaceTotal` in the aruba-clearpass profile. These were previously submitted as rates due to their underlying `Counter64` SNMP type, producing incorrect values. They are now submitted as gauges. Customers with existing dashboards or monitors on these metrics will see a discontinuity between historical rate datapoints and new gauge datapoints; please rebuild any affected widgets or monitors. ([#23791](https://github.com/DataDog/integrations-core/pull/23791))
+
+## 12.4.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add Cisco Catalyst CW9800H1 (OID 1.3.6.1.4.1.9.1.3324) to cisco-catalyst-wlc SNMP profile. ([#23551](https://github.com/DataDog/integrations-core/pull/23551))
+
+## 12.3.2 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Meraki Cloud Controller: use ``device_status`` tag instead of ``status`` for device-level online/offline to avoid confusion with uplink status (connected/not_connected) per Cisco Meraki API semantics. ([#22974](https://github.com/DataDog/integrations-core/pull/22974))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 12.3.1 / 2026-04-07 / Agent 7.78.0
+
+***Fixed***:
+
+* Bump pyasn1 from 0.4.8 to 0.6.3 to fix CVE-2026-30922 (DoS via unbounded ASN.1 recursion) and pysnmp from 5.1.0 to 7.1.22. ([#23124](https://github.com/DataDog/integrations-core/pull/23124))
+* Fix pysnmp 7.x API incompatibilities: varBindTable format, MIB sharing, constraint enforcement, and asyncio event-loop race condition in discovery worker threads. ([#23125](https://github.com/DataDog/integrations-core/pull/23125))
+
+## 12.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add type metadata field to `_generic-if` profile ([#22496](https://github.com/DataDog/integrations-core/pull/22496))
+
+***Fixed***:
+
+* Fix infoblox-ipam profile collecting duplicate cpu/memory metrics ([#22459](https://github.com/DataDog/integrations-core/pull/22459))
+
+## 12.2.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 12.1.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add `collect_vpn` config and `disabled` config in `interface_configs` to SNMP conf.yaml.example. ([#21620](https://github.com/DataDog/integrations-core/pull/21620))
+* [Juniper SRX] Update Juniper SRX SNMP profile to support new SRX models ([#21698](https://github.com/DataDog/integrations-core/pull/21698))
+
+## 12.0.0 / 2025-10-02 / Agent 7.72.0
+
+***Changed***:
+
+* Remove pycryptodomex dependency and unpin indirect dependencies. ([#21378](https://github.com/DataDog/integrations-core/pull/21378))
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 11.0.0 / 2025-09-05 / Agent 7.71.0
+
+***Changed***:
+
+* Add correct units and/or scale factor for UCD profile memory metrics ([#20818](https://github.com/DataDog/integrations-core/pull/20818))
+
+## 10.1.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 10.1.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
 ## 10.0.0 / 2025-04-17 / Agent 7.66.0
 
 ***Changed***:

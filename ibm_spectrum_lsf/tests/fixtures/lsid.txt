@@ -1,0 +1,6 @@
+IBM Spectrum LSF Community Edition 10.1.0.15, May 13 2025
+Copyright IBM Corp. 1992, 2016. All rights reserved.
+US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+
+My cluster name is test-cluster
+My master name is ip-11-21-111-198.ec2.internal

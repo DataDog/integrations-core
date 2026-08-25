@@ -15,6 +15,8 @@ Additionally, it includes pre-configured monitors for proactive notifications on
 
 This check monitors [Squid][1] metrics from the Cache Manager through the Datadog Agent.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

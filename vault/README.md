@@ -4,6 +4,8 @@
 
 This check monitors [Vault][1] cluster health and leader changes.
 
+**Minimum Agent version:** 6.3.2
+
 ## Setup
 
 ### Installation
@@ -163,7 +165,7 @@ _Available for Agent versions >6.0_
      ...
      [Service]
      ...
-     ExecStart=/bin/sh -c '/home/vagrant/bin/vault server -config=/home/vagrant/vault_nano/config/vault -log-level="trace" > /var/log/vault.log
+     ExecStart=/bin/sh -c '/home/vagrant/bin/vault server -config=/home/vagrant/vault_nano/config/vault -log-level="trace" > /var/log/vault.log'
      ...
      ```
 

@@ -2,6 +2,49 @@
 
 <!-- towncrier release notes start -->
 
+## 4.6.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add KRaft (Kafka Raft) metrics for Kafka clusters running without ZooKeeper. ([#23105](https://github.com/DataDog/integrations-core/pull/23105))
+
+## 4.5.0 / 2026-04-15 / Agent 7.79.0
+
+***Added***:
+
+* Add kafka.broker.start_time metric tagged with broker_id. ([#23020](https://github.com/DataDog/integrations-core/pull/23020))
+* Add kafka.log.partition.size metric for topic partition disk usage. ([#23028](https://github.com/DataDog/integrations-core/pull/23028))
+* Add kafka.log.directory.offline metric to track log directory health status. ([#23038](https://github.com/DataDog/integrations-core/pull/23038))
+
+## 4.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 4.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 4.2.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add kafka_cluster_id tag to Kafka cluster metrics ([#21687](https://github.com/DataDog/integrations-core/pull/21687))
+
+## 4.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo. ([#21206](https://github.com/DataDog/integrations-core/pull/21206))
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

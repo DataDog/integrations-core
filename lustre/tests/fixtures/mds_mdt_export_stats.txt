@@ -1,0 +1,19 @@
+snapshot_time             1749629228.342406610 secs.nsecs
+start_time                1748858813.005595222 secs.nsecs
+elapsed_time              770415.336811388 secs.nsecs
+open                      45 samples [usecs] 21 1766 8231 6335187
+close                     45 samples [usecs] 22 100 1755 76437
+mknod                     35 samples [usecs] 61 223 3796 462700
+unlink                    32 samples [usecs] 45 98 2057 138257
+mkdir                     5 samples [usecs] 156 1909 2709 3808705
+rmdir                     2 samples [usecs] 86 134 220 25352
+rename                    8 samples [usecs] 50 110 554 41270
+getattr                   130 samples [usecs] 3 21 938 10068
+setattr                   28 samples [usecs] 28 64 1111 46507
+getxattr                  7 samples [usecs] 16 217 395 52623
+setxattr                  7 samples [usecs] 1257 1481 9342 12499868
+statfs                    10 samples [usecs] 3 5 43 193
+sync                      11 samples [usecs] 4 2470 20412 46532912
+samedir_rename            7 samples [usecs] 50 81 444 29170
+parallel_rename_file      8 samples [usecs] 50 110 554 41270
+crossdir_rename           1 samples [usecs] 110 110 110 12100

@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: azure.iot_edge
 metric_id: azure-iot-edge
 backend_only: false

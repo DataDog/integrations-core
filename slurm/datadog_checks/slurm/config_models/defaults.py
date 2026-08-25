@@ -21,7 +21,7 @@ def instance_collect_sacct_stats():
 
 
 def instance_collect_scontrol_stats():
-    return True
+    return False
 
 
 def instance_collect_sdiag_stats():
@@ -76,8 +76,16 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_min_collection_interval():
     return 60
+
+
+def instance_resolve_scontrol_host_pids():
+    return False
 
 
 def instance_sacct_path():
@@ -90,6 +98,10 @@ def instance_scontrol_path():
 
 def instance_sdiag_path():
     return '/usr/bin/sdiag'
+
+
+def instance_seff_path():
+    return '/usr/bin/seff'
 
 
 def instance_sinfo_collection_level():

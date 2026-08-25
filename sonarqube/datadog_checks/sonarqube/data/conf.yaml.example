@@ -125,7 +125,9 @@ instances:
     # default_exclude: []
 
     ## @param components - mapping - optional
-    ## A mapping of components for which metrics should be collected. Each object may override the default
+    ## A mapping of components for which metrics should be collected.
+    ##
+    ## Each object may override the default
     ## options. Each component key may be configured with an optional configuration mapping to filter the metrics 
     ## that should be collected.
     ##
@@ -242,7 +244,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -265,7 +267,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
@@ -527,7 +529,7 @@ instances:
 
     ## Web JMX instance example
   -
-    ## @param is_jmx - boolean - optional - default: true
+    ## @param is_jmx - boolean - optional - default: false
     ## Whether or not this instance is a configuration for a JMX integration.
     ## If `is_jmx` is set to true at the init_config level, this flag is ignored.
     ##

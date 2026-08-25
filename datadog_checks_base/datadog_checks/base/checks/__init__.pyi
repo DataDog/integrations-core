@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .base import AgentCheck
+from .db import DatabaseCheck
 from .network import EventType, NetworkCheck, Status
 
-__all__ = ['AgentCheck', 'EventType', 'NetworkCheck', 'Status']
+__all__ = ['AgentCheck', 'DatabaseCheck', 'EventType', 'NetworkCheck', 'Status']

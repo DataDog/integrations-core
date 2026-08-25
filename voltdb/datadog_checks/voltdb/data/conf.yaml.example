@@ -57,28 +57,85 @@ init_config:
 #
 instances:
 
-    ## @param url - string - required
-    ## URL to a VoltDB client endpoint.
+  -
+    ## @param host - string - optional - default: localhost
+    ## Host of the VoltDB cluster member to connect to using the native binary
+    ## protocol. Use this option (with `port`) for direct connections to a
+    ## database node. To connect to the VoltDB Management Center (VMC) over
+    ## HTTP/JSON instead, leave `host` unset and set `url`. For failover across
+    ## multiple cluster members, use `hosts` instead of `host`.
     #
-  - url: http://localhost:8080
+    # host: localhost
 
-    ## @param username - string - required
-    ## The username to use to authenticate with VoltDB.
+    ## @param hosts - list of strings - optional
+    ## List of VoltDB cluster members to try when connecting using the native
+    ## binary protocol. Each entry is either `hostname` (uses the global
+    ## `port`) or `hostname:port`. The Agent connects to the first
+    ## reachable entry and silently fails over to subsequent entries if
+    ## the active node becomes unavailable. Takes precedence over `host`.
     #
-    username: <USERNAME>
+    # hosts:
+    #   - voltdb-1.example:21212
+    #   - voltdb-2.example:21212
+    #   - voltdb-3.example:21212
 
-    ## @param password - string - required
-    ## The password to use to authenticate with VoltDB.
+    ## @param url - string - optional - default: http://localhost:8080
+    ## URL of a VoltDB HTTP/JSON endpoint, typically served by the
+    ## VoltDB Management Center (VMC). When set, the integration uses the
+    ## HTTP/JSON transport instead of the native binary client. The
+    ## `username` and `password` options are required in this mode.
+    ##
+    ## For direct connections to a database node, prefer `host` (and
+    ## optionally `port`), which uses the native Python client.
     #
-    password: <PASSWORD>
+    # url: http://localhost:8080
 
-    ## @param password_hashed - boolean - optional - default: false
-    ## Set to true if the `password` value refers to a hashed version of the password.
+    ## @param port - integer - optional - default: 21212
+    ## Native client port of the VoltDB cluster member.
+    ##
+    ## See: https://docs.voltdb.com/UsingVoltDB/HostConfigPortOpts.php
     #
-    # password_hashed: false
+    # port: 21212
+
+    ## @param username - string - optional
+    ## The username to authenticate with VoltDB.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to authenticate with VoltDB.
+    #
+    # password: <PASSWORD>
+
+    ## @param use_ssl - boolean - optional - default: false
+    ## Set to `true` to connect to VoltDB using TLS.
+    ##
+    ## See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
+    #
+    # use_ssl: false
+
+    ## @param ssl_config_file - string - optional
+    ## Path to a VoltDB SSL configuration file that defines the Java keystore
+    ## and truststore files used by the native Python client.
+    ##
+    ## See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
+    #
+    # ssl_config_file: <SSL_CONFIG_FILE_PATH>
+
+    ## @param connect_timeout - number - optional - default: 8
+    ## Connection timeout (in seconds) when establishing the native client connection.
+    #
+    # connect_timeout: 8
+
+    ## @param procedure_timeout - number - optional - default: 60
+    ## Timeout (in seconds) for individual stored procedure calls. Set to
+    ## `0` to wait indefinitely for a response.
+    #
+    # procedure_timeout: 60
 
     ## @param statistics_components - list of strings - optional
     ## List VoltDB components to collect metrics. A subset of components are collected by default.
+    ##
     ## See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
     ## The following components are supported:
     ##  - COMMANDLOG
@@ -109,6 +166,14 @@ instances:
     #   - PROCEDURE
     #   - SNAPSHOTSTATUS
     #   - TABLE
+
+    ## @param password_hashed - boolean - optional - default: false
+    ## Only applicable to the HTTP/VMC transport (`url` is set). Set to
+    ## `true` if the `password` value is the SHA-256 hex digest of the
+    ## password instead of the cleartext. The native binary client does
+    ## not support pre-hashed passwords.
+    #
+    # password_hashed: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -232,11 +297,6 @@ instances:
     #
     # timeout: 10
 
-    ## @param connect_timeout - number - optional
-    ## The connect timeout for accessing services. Defaults to `timeout`.
-    #
-    # connect_timeout: <CONNECT_TIMEOUT>
-
     ## @param read_timeout - number - optional
     ## The read timeout for accessing services. Defaults to `timeout`.
     #
@@ -281,51 +341,48 @@ instances:
     ## Each query must have 2 fields, and can have a third optional field:
     ##
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##            Use the pipe `|` if you require a multi-line script.
+    ##     Use the pipe `|` if you require a multi-line script.
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##              The number of columns must equal the number of columns returned in the query.
-    ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is a `tag` type, this column is
-    ##                          considered a tag and applied to every
-    ##                          metric collected by this particular query.
-    ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to the following `tag` types to
-    ##                          tag each metric in the row with the name and value
-    ##                          of the item in this column:
-    ##                           i. tag           - This is the default tag type
-    ##                           ii. tag_list     - This allows multiple values to be attached
-    ##                                             to the tag name. For example: 
-    ##
-    ##                                             query = {
-    ##                                               "name": "example",
-    ##                                               "query": "...",
-    ##                                               "columns": [
-    ##                                                 {"name": "server_tag", "type": "tag_list"},
-    ##                                                 {"name": "foo", "type": "gauge"},
-    ##                                               ]
-    ##                                             }
-    ##
-    ##                                             May result in:
-    ##                                             gauge("foo", tags=[
-    ##                                                                 "server_tag:us",
-    ##                                                                 "server_tag:primary",
-    ##                                                                 "server_tag:default"
-    ##                                                               ])
-    ##                                             gauge("foo", tags=["server_tag:eu"])
-    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
-    ##                          You can use the `count` type to perform aggregation
-    ##                          for queries that return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored. To skip a column, enter:
-    ##                - {}
+    ##     The number of columns must equal the number of columns returned in the query.
+    ##     There are 2 required pieces of data:
+    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
+    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
+    ##           to every metric collected by this particular query.
+    ##       2. type - The submission method (gauge, monotonic_count, etc.).
+    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
+    ##           and value of the item in this column:
+    ##             1. tag - This is the default tag type
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##                 ```
+    ##                 query = {
+    ##                   "name": "example",
+    ##                   "query": "...",
+    ##                   "columns": [
+    ##                     {"name": "server_tag", "type": "tag_list"},
+    ##                     {"name": "foo", "type": "gauge"},
+    ##                   ]
+    ##                 }
+    ##                 ```
+    ##                 May result in:
+    ##                 ```
+    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+    ##                 gauge("foo", tags=["server_tag:eu"])
+    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                 ```
+    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
+    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
+    ##           the same or no tags.
+    ##     Columns without a name are ignored. To skip a column, enter:
+    ##     ```
+    ##       - {}
+    ##     ```
     ## 3. tags (optional) - A list of tags to apply to each metric.
     ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
     ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, 
-    ##     the query will be run every check run.
-    ##     If the collection interval is greater than check collection interval, 
-    ##     the query will NOT BE RUN exactly at the collection interval.
+    ##     If the collection interval is less than check collection interval, the query will be run every check
+    ##     run.
+    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
+    ##     exactly at the collection interval.
     ##     The query will be run at the next check run after the collection interval has passed.
     ## 5. metric_prefix (optional) - The prefix to apply to each metric.
     #

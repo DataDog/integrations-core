@@ -45,6 +45,9 @@ METRIC_MAP = {
     'traefik_config_reloads': 'config.reloads',
     'traefik_config_reloads_failure': 'config.reloads.failure',
     'traefik_tls_certs_not_after': 'tls.certs.not_after',
+    # https://doc.traefik.io/traefik/v3.3/observability/metrics/overview/
+    # In Traefik v3, open_connections is a single metric with entrypoint/router/service labels
+    'traefik_open_connections': 'open_connections',
     # https://doc.traefik.io/traefik/v2.11/observability/metrics/overview/#entrypoint-metrics
     'traefik_entrypoint_open_connections': 'entrypoint.open_connections',
     'traefik_entrypoint_request_duration_seconds': 'entrypoint.request.duration.seconds',

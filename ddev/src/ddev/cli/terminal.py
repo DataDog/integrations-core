@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from functools import cached_property
 from textwrap import indent as indent_text
 from time import monotonic, sleep
@@ -12,6 +13,7 @@ from typing import TYPE_CHECKING, Callable
 import click
 from rich.console import Console
 from rich.errors import StyleSyntaxError
+from rich.markup import escape
 from rich.style import Style
 from rich.text import Text
 
@@ -173,6 +175,41 @@ class Terminal:
     def style_debug(self, text: str) -> Text:
         return Text(text, style=self._style_level_debug)
 
+    def labeled_text(self, label: str, value: str | Text = '', *, width: int | None = None) -> Text:
+        """Return a rich label/value line using the terminal's info style for the label."""
+        text = Text()
+        prefix = f'{label}:'
+        if width is None:
+            prefix = f'{prefix} '
+        else:
+            prefix = prefix.ljust(width + 2)
+
+        text.append(prefix, style=self._style_level_info)
+        if isinstance(value, Text):
+            text.append_text(value)
+        else:
+            text.append(value)
+        return text
+
+    def labeled_lines(
+        self,
+        rows: Sequence[tuple[str, str | Text]],
+        *,
+        indent: str = '',
+        align: bool = True,
+    ) -> Text:
+        """Return aligned rich label/value lines."""
+        text = Text()
+        width = max((len(label) for label, _ in rows), default=0) if align else None
+
+        for i, (label, value) in enumerate(rows):
+            if i:
+                text.append('\n')
+            text.append(indent)
+            text.append_text(self.labeled_text(label, value, width=width))
+
+        return text
+
     def initialize_styles(self, styles: dict):  # no cov
         # Lazily display errors so that they use the correct style
         errors = []
@@ -242,8 +279,17 @@ class Terminal:
 
         self._output(f'DEBUG: {text}', None, stderr=stderr, indent=indent, link=link, **kwargs)
 
-    def display_header(self, title=''):
-        self.console.rule(Text(title, self._style_level_success))
+    def display_header(
+        self,
+        title='',
+        text_style: Style | str | None = None,
+        characters: str | None = None,
+        line_style: Style | str | None = None,
+    ):
+        text_style = text_style or self._style_level_success
+        characters = characters or "─"
+        line_style = line_style or "rule.line"
+        self.console.rule(Text(title, text_style), characters=characters, style=line_style)
 
     def display_markdown(self, text, stderr=False, **kwargs):
         from rich.markdown import Markdown
@@ -336,6 +382,13 @@ class Terminal:
                 self.console.print(*args, **kwargs)
             finally:
                 self.console.stderr = False
+
+    def escaped_output(self, *args, stderr=False, **kwargs):
+        """
+        Same as output but ensure we scape any tag-like element from the inputs. This is useful
+        when we want to print raw content (like a command output).
+        """
+        self.output(*(escape(arg) for arg in args), stderr=stderr, **kwargs)
 
     @staticmethod
     def prompt(text, **kwargs):

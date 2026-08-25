@@ -20,6 +20,8 @@ PARTITIONS = [0, 1]
 BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
+CONNECT_URL = 'http://localhost:8083'
+
 POSSIBLE_CONSUMER_GROUP_STATES = {
     'EMPTY',
     'STABLE',
@@ -134,6 +136,7 @@ def get_authentication_configuration(instance):
                     "ssl.certificate.location": instance.get("tls_cert"),
                     "ssl.key.location": instance.get("tls_private_key"),
                     "ssl.key.password": instance.get("tls_private_key_password"),
+                    "ssl.endpoint.identification.algorithm": "https",
                 }
             )
 

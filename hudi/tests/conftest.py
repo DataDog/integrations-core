@@ -16,7 +16,7 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
     with docker_run(
         compose_file=compose_file,
-        conditions=[CheckDockerLogs('spark-app-hudi', 'finished: show at script.scala:163')],
+        conditions=[CheckDockerLogs('spark-app-hudi', 'finished: show at script.scala')],
         attempts=5,
         attempts_wait=5,
     ):

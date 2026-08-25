@@ -66,6 +66,9 @@ static_resources:
                   envoy.filters.http.ext_authz:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute
                     disabled: true
+                  envoy.filters.http.ext_proc:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExtProcPerRoute
+                    disabled: true
               - match:
                   prefix: "/ratelimit/service/1"
                 route:
@@ -122,6 +125,29 @@ static_resources:
                 grpc_service:
                   envoy_grpc:
                     cluster_name: ratelimiter
+          - name: envoy.filters.http.ext_proc
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExternalProcessor
+              failure_mode_allow: true
+              grpc_service:
+                envoy_grpc:
+                  cluster_name: ext-proc
+          - name: envoy.filters.http.adaptive_concurrency
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.adaptive_concurrency.v3.AdaptiveConcurrency
+              gradient_controller_config:
+                sample_aggregate_percentile:
+                  value: 90
+                concurrency_limit_params:
+                  concurrency_update_interval: 0.1s
+                min_rtt_calc_params:
+                  jitter:
+                    value: 10
+                  interval: 60s
+                  request_count: 50
+              enabled:
+                default_value: true
+                runtime_key: "adaptive_concurrency.enabled"
           - name: envoy.filters.http.router
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -202,6 +228,19 @@ static_resources:
     # This timeout controls the initial TCP handshake timeout - not the timeout for the
     # entire request.
     connect_timeout: 0.25s
+  - name: ext-proc
+    type: static
+    connect_timeout: 0.25s
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: ext-proc
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 127.0.0.1
+                port_value: 10004
 dynamic_resources:
   cds_config:
     resource_api_version: V3

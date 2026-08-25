@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "821889b0-d4f9-4136-8059-7b7c42e6bd43",
   "app_id": "octopus-deploy",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

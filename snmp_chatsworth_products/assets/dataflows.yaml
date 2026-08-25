@@ -1,0 +1,5 @@
+provides:
+  - id: snmp-chatsworth-products-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

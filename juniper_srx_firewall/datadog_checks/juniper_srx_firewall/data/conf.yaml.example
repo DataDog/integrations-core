@@ -18,3 +18,5 @@
 #     port: <port>
 #     source: juniper-srx-firewall
 #     service: juniper-srx-firewall
+#     tags:
+#     - ndm_syslog:true

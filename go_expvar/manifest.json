@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "cac5ebe3-fa36-49f7-93c5-22116c745e80",
   "app_id": "go-expvar",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

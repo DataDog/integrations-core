@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: symantec-endpoint-protection
 metric_id: symantec-endpoint-protection
 backend_only: false

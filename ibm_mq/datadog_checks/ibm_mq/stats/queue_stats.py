@@ -5,8 +5,7 @@ from pymqi.CMQC import MQCA_Q_NAME, MQIA_DEFINITION_TYPE, MQIA_Q_TYPE
 from pymqi.CMQCFC import MQGACF_Q_STATISTICS_DATA
 
 from datadog_checks.ibm_mq.stats.base_stats import BaseStats
-
-from ..utils import sanitize_strings
+from datadog_checks.ibm_mq.utils import sanitize_strings
 
 try:
     import pymqi
@@ -48,6 +47,13 @@ class QueueInfo(object):
 
 
 class QueueStats(BaseStats):
-    def __init__(self, raw_message, timezone=None):
+    def __init__(self, raw_message, filtered_queue_names, timezone=None, filter_queue_statistics_metrics=False):
         super(QueueStats, self).__init__(raw_message, timezone=timezone)
-        self.queues = [QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA]]
+        if filter_queue_statistics_metrics and filtered_queue_names is not None:
+            self.queues = [
+                queue_info
+                for queue_info in (QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA])
+                if queue_info.name in filtered_queue_names
+            ]
+        else:
+            self.queues = [QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA]]

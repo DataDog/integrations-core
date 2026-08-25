@@ -25,7 +25,6 @@ def test_validate_config_spec_file_mandatory_in_core(repo, expect_failure):
     runner = CliRunner()
 
     with runner.isolated_filesystem():
-
         # Generate the check structure
         working_repo = 'integrations-{}'.format(repo)
         shutil.copytree(

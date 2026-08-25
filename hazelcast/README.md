@@ -4,6 +4,8 @@
 
 This check monitors [Hazelcast][1] v4.0+.
 
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 ### Installation

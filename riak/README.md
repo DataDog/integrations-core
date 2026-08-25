@@ -6,6 +6,8 @@
 
 This check lets you track node, vnode, and ring performance metrics from RiakKV or RiakTS.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

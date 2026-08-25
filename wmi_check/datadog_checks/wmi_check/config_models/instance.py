@@ -38,6 +38,7 @@ class InstanceConfig(BaseModel):
     class_: str = Field(..., alias='class')
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     filters: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     host: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None

@@ -1665,7 +1665,6 @@ def test_environments_metrics_http_failure(
 def test_deployment_metrics_releases_http_failure(
     get_current_datetime, dd_run_check, aggregator, expected_log, caplog, instance
 ):
-
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     caplog.set_level(logging.WARNING)

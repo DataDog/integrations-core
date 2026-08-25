@@ -1,4 +1,5 @@
 name: SonarQube
+fleet_configurable: true
 files:
 - name: sonarqube.yaml
   options:
@@ -23,6 +24,8 @@ files:
 
           Note: This only takes effect when `is_jmx` is set to `false` and is required for all
           API metrics.
+        fleet_configurable: true
+        formats: ["url"]
         value:
           type: string
       - name: default_tag
@@ -30,6 +33,7 @@ files:
           The tag name to use for `components` by default.
 
           Note: This only takes effect when `is_jmx` is set to `false`.
+        fleet_configurable: true
         value:
           type: string
           example: component
@@ -45,6 +49,7 @@ files:
           type: array
           items:
             type: string
+        fleet_configurable: false
       - name: default_exclude
         description: |
           A list of regular expressions used to collect metrics by default. For brevity,
@@ -57,9 +62,12 @@ files:
           type: array
           items:
             type: string
+        fleet_configurable: false
       - name: components
         description: |
-          A mapping of components for which metrics should be collected. Each object may override the default
+          A mapping of components for which metrics should be collected.
+
+          Each object may override the default
           options. Each component key may be configured with an optional configuration mapping to filter the metrics 
           that should be collected.
           
@@ -90,6 +98,7 @@ files:
                   - security.
                 exclude:
                   - issues.(false_positive_issues|reopened_issues)
+        fleet_configurable: true
         value:
           type: object
           additionalProperties: true
@@ -119,6 +128,7 @@ files:
             value:
               type: integer
               example: 10
+            fleet_configurable: false
           - name: include
             description: |
               Mapping of regular expressions keys and component config values that will be 'autodiscovered'.
@@ -140,6 +150,7 @@ files:
             value:
               type: object
               additionalProperties: true
+            fleet_configurable: false
           - name: exclude
             description: |
               List of regular expressions with the patterns of components that will not be 'autodiscovered'
@@ -147,6 +158,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
 
       - template: instances/http
         overrides:

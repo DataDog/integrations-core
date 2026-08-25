@@ -15,7 +15,7 @@
         "statuses": ["ok", "critical", "unknown"],
         "groups": ["host"],
         "name": "Container Health",
-        "description": "Returns `CRITICAL` if a container is unhealthy. Returns `OK` otherwise or `UNKNOWN` if the health is unknown."
+        "description": "Returns `CRITICAL` if a container is unhealthy. Returns `OK` otherwise or `UNKNOWN` if the health is unknown. **Note**: Only available for Agent v6 and below."
     },
     {
         "agent_version": "5.1.0",

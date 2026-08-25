@@ -7,8 +7,6 @@ from datadog_checks.base.utils.tracking import tracked_method
 from .base import XESessionBase, agent_check_getter
 from .xml_tools import (
     extract_field,
-    extract_int_value,
-    extract_value,
 )
 
 
@@ -91,17 +89,7 @@ class ErrorEventsHandler(XESessionBase):
             )
 
         # Extract action elements
-        for action in event.findall('./action'):
-            action_name = action.get('name')
-            if not action_name:
-                continue
-
-            if action_name == 'attach_activity_id':
-                event_data['activity_id'] = extract_value(action)
-            elif action_name == 'attach_activity_id_xfer':
-                event_data['activity_id_xfer'] = extract_value(action)
-            else:
-                event_data[action_name] = extract_value(action)
+        self._process_action_elements(event, event_data)
 
         return True
 
@@ -124,22 +112,7 @@ class ErrorEventsHandler(XESessionBase):
             )
 
         # Extract action elements
-        for action in event.findall('./action'):
-            action_name = action.get('name')
-            if not action_name:
-                continue
-
-            if action_name == 'attach_activity_id':
-                event_data['activity_id'] = extract_value(action)
-            elif action_name == 'attach_activity_id_xfer':
-                event_data['activity_id_xfer'] = extract_value(action)
-            elif action_name == 'session_id' or action_name == 'request_id':
-                # These are numeric values in the actions
-                value = extract_int_value(action)
-                if value is not None:
-                    event_data[action_name] = value
-            else:
-                event_data[action_name] = extract_value(action)
+        self._process_action_elements(event, event_data)
 
         return True
 

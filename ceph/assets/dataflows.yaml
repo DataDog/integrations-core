@@ -1,0 +1,9 @@
+provides:
+  - id: ceph-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: ceph-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

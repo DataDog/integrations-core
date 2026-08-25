@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4af17310-84ad-4bac-b05d-85917bc378cb",
   "app_id": "datadog-agent",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

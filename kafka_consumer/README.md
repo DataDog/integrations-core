@@ -11,6 +11,8 @@ This Agent integration collects message offset metrics from your Kafka consumers
 - If you want to collect JMX metrics from your Kafka brokers or Java-based consumers/producers, see the [Kafka Broker integration][19].
 
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -20,53 +22,92 @@ The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. 
 ### Configuration
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
-#### Host
-
-To configure this check for an Agent running on a host running your Kafka consumers:
-
-##### Metric collection
-
-1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options.
-
-2. [Restart the Agent][5].
-
-##### Log collection
-
-This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
-
-<!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][17] for guidance on applying the parameters below.
-
-##### Metric collection
+Configure this check on a container running the Kafka Consumer.
+See the [Autodiscovery Integration Templates][17] for guidance on applying the parameters below.
+In Kubernetes, if a single consumer is running on many containers, you can set up this check as a [Cluster Check][20] to avoid having multiple checks collecting the same metrics.
 
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `kafka_consumer`                     |
 | `<INIT_CONFIG>`      | blank or `{}`                        |
-| `<INSTANCE_CONFIG>`  | `{"kafka_connect_str": <KAFKA_CONNECT_STR>}` <br/>For example, `{"kafka_connect_str": "server:9092"}` |
+| `<INSTANCE_CONFIG>`  | `{"kafka_connect_str": "<KAFKA_CONNECT_STR>", "consumer_groups": {"<CONSUMER_NAME>": {}}}` <br/>For example, `{"kafka_connect_str": "server:9092", "consumer_groups": {"my_consumer_group": {}}}` |
 
-##### Log collection
+<!-- xxz tab xxx -->
+<!-- xxx tab "Host" xxx -->
 
-This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
+Configure this check on a host running the Kafka Consumer.
+Avoid having multiple Agents running with the same check configuration, as this puts additional pressure on your Kafka cluster.
+
+1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options. A minimal setup is:
+
+```
+instances:
+  - kafka_connect_str: <KAFKA_CONNECT_STR>
+    consumer_groups:
+      # Monitor all topics for consumer <CONSUMER_NAME>
+      <CONSUMER_NAME>: {}
+```
+
+2. [Restart the Agent][5].
+
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+### Kafka Console
+
+When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
+
+- **Brokers**: Configuration and health metrics.
+- **Topics and partitions**: Sizes, offsets, and replication status.
+- **Consumer groups**: Member details, group state, rebalance detection, membership-change counting, and metadata exposed as tags (`partition_assignor`, `consumer_group_type`, `is_simple_consumer_group`, and `group_instance_id`). Empty groups are visible through the `consumer_group_state:EMPTY` tag on `kafka.consumer_group.members`.
+- **Schema registry**: Schema metadata (requires `schema_registry_url`).
+
+#### Batched collection
+
+Broker configurations, topic configurations, and schema registry version checks are collected in batches across multiple agent runs rather than all at once. This reduces load on large Kafka clusters but means that not all metrics are emitted in every check run. On a cluster with many brokers, topics, or schema subjects, the integration spreads the work over successive runs so that each run stays fast and does not overload the cluster.
+
+Example configuration:
+```yaml
+instances:
+  - kafka_connect_str: localhost:9092
+    enable_cluster_monitoring: true
+    schema_registry_url: http://localhost:8081  # optional
+```
+
+### Kafka ACL Permissions
+
+**Cluster** (`kafka-cluster`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+
+**Topic** (`*`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+- READ, WRITE ([Kafka messages][21] only)
+
+**Consumer group** (`*`)
+- DESCRIBE
+- READ
+
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
+1. [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
+2. Ensure the metric `kafka.consumer_lag` is generated for the appropriate `consumer_group`.
 
 ## Data Collected
 
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this check.
+
+### Kafka messages
+
+This integration is used by [Data Streams Monitoring][18] to [retrieve messages from Kafka on demand][21].
 
 ### Events
 
@@ -82,7 +123,7 @@ The Kafka-consumer check does not include any service checks.
 - [Troubleshooting and Deep Dive for Kafka][10]
 - [Agent failed to retrieve RMIServer stub][11]
 
-**Kerberos GSSAPI Authentication**
+### Kerberos GSSAPI Authentication
 
 Depending on your Kafka cluster's Kerberos setup, you may need to configure the following:
 
@@ -94,32 +135,32 @@ Depending on your Kafka cluster's Kerberos setup, you may need to configure the 
 * `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (for example, `KRB5CCNAME=/tmp/krb5cc_xxx`)
 * If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file for your operating system. The procedure for modifying the Datadog Agent service unit file may vary for different Linux operating systems. For example, in a Linux `systemd` environment: 
 
-**Linux Systemd Example**
+### Linux Systemd Example
 
 1. Configure the environment variables in an environment file.
    For example: `/path/to/environment/file`
 
-  ```
-  KRB5_CLIENT_KTNAME=/etc/krb5.keytab
-  KRB5CCNAME=/tmp/krb5cc_xxx
-  ```
+   ```
+   KRB5_CLIENT_KTNAME=/etc/krb5.keytab
+   KRB5CCNAME=/tmp/krb5cc_xxx
+   ```
 
 2. Create a Datadog Agent service configuration override file: `sudo systemctl edit datadog-agent.service`
 
 3. Configure the following in the override file:
 
-  ```
-  [Service]
-  EnvironmentFile=/path/to/environment/file
-  ```
+   ```
+   [Service]
+   EnvironmentFile=/path/to/environment/file
+   ```
 
 4. Run the following commands to reload the systemd daemon, datadog-agent service, and Datadog Agent:
 
-```
-sudo systemctl daemon-reload
-sudo systemctl restart datadog-agent.service
-sudo service datadog-agent restart
-```
+   ```
+   sudo systemctl daemon-reload
+   sudo systemctl restart datadog-agent.service
+   sudo service datadog-agent restart
+   ```
 
 ## Further Reading
 
@@ -142,5 +183,7 @@ sudo service datadog-agent restart
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[18]: /data-streams
+[18]: /data-streams/kafka
 [19]: /integrations/kafka?search=kafka
+[20]: /containers/cluster_agent/clusterchecks/
+[21]: /data_streams/messages/

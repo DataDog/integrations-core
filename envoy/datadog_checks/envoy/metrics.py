@@ -175,6 +175,21 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_downstream_rq_tx_reset': 'http.downstream_rq_tx_reset',
     'envoy_http_downstream_rq_ws_on_non_ws_route': 'http.downstream_rq_ws_on_non_ws_route',
     'envoy_http_downstream_rq_xx': 'http.downstream_rq_xx',
+    'envoy_http_ext_proc_streams_started': 'http.ext_proc.streams_started',
+    'envoy_http_ext_proc_stream_msgs_sent': 'http.ext_proc.stream_msgs_sent',
+    'envoy_http_ext_proc_stream_msgs_received': 'http.ext_proc.stream_msgs_received',
+    'envoy_http_ext_proc_spurious_msgs_received': 'http.ext_proc.spurious_msgs_received',
+    'envoy_http_ext_proc_streams_closed': 'http.ext_proc.streams_closed',
+    'envoy_http_ext_proc_streams_failed': 'http.ext_proc.streams_failed',
+    'envoy_http_ext_proc_failure_mode_allowed': 'http.ext_proc.failure_mode_allowed',
+    'envoy_http_ext_proc_message_timeouts': 'http.ext_proc.message_timeouts',
+    'envoy_http_ext_proc_rejected_header_mutations': 'http.ext_proc.rejected_header_mutations',
+    'envoy_http_ext_proc_override_message_timeout_received': 'http.ext_proc.override_message_timeout_received',
+    'envoy_http_ext_proc_override_message_timeout_ignored': 'http.ext_proc.override_message_timeout_ignored',
+    'envoy_http_ext_proc_clear_route_cache_ignored': 'http.ext_proc.clear_route_cache_ignored',
+    'envoy_http_ext_proc_clear_route_cache_disabled': 'http.ext_proc.clear_route_cache_disabled',
+    'envoy_http_ext_proc_clear_route_cache_upstream_ignored': 'http.ext_proc.clear_route_cache_upstream_ignored',
+    'envoy_http_ext_proc_send_immediate_resp_upstream_ignored': 'http.ext_proc.send_immediate_resp_upstream_ignored',
     'envoy_http_no_cluster': 'http.no_cluster',
     'envoy_http_no_route': 'http.no_route',
     'envoy_http_passthrough_internal_redirect_bad_location': 'http.passthrough_internal_redirect_bad_location',
@@ -353,6 +368,10 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_outlier_detection_ejections_detected_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin',  # noqa: E501
     'envoy_access_logs_grpc_access_log_logs_dropped': 'access_logs.grpc_access_log.logs_dropped',
     'envoy_access_logs_grpc_access_log_logs_written': 'access_logs.grpc_access_log.logs_written',
+    'envoy_access_logs_grpc_access_log_grpc_entries_flushed': 'access_logs.grpc_access_log.grpc_entries_flushed',
+    'envoy_access_logs_grpc_access_log_grpc_entries_flush_failed': (
+        'access_logs.grpc_access_log.grpc_entries_flush_failed'
+    ),
     'envoy_tcp_downstream_cx': 'tcp.downstream_cx',
     'envoy_tcp_downstream_cx_no_route': 'tcp.downstream_cx_no_route',
     'envoy_tcp_downstream_cx_tx_bytes': 'tcp.downstream_cx_tx_bytes',
@@ -372,6 +391,27 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_rbac_denied': 'http.rbac_denied',
     'envoy_http_rbac_shadow_allowed': 'http.rbac_shadow_allowed',
     'envoy_http_rbac_shadow_denied': 'http.rbac_shadow_denied',
+    'envoy_http_adaptive_concurrency_gradient_controller_rq_blocked': (
+        'http.adaptive_concurrency.gradient_controller.rq_blocked'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_min_rtt_calculation_active': (
+        'http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_concurrency_limit': (
+        'http.adaptive_concurrency.gradient_controller.concurrency_limit'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_gradient': (
+        'http.adaptive_concurrency.gradient_controller.gradient'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_burst_queue_size': (
+        'http.adaptive_concurrency.gradient_controller.burst_queue_size'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_min_rtt_msecs': (
+        'http.adaptive_concurrency.gradient_controller.min_rtt_msecs'
+    ),
+    'envoy_http_adaptive_concurrency_gradient_controller_sample_rtt_msecs': (
+        'http.adaptive_concurrency.gradient_controller.sample_rtt_msecs'
+    ),
     'envoy_http_local_rate_limit_enabled': 'http.local_rate_limit_enabled',
     'envoy_http_local_rate_limit_enforced': 'http.local_rate_limit_enforced',
     'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
@@ -871,7 +911,7 @@ METRICS = {
     'cluster.ratelimit.ok': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -879,7 +919,7 @@ METRICS = {
     'cluster.ratelimit.error': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -887,7 +927,7 @@ METRICS = {
     'cluster.ratelimit.over_limit': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -2307,6 +2347,126 @@ METRICS = {
             (),
         ),
         'method': 'histogram',
+    },
+    'http.ext_proc.streams_started': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.stream_msgs_sent': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.stream_msgs_received': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.spurious_msgs_received': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.streams_closed': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.streams_failed': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.failure_mode_allowed': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.message_timeouts': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.rejected_header_mutations': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.override_message_timeout_received': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.override_message_timeout_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.clear_route_cache_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.clear_route_cache_disabled': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.clear_route_cache_upstream_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.send_immediate_resp_upstream_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'http.rs_too_large': {
         'tags': (
@@ -3878,6 +4038,22 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'access_logs.grpc_access_log.grpc_entries_flushed': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'access_logs.grpc_access_log.grpc_entries_flush_failed': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'http.rbac.allowed': {
         'tags': (
             ('stat_prefix',),
@@ -3956,6 +4132,69 @@ METRICS = {
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'http.adaptive_concurrency.gradient_controller.rq_blocked': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.concurrency_limit': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.gradient': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.burst_queue_size': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.min_rtt_msecs': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.sample_rtt_msecs': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
     },
 }
 # fmt: on

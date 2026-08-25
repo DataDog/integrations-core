@@ -5,9 +5,10 @@
 
 import binascii
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from bson import json_util
+from bson.codec_options import DatetimeConversion
 from cachetools import TTLCache
 from pymongo.errors import OperationFailure
 
@@ -68,7 +69,10 @@ class MongoSlowOperations(DBMAsyncJob):
 
         self._last_collection_timestamp = None
 
-        self._log_json_opts = json_util.JSONOptions(tz_aware=True)
+        self._log_json_opts = json_util.JSONOptions(
+            tz_aware=True,
+            datetime_conversion=DatetimeConversion.DATETIME_AUTO,
+        )
 
     def run_job(self):
         self.collect_slow_operations()
@@ -158,7 +162,7 @@ class MongoSlowOperations(DBMAsyncJob):
         for profile in profiling_data:
             if 'command' not in profile:
                 continue
-            profile["ts"] = profile["ts"].timestamp()  # convert datetime to timestamp
+            profile["ts"] = profile["ts"].replace(tzinfo=timezone.utc).timestamp()  # convert datetime to timestamp
             yield self._obfuscate_slow_operation(profile, db_name)
 
     def _collect_slow_operations_from_logs(self, db_names, last_ts):

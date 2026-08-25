@@ -1,0 +1,2280 @@
+{
+  "title": "Anthropic Usage and Costs Overview",
+  "description": "Monitor Anthropic API usage, token consumption, and associated costs",
+  "widgets": [
+    {
+      "id": 6079930088570244,
+      "definition": {
+        "title": "Total Anthropic Spend",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:all.cost{providername:Anthropic,$model,$user_name,$email,$organization_name,$token_type,$workspace_name}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 427419291647524,
+      "definition": {
+        "title": "Total Spend (past 30d)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:all.cost{providername:Anthropic,$model,$user_name,$email,$organization_name,$token_type,$workspace_name}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 1930536889981146,
+      "definition": {
+        "title": "Total Spend (30d prior)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "timeshift(query1, -2592000)"
+              }
+            ],
+            "queries": [
+              {
+                "query": "sum:all.cost{providername:Anthropic,$model,$user_name,$email,$organization_name,$token_type,$workspace_name}",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2475617524760759,
+      "definition": {
+        "title": "MoM change",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
+                },
+                "formula": "(query1 - timeshift(query2, -2592000)) / timeshift(query2, -2592000) * 100"
+              }
+            ],
+            "queries": [
+              {
+                "query": "sum:all.cost{providername:Anthropic,$model,$user_name,$email,$organization_name,$token_type,$workspace_name}",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "aggregator": "sum"
+              },
+              {
+                "query": "sum:all.cost{providername:Anthropic,$model,$user_name,$email,$organization_name,$token_type,$workspace_name}",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "black_on_light_green"
+              },
+              {
+                "comparator": "<",
+                "value": 10,
+                "palette": "black_on_light_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 100,
+                "palette": "black_on_light_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 100,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
+      },
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "title": "Cost Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 407,
+            "definition": {
+              "type": "note",
+              "content": "**Model Cost Efficiency**: Each Claude model has different pricing tiers. Opus models are premium but offer highest quality, Sonnet provides balanced cost-performance, and Haiku is most economical. Analyze cost per task completion to determine optimal model selection for different use cases.\n\nIn Datadog, set up cost alerts and use [Cloud Cost Management](https://app.datadoghq.com/cost) to manage your costs. These tools will help you implement usage quotas to prevent unexpected expenses. Consider implementing tiered access controls where premium models require additional approval. Regular cost reviews help identify trends and anomalies before they impact budgets significantly.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 401,
+            "definition": {
+              "title": "Daily Costs by Model (30 Days)",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$token_type,$organization_name,$model,$user_name,$email} by {model_name}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 403,
+            "definition": {
+              "title": "Cost Distribution by Workspace and Model (30 Days)",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {workspace_name,model}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 404,
+            "definition": {
+              "title": "Cost Breakdown by Token Type (30 Days)",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {token_type,model_name,workspace_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "alias": "Cost ($)",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 405,
+            "definition": {
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "title": "Cost Visualization by Model and Workspace (30 Days)",
+              "type": "treemap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {model,workspace_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 409,
+            "definition": {
+              "type": "note",
+              "content": "**Cost Optimizations**: \nUnderstanding your primary cost drivers helps optimize spending. Input tokens typically cost less than output tokens, while cache operations offer significant savings. Monitor the distribution of costs across different token types to identify optimization opportunities.\n\nImplement prompt optimization to reduce token usage, use appropriate models for each task, use caching for repeated contexts, and [batch high volume requests](https://docs.anthropic.com/en/docs/build-with-claude/batch-processing). Consider implementing a routing layer that automatically selects the most cost-effective model based on task requirements.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 17
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "Token Usage",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 209,
+            "definition": {
+              "type": "note",
+              "content": "**Token Usage Analysis**: Monitor token usage across different workspaces to understand departmental or project-specific consumption. This helps in budget allocation and identifying high-usage areas that might benefit from optimization. Consider implementing usage quotas or alerts for unusual spikes.\n\nIdentify peak usage periods to optimize resource allocation, potentially implement request queuing during high-demand times, and to gain insight into [setting optimal workspace rate limits](https://docs.anthropic.com/en/api/rate-limits). Understanding usage patterns helps in capacity planning and can reveal opportunities for load balancing across different time zones or business hours.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 202,
+            "definition": {
+              "title": "Total Tokens (Last Hour)",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 1
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "text_align": "center",
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 201,
+            "definition": {
+              "title": "Token Usage Over Time",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 203,
+            "definition": {
+              "title": "Top Token Consumers by Model",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$workspace_name,$organization_name,$email,$user_name,$model,$token_type} by {model}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 204,
+            "definition": {
+              "title": "Token Usage Breakdown",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$email,$user_name,$model,$organization_name,$token_type,$workspace_name} by {org_name,workspace_name,model}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.output_tokens{$email,$user_name,$model,$organization_name,$token_type,$workspace_name} by {org_name,workspace_name,model}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "group",
+                        "name": "org_name",
+                        "order": "desc"
+                      }
+                    ],
+                    "count": 500
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Input Tokens",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Output Tokens",
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 205,
+            "definition": {
+              "type": "note",
+              "content": "**Input vs Output Tokens**: Input tokens represent the prompts and context sent to Anthropic models, while output tokens are the generated responses. Monitor the ratio to optimize prompt engineering and reduce unnecessary context. A high input-to-output ratio might indicate verbose prompts that could be streamlined.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "right"
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7106833146706646,
+            "definition": {
+              "title": "Input Tokens (Last Hour)",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 1
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "text_align": "center",
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 8885191409050300,
+            "definition": {
+              "title": "Output Tokens (Last Hour)",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 1
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "text_align": "center",
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 7,
+              "y": 6,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 207,
+            "definition": {
+              "type": "note",
+              "content": "**Token Usage Optimizations**: Reduce token usage by implementing prompt caching for repeated contexts, using system prompts efficiently, and implementing response streaming. Regular monitoring helps identify optimization opportunities.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "Cache Performance",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 304,
+            "definition": {
+              "type": "note",
+              "content": "**Cache Strategy**: Prompt caching allows you to store and reuse context within your prompt. This makes it more practical to include additional information in your prompt—such as detailed instructions and example responses—which help improve every response Claude generates.\n\nAnthropic's caching system offers 5-minute and 1-hour ephemeral caches to reduce token costs for repeated context. You can also improve cache performance by structuring prompts with stable prefixes and grouping similar requests. \n\nFor the best caching strategy, refer to [Anthropic's caching recommendations](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#when-to-use-the-1-hour-cache).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 301,
+            "definition": {
+              "title": "Cache Token Usage Trends",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 3321592471666638,
+            "definition": {
+              "title": "Token Consumption Saved by Cache per Model",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "((1.25 * query3) + (2 * query2) + (0.1 * query1)) - query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 305,
+            "definition": {
+              "type": "note",
+              "content": "**Cache Hit Rate**: A high cache hit rate significantly reduces costs as cached tokens are charged at reduced rates compared to new input tokens. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom"
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 302,
+            "definition": {
+              "title": "Cache Hit Rate",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "(query1 / (query1 + query4 + query2 + query3)) * 100"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "text_align": "center",
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5373233506863203,
+            "definition": {
+              "title": "Cache Hit Rate by Model",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / (query1 + query4 + query2 + query3)) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 303,
+            "definition": {
+              "title": "Cache Usage Patterns",
+              "show_legend": false,
+              "type": "heatmap",
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              },
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4026529261321278,
+            "definition": {
+              "title": "Cache Write Breakdown",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "5m Cache Write",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "1h Cache Write",
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 306,
+            "definition": {
+              "type": "note",
+              "content": "**Caching Cost Impact**: Cache reads cost significantly less than cache writes or regular input tokens. Monitor the ratio of cache reads to writes to assess efficiency. Consider implementing prompt templates that maximize cache reuse, especially for system prompts and common contexts.\n\nThe [Message Batches API](https://docs.anthropic.com/en/docs/build-with-claude/batch-processing#using-prompt-caching-with-message-batches) supports prompt caching, allowing you to potentially reduce costs and processing time for batch requests. The pricing discounts from prompt caching and Message Batches can stack, providing even greater cost savings when both features are used together.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 29,
+        "width": 12,
+        "height": 11
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "title": "Model Performance",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 505,
+            "definition": {
+              "type": "note",
+              "content": "**Model Performance**: Monitor response times, token throughput, and error rates across different models. Higher-tier models generally provide better accuracy but at increased latency and cost. Balance these factors based on your specific use case requirements and user expectations.\n\nAnalyze how workloads are distributed across models to ensure optimal resource utilization. Consider implementing intelligent routing that automatically selects models based on task complexity, urgency, and budget constraints.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 501,
+            "definition": {
+              "title": "Token Usage by Model",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$workspace_name,$organization_name,$email,$user_name,$model,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 502,
+            "definition": {
+              "title": "Most Used Models",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$workspace_name,$organization_name,$email,$user_name,$model,$token_type} by {model}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.output_tokens{$workspace_name,$organization_name,$email,$user_name,$model,$token_type} by {model}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 508,
+            "definition": {
+              "type": "note",
+              "content": "**Model Optimizations**: Each model has unique strengths. Opus excels at complex multi-step reasoning, Sonnet balances capability with efficiency, and Haiku provides rapid responses for straightforward tasks. Tailor prompts and workflows to leverage each model's strengths effectively.\n\nWhen new models are released, test them with representative workloads before full migration. Compare quality, cost, and performance metrics. Implement gradual rollouts and A/B testing to ensure smooth transitions without impacting user experience.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 503,
+            "definition": {
+              "title": "Cost vs Usage Correlation (7 days)",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "scatterplot",
+              "requests": {
+                "table": {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$organization_name,$email,$model,$user_name,$token_type} by {model,org_name,workspace_name}",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$workspace_name,$organization_name,$email,$model,$user_name,$token_type} by {model,org_name,workspace_name}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:anthropic.messages.output_tokens{$workspace_name,$organization_name,$email,$model,$user_name,$token_type} by {model,org_name,workspace_name}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "dimension": "x",
+                      "formula": "query2"
+                    },
+                    {
+                      "dimension": "y",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "tokens"
+                        }
+                      },
+                      "formula": "query1 + query3"
+                    }
+                  ]
+                }
+              },
+              "xaxis": {
+                "scale": "linear",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "yaxis": {
+                "scale": "linear",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "color_by_groups": []
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3009394555165132,
+            "definition": {
+              "title": "Cost and Usage by Model",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query0",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$organization_name,$model,$email,$user_name,$token_type} by {model}.rollup(sum, daily)"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query0"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_reverse": false,
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "on_right_yaxis": true,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query0",
+                      "query": "sum:anthropic.messages.input_tokens{$workspace_name,$organization_name,$model,$email,$user_name,$token_type} by {model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.output_tokens{$workspace_name,$organization_name,$model,$email,$user_name,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query0"
+                    },
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 7,
+              "y": 3,
+              "width": 5,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 40,
+        "width": 12,
+        "height": 7,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "title": "User Analytics",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 710,
+            "definition": {
+              "type": "note",
+              "content": "**Usage Anomaly Detection**: Monitor for unusual user activity patterns that might indicate inefficient usage, runaway processes, or potential security concerns. Set up alerts for users exceeding normal consumption thresholds to prevent unexpected costs.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "right"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 701,
+            "definition": {
+              "title": "Token Usage by User",
+              "show_legend": false,
+              "legend_size": "auto",
+              "legend_layout": "horizontal",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name}.as_count()"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name}.as_count()"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 708,
+            "definition": {
+              "type": "note",
+              "content": "**User Analytics**: Monitor individual user adoption and usage patterns to identify power users, training needs, and potential optimization opportunities. High-volume users may benefit from specialized training on efficient prompt engineering to reduce token consumption.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 705,
+            "definition": {
+              "title": "User Activity Heatmap",
+              "show_legend": false,
+              "type": "heatmap",
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              },
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 709,
+            "definition": {
+              "type": "note",
+              "content": "**User Token Attribution**: Track costs by individual users to enable chargeback models and budget allocation. This data helps departments understand their AI spending and encourages responsible usage. Consider implementing user-level quotas or alerts for unusual consumption patterns.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom"
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 702,
+            "definition": {
+              "title": "Top Users by Token Consumption",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$user_name,$email,user_name:*,!user_name:none,$organization_name,$token_type} by {user_name}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$user_name,$email,user_name:*,!user_name:none,$organization_name,$token_type} by {user_name}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 704,
+            "definition": {
+              "title": "User Usage Breakdown",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name,model,org_name}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name,model,org_name}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name,model,org_name}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Input Tokens",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Output Tokens",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Cached Input Tokens",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "IO Ratio",
+                      "formula": "(query1 + query3) / query2"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 706,
+            "definition": {
+              "title": "User Token Distribution by Model",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:anthropic.messages.input_tokens{$model,$user_name,$workspace_name,$organization_name,$email,$token_type} by {user_name,model}",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$user_name,$workspace_name,$organization_name,$email,$token_type} by {user_name,model}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "dog_classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ],
+                    "count": 500
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 707,
+            "definition": {
+              "title": "User Usage Visualization",
+              "type": "treemap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:anthropic.messages.input_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model,user_name}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:anthropic.messages.output_tokens{$model,$email,$user_name,$token_type,$workspace_name,$organization_name} by {model,user_name}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "dog_classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 5,
+              "y": 9,
+              "width": 7,
+              "height": 4
+            }
+          },
+          {
+            "id": 7960539772614678,
+            "definition": {
+              "title": "Cache Usage By User",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.cache_read_input_tokens{$email, $model, $user_name, $token_type, $workspace_name, $organization_name} by {user_name}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{$email, $model, $user_name, $token_type, $workspace_name, $organization_name} by {user_name}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{$email, $model, $user_name, $token_type, $workspace_name, $organization_name} by {user_name}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:anthropic.messages.input_tokens{$email, $model, $user_name, $token_type, $workspace_name, $organization_name} by {user_name}.as_count()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:anthropic.messages.output_tokens{$email, $model, $user_name, $token_type, $workspace_name, $organization_name} by {user_name}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Cache Read",
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Cache Write (5m)",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Cache Write (1h)",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Input Tokens",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Output Tokens",
+                      "formula": "query5"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Cache Hit %",
+                      "formula": "(query1 / (query1 + query2 + query3)) * 100"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 712,
+            "definition": {
+              "type": "note",
+              "content": "**Usage Optimizations**: Track individual user patterns to identify friction points and optimization opportunities. Users with high retry rates or excessive token usage may benefit from additional training or access to different models better suited to their tasks.\n\nAnalyze usage patterns to segment users by consumption levels, model preferences, and use cases. This segmentation helps tailor training programs, optimize model allocation, and identify opportunities for bulk licensing or enterprise agreements.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 17,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 47,
+        "width": 12,
+        "height": 20
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "title": "Web Usage",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 604,
+            "definition": {
+              "type": "note",
+              "content": "**Web Usage**: The [Anthropic web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool) gives Claude direct access to real-time web content beyond its knowledge cutoff. Monitor usage to understand how often real-time information is requested. High usage might indicate opportunities for leveraging [Anthropic's prompt caching feature](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool#prompt-caching).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 607,
+            "definition": {
+              "type": "note",
+              "content": "**Search Pattern Analysis**: Analyze common search patterns to identify frequently needed information that could be pre-loaded or cached. Understanding search patterns helps optimize knowledge management strategies and can reduce reliance on real-time searches for static information.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom"
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 8,
+              "height": 2
+            }
+          },
+          {
+            "id": 602,
+            "definition": {
+              "title": "Total Web Searches (24h)",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.server_tool_use.web_search_requests{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count().rollup(sum, 86400)",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "text_align": "center",
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 601,
+            "definition": {
+              "title": "Web Search Tool Usage by Model",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.server_tool_use.web_search_requests{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 603,
+            "definition": {
+              "title": "Web Search Usage by Workspace",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:anthropic.messages.server_tool_use.web_search_requests{$model,$organization_name,$email,$user_name,$token_type,$workspace_name} by {org_name,workspace_name}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "cell_display_mode": "bar"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 606,
+            "definition": {
+              "type": "note",
+              "content": "**Web Usage Cost Impact**: Web searches can be token intensive. Monitor the cost-benefit ratio of search-enabled responses versus standard completions. Consider implementing search result summaries or excerpts to reduce the token cost of incorporating search results.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top"
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 67,
+        "width": 12,
+        "height": 10
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "model",
+      "prefix": "model",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "user_name",
+      "prefix": "user_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "email",
+      "prefix": "email",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "workspace_name",
+      "prefix": "workspace_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "token_type",
+      "prefix": "token_type",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "organization_name",
+      "prefix": "org_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

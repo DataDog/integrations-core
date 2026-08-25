@@ -2,6 +2,133 @@
 
 <!-- towncrier release notes start -->
 
+## 10.12.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Add MongoDB WiredTiger cache eviction metrics introduced in MongoDB 8.0.16. ([#24541](https://github.com/DataDog/integrations-core/pull/24541))
+
+## 10.11.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Remove server-side sort from MongoDB query metrics collection to avoid `queryStats` sort memory failures. ([#24140](https://github.com/DataDog/integrations-core/pull/24140))
+
+## 10.10.2 / 2026-06-09 / Agent 7.81.0
+
+***Fixed***:
+
+* Raise exceptions from the hostname property, so permission and connectivity errors surface as check failures. ([#23661](https://github.com/DataDog/integrations-core/pull/23661))
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 10.10.1 / 2026-05-14 / Agent 7.80.0
+
+***Fixed***:
+
+* Fixed a datetime overflow when collecting slow operations from MongoDB 8.0 replica set logs containing out-of-range `$date` sentinel values in RSM topology change entries. ([#23472](https://github.com/DataDog/integrations-core/pull/23472))
+* Include `database_instance` tag in `mongodb.can_connect` service check. ([#23476](https://github.com/DataDog/integrations-core/pull/23476))
+
+## 10.10.0 / 2026-04-15 / Agent 7.79.0
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Add `propagate_agent_tags` configuration option to propagate agent host tags to the MongoDB integration, matching existing support in PostgreSQL, MySQL, and SQL Server. ([#23138](https://github.com/DataDog/integrations-core/pull/23138))
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
+## 10.9.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 10.8.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix ``FailedToParse`` errors in DBM explain plans for aggregate queries by adding the required ``cursor`` option to the explain command. ([#22822](https://github.com/DataDog/integrations-core/pull/22822))
+* Fix ``IllegalOperation`` errors in DBM explain plans caused by attempting to explain ``listIndexes`` commands. ([#22825](https://github.com/DataDog/integrations-core/pull/22825))
+
+## 10.7.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add query metrics collection using $queryStats aggregation pipeline (MongoDB 7.0+ for Atlas deployments or 8.0+ for self-hosted) ([#22344](https://github.com/DataDog/integrations-core/pull/22344))
+
+## 10.6.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 10.5.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 10.4.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 10.3.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Collect index stats metric `mongodb.collection.indexes.accesses.opsps` on replica set secondary nodes. ([#20819](https://github.com/DataDog/integrations-core/pull/20819))
+
+***Fixed***:
+
+* Fix incorrect UTC timestamp parsing for system.profile slow queries when the agent runs in non-UTC timezones. ([#20834](https://github.com/DataDog/integrations-core/pull/20834))
+
+## 10.2.1 / 2025-07-21 / Agent 7.69.0
+
+***Fixed***:
+
+* Add deprecated `schemas` option to `config.yaml.example`. This config option is deprecated in Agent 7.69.0 and will be removed in a future release. ([#20783](https://github.com/DataDog/integrations-core/pull/20783))
+
+## 10.2.0 / 2025-07-10
+
+***Added***:
+
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add new `collect_schemas` configuration to replace deprecated `schemas` while maintaining backward compatibility. ([#20603](https://github.com/DataDog/integrations-core/pull/20603))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 10.1.1 / 2025-06-26 / Agent 7.68.0
+
+***Fixed***:
+
+* Add `maxTimeMS` to limit agent resource consumption and prevent operations from running indefinitely on the server side. ([#20515](https://github.com/DataDog/integrations-core/pull/20515))
+
+## 10.1.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
 ## 10.0.0 / 2025-05-15 / Agent 7.67.0
 
 ***Changed***:

@@ -1,0 +1,3 @@
+traffic_class, direction, total_bytes, shaped_bytes, shaped_packets, total_wait, total_wait_count, qos_drops, other_drops
+2,1,12720,12720,60,0,60,0,0
+4,1,25440,25440,120,0,120,0,0

@@ -1,12 +1,10 @@
 # Agent Check: KubeVirt Controller
 
-<div class="alert alert-warning">
-This integration is in public beta and should be enabled on production workloads with caution.
-</div>
-
 ## Overview
 
 This check monitors [KubeVirt Controller][1] through the Datadog Agent.
+
+**Minimum Agent version:** 7.59.0
 
 ## Setup
 

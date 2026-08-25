@@ -45,12 +45,16 @@ class Query(object):
                         The query will be run at the next check run after the collection interval has passed.
                 - (Optional) metric_prefix (str): The prefix to add to the metric name.
                     Note: If the metric prefix is None, the default metric prefix `<INTEGRATION>.` will be used.
+                - (Optional) params (Sequence): Bound parameters to pass alongside the query at execution time.
+                    The sequence is forwarded as-is to the executor's cursor.execute(query, params) call.
         '''
         # Contains the data to fill the rest of the attributes
         self.query_data = deepcopy(query_data or {})  # type: Dict[str, Any]
         self.name = None  # type: str
         # The actual query
         self.query = None  # type: str
+        # Optional bound parameters forwarded to the executor alongside the query string
+        self.params = None  # type: Any
         # Contains a mapping of column_name -> column_type, transformer
         self.column_transformers = None  # type: Tuple[Tuple[str, Tuple[str, Transformer]]]
         # These transformers are used to collect extra metrics calculated from the query result
@@ -214,9 +218,7 @@ class Query(object):
             elif extra_type not in extra_transformers and extra_type not in submission_transformers:
                 raise ValueError('unknown type `{}` for extra {} of {}'.format(extra_type, extra_name, query_name))
 
-            transformer_factory = extra_transformers.get(
-                extra_type, submission_transformers.get(extra_type)
-            )  # type: TransformerFactory
+            transformer_factory = extra_transformers.get(extra_type, submission_transformers.get(extra_type))  # type: TransformerFactory
 
             extra_source = extra.get('source')
             if extra_type in submission_transformers:
@@ -252,6 +254,7 @@ class Query(object):
 
         self.name = query_name
         self.query = query
+        self.params = self.query_data.get('params')
         self.column_transformers = tuple(column_data)
         self.extra_transformers = tuple(extra_data)
         self.base_tags = tags

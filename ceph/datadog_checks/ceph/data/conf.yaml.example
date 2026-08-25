@@ -20,7 +20,7 @@ instances:
     # ceph_cmd: /usr/bin/ceph
 
     ## @param ceph_cluster - string - optional - default: ceph
-    ## Cluster ceph to query.
+    ## Ceph cluster to query.
     #
     # ceph_cluster: ceph
 
@@ -35,9 +35,9 @@ instances:
 
     ## @param collect_service_check_for - list of strings - optional
     ## If you wish to customize the health checks sent as a service check, uncomment and edit the list below.
-    ## It collects by default the health check listed below.
+    ## It collects by default the health checks listed below.
     ## The list of health checks is available here: http://docs.ceph.com/docs/master/rados/operations/health-checks/
-    ## The health checks are only available if you're running ceph luminous or later
+    ## The health checks are only available if you're running Ceph Luminous or later
     #
     # collect_service_check_for:
     #   - OSD_DOWN

@@ -41,6 +41,7 @@ from datadog_checks.mongo.common import (
 )
 from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
+from datadog_checks.mongo.dbm.query_metrics import MongoQueryMetrics
 from datadog_checks.mongo.dbm.schemas import MongoSchemas
 from datadog_checks.mongo.dbm.slow_operations import MongoSlowOperations
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
@@ -50,7 +51,7 @@ from . import metrics
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 long = int
 
@@ -118,6 +119,7 @@ class MongoDb(AgentCheck):
         self._operation_samples = MongoOperationSamples(check=self)
         self._slow_operations = MongoSlowOperations(check=self)
         self._schemas = MongoSchemas(check=self)
+        self._query_metrics = MongoQueryMetrics(check=self)
 
         self._api = None
 
@@ -218,15 +220,15 @@ class MongoDb(AgentCheck):
             if option not in metrics.AVAILABLE_METRICS:
                 if option in metrics.DEFAULT_METRICS:
                     self.log.warning(
-                        u"`%s` option is deprecated. The corresponding metrics are collected by default.", option
+                        "`%s` option is deprecated. The corresponding metrics are collected by default.", option
                     )
                 else:
                     self.log.warning(
-                        u"Failed to extend the list of metrics to collect: unrecognized `%s` option", option
+                        "Failed to extend the list of metrics to collect: unrecognized `%s` option", option
                     )
                 continue
             additional_metrics = metrics.AVAILABLE_METRICS[option]
-            self.log.debug(u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
+            self.log.debug("Adding `%s` corresponding metrics to the list of metrics to collect.", option)
             metrics_to_collect.update(additional_metrics)
 
         return metrics_to_collect
@@ -292,12 +294,13 @@ class MongoDb(AgentCheck):
                 self._operation_samples.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+                self._query_metrics.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
         except CRITICAL_FAILURE as e:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_check_tags())
             self._unset_metadata()
             raise e  # Let exception bubble up to global handler and show full error in the logs.
         else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_check_tags())
 
     def _refresh_metadata(self):
         if self._mongo_version is None or self._mongo_modules is None:
@@ -320,7 +323,6 @@ class MongoDb(AgentCheck):
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
         self._mongo_version = None
-        self._resolved_hostname = None
 
     def _collect_metrics(self):
         deployment = self.deployment_type
@@ -411,6 +413,7 @@ class MongoDb(AgentCheck):
         if self._config.dbm_enabled:
             self._operation_samples.cancel()
             self._slow_operations.cancel()
+            self._query_metrics.cancel()
 
     def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role, hosting_type):
         replset_name = repl_set_payload["set"]

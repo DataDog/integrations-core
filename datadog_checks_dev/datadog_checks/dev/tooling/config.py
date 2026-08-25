@@ -9,7 +9,7 @@ import toml
 from atomicwrites import atomic_write
 from platformdirs import user_data_dir
 
-from ..fs import ensure_parent_dir_exists, file_exists, read_file
+from datadog_checks.dev.fs import ensure_parent_dir_exists, file_exists, read_file
 
 APP_DIR = user_data_dir('dd-checks-dev', False)
 CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
@@ -43,9 +43,9 @@ DEFAULT_CONFIG = {
         'integrations-internal-core': os.path.join('~', 'dd', 'integrations-internal-core'),
     },
     'agents': {
-        'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-        '7': {'docker': 'datadog/agent:7', 'local': '7'},
-        '6': {'docker': 'datadog/agent:6', 'local': '6'},
+        'master': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
+        '7': {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'},
+        '6': {'docker': 'registry.datadoghq.com/agent:6', 'local': '6'},
     },
     'orgs': {
         'default': {

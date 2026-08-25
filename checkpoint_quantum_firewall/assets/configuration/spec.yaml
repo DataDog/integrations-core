@@ -1,4 +1,5 @@
 name: checkpoint-quantum-firewall
+fleet_configurable: true
 files:
   - name: checkpoint_quantum_firewall.yaml
     options:
@@ -8,3 +9,5 @@ files:
             port: <PORT>
             service: checkpoint-quantum-firewall
             source: checkpoint-quantum-firewall
+            tags:
+              - "ndm_syslog:true"

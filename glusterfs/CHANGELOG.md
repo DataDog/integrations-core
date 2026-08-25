@@ -2,6 +2,53 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2026-06-09 / Agent 7.81.0
+
+***Added***:
+
+* Add support for security validation in models for the `gstatus_path` configuration option. ([#23881](https://github.com/DataDog/integrations-core/pull/23881))
+
+## 3.4.1 / 2026-03-18 / Agent 7.78.0
+
+***Fixed***:
+
+* Fix service check and metrics for stopped volumes ([#22486](https://github.com/DataDog/integrations-core/pull/22486))
+
+## 3.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Inherit ruff configuration from parent repo. No impact on integration itself. ([#22606](https://github.com/DataDog/integrations-core/pull/22606))
+
+## 3.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 3.2.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add volume heal entries count metric ([#21634](https://github.com/DataDog/integrations-core/pull/21634))
+
+## 3.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 3.0.2 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Stop relying on hardcoded value of run_path, and use the value in the agent config ([#20574](https://github.com/DataDog/integrations-core/pull/20574))
+
 ## 3.0.1 / 2024-10-10 / Agent 7.59.0
 
 ***Fixed***:
