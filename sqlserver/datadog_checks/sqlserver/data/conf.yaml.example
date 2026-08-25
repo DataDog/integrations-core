@@ -308,7 +308,7 @@ instances:
     ##
     ## <<< DEPRECATED >>>
     ##
-    ## Agent version: 7.80.0
+    ## Agent version: 7.84.0
     ## Migration: Use `database_metrics.instance_metrics.enabled` instead.
     #
     # include_instance_metrics: true

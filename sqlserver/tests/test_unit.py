@@ -1595,7 +1595,7 @@ def test_legacy_instance_metrics_option_emits_deprecation_warning(instance_docke
 
     assert check.warnings == [
         """Option `include_instance_metrics` in `instances` is deprecated ->
-Agent version: 7.80.0
+Agent version: 7.84.0
 Migration: Use `database_metrics.instance_metrics.enabled` instead.
 """
     ]

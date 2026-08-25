@@ -488,7 +488,7 @@ files:
           fleet_configurable: false
     - name: include_instance_metrics
       deprecation:
-        Agent version: 7.80.0
+        Agent version: 7.84.0
         Migration: Use `database_metrics.instance_metrics.enabled` instead.
       description: |
         DEPRECATED: Use `database_metrics.instance_metrics.enabled` instead.
