@@ -20,7 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery
 
 try:
     import datadog_agent
@@ -386,35 +386,34 @@ class SqlserverActivity(DBMAsyncJob):
             comments = statement['metadata'].get('comments', [])
             row['is_proc'] = bool(row.get('procedure_name'))
             has_proc_context = row['is_proc'] or is_statement_proc(row.get('text', ''))[0]
-            if has_proc_context and row.get('text'):
+            should_recover_comments = needs_comment_recovery(row.get('text'), comments)
+            if row.get('text') and (has_proc_context or should_recover_comments):
                 try:
-                    procedure_statement = obfuscate_sql_with_metadata(
+                    full_text_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
-                    row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
-                    procedure_comments = procedure_statement['metadata'].get('comments', [])
-                    if procedure_comments:
-                        comments = list(set(comments + procedure_comments))
-                    if not row.get('procedure_name'):
-                        procedures = procedure_statement['metadata'].get('procedures')
-                        if procedures:
-                            row['procedure_name'] = procedures[0].lower()
-                            row['is_proc'] = True
+                    comments = self._merge_comments(comments, full_text_statement['metadata'])
+                    if has_proc_context:
+                        row['procedure_signature'] = compute_sql_signature(full_text_statement['query'])
+                        if not row.get('procedure_name'):
+                            procedures = full_text_statement['metadata'].get('procedures')
+                            if procedures:
+                                row['procedure_name'] = procedures[0].lower()
+                                row['is_proc'] = True
                 except Exception as e:
-                    row['procedure_signature'] = '__procedure_obfuscation_error__'
-                    # if we fail to obfuscate the procedure text,
+                    if has_proc_context:
+                        row['procedure_signature'] = '__procedure_obfuscation_error__'
+                    # if we fail to obfuscate the full text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:
-                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
+                        self.log.warning("Failed to obfuscate query text=[%s] | err=[%s]", repr(row['text']), e)
                     else:
-                        self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
+                        self.log.debug("Failed to obfuscate query text | err=[%s]", e)
             if 'tail_text' in row:
                 tail_statement = obfuscate_sql_with_metadata(
                     row['tail_text'], self._obfuscator_options_for_tail_text, replace_null_character=True
                 )
-                appended_comments = tail_statement['metadata'].get('comments', [])
-                if appended_comments:
-                    comments = list(set(comments + appended_comments))
+                comments = self._merge_comments(comments, tail_statement['metadata'])
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
@@ -436,6 +435,11 @@ class SqlserverActivity(DBMAsyncJob):
     @staticmethod
     def _remove_null_vals(row):
         return {key: val for key, val in row.items() if val is not None}
+
+    @staticmethod
+    def _merge_comments(comments, obfuscated_metadata):
+        new_comments = obfuscated_metadata.get('comments', [])
+        return list(dict.fromkeys(comments + new_comments)) if new_comments else comments
 
     @staticmethod
     def _sanitize_row(row, obfuscated_statement=None):
