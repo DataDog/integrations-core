@@ -1,0 +1,40 @@
+{
+  "created_at": "2026-08-17",
+  "definition": {
+    "message": "{{#is_alert}}\nInteroperability queue depth in namespace {{id.name}} has risen above its expected range, currently at {{value}} on `intersystems_iris.interop.queued`. Check the production's business hosts for a stalled or disabled host, and confirm downstream systems are still accepting messages.\n{{/is_alert}}\n\n{{#is_recovery}}\nInteroperability queue depth in namespace {{id.name}} has returned to its expected range and queued messages are draining normally again.\n{{/is_recovery}}",
+    "name": "[InterSystems IRIS] Interoperability queue depth is abnormally high in namespace {{id.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):anomalies(avg:intersystems_iris.interop.queued{*} by {id}, 'basic', 2, direction='above', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:intersystems_iris"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the number of messages waiting in a namespace's interoperability queues. A queue that grows well beyond its normal depth usually means a business host has stalled or a downstream system has stopped accepting messages, and messages will keep accumulating until the backlog is cleared.",
+  "last_updated_at": "2026-08-17",
+  "tags": [
+    "integration:intersystems-iris"
+  ],
+  "title": "Interoperability queue depth is abnormally high",
+  "version": 2
+}
