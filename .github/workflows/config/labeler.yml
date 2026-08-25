@@ -449,10 +449,6 @@ integration/dell_powerflex:
 - changed-files:
   - any-glob-to-any-file:
     - dell_powerflex/**/*
-integration/dep_resolution:
-- changed-files:
-  - any-glob-to-any-file:
-    - dep_resolution/**/*
 integration/directory:
 - changed-files:
   - any-glob-to-any-file:
@@ -1521,18 +1517,6 @@ integration/terraform:
 - changed-files:
   - any-glob-to-any-file:
     - terraform/**/*
-integration/test_deps:
-- changed-files:
-  - any-glob-to-any-file:
-    - test_deps/**/*
-integration/test_hatch:
-- changed-files:
-  - any-glob-to-any-file:
-    - test_hatch/**/*
-integration/test_repair:
-- changed-files:
-  - any-glob-to-any-file:
-    - test_repair/**/*
 integration/tibco_ems:
 - changed-files:
   - any-glob-to-any-file:
@@ -1645,10 +1629,6 @@ integration/weblogic:
 - changed-files:
   - any-glob-to-any-file:
     - weblogic/**/*
-integration/wheeltest:
-- changed-files:
-  - any-glob-to-any-file:
-    - wheeltest/**/*
 integration/win32_event_log:
 - changed-files:
   - any-glob-to-any-file:
