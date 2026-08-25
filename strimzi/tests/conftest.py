@@ -19,9 +19,6 @@ from .common import HERE, KUBERNETES_VERSION, STRIMZI_VERSION
 NAMESPACE = "kafka"
 CLUSTER_OPERATOR_DEPLOYMENT = "strimzi-cluster-operator"
 ENTITY_OPERATOR_DEPLOYMENT = "my-cluster-entity-operator"
-CLUSTER_OPERATOR_PORT = 8080
-TOPIC_OPERATOR_PORT = 8080
-USER_OPERATOR_PORT = 8081
 
 CLUSTER_OPERATOR_POD_IP_STATE = "strimzi_cluster_operator_pod_ip"
 ENTITY_OPERATOR_POD_IP_STATE = "strimzi_entity_operator_pod_ip"
@@ -77,10 +74,6 @@ def setup_strimzi():
             check=True,
         )
 
-    # `setup_strimzi` only runs while the environment is being set up. Later invocations of the
-    # `dd_environment` fixture (e.g. during `ddev env stop`) run in a fresh process, and by then the
-    # cluster may already be gone, so the pod IPs are cached here via `save_state`/`get_state` rather
-    # than looked up live.
     save_state(
         CLUSTER_OPERATOR_POD_IP_STATE,
         get_deployment_pod_ip(CLUSTER_OPERATOR_DEPLOYMENT),
@@ -153,9 +146,9 @@ def dd_environment():
             entity_operator_ip = get_state(ENTITY_OPERATOR_POD_IP_STATE)
 
             instance = {
-                "cluster_operator_endpoint": f"http://{cluster_operator_ip}:{CLUSTER_OPERATOR_PORT}/metrics",
-                "topic_operator_endpoint": f"http://{entity_operator_ip}:{TOPIC_OPERATOR_PORT}/metrics",
-                "user_operator_endpoint": f"http://{entity_operator_ip}:{USER_OPERATOR_PORT}/metrics",
+                "cluster_operator_endpoint": f"http://{cluster_operator_ip}:8080/metrics",
+                "topic_operator_endpoint": f"http://{entity_operator_ip}:8080/metrics",
+                "user_operator_endpoint": f"http://{entity_operator_ip}:8081/metrics",
             }
 
             metadata = {
