@@ -12,9 +12,9 @@ import pytest
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.date import parse_rfc3339
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
 # Skip the whole tests module on Windows
@@ -458,6 +458,17 @@ def mock_from_file(fname):
         return f.read()
 
 
+def _text_response(text: str) -> FakeHTTPResponse:
+    content = text.encode('utf-8')
+    return FakeHTTPResponse(
+        content=content,
+        text=text,
+        content_chunks=(content,),
+        lines=text.splitlines(),
+        headers={'Content-Type': 'text/plain'},
+    )
+
+
 def test_bad_config():
     with pytest.raises(Exception):
         KubeletCheck('kubelet', {}, [{}, {}])
@@ -559,11 +570,11 @@ def test_kubelet_credentials_update(monkeypatch, aggregator, mock_openmetrics_ht
     }
     check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
 
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        content=mock_from_file('kubelet_metrics_1_14.txt'),
-        headers={'Content-Type': 'text/plain'},
+    mock_openmetrics_http.get.return_value = _text_response(mock_from_file('kubelet_metrics_1_14.txt'))
+    mock_openmetrics_http.head.return_value = FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
     )
-    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
 
     # Credentials can change between runs, so cached clients must be rebuilt.
     with mock.patch.object(check, 'reset_http_config', wraps=check.reset_http_config) as reset:
@@ -858,7 +869,7 @@ def test_report_container_state_metrics(monkeypatch, tagger):
     monkeypatch.setattr(
         check,
         'perform_kubelet_query',
-        mock.Mock(return_value=MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_crashed.json'))),
+        mock.Mock(return_value=FakeHTTPResponse(content=mock_from_file('pods_crashed.json').encode('utf-8'))),
     )
     monkeypatch.setattr(check, 'compute_pod_expiration_datetime', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
@@ -1011,7 +1022,7 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
     monkeypatch.setattr(
         check,
         'perform_kubelet_query',
-        mock.Mock(return_value=MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_expired.json'))),
+        mock.Mock(return_value=FakeHTTPResponse(content=mock_from_file('pods_expired.json').encode('utf-8'))),
     )
     monkeypatch.setattr(
         check, 'compute_pod_expiration_datetime', mock.Mock(return_value=parse_rfc3339("2019-02-18T16:00:06Z"))
@@ -1043,7 +1054,7 @@ def test_perform_kubelet_check(monkeypatch, mock_openmetrics_http):
     check.kubelet_credentials = KubeletCredentials({})
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
+    mock_openmetrics_http.get.return_value = FakeHTTPResponse(status_code=200)
 
     instance_tags = ["one:1"]
     check._perform_kubelet_check(instance_tags)
@@ -1057,7 +1068,7 @@ def test_report_node_metrics(monkeypatch, mock_openmetrics_http):
     check.kubelet_credentials = KubeletCredentials({})
     check.node_spec_url = "http://localhost:10255/spec"
     check.pod_list_url = "http://localhost:10255/pods"
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(json_data={'num_cores': 4, 'memory_capacity': 512})
+    mock_openmetrics_http.get.return_value = FakeHTTPResponse(json_result={'num_cores': 4, 'memory_capacity': 512})
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
     check._report_node_metrics(['foo:bar'])
@@ -1077,7 +1088,10 @@ def test_report_node_metrics_kubernetes1_18(aggregator, mock_openmetrics_http):
     check.node_spec_url = "http://localhost:10255/spec"
     check.pod_list_url = "http://localhost:10255/pods"
 
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=404, content='Error Code')
+    mock_openmetrics_http.get.return_value = FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
+    )
     check._report_node_metrics(['foo:bar'])
 
     assert mock_openmetrics_http.get.call_args.args[0] == check.node_spec_url
@@ -1530,7 +1544,7 @@ def test_probe_metrics(monkeypatch, aggregator, tagger):
 
 
 def test_detect_probes(monkeypatch, mock_openmetrics_http):
-    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=200)
+    mock_openmetrics_http.head.return_value = FakeHTTPResponse(status_code=200)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1542,7 +1556,7 @@ def test_detect_probes(monkeypatch, mock_openmetrics_http):
 
 
 def test_detect_probes_cached(monkeypatch, mock_openmetrics_http):
-    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=200)
+    mock_openmetrics_http.head.return_value = FakeHTTPResponse(status_code=200)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1558,7 +1572,7 @@ def test_detect_probes_cached(monkeypatch, mock_openmetrics_http):
 
 
 def test_detect_probes_404(monkeypatch, mock_openmetrics_http):
-    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
+    mock_openmetrics_http.head.return_value = FakeHTTPResponse(status_code=404)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1570,7 +1584,7 @@ def test_detect_probes_404(monkeypatch, mock_openmetrics_http):
 
 
 def test_detect_probes_404_cached(monkeypatch, mock_openmetrics_http):
-    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
+    mock_openmetrics_http.head.return_value = FakeHTTPResponse(status_code=404)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)

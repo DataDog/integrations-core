@@ -10,10 +10,10 @@ from time import sleep
 import pytest
 import requests
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.gitlab import GitlabCheck
 
 from .common import (
@@ -46,6 +46,15 @@ CONFIG = {
         }
     ],
 }
+
+
+def _openmetrics_response(text: str) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        content=text.encode('utf-8'),
+        text=text,
+        headers={'Content-Type': 'text/plain'},
+        lines=text.splitlines(),
+    )
 
 
 @pytest.fixture(scope="session")
@@ -114,29 +123,29 @@ def mocked_requests_get(*args, **kwargs):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'readiness_check.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
-            return MockHTTPResponse(json_data=json.loads(text_data))
+            return FakeHTTPResponse(json_result=json.loads(text_data))
 
     elif url == "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
         HOST, GITLAB_LOCAL_PORT
     ):
-        return MockHTTPResponse()
+        return FakeHTTPResponse()
     elif url == "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
 
         with open(f_name, 'r') as f:
             text_data = f.read()
-            return MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+            return _openmetrics_response(text_data)
     elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gitaly.txt')
 
         with open(f_name, 'r') as f:
             text_data = f.read()
-            return MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+            return _openmetrics_response(text_data)
     elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
-            return MockHTTPResponse(json_data=json.loads(text_data))
+            return FakeHTTPResponse(json_result=json.loads(text_data))
 
     pytest.fail("url `{}` not registered".format(args[0]))
 

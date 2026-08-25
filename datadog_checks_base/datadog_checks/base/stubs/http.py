@@ -50,6 +50,7 @@ class FakeHTTPResponse:
         text: str = '',
         headers: Mapping[str, str] | None = None,
         json_result: Any = JSON_RESULT_UNSET,
+        json_error: Exception | None = None,
         content_chunks: Iterable[bytes | str] = (),
         lines: Iterable[bytes | str] = (),
         status_error: HTTPClientStatusError | None = None,
@@ -76,6 +77,7 @@ class FakeHTTPResponse:
         self.history: list[HTTPResponse] = list(history)
         self.closed = False
         self._json_result = json_result
+        self._json_error = json_error
         self._content_chunks = tuple(content_chunks)
         self._lines = tuple(lines)
         self._status_error = status_error
@@ -91,6 +93,8 @@ class FakeHTTPResponse:
         return self._reason
 
     def json(self, **kwargs: Any) -> Any:
+        if self._json_error is not None:
+            raise self._json_error
         if self._json_result is JSON_RESULT_UNSET:
             raise ValueError('No JSON result was configured for this fake response.')
         return self._json_result

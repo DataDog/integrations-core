@@ -1,25 +1,28 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
 import os
 import ssl
 import threading
 import time
 from http import server as BaseHTTPServer
+from typing import Any
 from urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, urlunparse
 
 import mock
 import pytest
 import urllib3
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientConnectTimeoutError,
     HTTPClientReadTimeoutError,
     HTTPClientRequestError,
+    HTTPClientStatusError,
 )
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
 
@@ -165,14 +168,48 @@ STANDALONE_SPARK_METRICS_JSON_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, 'metri
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
+
+def _json_response(json_result: Any) -> FakeHTTPResponse:
+    text = json.dumps(json_result)
+    return FakeHTTPResponse(content=text.encode('utf-8'), text=text, json_result=json_result)
+
+
+def _json_response_from_fixture(filename: str) -> FakeHTTPResponse:
+    with open(os.path.join(FIXTURE_DIR, filename), encoding='utf-8') as response_file:
+        text = response_file.read()
+    return FakeHTTPResponse(content=text.encode('utf-8'), text=text, json_result=json.loads(text))
+
+
+def _text_response_from_fixture(filename: str) -> FakeHTTPResponse:
+    with open(os.path.join(FIXTURE_DIR, filename), encoding='utf-8') as response_file:
+        text = response_file.read()
+    return FakeHTTPResponse(content=text.encode('utf-8'), text=text)
+
+
+def _invalid_json_response(text: str) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        content=text.encode('utf-8'),
+        text=text,
+        json_error=json.JSONDecodeError('Expecting value', text, 0),
+    )
+
+
+def _status_response(status_code: int) -> FakeHTTPResponse:
+    error_kind = 'Client Error' if status_code < 500 else 'Server Error'
+    return FakeHTTPResponse(
+        status_code=status_code,
+        status_error=HTTPClientStatusError(f'{status_code} {error_kind}'),
+    )
+
+
 DEFAULT_RESPONSES = {
-    '/jobs': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics')),
-    '/stages': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics')),
-    '/executors': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics')),
-    '/storage/rdd': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics')),
-    '/streaming/statistics': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics')),
-    '/metrics/json': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json')),
-    '/api/v1/version': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'version')),
+    '/jobs': _json_response_from_fixture('job_metrics'),
+    '/stages': _json_response_from_fixture('stage_metrics'),
+    '/executors': _json_response_from_fixture('executor_metrics'),
+    '/storage/rdd': _json_response_from_fixture('rdd_metrics'),
+    '/streaming/statistics': _json_response_from_fixture('streaming_statistics'),
+    '/metrics/json': _json_response_from_fixture('metrics_json'),
+    '/api/v1/version': _json_response_from_fixture('version'),
 }
 
 
@@ -187,9 +224,9 @@ def yarn_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == YARN_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'yarn_apps'))
+        return _json_response_from_fixture('yarn_apps')
     elif arg_url == YARN_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
+        return _json_response_from_fixture('spark_apps')
     return get_default_mock(url)
 
 
@@ -197,100 +234,100 @@ def mesos_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == MESOS_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'mesos_apps'))
+        return _json_response_from_fixture('mesos_apps')
     elif arg_url == MESOS_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
+        return _json_response_from_fixture('spark_apps')
     elif arg_url == MESOS_SPARK_JOB_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
+        return _json_response_from_fixture('job_metrics')
     elif arg_url == MESOS_SPARK_STAGE_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
+        return _json_response_from_fixture('stage_metrics')
     elif arg_url == MESOS_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
+        return _json_response_from_fixture('executor_metrics')
     elif arg_url == MESOS_SPARK_RDD_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
+        return _json_response_from_fixture('rdd_metrics')
     elif arg_url == MESOS_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
+        return _json_response_from_fixture('streaming_statistics')
     elif arg_url == MESOS_SPARK_METRICS_JSON_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+        return _json_response_from_fixture('metrics_json')
 
 
 def driver_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == DRIVER_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
+        return _json_response_from_fixture('spark_apps')
     elif arg_url == DRIVER_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
+        return _json_response_from_fixture('spark_apps')
     elif arg_url == DRIVER_SPARK_JOB_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
+        return _json_response_from_fixture('job_metrics')
     elif arg_url == DRIVER_SPARK_STAGE_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
+        return _json_response_from_fixture('stage_metrics')
     elif arg_url == DRIVER_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
+        return _json_response_from_fixture('executor_metrics')
     elif arg_url == DRIVER_SPARK_RDD_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
+        return _json_response_from_fixture('rdd_metrics')
     elif arg_url == DRIVER_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
+        return _json_response_from_fixture('streaming_statistics')
     elif arg_url == DRIVER_SPARK_METRICS_JSON_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+        return _json_response_from_fixture('metrics_json')
 
 
 def standalone_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_apps'))
+        return _json_response_from_fixture('spark_standalone_apps')
     elif arg_url == STANDALONE_APP_HTML_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_app'))
+        return _text_response_from_fixture('spark_standalone_app')
     elif arg_url == STANDALONE_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
+        return _json_response_from_fixture('spark_apps')
     elif arg_url == STANDALONE_SPARK_JOB_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
+        return _json_response_from_fixture('job_metrics')
     elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
+        return _json_response_from_fixture('stage_metrics')
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
+        return _json_response_from_fixture('executor_metrics')
     elif arg_url == STANDALONE_SPARK_RDD_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
+        return _json_response_from_fixture('rdd_metrics')
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
+        return _json_response_from_fixture('streaming_statistics')
     elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+        return _json_response_from_fixture('metrics_json')
 
 
 def standalone_requests_pre20_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_apps'))
+        return _json_response_from_fixture('spark_standalone_apps')
     elif arg_url == STANDALONE_APP_HTML_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_app'))
+        return _text_response_from_fixture('spark_standalone_app')
     elif arg_url == STANDALONE_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps_pre20'))
+        return _json_response_from_fixture('spark_apps_pre20')
     elif arg_url == STANDALONE_SPARK_JOB_URL:
-        return MockHTTPResponse(status_code=404)
+        return _status_response(404)
     elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        return MockHTTPResponse(status_code=404)
+        return _status_response(404)
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(status_code=404)
+        return _status_response(404)
     elif arg_url == STANDALONE_SPARK_RDD_URL:
-        return MockHTTPResponse(status_code=404)
+        return _status_response(404)
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(status_code=404)
+        return _status_response(404)
     elif arg_url == STANDALONE_SPARK_JOB_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
+        return _json_response_from_fixture('job_metrics')
     elif arg_url == STANDALONE_SPARK_STAGE_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
+        return _json_response_from_fixture('stage_metrics')
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
+        return _json_response_from_fixture('executor_metrics')
     elif arg_url == STANDALONE_SPARK_RDD_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
+        return _json_response_from_fixture('rdd_metrics')
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
+        return _json_response_from_fixture('streaming_statistics')
     elif arg_url == VERSION_PATH:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'version'))
+        return _json_response_from_fixture('version')
     elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+        return _json_response_from_fixture('metrics_json')
 
 
 def proxy_with_warning_page_mock(url, *args, **kwargs):
@@ -308,7 +345,11 @@ def proxy_with_warning_page_mock(url, *args, **kwargs):
         url_parts[4] = urlencode(query)
         with open(os.path.join(FIXTURE_DIR, 'html_warning_page'), 'r') as f:
             body = f.read().replace('$REDIRECT_URL$', urlunparse(url_parts))
-            return MockHTTPResponse(body, cookies={'proxy_cookie': 'foo'})
+            return FakeHTTPResponse(
+                content=body.encode('utf-8'),
+                text=body,
+                cookies={'proxy_cookie': 'foo'},
+            )
 
 
 CHECK_NAME = 'spark'
@@ -1181,10 +1222,8 @@ def test_do_not_crash_on_version_collection_failure():
 @pytest.mark.unit
 def test_driver_startup_message_default_retries(aggregator, caplog):
     """Default behavior (startup_wait_retries=3): retry 3 times then raise."""
-    from json import JSONDecodeError
-
     check = SparkCheck('spark', {}, [DRIVER_CONFIG])
-    response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    response = _invalid_json_response("Spark is starting up. Please wait a while until it's ready.")
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=response):
@@ -1196,7 +1235,7 @@ def test_driver_startup_message_default_retries(aggregator, caplog):
                 assert result is None, f"Attempt {i + 1} should return None"
 
             # 4th attempt should raise
-            with pytest.raises(JSONDecodeError):
+            with pytest.raises(json.JSONDecodeError):
                 check._rest_request_to_json(DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
 
     assert 'spark driver not ready yet' in caplog.text.lower()
@@ -1213,15 +1252,13 @@ def test_driver_startup_message_default_retries(aggregator, caplog):
 @pytest.mark.parametrize("retries_value", [0, -1, -5])
 def test_driver_startup_message_disabled(aggregator, retries_value):
     """When startup_wait_retries<=0, treat startup messages as errors immediately."""
-    from json import JSONDecodeError
-
     config = DRIVER_CONFIG.copy()
     config['startup_wait_retries'] = retries_value
     check = SparkCheck('spark', {}, [config])
-    response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    response = _invalid_json_response("Spark is starting up. Please wait a while until it's ready.")
 
     with mock.patch.object(check, '_rest_request', return_value=response):
-        with pytest.raises(JSONDecodeError):
+        with pytest.raises(json.JSONDecodeError):
             check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
 
     aggregator.assert_service_check(
@@ -1234,12 +1271,10 @@ def test_driver_startup_message_disabled(aggregator, retries_value):
 @pytest.mark.unit
 def test_driver_startup_message_limited_retries(aggregator, caplog):
     """When startup_wait_retries>0, retry N times then raise."""
-    from json import JSONDecodeError
-
     config = DRIVER_CONFIG.copy()
     config['startup_wait_retries'] = 3
     check = SparkCheck('spark', {}, [config])
-    response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    response = _invalid_json_response("Spark is starting up. Please wait a while until it's ready.")
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=response):
@@ -1251,7 +1286,7 @@ def test_driver_startup_message_limited_retries(aggregator, caplog):
                 assert result is None, f"Attempt {i + 1} should return None"
 
             # 4th attempt should raise
-            with pytest.raises(JSONDecodeError):
+            with pytest.raises(json.JSONDecodeError):
                 check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
 
     assert 'attempt 1/3' in caplog.text.lower()
@@ -1271,8 +1306,8 @@ def test_driver_startup_retry_counter_resets_on_success(caplog):
     config = DRIVER_CONFIG.copy()
     config['startup_wait_retries'] = 2
     check = SparkCheck('spark', {}, [config])
-    startup_response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
-    success_response = MockHTTPResponse(json_data=[{"id": "app_001", "name": "TestApp"}])
+    startup_response = _invalid_json_response("Spark is starting up. Please wait a while until it's ready.")
+    success_response = _json_response([{"id": "app_001", "name": "TestApp"}])
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=startup_response):
@@ -1350,7 +1385,7 @@ def test_do_not_crash_on_single_app_failure():
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
 def test_no_running_apps(aggregator, dd_run_check, instance, service_check, caplog, mock_http):
-    mock_http.get.return_value = MockHTTPResponse("{}")
+    mock_http.get.return_value = _json_response({})
     with caplog.at_level(logging.WARNING):
         dd_run_check(SparkCheck('spark', {}, [instance]))
 
@@ -1369,11 +1404,9 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check, capl
 @pytest.mark.parametrize(
     "mock_response",
     [
-        pytest.param(MockHTTPResponse(content=""), id="Invalid JSON"),  # this triggers json parsing error,
-        pytest.param(MockHTTPResponse(status_code=404), id="property not found"),
-        pytest.param(
-            MockHTTPResponse(status_code=500), id="Spark internal server error"
-        ),  # reported by users in the wild
+        pytest.param(_invalid_json_response(""), id="Invalid JSON"),
+        pytest.param(_status_response(404), id="property not found"),
+        pytest.param(_status_response(500), id="Spark internal server error"),
     ],
 )
 @pytest.mark.parametrize(
@@ -1405,8 +1438,8 @@ def test_yarn_no_json_for_app_properties(
         if arg_url == property_url:
             return mock_response
         elif arg_url == YARN_SPARK_APP_URL:
-            return MockHTTPResponse(
-                json_data=[
+            return _json_response(
+                [
                     {
                         "id": SPARK_APP_ID,
                         "name": "PySparkShell",

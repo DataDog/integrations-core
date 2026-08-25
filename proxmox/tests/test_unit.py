@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 import mock
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
 
@@ -27,6 +28,15 @@ from .common import (
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
 )
+
+
+def _status_response(status_code: int) -> FakeHTTPResponse:
+    error_kind = 'Client Error' if status_code < 500 else 'Server Error'
+    return FakeHTTPResponse(
+        status_code=status_code,
+        json_result=None,
+        status_error=HTTPClientStatusError(f'{status_code} {error_kind}'),
+    )
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -58,11 +68,11 @@ def test_no_tags(dd_run_check, aggregator, instance):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/api2/json/version': MockHTTPResponse(status_code=500)}},
+            {'http_error': {'/api2/json/version': _status_response(500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/api2/json/version': MockHTTPResponse(status_code=404)}},
+            {'http_error': {'/api2/json/version': _status_response(404)}},
             id='404',
         ),
     ],
@@ -268,26 +278,18 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
     ('mock_http_get'),
     [
         pytest.param(
-            {
-                'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockHTTPResponse(status_code=500)
-                }
-            },
+            {'http_error': {'/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': _status_response(500)}},
             id='500',
         ),
         pytest.param(
-            {
-                'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockHTTPResponse(status_code=404)
-                }
-            },
+            {'http_error': {'/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': _status_response(404)}},
             id='404',
         ),
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockHTTPResponse(
-                        status_code=200, json_data={"data": None, "message": "No QEMU guest agent configured\n"}
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': FakeHTTPResponse(
+                        json_result={"data": None, "message": "No QEMU guest agent configured\n"}
                     )
                 }
             },
@@ -489,7 +491,7 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/api2/json/cluster/metrics/export': MockHTTPResponse(status_code=501)}},
+            {'http_error': {'/api2/json/cluster/metrics/export': _status_response(501)}},
             id='501',
         ),
     ],

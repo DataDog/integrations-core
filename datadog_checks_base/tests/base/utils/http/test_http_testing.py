@@ -5,9 +5,9 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import http as http_testing
-from datadog_checks.dev.http import MockHTTPResponse
 
 
 def test_mock_http_patches_agentcheck(mock_http):
@@ -18,6 +18,13 @@ def test_mock_http_patches_agentcheck(mock_http):
 def test_mock_http_patches_explicit_agentcheck_client(mock_http):
     check = AgentCheck('test', {}, [{}])
     assert check.create_http_client({'url': 'https://example.test'}) is mock_http
+
+
+def test_http_module_reexports_base_fakes():
+    assert http_testing.FakeHTTPClient is FakeHTTPClient
+    assert http_testing.FakeHTTPResponse is FakeHTTPResponse
+    assert http_testing.MockHTTPResponse is FakeHTTPResponse
+    assert http_testing.RecordedRequest is RecordedRequest
 
 
 def test_fake_http_installs_registered_response_and_records_request(fake_http):
@@ -57,7 +64,15 @@ def test_mock_http_exposes_tls_config(mock_http):
     assert mock_http.tls_config == {}
 
 
-def test_legacy_mock_response_is_a_requests_response():
+def test_legacy_mock_response_is_a_requests_response_without_loading_base_fakes(mocker):
+    real_import_module = http_testing.importlib.import_module
+
+    def import_legacy(name):
+        if name == 'datadog_checks.base.stubs.http':
+            raise AssertionError('legacy compatibility must not load the base HTTP fakes')
+        return real_import_module(name)
+
+    mocker.patch.object(http_testing.importlib, 'import_module', side_effect=import_legacy)
     with pytest.warns(DeprecationWarning, match='FakeHTTPResponse'):
         legacy = http_testing.MockResponse
 
@@ -93,16 +108,25 @@ def test_legacy_mock_response_reads_a_file(tmp_path):
     assert legacy(file_path=str(path)).json() == {'key': 'value'}
 
 
-def test_mock_http_response_compatibility_builder_returns_base_fake(tmp_path):
+def test_mock_response_fixture_builds_base_fake(tmp_path, mock_response):
     path = tmp_path / 'payload.txt'
     path.write_text('line one\nline two')
 
-    response = MockHTTPResponse(file_path=str(path), headers={'X-Test': 'value'})
+    response = mock_response(file_path=str(path), headers={'X-Test': 'value'})
 
     assert isinstance(response, FakeHTTPResponse)
     assert response.content == b'line one\nline two'
     assert list(response.iter_lines()) == ['line one', 'line two']
     assert response.headers['x-test'] == 'value'
+
+
+def test_mock_response_fixture_configures_json_and_status_errors(mock_response):
+    response = mock_response(json_data={'error': 'unavailable'}, status_code=503)
+
+    assert response.json() == {'error': 'unavailable'}
+    with pytest.raises(HTTPClientStatusError, match='503 Server Error') as exc_info:
+        response.raise_for_status()
+    assert exc_info.value.response is response
 
 
 def test_mock_http_response_per_endpoint_accepts_base_fakes(mock_http_response_per_endpoint):

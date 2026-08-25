@@ -5,8 +5,8 @@ import pytest
 from mock.mock import MagicMock
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
@@ -64,7 +64,7 @@ def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_con
     ],
 )
 def test_get_gitlab_version(mock_http, raw_version):
-    mock_http.get.return_value = MockHTTPResponse(json_data={"version": raw_version})
+    mock_http.get.return_value = FakeHTTPResponse(json_result={"version": raw_version})
 
     version = get_gitlab_version(mock_http, MagicMock(), "http://localhost", "my-token")
 

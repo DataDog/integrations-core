@@ -16,10 +16,10 @@ from mock import patch
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 
 text_content_type = 'text/plain; version=0.0.4'
 FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))
@@ -41,6 +41,15 @@ OPENMETRICS_CHECK_INSTANCE = {
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
     'namespace': 'openmetrics',
 }
+
+
+def _text_response(text: str) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        content=text.encode('utf-8'),
+        text=text,
+        headers={'Content-Type': text_content_type},
+        lines=text.splitlines(),
+    )
 
 
 @pytest.fixture
@@ -113,7 +122,7 @@ def test_config_instance(mocked_prometheus_check):
 
 def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
     check.process_metric = mock.MagicMock()
     check.process(mocked_prometheus_scraper_config)
     check.poll.assert_called_with(mocked_prometheus_scraper_config)
@@ -737,7 +746,7 @@ def test_filter_sample_on_gauge(p_check, mocked_prometheus_scraper_config):
     expected_metric.add_metric(['heapster-v1.4.3'], 1)
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     mocked_prometheus_scraper_config['_text_filter_blacklist'] = ["deployment=\"kube-dns\""]
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
@@ -770,7 +779,7 @@ def test_parse_one_gauge(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.add_metric([], 1)
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -802,7 +811,7 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.name = 'go_memstats_mallocs_total'
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -860,7 +869,7 @@ def test_parse_one_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -994,7 +1003,7 @@ def test_parse_one_histogram(p_check, mocked_prometheus_scraper_config):
     )
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
     assert 1 == len(metrics)
@@ -1096,7 +1105,7 @@ def test_parse_two_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1134,7 +1143,7 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1223,7 +1232,7 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1286,7 +1295,7 @@ def test_decumulate_histogram_buckets_multiple_contexts(p_check, mocked_promethe
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="POST"} 150\n'
     )
 
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1354,7 +1363,7 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
         'random_histogram_count{url="http://127.0.0.1:8080/api",verb="GET"} 70\n'
     )
 
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1406,7 +1415,7 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1477,7 +1486,7 @@ def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.add_sample("http_response_size_bytes", {"handler": "prometheus", "quantile": "0.99"}, 25763.0)
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1520,7 +1529,7 @@ def test_parse_one_summary_with_no_quantile(p_check, mocked_prometheus_scraper_c
     expected_etcd_metric.add_metric(["prometheus"], 5.0, 120512.0)
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1575,7 +1584,7 @@ def test_parse_two_summaries_with_labels(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1616,7 +1625,7 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
     )
 
     # Iter on the generator to get all metrics
-    response = MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
     assert 1 == len(metrics)
@@ -2671,7 +2680,7 @@ def test_filter_metrics(
 def test_metadata_default(mocked_openmetrics_check_factory, text_data, datadog_agent):
     instance = dict(OPENMETRICS_CHECK_INSTANCE)
     check = mocked_openmetrics_check_factory(instance)
-    check.poll = mock.MagicMock(return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
 
     check.check(instance)
     datadog_agent.assert_metadata_count(0)
@@ -2682,7 +2691,7 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     instance['metadata_metric_name'] = 'kubernetes_build_info'
     instance['metadata_label_map'] = {'version': 'gitVersion'}
     check = mocked_openmetrics_check_factory(instance)
-    check.poll = mock.MagicMock(return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
 
     version_metadata = {
         'version.major': '1',
@@ -2892,7 +2901,7 @@ def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
     config = check.get_scraper_config(instance)
     config['_dry_run'] = False
 
-    check.poll = mock.MagicMock(return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
     check.process(config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
@@ -2915,7 +2924,7 @@ def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data)
     config = check.get_scraper_config(instance)
     config['_dry_run'] = False
 
-    check.poll = mock.MagicMock(return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
     check.process(config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
@@ -3098,7 +3107,7 @@ def test_use_process_start_time(
 
     check = mocked_openmetrics_check_factory(instance)
     test_data = _make_test_use_process_start_time_data(process_start_time)
-    check.poll = mock.MagicMock(return_value=MockHTTPResponse(test_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(test_data))
 
     for _ in range(0, 5):
         aggregator.reset()
@@ -3151,9 +3160,7 @@ def test_refresh_bearer_token(text_data, mocked_openmetrics_check_factory):
 
     with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(TOKENS_PATH, 'default_token')):
         check = mocked_openmetrics_check_factory(instance)
-        check.poll = mock.MagicMock(
-            return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
-        )
+        check.poll = mock.MagicMock(return_value=_text_response(text_data))
         instance = check.get_scraper_config(instance)
         assert instance['_bearer_token'] == 'my default token'
         time.sleep(1.5)

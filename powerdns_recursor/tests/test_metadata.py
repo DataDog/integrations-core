@@ -5,8 +5,8 @@
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common
@@ -35,7 +35,7 @@ def test_metadata_unit_timeout(datadog_agent, mock_http):
 
 def test_metadata_unit_missing_header(datadog_agent, mock_http):
     check, config_obj = _make_check()
-    mock_http.get.return_value = MockHTTPResponse()
+    mock_http.get.return_value = FakeHTTPResponse()
     check._collect_metadata(config_obj)
     datadog_agent.assert_metadata_count(0)
     check.log.debug.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
@@ -43,7 +43,7 @@ def test_metadata_unit_missing_header(datadog_agent, mock_http):
 
 def test_metadata_unit_bad_version_header(datadog_agent, mock_http):
     check, config_obj = _make_check()
-    mock_http.get.return_value = MockHTTPResponse(headers={'Server': 'wrong_stuff'})
+    mock_http.get.return_value = FakeHTTPResponse(headers={'Server': 'wrong_stuff'})
     check._collect_metadata(config_obj)
     datadog_agent.assert_metadata_count(0)
     check.log.debug.assert_called_with('Error while decoding PowerDNS Recursor version: %s', 'list index out of range')

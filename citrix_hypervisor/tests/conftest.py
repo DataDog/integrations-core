@@ -1,14 +1,35 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockHTTPResponse
 
 from . import common
+
+
+def _fixture_response(path: str) -> FakeHTTPResponse:
+    with open(path, 'rb') as response_file:
+        content = response_file.read()
+    text = content.decode('utf-8')
+    try:
+        json_result = json.loads(text)
+    except json.JSONDecodeError as error:
+        return FakeHTTPResponse(content=content, text=text, json_error=error)
+    return FakeHTTPResponse(content=content, text=text, json_result=json_result)
+
+
+def _not_found_response() -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
+        reason='Not Found',
+    )
 
 
 @pytest.fixture(scope='session')
@@ -37,14 +58,14 @@ def mock_requests_get(url, *args, **kwargs):
     print(url_parts)
 
     if url_parts[0] == 'wrong':
-        return MockHTTPResponse(status_code=404)
+        return _not_found_response()
 
     json_file = f"rrd_updates_{url_parts[0]}.json" if url_parts[1] == "rrd_updates" else f"{url_parts[1]}.json"
     path = os.path.join(common.HERE, 'fixtures', 'standalone', json_file)
     if not os.path.exists(path):
-        return MockHTTPResponse(status_code=404)
+        return _not_found_response()
 
-    return MockHTTPResponse(file_path=path)
+    return _fixture_response(path)
 
 
 @pytest.fixture
