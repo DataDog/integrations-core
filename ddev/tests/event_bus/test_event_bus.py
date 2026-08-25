@@ -9,6 +9,7 @@ import math
 import threading
 import time
 from collections.abc import Generator
+from concurrent.futures import Executor, ThreadPoolExecutor
 from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
@@ -150,12 +151,14 @@ class MockOrchestrator(EventBusOrchestrator):
         max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
         fail_fast: bool = False,
+        executor: Executor | None = None,
     ):
         super().__init__(
             logger=logger,
             max_timeout=max_timeout,
             grace_period=grace_period,
             fail_fast=fail_fast,
+            executor=executor,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -836,6 +839,118 @@ def test_an_on_initialize_submission_survives_a_zero_grace_period(secretary: Sec
     orchestrator.run()
 
     assert [message.id for message in secretary.delivered_memos] == ["from_initialize"]
+
+
+class SlowGatherer(SyncProcessor[Memo]):
+    """Outlives the bus, checking between units of work whether it should stop."""
+
+    def __init__(self, name: str, units: int = 40):
+        super().__init__(name)
+        self.units = units
+        self.units_done = 0
+        self.saw_stopping = False
+
+    def process_message(self, message: Memo):
+        for _ in range(self.units):
+            if self.stopping:
+                self.saw_stopping = True
+                return
+            time.sleep(0.05)
+            self.units_done += 1
+
+
+class UncooperativeGatherer(SyncProcessor[Memo]):
+    """Runs to completion whatever the bus is doing, as work that cannot be interrupted does."""
+
+    def __init__(self, name: str, units: int = 30):
+        super().__init__(name)
+        self.units = units
+        self.units_done = 0
+
+    def process_message(self, message: Memo):
+        for _ in range(self.units):
+            time.sleep(0.05)
+            self.units_done += 1
+
+
+@pytest.mark.parametrize("lend_executor", [False, True], ids=["own_pool", "borrowed_pool"])
+def test_a_sync_processor_outliving_the_timeout_is_waited_for(lend_executor: bool):
+    """`on_finalize` must not report while a processor is still mutating what it reports.
+
+    Cancelling the task cannot interrupt a thread, so without waiting the hook publishes a partial
+    snapshot and the processor finishes afterwards, once the run has already said what it found.
+    A pool lent by the caller runs the same work, so it needs the same wait.
+    """
+    gatherer = UncooperativeGatherer("gatherer", units=30)
+    observed: dict[str, int] = {}
+
+    class Bus(MockOrchestrator):
+        async def on_finalize(self, exception: Exception | None):
+            await super().on_finalize(exception)
+            observed["units_done"] = gatherer.units_done
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = Bus(
+            logging.getLogger("test_drain"),
+            max_timeout=0.5,
+            grace_period=0.1,
+            executor=lent if lend_executor else None,
+        )
+        orchestrator.register_processor(gatherer, [Memo])
+        orchestrator.submit_message(Memo("gather_me"))
+
+        orchestrator.run()
+
+    assert observed["units_done"] == gatherer.units
+
+
+def test_a_lent_executor_outlives_the_run_that_borrowed_it():
+    """The caller may reuse the pool it lent, so the bus must not retire what it does not own.
+
+    Rules out satisfying the wait above by shutting the pool down regardless of ownership.
+    """
+    gatherer = UncooperativeGatherer("gatherer", units=5)
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = MockOrchestrator(
+            logging.getLogger("test_lent_pool"), max_timeout=0.5, grace_period=0.1, executor=lent
+        )
+        orchestrator.register_processor(gatherer, [Memo])
+        orchestrator.submit_message(Memo("gather_me"))
+
+        orchestrator.run()
+
+        assert lent.submit(str, "still usable").result() == "still usable"
+
+
+def test_a_sync_processor_can_abandon_work_once_the_bus_stops():
+    """The stop flag is what makes a timeout bound a sync processor at all.
+
+    Without it the processor runs all its units however long the bus has been gone, which is the
+    difference between a run that overshoots by one unit of work and one that overshoots by a batch.
+    """
+    gatherer = SlowGatherer("gatherer", units=200)
+    orchestrator = MockOrchestrator(logging.getLogger("test_stopping"), max_timeout=0.3, grace_period=0.1)
+    orchestrator.register_processor(gatherer, [Memo])
+    orchestrator.submit_message(Memo("gather_me"))
+
+    orchestrator.run()
+
+    assert gatherer.saw_stopping
+    assert gatherer.units_done < gatherer.units
+
+
+def test_a_caller_provided_executor_outlives_the_bus():
+    """A caller that supplies an executor may reuse it, so the bus must not retire it."""
+    executor = ThreadPoolExecutor(max_workers=1)
+    orchestrator = MockOrchestrator(logging.getLogger("test_borrowed"), executor=executor, grace_period=0.1)
+    orchestrator.register_processor(Secretary("secretary"), [Memo])
+    orchestrator.submit_message(Memo("memo"))
+
+    orchestrator.run()
+
+    assert executor.submit(lambda: "still usable").result() == "still usable"
+    executor.shutdown(wait=True)
 
 
 def test_processor_submit_without_bus():
