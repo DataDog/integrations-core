@@ -9,11 +9,18 @@ import os
 import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
+from collections.abc import Mapping
+from datetime import timedelta
+from http.client import responses as http_reasons
 from io import open
-from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
+from textwrap import dedent
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
 from unittest.mock import PropertyMock, create_autospec
 
 import pytest
+
+if TYPE_CHECKING:
+    from datadog_checks.base.stubs.http import FakeHTTPResponse
 
 from datadog_checks.dev._env import (
     E2E_FIXTURE_NAME,
@@ -35,7 +42,6 @@ from datadog_checks.dev._env import (
 
 __aggregator = None
 __datadog_agent = None
-MockHTTPResponse = None
 
 _DEFAULT_MOCK_METHOD = 'requests.Session.get'  # Backend-specific, update alongside the backend.
 
@@ -373,11 +379,70 @@ def dd_default_hostname():
 
 @pytest.fixture
 def mock_response():
-    global MockHTTPResponse
-    if MockHTTPResponse is None:
-        from datadog_checks.dev.http import MockHTTPResponse
+    yield _build_mock_http_response
 
-    yield MockHTTPResponse
+
+def _build_mock_http_response(
+    content: str | bytes = '',
+    status_code: int = 200,
+    headers: Mapping[str, str] | None = None,
+    json_data: Any = None,
+    file_path: str | None = None,
+    cookies: Mapping[str, str] | None = None,
+    elapsed_seconds: float = 0.1,
+    normalize_content: bool = True,
+    url: str = '',
+    history: list[Any] | None = None,
+) -> 'FakeHTTPResponse':
+    """Build a base-owned fake from the legacy pytest fixture arguments."""
+    http_stubs = importlib.import_module('datadog_checks.base.stubs.http')
+    HTTPClientStatusError = importlib.import_module('datadog_checks.base.utils.http_exceptions').HTTPClientStatusError
+    response_headers = dict(headers or {})
+    json_result = http_stubs.JSON_RESULT_UNSET
+
+    if json_data is not None:
+        json_result = json_data
+        content = json.dumps(json_data)
+        response_headers.setdefault('Content-Type', 'application/json')
+    elif file_path is not None:
+        with open(file_path, 'rb') as response_file:
+            content = response_file.read()
+
+    if normalize_content and (
+        (isinstance(content, str) and content.startswith('\n'))
+        or (isinstance(content, bytes) and content.startswith(b'\n'))
+    ):
+        content = dedent(content[1:]) if isinstance(content, str) else content[1:]
+
+    content_bytes = content.encode('utf-8') if isinstance(content, str) else content
+    text = content if isinstance(content, str) else content.decode('utf-8', errors='replace')
+
+    if json_result is http_stubs.JSON_RESULT_UNSET and text:
+        try:
+            json_result = json.loads(text)
+        except (TypeError, ValueError):
+            pass
+
+    status_error = None
+    if status_code >= 400:
+        error_kind = 'Client Error' if status_code < 500 else 'Server Error'
+        status_error = HTTPClientStatusError(f'{status_code} {error_kind}')
+
+    return http_stubs.FakeHTTPResponse(
+        status_code=status_code,
+        content=content_bytes,
+        text=text,
+        headers=response_headers,
+        json_result=json_result,
+        content_chunks=(content_bytes,) if content_bytes else (),
+        lines=text.splitlines(),
+        status_error=status_error,
+        elapsed=timedelta(seconds=elapsed_seconds),
+        cookies=cookies,
+        url=url,
+        history=history or (),
+        reason=http_reasons.get(status_code, ''),
+    )
 
 
 @pytest.fixture

@@ -3,14 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from itertools import product
+from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
 from packaging import version
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.types import ServiceCheck
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
@@ -39,6 +41,18 @@ IDENTITY_INFO_TAGS = [
 ]
 
 
+def _text_response(file_path: str | Path) -> FakeHTTPResponse:
+    content = Path(file_path).read_bytes()
+    text = content.decode('utf-8')
+    return FakeHTTPResponse(
+        content=content,
+        text=text,
+        content_chunks=(content,),
+        lines=text.splitlines(),
+        headers={'Content-Type': 'text/plain'},
+    )
+
+
 def _rmq_om_check(prom_plugin_settings):
     return RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': prom_plugin_settings}])
 
@@ -61,7 +75,7 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
 
     We expect in this case all the metrics from the '/metrics' endpoint.
     """
-    mock_http.get.return_value = MockHTTPResponse(file_path=os.path.join(OM_RESPONSE_FIXTURES, "metrics.txt"))
+    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, "metrics.txt"))
     prometheus_settings = {'url': TEST_URL, **aggregated_setting}
     check = _rmq_om_check(prometheus_settings)
     dd_run_check(check)
@@ -84,7 +98,7 @@ def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http):
 
     We expect all metrics except the ones unique to the `/metrics` endpoint to be collected.
     """
-    mock_http.get.return_value = MockHTTPResponse(file_path=os.path.join(OM_RESPONSE_FIXTURES, "per-object.txt"))
+    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, "per-object.txt"))
     prometheus_settings = {'url': TEST_URL}
     check = _rmq_om_check(prometheus_settings)
     dd_run_check(check)
@@ -124,7 +138,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
 
     We expect in this case only the metrics for the unaggregated endpoint, nothing from '/metrics'.
     """
-    mock_http.get.return_value = MockHTTPResponse(file_path=os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
+    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
     check = _rmq_om_check(
         {
             'url': TEST_URL,
@@ -165,7 +179,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
     reason=f"Skipping test because RABBITMQ_VERSION is {RABBITMQ_VERSION} (not greater than 4.0)",
 )
 def test_unaggregated_endpoint_v4(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(file_path=os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
+    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
     check = _rmq_om_check(
         {
             'url': TEST_URL,
@@ -200,8 +214,7 @@ def mock_http_responses(url, **_params):
             '/metrics/detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
         ): 'detailed-only-metrics.txt',
     }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
-    with open(os.path.join(OM_RESPONSE_FIXTURES, fname)) as fh:
-        return MockHTTPResponse(content=fh.read())
+    return _text_response(os.path.join(OM_RESPONSE_FIXTURES, fname))
 
 
 @pytest.mark.parametrize(
@@ -348,7 +361,10 @@ def test_config(prom_plugin_settings, err):
 
 
 def test_service_check_critical(aggregator, dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(status_code=404)
+    mock_http.get.return_value = FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
+    )
     check = _rmq_om_check({'url': 'http://fail'})
     with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)

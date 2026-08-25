@@ -11,7 +11,6 @@ import pytest
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 
@@ -29,7 +28,9 @@ def test_retrieve_pod_list_success(mock_http):
     check = KubeletBase('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     check.kubelet_credentials = KubeletCredentials({})
-    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('kubelet_base/pod_list_raw.dat'))
+    mock_http.get.return_value = FakeHTTPResponse(
+        content=mock_from_file('kubelet_base/pod_list_raw.dat').encode('utf-8')
+    )
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))
@@ -40,7 +41,7 @@ def test_retrieve_pod_list_parses_via_json(mock_http):
     check = KubeletBase('kubelet', {}, [{}])
     check.pod_list_url = 'http://kubelet:10255/pods'
     check.kubelet_credentials = KubeletCredentials({})
-    mock_http.get.return_value = MockHTTPResponse(json_data={'items': [{'name': 'p1'}]})
+    mock_http.get.return_value = FakeHTTPResponse(content=b'{"items": [{"name": "p1"}]}')
 
     pod_list = check.retrieve_pod_list()
     assert pod_list['items'] == [{'name': 'p1'}]
@@ -52,7 +53,7 @@ def test_perform_kubelet_query_forwards_credentials_and_verbosity(mock_http, ver
     check.kubelet_credentials = KubeletCredentials(
         {'token': 'tkn', 'ca_cert': '/ca.pem', 'client_crt': '/crt.pem', 'client_key': '/key.pem'}
     )
-    mock_http.get.return_value = MockHTTPResponse(status_code=200)
+    mock_http.get.return_value = FakeHTTPResponse(status_code=200)
 
     check.perform_kubelet_query('https://kubelet:10250/healthz', verbose=verbose)
 
@@ -66,7 +67,7 @@ def test_perform_kubelet_query_forwards_credentials_and_verbosity(mock_http, ver
 def test_perform_kubelet_query_forwards_the_bearer_token(mock_http):
     check = KubeletBase('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials({'token': 'tkn'})
-    mock_http.get.return_value = MockHTTPResponse(status_code=200)
+    mock_http.get.return_value = FakeHTTPResponse(status_code=200)
 
     check.perform_kubelet_query('https://kubelet:10250/healthz')
 

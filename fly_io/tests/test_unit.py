@@ -3,12 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import json
 import logging
 
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
@@ -23,6 +25,22 @@ from .metrics import (
     PROMETHEUS_METRICS_ONE_HOST,
     VOLUME_METRICS,
 )
+
+
+def _status_response(status_code: int) -> FakeHTTPResponse:
+    error_kind = 'Client Error' if status_code < 500 else 'Server Error'
+    return FakeHTTPResponse(
+        status_code=status_code,
+        status_error=HTTPClientStatusError(f'{status_code} {error_kind}'),
+    )
+
+
+def _invalid_json_response(text: str) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        content=text.encode('utf-8'),
+        text=text,
+        json_error=json.JSONDecodeError('Expecting value', text, 0),
+    )
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -94,11 +112,11 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps': MockHTTPResponse(status_code=500)}},
+            {'http_error': {'/v1/apps': _status_response(500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/v1/apps': MockHTTPResponse(status_code=404)}},
+            {'http_error': {'/v1/apps': _status_response(404)}},
             id='404',
         ),
     ],
@@ -124,8 +142,8 @@ def test_rest_api_exception(dd_run_check, instance, aggregator):
         pytest.param(
             {
                 'http_error': {
-                    '/v1/apps/example-app-1/machines': MockHTTPResponse(
-                        json_data=[{'state': 'started', 'config': None}]
+                    '/v1/apps/example-app-1/machines': FakeHTTPResponse(
+                        json_result=[{'state': 'started', 'config': None}]
                     )
                 }
             },
@@ -158,7 +176,7 @@ def test_bad_response_exception(dd_run_check, instance, aggregator, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-1/volumes': MockHTTPResponse(status_code=404)}},
+            {'http_error': {'/v1/apps/example-app-1/volumes': _status_response(404)}},
             id='http error',
         ),
     ],
@@ -189,7 +207,7 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-1/volumes': MockHTTPResponse(content='<html>gateway</html>')}},
+            {'http_error': {'/v1/apps/example-app-1/volumes': _invalid_json_response('<html>gateway</html>')}},
             id='non-json body',
         ),
     ],
@@ -241,7 +259,7 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
     ('mock_http_get, log_lines'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-2': MockHTTPResponse(status_code=404)}},
+            {'http_error': {'/v1/apps/example-app-2': _status_response(404)}},
             [
                 "Encountered an HTTP error in '_get_app_status'"
                 " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
@@ -252,8 +270,8 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
         pytest.param(
             {
                 'http_error': {
-                    '/v1/apps/example-app-1': MockHTTPResponse(status_code=404),
-                    '/v1/apps/example-app-2': MockHTTPResponse(status_code=500),
+                    '/v1/apps/example-app-1': _status_response(404),
+                    '/v1/apps/example-app-2': _status_response(500),
                 }
             },
             [

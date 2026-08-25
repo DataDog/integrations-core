@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
-import os
+from pathlib import Path
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
-from datadog_checks.dev.http import MockHTTPResponse
 
 from . import common
 
@@ -39,19 +39,25 @@ def check(instance):
     return DcgmCheck('dcgm.', {}, [instance])
 
 
+def _text_response(file_path: str | Path) -> FakeHTTPResponse:
+    content = Path(file_path).read_bytes()
+    text = content.decode('utf-8')
+    return FakeHTTPResponse(
+        content=content,
+        text=text,
+        content_chunks=(content,),
+        lines=text.splitlines(),
+        headers={'Content-Type': 'text/plain'},
+    )
+
+
 @pytest.fixture()
 def mock_metrics(mock_http):
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    mock_http.get.return_value = _text_response(Path(__file__).parent / 'fixtures' / 'metrics.txt')
     yield
 
 
 @pytest.fixture()
 def mock_label_remap(mock_http):
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'label_remap.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    mock_http.get.return_value = _text_response(Path(__file__).parent / 'fixtures' / 'label_remap.txt')
     yield

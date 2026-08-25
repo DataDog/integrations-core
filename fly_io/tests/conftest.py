@@ -9,11 +9,11 @@ from urllib.parse import urlparse
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_FLY_LAB
 
@@ -47,6 +47,13 @@ def get_json_value_from_file(file_path):
 def get_url_path(url):
     parsed_url = urlparse(url)
     return parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+
+
+def _openmetrics_response(file_path: str) -> FakeHTTPResponse:
+    with open(file_path, 'rb') as response_file:
+        content = response_file.read()
+    text = content.decode('utf-8')
+    return FakeHTTPResponse(content=content, text=text, lines=text.splitlines())
 
 
 @pytest.fixture
@@ -97,7 +104,7 @@ def mock_http_call(mock_responses):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
-        raise HTTPClientStatusError('404 Client Error', response=MockHTTPResponse(status_code=404, url=url))
+        raise HTTPClientStatusError('404 Client Error', response=FakeHTTPResponse(status_code=404, url=url))
 
     yield call
 
@@ -114,11 +121,11 @@ def mock_http_get(request, mock_http, mock_http_call):
             return http_error[url]
         if "/metrics" in url:
             filepath = os.path.join(get_here(), 'fixtures', 'output.txt')
-            return MockHTTPResponse(file_path=filepath)
+            return _openmetrics_response(filepath)
         headers = kwargs.get('headers')
         params = kwargs.get('params')
         json_data = mock_http_call(method, url, headers=headers, params=params)
-        return MockHTTPResponse(json_data=json_data)
+        return FakeHTTPResponse(json_result=json_data)
 
     mock_http.get.side_effect = get
     return mock_http.get

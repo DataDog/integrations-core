@@ -54,6 +54,16 @@ def test_fake_response_does_not_derive_results_from_content_or_headers():
         response.json()
 
 
+def test_fake_response_raises_configured_json_error():
+    error = ValueError('invalid JSON')
+    response = FakeHTTPResponse(json_error=error)
+
+    with pytest.raises(ValueError) as exc_info:
+        response.json()
+
+    assert exc_info.value is error
+
+
 def test_fake_response_raises_configured_status_error():
     error = HTTPClientStatusError('503 Service Unavailable')
     response = FakeHTTPResponse(status_code=503, status_error=error)

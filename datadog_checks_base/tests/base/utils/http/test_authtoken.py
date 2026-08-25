@@ -9,11 +9,12 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http import DEFAULT_EXPIRATION, RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import DEFAULT_OPTIONS, FIXTURE_PATH
 
@@ -607,14 +608,20 @@ class TestAuthTokenDCOS:
                 assert isinstance(decoded['exp'], int)
                 assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
 
-                return MockHTTPResponse(json_data={'token': 'auth-token'})
-            return MockHTTPResponse(status_code=404)
+                return FakeHTTPResponse(json_result={'token': 'auth-token'})
+            return FakeHTTPResponse(
+                status_code=404,
+                status_error=HTTPClientStatusError('404 Client Error'),
+            )
 
         def auth(*args, **kwargs):
             if args[0] == 'https://leader.mesos/service/some-service':
                 assert kwargs['headers']['Authorization'] == 'token=auth-token'
-                return MockHTTPResponse(json_data={})
-            return MockHTTPResponse(status_code=404)
+                return FakeHTTPResponse(status_code=200)
+            return FakeHTTPResponse(
+                status_code=404,
+                status_error=HTTPClientStatusError('404 Client Error'),
+            )
 
         with mock.patch('requests.post', side_effect=login), mock.patch('requests.Session.get', side_effect=auth):
             http = RequestsWrapper(instance, init_config)
@@ -666,7 +673,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             }
             http = RequestsWrapper(instance, {})
 
-            with mock.patch('requests.Session.get', return_value=MockHTTPResponse()) as get:
+            with mock.patch('requests.Session.get', return_value=FakeHTTPResponse(status_code=200)) as get:
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com', extra_headers={'Accept': 'text/plain'})
 
@@ -685,11 +692,17 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             }
             http = RequestsWrapper(instance, {})
 
-            with mock.patch('requests.Session.get', return_value=MockHTTPResponse()):
+            with mock.patch('requests.Session.get', return_value=FakeHTTPResponse(status_code=200)):
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
 
-            responses = [MockHTTPResponse(status_code=401), MockHTTPResponse(status_code=200)]
+            responses = [
+                FakeHTTPResponse(
+                    status_code=401,
+                    status_error=HTTPClientStatusError('401 Client Error'),
+                ),
+                FakeHTTPResponse(status_code=200),
+            ]
             with mock.patch('requests.Session.get', side_effect=responses) as get:
                 write_file(token_file, '\nsecret2\n')
                 http.get('https://www.google.com', extra_headers={'Accept': 'text/plain'})
@@ -769,7 +782,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 if counter['errors'] <= 1:
                     raise Exception
 
-                return MockHTTPResponse()
+                return FakeHTTPResponse(status_code=200)
 
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
@@ -807,12 +820,13 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
 
-            def error():
-                raise Exception()
-
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=error)) as get:
+            response = FakeHTTPResponse(
+                status_code=500,
+                status_error=HTTPClientStatusError('500 Server Error'),
+            )
+            with mock.patch('requests.Session.get', return_value=response) as get:
                 write_file(token_file, '\nsecret2\n')
                 http.get('https://www.google.com')
 
