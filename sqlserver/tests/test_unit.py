@@ -32,6 +32,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
 )
+from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseStatsMetrics
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFractionMetric, SqlSimpleMetric
 from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -839,6 +840,31 @@ def test_autodiscovery_resets_database_metrics_on_db_addition(instance_autodisco
     assert changed is True
     assert check.databases == {Database('master'), Database('tempdb'), Database('newdb')}
     assert check._database_metrics is None
+
+
+def test_autodiscovery_resets_database_metrics_after_initial_empty_result(instance_autodiscovery):
+    """Database metric executors must refresh when an initially empty discovery later finds a database."""
+    _, mock_cursor = _mock_database_list()
+    instance_autodiscovery['autodiscovery_include'] = ['newdb$']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is False
+    assert check.databases == set()
+
+    assert check.database_metrics
+
+    Row = namedtuple('Row', 'name')
+    mock_cursor.fetchall.return_value = iter([Row('newdb')])
+    check._ad_last_check = 0
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is True
+    assert check.databases == {Database('newdb')}
+    database_stats_metrics = next(
+        metric for metric in check.database_metrics if isinstance(metric, SqlserverDatabaseStatsMetrics)
+    )
+    assert [query.get('params') for query in database_stats_metrics.queries] == [('newdb',)]
 
 
 @pytest.mark.parametrize(
