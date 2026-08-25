@@ -13,22 +13,19 @@ import tempfile
 import zipfile
 import zlib
 from datetime import date
-from functools import cache
 from types import TracebackType
-from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
 
 import requests
 import squarify
 from datadog import api, initialize
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.common_params import WheelsStorageTier
 from ddev.utils.fs import Path
 from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
-
-RESOLVE_BUILD_DEPS_WORKFLOW = '.github/workflows/resolve-build-deps.yaml'
-MEASURE_DISK_USAGE_WORKFLOW = '.github/workflows/measure-disk-usage.yml'
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -73,7 +70,7 @@ class CLIParameters(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
-    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
+    wheels_storage: WheelsStorageTier  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class CLIParametersTimeline(TypedDict):
@@ -83,7 +80,7 @@ class CLIParametersTimeline(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
-    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
+    wheels_storage: WheelsStorageTier  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
@@ -303,15 +300,68 @@ def extract_version_from_about_py(path: str) -> str:
 
 
 WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
+WHEELS_STORAGE_TIERS: tuple[WheelsStorageTier, ...] = get_args(WheelsStorageTier)
 
 
-def resolve_wheel_url(url: str, wheels_storage: str) -> str:
+def resolve_wheel_url(url: str, wheels_storage: WheelsStorageTier) -> str:
     """Substitute the wheels storage tier into a lockfile URL."""
     return url.replace(WHEELS_STORAGE_PLACEHOLDER, wheels_storage)
 
 
+def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[str]:
+    """
+    Returns the URL resolved against the preferred tier first, then the remaining tiers.
+
+    A wheel is the same object whichever tier serves it, but the tiers have different retention:
+    older builds are pruned from dev while stable keeps them. Falling back therefore lets commits
+    old enough to have aged out of dev still be measured.
+    """
+    if WHEELS_STORAGE_PLACEHOLDER not in url:
+        return [url]
+
+    tiers = [wheels_storage, *(tier for tier in WHEELS_STORAGE_TIERS if tier != wheels_storage)]
+    return [resolve_wheel_url(url, tier) for tier in tiers]
+
+
+def request_wheel(
+    app: Application, url: str, wheels_storage: WheelsStorageTier, head: bool = False
+) -> requests.Response:
+    """
+    Fetches a wheel by trying each storage tier in order, returning the first successful response.
+
+    Both 404 and 403 are treated as "not found" and trigger a fallback to the next tier, since the
+    dev/stable S3 buckets return 403 instead of 404 for a missing key when the caller can't list the
+    bucket. Any other error status aborts immediately instead of retrying. If every tier fails, the
+    raised error lists all tried tiers, since the URL alone wouldn't reveal that a fallback was
+    attempted.
+    """
+    candidates = wheel_url_candidates(url, wheels_storage)
+    tried: list[str] = []
+    for index, candidate in enumerate(candidates):
+        response = requests.head(candidate) if head else requests.get(candidate, stream=True)
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            response.close()
+            tried.append(f"{candidate} ({response.status_code})")
+            is_last = index == len(candidates) - 1
+            if is_last or response.status_code not in (403, 404):
+                app.display_debug(f"Wheel request failed for all tried tiers: {', '.join(tried)}")
+                raise requests.HTTPError(f"{e}. Tried: {', '.join(tried)}", response=response) from e
+            app.display_debug(f"Wheel not found at {candidate}, falling back to the next tier")
+            continue
+        return response
+
+    raise RuntimeError(f"No wheels storage tier served {url}")
+
+
 def get_dependencies(
-    repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str
+    app: Application,
+    repo_path: str | Path,
+    platform: str,
+    version: str,
+    compressed: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
@@ -323,14 +373,17 @@ def get_dependencies(
         file_path = os.path.join(resolved_path, filename)
 
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls, versions = get_dependencies_list(file_path, wheels_storage)
-            return get_dependencies_sizes(deps, download_urls, versions, compressed)
+            deps, download_urls, versions = get_dependencies_list(file_path)
+            return get_dependencies_sizes(app, deps, download_urls, versions, compressed, wheels_storage)
     return []
 
 
-def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str], list[str], list[str]]:
+def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
+
+    URLs keep their storage tier placeholder; it is resolved when the wheel is requested so a
+    missing wheel can fall back to another tier.
     """
     download_urls = []
     deps = []
@@ -343,7 +396,7 @@ def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
-            url = resolve_wheel_url(match.group(2), wheels_storage)
+            url = match.group(2)
 
             deps.append(name)
             download_urls.append(url)
@@ -357,7 +410,12 @@ def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str
 
 
 def get_dependencies_sizes(
-    deps: list[str], download_urls: list[str], versions: list[str], compressed: bool
+    app: Application,
+    deps: list[str],
+    download_urls: list[str],
+    versions: list[str],
+    compressed: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> list[FileDataEntry]:
     """
     Calculates the sizes of dependencies, either compressed or uncompressed.
@@ -371,8 +429,7 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        with requests.get(url, stream=True) as response:
-            response.raise_for_status()
+        with request_wheel(app, url, wheels_storage) as response:
             wheel_data = response.content
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -381,11 +438,7 @@ def get_dependencies_sizes(
                 f.write(wheel_data)
             if compressed:
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
-                    size = sum(
-                        zinfo.compress_size
-                        for zinfo in zip_ref.infolist()
-                        if not is_excluded_from_wheel(zinfo.filename)
-                    )
+                    size = sum(zinfo.compress_size for zinfo in zip_ref.infolist())
             else:
                 extract_path = Path(tmpdir) / "extracted"
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
@@ -393,14 +446,8 @@ def get_dependencies_sizes(
 
                 size = 0
                 for dirpath, _, filenames in os.walk(extract_path):
-                    rel_dir = os.path.relpath(dirpath, extract_path)
-                    if is_excluded_from_wheel(rel_dir):
-                        continue
                     for name in filenames:
                         file_path = os.path.join(dirpath, name)
-                        rel_file = os.path.relpath(file_path, extract_path)
-                        if is_excluded_from_wheel(rel_file):
-                            continue
                         size += os.path.getsize(file_path)
 
         file_data.append(
@@ -414,80 +461,6 @@ def get_dependencies_sizes(
         )
 
     return file_data
-
-
-def get_dependencies_from_json(
-    dependency_sizes: Path, platform: str, version: str, compressed: bool
-) -> list[FileDataEntry]:
-    data = json.loads(dependency_sizes.read_text())
-    size_key = "compressed" if compressed else "uncompressed"
-    return [
-        {
-            "Name": name,
-            "Version": sizes.get("version", ""),
-            "Size_Bytes": int(sizes.get(size_key, 0)),
-            "Size": convert_to_human_readable_size(sizes.get(size_key, 0)),
-            "Type": "Dependency",
-        }
-        for name, sizes in data.items()
-    ]
-
-
-def is_excluded_from_wheel(path: str) -> bool:
-    """
-    These files are excluded from the wheel in the agent build:
-    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
-    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
-    the wheels still include them.
-    """
-    excluded_test_paths = [
-        os.path.normpath(path)
-        for path in [
-            "idlelib/idle_test",
-            "bs4/tests",
-            "Cryptodome/SelfTest",
-            "gssapi/tests",
-            "keystoneauth1/tests",
-            "openstack/tests",
-            "os_service_types/tests",
-            "pbr/tests",
-            "pkg_resources/tests",
-            "psutil/tests",
-            "securesystemslib/_vendor/ed25519/test_data",
-            "setuptools/_distutils/tests",
-            "setuptools/tests",
-            "simplejson/tests",
-            "stevedore/tests",
-            "supervisor/tests",
-            "test",  # cm-client
-            "vertica_python/tests",
-            "websocket/tests",
-        ]
-    ]
-
-    type_annot_libraries = [
-        "krb5",
-        "Cryptodome",
-        "ddtrace",
-        "pyVmomi",
-        "gssapi",
-    ]
-    rel_path = Path(path).as_posix()
-
-    # Test folders
-    for test_folder in excluded_test_paths:
-        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
-            return True
-
-    # Python type annotations
-    path_parts = Path(rel_path).parts
-    if path_parts:
-        dependency_name = path_parts[0]
-        if dependency_name in type_annot_libraries:
-            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
-                return True
-
-    return False
 
 
 def format_modules(
@@ -1014,245 +987,6 @@ def get_commit_data(commit: str) -> tuple[int, str, list[str], list[str]]:
     if not prs:
         prs = [""]
     return int(timestamp), message, tickets, prs
-
-
-@cache
-def get_last_dependency_sizes_artifact(
-    app: Application, commit: str, platform: str, py_version: str, compressed: bool
-) -> Path | None:
-    '''
-    Lockfiles of dependencies are not updated in the same commit as the dependencies are updated.
-    So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
-    size of that commit.
-    '''
-    size_type = 'compressed' if compressed else 'uncompressed'
-    app.display(f"\nRetrieving dependency sizes for {commit} ({platform}, py{py_version}, {size_type})")
-
-    dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
-    if not dep_sizes_json:
-        app.display_debug("No dependency sizes in current commit, searching ancestors")
-        try:
-            base_commit = app.repo.git.merge_base(commit, "origin/master")
-        except Exception as e:
-            app.display_error(f"Failed to find merge base for {commit}: {e}")
-            return None
-        if base_commit != commit:
-            app.display_debug(f"Found base commit: {base_commit}")
-            previous_commit = base_commit
-        else:
-            app.display_debug("No base commit found, using previous commit")
-            previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
-
-        app.display(f"\n -> Searching for dependency sizes in previous commit: {previous_commit}")
-
-        dep_sizes_json = get_previous_dep_sizes(app, previous_commit, platform, py_version, compressed)
-    return Path(dep_sizes_json) if dep_sizes_json else None
-
-
-@cache
-def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_version: str) -> Path | None:
-    '''
-    Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
-    '''
-    app.display(f"\n -> Checking if dependency sizes were resolved in commit: {current_commit}")
-
-    run_id = get_run_id(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
-    if run_id:
-        dep_sizes_json = get_current_sizes_json(app, run_id, platform, py_version)
-        return dep_sizes_json
-    else:
-        return None
-
-
-@cache
-def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
-    app.display_debug(f"Fetching workflow run ID for {commit} ({os.path.basename(workflow)})")
-
-    result = subprocess.run(
-        [
-            'gh',
-            'run',
-            'list',
-            '--workflow',
-            workflow,
-            '-c',
-            commit,
-            '--json',
-            'databaseId,name',
-            '--jq',
-            '.[-1].databaseId',
-        ],
-        capture_output=True,
-        text=True,
-    )
-    run_id = result.stdout.strip() if result.stdout else None
-    if run_id:
-        app.display_debug(f"Workflow run ID: {run_id}")
-    else:
-        app.display_warning(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
-
-    return run_id
-
-
-@cache
-def get_run_id_measure_disk_usage(app: Application, commit: str) -> str | None:
-    workflow_name = os.path.basename(MEASURE_DISK_USAGE_WORKFLOW)
-    wanted_name = f"Measure Disk Usage [{commit}]"
-
-    app.display_debug(f"Fetching workflow run ID for {commit} ({workflow_name})")
-
-    per_page = 100
-    max_pages = 5
-
-    for page in range(1, max_pages + 1):
-        app.display_debug(f"Fetching workflow run ID for {commit} ({workflow_name}) - Page {page} of {max_pages}")
-        result = subprocess.run(
-            [
-                "gh",
-                "api",
-                f"repos/DataDog/integrations-core/actions/workflows/{workflow_name}/runs",
-                "-X",
-                "GET",
-                "-f",
-                f"per_page={per_page}",
-                "-f",
-                f"page={page}",
-                "--jq",
-                (f'[.workflow_runs[] | select(.name == "{wanted_name}") | .id] | first // empty'),
-            ],
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode != 0:
-            app.display_warning(f"No workflow run found for {commit} ({workflow_name}) ")
-            return None
-
-        out = (result.stdout or "").strip()
-        if out:
-            app.display_debug(f"Workflow run ID: {out}")
-            return out
-    return None
-
-
-@cache
-def get_current_sizes_json(app: Application, run_id: str, platform: str, py_version: str) -> Path | None:
-    '''
-    Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
-    '''
-    app.display(f"\nRetrieving dependency sizes artifact (run={run_id}, platform={platform})")
-    with tempfile.TemporaryDirectory() as tmpdir:
-        app.display_debug(f"Downloading artifacts to {tmpdir}...")
-        try:
-            subprocess.run(
-                [
-                    'gh',
-                    'run',
-                    'download',
-                    run_id,
-                    '--name',
-                    f'target-{platform}',
-                    '--dir',
-                    tmpdir,
-                ],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-        except subprocess.CalledProcessError as e:
-            if e.stderr and "no valid artifacts found" in e.stderr:
-                app.display_warning(f"No resolved dependencies found for platform {platform} (run {run_id})")
-            else:
-                app.display_error(f"Failed to download dependency sizes (run={run_id}, platform={platform}): {e}")
-                app.display_warning(e.stderr)
-
-            return None
-
-        app.display_debug("Artifact extraction complete")
-        sizes_file = Path(tmpdir) / platform / 'py3' / 'sizes.json'
-
-        if not sizes_file.is_file():
-            app.display_warning(f"Dependency sizes artifact missing: {sizes_file.name}")
-            return None
-
-        app.display_debug(f"Found dependency sizes: {sizes_file.name}")
-        dest_path = sizes_file.rename(f"{platform}_{py_version}.json")
-        return dest_path
-
-
-@cache
-def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
-    app.display(f"Downloading artifact '{artifact_name}' (run {run_id})...")
-    try:
-        cmd = [
-            'gh',
-            'run',
-            'download',
-            run_id,
-            '--name',
-            artifact_name,
-        ]
-        if target_dir:
-            cmd.extend(['--dir', target_dir])
-
-        subprocess.run(cmd, check=True, text=True, capture_output=True)
-    except subprocess.CalledProcessError as e:
-        app.display_warning(f"Failed to download artifact '{artifact_name}' (run {run_id}): {e}")
-        app.display_warning(e.stderr)
-        return None
-
-    artifact_path = Path(target_dir) / artifact_name if target_dir else Path(artifact_name)
-    app.display_debug(f"Saved to {artifact_path}")
-    return artifact_path
-
-
-@cache
-def get_previous_dep_sizes(
-    app: Application, base_commit: str, platform: str, py_version: str, compressed: bool
-) -> Path | None:
-    '''
-    Gets the dependency sizes for a given commit when dependencies were not resolved.
-    '''
-    with tempfile.TemporaryDirectory() as tmpdir:
-        if (run_id := get_run_id_measure_disk_usage(app, base_commit)) is None:
-            return None
-
-        artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
-        sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
-
-        if not sizes_json:
-            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {base_commit}\n")
-            return None
-
-        sizes = parse_sizes_json(sizes_json, platform, py_version, compressed)
-
-        sizes_path = Path(tmpdir) / f"{platform}_{py_version}.json"
-        with open(sizes_path, "w") as f:
-            json.dump(sizes, f, indent=2)
-
-        target_path = f"{platform}_{py_version}.json"
-        shutil.copy(sizes_path, target_path)
-        return Path(target_path)
-
-
-@cache
-def parse_sizes_json(
-    sizes_json_path: Path, platform: str, py_version: str, compressed: bool
-) -> dict[str, dict[str, int]]:
-    sizes_list = list(json.loads(sizes_json_path.read_text()))
-    size_key = "compressed" if compressed else "uncompressed"
-    sizes = {
-        dep["Name"]: {
-            size_key: int(dep["Size_Bytes"]),
-            "version": dep.get("Version"),
-            "compression": compressed,
-        }
-        for dep in sizes_list
-        if dep.get("Type") == "Dependency"
-        and dep.get("Platform") == platform
-        and dep.get("Python_Version") == py_version
-    }
-
-    return sizes
 
 
 class WrongDependencyFormat(Exception):
