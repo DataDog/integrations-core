@@ -520,7 +520,7 @@ class KafkaActionsClient:
 
         resource = ConfigResource(ResourceType.TOPIC, topic)
         for key, value in configs.items():
-            resource.add_incremental_config(ConfigEntry(key, value, incremental_operation=AlterConfigOpType.SET))
+            resource.add_incremental_config(ConfigEntry(key, str(value), incremental_operation=AlterConfigOpType.SET))
 
         futures = admin.incremental_alter_configs([resource])
 
@@ -529,6 +529,15 @@ class KafkaActionsClient:
                 future.result()
                 self.log.debug("Topic '%s' configuration updated", topic)
                 return True
+            except KafkaException as e:
+                if e.args[0].code() in (KafkaError.UNSUPPORTED_VERSION, KafkaError._UNSUPPORTED_FEATURE):
+                    self.log.error(
+                        "Failed to update topic '%s' config: broker does not support "
+                        "IncrementalAlterConfigs (requires Kafka 2.3+): %s",
+                        topic,
+                        e,
+                    )
+                raise
             except Exception as e:
                 self.log.error("Failed to update topic '%s' config: %s", topic, e)
                 raise
@@ -559,6 +568,15 @@ class KafkaActionsClient:
                 future.result()
                 self.log.debug("Topic '%s' configuration deleted: %s", topic, config_keys)
                 return True
+            except KafkaException as e:
+                if e.args[0].code() in (KafkaError.UNSUPPORTED_VERSION, KafkaError._UNSUPPORTED_FEATURE):
+                    self.log.error(
+                        "Failed to delete topic '%s' config: broker does not support "
+                        "IncrementalAlterConfigs (requires Kafka 2.3+): %s",
+                        topic,
+                        e,
+                    )
+                raise
             except Exception as e:
                 self.log.error("Failed to delete topic '%s' config: %s", topic, e)
                 raise
