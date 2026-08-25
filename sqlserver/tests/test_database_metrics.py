@@ -63,7 +63,6 @@ AUTODISCOVERY_FILTERED_INSTANCE_METRICS = [
     'sqlserver.database.user_access',
     'sqlserver.database.backup_count',
 ]
-SQLSERVER_PARAMETER_LIMIT = 2100
 
 
 @pytest.mark.unit

@@ -9,9 +9,12 @@ from typing import Callable, List, Optional
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.core import QueryExecutor
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_RDS
-
-SQLSERVER_PARAMETER_LIMIT = 2100
+from datadog_checks.sqlserver.const import (
+    SQLSERVER_PARAMETER_LIMIT,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
+)
 
 
 class SqlserverDatabaseMetricsBase:
