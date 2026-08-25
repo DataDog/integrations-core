@@ -11,6 +11,7 @@ import pytest
 from pytest import fail
 from semver import VersionInfo
 
+from datadog_checks.base.utils.db.schemas import SchemaCollector
 from datadog_checks.postgres import PostgreSql, util
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
@@ -100,6 +101,8 @@ def test_view_collector_maps_view_metadata(pg_instance, integration_check):
 def test_schema_collectors_report_separate_object_counts(
     pg_instance, integration_check, collector_class, expected_metric, unexpected_metric
 ):
+    if collector_class is PostgresViewCollector and not hasattr(SchemaCollector, 'object_count_metric_name'):
+        pytest.skip("The minimum base package does not schedule PostgreSQL view collection")
     check = integration_check(pg_instance)
     check.gauge = mock.Mock()
     collector = collector_class(check)
@@ -115,8 +118,7 @@ def test_schema_collectors_report_separate_object_counts(
 @pytest.mark.parametrize(('collect_views', 'views_collected'), [(True, True), (False, False)])
 def test_schema_collection_can_disable_views(collect_views, views_collected):
     metadata = object.__new__(PostgresMetadata)
-    metadata._config = mock.Mock()
-    metadata._config.collect_schemas.collect_views = collect_views
+    metadata._collect_views_enabled = collect_views
     metadata._schema_collector = mock.Mock()
     metadata._schema_collector.collect_schemas.return_value = True
     metadata._view_collector = mock.Mock()

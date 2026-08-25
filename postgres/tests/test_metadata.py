@@ -7,6 +7,7 @@ from typing import List
 
 import pytest
 
+from datadog_checks.base.utils.db.schemas import SchemaCollector
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 from .common import POSTGRES_LOCALE, POSTGRES_VERSION
@@ -115,6 +116,9 @@ def test_collect_views(integration_check, dbm_instance, aggregator):
     view_events = [
         event for event in aggregator.get_event_platform_events("dbm-metadata") if event['kind'] == 'pg_views'
     ]
+    if not hasattr(SchemaCollector, 'object_count_metric_name'):
+        assert view_events == []
+        return
     assert len(view_events) == 1
     schemas = [database['schemas'][0] for event in view_events for database in event['metadata']]
     assert all(schema['tables'] == [] for schema in schemas)

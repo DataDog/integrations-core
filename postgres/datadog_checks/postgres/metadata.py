@@ -10,6 +10,8 @@ import time
 import psycopg
 from psycopg.rows import dict_row
 
+from datadog_checks.base.utils.db.schemas import SchemaCollector
+
 from .column_statistics import PostgresColumnStatisticsCollector
 from .schemas import PostgresSchemaCollector
 from .util import collection_interval_gcd
@@ -122,7 +124,13 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
         self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
-        self._view_collector = PostgresViewCollector(check) if config.collect_schemas.enabled else None
+        collect_views_requested = config.collect_schemas.enabled and config.collect_schemas.collect_views is not False
+        self._collect_views_enabled = collect_views_requested and hasattr(SchemaCollector, 'object_count_metric_name')
+        self._view_collector = PostgresViewCollector(check) if self._collect_views_enabled else None
+        if collect_views_requested and not self._collect_views_enabled:
+            self._log.warning(
+                "PostgreSQL view collection requires object-specific schema count telemetry; skipping view collection"
+            )
         self._collect_column_statistics_enabled = config.collect_column_statistics.enabled and config.dbm
         self._column_statistics_collector = (
             PostgresColumnStatisticsCollector(check, self._cancel_event)
@@ -248,7 +256,7 @@ class PostgresMetadata(DBMAsyncJob):
         if not started:
             # TODO: Emit health event for over-long collection
             self._log.warning("Previous schema collection still in progress, skipping this collection")
-        if self._config.collect_schemas.collect_views is not False:
+        if self._collect_views_enabled:
             self._view_collector.collect_schemas()
 
     @tracked_method(agent_check_getter=agent_check_getter)
