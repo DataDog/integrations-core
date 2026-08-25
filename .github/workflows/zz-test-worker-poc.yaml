@@ -74,8 +74,10 @@ jobs:
 
       - name: Parse matrix and set matrix output
         id: set_matrix
+        env:
+          MATRIX_JSON: ${{ inputs.matrix_json }}
         run: |
-          COMBINED_MATRIX=$(python .github/workflows/scripts/explode-matrix.py '${{ inputs.matrix_json }}')
+          COMBINED_MATRIX=$(python .github/workflows/scripts/explode-matrix.py "$MATRIX_JSON")
 
           if [ $? -ne 0 ]; then
             echo "::error::Python script failed to generate matrix."

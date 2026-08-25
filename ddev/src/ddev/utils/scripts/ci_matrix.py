@@ -58,6 +58,10 @@ TESTABLE_FILE_PATTERN = re.compile(
     re.VERBOSE,
 )
 AGENT_REQUIREMENTS_FILE = 'agent_requirements.in'
+# Targets are derived from directory names in the pull request diff, which are attacker-controlled on fork PRs, and
+# they flow into CI as job inputs. Every real integration directory is lowercase alphanumeric with underscores or
+# hyphens, so anything else is either a mistake or an injection attempt and must never reach a runner.
+TARGET_NAME_PATTERN = re.compile(r'^[a-z0-9][a-z0-9_-]*$')
 NON_TESTABLE_FILES = {'auto_conf.yaml'}
 DISPLAY_ORDER_OVERRIDE = {
     _d: _i
@@ -162,6 +166,9 @@ def get_changed_targets(root: Path, *, ref: str, exact: bool, local: bool, verbo
     targets = []
     for directory_name, files in changed_directories.items():
         if directory_name in UNTESTABLE_INTEGRATIONS:
+            continue
+        if not TARGET_NAME_PATTERN.match(directory_name):
+            print(f'Ignoring target with unexpected name: {directory_name!r}', file=sys.stderr)
             continue
         directory = root / directory_name
         if not ((directory / 'hatch.toml').is_file() and (directory / 'tests').is_dir()):
