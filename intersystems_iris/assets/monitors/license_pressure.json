@@ -24,7 +24,7 @@
     "priority": null,
     "query": "avg(last_15m):avg:intersystems_iris.license.percent_used{*} by {host} > 90",
     "tags": [
-      "integration:intersystems_iris"
+      "integration:intersystems-iris"
     ],
     "type": "query alert"
   },

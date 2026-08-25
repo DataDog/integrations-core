@@ -22,7 +22,7 @@
     "priority": null,
     "query": "max(last_5m):max:intersystems_iris.system.alerts_new{*} by {host} >= 1",
     "tags": [
-      "integration:intersystems_iris"
+      "integration:intersystems-iris"
     ],
     "type": "query alert"
   },

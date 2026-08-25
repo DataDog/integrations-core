@@ -26,7 +26,7 @@
     "priority": null,
     "query": "avg(last_15m):anomalies(avg:intersystems_iris.interop.queued{*} by {id}, 'basic', 2, direction='above', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
     "tags": [
-      "integration:intersystems_iris"
+      "integration:intersystems-iris"
     ],
     "type": "query alert"
   },

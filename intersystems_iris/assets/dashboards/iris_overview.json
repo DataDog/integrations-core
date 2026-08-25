@@ -42,8 +42,8 @@
         "formulas": [ { "formula": "query1" } ],
         "conditional_formats": [
           { "comparator": "<", "value": 0, "palette": "white_on_red" },
-          { "comparator": "==", "value": 0, "palette": "white_on_green" },
-          { "comparator": "==", "value": 1, "palette": "white_on_yellow" },
+          { "comparator": "=", "value": 0, "palette": "white_on_green" },
+          { "comparator": "=", "value": 1, "palette": "white_on_yellow" },
           { "comparator": ">=", "value": 2, "palette": "white_on_red" }
         ]
       } ]
