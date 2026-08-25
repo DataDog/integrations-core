@@ -149,15 +149,11 @@ class MySql(DatabaseCheck):
             and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
         )
 
-        # Pass function reference and managed auth flag to async jobs
-        self._statement_metrics = MySQLStatementMetrics(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
-        self._statement_samples = MySQLStatementSamples(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
-        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        self.statement_metrics = None
+        self.statement_samples = None
+        self.mysql_metadata = None
+        self.query_activity = None
+        self._register_async_jobs()
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -170,6 +166,30 @@ class MySql(DatabaseCheck):
         self._is_innodb_engine_enabled_cached = None
 
         self._submit_initialization_health_event()
+
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime."""
+        self._query_manager = None
+        self._runtime_queries_cached = None
+        self.health = None
+
+    def _register_async_jobs(self):
+        """Build and register the async jobs enabled by this check's configuration."""
+        if not self._config.dbm_enabled:
+            return
+
+        self.statement_metrics = self.register_async_job(
+            MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        )
+        self.statement_samples = self.register_async_job(
+            MySQLStatementSamples(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        )
+        self.mysql_metadata = self.register_async_job(
+            MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        )
+        self.query_activity = self.register_async_job(
+            MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        )
 
     def _submit_initialization_health_event(self):
         try:
@@ -398,10 +418,7 @@ class MySql(DatabaseCheck):
 
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
-                    self._statement_metrics.run_job_loop(dbm_tags)
-                    self._statement_samples.run_job_loop(dbm_tags)
-                    self._query_activity.run_job_loop(dbm_tags)
-                    self._mysql_metadata.run_job_loop(dbm_tags)
+                    self.run_async_jobs(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -415,12 +432,6 @@ class MySql(DatabaseCheck):
         finally:
             self._conn = None
             self._report_warnings()
-
-    def cancel(self):
-        self._statement_samples.cancel()
-        self._statement_metrics.cancel()
-        self._query_activity.cancel()
-        self._mysql_metadata.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
