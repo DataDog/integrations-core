@@ -80,7 +80,6 @@ jobs:
           SHA: ${{ github.event.workflow_run.head_sha }}
           EVENT: ${{ github.event.workflow_run.event }}
         run: |
-          git fetch --quiet origin master
           if [ "$EVENT" = "push" ]; then
             base_sha=$(git rev-parse "${SHA}^1")
           else
