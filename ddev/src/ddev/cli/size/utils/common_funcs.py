@@ -521,6 +521,10 @@ def format(s: str) -> str:
     return f'"{s}"' if "," in s else s
 
 
+def build_section_label(header: str, total: str | None) -> str:
+    return f"{header} ({total})" if total is not None else header
+
+
 def save_markdown(
     app: Application,
     title: str,
@@ -576,12 +580,13 @@ def save_markdown(
         else:
             label = "Other"
 
+        readable_total = None
         if section_total != "none":
             total = sum(int(row.get("Size_Bytes", 0) or 0) for row in group)
             readable_total = convert_to_human_readable_size(total)
             if section_total == "delta" and total > 0:
                 readable_total = f"+{readable_total}"
-            label = f"{label} ({readable_total})"
+        label = build_section_label(label, readable_total)
 
         # Collapsed by default so a reader can pick out the platform they care about instead of
         # scrolling past all of them. The blank line after </summary> is required: without it
@@ -878,7 +883,12 @@ def initialize_dd_client(app: Application, org: str | None, key: str | None) -> 
     """
     Resolves Datadog credentials from a configured org or a raw API key and initializes the API client.
     """
-    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
+    if org:
+        if org not in app.config.orgs:
+            raise RuntimeError(f"No organization named `{org}` found in config file")
+        config_file_info = app.config.orgs[org]
+    else:
+        config_file_info = {'api_key': key, 'site': 'datadoghq.com'}
 
     if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
@@ -888,6 +898,7 @@ def initialize_dd_client(app: Application, org: str | None, key: str | None) -> 
     initialize(
         api_key=config_file_info["api_key"],
         api_host=f"https://api.{config_file_info['site']}",
+        mute=False,
     )
 
 
@@ -947,7 +958,9 @@ def send_diff_metrics_to_dd(
 
     app.display(f"Sending {len(metrics)} size diff metrics to Datadog...")
     app.display_debug(f"Sending size diff metrics: {metrics}")
-    api.Metric.send(metrics=metrics)
+    response = api.Metric.send(metrics=metrics)
+    if response.get("errors"):
+        raise RuntimeError(f"Failed to send size diff metrics to Datadog: {response['errors']}")
 
 
 def send_metrics_to_dd(

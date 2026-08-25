@@ -28,6 +28,7 @@ from ddev.cli.size.utils.common_funcs import (
     save_csv,
     save_json,
     save_markdown,
+    send_diff_metrics_to_dd,
     wheel_url_candidates,
 )
 from ddev.utils.fs import Path
@@ -506,6 +507,47 @@ def test_save_markdown_orders_sections_deterministically():
 
     written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
     assert re.findall(r"<summary>(\S+), Python", written_content) == sorted(platforms)
+
+
+def test_send_diff_metrics_to_dd_metric_shape():
+    modules = [
+        {
+            "Name": "dep1",
+            "Version": "1.0.0 -> 1.1.0",
+            "Type": "Dependency",
+            "Size_Bytes": 500,
+            "Size": "+500 B",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "path1.py (DELETED)",
+            "Version": "1.0.0",
+            "Type": "Integration",
+            "Size_Bytes": -1000,
+            "Size": "-1000 B",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
+    ]
+
+    with (
+        patch("ddev.cli.size.utils.common_funcs.initialize"),
+        patch(
+            "ddev.cli.size.utils.common_funcs.get_commit_data",
+            return_value=(1700000000, "Bump dep1 (#123)", ["AI-1"], ["123"]),
+        ),
+        patch("ddev.cli.size.utils.common_funcs.api.Metric.send", return_value={"status": "ok"}) as mock_metric_send,
+    ):
+        send_diff_metrics_to_dd(MagicMock(), "commit2", modules, None, "fake_key", False)
+
+    metrics = mock_metric_send.call_args.kwargs["metrics"]
+    assert len(metrics) == 2
+    assert {m["metric"] for m in metrics} == {"datadog.agent_integrations.size_diff"}
+    assert [m["points"] for m in metrics] == [[(1700000000, 500)], [(1700000000, -1000)]]
+    assert "name:dep1" in metrics[0]["tags"]
+    assert "compression:uncompressed" in metrics[0]["tags"]
+    assert "pr_number:123" in metrics[0]["tags"]
 
 
 @pytest.mark.parametrize(

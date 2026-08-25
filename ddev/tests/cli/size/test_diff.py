@@ -138,6 +138,7 @@ def test_diff_no_differences(ddev):
             ],
         ),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send,
     ):
         result = ddev(
             "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"
@@ -150,6 +151,21 @@ def test_diff_no_differences(ddev):
         assert ddev("size", "diff", "commit1", "commit2", "--compressed").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--format", "csv,markdown,json,png").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--show-gui").exit_code == 0
+
+        result = ddev(
+            "size",
+            "diff",
+            "commit1",
+            "commit2",
+            "--platform",
+            "linux-aarch64",
+            "--python",
+            "3.12",
+            "--to-dd-key",
+            "fake_key",
+        )
+        assert result.exit_code == 0, result.output
+        mock_send.assert_not_called()
 
 
 def test_diff_invalid_platform(ddev):
@@ -226,9 +242,10 @@ def test_diff_invalid_platform_and_version(ddev):
         assert result.exit_code != 0
 
 
-def test_diff_sends_metrics_to_dd(ddev, mock_size_diff_dependencies):
+@pytest.mark.parametrize("compressed", [False, True])
+def test_diff_sends_metrics_to_dd(ddev, mock_size_diff_dependencies, compressed):
     with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
-        result = ddev(
+        cli_args = [
             "size",
             "diff",
             "commit1",
@@ -239,37 +256,42 @@ def test_diff_sends_metrics_to_dd(ddev, mock_size_diff_dependencies):
             "3.12",
             "--to-dd-key",
             "fake_key",
+        ]
+        if compressed:
+            cli_args.append("--compressed")
+        result = ddev(*cli_args)
+
+    assert result.exit_code == 0, result.output
+    mock_send.assert_called_once()
+    app, commit, modules, org, key, sent_compressed = mock_send.call_args.args
+    # Deltas must be attributed to the later of the two commits.
+    assert commit == "commit2"
+    assert org is None
+    assert key == "fake_key"
+    assert sent_compressed is compressed
+    assert modules
+
+
+def test_diff_sends_metrics_to_dd_with_org(ddev, mock_size_diff_dependencies):
+    with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
+        result = ddev(
+            "size",
+            "diff",
+            "commit1",
+            "commit2",
+            "--platform",
+            "linux-aarch64",
+            "--python",
+            "3.12",
+            "--to-dd-org",
+            "default",
         )
 
     assert result.exit_code == 0, result.output
     mock_send.assert_called_once()
     app, commit, modules, org, key, compressed = mock_send.call_args.args
-    # Deltas must be attributed to the later of the two commits.
-    assert commit == "commit2"
-    assert org is None
-    assert key == "fake_key"
-    assert compressed is False
-    assert modules
-
-
-def test_diff_sends_compressed_metrics_to_dd(ddev, mock_size_diff_dependencies):
-    with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
-        result = ddev(
-            "size",
-            "diff",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-aarch64",
-            "--python",
-            "3.12",
-            "--to-dd-key",
-            "fake_key",
-            "--compressed",
-        )
-
-    assert result.exit_code == 0, result.output
-    assert mock_send.call_args.args[5] is True
+    assert org == "default"
+    assert key is None
 
 
 def test_diff_no_dd_credentials_does_not_send(ddev, mock_size_diff_dependencies):
@@ -286,86 +308,3 @@ def test_diff_org_and_key_are_mutually_exclusive(ddev, mock_size_diff_dependenci
 
     assert result.exit_code != 0
     mock_send.assert_not_called()
-
-
-def test_diff_no_differences_does_not_send(ddev):
-    fake_repo = MagicMock()
-    fake_repo.repo_dir = "fake_repo"
-    fake_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
-
-    with (
-        patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=fake_repo),
-        patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
-        patch("ddev.cli.size.diff.get_valid_platforms", return_value={"linux-aarch64"}),
-        patch("ddev.cli.size.diff.get_valid_versions", return_value={"3.12"}),
-        patch.object(fake_repo, "checkout_commit"),
-        patch("ddev.cli.size.utils.common_funcs.tempfile.mkdtemp", return_value="fake_repo"),
-        patch(
-            "ddev.cli.size.diff.get_files",
-            return_value=[{"Name": "path1.py", "Version": "1.0.0", "Size_Bytes": 1000, "Type": "Integration"}],
-        ),
-        patch(
-            "ddev.cli.size.diff.get_dependencies",
-            return_value=[{"Name": "dep1", "Version": "2.0.0", "Size_Bytes": 2000, "Type": "Dependency"}],
-        ),
-        patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send,
-    ):
-        result = ddev(
-            "size",
-            "diff",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-aarch64",
-            "--python",
-            "3.12",
-            "--to-dd-key",
-            "fake_key",
-        )
-
-    assert result.exit_code == 0, result.output
-    assert "No size differences were detected" in result.output
-    mock_send.assert_not_called()
-
-
-def test_send_diff_metrics_to_dd_metric_shape():
-    from ddev.cli.size.utils.common_funcs import send_diff_metrics_to_dd
-
-    modules = [
-        {
-            "Name": "dep1",
-            "Version": "1.0.0 -> 1.1.0",
-            "Type": "Dependency",
-            "Size_Bytes": 500,
-            "Size": "+500 B",
-            "Platform": "linux-aarch64",
-            "Python_Version": "3.12",
-        },
-        {
-            "Name": "path1.py (DELETED)",
-            "Version": "1.0.0",
-            "Type": "Integration",
-            "Size_Bytes": -1000,
-            "Size": "-1000 B",
-            "Platform": "linux-aarch64",
-            "Python_Version": "3.12",
-        },
-    ]
-
-    with (
-        patch("ddev.cli.size.utils.common_funcs.initialize"),
-        patch(
-            "ddev.cli.size.utils.common_funcs.get_commit_data",
-            return_value=(1700000000, "Bump dep1 (#123)", ["AI-1"], ["123"]),
-        ),
-        patch("ddev.cli.size.utils.common_funcs.api.Metric.send") as mock_metric_send,
-    ):
-        send_diff_metrics_to_dd(MagicMock(), "commit2", modules, None, "fake_key", False)
-
-    metrics = mock_metric_send.call_args.kwargs["metrics"]
-    assert len(metrics) == 2
-    assert {m["metric"] for m in metrics} == {"datadog.agent_integrations.size_diff"}
-    assert [m["points"] for m in metrics] == [[(1700000000, 500)], [(1700000000, -1000)]]
-    assert "name:dep1" in metrics[0]["tags"]
-    assert "compression:uncompressed" in metrics[0]["tags"]
-    assert "pr_number:123" in metrics[0]["tags"]
