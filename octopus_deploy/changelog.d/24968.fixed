@@ -1,0 +1,1 @@
+Collect deployment tasks with one request per task state for the whole server instead of two requests per project.
