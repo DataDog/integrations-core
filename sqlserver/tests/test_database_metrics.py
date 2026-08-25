@@ -2040,6 +2040,34 @@ def test_sqlserver_database_metrics_init(
     assert 'tempdb' in database_file_metrics[0].databases
 
 
+@pytest.mark.unit
+def test_database_metric_operation_tags_are_not_metric_tags(aggregator, init_config, instance_docker_metrics):
+    query = {
+        'name': 'test_query',
+        'query': 'SELECT 1',
+        'columns': [{'name': 'test.metric', 'type': 'gauge'}],
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    query_executor = sqlserver_check._new_query_executor(
+        [query],
+        mock.MagicMock(return_value=[[1]]),
+        extra_tags=['metric:test'],
+        track_operation_time=True,
+        operation_tags=['database:test'],
+    )
+    query_executor.compile_queries()
+    query_executor.execute()
+
+    metric = aggregator.metrics('sqlserver.test.metric')[0]
+    assert 'metric:test' in metric.tags
+    assert 'database:test' not in metric.tags
+
+    operation_time = aggregator.metrics('dd.sqlserver.operation.time')[0]
+    assert 'operation:test_query' in operation_time.tags
+    assert 'database:test' in operation_time.tags
+    assert 'metric:test' not in operation_time.tags
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_database_metric_operation_time_tracks_enabled_collectors(

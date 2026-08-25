@@ -272,6 +272,19 @@ class SQLServer(DatabaseCheck):
 
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False, operation_tags=None):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
+        if track_operation_time and operation_tags:
+            operations = {query['query']: query['name'] for query in queries}
+            execute_query = executor
+
+            def execute_tracked_query(query: str, params: tuple | None = None) -> list[tuple]:
+                with tracked_query(self, operation=operations[query], tags=operation_tags):
+                    if params is not None:
+                        return execute_query(query, params=params)
+                    return execute_query(query)
+
+            executor = execute_tracked_query
+            track_operation_time = False
+
         return QueryExecutor(
             executor,
             self,
@@ -279,7 +292,6 @@ class SQLServer(DatabaseCheck):
             tags=tags,
             hostname=self.reported_hostname,
             track_operation_time=track_operation_time,
-            operation_tags=operation_tags,
         )
 
     def add_core_tags(self):
