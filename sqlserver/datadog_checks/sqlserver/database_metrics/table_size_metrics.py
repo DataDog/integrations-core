@@ -122,6 +122,7 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
                 queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
                 track_operation_time=self.track_operation_time,
+                operation_tags=['database:{}'.format(database)],
             )
             executor.compile_queries()
             executors.append(executor)
