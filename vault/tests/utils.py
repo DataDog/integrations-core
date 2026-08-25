@@ -87,8 +87,6 @@ def assert_collection(aggregator, tags, use_openmetrics, runs=1, exclude=()):
                 else:
                     raise
             else:
-                if metric in exclude:
-                    continue
                 aggregator.assert_metric_has_tag_prefix(metric, 'is_leader:', at_least=at_least)
                 aggregator.assert_metric_has_tag_prefix(metric, 'vault_cluster:', at_least=at_least)
                 aggregator.assert_metric_has_tag_prefix(metric, 'vault_version:', at_least=at_least)
