@@ -13,31 +13,21 @@ if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
 
-PG_VIEWS_QUERY = """
-SELECT c.oid                         AS view_id,
-       c.relnamespace                AS schema_id,
-       c.relname                     AS view_name,
-       c.relowner::regrole::text     AS view_owner,
-       c.relkind::text               AS relkind,
-       pg_get_viewdef(c.oid, true)   AS definition
-FROM   pg_class c
-WHERE  c.relkind IN ('v', 'm')
-"""
-
-
 VIEW_COLUMNS_QUERY = """
-SELECT attname                           AS name,
-       format_type(atttypid, atttypmod)  AS data_type,
-       NOT attnotnull                    AS nullable,
-       pg_get_expr(adbin, adrelid)       AS default,
-       attrelid                          AS view_id,
-       attnum                            AS ordinal_position
-FROM   pg_attribute
+SELECT a.attname                            AS name,
+       format_type(a.atttypid, a.atttypmod) AS data_type,
+       NOT a.attnotnull                     AS nullable,
+       pg_get_expr(ad.adbin, ad.adrelid)    AS default,
+       selected_views.view_id,
+       a.attnum                            AS ordinal_position
+FROM   selected_views
+       INNER JOIN pg_attribute a
+               ON a.attrelid = selected_views.view_id
        LEFT JOIN pg_attrdef ad
-              ON adrelid = attrelid
-                 AND adnum = attnum
-WHERE  attnum > 0
-       AND NOT attisdropped
+              ON ad.adrelid = a.attrelid
+                 AND ad.adnum = a.attnum
+WHERE  a.attnum > 0
+       AND NOT a.attisdropped
 """
 
 
@@ -88,24 +78,28 @@ class PostgresViewCollector(PostgresSchemaCollector):
             schemas AS (
                 {schemas_query}
             ),
-            views AS (
-                {PG_VIEWS_QUERY}
-            ),
-            schema_views AS (
+            selected_views AS (
                 SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
-                    views.view_id, views.view_name, views.view_owner, views.relkind, views.definition
+                    c.oid AS view_id, c.relname AS view_name,
+                    c.relowner::regrole::text AS view_owner, c.relkind::text AS relkind
                 FROM schemas
-                INNER JOIN views ON schemas.schema_id = views.schema_id
-                ORDER BY schemas.schema_name, views.view_name
+                INNER JOIN pg_class c ON schemas.schema_id = c.relnamespace
+                WHERE c.relkind IN ('v', 'm')
+                ORDER BY schemas.schema_name, c.relname
                 LIMIT {limit}
+            ),
+            views AS (
+                SELECT selected_views.*,
+                    pg_get_viewdef(selected_views.view_id, true) AS definition
+                FROM selected_views
             ),
             columns AS (
                 {VIEW_COLUMNS_QUERY}
             )
 
-            SELECT schema_views.schema_id, schema_views.schema_name, schema_views.schema_owner,
-                schema_views.view_id, schema_views.view_name, schema_views.view_owner,
-                schema_views.relkind, schema_views.definition,
+            SELECT views.schema_id, views.schema_name, views.schema_owner,
+                views.view_id, views.view_name, views.view_owner,
+                views.relkind, views.definition,
                 array_agg(
                     json_build_object(
                         'data_type', columns.data_type,
@@ -114,11 +108,11 @@ class PostgresViewCollector(PostgresSchemaCollector):
                         'nullable', columns.nullable
                     ) ORDER BY columns.ordinal_position
                 ) FILTER (WHERE columns.name IS NOT NULL) AS columns
-            FROM schema_views
-                LEFT JOIN columns ON schema_views.view_id = columns.view_id
-            GROUP BY schema_views.schema_id, schema_views.schema_name, schema_views.schema_owner,
-                schema_views.view_id, schema_views.view_name, schema_views.view_owner,
-                schema_views.relkind, schema_views.definition
+            FROM views
+                LEFT JOIN columns ON views.view_id = columns.view_id
+            GROUP BY views.schema_id, views.schema_name, views.schema_owner,
+                views.view_id, views.view_name, views.view_owner,
+                views.relkind, views.definition
             ;
         """
         return query, schemas_params

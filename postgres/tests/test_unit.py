@@ -35,6 +35,9 @@ def test_schema_collectors_use_independent_queries_and_limits(pg_instance, integ
     assert "LIMIT 1000" in view_query
     assert "c.relkind IN ('v', 'm')" in view_query
     assert "pg_get_viewdef" in view_query
+    assert view_query.index("LIMIT 1000") < view_query.index("pg_get_viewdef")
+    assert view_query.index("LIMIT 1000") < view_query.index("INNER JOIN pg_attribute")
+    assert "a.attrelid = selected_views.view_id" in view_query
 
 
 def test_view_collector_maps_view_metadata(pg_instance, integration_check):
