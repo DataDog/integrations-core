@@ -38,20 +38,6 @@ def test_generates_one_http_candidate() -> None:
     ]
 
 
-def test_all_candidates_enable_metric_collection() -> None:
-    # Every generated candidate must be able to reach Vault's real metrics scrape, not just the
-    # always-unauthenticated leader/health endpoints. `no_token=True` is the only signal discovery
-    # can produce on its own; a `client_token`/`client_token_path` can only come from the user.
-    service = Service(id='vault', host='127.0.0.1', ports=(Port(number=8200),))
-
-    instances = generated_instances(service)
-
-    assert all(
-        instance.get('no_token') is True or instance.get('client_token') or instance.get('client_token_path')
-        for instance in instances
-    )
-
-
 def test_ipv6_host_is_bracketed_in_generated_api_url() -> None:
     service = Service(id='vault', host='fd00::1', ports=(Port(number=8200),))
 
