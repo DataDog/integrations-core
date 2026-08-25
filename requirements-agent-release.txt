@@ -34,7 +34,7 @@ datadog-ceph==4.5.1; sys_platform != 'win32'
 datadog-cert-manager==6.4.1
 datadog-checkpoint-harmony-endpoint==1.2.0
 datadog-checkpoint-quantum-firewall==1.3.0
-datadog-checks-base==38.0.0
+datadog-checks-base==38.1.0
 datadog-checks-dependency-provider==3.2.0
 datadog-checks-downloader==9.3.0
 datadog-cilium==6.4.1
@@ -103,7 +103,7 @@ datadog-http-check==13.0.0
 datadog-hudi==4.3.0
 datadog-hugging-face-tgi==1.5.1
 datadog-hyperv==3.4.0; sys_platform == 'win32'
-datadog-ibm-ace==4.6.0
+datadog-ibm-ace==4.6.1
 datadog-ibm-db2==4.4.0
 datadog-ibm-i==5.0.0; sys_platform != 'win32'
 datadog-ibm-mq==8.11.0
@@ -210,7 +210,7 @@ datadog-silk==4.5.0
 datadog-silverstripe-cms==1.9.0
 datadog-singlestore==4.6.0
 datadog-slurm==2.5.1; sys_platform == 'linux2'
-datadog-snmp==13.2.0
+datadog-snmp==13.3.0
 datadog-solr==2.4.0
 datadog-sonarqube==5.6.1
 datadog-sonatype-nexus==2.3.0; sys_platform != 'darwin'
