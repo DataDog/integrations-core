@@ -223,12 +223,7 @@ class SQLServer(DatabaseCheck):
             self.data_observability = self.register_async_job(SqlServerDataObservability(self, self._config))
 
     def initialize_xe_session_handlers(self):
-        """Build and register the XE session handlers without starting them.
-
-        These are built here rather than in ``_register_async_jobs`` because their constructor
-        reads the engine edition from ``static_info_cache``, which ``load_static_information``
-        populates earlier in ``check_initializations``.
-        """
+        """Build and register the XE session handlers without starting them"""
         if not self.xe_session_handlers and self._config.dbm_enabled:
             self.xe_session_handlers = get_xe_session_handlers(self, self._config)
             for handler in self.xe_session_handlers:
@@ -241,8 +236,6 @@ class SQLServer(DatabaseCheck):
         self._database_metrics = None
         self.health = None
         self._connection = None
-        # These three hold callables closing over this check, so each pins it independently of
-        # the others: the tag manager's normalizer, and the metric type dispatch in the other two.
         self.tag_manager = None
         self.proc_type_mapping = {}
         self.instance_metrics = []
