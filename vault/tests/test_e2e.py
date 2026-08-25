@@ -26,17 +26,20 @@ def test_e2e(dd_agent_check, e2e_instance, global_tags, use_openmetrics, use_aut
 @noauth_required
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
-    aggregator = dd_agent_check_discovery(rate=True)
+    aggregator = dd_agent_check_discovery(discovery_min_instances=2, rate=True)
 
-    # `assert_collection` needs at least one tag every metric carries to drive its per-metric
-    # coverage loop. Discovery resolves `api_url` from the container at runtime, so read back
-    # the tag the check itself attached instead of hardcoding a value.
-    api_url_tag = next(tag for tag in aggregator.metrics('vault.is_leader')[0].tags if tag.startswith('api_url:'))
+    # The E2E environment has a leader and a replica. Both use the Vault image and must be
+    # discovered, so assert against the runtime-resolved URLs rather than one arbitrary instance.
+    api_url_tags = {
+        tag for metric in aggregator.metrics('vault.is_leader') for tag in metric.tags if tag.startswith('api_url:')
+    }
+    assert len(api_url_tags) == 2, f'Expected discovery to configure both Vault nodes, got {sorted(api_url_tags)}'
+
     assert_collection(
         aggregator,
-        [api_url_tag],
+        sorted(api_url_tags),
         use_openmetrics=True,
-        runs=2,
+        runs=4,
         # These metrics only appear once a request has gone through Vault's authenticated
         # logical-request pipeline (ACL/token checks, audit logging, policy lookups, lease
         # issuance). The main `test_e2e` suite gets that incidentally, from auth-related tests
