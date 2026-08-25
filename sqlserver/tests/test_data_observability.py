@@ -118,6 +118,25 @@ def _create_check(instance):
     return check
 
 
+def test_data_observability_schedules_schema_collection():
+    instance = _make_do_instance(
+        queries=[],
+        extra={'collect_schemas': {'enabled': True}},
+    )
+    check = _create_check(instance)
+    check._submit_initialization_health_event = MagicMock()
+    check.load_static_information = MagicMock()
+    check._query_manager = MagicMock()
+    check._send_database_instance_metadata = MagicMock()
+    check.collect_metrics = MagicMock()
+    check.sql_metadata.run_job_loop = MagicMock()
+    check.data_observability.run_job_loop = MagicMock()
+
+    check.check(instance)
+
+    check.sql_metadata.run_job_loop.assert_called_once_with(check.tag_manager.get_tags())
+
+
 def _setup_and_run(instance=None, queries=None, mock_cursor=None):
     if instance is None:
         instance = _make_do_instance(queries=queries)

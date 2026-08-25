@@ -910,7 +910,6 @@ class SQLServer(DatabaseCheck):
                 self.statement_metrics.run_job_loop(self.tag_manager.get_tags())
                 self.procedure_metrics.run_job_loop(self.tag_manager.get_tags())
                 self.activity.run_job_loop(self.tag_manager.get_tags())
-                self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
                 self.deadlocks.run_job_loop(self.tag_manager.get_tags())
 
                 # Run XE session handlers
@@ -919,6 +918,9 @@ class SQLServer(DatabaseCheck):
                         handler.run_job_loop(self.tag_manager.get_tags())
                     except Exception as e:
                         self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
+
+            if self._config.dbm_enabled or self._config.data_observability.enabled:
+                self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
 
             if self._config.data_observability.enabled:
                 self.data_observability.run_job_loop(self.tag_manager.get_tags())

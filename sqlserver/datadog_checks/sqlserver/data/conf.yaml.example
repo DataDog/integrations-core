@@ -798,7 +798,8 @@ instances:
     # collect_schemas:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        ## Enable schema collection. Requires either `dbm: true` or `data_observability.enabled: true`.
+        ## Defaults to false.
         #
         # enabled: false
 
@@ -837,7 +838,8 @@ instances:
     # schemas_collection:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        ## Enable schema collection. Requires either `dbm: true` or `data_observability.enabled: true`.
+        ## Defaults to false.
         #
         # enabled: false
 
