@@ -83,8 +83,7 @@ jobs:
         run: |
           git fetch --quiet origin master
           if [ "$EVENT" = "push" ]; then
-            # Resolved from the commit rather than from the event, which reports all-zeros on a
-            # branch's first push and a discarded commit after a force-push.
+            # The event's before-SHA is all-zeros on a branch's first push and after a force-push.
             base_sha=$(git rev-parse "${SHA}^1")
           else
             base_sha=$(git merge-base origin/master "$SHA")
@@ -123,8 +122,7 @@ jobs:
           fi
           ddev "${args[@]}"
 
-      # Resolved from the commit rather than taken from workflow_run.pull_requests, which lists every
-      # pull request associated with the commit and is empty for forks.
+      # workflow_run.pull_requests is empty for forks, so resolve the PR from the commit instead.
       - name: Resolve the pull request number
         id: pr
         if: github.event.workflow_run.event == 'pull_request'
@@ -139,28 +137,21 @@ jobs:
           fi
           echo "number=$number" >> "$GITHUB_OUTPUT"
 
-      - name: Comment the size difference on the pull request
+      - name: Build the size difference comment
         if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
-        continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ steps.pr.outputs.number }}
           SHA: ${{ github.event.workflow_run.head_sha }}
           BASE_SHA: ${{ steps.base.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           UNCOMPRESSED_OUTCOME: ${{ steps.diff-uncompressed.outcome }}
           COMPRESSED_OUTCOME: ${{ steps.diff-compressed.outcome }}
-          COMMENT_MARKER: "<!-- ddev-size-diff-comment -->"
         run: |
-          # ddev size diff writes an export only when something changed size, so an absent one means
-          # either a size-neutral pull request or a measurement that never finished. The step outcome
-          # decides which, so a crash is not reported as "nothing changed".
+          # Present only when ddev size diff found a size change; absent + outcome=success means no change.
           section() {
             local title=$1 file=$2 outcome=$3
             printf '<details>\n<summary><strong>%s</strong></summary>\n\n' "$title"
             if [ -f "$file" ]; then
-              # Skip the export's own "# Diff" heading; the summary already says what this is.
-              tail -n +3 "$file"
+              tail -n +3 "$file"  # drop the export's own "# Diff" heading
             elif [ "$outcome" = "success" ]; then
               printf 'No integration or dependency changed size.\n'
             else
@@ -171,26 +162,31 @@ jobs:
           }
 
           {
-            printf '%s\n' "$COMMENT_MARKER"
             printf '## Disk usage change\n\n'
             printf 'Commit `%s` compared against `%s`.\n\n' "${SHA:0:7}" "${BASE_SHA:0:7}"
             section 'Uncompressed' diff_uncompressed.md "$UNCOMPRESSED_OUTCOME"
             section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
           } > size_diff_comment.md
 
-          # Update this workflow's own previous comment rather than stacking a new one per push.
-          comment_id=$(
-            gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
-              --jq '.[] | select(.body | contains($ENV.COMMENT_MARKER)) | .id' \
-              | head -n 1
-          )
-          if [ -n "$comment_id" ]; then
-            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id}" \
-              -F body=@size_diff_comment.md
-          else
-            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-              -F body=@size_diff_comment.md
-          fi
+      - name: Find the previous size difference comment
+        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
+        id: find-comment
+        continue-on-error: true
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        with:
+          issue-number: ${{ steps.pr.outputs.number }}
+          comment-author: github-actions[bot]
+          body-includes: Disk usage change
+
+      - name: Comment the size difference on the pull request
+        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
+        continue-on-error: true
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ steps.pr.outputs.number }}
+          body-path: size_diff_comment.md
+          edit-mode: replace
 
       - name: Upload JSON uncompressed sizes artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
