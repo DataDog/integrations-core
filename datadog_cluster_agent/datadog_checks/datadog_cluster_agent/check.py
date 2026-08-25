@@ -70,6 +70,8 @@ DEFAULT_METRICS = {
     'go_goroutines': 'go.goroutines',
     'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
     'go_threads': 'go.threads',
+    'instrumentation_controller__reconciliations': 'instrumentation_controller.reconciliations',
+    'instrumentation_controller__resources': 'instrumentation_controller.resources',
     'kubernetes_apiserver_emitted_events': 'kubernetes_apiserver.emitted_events',
     'kubernetes_apiserver_kube_events': 'kubernetes_apiserver.kube_events',
     'language_detection_dca_handler_processed_requests': 'language_detection_dca_handler.processed_requests',
