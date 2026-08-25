@@ -4,10 +4,9 @@ name: signal probe
 # cancelled, and whether being a child of the step's bash costs us them. Delete once recorded.
 
 on:
-  pull_request:
-    paths:
-    - '.github/workflows/signal-probe.yml'
-    - 'ddev/src/ddev/cli/ci/signal_probe.py'
+  push:
+    branches:
+    - 'aarakke/signal-probe'
   workflow_dispatch:
 
 jobs:
