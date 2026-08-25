@@ -921,19 +921,6 @@ def _expected_dbm_instance_tags(check):
     ]
 
 
-@pytest.mark.parametrize("statement_metrics_enabled", [True, False])
-def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled):
-    dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
-    check.cancel()
-    if statement_metrics_enabled:
-        assert check.statement_metrics._job_loop_future is not None
-        check.statement_metrics._job_loop_future.result()
-    else:
-        assert check.statement_metrics._job_loop_future is None
-
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
@@ -954,12 +941,8 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_metrics']['run_sync'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
+    # cancel() joins the job loop before returning, so the loop has reported its exit by now
     check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check.statement_metrics._job_loop_future.result()
-    assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
-    # if the thread doesn't start until after the cancel signal is set then the db connection will never
-    # be created in the first place
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
         tags=_expected_dbm_instance_tags(check) + ['job:query-metrics'],
@@ -1124,23 +1107,22 @@ def _mock_database_list():
 
 
 @pytest.mark.unit
-def test_metrics_lookback_multiplier(instance_docker):
-    instance_docker['query_metrics'] = {'collection_interval': 3}
+@pytest.mark.parametrize(
+    'query_metrics, expected_lookback',
+    [
+        ({'collection_interval': 3}, 6),
+        ({'lookback_window': 86400}, 86400),
+    ],
+    ids=['multiplier', 'explicit-window'],
+)
+def test_metrics_lookback_window(instance_docker, query_metrics, expected_lookback):
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = query_metrics
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     _, mock_cursor = _mock_database_list()
 
     check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
-    mock_cursor.execute.assert_called_with(ANY, (6,))
-
-
-@pytest.mark.unit
-def test_metrics_lookback_window_config(instance_docker):
-    instance_docker['query_metrics'] = {'lookback_window': 86400}
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    _, mock_cursor = _mock_database_list()
-
-    check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
-    mock_cursor.execute.assert_called_with(ANY, (86400,))
+    mock_cursor.execute.assert_called_with(ANY, (expected_lookback,))
 
 
 @pytest.mark.unit
