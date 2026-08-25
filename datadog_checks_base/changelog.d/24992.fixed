@@ -1,0 +1,1 @@
+Skip the redundant string conversion for tags that are already strings when submitting metrics.
