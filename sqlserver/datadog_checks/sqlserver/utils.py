@@ -6,6 +6,7 @@ import re
 import shutil
 import sys
 from typing import Dict, Optional, Sequence
+from xml.etree import ElementTree
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
@@ -25,6 +26,13 @@ DBM_COMMENT_MARKERS = (
     'traceparent=',
     'ddsh=',
 )
+
+
+def serialize_database_names(database_names: list[str]) -> str:
+    root = ElementTree.Element('databases')
+    for database_name in database_names:
+        ElementTree.SubElement(root, 'database').text = database_name
+    return ElementTree.tostring(root, encoding='unicode')
 
 
 # Database is used to store both the name and physical_database_name

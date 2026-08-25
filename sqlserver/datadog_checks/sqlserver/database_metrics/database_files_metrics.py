@@ -4,11 +4,13 @@
 
 import functools
 
+from datadog_checks.sqlserver.utils import is_azure_sql_database, serialize_database_names
+
 from .base import SqlserverDatabaseMetricsBase
 
-DATABASE_FILES_METRICS_QUERY = {
-    "name": "sys.database_files",
-    "query": """SELECT
+DATABASE_FILES_QUERY = """SELECT
+        DB_NAME() AS db,
+        DB_NAME() AS database_name,
         file_id,
         CASE type
             WHEN 0 THEN 'data'
@@ -25,8 +27,14 @@ DATABASE_FILES_METRICS_QUERY = {
         ISNULL(CAST(FILEPROPERTY(name, 'SpaceUsed') as int), 0) as space_used,
         state
         FROM sys.database_files
-    """,
+    """
+
+DATABASE_FILES_METRICS_QUERY = {
+    "name": "sys.database_files",
+    "query": DATABASE_FILES_QUERY,
     "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "database", "type": "tag"},
         {"name": "file_id", "type": "tag"},
         {"name": "file_type", "type": "tag"},
         {"name": "file_location", "type": "tag"},
@@ -42,6 +50,33 @@ DATABASE_FILES_METRICS_QUERY = {
         {"name": "database.files.space_used", "expression": "space_used*8", "submit_type": "gauge"},
     ],
 }
+
+DATABASE_FILES_BATCH_QUERY = """SET NOCOUNT ON;
+DECLARE @monitored_databases xml = ?;
+DECLARE @database sysname;
+DECLARE @module nvarchar(776);
+DECLARE @statement nvarchar(max) = N'{}';
+
+DECLARE database_cursor CURSOR LOCAL FAST_FORWARD FOR
+    SELECT database_node.value('.', 'sysname')
+    FROM @monitored_databases.nodes('/databases/database') AS databases(database_node);
+
+OPEN database_cursor;
+FETCH NEXT FROM database_cursor INTO @database;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    BEGIN TRY
+        SET @module = QUOTENAME(@database) + N'.sys.sp_executesql';
+        EXEC @module @statement;
+    END TRY
+    BEGIN CATCH
+        -- A database can become unavailable after autodiscovery. Skip it so later databases are still collected.
+    END CATCH;
+    FETCH NEXT FROM database_cursor INTO @database;
+END;
+CLOSE database_cursor;
+DEALLOCATE database_cursor;
+""".format(DATABASE_FILES_QUERY.replace("'", "''"))
 
 
 class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
@@ -68,12 +103,21 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
         )
 
     def _build_query_executors(self):
+        if not is_azure_sql_database(self.engine_edition):
+            query = dict(DATABASE_FILES_METRICS_QUERY)
+            query['query'] = DATABASE_FILES_BATCH_QUERY
+            query['params'] = (serialize_database_names(self.databases or []),)
+            executor = self.new_query_executor(
+                [query], executor=functools.partial(self.execute_query_handler, fetch_multiple_results=True)
+            )
+            executor.compile_queries()
+            return [executor]
+
         executors = []
         for database in self.databases:
             executor = self.new_query_executor(
                 self.queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
-                extra_tags=['db:{}'.format(database), 'database:{}'.format(database)],
             )
             executor.compile_queries()
             executors.append(executor)
