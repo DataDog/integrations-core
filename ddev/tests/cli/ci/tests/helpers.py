@@ -157,6 +157,16 @@ def copied(source: str, destination: str) -> ChangedFile:
     return ChangedFile(change_type=ChangeType.COPIED, path=destination, previous_path=source)
 
 
+class RecordingBus:
+    """Stands in for the event bus in processor unit tests, recording what the processor submits."""
+
+    def __init__(self):
+        self.queue: asyncio.Queue[BaseMessage] = asyncio.Queue()
+
+    def submit_message(self, message: BaseMessage) -> None:
+        self.queue.put_nowait(message)
+
+
 def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
     messages: list[BaseMessage] = []
     while not queue.empty():
