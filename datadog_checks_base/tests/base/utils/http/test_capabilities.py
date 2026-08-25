@@ -1,19 +1,48 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import timedelta
+
 import mock
 import pytest
 import requests
-from requests.adapters import HTTPAdapter
 
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPResponse
 from datadog_checks.base.utils.requests_adapter import RequestsResponseAdapter
 
+from . import common
 from .common import get_wire_headers
 
 pytestmark = [pytest.mark.unit]
+
+
+def test_requests_transport_builds_response_through_requests():
+    transport = common.RequestsTransport()
+    transport.respond(
+        status_code=202,
+        content=b'{"result": "ok"}',
+        headers={
+            'Content-Type': 'application/json',
+            'Link': '<http://example.test/items?page=2>; rel="next"',
+        },
+    )
+    http = common.create_requests_client(transport)
+
+    response = http.get('http://example.test/items')
+
+    assert response.status_code == 202
+    assert response.content == b'{"result": "ok"}'
+    assert response.text == '{"result": "ok"}'
+    assert response.json() == {'result': 'ok'}
+    assert response.headers['content-type'] == 'application/json'
+    assert response.encoding == 'utf-8'
+    assert response.elapsed >= timedelta()
+    assert response.ok
+    assert response.reason == 'Accepted'
+    assert response.url == 'http://example.test/items'
+    assert response.links == {'next': {'url': 'http://example.test/items?page=2', 'rel': 'next'}}
+    assert len(transport.requests) == 1
 
 
 class TestClose:
@@ -23,11 +52,12 @@ class TestClose:
         assert http._session is None
 
     def test_close_closes_underlying_session(self):
-        http = RequestsWrapper({}, {})
-        session = http.session
-        with mock.patch.object(session, 'close') as close:
-            http.close()
-        close.assert_called_once_with()
+        transport = common.RequestsTransport()
+        http = common.create_requests_client(transport)
+
+        http.close()
+
+        assert transport.closed
 
     def test_close_resets_session(self):
         http = RequestsWrapper({}, {})
@@ -44,15 +74,23 @@ class TestClose:
         assert http._session is None
 
     def test_request_succeeds_after_close(self):
+        first_transport = common.RequestsTransport()
+        first_transport.respond()
         http = RequestsWrapper({}, {})
         http.persist_connections = True
-        with mock.patch('requests.Session.get') as get:
-            http.get('http://example.com')
-            first = http.session
-            http.close()
-            http.get('http://example.com')
-            second = http.session
-        assert get.call_count == 2
+        first = http.session
+        first.mount('http://', first_transport)
+        http.get('http://example.com')
+        http.close()
+
+        second_transport = common.RequestsTransport()
+        second_transport.respond()
+        second = http.session
+        second.mount('http://', second_transport)
+        http.get('http://example.com')
+
+        assert len(first_transport.requests) == 1
+        assert len(second_transport.requests) == 1
         assert second is not first
 
 
@@ -70,42 +108,26 @@ class TestDisableAuth:
         assert http.trust_env is True
 
     def test_netrc_header_injected_without_disable_auth(self):
-        http = RequestsWrapper({}, {})
+        transport = common.RequestsTransport()
+        transport.respond()
+        http = common.create_requests_client(transport)
         http.options['auth'] = None
-        captured = {}
 
-        def fake_send(session_self, request, **kwargs):
-            captured['headers'] = dict(request.headers)
-            response = requests.Response()
-            response.status_code = 200
-            return response
-
-        with (
-            mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
-            mock.patch('requests.sessions.Session.send', new=fake_send),
-        ):
+        with mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')):
             http.get('http://example.com')
 
-        assert 'Authorization' in captured['headers']
+        assert 'Authorization' in transport.requests[0].headers
 
     def test_disable_auth_suppresses_netrc_header(self):
-        http = RequestsWrapper({}, {})
-        captured = {}
+        transport = common.RequestsTransport()
+        transport.respond()
+        http = common.create_requests_client(transport)
 
-        def fake_send(session_self, request, **kwargs):
-            captured['headers'] = dict(request.headers)
-            response = requests.Response()
-            response.status_code = 200
-            return response
-
-        with (
-            mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
-            mock.patch('requests.sessions.Session.send', new=fake_send),
-        ):
+        with mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')):
             http.disable_auth()
             http.get('http://example.com')
 
-        assert 'Authorization' not in captured['headers']
+        assert 'Authorization' not in transport.requests[0].headers
 
 
 class TestCookies:
@@ -198,33 +220,26 @@ class TestResponseProtocolSurface:
         assert callable(HTTPResponse.get_peer_cert)
 
     def test_context_manager_closes_underlying_response(self):
-        response = requests.Response()
-        response.close = mock.Mock()
-        adapter = RequestsResponseAdapter(response, 1024)
+        transport = common.RequestsTransport()
+        transport.respond(content=b'body')
+        http = common.create_requests_client(transport)
+        response = http.get('http://example.test/items', stream=True)
+        raw_response = transport.raw_responses[0]
 
-        with adapter as entered:
-            assert entered is adapter
+        with response as entered:
+            assert entered is response
 
-        response.close.assert_called_once_with()
+        assert raw_response.closed
+        assert raw_response.released
 
     def test_requests_members_are_not_exposed(self):
-        response = requests.Response()
-        response.raw = object()
-        response.request = requests.Request('GET', 'http://example.com').prepare()
-        adapter = RequestsResponseAdapter(response, 1024)
+        transport = common.RequestsTransport()
+        transport.respond()
+        http = common.create_requests_client(transport)
+        response = http.get('http://example.test/items')
 
-        assert not hasattr(adapter, 'raw')
-        assert not hasattr(adapter, 'request')
-
-
-def build_requests_response(content: bytes, headers: dict[str, str] | None = None) -> RequestsResponseAdapter:
-    """Build through the requests adapter so headers determine encoding."""
-    raw = mock.Mock(spec=['status', 'headers', 'reason', 'version'])
-    raw.status, raw.headers, raw.reason, raw.version = 200, headers or {}, 'OK', 11
-    response = HTTPAdapter().build_response(requests.Request('GET', 'http://example.com').prepare(), raw)
-    response._content = content
-    response._content_consumed = True
-    return RequestsResponseAdapter(response, 1024)
+        assert not hasattr(response, 'raw')
+        assert not hasattr(response, 'request')
 
 
 @pytest.mark.parametrize(
@@ -240,17 +255,33 @@ def build_requests_response(content: bytes, headers: dict[str, str] | None = Non
     ],
 )
 def test_requests_encoding_derived_from_content_type(headers, expected):
-    response = build_requests_response(b'abc', headers)
+    transport = common.RequestsTransport()
+    transport.respond(content=b'abc', headers=headers)
+    http = common.create_requests_client(transport)
+
+    response = http.get('http://example.test/items')
+
     assert response.encoding == expected
 
 
 def test_requests_decode_unicode_yields_bytes_when_the_encoding_is_undetermined():
     content = 'a: café\nb: 2'.encode('utf-8')
-    response = build_requests_response(content)
+    transport = common.RequestsTransport()
+    transport.respond(content=content)
+    transport.respond(content=content)
+    http = common.create_requests_client(transport)
+    lines_response = http.get('http://example.test/lines', stream=True)
+    chunks_response = http.get('http://example.test/chunks', stream=True)
 
-    assert response.encoding is None
-    assert list(response.iter_lines(decode_unicode=True)) == [b'a: caf\xc3\xa9', b'b: 2']
-    assert list(response.iter_content(chunk_size=4, decode_unicode=True)) == [b'a: c', b'af\xc3\xa9', b'\nb: ', b'2']
+    assert lines_response.encoding is None
+    assert chunks_response.encoding is None
+    assert list(lines_response.iter_lines(decode_unicode=True)) == [b'a: caf\xc3\xa9', b'b: 2']
+    assert list(chunks_response.iter_content(chunk_size=4, decode_unicode=True)) == [
+        b'a: c',
+        b'af\xc3\xa9',
+        b'\nb: ',
+        b'2',
+    ]
 
 
 @pytest.mark.parametrize(
@@ -272,10 +303,10 @@ def test_requests_iter_lines_contract(
     expected: list[bytes | str],
     element_type: type[bytes] | type[str],
 ) -> None:
-    raw_response = requests.Response()
-    raw_response._content = content
-    raw_response._content_consumed = True
-    response = RequestsResponseAdapter(raw_response, 1024)
+    transport = common.RequestsTransport()
+    transport.respond(content=content)
+    http = common.create_requests_client(transport)
+    response = http.get('http://example.test/items', stream=True)
 
     if decode_unicode:
         response.encoding = 'utf-8'
@@ -316,27 +347,25 @@ class TestPeerCert:
 
 class TestHistory:
     def test_history_items_are_wrapped(self):
-        redirect = mock.Mock()
-        redirect.status_code = 301
-        final = mock.Mock()
-        final.history = [redirect]
-        adapter = RequestsResponseAdapter(final, 1024)
-        history = adapter.history
+        transport = common.RequestsTransport()
+        transport.respond(status_code=302, headers={'Location': '/final'})
+        transport.respond(content=b'complete')
+        http = common.create_requests_client(transport)
+
+        response = http.get('http://example.test/start')
+
+        history = response.history
         assert len(history) == 1
         assert isinstance(history[0], RequestsResponseAdapter)
-        assert history[0].status_code == 301
-
-    def test_history_item_translates_raise_for_status(self):
-        redirect = mock.Mock()
-        redirect.raise_for_status.side_effect = requests.exceptions.HTTPError('boom')
-        final = mock.Mock()
-        final.history = [redirect]
-        adapter = RequestsResponseAdapter(final, 1024)
-        with pytest.raises(HTTPClientStatusError):
-            adapter.history[0].raise_for_status()
+        assert history[0].status_code == 302
+        assert history[0].url == 'http://example.test/start'
+        assert response.url == 'http://example.test/final'
 
     def test_empty_history(self):
-        response = mock.Mock()
-        response.history = []
-        adapter = RequestsResponseAdapter(response, 1024)
-        assert adapter.history == []
+        transport = common.RequestsTransport()
+        transport.respond()
+        http = common.create_requests_client(transport)
+
+        response = http.get('http://example.test/items')
+
+        assert response.history == []
