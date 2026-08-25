@@ -31,6 +31,7 @@ from .exceptions import (
 logger = logging.getLogger(__name__)
 
 V2_REPOSITORY_URL = "https://agent-integration-wheels.datadoghq.com"
+V2_METADATA_ROOT = Path(__file__).parent / 'data' / 'v2' / 'repositories'
 
 # tuf.ngclient sets its own fetcher timeout; this applies only to the raw wheel urlopen().
 WHEEL_FETCH_TIMEOUT_SECONDS = 60
@@ -45,9 +46,15 @@ SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
 class TUFPointerDownloader:
     """Downloads Datadog integration wheels from a v2 TUF repository."""
 
-    def __init__(self, repository_url: str, disable_verification: bool = False):
+    def __init__(
+        self,
+        repository_url: str,
+        disable_verification: bool = False,
+        metadata_root: Path | None = None,
+    ):
         self._repository_url = repository_url.rstrip('/')
         self._disable_verification = disable_verification
+        self._metadata_root = metadata_root or V2_METADATA_ROOT
 
         if disable_verification:
             logger.warning('Running with TUF verification disabled. Integrity is protected only by TLS (HTTPS).')
@@ -55,7 +62,24 @@ class TUFPointerDownloader:
     def _bootstrap_metadata_dir(self, metadata_dir: Path) -> None:
         dest = metadata_dir / 'root.json'
         metadata = importlib.resources.files('datadog_checks.downloader') / 'data' / 'v2' / 'metadata'
-        dest.write_bytes((metadata / 'root.json').read_bytes())
+        root_bytes = (metadata / 'root.json').read_bytes()
+        temp_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=metadata_dir, prefix='.root.', suffix='.tmp', delete=False) as temp:
+                temp_path = Path(temp.name)
+                temp.write(root_bytes)
+            temp_path.replace(dest)
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
+
+    def _prepare_metadata_dir(self) -> Path:
+        repository_id = hashlib.sha256(self._repository_url.encode()).hexdigest()
+        metadata_dir = self._metadata_root / repository_id / 'metadata'
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        if not (metadata_dir / 'root.json').exists():
+            self._bootstrap_metadata_dir(metadata_dir)
+        return metadata_dir
 
     def _make_updater(self, metadata_dir: Path, target_dir: Path) -> Updater:
         return Updater(
@@ -113,14 +137,12 @@ class TUFPointerDownloader:
 
     def get_pointer(self, project: str, version: str | None = None) -> dict:
         """Return the pointer JSON for *project* at *version* (or 'latest' when None)."""
+        metadata_dir = self._prepare_metadata_dir()
         with tempfile.TemporaryDirectory() as tmp:
-            metadata_dir = Path(tmp) / 'metadata'
             target_dir = Path(tmp) / 'targets'
-            metadata_dir.mkdir()
             target_dir.mkdir()
 
             target_path = self._target_path(project, version)
-            self._bootstrap_metadata_dir(metadata_dir)
             updater = self._make_updater(metadata_dir, target_dir)
             updater.refresh()
 
