@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.0.2 / 2026-08-26
+
+***Fixed***:
+
+* Bump ddtrace to 4.12.2 to remediate CVE-2026-50271 (W3C baggage header DoS). ([#24864](https://github.com/DataDog/integrations-core/pull/24864))
+
 ## 38.0.1 / 2026-08-24
 
 ***Fixed***:
