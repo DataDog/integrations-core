@@ -37,11 +37,23 @@ DBNAME_PATTERN = re.compile(r'^[A-Za-z0-9_$]+$')
 Mode = Literal["cron", "interval"]
 
 
+@dataclass
+class ScheduledQuery:
+    query: Query
+    scheduler: CronScheduler | None
+    last_execution: float | None = None
+    pending_retry: DueQuery | None = None
+
+
 @dataclass(frozen=True)
 class DueQuery:
-    query: Query
+    scheduled_query: ScheduledQuery
     scheduled_time: float
     mode: Mode
+
+    @property
+    def query(self) -> Query:
+        return self.scheduled_query.query
 
 
 class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
@@ -55,10 +67,6 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
     ) -> None:
         self._check = check
         self._do_config = do_config
-        self._last_execution: dict[int, float] = {}
-        # CronScheduler consumes a tick when it reports it. Keep due work here if
-        # the connection fails so the next poll can retry the same execution.
-        self._pending_retries: dict[int, DueQuery] = {}
         self._connection_args_provider = connection_args_provider
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0.0
@@ -81,7 +89,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
             job_name="data-observability",
         )
-        self._queries, self._schedulers = self._filter_valid_queries(do_config.queries or ())
+        self._scheduled_queries = self._filter_valid_queries(do_config.queries or ())
 
     def shutdown(self) -> None:
         self._close_db_conn()
@@ -100,20 +108,18 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             except Exception:
                 self._log.debug("Failed to close Data Observability database connection", exc_info=True)
 
-    def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[tuple[Query, ...], dict[int, CronScheduler]]:
-        valid: list[Query] = []
-        schedulers: dict[int, CronScheduler] = {}
+    def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[ScheduledQuery, ...]:
+        valid: list[ScheduledQuery] = []
         for query in queries:
             try:
                 self._validate_dbname(query.dbname)
             except ValueError as e:
                 self._log.warning("Skipping DO query monitor_id=%d: %s", query.monitor_id, e)
                 continue
+            scheduler = None
             if query.schedule:
                 try:
-                    schedulers[query.monitor_id] = CronScheduler(
-                        query.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS
-                    )
+                    scheduler = CronScheduler(query.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
                 except (ValueError, TypeError) as e:
                     self._log.warning(
                         "Skipping DO query monitor_id=%d: invalid cron schedule %r (%s). "
@@ -130,22 +136,33 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                     query.monitor_id,
                 )
                 continue
-            valid.append(query)
-        return tuple(valid), schedulers
+            valid.append(ScheduledQuery(query=query, scheduler=scheduler))
+        return tuple(valid)
 
     def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
         due: list[DueQuery] = []
-        for query in self._queries:
+        for scheduled_query in self._scheduled_queries:
+            query = scheduled_query.query
+            newly_due = None
             if query.schedule:
-                ticks = self._schedulers[query.monitor_id].due_ticks(now + 0.001)
+                scheduler = scheduled_query.scheduler
+                assert scheduler is not None
+                ticks = scheduler.due_ticks(now + 0.001)
                 if ticks:
-                    due.append(DueQuery(query, ticks[-1], "cron"))
+                    newly_due = DueQuery(scheduled_query, ticks[-1], "cron")
             else:
-                last = self._last_execution.get(query.monitor_id)
+                last = scheduled_query.last_execution
                 if last is None or now - last >= query.interval_seconds:
                     scheduled = last + query.interval_seconds if last is not None else now
-                    due.append(DueQuery(query, scheduled, "interval"))
+                    newly_due = DueQuery(scheduled_query, scheduled, "interval")
+
+            if newly_due is not None:
+                scheduled_query.pending_retry = None
+                due.append(newly_due)
+            elif scheduled_query.pending_retry is not None:
+                due.append(scheduled_query.pending_retry)
+                scheduled_query.pending_retry = None
         return due
 
     def _build_base_tags(self) -> list[str]:
@@ -252,15 +269,12 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         }
 
     def run_job(self) -> None:
-        # A newly due execution replaces an older pending execution for the same
-        # monitor so an extended outage does not build an unbounded backlog.
-        due_by_monitor_id = dict(self._pending_retries)
-        self._pending_retries = {}
-        due_by_monitor_id.update({due.query.monitor_id: due for due in self._get_due_queries()})
+        # Each physical query owns its scheduling and retry state. A newly due
+        # execution replaces that query's older retry so outages cannot build a backlog.
         # Group shared session state so each database and timeout is selected as
         # few times as possible during this collection.
         due_queries = sorted(
-            due_by_monitor_id.values(),
+            self._get_due_queries(),
             key=lambda due: (due.query.dbname, due.query.query_timeout),
         )
         if not due_queries:
@@ -272,7 +286,8 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             conn = self._get_db_connection()
         except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
             self._close_db_conn()
-            self._pending_retries.update(due_by_monitor_id)
+            for due in due_queries:
+                due.scheduled_query.pending_retry = due
             raise
 
         for index, due in enumerate(due_queries):
@@ -284,11 +299,12 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                 result = self._execute_single_query(conn, query)
             except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
                 self._close_db_conn()
-                self._pending_retries.update({pending.query.monitor_id: pending for pending in due_queries[index:]})
+                for pending in due_queries[index:]:
+                    pending.scheduled_query.pending_retry = pending
                 raise
             now_at_fire_end = time.time()
             if due.mode == "interval":
-                self._last_execution[query.monitor_id] = now_at_fire_end
+                due.scheduled_query.last_execution = now_at_fire_end
 
             try:
                 self._check.gauge(
