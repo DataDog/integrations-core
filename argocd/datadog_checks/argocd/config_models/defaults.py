@@ -76,8 +76,16 @@ def instance_genresources_cluster_scrape_interval_seconds():
     return 300
 
 
+def instance_genresources_collect_projects():
+    return True
+
+
 def instance_genresources_max_resources_per_cycle():
     return 10000
+
+
+def instance_genresources_project_scrape_interval_seconds():
+    return 300
 
 
 def instance_genresources_repository_scrape_interval_seconds():
