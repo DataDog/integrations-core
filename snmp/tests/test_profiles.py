@@ -2771,9 +2771,7 @@ def test_fortinet_fortigate(aggregator):
     for sensor_index, sensor_name in hw_sensors:
         sensor_tags = common_tags + ['sensor_index:{}'.format(sensor_index), 'sensor_name:{}'.format(sensor_name)]
         aggregator.assert_metric('snmp.fgHwSensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
-        aggregator.assert_metric(
-            'snmp.fgHwSensorAlarmStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1
-        )
+        aggregator.assert_metric('snmp.fgHwSensorAlarmStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
     # Interface
     aggregator.assert_metric('snmp.fgIntfEntVdom', metric_type=aggregator.GAUGE, count=1)
