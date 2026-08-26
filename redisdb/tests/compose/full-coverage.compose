@@ -97,6 +97,8 @@ services:
   # slowlog, client-side caching), not just the one-shot seed. Writes straight to
   # the master; scrapers read the same data through the proxy. See ../activity-gen.sh.
   activity-gen:
+    # Same image as the other services (no extra pull); used only for its
+    # redis-cli client to drive the workload against the master.
     image: "redis:${REDIS_VERSION:-7.4}"
     depends_on:
       redis-master:
