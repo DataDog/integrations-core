@@ -109,7 +109,7 @@ def test_legacy_mock_response_reads_a_file(tmp_path):
 
 def test_mock_response_fixture_builds_requests_response(tmp_path, mock_response):
     path = tmp_path / 'payload.txt'
-    path.write_text('line one\nline two')
+    path.write_bytes(b'line one\nline two')
 
     response = mock_response(file_path=str(path), headers={'X-Test': 'value'})
 
