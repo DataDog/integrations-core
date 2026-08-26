@@ -525,6 +525,270 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
 
 
 @pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/ha/status/current': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='ha-disabled',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_ha_metrics_null_data(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('proxmox.ha.quorum', count=0)
+    aggregator.assert_metric('proxmox.ha.quorate', count=0)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(
+                        status_code=200,
+                        json_data={'data': {'data': None}},
+                    )
+                }
+            },
+            id='no-exported-metrics',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_performance_metrics_null_data(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    for metric in {'proxmox.cpu.current', 'proxmox.disk.total', 'proxmox.mem.total'}:
+        aggregator.assert_metric(metric, count=0)
+
+
+PERMISSION_DENIED_RESPONSE = {'data': None, 'message': 'Permission check failed (/ , Sys.Audit)'}
+TWO_NODE_RESOURCES = {
+    'data': [
+        {'id': 'node/node-1', 'node': 'node-1', 'status': 'online', 'type': 'node'},
+        {'id': 'node/node-2', 'node': 'node-2', 'status': 'online', 'type': 'node'},
+    ]
+}
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='resources',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(
+                        status_code=403,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='performance-metrics',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/ha/status/current': MockResponse(
+                        status_code=200,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='ha',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_api_error_response(dd_run_check, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+
+    with pytest.raises(Exception, match=r'Permission check failed \(/ , Sys.Audit\)'):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='resources',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_required_null_data(dd_run_check, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+
+    with pytest.raises(Exception, match=r'Proxmox API returned null data for .*/cluster/resources'):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='no-tasks',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_tasks_null_data(dd_run_check, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+    assert aggregator.events == []
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                        status_code=200,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='tasks',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_tasks_api_error_response(dd_run_check, instance, caplog):
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+
+    assert "Failed to collect tasks for node ip-122-82-3-112" in caplog.text
+    assert "Permission check failed (/ , Sys.Audit)" in caplog.text
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
+                    '/api2/json/nodes/node-1/tasks': MockResponse(status_code=200, json_data={'data': []}),
+                    '/api2/json/nodes/node-2/tasks': MockResponse(status_code=200, json_data={'data': []}),
+                }
+            },
+            id='two-nodes',
+        ),
+    ],
+    indirect=True,
+)
+def test_tasks_use_per_node_collection_windows(dd_run_check, instance, mock_http_get, monkeypatch):
+    collect_times = [
+        datetime.fromtimestamp(100, timezone.utc),
+        datetime.fromtimestamp(200, timezone.utc),
+        datetime.fromtimestamp(300, timezone.utc),
+    ]
+    monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+
+    task_calls = [call for call in mock_http_get.call_args_list if call.args[0].endswith('/tasks')]
+    assert [call.kwargs['params']['since'] for call in task_calls] == [100, 100]
+    assert check.last_event_collect_times == {'node-1': collect_times[1], 'node-2': collect_times[2]}
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
+                    '/api2/json/nodes/node-1/tasks': MockResponse(
+                        status_code=500,
+                        json_data={'data': None, 'message': 'node unavailable'},
+                    ),
+                    '/api2/json/nodes/node-2/tasks': MockResponse(status_code=200, json_data={'data': []}),
+                }
+            },
+            id='first-node-unavailable',
+        ),
+    ],
+    indirect=True,
+)
+def test_task_error_does_not_block_other_nodes(dd_run_check, instance, mock_http_get, monkeypatch, caplog):
+    collect_times = [
+        datetime.fromtimestamp(100, timezone.utc),
+        datetime.fromtimestamp(200, timezone.utc),
+        datetime.fromtimestamp(300, timezone.utc),
+    ]
+    monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+
+    task_calls = [call for call in mock_http_get.call_args_list if call.args[0].endswith('/tasks')]
+    assert [call.args[0] for call in task_calls] == [
+        'http://localhost:8006/api2/json/nodes/node-1/tasks',
+        'http://localhost:8006/api2/json/nodes/node-2/tasks',
+    ]
+    assert check.last_event_collect_times == {'node-2': collect_times[2]}
+    assert "Failed to collect tasks for node node-1" in caplog.text
+
+
+@pytest.mark.parametrize(
     ('collect_tasks, task_types, expected_events'),
     [
         pytest.param(
