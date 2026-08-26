@@ -65,3 +65,7 @@ variety, eviction, expiry, net bytes, blocked clients, forks/RDB, slowlog, and
 client-side caching so both scrapers see non-zero values across scrapes. It is
 part of the fixture, so any consumer of `redis-full` gets it automatically with no
 extra wiring. Tunable via `ACTIVITY_DB` / `ACTIVITY_DURATION`.
+
+For a quiescent `redis-full` (no generated traffic), set `ACTIVITY_GEN=0` in the
+host environment before starting the fixture; the container stays up but does
+nothing.

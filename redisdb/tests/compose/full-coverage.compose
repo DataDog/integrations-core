@@ -110,6 +110,9 @@ services:
       DB_HOST: redis-master
       REDIS_PASSWORD: devops-best-friend
       ACTIVITY_DB: "14"
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent redis-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
     volumes:
       - ../activity-gen.sh:/opt/activity-gen.sh:ro
     command: ["sh", "/opt/activity-gen.sh"]
