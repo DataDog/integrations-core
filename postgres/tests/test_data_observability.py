@@ -201,7 +201,7 @@ def test_per_query_interval_tracking(aggregator, pg_instance):
 
     # Reset last_execution to force re-run
     aggregator.reset()
-    check.data_observability._last_execution[1] = 0.0
+    check.data_observability._scheduled_queries[0].last_execution = 0.0
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
 
@@ -410,8 +410,7 @@ def test_failed_query_updates_last_execution(aggregator, pg_instance):
     check.db_pool = _mock_db_pool(mock_conn)
 
     check.data_observability.run_job()
-    assert 1 in check.data_observability._last_execution
-    assert check.data_observability._last_execution[1] > 0
+    assert check.data_observability._scheduled_queries[0].last_execution > 0
 
     # Immediate re-run should skip the query (interval not elapsed)
     aggregator.reset()
@@ -634,13 +633,13 @@ def test_schedule_advances_after_run(pg_instance, monkeypatch):
     # First run at 00:50:05: lookback recovery fires (5s within 300s window); scheduler
     # caches next_tick = 01:50:00.
     check.data_observability.run_job()
-    mid = CRON_QUERY['monitor_id']
-    first_next_run = check.data_observability._schedulers[mid].next_tick
+    scheduler = check.data_observability._scheduled_queries[0].scheduler
+    first_next_run = scheduler.next_tick
 
     current_time[0] = _BASE_EPOCH + 3665  # ~01:50:05
     check.data_observability.run_job()
 
-    second_next_run = check.data_observability._schedulers[mid].next_tick
+    second_next_run = scheduler.next_tick
     # After firing at 01:50:05, next_tick should advance to 02:50:00
     assert second_next_run > first_next_run
     # Should be approximately 1 hour later
@@ -685,7 +684,7 @@ def test_invalid_cron_schedule_filtered_at_init(pg_instance, aggregator, caplog)
     mock_conn, _ = _make_mock_conn()
     with caplog.at_level(logging.WARNING):
         check = _create_check(pg_instance, queries=[bad, good])
-    assert {q.monitor_id for q in check.data_observability._queries} == {1}
+    assert {scheduled.query.monitor_id for scheduled in check.data_observability._scheduled_queries} == {1}
     assert any('invalid cron schedule' in r.message and "'not-a-cron'" in r.message for r in caplog.records)
 
     check.db_pool = _mock_db_pool(mock_conn)
@@ -719,7 +718,7 @@ def test_query_without_schedule_or_positive_interval_filtered_at_init(pg_instanc
     }
     with caplog.at_level(logging.WARNING):
         check = _create_check(pg_instance, queries=[query])
-    assert check.data_observability._queries == ()
+    assert check.data_observability._scheduled_queries == ()
     assert any('neither schedule nor positive interval_seconds' in r.message for r in caplog.records)
 
 
@@ -743,7 +742,7 @@ def test_lateness_metric_emitted_for_cron(pg_instance, aggregator, monkeypatch):
     # Scheduler caches next_tick = 00:50:00.
     check.data_observability.run_job()
     mid = CRON_QUERY['monitor_id']
-    scheduled_tick = check.data_observability._schedulers[mid].next_tick
+    scheduled_tick = check.data_observability._scheduled_queries[0].scheduler.next_tick
 
     # Step 2: Advance to 00:52:00 — 2 minutes late
     current_time[0] = fire_time
@@ -811,11 +810,11 @@ def test_lateness_clamped_at_zero(pg_instance, aggregator, monkeypatch):
     from datadog_checks.postgres.data_observability import DueQuery
 
     skewed_scheduled = current_time[0] + 100.0
-    q = check.data_observability._do_config.queries[0]
+    scheduled_query = check.data_observability._scheduled_queries[0]
     with patch.object(
         check.data_observability,
         '_get_due_queries',
-        return_value=[DueQuery(q, skewed_scheduled, "cron")],
+        return_value=[DueQuery(scheduled_query, skewed_scheduled, "cron")],
     ):
         aggregator.reset()
         check.data_observability.run_job()
@@ -875,6 +874,45 @@ def test_starved_query_eventually_fires(pg_instance, aggregator, monkeypatch):
     b_lateness = [m for m in lateness_metrics if 'monitor_id:51' in m.tags]
     assert len(b_lateness) == 1
     assert b_lateness[0].value > 0.0
+
+
+def test_cron_queries_with_same_monitor_id_have_independent_schedulers(pg_instance, monkeypatch):
+    query_a = {
+        **deepcopy(CRON_QUERY),
+        'monitor_id': 0,
+        'query': 'SELECT 1',
+        'schedule': '50 * * * *',
+    }
+    query_b = {
+        **deepcopy(CRON_QUERY),
+        'monitor_id': 0,
+        'query': 'SELECT 2',
+        'schedule': '51 * * * *',
+    }
+    current_time = [float(_BASE_EPOCH)]
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
+
+    check = _create_check(pg_instance, queries=[query_a, query_b])
+    assert check.data_observability._get_due_queries() == []
+
+    current_time[0] = _BASE_EPOCH + 65
+    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT 1']
+
+    current_time[0] = _BASE_EPOCH + 125
+    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT 2']
+
+
+def test_interval_queries_with_same_monitor_id_track_execution_independently(pg_instance, monkeypatch):
+    queries = [
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT 1'},
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT 2'},
+    ]
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: 1_000.0)
+    check = _create_check(pg_instance, queries=queries)
+
+    check.data_observability._scheduled_queries[0].last_execution = 1_000.0
+
+    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT 2']
 
 
 # ---------------------------------------------------------------------------
@@ -969,8 +1007,8 @@ def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatc
     # First run: lookback recovery fires (5s within 300s window); scheduler caches next_tick = 01:50:00.
     # The query fails; aggregator records an error metric that we discard below.
     check.data_observability.run_job()
-    mid = CRON_QUERY['monitor_id']
-    registered = check.data_observability._schedulers[mid].next_tick
+    scheduler = check.data_observability._scheduled_queries[0].scheduler
+    registered = scheduler.next_tick
 
     # Jump past the next tick and let the failing query fire again.
     current_time[0] = _BASE_EPOCH + 3665  # ~01:50:05
@@ -982,7 +1020,7 @@ def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatc
 
     # next_tick must have advanced past the just-fired tick; otherwise the very next
     # poll would re-fire the same tick in a tight loop.
-    advanced = check.data_observability._schedulers[mid].next_tick
+    advanced = scheduler.next_tick
     assert advanced > registered
     assert advanced >= current_time[0]
 
