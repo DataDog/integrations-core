@@ -110,6 +110,12 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             self._db.ping()
         return self._db
 
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
+        self._databases_data = None
+
     def _close_db_conn(self):
         if self._db:
             try:
@@ -123,6 +129,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)
@@ -157,9 +164,6 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                     """An error occurred while collecting schema data.
                                 These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
-
-    def shut_down(self):
-        self._databases_data.shut_down()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):

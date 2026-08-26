@@ -8,6 +8,7 @@ import pytest
 
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
+from ddev.utils.git import ChangedFile, ChangeType, parse_name_status
 from tests.helpers.git import ClonedRepo
 
 
@@ -191,12 +192,129 @@ def test_changed_files(repository):
     zoo_subdir.mkdir()
     (zoo_subdir / "foo.txt").touch()
 
-    changed_files = ["zoo/sub/foo.txt", "zoo/bar.txt", "pyproject.toml"]
+    changed_files = [
+        ChangedFile(ChangeType.ADDED, "zoo/sub/foo.txt"),
+        ChangedFile(ChangeType.ADDED, "zoo/bar.txt"),
+        ChangedFile(ChangeType.MODIFIED, "pyproject.toml"),
+    ]
     assert repo.git.changed_files() == changed_files
 
     (zoo_subdir / "baz.txt").touch()
-    changed_files.insert(0, "zoo/sub/baz.txt")
+    changed_files.insert(0, ChangedFile(ChangeType.ADDED, "zoo/sub/baz.txt"))
     assert repo.git.changed_files() == changed_files
+
+
+def test_changed_files_between_refs_ignores_the_working_tree(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    (repo.path / "committed.txt").touch()
+    repo.git.capture("add", "committed.txt")
+    repo.git.capture("commit", "-m", "test commit")
+    head = repo.git.capture("rev-parse", "HEAD").strip()
+
+    # Uncommitted, so it must not appear when an explicit head is given
+    (repo.path / "untracked.txt").touch()
+
+    assert repo.git.changed_files(f"{head}^1", head) == [ChangedFile(ChangeType.ADDED, "committed.txt")]
+    assert ChangedFile(ChangeType.ADDED, "untracked.txt") in repo.git.changed_files()
+
+
+def test_changed_files_ignores_changes_made_on_the_base_after_divergence(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    base = repo.git.capture("rev-parse", "HEAD").strip()
+    (repo.path / "mine.txt").touch()
+    repo.git.capture("add", "mine.txt")
+    repo.git.capture("commit", "-m", "my work")
+    head = repo.git.capture("rev-parse", "HEAD").strip()
+
+    repo.git.capture("checkout", "-b", "base-branch", base)
+    (repo.path / "theirs.txt").touch()
+    repo.git.capture("add", "theirs.txt")
+    repo.git.capture("commit", "-m", "their work")
+
+    assert repo.git.changed_files("base-branch", head) == [ChangedFile(ChangeType.ADDED, "mine.txt")]
+
+
+def test_changed_files_reports_renames_with_their_source(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    original = repo.path / "renamed_from.txt"
+    original.write_text("some content worth detecting as a rename\n" * 10)
+    repo.git.capture("add", "renamed_from.txt")
+    repo.git.capture("commit", "-m", "add file")
+    base = repo.git.capture("rev-parse", "HEAD").strip()
+
+    repo.git.capture("mv", "renamed_from.txt", "renamed_to.txt")
+    repo.git.capture("commit", "-m", "rename file")
+    head = repo.git.capture("rev-parse", "HEAD").strip()
+
+    assert repo.git.changed_files(base, head) == [
+        ChangedFile(ChangeType.RENAMED, "renamed_to.txt", previous_path="renamed_from.txt")
+    ]
+
+
+@pytest.mark.parametrize(
+    ("output", "expected"),
+    [
+        pytest.param("", [], id="empty"),
+        pytest.param("A\tadded.py", [ChangedFile(ChangeType.ADDED, "added.py")], id="added"),
+        pytest.param("D\tgone.py", [ChangedFile(ChangeType.DELETED, "gone.py")], id="deleted"),
+        pytest.param("T\tlink.py", [ChangedFile(ChangeType.MODIFIED, "link.py")], id="type-change-is-a-modification"),
+        pytest.param("X\todd.py", [ChangedFile(ChangeType.MODIFIED, "odd.py")], id="unknown-status-is-a-modification"),
+        pytest.param(
+            "R100\told.py\tnew.py",
+            [ChangedFile(ChangeType.RENAMED, "new.py", previous_path="old.py")],
+            id="rename-keeps-the-source",
+        ),
+        pytest.param(
+            "C75\tsource.py\tcopy.py",
+            [ChangedFile(ChangeType.COPIED, "copy.py", previous_path="source.py")],
+            id="copy-keeps-the-source",
+        ),
+        pytest.param("warning: CRLF\nM\treal.py", [ChangedFile(ChangeType.MODIFIED, "real.py")], id="skips-warnings"),
+        pytest.param(
+            "M\tpath with spaces.py",
+            [ChangedFile(ChangeType.MODIFIED, "path with spaces.py")],
+            id="paths-may-contain-spaces",
+        ),
+    ],
+)
+def test_parse_name_status(output, expected):
+    assert parse_name_status(output) == expected
+
+
+@pytest.mark.parametrize(
+    ("changed_file", "expected"),
+    [
+        pytest.param(ChangedFile(ChangeType.MODIFIED, "a.py"), ("a.py",), id="modified"),
+        pytest.param(ChangedFile(ChangeType.DELETED, "a.py"), ("a.py",), id="deleted"),
+        pytest.param(
+            ChangedFile(ChangeType.RENAMED, "new/a.py", previous_path="old/a.py"),
+            ("new/a.py", "old/a.py"),
+            id="rename-affects-its-source-too",
+        ),
+        pytest.param(
+            ChangedFile(ChangeType.COPIED, "new/a.py", previous_path="old/a.py"),
+            ("new/a.py",),
+            id="copy-leaves-the-source-untouched",
+        ),
+    ],
+)
+def test_affected_paths(changed_file, expected):
+    assert changed_file.affected_paths == expected
+
+
+@pytest.mark.parametrize(
+    ("output", "message"),
+    [
+        pytest.param("M", "Malformed diff line", id="missing-path"),
+        pytest.param("R100\tonly_one_path.py", "Malformed rename/copy diff line", id="rename-missing-destination"),
+    ],
+)
+def test_parse_name_status_rejects_malformed_lines(output, message):
+    with pytest.raises(ValueError, match=message):
+        parse_name_status(output)
 
 
 def test_filtered_tags(repository):
@@ -222,6 +340,20 @@ def test_fetch_tags(repository, mocker):
             check=True,
         ),
     ]
+
+
+def test_merge_base_skips_warning_lines(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+    head = repo.git.capture('rev-parse', 'HEAD').strip()
+
+    # A branch and a tag of the same name make git print `warning: refname 'ambiguous' is
+    # ambiguous.` ahead of the sha, and `capture` folds it into the output
+    repo.git.capture('branch', 'ambiguous')
+    repo.git.capture('tag', 'ambiguous')
+    try:
+        assert repo.git.merge_base('ambiguous') == head
+    finally:
+        repo.git.capture('branch', '--delete', 'ambiguous')
 
 
 def test_get_merge_base(repository):

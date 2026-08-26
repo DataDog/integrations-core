@@ -148,6 +148,25 @@ def test_no_queries_does_nothing(aggregator):
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
 
+def test_cancelled_job_aborts_before_connecting(aggregator):
+    """A cancelled job must stop before it opens a connection or runs a query.
+
+    Teardown waits for the job loop, so a pass that works through its remaining databases
+    after a cancel holds up the Agent's unschedule for as long as those queries take.
+    """
+    check = _create_check(_make_do_instance(queries=deepcopy(MULTI_QUERIES)))
+    mock_connection, cursor, _ = _make_connection_mocks()
+    check._connection = mock_connection
+    check.data_observability.cancel()
+
+    with pytest.raises(Exception, match='cancelled'):
+        check.data_observability.run_job()
+
+    mock_connection._open_managed_db_connections.assert_not_called()
+    cursor.execute.assert_not_called()
+    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
+
+
 def test_multi_query_execution(aggregator):
     _setup_and_run(queries=deepcopy(MULTI_QUERIES))
 
