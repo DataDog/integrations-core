@@ -151,6 +151,23 @@ class RepositoryWideRule:
             yield from facts.eligible_targets()
 
 
+@dataclass(frozen=True)
+class AllTargetsRule:
+    """Select every eligible target, whatever changed.
+
+    Used by a run that tests the whole repository on purpose — a push to the default branch, the
+    nightly schedule, the Agent test workflow — where the change set is not what decides.
+    """
+
+    def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterator[str]:
+        yield from facts.eligible_targets()
+
+
+def all_target_rules() -> tuple[TargetRule, ...]:
+    """The rule set that tests every eligible target."""
+    return (AllTargetsRule(),)
+
+
 def default_target_rules(*, is_core: bool) -> tuple[TargetRule, ...]:
     """Build the default ordered rule set for a repository."""
     return (DirectTargetRule(), RepositoryWideRule(is_core=is_core))

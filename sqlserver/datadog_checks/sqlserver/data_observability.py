@@ -15,6 +15,7 @@ from datadog_checks.base.utils.serialization import json
 
 from .connection import split_sqlserver_host_port
 from .connection_errors import SQLConnectionError
+from .utils import raise_if_cancelled
 
 try:
     import pyodbc
@@ -87,7 +88,7 @@ class SqlServerDataObservability(DBMAsyncJob):
         # Filter bad queries on check construction.
         self._queries, self._schedulers = self._filter_valid_queries(self._do_config.queries or ())
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
 
     @property
@@ -163,9 +164,8 @@ class SqlServerDataObservability(DBMAsyncJob):
         """Execute a query, catching expected DB exceptions per-query so the loop continues."""
         monitor_id = query_spec.monitor_id
         start = time.time()
+        raise_if_cancelled(self._cancel_event)
         try:
-            if self._cancel_event.is_set():
-                raise Exception("Job loop cancelled. Aborting query.")
             cursor.execute(query_spec.query)
             # cursor.description is None when the query produced no result set
             # (e.g. INSERT, UPDATE, DELETE, or a syntax error that executed without
@@ -346,6 +346,7 @@ class SqlServerDataObservability(DBMAsyncJob):
 
         for group in queries_by_dbname.values():
             conn_dbname = group[0].query.dbname
+            raise_if_cancelled(self._cancel_event)
             try:
                 with self._check.connection._open_managed_db_connections(
                     self._check.connection.DEFAULT_DB_KEY,
