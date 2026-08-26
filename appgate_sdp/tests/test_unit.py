@@ -5,6 +5,8 @@ import pytest
 
 from datadog_checks.appgate_sdp import AppgateSDPCheck
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS_MOCK, get_fixture_path
@@ -28,10 +30,11 @@ def test_check_appgate_sdp(dd_run_check, aggregator, instance, mock_http, mock_r
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_emits_critical_service_check_when_service_is_down(
-    dd_run_check, aggregator, instance, mock_http, mock_response
-):
-    mock_http.get.return_value = mock_response(status_code=404)
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http):
+    mock_http.get.return_value = FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
+    )
     check = AppgateSDPCheck('appgate_sdp', {}, [instance])
     with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)

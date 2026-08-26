@@ -70,13 +70,11 @@ def ref_gauge():
 
 
 @pytest.fixture
-def bin_data():
+def bin_data_path():
     f_name = os.path.join(FIXTURES_PATH, 'protobuf.bin')
-    with open(f_name, 'rb') as f:
-        bin_data = f.read()
-        assert len(bin_data) == 51855
+    assert os.path.getsize(f_name) == 51855
 
-    return bin_data
+    return f_name
 
 
 @pytest.fixture
@@ -106,8 +104,8 @@ def test_check(mocked_prometheus_check):
         mocked_prometheus_check.check(None)
 
 
-def test_parse_metric_family_protobuf(bin_data, mocked_prometheus_check, mock_response):
-    response = mock_response(content=bin_data, headers={'Content-Type': protobuf_content_type})
+def test_parse_metric_family_protobuf(bin_data_path, mocked_prometheus_check, mock_response):
+    response = mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
     check = mocked_prometheus_check
 
     messages = list(check.parse_metric_family(response))
@@ -123,7 +121,7 @@ def test_parse_metric_family_protobuf(bin_data, mocked_prometheus_check, mock_re
     # override the type:
     check.type_overrides = {"go_goroutines": "summary"}
 
-    response = mock_response(content=bin_data, headers={'Content-Type': protobuf_content_type})
+    response = mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
 
     messages = list(check.parse_metric_family(response))
 
@@ -233,19 +231,19 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check, mock_respo
     assert _histo in messages
 
 
-def test_parse_metric_family_unsupported(bin_data, mocked_prometheus_check, mock_response):
+def test_parse_metric_family_unsupported(bin_data_path, mocked_prometheus_check, mock_response):
     check = mocked_prometheus_check
     with pytest.raises(UnknownFormatError):
-        response = mock_response(content=bin_data, headers={'Content-Type': 'application/json'})
+        response = mock_response(file_path=bin_data_path, headers={'Content-Type': 'application/json'})
         list(check.parse_metric_family(response))
 
 
-def test_process(bin_data, mocked_prometheus_check, mock_response, ref_gauge):
+def test_process(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
 
     check.poll = mock.MagicMock(
-        return_value=mock_response(content=bin_data, headers={'Content-Type': protobuf_content_type})
+        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
     )
     check.process_metric = mock.MagicMock()
     check.process(endpoint, instance=None)
@@ -253,12 +251,12 @@ def test_process(bin_data, mocked_prometheus_check, mock_response, ref_gauge):
     check.process_metric.assert_called_with(ref_gauge, instance=None)
 
 
-def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, mock_response, ref_gauge):
+def test_process_send_histograms_buckets(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
     """Checks that the send_histograms_buckets parameter is passed along"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
     check.poll = mock.MagicMock(
-        return_value=mock_response(content=bin_data, headers={'Content-Type': protobuf_content_type})
+        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
     )
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_histograms_buckets=False, instance=None)
@@ -266,12 +264,12 @@ def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, mock
     check.process_metric.assert_called_with(ref_gauge, instance=None, send_histograms_buckets=False)
 
 
-def test_process_send_monotonic_counter(bin_data, mocked_prometheus_check, mock_response, ref_gauge):
+def test_process_send_monotonic_counter(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
     """Checks that the send_monotonic_counter parameter is passed along"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
     check.poll = mock.MagicMock(
-        return_value=mock_response(content=bin_data, headers={'Content-Type': protobuf_content_type})
+        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
     )
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_monotonic_counter=False, instance=None)
@@ -279,12 +277,12 @@ def test_process_send_monotonic_counter(bin_data, mocked_prometheus_check, mock_
     check.process_metric.assert_called_with(ref_gauge, instance=None, send_monotonic_counter=False)
 
 
-def test_process_instance_with_tags(bin_data, mocked_prometheus_check, mock_response, ref_gauge):
+def test_process_instance_with_tags(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
     """Checks that an instances with tags passes them as custom tag"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
     check.poll = mock.MagicMock(
-        return_value=mock_response(content=bin_data, headers={'Content-Type': protobuf_content_type})
+        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
     )
     check.process_metric = mock.MagicMock()
     instance = {'endpoint': 'IgnoreMe', 'tags': ['tag1:tagValue1', 'tag2:tagValue2']}
@@ -320,11 +318,11 @@ def test_process_metric_filtered(mocked_prometheus_check):
     check.gauge.assert_not_called()
 
 
-def test_poll_protobuf(bin_data, mocked_prometheus_check, mock_prometheus_http, mock_response):
+def test_poll_protobuf(bin_data_path, mocked_prometheus_check, mock_prometheus_http, mock_response):
     """Tests poll using the protobuf format"""
     check = mocked_prometheus_check
     mock_prometheus_http.get.return_value = mock_response(
-        content=bin_data, headers={'Content-Type': protobuf_content_type}
+        file_path=bin_data_path, headers={'Content-Type': protobuf_content_type}
     )
 
     response = check.poll("http://fake.endpoint:10055/metrics")

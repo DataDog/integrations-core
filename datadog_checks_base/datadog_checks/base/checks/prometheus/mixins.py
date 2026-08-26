@@ -211,6 +211,8 @@ class PrometheusScraperMixin(object):
                 yield message
 
         elif 'text/plain' in response.headers['Content-Type']:
+            if response.encoding is None:
+                response.encoding = 'utf-8'
             input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
             if self._text_filter_blacklist:
                 input_gen = self._text_filter_input(input_gen)
