@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_sql_database, raise_if_cancelled
 
 from .xml_tools import extract_int_value, extract_value
 
@@ -198,12 +198,17 @@ class XESessionBase(DBMAsyncJob):
         engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
         self._is_azure_sql_database = is_azure_sql_database(engine_edition)
 
+    def shutdown(self) -> None:
+        self._check = None
+
     def _close_db_conn(self):
         """Close database connection on shutdown"""
         pass
 
     def session_exists(self):
         """Check if this XE session exists and is running"""
+        raise_if_cancelled(self._cancel_event)
+
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
@@ -223,6 +228,8 @@ class XESessionBase(DBMAsyncJob):
         Query the ring buffer data and parse the XML on the client side.
         This avoids expensive server-side XML parsing for better performance.
         """
+        raise_if_cancelled(self._cancel_event)
+
         raw_xml = None
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:

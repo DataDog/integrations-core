@@ -373,7 +373,7 @@ async def test_list_issue_comments_success():
 
 
 async def test_list_issue_comments_follows_link_header():
-    """The updater must see every comment, or it creates a duplicate instead of editing its own."""
+    """The run reporter must see every comment, or it creates a duplicate instead of editing its own."""
     second_page_url = "https://api.github.com/repos/owner/repo/issues/7/comments?page=2"
 
     def handler(request: httpx.Request) -> httpx.Response:

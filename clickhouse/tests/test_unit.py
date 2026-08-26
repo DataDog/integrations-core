@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gc
+import inspect
+import weakref
+
 import mock
 import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
 from datadog_checks.clickhouse.utils import (
     BUILTIN_SAMPLE_CLUSTERS,
@@ -955,3 +960,131 @@ def test_check_always_emits_a_hosting_type_tag(instance):
                 check.check({})
 
     assert f'{HOSTING_TYPE_TAG}:{HostingType.UNKNOWN}' in check.tags
+
+
+ALL_DBM_JOBS = {
+    'query_metrics': 'query-metrics',
+    'query_samples': 'query-samples',
+    'query_completions': 'query-completions',
+    'query_errors': 'query-errors',
+    'schema_metrics': 'clickhouse-table-metrics',
+    'collect_schemas': 'clickhouse-metadata',
+    'parts_and_merges': 'parts-and-merges',
+}
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, expected',
+    [
+        pytest.param(True, sorted(ALL_DBM_JOBS.values()), id='dbm-on'),
+        pytest.param(False, [], id='dbm-off'),
+    ],
+)
+def test_configured_jobs_are_the_jobs_that_run(instance, dbm_enabled, expected):
+    """Every job this configuration enables is the set that the check actually starts.
+
+    Catches a job that stops being wired up: it would keep its config option and its attribute
+    while silently never collecting. Every job is gated on dbm, so nothing runs when it is off.
+    """
+    instance = {**instance, 'dbm': dbm_enabled, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    started = []
+    with mock.patch.object(
+        DBMAsyncJob, 'run_job_loop', autospec=True, side_effect=lambda self, tags: started.append(self._job_name)
+    ):
+        check.run_async_jobs(check.tags)
+
+    assert sorted(started) == expected
+
+
+def test_cancel_closes_main_client_and_releases_pool(instance):
+    """cancel() runs shutdown(), which releases what the check holds for its whole lifetime."""
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    client = mock.MagicMock()
+    check._client = client
+
+    check.cancel()
+
+    client.close.assert_called_once()
+    assert check._client is None
+    assert check._pool_manager is None
+
+
+def test_cancel_shuts_down_registered_jobs(instance):
+    """The registry drives teardown, so each job's shutdown() releases its dedicated client."""
+    instance = {**instance, 'dbm': True, 'query_errors': {'enabled': True}}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    job_client = mock.MagicMock()
+    check.query_errors._db_client = job_client
+
+    check.cancel()
+
+    job_client.close.assert_called_once()
+    assert check.query_errors._db_client is None
+
+
+CANCEL_POLLED_QUERY_METHODS = [
+    ('statement_samples', '_get_active_queries', ()),
+    ('statement_samples', '_get_active_connections', ()),
+    ('statement_samples', '_query_buffer_snapshot', ()),
+    ('table_metrics', '_execute_query', ('SELECT 1',)),
+    ('parts_and_merges', '_execute_query', ('SELECT 1',)),
+]
+
+
+@pytest.mark.parametrize('job_attr, method_name, args', CANCEL_POLLED_QUERY_METHODS)
+def test_query_methods_abort_once_cancelled(instance, job_attr, method_name, args):
+    """A cancel that lands mid-tick must not start another query.
+
+    Without the check, a job already inside run_job issues its remaining queries and
+    each one blocks until the client read_timeout elapses, stalling the Agent's
+    unschedule for as many timeouts as the tick has queries left.
+    """
+    instance = {**instance, 'dbm': True, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.create_dbm_client = mock.MagicMock()
+    job = getattr(check, job_attr)
+    job.cancel()
+
+    with pytest.raises(Exception, match='cancelled'):
+        getattr(job, method_name)(*args)
+
+    check.create_dbm_client.assert_not_called()
+
+
+def test_check_gc_after_cancel(instance):
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    instance = {**instance, 'dbm': True, **{option: {'enabled': True} for option in ALL_DBM_JOBS}}
+
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()

@@ -51,7 +51,8 @@ class BaseMessage:
 class BaseProcessor[T: BaseMessage]:
     def __init__(self, name: str):
         self.name = name
-        self.queue: asyncio.Queue[BaseMessage] | None = None
+        # Set by the bus at registration.
+        self.bus: EventBusOrchestrator | None = None
 
     async def on_success(self, message: T) -> None:
         pass
@@ -76,9 +77,11 @@ class BaseProcessor[T: BaseMessage]:
         raise error
 
     def submit_message(self, message: BaseMessage) -> None:
-        if self.queue is None:
+        """Put *message* on the bus this processor was registered in, from any thread."""
+        if self.bus is None:
             raise ProcessorQueueError("This processor has not been added to an active event bus")
-        self.queue.put_nowait(message)
+
+        self.bus.submit_message(message)
 
     def should_process_message(self, message: BaseMessage) -> bool:
         return True
@@ -140,6 +143,7 @@ class EventBusOrchestrator(ABC):
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
+        self._loop: asyncio.AbstractEventLoop | None = None
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
         """
@@ -154,15 +158,20 @@ class EventBusOrchestrator(ABC):
 
     def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
         """Registers a processor to receive specific message types."""
-        processor.queue = self._queue
+        processor.bus = self
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
 
     def submit_message(self, message: BaseMessage):
+        """Adds a message to the queue, from any thread.
+
+        ``asyncio.Queue`` is not thread-safe, and a put it loses leaves the bus spinning on a message
+        it never reads, so while the bus runs the loop thread makes every put.
         """
-        Adds a message to the queue.
-        """
-        self._queue.put_nowait(message)
+        if self._loop is not None and self._loop.is_running():
+            self._loop.call_soon_threadsafe(self._queue.put_nowait, message)
+        else:
+            self._queue.put_nowait(message)
 
     def run(self):
         """
@@ -205,6 +214,10 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_INITIALIZE, e),
                 self.on_error,
             )
+        # Only now, so what the hook submitted is already queued. A deferred put is read because the
+        # callback that queues it precedes the task completion that wakes the loop, and the hook has
+        # no task to be ordered behind: a zero grace period would stop the bus before it ran.
+        self._loop = asyncio.get_running_loop()
 
     @abstractmethod
     async def on_initialize(self):  # pragma: no cover
