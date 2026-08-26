@@ -9,7 +9,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import GITHUB_API_VERSION, AsyncGitHubClient, PaginationData, async_github_client
-from ddev.utils.github_async.client import QUERY_VALUE_MASK, masked_query, with_query_masked
+from ddev.utils.github_async.client import QUERY_MASK, failure_reason, with_query_masked
 from ddev.utils.github_async.retry import NO_RETRY
 from tests.utils.github_async.helpers import TOKEN, json_response, make_client
 from tests.utils.github_async.payloads import artifact, workflow_run_payload
@@ -127,40 +127,52 @@ async def test_list_workflow_run_artifacts_two_pages() -> None:
 
 
 @pytest.mark.parametrize(
-    ("query", "secret", "expected_names"),
+    ("url", "expected"),
     [
         pytest.param(
-            "X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=900&X-Amz-Signature=abc123SECRET",
-            "abc123SECRET",
-            ["X-Amz-Algorithm", "X-Amz-Expires", "X-Amz-Signature"],
-            id="s3",
+            "https://productionresultssa.blob.core.windows.net/zip?se=2026-08-25T15%3A00%3A00Z&sig=abc%2F1%3D&sp=r",
+            f"https://productionresultssa.blob.core.windows.net/zip?{QUERY_MASK}",
+            id="azure-blob",
         ),
         pytest.param(
-            "se=2026-08-24T13%3A00%3A00Z&sig=SECRETSAS%2Bxyz&sp=r", "SECRETSAS", ["se", "sig", "sp"], id="azure"
+            "https://s3.amazonaws.com/zip?X-Amz-Signature=deadbeef&X-Amz-Security-Token=tok",
+            f"https://s3.amazonaws.com/zip?{QUERY_MASK}",
+            id="s3",
         ),
+        pytest.param("https://api.github.com/repos/o/r", "https://api.github.com/repos/o/r", id="no-query"),
     ],
 )
-def test_masking_a_query_hides_every_value_and_keeps_every_name(
-    query: str, secret: str, expected_names: list[str]
-) -> None:
-    """Which parameter holds the signature depends on the storage host, so all values are masked.
+def test_a_signed_url_keeps_nothing_of_its_query(url: str, expected: str) -> None:
+    """Every parameter of a signed URL exists to sign it, so none of it is safe to keep.
 
-    Keeping the names is what makes a masked URL still worth logging: they say which signing scheme
-    was in play. Masking only the names we recognise would leak the first time a download redirects
-    somewhere new.
+    Which one holds the signature depends on the storage host, and keeping any of them means deciding
+    that correctly for a host we have not seen yet.
     """
-    masked = masked_query(query)
-
-    assert secret not in masked
-    assert [parameter.partition("=")[0] for parameter in masked.split("&")] == expected_names
-    assert {parameter.partition("=")[2] for parameter in masked.split("&")} == {QUERY_VALUE_MASK}
+    assert with_query_masked(url) == expected
 
 
-def test_masking_leaves_a_message_that_quotes_no_url_alone() -> None:
-    """A transport error reports an OS-level reason, and rewriting one would only obscure it."""
-    assert with_query_masked("[Errno 61] Connection refused", "https://signed.example/zip") == (
-        "[Errno 61] Connection refused"
-    )
+def test_a_failed_status_is_reported_without_httpx_quoting_the_url() -> None:
+    """httpx builds a status error's message around the full URL, so we build our own from the status.
+
+    Rewriting that message instead would leave the signature one encoding change away from the log.
+    """
+    request = httpx.Request("GET", "https://blob.example/zip?sig=secret")
+
+    reason = failure_reason(httpx.HTTPStatusError("", request=request, response=httpx.Response(403, request=request)))
+
+    assert reason == "HTTP 403 Forbidden"
+
+
+def test_a_transport_failure_keeps_the_reason_the_os_gave() -> None:
+    """A transport error names why the connection failed, which is the whole of its value."""
+    assert failure_reason(httpx.ConnectError("[Errno 61] Connection refused")) == "[Errno 61] Connection refused"
+
+
+def test_a_transport_failure_that_quotes_a_url_still_loses_the_query() -> None:
+    """httpx keeps the URL on `.request` rather than in the message, but that is not ours to rely on."""
+    error = httpx.ConnectError("connection to https://signed.example/zip?sig=secret refused")
+
+    assert failure_reason(error) == f"connection to https://signed.example/zip?{QUERY_MASK}"
 
 
 async def test_a_transport_failure_still_carries_the_request_it_failed_on() -> None:

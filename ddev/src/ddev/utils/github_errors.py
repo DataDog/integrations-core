@@ -46,20 +46,20 @@ def github_secondary_rate_limit_wait(response: httpx.Response) -> float | None:
 class GitHubUnexpectedRedirectError(httpx.HTTPStatusError):
     """A GitHub endpoint answered with a redirect that is not part of its contract.
 
-    The client never follows redirects, because the `Authorization` header would travel to whatever
-    host `Location` names. One endpoint, the artifact download, does expect a redirect and asks for
-    it; anywhere else a redirect means our assumption about the endpoint is wrong, so it is surfaced
-    rather than followed or retried.
+    The client never follows one, because the `Authorization` header would travel to whatever host
+    `Location` names. Only the artifact download expects a redirect; anywhere else it is surfaced.
     """
 
     @classmethod
     def from_response(cls, method: str, endpoint: str, response: httpx.Response) -> Self:
-        """Build the error for an unexpected redirect returned by *method* *endpoint*."""
-        location = response.headers.get('location') or '<no Location header>'
+        """Build the error for an unexpected redirect returned by *method* *endpoint*.
+
+        Only called for a response that carries a Location.
+        """
         return cls(
             f'{method} {endpoint} returned an unexpected redirect (HTTP {response.status_code}) to '
-            f'{location}. This endpoint is not expected to redirect, so the client did not follow it '
-            f'and the GitHub token was not sent to the target.',
+            f'{response.headers["location"]}. This endpoint is not expected to redirect, so the client '
+            f'did not follow it and the GitHub token was not sent to the target.',
             request=response.request,
             response=response,
         )

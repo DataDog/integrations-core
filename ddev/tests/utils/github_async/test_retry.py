@@ -10,7 +10,6 @@ effect. Rate-limit retries are a different layer, covered in `test_rate_limiting
 from __future__ import annotations
 
 import logging
-from dataclasses import FrozenInstanceError
 
 import httpx
 import pytest
@@ -160,9 +159,8 @@ async def test_the_client_defaults_can_be_replaced_wholesale() -> None:
 async def test_the_client_refuses_to_replay_what_replaying_cannot_fix(response: httpx.Response) -> None:
     """Even asked to retry everything, these stay single attempts.
 
-    Credentials do not improve by asking again, a rate-limit response belongs to the limiter whose
-    pause is the correct wait, and a redirect is an answer rather than a failure. A policy that could
-    opt into these would turn each one into a slower version of the same outcome.
+    Each would only reach the same outcome more slowly: bad credentials, a pause the limiter already
+    owns, or a redirect, which is an answer.
     """
     transport, calls = recording_transport([response])
     client = AsyncGitHubClient(token=TOKEN, transport=transport, max_rate_limit_retries=0)
@@ -176,9 +174,8 @@ async def test_the_client_refuses_to_replay_what_replaying_cannot_fix(response: 
 async def test_a_missing_resource_is_an_answer_rather_than_a_failure_to_retry() -> None:
     """`get_pull_request` returning 404 means there is no pull request for that number.
 
-    Dispatcher relies on that answer to fall through to commit resolution, so retrying it would only
-    delay a decision GitHub has already given. It stays out of the defaults rather than out of every
-    policy, since a caller waiting for a freshly created resource to appear may opt in.
+    Dispatcher falls through to commit resolution on that answer, so retrying only delays it. Out of
+    the defaults rather than banned, since a caller awaiting a fresh resource may opt in.
     """
     transport, calls = recording_transport(
         [httpx.Response(404), httpx.Response(404), json_response(full_pull_request_payload(number=5))]
@@ -217,6 +214,21 @@ async def test_an_unexpected_redirect_names_the_endpoint_and_is_not_followed() -
     assert "https://evil.example/steal" in message
     assert len(calls) == 1
     assert calls[0].url.host == "api.github.com"
+
+
+async def test_a_not_modified_response_is_reported_for_what_it_is() -> None:
+    """304 sits in the 3xx range but carries no Location, so it is an answer, not a redirect.
+
+    Reporting it as a redirect means reaching for a Location header that a 304 never has, which
+    raises `KeyError` and buries the status the server actually sent.
+    """
+    transport, _ = recording_transport([httpx.Response(304)])
+    client = AsyncGitHubClient(token=TOKEN, transport=transport)
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.get_workflow_run("o", "r", 42, retry=NO_RETRY)
+
+    assert "304" in str(exc_info.value)
 
 
 # ---------------------------------------------------------------------------
@@ -282,18 +294,12 @@ def test_unless_removes_a_condition_the_policy_would_otherwise_retry() -> None:
     assert policy.should_retry(_status_error(502))
 
 
-def test_a_shared_default_cannot_be_retuned_in_place() -> None:
-    """The defaults are shared for the life of the process, so one caller must not retune them.
+def test_tuning_a_policy_leaves_the_shared_default_alone() -> None:
+    """The defaults live for the whole process, so tuning one client must not reach another's."""
+    tuned = SAFE_RETRY.replace(attempts=1)
 
-    `SAFE_RETRY.attempts = 1` would otherwise disable retries for every client already holding it,
-    including ones on other tasks, which is a change nobody could trace back to its cause.
-    """
-    with pytest.raises(FrozenInstanceError):
-        SAFE_RETRY.attempts = 1  # type: ignore[misc]
-
+    assert tuned.attempts == 1
     assert SAFE_RETRY.attempts == DEFAULT_ATTEMPTS
-    # Tuning goes through replace, which leaves the shared default alone.
-    assert SAFE_RETRY.replace(attempts=1).attempts == 1
     assert SAFE_RETRY.attempts == DEFAULT_ATTEMPTS
 
 

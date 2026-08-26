@@ -98,11 +98,8 @@ def any_of(*predicates: RetryPredicate) -> RetryPredicate:
 class RetryPolicy:
     """What to retry, and how hard to try.
 
-    Frozen because the defaults below are shared for the life of the process: tuning one in place would
-    change the behaviour of every client that took it. `replace`, `also_on` and `unless` return new
-    policies instead.
-
-    `timeout` bounds the whole ladder including backoff; None leaves `attempts` as the only stop.
+    Frozen because the defaults below are shared for the life of the process; `replace`, `also_on` and
+    `unless` return new policies. `timeout` bounds the whole ladder, backoff included.
     """
 
     should_retry: RetryPredicate = never
@@ -181,8 +178,7 @@ DEFAULT_RETRY_POLICIES = RetryPolicies()
 def retry_attempts(policy: RetryPolicy, should_retry: RetryPredicate) -> AsyncIterator[stamina.Attempt]:
     """Yield one attempt per try of `policy`, retrying what `should_retry` accepts.
 
-    The caller runs its work inside `with attempt:`, which is what swallows a retryable exception,
-    waits the backoff and lets the loop turn again.
+    The caller's work goes inside `with attempt:`, which swallows a retryable exception and waits.
     """
     return stamina.retry_context(
         on=should_retry,

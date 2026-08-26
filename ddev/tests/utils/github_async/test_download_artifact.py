@@ -106,9 +106,7 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malici
 async def test_an_expired_signed_url_is_resolved_again_rather_than_refetched(monkeypatch, tmp_path) -> None:
     """The signed URL is short-lived, so the retry has to start from the redirect.
 
-    An expired URL comes back from the storage host as a 403. Retrying only the download would
-    refetch the same dead URL and fail identically, so the pair is retried together and the second
-    attempt asks GitHub for a fresh one.
+    Retrying only the download would refetch the same dead URL and fail identically.
     """
     signed_urls = ["https://signed.example/expired", "https://signed.example/fresh"]
     github_calls: list[httpx.Request] = []
