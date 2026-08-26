@@ -171,7 +171,7 @@ def get_changed_targets(root: Path, *, ref: str, exact: bool, local: bool, verbo
     for directory_name, files in changed_directories.items():
         if directory_name in UNTESTABLE_INTEGRATIONS:
             continue
-        if not TARGET_NAME_PATTERN.match(directory_name):
+        if not TARGET_NAME_PATTERN.fullmatch(directory_name):
             print(f'Ignoring target with unexpected name: {directory_name!r}', file=sys.stderr)
             continue
         directory = root / directory_name
@@ -266,7 +266,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                     os_index = list(keys).index('os') if 'os' in keys else -1
                     for combination in product(*values):
                         env_name = '-'.join(combination)
-                        if not TARGET_ENV_NAME_PATTERN.match(env_name):
+                        if not TARGET_ENV_NAME_PATTERN.fullmatch(env_name):
                             print(f'Ignoring target env with unexpected name: {env_name!r}', file=sys.stderr)
                             continue
                         os = combination[os_index] if os_index != -1 else platform_ids[0]

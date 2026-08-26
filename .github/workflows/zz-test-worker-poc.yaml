@@ -38,19 +38,23 @@ jobs:
       - name: Create Check Run
         id: create_check
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          RUN_NAME: ${{ inputs.name }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
         with:
           github-token: ${{ steps.octo-sts.outputs.token }}
           script: |
+            const runName = process.env.RUN_NAME;
             const response = await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: 'Test Worker POC - ${{ inputs.name }}',
-              head_sha: '${{ inputs.source_sha }}',
+              name: `Test Worker POC - ${runName}`,
+              head_sha: process.env.SOURCE_SHA,
               status: 'in_progress',
               details_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
               output: {
-                title: 'Test Worker POC Running - ${{ inputs.name }}',
-                summary: 'The test worker POC workflow is currently running for ${{ inputs.name }}.'
+                title: `Test Worker POC Running - ${runName}`,
+                summary: `The test worker POC workflow is currently running for ${runName}.`
               }
             });
             return response.data.id;
@@ -104,11 +108,16 @@ jobs:
           ref: ${{ inputs.checkout_ref }}
 
       - name: Run Generic Task
+        env:
+          JOB_NAME: ${{ matrix.name }}
+          PLATFORM: ${{ matrix.platform }}
+          RUNNER: ${{ toJSON(matrix.runner) }}
+          TARGET: ${{ matrix.target }}
         run: |
-          echo "Running generic logic for job: ${{ matrix.name }}"
-          echo "Platform: ${{ matrix.platform }}"
-          echo "Runner: ${{ matrix.runner }}"
-          echo "Target: ${{ matrix.target }}"
+          echo "Running generic logic for job: $JOB_NAME"
+          echo "Platform: $PLATFORM"
+          echo "Runner: $RUNNER"
+          echo "Target: $TARGET"
           echo "Git SHA: $(git rev-parse HEAD)"
 
   complete_check_run:
