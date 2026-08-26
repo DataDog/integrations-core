@@ -44,6 +44,10 @@ tasks:
   # `with: [redis-full, activity-gen]`.
   - id: activity-gen
     image: "redis:${REDIS_VERSION:-7.4}"
+    labels:
+      # Published so other repos (e.g. semantic-core FTF) can OCI-federate this
+      # workload instead of vendoring a copy of the script.
+      evalya.io/publish: "true"
     command: ["sh", "/opt/activity-gen.sh"]
     volumes:
       - ./activity-gen.sh:/opt/activity-gen.sh:ro
