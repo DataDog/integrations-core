@@ -7,7 +7,7 @@ from collections import ChainMap
 from collections.abc import Mapping
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import yaml
 from requests.exceptions import RequestException
@@ -124,7 +124,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         for scraper in self.scrapers.values():
             scraper.set_dynamic_tags(*tags)
 
-    def get_config_with_defaults(self, config: Mapping[str, Any]) -> Mapping[str, Any]:
+    def get_config_with_defaults(self, config):
         """Combine instance config with class defaults and file-based metric mappings.
 
         Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
