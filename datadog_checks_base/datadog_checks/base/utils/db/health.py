@@ -73,6 +73,7 @@ class Health:
         cooldown_time: int = None,
         cooldown_values: list[str] = None,
         data: dict = None,
+        error_code: str = None,
     ):
         """
         Submit a health event to the aggregator.
@@ -89,6 +90,10 @@ class Health:
         :param cooldown_values: list of str
             Additional values to include in the cooldown key.
         :param data: A dictionary to be submitted as `data`. Must be JSON serializable.
+        :param error_code: Stable kebab-case classification of the failure
+            (e.g. "connection-refused", "privilege-replication-client"). Read
+            by the DBM Setup UI to render an actionable remediation card.
+            Should be omitted for non-error events.
         """
         category = self.check.__NAMESPACE__ or self.check.__class__.__name__.lower()
         if cooldown_time:
@@ -99,23 +104,21 @@ class Health:
                 if self._ttl_cache.get(cooldown_key, None):
                     return
                 self._ttl_cache[cooldown_key] = cooldown_time
-        self.check.event_platform_event(
-            json.dumps(
-                {
-                    'timestamp': time.time() * 1000,
-                    'version': 1,
-                    'check_id': self.check.check_id,
-                    'category': category,
-                    'name': name,
-                    'status': status,
-                    'tags': tags or [],
-                    'ddagentversion': datadog_agent.get_version(),
-                    'ddagenthostname': datadog_agent.get_hostname(),
-                    'data': data,
-                }
-            ),
-            "dbm-health",
-        )
+        payload = {
+            'timestamp': time.time() * 1000,
+            'version': 1,
+            'check_id': self.check.check_id,
+            'category': category,
+            'name': name,
+            'status': status,
+            'tags': tags or [],
+            'ddagentversion': datadog_agent.get_version(),
+            'ddagenthostname': datadog_agent.get_hostname(),
+            'data': data,
+        }
+        if error_code:
+            payload['error_code'] = error_code
+        self.check.event_platform_event(json.dumps(payload), "dbm-health")
 
     def submit_exception_health_event(self, exception: Exception, data: dict):
         trace = traceback.extract_tb(exception.__traceback__)
