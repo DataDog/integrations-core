@@ -6,17 +6,22 @@
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import EXPECTED_METRICS
 
 
-def test_critical_service_check(dd_run_check, aggregator, mock_http, mock_response, check):
+def test_critical_service_check(dd_run_check, aggregator, mock_http, check):
     """
     When we can't connect to dcgm-exporter for whatever reason we should only submit a CRITICAL service check.
     """
-    mock_http.get.return_value = mock_response(status_code=404)
+    mock_http.get.return_value = FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
+    )
     with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
     aggregator.assert_service_check('dcgm.openmetrics.health', status=check.CRITICAL)
