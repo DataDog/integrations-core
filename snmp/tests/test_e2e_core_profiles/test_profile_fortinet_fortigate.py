@@ -72,9 +72,7 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.fgHwSensorValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.fgHwSensorAlarmStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.fgHwSensorAlarmStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['processor_index:12'],
