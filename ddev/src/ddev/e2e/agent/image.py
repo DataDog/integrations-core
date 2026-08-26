@@ -17,8 +17,9 @@ AGENT_VERSION_REGEX = (
 
 
 def normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
-    if not agent_build:
-        return 'registry.datadoghq.com/agent-dev:master-py3'
+    agent_build = 'datadog/agent-dev:sarah-parser-go-client-py3'
+    if use_jmx:
+        agent_build += '-jmx'
 
     if match := re.match(AGENT_IMAGE_REGEX, agent_build):
         org, image, tag = match.groups()
