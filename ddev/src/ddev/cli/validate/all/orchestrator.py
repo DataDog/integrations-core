@@ -97,6 +97,9 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Validate configuration data models match spec.yaml",
         fix_flag="--sync",
     ),
+    "os-wrapper": ValidationConfig(
+        description="Validate integrations use the OS wrapper for file and subprocess access",
+    ),
     "openmetrics": ValidationConfig(
         description="Validate OpenMetrics integrations disable the metric limit",
     ),
