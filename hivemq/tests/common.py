@@ -8,4 +8,13 @@ HOST = get_docker_hostname()
 
 JMX_PORT = 9010
 
-INSTANCE = {'host': HOST, 'port': JMX_PORT, 'max_returned_metrics': 99999}
+INSTANCE = {'host': HOST, 'port': JMX_PORT, 'max_returned_metrics': 99999, 'is_jmx': True}
+
+OPENMETRICS_PORT = 9399
+OPENMETRICS_ENDPOINT = f'http://{HOST}:{OPENMETRICS_PORT}/metrics'
+
+OPENMETRICS_INSTANCE = {
+    'is_jmx': False,
+    'use_openmetrics': True,
+    'openmetrics_endpoint': OPENMETRICS_ENDPOINT,
+}

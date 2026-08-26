@@ -1,0 +1,15 @@
+# HELP com_hivemq_system_system_cpu_load Generated from Dropwizard metric import (metric=com.hivemq.system.system-cpu.load, type=com.codahale.metrics.Gauge)
+# TYPE com_hivemq_system_system_cpu_load gauge
+com_hivemq_system_system_cpu_load 0.42
+# HELP com_hivemq_messages_incoming_publish_count Generated from Dropwizard metric import (metric=com.hivemq.messages.incoming.publish.count, type=com.codahale.metrics.Counter)
+# TYPE com_hivemq_messages_incoming_publish_count gauge
+com_hivemq_messages_incoming_publish_count 1234
+# HELP com_hivemq_messages_incoming_publish_bytes Generated from Dropwizard metric import (metric=com.hivemq.messages.incoming.publish.bytes, type=com.codahale.metrics.Histogram)
+# TYPE com_hivemq_messages_incoming_publish_bytes summary
+com_hivemq_messages_incoming_publish_bytes{quantile="0.5",} 100.0
+com_hivemq_messages_incoming_publish_bytes{quantile="0.75",} 150.0
+com_hivemq_messages_incoming_publish_bytes{quantile="0.95",} 200.0
+com_hivemq_messages_incoming_publish_bytes{quantile="0.98",} 220.0
+com_hivemq_messages_incoming_publish_bytes{quantile="0.99",} 240.0
+com_hivemq_messages_incoming_publish_bytes{quantile="0.999",} 260.0
+com_hivemq_messages_incoming_publish_bytes_count 42
