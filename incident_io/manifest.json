@@ -29,9 +29,9 @@
       }
     ],
     "classifier_tags": [
-      "Category::Log Collection",
-      "Category::Incidents",
-      "Submitted Data Type::Logs",
+      "Category::Collaboration",
+      "Category::Issue Tracking",
+      "Category::Event Management",
       "Offering::Integration"
     ]
   },
@@ -41,7 +41,7 @@
       "source_type_id": 25431122,
       "source_type_name": "incident.io",
       "events": {
-        "creates_events": false
+        "creates_events": true
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"

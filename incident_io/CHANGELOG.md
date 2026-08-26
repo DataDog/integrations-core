@@ -5,3 +5,9 @@
 ***Added***:
 
 * Initial Release
+
+## 2.0.0 / 2026-08-26
+
+***Updated***:
+
+* Use event management v2 wehbook.

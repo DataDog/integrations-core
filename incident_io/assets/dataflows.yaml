@@ -1,6 +1,6 @@
 provides:
-  - id: incident-io-logs
+  - id: incident-io-events
     always_on: true
     granular: false
-    data_type: logs
+    data_type: events
     direction: inbound
