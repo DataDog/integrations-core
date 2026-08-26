@@ -38,24 +38,54 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import COMMENT_BODY_LIMIT, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
+    IssueComment,
     Label,
     PullRequest,
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
 )
+from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
 DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
+
+# Id returned by the default `create_issue_comment` / `update_issue_comment` responses. Exported so
+# tests can assert the run reporter edits the comment it created rather than duplicating the literal.
+DEFAULT_COMMENT_ID = 4242
+
+
+def _ensure_body_fits(body: str):
+    """Mirror the real client's pre-flight length guard.
+
+    Without it a test could pass a body the real client would never send and still report success.
+    """
+    size = len(body.encode('utf-8'))
+    if size > COMMENT_BODY_LIMIT:
+        raise GitHubBodyTooLongError.from_measurement(size, limit=COMMENT_BODY_LIMIT)
+
+
+def _as_client_would_raise(error: BaseException) -> BaseException:
+    """Convert a mocked HTTP error the way `AsyncGitHubClient._request` would.
+
+    A test registering a plain 422 describes what GitHub returns, not what a caller receives, so the
+    fake converts it the same way -- otherwise tests assert a shape no caller can ever see.
+    """
+    if (
+        isinstance(error, httpx.HTTPStatusError)
+        and (message := github_body_too_long_message(error.response)) is not None
+    ):
+        return GitHubBodyTooLongError.from_response(message, limit=COMMENT_BODY_LIMIT)
+    return error
 
 
 @dataclass
@@ -84,6 +114,20 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             headers={},
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        'create_issue_comment': lambda: GitHubResponse(
+            data=IssueComment(
+                id=DEFAULT_COMMENT_ID,
+                body='',
+                html_url='https://github.com/test/repo/issues/1#issuecomment-1',
+            ),
+            headers={},
+        ),
+        'update_issue_comment': lambda: GitHubResponse(
+            data=IssueComment(id=DEFAULT_COMMENT_ID, body=''),
+            headers={},
+        ),
+        # Default to a PR with no existing Dispatcher comment, so the run reporter creates one.
+        'list_issue_comments': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         # Default to "PR not found" so tests that don't care about PR lookup auto-fall-through
         # to commit resolution. Tests that need a specific PR register their own mock_response.
         'get_pull_request': lambda: httpx.HTTPStatusError(
@@ -91,6 +135,9 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             request=httpx.Request('GET', 'https://api.github.com/'),
             response=httpx.Response(404),
         ),
+        # Default to "no existing PRs" so the --from-pr idempotency check does not skip a base
+        # unless a test explicitly registers an existing backport PR.
+        'list_pull_requests': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         'create_workflow_dispatch': lambda: GitHubResponse(
             data=WorkflowDispatchResult(
                 workflow_run_id=123,
@@ -220,6 +267,27 @@ class FakeAsyncGitHubClient:
             timeout=timeout,
         )
 
+    async def list_pull_requests(
+        self,
+        owner: str,
+        repo: str,
+        state: Literal['open', 'closed', 'all'] = 'open',
+        head: str | None = None,
+        base: str | None = None,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> GitHubResponse[list[PullRequest]]:
+        return self._call(
+            'list_pull_requests',
+            owner=owner,
+            repo=repo,
+            state=state,
+            head=head,
+            base=base,
+            per_page=per_page,
+            timeout=timeout,
+        )
+
     async def create_pull_request(
         self,
         owner: str,
@@ -242,6 +310,73 @@ class FakeAsyncGitHubClient:
             draft=draft,
             timeout=timeout,
         )
+
+    async def create_issue_comment(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
+        _ensure_body_fits(body)
+        return self._call(
+            'create_issue_comment',
+            owner=owner,
+            repo=repo,
+            issue_number=issue_number,
+            body=body,
+            timeout=timeout,
+        )
+
+    async def update_issue_comment(
+        self,
+        owner: str,
+        repo: str,
+        comment_id: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
+        _ensure_body_fits(body)
+        return self._call(
+            'update_issue_comment',
+            owner=owner,
+            repo=repo,
+            comment_id=comment_id,
+            body=body,
+            timeout=timeout,
+        )
+
+    async def list_issue_comments(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
+        """Async-generator mirror.
+
+        A page is itself a list of comments, so pages are registered explicitly: one `GitHubResponse`
+        for one page, a list of them for several. See `comment_page` in `tests.cli.ci.tests.helpers`.
+        """
+        self._record(
+            'list_issue_comments',
+            owner=owner,
+            repo=repo,
+            issue_number=issue_number,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_issue_comments',
+            {'owner': owner, 'repo': repo, 'issue_number': issue_number, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            yield page
 
     async def add_labels_to_issue(
         self,
@@ -506,7 +641,7 @@ class FakeAsyncGitHubClient:
         self._record(method, **call_kwargs)
         response = self._resolve_response(method, call_kwargs)
         if isinstance(response, BaseException):
-            raise response
+            raise _as_client_would_raise(response)
         if isinstance(response, GitHubResponse):
             return response
         return GitHubResponse.model_validate({'data': response, 'headers': {}})

@@ -148,6 +148,11 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         self._flush_checkpoint = NodeCheckpoint(self, FLUSH_CHECKPOINT_CACHE_KEY, self._flush_collection_interval)
         self._last_flush_collection_time = 0.0
 
+    def shutdown(self) -> None:
+        super().shutdown()
+        # Holds the check and a bound method of this job, so dropping it releases both.
+        self._explain_plans = None
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
         """

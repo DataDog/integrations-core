@@ -102,13 +102,19 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if not self._db:
             conn_args = self._connection_args_provider()
-            self._db = connect_with_session_variables(**conn_args)
+            self._db = connect_with_session_variables(mysql_version=self._check.version, **conn_args)
             if self._uses_managed_auth:
                 self._db_created_at = time.time()
         else:
             # ping() will by default automatically reconnect if the connection is lost
             self._db.ping()
         return self._db
+
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
+        self._databases_data = None
 
     def _close_db_conn(self):
         if self._db:
@@ -123,6 +129,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)
@@ -157,9 +164,6 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                     """An error occurred while collecting schema data.
                                 These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
-
-    def shut_down(self):
-        self._databases_data.shut_down()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):

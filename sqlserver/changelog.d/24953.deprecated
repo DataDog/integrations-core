@@ -1,0 +1,1 @@
+Deprecate ``include_instance_metrics`` in favor of ``database_metrics.instance_metrics.enabled``.

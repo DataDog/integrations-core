@@ -1,0 +1,1 @@
+Further speed up performance counter metric collection on instances with many autodiscovered databases, and skip fraction metrics whose base counter is missing for an instance instead of ending the collection early.

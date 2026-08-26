@@ -5,12 +5,20 @@
 
 from __future__ import annotations
 
+import contextlib
+import inspect
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
+
 import httpx
 import pytest
 
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import Artifact, ArtifactsList, PullRequest
+from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
+from tests.cli.ci.tests.helpers import comment_page
 from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.utils.github_async.helpers import first_page
 
 
 @pytest.fixture
@@ -243,6 +251,33 @@ async def test_assert_called_with_fails_when_no_match(fake: FakeAsyncGitHubClien
         )
 
 
+async def test_list_issue_comments_defaults_to_no_comments(fake: FakeAsyncGitHubClient):
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+    assert [comment for page in pages for comment in page.data] == []
+
+
+async def test_list_issue_comments_yields_the_pages_it_was_given(fake: FakeAsyncGitHubClient):
+    """A page is itself a list of comments, so pages are registered explicitly rather than inferred."""
+    fake.mock_response(
+        'list_issue_comments',
+        [comment_page(IssueComment(id=1, body='a')), comment_page(IssueComment(id=2, body='b'))],
+    )
+
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+
+    assert len(pages) == 2
+    assert [comment.id for page in pages for comment in page.data] == [1, 2]
+
+
+async def test_list_issue_comments_yields_one_page_for_one_response(fake: FakeAsyncGitHubClient):
+    fake.mock_response('list_issue_comments', comment_page(IssueComment(id=1, body='a'), IssueComment(id=2, body='b')))
+
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+
+    assert len(pages) == 1
+    assert [comment.id for comment in pages[0].data] == [1, 2]
+
+
 async def test_assert_not_called_passes_when_method_unused(fake: FakeAsyncGitHubClient) -> None:
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -266,6 +301,76 @@ async def test_calls_are_recorded_regardless_of_response(fake: FakeAsyncGitHubCl
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b', draft=False)
 
     assert len(fake.calls_to('create_pull_request')) == 2
+
+
+# One call per mirror, paired with an argument the recording must carry back. Every mirror belongs
+# here: `test_every_mirror_is_in_the_call_table` fails when one is added without being registered,
+# which is the case a hand-written test per method cannot catch.
+MIRROR_CALLS = [
+    ('get_pull_request', lambda f, _: f.get_pull_request('o', 'r', 5), {'pull_number': 5}),
+    ('list_pull_requests', lambda f, _: f.list_pull_requests('o', 'r', head='o:branch'), {'head': 'o:branch'}),
+    ('create_pull_request', lambda f, _: f.create_pull_request('o', 'r', 'T', 'h', 'b', draft=True), {'draft': True}),
+    ('create_issue_comment', lambda f, _: f.create_issue_comment('o', 'r', 7, 'hello'), {'body': 'hello'}),
+    ('update_issue_comment', lambda f, _: f.update_issue_comment('o', 'r', 3, 'edited'), {'comment_id': 3}),
+    ('list_issue_comments', lambda f, _: first_page(f.list_issue_comments('o', 'r', 7)), {'issue_number': 7}),
+    (
+        'add_labels_to_issue',
+        lambda f, _: f.add_labels_to_issue('o', 'r', 7, ['qa/skip-qa']),
+        {'labels': ['qa/skip-qa']},
+    ),
+    (
+        'create_workflow_dispatch',
+        lambda f, _: f.create_workflow_dispatch('o', 'r', 'wf.yml', 'main'),
+        {'workflow_id': 'wf.yml'},
+    ),
+    ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    (
+        'create_check_run',
+        lambda f, _: f.create_check_run('o', 'r', 'unit', 'abc123', 'in_progress'),
+        {'head_sha': 'abc123'},
+    ),
+    ('update_check_run', lambda f, _: f.update_check_run('o', 'r', 9, status='in_progress'), {'check_run_id': 9}),
+    (
+        'list_workflow_run_artifacts',
+        lambda f, _: first_page(f.list_workflow_run_artifacts('o', 'r', 42)),
+        {'run_id': 42},
+    ),
+    ('list_workflow_jobs', lambda f, _: first_page(f.list_workflow_jobs('o', 'r', 42)), {'run_id': 42}),
+    (
+        'download_artifact',
+        lambda f, tmp: f.download_artifact('https://x/zip', tmp / 'out'),
+        {'archive_download_url': 'https://x/zip'},
+    ),
+]
+
+
+def test_every_mirror_is_in_the_call_table():
+    """A mirror missing from the table is an untested mirror, so the omission has to fail loudly."""
+    mirrors = {
+        name
+        for name, member in vars(FakeAsyncGitHubClient).items()
+        if not name.startswith('_')
+        and name != 'aclose'
+        and (inspect.iscoroutinefunction(member) or inspect.isasyncgenfunction(member))
+    }
+
+    assert {name for name, _, _ in MIRROR_CALLS} == mirrors
+
+
+@pytest.mark.parametrize(('method', 'call', 'expected'), MIRROR_CALLS, ids=[name for name, _, _ in MIRROR_CALLS])
+async def test_a_mirror_records_the_arguments_it_was_called_with(
+    fake: FakeAsyncGitHubClient,
+    tmp_path: Path,
+    method: str,
+    call: Callable[[FakeAsyncGitHubClient, Path], Any],
+    expected: dict[str, Any],
+):
+    """Recording happens before the response resolves, so a mirror whose default raises still records."""
+    with contextlib.suppress(httpx.HTTPStatusError):
+        await call(fake, tmp_path)
+
+    recorded = fake.last_call(method).kwargs
+    assert expected.items() <= recorded.items()
 
 
 # ---------------------------------------------------------------------------

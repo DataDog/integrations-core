@@ -1,1 +1,0 @@
-Use Docker Compose labels to find containers during discovery stability tests without reparsing Compose files.

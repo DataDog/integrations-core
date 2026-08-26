@@ -1,0 +1,1 @@
+Remove the logging adapter cleanup from check teardown, which the base class no longer needs.

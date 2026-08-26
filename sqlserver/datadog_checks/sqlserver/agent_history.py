@@ -9,6 +9,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.utils import raise_if_cancelled
 
 try:
     import datadog_agent
@@ -128,6 +129,9 @@ class SqlserverAgentHistory(DBMAsyncJob):
         )
         self._conn_key_prefix = "dbm-agent-jobs-"
 
+    def shutdown(self) -> None:
+        self._check = None
+
     def _close_db_conn(self):
         pass
 
@@ -175,6 +179,8 @@ class SqlserverAgentHistory(DBMAsyncJob):
         Collects all current agent activity for the SQLServer intance.
         :return:
         """
+        raise_if_cancelled(self._cancel_event)
+
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 history_rows = self._get_new_agent_job_history(cursor)

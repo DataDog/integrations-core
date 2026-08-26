@@ -60,7 +60,7 @@ class PostgresDataObservability(DBMAsyncJob):
         # Filter bad queries on check construction.
         self._queries, self._schedulers = self._filter_valid_queries(self._do_config.queries or ())
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
 
     @property

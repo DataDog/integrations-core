@@ -1,0 +1,45 @@
+# Official `mariadb` image (Docker Hub library), used for MariaDB majors that the
+# deprecated bitnamilegacy/mariadb image no longer publishes (12.1+, and the 13 RC).
+# Modeled on percona.yaml: the official image doesn't auto-configure replication like
+# the bitnami image, so replication is bootstrapped via /docker-entrypoint-initdb.d
+# scripts and per-role config files.
+#
+# NOTE (flagged for CI validation): this compose has not been run in CI yet — the
+# healthcheck, GTID replication setup, and log paths for the official mariadb image
+# need to be confirmed on a real run. See DBMON-6807.
+services:
+  mysql-master:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_IMAGE_TAG}"
+    environment:
+      - MARIADB_ROOT_PASSWORD=mypass
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ./mariadb-official-primary.conf:/etc/mysql/conf.d/primary.cnf
+      - ./mariadb_official_primary_initdb:/docker-entrypoint-initdb.d
+
+  mysql-slave:
+    container_name: mysql-slave
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_IMAGE_TAG}"
+    environment:
+      - MARIADB_ROOT_PASSWORD=mypass
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${MYSQL_SLAVE_PORT}:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ./mariadb-official-replica.conf:/etc/mysql/conf.d/replica.cnf
+      - ./mariadb_official_replica_initdb:/docker-entrypoint-initdb.d
+    depends_on:
+      mysql-master:
+        condition: service_healthy

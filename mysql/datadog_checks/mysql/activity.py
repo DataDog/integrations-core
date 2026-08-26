@@ -7,7 +7,7 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
-from typing import Dict, List  # noqa: F401
+from typing import Any, Dict, List  # noqa: F401
 
 import pymysql
 
@@ -247,6 +247,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
     def _collect_activity(self):
         # type: () -> None
         # do not emit any dd.internal metrics for DBM specific check code
+        self._raise_if_cancelled()
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             rows = self._get_activity(cursor)
@@ -289,6 +290,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
+        self._raise_if_cancelled()
         query = self._get_activity_query()
         self._log.debug("Running activity query [%s]", query)
         cursor.execute(query)
@@ -303,9 +305,10 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         estimated_size = 0
         for row in rows:
             if row["thread_id"] in seen:
-                # `performance_schema.events_statements_current` can contain previous statements
-                # for the same thread. We only want the most recent one.
-                if row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
+                # A thread appears more than once when `performance_schema.events_statements_current`
+                # holds a row per nesting level, and when it still holds a statement the thread has
+                # already finished. Only the finished ones are safe to drop.
+                if self._ended_before(row, seen[row["thread_id"]]["event_timer_start"]):
                     continue
                 else:
                     second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
@@ -323,13 +326,30 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         return normalized_rows
 
     @staticmethod
+    def _ended_before(row: dict[str, Any], event_timer_start: int | None) -> bool:
+        """
+        Whether the statement in `row` finished before `event_timer_start`, the start of the most
+        recent statement seen for the same thread. Such a row is a leftover that
+        `performance_schema.events_statements_current` still holds for a thread that has moved on.
+
+        Both timers are NULL when the instrument that produced the event has `TIMED = NO` in
+        `setup_instruments`, and when no `events_statements_current` row joins to the thread at all,
+        in which case the SQL text comes from `PROCESSLIST_info` instead. Ordering is undecidable
+        without both timers, so such a row is never dropped: reporting a possibly stale statement is
+        preferable to dropping an active one.
+        """
+        event_timer_end = row.get("event_timer_end")
+        if event_timer_end is None or event_timer_start is None:
+            return False
+        return event_timer_end < event_timer_start
+
+    @staticmethod
     def _eliminate_duplicate_rows(rows, second_pass):
         # type: (List[Dict[str]], Dict[str]) -> List[Dict[str]]
         filtered_rows = []
         for row in rows:
-            if (
-                row["thread_id"] in second_pass
-                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+            if row["thread_id"] in second_pass and MySQLActivity._ended_before(
+                row, second_pass[row["thread_id"]]["event_timer_start"]
             ):
                 continue
             filtered_rows.append(row)
@@ -413,6 +433,11 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         if isinstance(o, datetime.timedelta):
             return int(o.total_seconds())
         raise TypeError
+
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
 
     def _close_db_conn(self):
         # type: () -> None
