@@ -8,7 +8,7 @@ from typing import Iterator
 
 from cachetools import TTLCache
 from packaging.version import Version
-from pymongo.errors import OperationFailure
+from pymongo.errors import NotPrimaryError, OperationFailure
 
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
@@ -110,8 +110,10 @@ class MongoQueryMetrics(DBMAsyncJob):
             if deployment.is_arbiter:
                 self._check.log.debug("Skipping query metrics collection on arbiter node")
                 return False
-            if deployment.replset_state == 3:  # RECOVERING
-                self._check.log.debug("Skipping query metrics collection on node in recovering state")
+            if not deployment.is_readable:
+                self._check.log.debug(
+                    "Skipping query metrics collection on node in %s state", deployment.replset_state_name
+                )
                 return False
 
         # Check MongoDB version
@@ -223,6 +225,9 @@ class MongoQueryMetrics(DBMAsyncJob):
         try:
             for doc in self._check.api_client.query_stats():
                 yield doc
+        except NotPrimaryError as e:
+            self._check.log.warning("Could not collect query metrics, node is not primary or secondary")
+            self._check.log.debug("Error details: %s", e)
         except OperationFailure as e:
             self._check.log.warning("Failed to query $queryStats: %s", e)
             raise

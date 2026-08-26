@@ -31,6 +31,9 @@ PRIMARY_STATE_ID = 1
 SECONDARY_STATE_ID = 2
 ARBITER_STATE_ID = 7
 
+# States in which a replica set node can serve reads.
+READABLE_STATE_IDS = frozenset({PRIMARY_STATE_ID, SECONDARY_STATE_ID})
+
 DEFAULT_TIMEOUT = 30
 ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
@@ -171,6 +174,11 @@ class ReplicaSetDeployment(Deployment):
         # There is only ever one primary node in a replica set.
         # In case sharding is disabled, the primary can be considered the master.
         return not self.use_shards and self.is_primary
+
+    @property
+    def is_readable(self):
+        """Whether the node can serve reads (PRIMARY or SECONDARY)."""
+        return self.replset_state in READABLE_STATE_IDS
 
     @property
     def cluster_type(self):

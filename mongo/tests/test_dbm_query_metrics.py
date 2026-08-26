@@ -4,6 +4,7 @@
 
 import mock
 import pytest
+from pymongo.errors import NotPrimaryError
 
 from . import common
 from .conftest import mock_now, mock_pymongo
@@ -83,6 +84,31 @@ def test_mongo_query_metrics_version_check(aggregator, instance_integration_clus
         run_check_once(mongo_check, dd_run_check)
 
     # No query metrics events should be emitted for MongoDB < 8.0
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    fqt_samples = [event for event in dbm_samples if event.get('dbm_type') == 'fqt']
+    assert len(fqt_samples) == 0
+
+
+@mock_now(1715911398.1112723)
+@common.standalone
+def test_mongo_query_metrics_not_primary(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
+    """Test that a NotPrimaryError during $queryStats does not fail the check."""
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['query_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    with mock_pymongo("standalone"):
+        with mock.patch.object(mongo_check, '_mongo_version', '8.0.0'):
+            with mock.patch(
+                'datadog_checks.mongo.api.MongoApi.query_stats', side_effect=NotPrimaryError("node is recovering")
+            ):
+                aggregator.reset()
+                run_check_once(mongo_check, dd_run_check)
+
+    aggregator.assert_service_check('mongodb.can_connect', common.MongoDb.OK)
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     fqt_samples = [event for event in dbm_samples if event.get('dbm_type') == 'fqt']
     assert len(fqt_samples) == 0
