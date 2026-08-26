@@ -21,8 +21,14 @@ from .constants import (
     CLIENT_HEALTH_ENDPOINT,
     CLIENTS_SUMMARY_ANALYTICS_ENDPOINT,
     DEVICE_REACHABLE_VALUES,
+    EVENT_DEFAULT_ALERT_TYPE,
     EVENT_DEFAULT_MAX_PAGES,
+    EVENT_DETAIL_FIELDS,
     EVENT_DEVICE_FAMILY_GROUPS,
+    EVENT_SEVERITY_ALERT_TYPES,
+    EVENT_SOURCE_TYPE,
+    EVENT_TAG_FIELDS,
+    EVENT_TYPE,
     FABRIC_SITE_HEALTH_ENDPOINT,
     INTERFACES_ENDPOINT,
     L3_TOPOLOGY_ENDPOINT_TEMPLATE,
@@ -718,6 +724,57 @@ def collect_assurance_issues(check: Any, client: Any, base_tags: list[str] | Non
 # -- assurance events -----------------------------------------------------------------
 
 
+def _event_alert_type(record: dict[str, Any]) -> str:
+    """Map a Catalyst Center syslog severity onto a Datadog alert type.
+
+    Severity 0 is the most severe. An unrecognised or absent value becomes ``info`` rather than
+    ``error``, so a scale change on the appliance cannot manufacture alerts.
+    """
+    severity = record.get('severity')
+    if not isinstance(severity, int):
+        return EVENT_DEFAULT_ALERT_TYPE
+    return EVENT_SEVERITY_ALERT_TYPES.get(severity, EVENT_DEFAULT_ALERT_TYPE)
+
+
+def _event_body(record: dict[str, Any]) -> str:
+    """Assemble the diagnosis text, skipping fields the appliance left empty.
+
+    These are the fields the metric breakdown cannot carry: free text, and several of them
+    per-client. Here they are searchable without becoming tag dimensions.
+    """
+    lines = [f'{label}: {record[field]}' for field, label in EVENT_DETAIL_FIELDS if record.get(field)]
+    for field, label in (('networkDeviceName', 'Device'), ('clientMac', 'Client MAC'), ('username', 'Username')):
+        if record.get(field):
+            lines.append(f'{label}: {record[field]}')
+    return '\n'.join(lines)
+
+
+def _event_payload(record: dict[str, Any], fallback_timestamp: int, base_tags: list[str]) -> dict[str, Any]:
+    """Build one Datadog event from one assurance event record.
+
+    ``host`` is deliberately left unset. Catalyst Center device names are not Datadog hostnames, and
+    setting one that does not resolve invents a host in the infrastructure list; the device is
+    carried as a tag and in the body instead.
+
+    ``aggregation_key`` is the appliance's own event id, which is what lets the stream collapse the
+    duplicates a re-polled window produces.
+    """
+    timestamp = record.get('timestamp')
+    payload: dict[str, Any] = {
+        # The appliance reports epoch milliseconds; the events intake expects seconds.
+        'timestamp': int(timestamp) // 1000 if isinstance(timestamp, int) else fallback_timestamp,
+        'event_type': EVENT_TYPE,
+        'source_type_name': EVENT_SOURCE_TYPE,
+        'msg_title': str(record.get('name') or 'Catalyst Center assurance event'),
+        'msg_text': _event_body(record),
+        'alert_type': _event_alert_type(record),
+        'tags': base_tags + [f'{tag_key}:{record[field]}' for field, tag_key in EVENT_TAG_FIELDS if record.get(field)],
+    }
+    if record.get('id'):
+        payload['aggregation_key'] = str(record['id'])
+    return payload
+
+
 def collect_events(
     check: Any,
     client: Any,
@@ -725,7 +782,16 @@ def collect_events(
     end_time: int,
     base_tags: list[str] | None = None,
 ) -> None:
-    """Collect assurance events in one time window, as counts by severity, family, type and device.
+    """Collect assurance events in one time window, as Datadog events plus aggregate counts.
+
+    Each record becomes a Datadog event carrying the diagnosis, and the same records are counted by
+    severity, family, type and device. Both are submitted because they answer different questions:
+    the counts are what a monitor alerts on and what a graph shows, the events are what someone
+    reads afterwards to find out why.
+
+    This is the fallback ingestion path. Where outbound webhooks are permitted, an Event Management
+    subscription posts the same events straight to the Datadog intake and this collector should stay
+    disabled -- the two paths are alternatives, and running both submits every event twice.
 
     The window is supplied rather than derived here so that the caller owns the cursor: consecutive
     windows must not overlap, or every event is counted more than once. Both bounds are epoch
@@ -779,6 +845,12 @@ def collect_events(
         for field, tag_key in EVENT_BREAKDOWNS:
             for value, count in _group_counts(records, field).items():
                 check.count('event.count', count, tags=tags + [f'{tag_key}:{value}'])
+
+        # A record with no timestamp falls back to the end of the window it was found in, which is
+        # the latest moment it could have happened.
+        fallback_timestamp = end_time // 1000
+        for record in records:
+            check.event(_event_payload(record, fallback_timestamp, tags))
 
 
 # -- application visibility -----------------------------------------------------------

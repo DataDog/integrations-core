@@ -105,8 +105,54 @@ EVENT_DEFAULT_LOOKBACK_MINUTES: Final = 15
 
 # A page here holds 20 records, so `max_pages` -- sized for the 500-record endpoints -- would
 # permit 1000 requests per family group against an endpoint whose documented rate limit can be as
-# low as 20/minute. Events get their own, far tighter bound.
+# low as 20/minute. Events get their own, far tighter bound. This also caps how many Datadog events
+# one cycle can submit: 4 family groups x 10 pages x 20 records = 800.
 EVENT_DEFAULT_MAX_PAGES: Final = 10
+
+# `severity` is the syslog scale, quoted from the AssuranceEvents spec: 0 Emergency, 1 Alert,
+# 2 Critical, 3 Error, 4 Warning, 5 Notice, 6 Info. Note that **0 is the most severe**, not the
+# least -- the inverse of the P1-P4 convention Catalyst Center uses for assurance *issues*, which is
+# an easy and silent mistake to make when reading the two side by side.
+EVENT_SEVERITY_ALERT_TYPES: Final[dict[int, str]] = {
+    0: 'error',
+    1: 'error',
+    2: 'error',
+    3: 'error',
+    4: 'warning',
+    5: 'info',
+    6: 'info',
+}
+
+# Used when `severity` is absent or is not one of the seven documented values. Chosen over
+# 'error' so that an unrecognised scale cannot manufacture alerts.
+EVENT_DEFAULT_ALERT_TYPE: Final = 'info'
+
+# Fields carrying the diagnosis, in the order they read best in an event body. These are the ones
+# the metric breakdown cannot keep: they are free text, and several are per-client.
+EVENT_DETAIL_FIELDS: Final[tuple[tuple[str, str], ...]] = (
+    ('reasonDescription', 'Reason'),
+    ('subReasonDescription', 'Sub-reason'),
+    ('failureCategory', 'Failure category'),
+    ('resultStatus', 'Result'),
+    ('lastApDisconnectReason', 'Last AP disconnect reason'),
+    ('details', 'Details'),
+)
+
+# Tags on the Datadog event. Wider than the metric breakdown because an event is not a time series,
+# so these do not multiply into new series -- but still bounded, and still excluding the per-client
+# identifiers (`clientMac`, `ipv4`, `username`), which belong in the body where they are searchable
+# without being indexed as dimensions.
+EVENT_TAG_FIELDS: Final[tuple[tuple[str, str], ...]] = (
+    ('severity', 'severity'),
+    ('deviceFamily', 'device_family'),
+    ('name', 'event_name'),
+    ('networkDeviceName', 'device_name'),
+    ('siteHierarchy', 'site'),
+    ('ssid', 'ssid'),
+)
+
+EVENT_SOURCE_TYPE: Final = 'cisco_catalyst_center'
+EVENT_TYPE: Final = 'cisco_catalyst_center_assurance'
 
 # Keys that make up an error object. Used to tell an error apart from a real record, since both
 # arrive in the `response` slot.
