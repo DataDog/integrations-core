@@ -581,6 +581,36 @@ class KafkaActionsClient:
                 self.log.error("Failed to delete topic '%s' config: %s", topic, e)
                 raise
 
+    def describe_topic_config(self, topic: str) -> dict[str, str]:
+        """Fetch current topic configuration via describe_configs.
+
+        Used after a config update to emit the updated config to the event
+        platform so the UI reflects changes immediately, without waiting for
+        the kafka_consumer check's cache to expire.
+
+        Args:
+            topic: Topic name
+
+        Returns:
+            Dict of config key-value pairs
+        """
+        admin = self.get_admin_client()
+
+        resource = ConfigResource(ResourceType.TOPIC, topic)
+        futures = admin.describe_configs([resource], request_timeout=10)
+
+        for _res, future in futures.items():
+            try:
+                config_result = future.result(timeout=10)
+                if not config_result:
+                    return {}
+                return {name: entry.value for name, entry in config_result.items() if entry.value is not None}
+            except Exception as e:
+                self.log.error("Failed to describe configs for topic '%s': %s", topic, e)
+                raise
+
+        return {}
+
     def delete_consumer_group(self, consumer_group: str) -> bool:
         """Delete a consumer group.
 
