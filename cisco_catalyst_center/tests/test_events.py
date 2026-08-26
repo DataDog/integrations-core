@@ -63,6 +63,22 @@ EVENTS: list[dict[str, Any]] = [
     },
 ]
 
+#: One record carrying the fields the Datadog event body is assembled from. `timestamp` is epoch
+#: milliseconds, as the appliance reports it.
+DETAILED_EVENT: dict[str, Any] = {
+    'id': 'e9',
+    'severity': 0,
+    'name': 'AP Disconnected',
+    'deviceFamily': 'Unified AP',
+    'networkDeviceName': 'ap-7',
+    'siteHierarchy': 'Global/US/Building-1',
+    'ssid': 'corp-wifi',
+    'timestamp': 1_755_001_234_567,
+    'reasonDescription': 'AP lost connection to WLC',
+    'failureCategory': 'AP_CONNECTIVITY',
+    'clientMac': 'aa:bb:cc:dd:ee:ff',
+}
+
 
 def _check(instance: InstanceType) -> CiscoCatalystCenterCheck:
     return CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
@@ -192,6 +208,97 @@ def test_collect_events_tags_only_the_bounded_dimensions(aggregator: AggregatorS
         for tag in metric.tags
     }
     assert keys == {'severity', 'device_family', 'event_name', 'device_name'}
+
+
+# -- the Datadog events -----------------------------------------------------------------
+
+
+def test_collect_events_submits_one_datadog_event_per_record(
+    aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # The counts say how many; the events say which. Dropping to counts alone discards 65 of the
+    # 69 fields on each record, and the diagnosis is in those fields.
+    collect_events(_check(instance), _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
+
+    assert len(aggregator.events) == len(EVENTS)
+
+
+def test_collect_events_titles_the_event_with_the_event_name(
+    aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
+
+    assert aggregator.events[0]['msg_title'] == 'AP Disconnected'
+
+
+def test_collect_events_body_carries_the_diagnosis(aggregator: AggregatorStub, instance: InstanceType) -> None:
+    # These are the fields a metric dimension cannot hold: free text, and per-client.
+    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
+
+    body = aggregator.events[0]['msg_text']
+    assert 'AP lost connection to WLC' in body
+    assert 'aa:bb:cc:dd:ee:ff' in body
+
+
+def test_collect_events_converts_the_appliance_timestamp_to_seconds(
+    aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # The appliance reports epoch milliseconds. Submitting those unconverted dates every event to
+    # the year 57000, which silently empties the event stream for the window being viewed.
+    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
+
+    assert aggregator.events[0]['timestamp'] == 1_755_001_234
+
+
+def test_collect_events_aggregates_on_the_appliance_event_id(
+    aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # A re-polled window resubmits the same events. The appliance id is what lets the stream
+    # collapse them instead of showing each one twice.
+    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
+
+    assert aggregator.events[0]['aggregation_key'] == 'e9'
+
+
+@pytest.mark.parametrize(
+    ('severity', 'expected'),
+    [
+        (0, 'error'),  # Emergency, the most severe end of the syslog scale
+        (3, 'error'),  # Error
+        (4, 'warning'),  # Warning
+        (6, 'info'),  # Info
+        (99, 'info'),  # off the documented scale: must not manufacture an alert
+        (None, 'info'),  # absent
+    ],
+)
+def test_collect_events_maps_syslog_severity_to_alert_type(
+    aggregator: AggregatorStub, instance: InstanceType, severity: object, expected: str
+) -> None:
+    record = {**DETAILED_EVENT, 'severity': severity}
+
+    collect_events(_check(instance), _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
+
+    assert aggregator.events[0]['alert_type'] == expected
+
+
+def test_collect_events_does_not_set_a_host_on_the_event(aggregator: AggregatorStub, instance: InstanceType) -> None:
+    # Catalyst Center device names are not Datadog hostnames. Setting one that does not resolve
+    # invents a host in the infrastructure list, so the device travels as a tag instead.
+    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
+
+    assert not aggregator.events[0].get('host')
+
+
+def test_collect_events_given_no_timestamp_falls_back_to_the_window_end(
+    aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # The latest moment the event could have happened, and it keeps the event inside the window a
+    # user is looking at rather than at the epoch.
+    record = {key: value for key, value in DETAILED_EVENT.items() if key != 'timestamp'}
+
+    collect_events(_check(instance), _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
+
+    assert aggregator.events[0]['timestamp'] == WINDOW_END // 1000
 
 
 # -- the window cursor ------------------------------------------------------------------

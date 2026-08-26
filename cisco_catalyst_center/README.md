@@ -24,6 +24,19 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][5].
 
+### Event collection
+
+Set `collect_events: true` in `cisco_catalyst_center.d/conf.yaml` to collect Catalyst Center
+assurance events. Each cycle polls the window since the previous one, so an event is submitted
+exactly once.
+
+Polling costs four requests per cycle at minimum, delays each event by up to one collection
+interval, and submits at most 800 events per cycle. Events that occur while the Agent is stopped for
+more than seven days cannot be recovered, because that is the widest window the endpoint serves.
+
+If Catalyst Center is already configured to notify Datadog directly, leave this disabled. Both paths
+carry the same events, so enabling both submits everything twice.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `cisco_catalyst_center` under the Checks section.
@@ -36,11 +49,16 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The cisco_catalyst_center integration does not include any events.
+When `collect_events` is enabled, the cisco_catalyst_center integration submits each Catalyst Center
+assurance event as a Datadog event. The title is the event name, the body carries the reason,
+sub-reason, failure category and result reported by the appliance, and the alert type is derived from
+the event's syslog severity: Emergency through Error become errors, Warning becomes a warning, and
+Notice and Info become informational.
+
+Events are tagged with severity, device family, event name, device name, site and SSID. Per-client
+identifiers appear in the event body rather than as tags.
 
 ### Service checks
-
-The cisco_catalyst_center integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
