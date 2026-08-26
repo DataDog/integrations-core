@@ -62,7 +62,7 @@ def dd_environment(dd_save_state):
 
 
 @pytest.fixture(scope='session')
-def spark_kubeconfig(dd_get_state):
+def spark_kubeconfig(dd_get_state) -> str:
     return dd_get_state('spark_kubeconfig')
 
 
