@@ -10,7 +10,7 @@ Integrate your incident.io account with Datadog to gain insights into incident-r
 
 ### Webhook Configuration
 
-Configure the Datadog endpoint to forward events of incident.io incidents as logs to Datadog. For more details, see the incident.io [webhooks][2] documentation.
+Configure the Datadog endpoint to forward incident.io incident events to Datadog using the Event Management v2 webhook. For more details, see the incident.io [webhooks][2] documentation.
 
 1. {{< integration-api-key-picker >}}
 2. Log in to your [incident.io account][3] as org owner.
@@ -22,13 +22,13 @@ Configure the Datadog endpoint to forward events of incident.io incidents as log
 
 ## Data Collected
 
-### Logs
+### Events
 
-The incident.io integration ingests the following logs:
+The incident.io integration ingests the following events:
 
-- Public incident event logs
-- Private incident event logs
-- Action and follow up event logs
+- Public incident events
+- Private incident events
+- Action and follow up events
 
 ### Metrics
 
@@ -38,9 +38,9 @@ incident.io does not include any metrics.
 
 incident.io does not include any service checks.
 
-### Events
+### Logs
 
-incident.io does not include any events.
+incident.io does not include any logs.
 
 ## Support
 

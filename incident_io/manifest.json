@@ -32,6 +32,7 @@
       "Category::Collaboration",
       "Category::Issue Tracking",
       "Category::Event Management",
+      "Submitted Data Type::Events",
       "Offering::Integration"
     ]
   },
@@ -49,9 +50,6 @@
     },
     "dashboards": {
       "incident.io - Incidents Overview": "assets/dashboards/incident-io_incidents_overview.json"
-    },
-    "logs": {
-      "source": "incident-io"
     },
     "monitors": {
       "Critical public incident": "assets/monitors/critical_public_incident.json",
