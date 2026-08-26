@@ -247,6 +247,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
     def _collect_activity(self):
         # type: () -> None
         # do not emit any dd.internal metrics for DBM specific check code
+        self._raise_if_cancelled()
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             rows = self._get_activity(cursor)
@@ -289,6 +290,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
+        self._raise_if_cancelled()
         query = self._get_activity_query()
         self._log.debug("Running activity query [%s]", query)
         cursor.execute(query)
@@ -431,6 +433,11 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         if isinstance(o, datetime.timedelta):
             return int(o.total_seconds())
         raise TypeError
+
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
 
     def _close_db_conn(self):
         # type: () -> None

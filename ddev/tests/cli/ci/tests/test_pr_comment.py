@@ -622,9 +622,9 @@ def test_summary_line_reports_state_and_counts():
 def test_the_run_summary_is_the_comment_without_the_marker():
     """The same report, on a surface that has nothing to find it by.
 
-    The marker exists only so the updater can locate its comment. A run summary is written once and
+    The marker exists only so the run reporter can locate its comment. A run summary is written once and
     never looked up, so carrying the marker there would say nothing and would put it somewhere the
-    updater's ownership rules do not apply.
+    run reporter's ownership rules do not apply.
     """
     progress = DispatcherProgress(batches=(batch_progress("batch-01", job_progress(attempt())),), done=True)
     body = render_comment(progress)

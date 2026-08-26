@@ -23,7 +23,7 @@ from datadog_checks.sqlserver.queries import (
     get_deadlocks_query,
     get_xe_sessions_query,
 )
-from datadog_checks.sqlserver.utils import is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_sql_database, raise_if_cancelled
 
 try:
     import datadog_agent
@@ -73,6 +73,9 @@ class Deadlocks(DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
         )
         self._conn_key_prefix = "dbm-deadlocks-"
+
+    def shutdown(self) -> None:
+        self._check = None
 
     def _close_db_conn(self):
         pass
@@ -166,6 +169,8 @@ class Deadlocks(DBMAsyncJob):
         raise NoXESessionError(NO_XE_SESSION_ERROR)
 
     def _query_deadlocks(self):
+        raise_if_cancelled(self._cancel_event)
+
         if self._xe_session_name is None:
             engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
             if is_azure_sql_database(engine_edition):

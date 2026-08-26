@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Builders shared by the Dispatcher batching, gatherer, renderer and updater tests."""
+"""Builders shared by the Dispatcher batching, gatherer, renderer and run reporter tests."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import re
 from collections.abc import Iterable, Sequence
 
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
-from ddev.cli.ci.tests.messages import BatchJob
+from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
     DispatcherProgress,
@@ -91,6 +91,17 @@ def make_job(
     )
 
 
+def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
+    job_list = list(batch_jobs) or [make_job()]
+    return TestBatch(
+        id=batch_id,
+        batch_id=batch_id,
+        job_list=job_list,
+        jobs_count=len(job_list),
+        integrations=sorted({job.target for job in job_list}),
+    )
+
+
 def jobs(target: str, count: int) -> list[BatchJob]:
     # Each job carries a distinct environment, as production jobs within an integration do, so
     # names and artifact identities are unique within the target.
@@ -157,6 +168,16 @@ def copied(source: str, destination: str) -> ChangedFile:
     return ChangedFile(change_type=ChangeType.COPIED, path=destination, previous_path=source)
 
 
+class RecordingBus:
+    """Stands in for the event bus in processor unit tests, recording what the processor submits."""
+
+    def __init__(self):
+        self.queue: asyncio.Queue[BaseMessage] = asyncio.Queue()
+
+    def submit_message(self, message: BaseMessage) -> None:
+        self.queue.put_nowait(message)
+
+
 def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
     messages: list[BaseMessage] = []
     while not queue.empty():
@@ -165,7 +186,7 @@ def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
 
 
 # ---------------------------------------------------------------------------
-# Progress snapshots, as the renderer and the pull-request updater see them
+# Progress snapshots, as the renderer and the run reporter see them
 # ---------------------------------------------------------------------------
 
 JOB_URL = "https://github.com/o/r/actions/runs/1/job/9"

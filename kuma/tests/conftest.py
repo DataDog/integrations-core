@@ -5,8 +5,12 @@ import os
 
 import pytest
 
+from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
+
+HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 
 KUMA_NAMESPACE = 'kuma-system'
 KUMA_SERVICE = 'kuma-control-plane'
@@ -57,10 +61,12 @@ def dd_environment(dd_save_state):
             'agent_type': 'kubernetes',
             'kubernetes': {
                 'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'kuma', 'data', 'auto_conf.yaml'),
             },
         }
 
         dd_save_state('kuma_instance', instance)
+        dd_save_state('kuma_kubeconfig', kubeconfig)
         yield instance, metadata
 
 
@@ -72,3 +78,8 @@ def instance(dd_get_state):
             'openmetrics_endpoint': 'http://localhost:5680/metrics',
         },
     )
+
+
+@pytest.fixture(scope='session')
+def kuma_kubeconfig(dd_get_state):
+    return dd_get_state('kuma_kubeconfig')

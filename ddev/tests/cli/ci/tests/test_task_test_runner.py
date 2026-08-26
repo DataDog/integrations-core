@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 from pathlib import Path
 from typing import Any
@@ -23,7 +22,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
-from tests.cli.ci.tests.helpers import drain_queue, make_job
+from tests.cli.ci.tests.helpers import RecordingBus, drain_queue, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------
@@ -98,7 +97,7 @@ def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner
         client=client,  # type: ignore[arg-type]
         options=options,
     )
-    runner.queue = asyncio.Queue()
+    runner.bus = RecordingBus()  # type: ignore[assignment]
     return runner
 
 
@@ -129,7 +128,7 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
     )
     await runner.process_message(batch)
 
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -289,7 +288,7 @@ async def test_uses_batch_id_not_message_id_for_correlation(tmp_path: Path):
     assert fake.calls_to("create_check_run")[0].kwargs["name"] == "test-batch/batch-07"
     assert fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]["batch_id"] == "batch-07"
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     assert finished.id == "msg-uuid-xyz"
     assert finished.batch_id == "batch-07"
@@ -328,7 +327,7 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path):
         TestBatch(id="batch-c", batch_id="batch-c", job_list=[j1, j2], jobs_count=2, integrations=["ntp"])
     )
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     assert finished.status == "failure"
 
@@ -360,7 +359,7 @@ async def test_process_message_batch_job_without_workflow_match(tmp_path: Path):
         TestBatch(id="batch-d", batch_id="batch-d", job_list=[job], jobs_count=1, integrations=["ntp"])
     )
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     [result] = finished.batch_jobs
     assert result.job == job
@@ -382,7 +381,7 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path):
         TestBatch(id="batch-e", batch_id="batch-e", job_list=[job], jobs_count=1, integrations=["ntp"])
     )
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     [result] = finished.batch_jobs
     assert result.workflow_job is not None and result.workflow_job.conclusion == "success"
@@ -406,7 +405,7 @@ async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_
     # correlated job carrying no workflow job.
     await runner.process_message(make_batch())
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     assert finished.status == "success"
     assert all(result.workflow_job is None for result in finished.batch_jobs)
@@ -423,7 +422,7 @@ async def test_process_message_failure_path(tmp_path: Path):
         TestBatch(id="batch-2", batch_id="batch-2", job_list=[make_job()], jobs_count=1, integrations=["ntp"])
     )
 
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -445,7 +444,7 @@ async def test_process_message_skipped_conclusion(tmp_path: Path):
     await runner.process_message(make_batch())
 
     # A "skipped" GitHub conclusion maps to a "skipped" BatchFinished and a "skipped" check run.
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -470,7 +469,7 @@ async def test_process_message_polls_until_completed(tmp_path: Path):
     )
 
     assert len(fake.calls_to("get_workflow_run")) == 4
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
@@ -510,7 +509,7 @@ async def test_process_message_null_conclusion(tmp_path: Path):
     await runner.process_message(make_batch())
 
     # A null GitHub conclusion maps to a "failure" BatchFinished and a "neutral" check run.
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -536,7 +535,7 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
     assert len(update_calls) == 1
     assert update_calls[0].kwargs["conclusion"] == "success"
 
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -555,7 +554,7 @@ async def test_process_message_swallows_check_run_close_failure(tmp_path: Path):
     await runner.process_message(make_batch())
 
     assert len(fake.calls_to("update_check_run")) == 1
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
@@ -582,7 +581,7 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
         "https://api.github.com/artifact/2/zip",
         "https://api.github.com/artifact/3/zip",
     ]
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
@@ -657,11 +656,11 @@ async def test_failure_at_submit_message_closes_check_run_as_success(tmp_path: P
     mock_artifacts(fake, [make_artifact(1)])
     runner = make_runner(fake, tmp_path)
 
-    class _BoomQueue:
-        def put_nowait(self, _: Any):
+    class _BoomBus:
+        def submit_message(self, _: Any):
             raise boom
 
-    runner.queue = _BoomQueue()  # type: ignore[assignment]
+    runner.bus = _BoomBus()  # type: ignore[assignment]
 
     with pytest.raises(RuntimeError, match="boom-submit-message"):
         await runner.process_message(make_batch())
