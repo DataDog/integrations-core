@@ -89,6 +89,53 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
+      ocsf:
+        activity_id: 4
+        activity_name: "Delete"
+        actor:
+          process:
+            pid: 1111
+            tid: 1111
+          user:
+            uid: "A-1-1-11"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          data:
+            BufferSize: "4"
+            NAME: "dds-dns"
+            RDATA: "0A110AA1"
+            TTL: "0"
+            Type: "1"
+            TypeName: "Address record"
+            Zone: "dds-dns.local"
+            ZoneScope: "Default"
+          device:
+            name: "DDS-DNS.dds-dns.local"
+            type: "Server"
+            type_id: 1
+          name: "dds-dns"
+          type: "Record"
+          type_id: 99
+          user:
+            uid: "A-1-1-11"
+        metadata:
+          correlation_uid: ""
+          event_code: "520"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-06T07:44:18.8322685Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          uid: "222"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+      other_entity_type: "Record"
       title: "Record delete - dynamic update"
     message: "A resource record of type 1, name dds-dns and RDATA 0A110AA1 was deleted from scope Default of zone dds-dns.local via dynamic update from IP Address 10.10.10.10."
     status: "info"
@@ -165,6 +212,37 @@ tests:
       evt:
         id: "526"
       level: "Information"
+      ocsf:
+        activity_id: 1
+        activity_name: "Log"
+        actor:
+          process:
+            pid: 1111
+            tid: 1111
+          user:
+            uid: "S-1-1-11-1115675242-1113514982-4229196803-111"
+        category_name: "Discovery"
+        category_uid: 5
+        class_name: "Device Config State Change"
+        class_uid: 5019
+        device:
+          name: "DDS-DNS.dds-dns.local"
+          type: "Server"
+          type_id: 1
+        metadata:
+          correlation_uid: ""
+          event_code: "526"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-06T13:09:06.1616986Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          uid: "277"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
       title: "Zone unsign"
     message: "The zone _msdcs.dds-dns.local was unsigned."
     status: "info"
@@ -256,9 +334,736 @@ tests:
       evt:
         id: "515"
       level: "Information"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          process:
+            pid: 1111
+            tid: 1111
+          user:
+            uid: "S-1-1-11-111111-11111111111-1111-500"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          data:
+            BufferSize: "16"
+            NAME: "DESKTOP-ABCD.dds-dns.local"
+            RDATA: "FAAA000A00D000014E402EB2F12019E"
+            TTL: "1200"
+            Type: "28"
+            TypeName: "IPv6 address record"
+            VirtualizationID: "."
+            Zone: "dds-dns.local"
+            ZoneScope: "Default"
+          device:
+            name: "DDS-DNS.dds-dns.local"
+            type: "Server"
+            type_id: 1
+          name: "DESKTOP-ABCD.dds-dns.local"
+          type: "Record"
+          type_id: 99
+          user:
+            uid: "S-1-1-11-111111-11111111111-1111-500"
+        metadata:
+          correlation_uid: ""
+          event_code: "515"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-19T05:15:41.3857981Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          uid: "527"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+      other_entity_type: "Record"
       title: "Record create"
     message: "A resource record of type 28, name DESKTOP-ABCD.dds-dns.local, TTL 1200 and RDATA FAAA000A00D000014E402EB2F12019E was created in scope Default of zone dds-dns.local. [virtualization instance: .]."
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1742361341385
+ -
+  sample: |-
+    {
+      "level" : "Information",
+      "Event" : {
+        "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData" : {
+          "Data" : {
+            "VirtualizationID" : ".",
+            "Zone" : "Test_Zone"
+          }
+        },
+        "System" : {
+          "Correlation" : "",
+          "Task" : "ZONE_OP",
+          "Keywords" : "0x4000000000080000",
+          "Channel" : "Microsoft-Windows-DNSServer/Audit",
+          "Opcode" : "Info",
+          "Security" : {
+            "UserID" : "S-1-5-21-2225675242-3203514982-4229196803-500"
+          },
+          "Provider" : {
+            "Guid" : "{eb79061a-a566-4698-9119-3ed2807060e7}",
+            "Name" : "Microsoft-Windows-DNSServer"
+          },
+          "TimeCreated" : {
+            "SystemTime" : "2025-03-27T08:19:20.219Z"
+          },
+          "EventRecordID" : "245",
+          "Execution" : {
+            "ThreadID" : "7020",
+            "ProcessID" : "2892"
+          },
+          "Version" : "0",
+          "Computer" : "DDS-DNS.dds-dns.local",
+          "EventID" : "513",
+          "Level" : "4"
+        }
+      },
+      "message" : "The zone Test_Zone was deleted. [virtualization instance: .]."
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            VirtualizationID: "."
+            Zone: "Test_Zone"
+        System:
+          Channel: "Microsoft-Windows-DNSServer/Audit"
+          Computer: "DDS-DNS.dds-dns.local"
+          Correlation: ""
+          EventRecordID: "245"
+          Execution:
+            ProcessID: "2892"
+            ThreadID: "7020"
+          Keywords: "0x4000000000080000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{eb79061a-a566-4698-9119-3ed2807060e7}"
+            Name: "Microsoft-Windows-DNSServer"
+          Security:
+            UserID: "S-1-5-21-2225675242-3203514982-4229196803-500"
+          Task: "ZONE_OP"
+          TimeCreated:
+            SystemTime: "2025-03-27T08:19:20.219Z"
+          Version: "0"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "513"
+      level: "Information"
+      ocsf:
+        activity_id: 4
+        activity_name: "Delete"
+        actor:
+          process:
+            pid: 2892
+            tid: 7020
+          user:
+            uid: "S-1-5-21-2225675242-3203514982-4229196803-500"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          data:
+            VirtualizationID: "."
+            Zone: "Test_Zone"
+          device:
+            name: "DDS-DNS.dds-dns.local"
+            type: "Server"
+            type_id: 1
+          name: "Test_Zone"
+          type: "Zone"
+          type_id: 99
+          user:
+            uid: "S-1-5-21-2225675242-3203514982-4229196803-500"
+        metadata:
+          correlation_uid: ""
+          event_code: "513"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-27T08:19:20.219Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          uid: "245"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1743063560219
+      other_entity_type: "Zone"
+      title: "Zone delete"
+    message: "The zone Test_Zone was deleted. [virtualization instance: .]."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743063560219
+ -
+  sample: |-
+    {
+      "level" : "Information",
+      "Event" : {
+        "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData" : {
+          "Data" : {
+            "VirtualizationID" : ".",
+            "Zone" : "Test_Primary_Zone"
+          }
+        },
+        "System" : {
+          "Correlation" : "",
+          "Task" : "ZONE_OP",
+          "Keywords" : "0x4000000000080000",
+          "Channel" : "Microsoft-Windows-DNSServer/Audit",
+          "Opcode" : "Info",
+          "Security" : {
+            "UserID" : "S-1-5-21-2225675242-3203514982-4229196803-500"
+          },
+          "Provider" : {
+            "Guid" : "{eb79061a-a566-4698-9119-3ed2807060e7}",
+            "Name" : "Microsoft-Windows-DNSServer"
+          },
+          "TimeCreated" : {
+            "SystemTime" : "2025-03-27T08:19:20.219Z"
+          },
+          "EventRecordID" : "289",
+          "Execution" : {
+            "ThreadID" : "6824",
+            "ProcessID" : "2892"
+          },
+          "Version" : "0",
+          "Computer" : "DDS-DNS.dds-dns.local",
+          "EventID" : "559",
+          "Level" : "4"
+        }
+      },
+      "message" : "The zone Test_Primary_Zone is paused. [virtualization instance: .]."
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            VirtualizationID: "."
+            Zone: "Test_Primary_Zone"
+        System:
+          Channel: "Microsoft-Windows-DNSServer/Audit"
+          Computer: "DDS-DNS.dds-dns.local"
+          Correlation: ""
+          EventRecordID: "289"
+          Execution:
+            ProcessID: "2892"
+            ThreadID: "6824"
+          Keywords: "0x4000000000080000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{eb79061a-a566-4698-9119-3ed2807060e7}"
+            Name: "Microsoft-Windows-DNSServer"
+          Security:
+            UserID: "S-1-5-21-2225675242-3203514982-4229196803-500"
+          Task: "ZONE_OP"
+          TimeCreated:
+            SystemTime: "2025-03-27T08:19:20.219Z"
+          Version: "0"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "559"
+      level: "Information"
+      ocsf:
+        activity_id: 99
+        activity_name: "Pause"
+        actor:
+          process:
+            pid: 2892
+            tid: 6824
+          user:
+            uid: "S-1-5-21-2225675242-3203514982-4229196803-500"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          data:
+            VirtualizationID: "."
+            Zone: "Test_Primary_Zone"
+          device:
+            name: "DDS-DNS.dds-dns.local"
+            type: "Server"
+            type_id: 1
+          name: "Test_Primary_Zone"
+          type: "Zone"
+          type_id: 99
+          user:
+            uid: "S-1-5-21-2225675242-3203514982-4229196803-500"
+        metadata:
+          correlation_uid: ""
+          event_code: "559"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-27T08:19:20.219Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          uid: "289"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1743063560219
+      other_entity_activity: "Pause"
+      other_entity_type: "Zone"
+      title: "Pause zone"
+    message: "The zone Test_Primary_Zone is paused. [virtualization instance: .]."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743063560219
+ -
+  sample: |-
+    {
+      "level" : "Information",
+      "Event" : {
+        "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData" : "",
+        "System" : {
+          "Correlation" : "",
+          "Task" : "SERVER_OP",
+          "Keywords" : "0x4000000020000000",
+          "Channel" : "Microsoft-Windows-DNSServer/Audit",
+          "Opcode" : "0",
+          "Security" : {
+            "UserID" : "S-1-5-21-2225675242-3203514982-4229196803-500"
+          },
+          "Provider" : {
+            "Guid" : "{eb79061a-a566-4698-9119-3ed2807060e7}",
+            "Name" : "Microsoft-Windows-DNSServer"
+          },
+          "TimeCreated" : {
+            "SystemTime" : "2026-01-15T16:05:21.123Z"
+          },
+          "EventRecordID" : "12388",
+          "Execution" : {
+            "ThreadID" : "3484",
+            "ProcessID" : "2996"
+          },
+          "Version" : "0",
+          "Computer" : "DDS-DNS.dds-dns.local",
+          "EventID" : "548",
+          "Level" : "4"
+        }
+      },
+      "message" : "A request to restart the DNS server service has been received."
+    }
+  result:
+    custom:
+      Event:
+        EventData: ""
+        System:
+          Channel: "Microsoft-Windows-DNSServer/Audit"
+          Computer: "DDS-DNS.dds-dns.local"
+          Correlation: ""
+          EventRecordID: "12388"
+          Execution:
+            ProcessID: "2996"
+            ThreadID: "3484"
+          Keywords: "0x4000000020000000"
+          Level: "4"
+          Opcode: "0"
+          Provider:
+            Guid: "{eb79061a-a566-4698-9119-3ed2807060e7}"
+            Name: "Microsoft-Windows-DNSServer"
+          Security:
+            UserID: "S-1-5-21-2225675242-3203514982-4229196803-500"
+          Task: "SERVER_OP"
+          TimeCreated:
+            SystemTime: "2026-01-15T16:05:21.123Z"
+          Version: "0"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "548"
+      level: "Information"
+      ocsf:
+        activity_id: 5
+        activity_name: "Restart"
+        actor:
+          process:
+            pid: 2996
+            tid: 3484
+          user:
+            uid: "S-1-5-21-2225675242-3203514982-4229196803-500"
+        app:
+          name: "Microsoft-Windows-DNSServer"
+          uid: "{eb79061a-a566-4698-9119-3ed2807060e7}"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Application Lifecycle"
+        class_uid: 6002
+        device:
+          name: "DDS-DNS.dds-dns.local"
+          type: "Server"
+          type_id: 1
+        metadata:
+          correlation_uid: ""
+          event_code: "548"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2026-01-15T16:05:21.123Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          profiles:
+           - "host"
+          uid: "12388"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1768493121123
+      title: "Restart server"
+    message: "A request to restart the DNS server service has been received."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768493121123
+ -
+  sample: |-
+    {
+      "level" : "Information",
+      "Event" : {
+        "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData" : {
+          "Data" : {
+            "KeyProtocol" : "DNSSec",
+            "BufferSize" : "31",
+            "Base64Data" : "3235372033203133205A6843613372474C6F665A636E64464E326156643D3D",
+            "CryptoAlgorithm" : "RSA/SHA-256",
+            "Name" : "test_dnskey.TrustAnchors"
+          }
+        },
+        "System" : {
+          "Correlation" : "",
+          "Task" : "DNSSEC_OP",
+          "Keywords" : "0x4000000100000000",
+          "Channel" : "Microsoft-Windows-DNSServer/Audit",
+          "Opcode" : "Info",
+          "Security" : {
+            "UserID" : "S-1-5-21-2225675242-3203514982-4229196803-500"
+          },
+          "Provider" : {
+            "Guid" : "{eb79061a-a566-4698-9119-3ed2807060e7}",
+            "Name" : "Microsoft-Windows-DNSServer"
+          },
+          "TimeCreated" : {
+            "SystemTime" : "2025-03-27T08:19:20.219Z"
+          },
+          "EventRecordID" : "282",
+          "Execution" : {
+            "ThreadID" : "2300",
+            "ProcessID" : "2892"
+          },
+          "Version" : "0",
+          "Computer" : "DDS-DNS.dds-dns.local",
+          "EventID" : "544",
+          "Level" : "4"
+        }
+      },
+      "message" : "The DNSKEY with Key Protocol DNSSec, Base64 Data 0x3235372033203133205A6843613372474C6F665A636E64464E326156643D3D and Crypto Algorithm RSA/SHA-256 has been added at the trust point test_dnskey.TrustAnchors."
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Base64Data: "3235372033203133205A6843613372474C6F665A636E64464E326156643D3D"
+            BufferSize: "31"
+            CryptoAlgorithm: "RSA/SHA-256"
+            KeyProtocol: "DNSSec"
+            Name: "test_dnskey.TrustAnchors"
+        System:
+          Channel: "Microsoft-Windows-DNSServer/Audit"
+          Computer: "DDS-DNS.dds-dns.local"
+          Correlation: ""
+          EventRecordID: "282"
+          Execution:
+            ProcessID: "2892"
+            ThreadID: "2300"
+          Keywords: "0x4000000100000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{eb79061a-a566-4698-9119-3ed2807060e7}"
+            Name: "Microsoft-Windows-DNSServer"
+          Security:
+            UserID: "S-1-5-21-2225675242-3203514982-4229196803-500"
+          Task: "DNSSEC_OP"
+          TimeCreated:
+            SystemTime: "2025-03-27T08:19:20.219Z"
+          Version: "0"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "544"
+      level: "Information"
+      ocsf:
+        activity_id: 1
+        activity_name: "Log"
+        actor:
+          process:
+            pid: 2892
+            tid: 2300
+          user:
+            uid: "S-1-5-21-2225675242-3203514982-4229196803-500"
+        category_name: "Discovery"
+        category_uid: 5
+        class_name: "Device Config State Change"
+        class_uid: 5019
+        device:
+          name: "DDS-DNS.dds-dns.local"
+          type: "Server"
+          type_id: 1
+        metadata:
+          correlation_uid: ""
+          event_code: "544"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-27T08:19:20.219Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          uid: "282"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1743063560219
+      title: "Add trust point DNSKEY"
+    message: "The DNSKEY with Key Protocol DNSSec, Base64 Data 0x3235372033203133205A6843613372474C6F665A636E64464E326156643D3D and Crypto Algorithm RSA/SHA-256 has been added at the trust point test_dnskey.TrustAnchors."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743063560219
+ -
+  sample: |-
+    {
+      "level" : "Information",
+      "Event" : {
+        "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData" : {
+          "Data" : {
+            "Type" : "KSK",
+            "Zone" : "Test_Primary_Zone",
+            "GUID" : "{60901E33-AD11-429B-BBC8-0234171931C0}"
+          }
+        },
+        "System" : {
+          "Correlation" : "",
+          "Task" : "DNSSEC_OP",
+          "Keywords" : "0x4000000000800000",
+          "Channel" : "Microsoft-Windows-DNSServer/Audit",
+          "Opcode" : "Info",
+          "Security" : {
+            "UserID" : "S-1-5-18"
+          },
+          "Provider" : {
+            "Guid" : "{eb79061a-a566-4698-9119-3ed2807060e7}",
+            "Name" : "Microsoft-Windows-DNSServer"
+          },
+          "TimeCreated" : {
+            "SystemTime" : "2025-03-27T08:19:20.219Z"
+          },
+          "EventRecordID" : "447",
+          "Execution" : {
+            "ThreadID" : "5756",
+            "ProcessID" : "2892"
+          },
+          "Version" : "0",
+          "Computer" : "DDS-DNS.dds-dns.local",
+          "EventID" : "528",
+          "Level" : "4"
+        }
+      },
+      "message" : "Rollover was started on the type KSK with GUID {60901E33-AD11-429B-BBC8-0234171931C0} of zone Test_Primary_Zone."
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            GUID: "{60901E33-AD11-429B-BBC8-0234171931C0}"
+            Type: "KSK"
+            Zone: "Test_Primary_Zone"
+        System:
+          Channel: "Microsoft-Windows-DNSServer/Audit"
+          Computer: "DDS-DNS.dds-dns.local"
+          Correlation: ""
+          EventRecordID: "447"
+          Execution:
+            ProcessID: "2892"
+            ThreadID: "5756"
+          Keywords: "0x4000000000800000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{eb79061a-a566-4698-9119-3ed2807060e7}"
+            Name: "Microsoft-Windows-DNSServer"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "DNSSEC_OP"
+          TimeCreated:
+            SystemTime: "2025-03-27T08:19:20.219Z"
+          Version: "0"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "528"
+      level: "Information"
+      ocsf:
+        activity_id: 1
+        activity_name: "Log"
+        actor:
+          process:
+            pid: 2892
+            tid: 5756
+          user:
+            uid: "S-1-5-18"
+        category_name: "Discovery"
+        category_uid: 5
+        class_name: "Device Config State Change"
+        class_uid: 5019
+        device:
+          name: "DDS-DNS.dds-dns.local"
+          type: "Server"
+          type_id: 1
+        metadata:
+          correlation_uid: ""
+          event_code: "528"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-27T08:19:20.219Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          uid: "447"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1743063560219
+      title: "Key rollover start"
+    message: "Rollover was started on the type KSK with GUID {60901E33-AD11-429B-BBC8-0234171931C0} of zone Test_Primary_Zone."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743063560219
+ -
+  sample: |-
+    {
+      "level" : "Information",
+      "Event" : {
+        "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData" : "",
+        "System" : {
+          "Correlation" : "",
+          "Task" : "SERVER_OP",
+          "Keywords" : "0x4000002000000000",
+          "Channel" : "Microsoft-Windows-DNSServer/Audit",
+          "Opcode" : "Info",
+          "Security" : {
+            "UserID" : "S-1-5-21-2225675242-3203514982-4229196803-500"
+          },
+          "Provider" : {
+            "Guid" : "{eb79061a-a566-4698-9119-3ed2807060e7}",
+            "Name" : "Microsoft-Windows-DNSServer"
+          },
+          "TimeCreated" : {
+            "SystemTime" : "2025-03-27T08:19:20.219Z"
+          },
+          "EventRecordID" : "315",
+          "Execution" : {
+            "ThreadID" : "7644",
+            "ProcessID" : "2892"
+          },
+          "Version" : "0",
+          "Computer" : "DDS-DNS.dds-dns.local",
+          "EventID" : "552",
+          "Level" : "4"
+        }
+      },
+      "message" : "A resource record scavenging cycle has been started on the DNS Server."
+    }
+  result:
+    custom:
+      Event:
+        EventData: ""
+        System:
+          Channel: "Microsoft-Windows-DNSServer/Audit"
+          Correlation: ""
+          EventID: "552"
+          EventRecordID: "315"
+          Execution:
+            ProcessID: "2892"
+            ThreadID: "7644"
+          Keywords: "0x4000002000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{eb79061a-a566-4698-9119-3ed2807060e7}"
+            Name: "Microsoft-Windows-DNSServer"
+          Security:
+            UserID: "S-1-5-21-2225675242-3203514982-4229196803-500"
+          Task: "SERVER_OP"
+          TimeCreated:
+            SystemTime: "2025-03-27T08:19:20.219Z"
+          Version: "0"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "552"
+      level: "Information"
+      ocsf:
+        activity_id: 99
+        activity_name: "Start scavenging"
+        actor:
+          process:
+            pid: 2892
+            tid: 7644
+          user:
+            uid: "S-1-5-21-2225675242-3203514982-4229196803-500"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        device:
+          name: "DDS-DNS.dds-dns.local"
+          type: "Server"
+          type_id: 1
+        metadata:
+          correlation_uid: ""
+          event_code: "552"
+          log_name: "Microsoft-Windows-DNSServer/Audit"
+          log_provider: "Microsoft-Windows-DNSServer"
+          log_version: "0"
+          original_time: "2025-03-27T08:19:20.219Z"
+          product:
+            name: "Microsoft DNS"
+            vendor_name: "Microsoft"
+          profiles:
+           - "host"
+          uid: "315"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1743063560219
+      title: "Start scavenging"
+    message: "A resource record scavenging cycle has been started on the DNS Server."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743063560219
