@@ -67,6 +67,8 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
             'sfos_ip_sec_vpn_conn_type:site-to-site',
             'sfos_ip_sec_vpn_localgw_port:quaintly driving forward forward kept their forward',
             'sfos_ip_sec_vpn_policy_name:driving oxen forward quaintly quaintly but but',
+            'sfos_ip_sec_vpn_conn_status:1',
+            'sfos_ip_sec_vpn_active_status:1',
         ],
         [
             'sfos_ip_sec_vpn_conn_des:oxen zombies acted forward kept',
@@ -75,6 +77,8 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
             'sfos_ip_sec_vpn_conn_type:host-to-host',
             'sfos_ip_sec_vpn_localgw_port:acted kept zombies Jaded Jaded but Jaded',
             'sfos_ip_sec_vpn_policy_name:oxen forward',
+            'sfos_ip_sec_vpn_conn_status:2',
+            'sfos_ip_sec_vpn_active_status:2',
         ],
     ]
     for tag_row in tag_rows:
