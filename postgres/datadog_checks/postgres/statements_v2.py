@@ -12,13 +12,19 @@ from cachetools import TTLCache
 from psycopg.rows import dict_row
 
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.query_metrics import (
+    ObfuscationLookup,
+    ObfuscationResult,
+    QueryStats,
+    ResolveStats,
+    TextKind,
+    resolve_obfuscations,
+)
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
-from .delta_detector import DeltaDetector, PgssKey
-from .obfuscation_lookup import ObfuscationLookup, ObfuscationResult
 from .statements import (
     PG_STAT_STATEMENTS_COUNT_QUERY,
     PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4,
@@ -70,6 +76,12 @@ LIGHTWEIGHT_DESIRED_COLUMNS = (
     LIGHTWEIGHT_REQUIRED_COLUMNS | LIGHTWEIGHT_TAG_COLUMNS | PG_STAT_STATEMENTS_METRICS_COLUMNS
 )
 
+PgssKey = tuple[int, int, int]  # (queryid, dbid, userid)
+
+DDIGNORE_PREFIX = '/* DDIGNORE */'
+
+INSUFFICIENT_PRIVILEGE = '<insufficient privilege>'
+
 
 def agent_check_getter(self):
     return self._check
@@ -77,6 +89,22 @@ def agent_check_getter(self):
 
 def _output_row_key(row):
     return row['query_signature'], row['datname'], row['rolname']
+
+
+def pgss_key(row: dict) -> PgssKey:
+    """Identity of a pg_stat_statements row, which functionally determines its query text."""
+    return row['queryid'], row['dbid'], row['userid']
+
+
+def classify_query_text(text: str) -> TextKind:
+    if text.startswith(DDIGNORE_PREFIX):
+        # Queries the Agent tags for itself; monitoring artifacts rather than application traffic.
+        return TextKind.EXCLUDED
+    if text == INSUFFICIENT_PRIVILEGE:
+        # Describes our role rather than the statement, and the grant may arrive later, so this must
+        # stay retryable rather than being remembered as excluded.
+        return TextKind.UNAVAILABLE
+    return TextKind.STATEMENT
 
 
 class PostgresStatementMetricsV2(DBMAsyncJob):
@@ -88,6 +116,10 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
       3. For changed (queryid, dbid, userid) keys, look up cached ObfuscationResults; on miss,
          fetch text from PG, obfuscate via FFI, cache, and discard raw text.
       4. Merge derivative rows by (query_signature, datname, rolname) and emit.
+
+    The diffing, caching, and resolution steps are the shared primitives in
+    :mod:`datadog_checks.base.utils.db.query_metrics`; this class supplies the Postgres specifics,
+    namely the pgss row key, how to read statement text, and how to classify the text it gets back.
     """
 
     def __init__(self, check, config: InstanceConfig):
@@ -110,8 +142,9 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         self._tags_no_db: list[str] | None = None
         self.tags: list[str] | None = None
 
-        self._delta_detector = DeltaDetector(
-            metric_columns=PG_STAT_STATEMENTS_METRICS_COLUMNS,
+        self._query_stats: QueryStats[PgssKey] = QueryStats(
+            counter_columns=PG_STAT_STATEMENTS_METRICS_COLUMNS,
+            key=pgss_key,
             execution_indicators=frozenset({'calls'}),
         )
 
@@ -122,7 +155,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         obfuscate_options['dbms'] = 'postgresql'
         obfuscate_options_str = to_native_string(json.dumps(obfuscate_options))
 
-        self._obfuscation_lookup = ObfuscationLookup(
+        self._obfuscation_lookup: ObfuscationLookup[PgssKey] = ObfuscationLookup(
             maxsize=DEFAULT_PGSS_MAX,
             obfuscate_options=obfuscate_options_str,
             log_unobfuscated_queries=config.log_unobfuscated_queries,
@@ -137,7 +170,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
     def shutdown(self) -> None:
         self._check = None
         self._full_statement_text_cache = None
-        self._delta_detector = None
+        self._query_stats = None
         self._obfuscation_lookup = None
 
     # -- Database helpers ------------------------------------------------
@@ -244,8 +277,10 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
     def _sync_cache_sizes(self):
         pgss_max_setting = self._check.pg_settings.get("pg_stat_statements.max")
         pgss_max = int(pgss_max_setting) if pgss_max_setting else DEFAULT_PGSS_MAX
-        if self._obfuscation_lookup._maxsize != pgss_max:
-            self._obfuscation_lookup._maxsize = pgss_max
+        if self._obfuscation_lookup.maxsize != pgss_max:
+            # The setter trims, so lowering the setting reclaims the excess instead of waiting for
+            # the cache to churn down to the new bound.
+            self._obfuscation_lookup.maxsize = pgss_max
 
     # -- Lightweight snapshot (integer-only, no query text) ---------------
 
@@ -318,70 +353,49 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 params=(qids, dbids, userids),
                 row_factory=dict_row,
             )
-            return {(row['queryid'], row['dbid'], row['userid']): row['query'] for row in rows}
+            return {pgss_key(row): row['query'] for row in rows}
         except psycopg.Error as e:
             self._log.warning("Failed to fetch query text for %d pgss keys: %s", len(keys), e)
             return {}
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _populate_obfuscation_lookup(self, raw_texts: dict[PgssKey, str]) -> dict[PgssKey, ObfuscationResult]:
-        """FFI obfuscation + cache update for raw query texts (miss path)."""
-        return self._obfuscation_lookup.populate(raw_texts)
-
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _resolve_obfuscations(
-        self, changed_pgss_keys: set[PgssKey], vanished_pgss_keys: set[PgssKey]
+        self, live_pgss_keys: set[PgssKey], changed_pgss_keys: set[PgssKey]
     ) -> dict[PgssKey, ObfuscationResult]:
-        self._obfuscation_lookup.evict(vanished_pgss_keys)
-
-        if not changed_pgss_keys:
-            return {}
-
-        hits, misses = self._obfuscation_lookup.lookup(changed_pgss_keys)
-
-        self._check.gauge(
-            "dd.postgres.statement_metrics.lookup.hits",
-            len(hits),
-            tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.reported_hostname,
-            raw=True,
+        result = resolve_obfuscations(
+            lookup=self._obfuscation_lookup,
+            live_keys=live_pgss_keys,
+            changed_keys=changed_pgss_keys,
+            fetch_texts=self._fetch_query_texts,
+            classify=classify_query_text,
         )
-        self._check.gauge(
-            "dd.postgres.statement_metrics.lookup.misses",
-            len(misses),
-            tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.reported_hostname,
-            raw=True,
-        )
+        self._emit_resolve_stats(result.stats)
+        return result.results
 
-        if misses:
-            raw_texts = self._fetch_query_texts(misses)
-            filtered = {}
-            ignorable: set[PgssKey] = set()
-            for pgss_key, text in raw_texts.items():
-                if not text:
-                    continue
-                if text.startswith('/* DDIGNORE */'):
-                    # We want to ignore tracking query metrics for queries with the /* DDIGNORE */ comment.
-                    ignorable.add(pgss_key)
-                    continue
-                if text == '<insufficient privilege>':
-                    continue
-                filtered[pgss_key] = text
-            if ignorable:
-                self._obfuscation_lookup.mark_ignored(ignorable)
-            populated = self._populate_obfuscation_lookup(filtered)
-            hits.update(populated)
-
-        return hits
+    def _emit_resolve_stats(self, stats: ResolveStats):
+        tags = self.tags + self._check._get_debug_tags()
+        for name, value in (
+            ("hits", stats.hits),
+            ("misses", stats.misses),
+            ("fetched", stats.fetched),
+            ("ignored", stats.ignored),
+            ("failed", stats.failed),
+            ("dropped", stats.dropped),
+        ):
+            self._check.gauge(
+                "dd.postgres.statement_metrics.lookup.{}".format(name),
+                value,
+                tags=tags,
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
 
     # -- Row assembly -----------------------------------------------------
 
     def _assemble_rows(self, derivative_rows: list[dict], obfuscations: dict[PgssKey, ObfuscationResult]) -> list[dict]:
         assembled: list[dict] = []
         for row in derivative_rows:
-            pgss_key: PgssKey = (row['queryid'], row['dbid'], row['userid'])
-            obf = obfuscations.get(pgss_key)
+            obf = obfuscations.get(pgss_key(row))
             if obf is None:
                 continue
             out = dict(row)
@@ -458,7 +472,8 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             self._log.debug("collect: no snapshot rows")
             return []
 
-        delta = self._delta_detector.compute(snapshot_rows)
+        live_pgss_keys = {pgss_key(row) for row in snapshot_rows}
+        delta = self._query_stats.diff(snapshot_rows)
 
         self._check.gauge(
             "dd.postgres.statement_metrics.delta.derivative_rows",
@@ -469,16 +484,20 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         )
         self._check.gauge(
             "dd.postgres.statement_metrics.delta.changed_queryids",
-            len(delta.changed_pgss_keys),
+            len(delta.changed_keys),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.reported_hostname,
             raw=True,
         )
 
+        # Resolution runs even with nothing to report, because it is what prunes cache entries whose
+        # statements have left pg_stat_statements. Returning early here would let the cache sit at
+        # its bound holding obfuscated text for statements that no longer exist.
+        obfuscations = self._resolve_obfuscations(live_pgss_keys, delta.changed_keys)
+
         if not delta.derivative_rows:
             return []
 
-        obfuscations = self._resolve_obfuscations(delta.changed_pgss_keys, delta.vanished_pgss_keys)
         rows = self._assemble_rows(delta.derivative_rows, obfuscations)
         self._log.debug(
             "collect: snapshot=%d derivative=%d obfuscated=%d output=%d",

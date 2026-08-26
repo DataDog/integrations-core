@@ -83,11 +83,11 @@ def test_statement_metrics_v2(
     check = integration_check(dbm_instance_v2)
     check._connect()
 
-    # First check: seeds DeltaDetector with initial snapshot (no derivatives)
+    # First check: seeds the counter baseline with an initial snapshot (no derivatives)
     _run_queries()
     run_one_check(check, cancel=False)
 
-    # Second check: queries run again, DeltaDetector produces derivatives
+    # Second check: queries run again, so diffing against the baseline produces derivatives
     _run_queries()
     run_one_check(check, cancel=False)
 
@@ -434,16 +434,12 @@ def test_internal_telemetry_gauges_v2(aggregator, integration_check, dbm_instanc
         tags=expected_tags + debug_tags,
         hostname='stubbed.hostname',
     )
-    aggregator.assert_metric(
-        "dd.postgres.statement_metrics.lookup.hits",
-        tags=expected_tags + debug_tags,
-        hostname='stubbed.hostname',
-    )
-    aggregator.assert_metric(
-        "dd.postgres.statement_metrics.lookup.misses",
-        tags=expected_tags + debug_tags,
-        hostname='stubbed.hostname',
-    )
+    for stat in ("hits", "misses", "fetched", "ignored", "failed", "dropped"):
+        aggregator.assert_metric(
+            "dd.postgres.statement_metrics.lookup.{}".format(stat),
+            tags=expected_tags + debug_tags,
+            hostname='stubbed.hostname',
+        )
 
     conn.close()
 
@@ -495,7 +491,7 @@ def test_fqt_cache_deduplication_v2(aggregator, integration_check, dbm_instance_
     check = integration_check(dbm_instance_v2)
     check._connect()
 
-    # Cycle 1: seeds DeltaDetector snapshot (no derivatives yet)
+    # Cycle 1: seeds the counter baseline (no derivatives yet)
     conn.cursor().execute("SELECT city FROM persons WHERE city = %s", ("hello",))
     run_one_check(check, cancel=False)
 
@@ -563,10 +559,15 @@ def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_c
         return texts
 
     original_resolve = job._resolve_obfuscations
+    previous_live_keys: set = set()
 
-    def _resolve_spy(changed_pgss_keys, vanished_pgss_keys):
-        vanished_before_fetch.update(vanished_pgss_keys)
-        return original_resolve(changed_pgss_keys, vanished_pgss_keys)
+    def _resolve_spy(live_pgss_keys, changed_pgss_keys):
+        # Retention is driven by the live key set, so a key that left pgss is whatever was live on
+        # the previous cycle but is not live now.
+        vanished_before_fetch.update(previous_live_keys - live_pgss_keys)
+        previous_live_keys.clear()
+        previous_live_keys.update(live_pgss_keys)
+        return original_resolve(live_pgss_keys, changed_pgss_keys)
 
     with (
         mock.patch.object(job, '_fetch_query_texts', side_effect=_spy),
@@ -727,7 +728,7 @@ def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, d
     key_map = job._obfuscation_lookup._key_to_sig
     cached_key = next((key for key, sig in key_map.items() if sig == query_signature), None)
     assert cached_key is not None, "the test query should be cached after a cycle that reported it"
-    warm_size = job._obfuscation_lookup.queryid_map_size
+    warm_size = job._obfuscation_lookup.key_map_size
 
     # Replaying the same snapshot leaves every counter unchanged, so the cycle produces no
     # derivative rows; dropping one row makes that key absent from the table while the rest of the
@@ -742,4 +743,46 @@ def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, d
         "a key absent from pg_stat_statements must be dropped from the cache even on a cycle that "
         "produced no derivative rows"
     )
-    assert job._obfuscation_lookup.queryid_map_size < warm_size
+    assert job._obfuscation_lookup.key_map_size < warm_size
+
+
+# ---------------------------------------------------------------------------
+# Key sets handed to resolution are projected consistently
+# ---------------------------------------------------------------------------
+
+
+@requires_over_10
+def test_changed_keys_stay_within_live_keys_v2(aggregator, integration_check, dbm_instance_v2):
+    """Resolution resolves `changed_keys` and retains `live_keys`, so the former must be a subset of
+    the latter. Projecting them from different row sets makes the resolver cache results that
+    retention immediately discards, re-fetching every statement's text on every cycle while the
+    emitted metrics stay correct."""
+    conn = _test_query_conn()
+    check = integration_check(dbm_instance_v2)
+    check._connect()
+
+    conn.cursor().execute(TEST_QUERY, ("hello",))
+    run_one_check(check, cancel=False)
+    job = check.statement_metrics
+    assert isinstance(job, PostgresStatementMetricsV2)
+
+    original_resolve = job._resolve_obfuscations
+    stray_keys: set = set()
+    resolved_cycles = 0
+
+    def _resolve_spy(live_pgss_keys, changed_pgss_keys):
+        nonlocal resolved_cycles
+        resolved_cycles += 1
+        stray_keys.update(changed_pgss_keys - live_pgss_keys)
+        return original_resolve(live_pgss_keys, changed_pgss_keys)
+
+    cycles = 3
+    with mock.patch.object(job, '_resolve_obfuscations', side_effect=_resolve_spy):
+        for _ in range(cycles):
+            conn.cursor().execute(TEST_QUERY, ("hello",))
+            run_one_check(check, cancel=False)
+
+    conn.close()
+
+    assert resolved_cycles == cycles, "resolution must run every cycle, otherwise retention is skipped"
+    assert not stray_keys, f"changed keys absent from the live key set: {sorted(stray_keys)}"
