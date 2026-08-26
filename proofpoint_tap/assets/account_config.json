@@ -64,6 +64,11 @@
       }
     }
   ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "proofpoint-tap-logs"
+    }
+  ],
   "health_probe": {
     "http_method": "GET",
     "path": "/v2/siem/clicks/blocked?format=json&sinceSeconds=3600",
