@@ -300,7 +300,6 @@ def test_tuning_a_policy_leaves_the_shared_default_alone() -> None:
 
     assert tuned.attempts == 1
     assert SAFE_RETRY.attempts == DEFAULT_ATTEMPTS
-    assert SAFE_RETRY.attempts == DEFAULT_ATTEMPTS
 
 
 @pytest.mark.parametrize(
