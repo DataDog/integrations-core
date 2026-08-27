@@ -77,6 +77,15 @@ def test_over_limit_run_reports_expected_issue(datadog_agent: Any) -> None:
     assert issue['tags'] == ['integration:openmetrics_test', 'openmetrics', 'metric-limit']
     assert len(issue['remediation']['steps']) == 4
 
+    verify_step = issue['remediation']['steps'][2]['text']
+    # The Fleet UI renders remediation text as plain text, so the config key must
+    # be described as nested (not as a dotted single-line key, which the check does
+    # not parse) and both emitted metric names must be spelled out in full.
+    assert 'debug_metrics.metric_contexts: true' not in verify_step
+    assert 'metric_contexts to true under the debug_metrics section' in verify_step
+    assert 'datadog.agent.metrics.contexts.total' in verify_step
+    assert 'datadog.agent.metrics.contexts.limit' in verify_step
+
 
 def test_repeated_over_limit_runs_report_same_id(datadog_agent: Any) -> None:
     check = create_check()
