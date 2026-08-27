@@ -7,7 +7,8 @@ import sys
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs import tagger as tagger_stub
+from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.kubelet import KubeletCheck
 
@@ -17,40 +18,52 @@ from .test_kubelet import EXPECTED_METRICS_COMMON, NODE_SPEC, mock_from_file
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
 
 EXPECTED_METRICS_CADVISOR = ['kubernetes.network_errors', 'kubernetes.diskio.io_service_bytes.stats.total']
+CADVISOR_URL = "http://kubelet:4192/api/v1.3/subcontainers/"
 
 
 @pytest.fixture
 def tagger():
-    from datadog_checks.base.stubs import tagger
-
-    tagger.reset()
+    tagger_stub.reset()
     # We filter out slices unknown by the tagger, mock a non-empty taglist
-    tagger.set_default_tags(["foo:bar"])
-    return tagger
+    tagger_stub.set_default_tags(["foo:bar"])
+    return tagger_stub
 
 
-def test_detect_cadvisor_nominal(mock_openmetrics_http):
-    mock_openmetrics_http.head.return_value = FakeHTTPResponse(status_code=200)
+def test_detect_cadvisor_nominal(fake_http):
+    options = {'timeout': 1, 'allow_redirects': False}
+    fake_http.register_response('HEAD', CADVISOR_URL, FakeHTTPResponse(status_code=200), match_options=options)
     check = KubeletCheck('kubelet', {}, [{}])
     url = check.detect_cadvisor("http://kubelet:10250", 4192)
-    assert url == "http://kubelet:4192/api/v1.3/subcontainers/"
+    assert url == CADVISOR_URL
+    fake_http.assert_requests([RecordedRequest('HEAD', CADVISOR_URL, options)])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_detect_cadvisor_404(mock_openmetrics_http):
-    mock_openmetrics_http.head.return_value = FakeHTTPResponse(
-        status_code=404,
-        status_error=HTTPClientStatusError('404 Client Error'),
+def test_detect_cadvisor_404(fake_http):
+    options = {'timeout': 1, 'allow_redirects': False}
+    fake_http.register_response(
+        'HEAD',
+        CADVISOR_URL,
+        FakeHTTPResponse(
+            status_code=404,
+            status_error=HTTPClientStatusError('404 Client Error'),
+        ),
+        match_options=options,
     )
     check = KubeletCheck('kubelet', {}, [{}])
     with pytest.raises(HTTPClientStatusError):
         check.detect_cadvisor("http://kubelet:10250", 4192)
+    fake_http.assert_requests([RecordedRequest('HEAD', CADVISOR_URL, options)])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_detect_cadvisor_does_not_follow_redirects(mock_openmetrics_http):
-    mock_openmetrics_http.head.return_value = FakeHTTPResponse(status_code=200)
+def test_detect_cadvisor_does_not_follow_redirects(fake_http):
+    options = {'timeout': 1, 'allow_redirects': False}
+    fake_http.register_response('HEAD', CADVISOR_URL, FakeHTTPResponse(status_code=200), match_options=options)
     check = KubeletCheck('kubelet', {}, [{}])
     check.detect_cadvisor("http://kubelet:10250", 4192)
-    assert mock_openmetrics_http.head.call_args.kwargs['allow_redirects'] is False
+    fake_http.assert_requests([RecordedRequest('HEAD', CADVISOR_URL, options)])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_detect_cadvisor_port_zero():

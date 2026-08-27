@@ -117,6 +117,13 @@ def test_fake_client_raises_registered_exception():
     client.assert_all_responses_consumed()
 
 
+def test_fake_client_reads_configured_cookies_and_falls_back_for_missing_names():
+    client = FakeHTTPClient(cookies={'session': 'abc'})
+
+    assert client.get_cookie('session') == 'abc'
+    assert client.get_cookie('missing', 'fallback') == 'fallback'
+
+
 def test_fake_client_reports_unmatched_request_and_pending_responses():
     client = FakeHTTPClient()
     client.register_response('POST', 'https://example.test/items', FakeHTTPResponse())

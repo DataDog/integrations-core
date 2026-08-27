@@ -4,13 +4,10 @@
 
 import json
 import os
-from pathlib import Path
-from urllib.parse import urlparse
 
 import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.fs import get_here
 
 from .common import INSTANCE
@@ -26,82 +23,43 @@ def dd_environment():
     yield INSTANCE
 
 
-def get_json_value_from_file(file_path):
+def _json_response(file_path: str) -> FakeHTTPResponse:
     with open(file_path, 'r') as file:
-        return json.load(file)
-
-
-def get_url_path(url):
-    parsed_url = urlparse(url)
-    return parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+        return FakeHTTPResponse(json_result=json.load(file))
 
 
 @pytest.fixture
-def mock_responses():
-    responses_map = {}
-
-    def process_files(dir, response_parent):
-        for file in dir.rglob('*'):
-            if file.is_file() and file.stem != ".slash":
-                relative_dir_path = (
-                    "/"
-                    + (str(file.parent.relative_to(dir)) if str(file.parent.relative_to(dir)) != "." else "")
-                    + ("/" if (file.parent / ".slash").is_file() else "")
-                )
-                if relative_dir_path not in response_parent:
-                    response_parent[relative_dir_path] = {}
-                json_data = get_json_value_from_file(file)
-                response_parent[relative_dir_path][file.stem] = json_data
-
-    def process_dir(dir, response_parent):
-        response_parent[dir.name] = {}
-        process_files(dir, response_parent[dir.name])
-
-    def create_responses_tree():
-        root_dir_path = os.path.join(get_here(), 'fixtures')
-        method_subdirs = [d for d in Path(root_dir_path).iterdir() if d.is_dir() and d.name == 'GET']
-        for method_subdir in method_subdirs:
-            process_dir(method_subdir, responses_map)
-
-    def method(method, url, file='response', headers=None, params=None):
-        filename = file
-        request_path = url
-        if params:
-            param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
-            request_path = f'{url}/{param_string}'
-
-        response = responses_map.get(method, {}).get(request_path, {}).get(filename)
-        return response
-
-    create_responses_tree()
-    yield method
-
-
-@pytest.fixture
-def mock_http_call(mock_responses):
-    def call(method, url, file='response', headers=None, params=None):
-        response = mock_responses(method, url, file=file, headers=headers, params=params)
-        if response is not None:
-            return response
-        raise HTTPClientStatusError('404 Client Error', response=FakeHTTPResponse(status_code=404, url=url))
-
-    yield call
-
-
-@pytest.fixture
-def mock_http_get(request, mock_http, mock_http_call):
+def mock_http_get(request, fake_http):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
-    http_error = param.pop('http_error', {})
+    overrides = param.get('http_error', {})
+    fixtures_dir = os.path.join(get_here(), 'fixtures', 'GET')
+    api_endpoint = INSTANCE['proxmox_server']
+    response_paths = (
+        ('/version', 'api2/json/version/response.json', None),
+        ('/cluster/resources', 'api2/json/cluster/resources/response.json', None),
+        (
+            '/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name',
+            'api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name/response.json',
+            None,
+        ),
+        ('/cluster/metrics/export', 'api2/json/cluster/metrics/export/response.json', None),
+        ('/cluster/ha/status/current', 'api2/json/cluster/ha/status/current/response.json', None),
+        (
+            '/nodes/ip-122-82-3-112/tasks',
+            'api2/json/nodes/ip-122-82-3-112/tasks/since=1752552000/response.json',
+            {'params': {'since': 1752552000}},
+        ),
+    )
 
-    def get(url, *args, **kwargs):
-        method = 'GET'
-        url = get_url_path(url)
-        if http_error and url in http_error:
-            return http_error[url]
-        headers = kwargs.get('headers')
-        params = kwargs.get('params')
-        json_data = mock_http_call(method, url, headers=headers, params=params)
-        return FakeHTTPResponse(json_result=json_data)
+    for path, fixture_path, match_options in response_paths:
+        response = overrides.get(f'/api2/json{path}')
+        if response is None:
+            response = _json_response(os.path.join(fixtures_dir, fixture_path))
+        fake_http.register_response(
+            'GET',
+            f'{api_endpoint}{path}',
+            response,
+            match_options=match_options,
+        )
 
-    mock_http.get.side_effect = get
-    return mock_http.get
+    return fake_http

@@ -11,7 +11,7 @@ from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
-from unittest.mock import PropertyMock, create_autospec
+from unittest.mock import PropertyMock
 
 import pytest
 
@@ -400,76 +400,23 @@ def fake_http(mocker):
 
 
 @pytest.fixture
-def mock_http(mocker):
-    from datadog_checks.base.checks.base import AgentCheck
-    from datadog_checks.base.utils.headers import set_header
-    from datadog_checks.base.utils.http_protocol import HTTPClient
-
-    client = create_autospec(HTTPClient)
-    cookie_return_value_unset = object()
-
-    # create_autospec skips annotation-only attributes; assign them explicitly.
-    header_state: dict[str, str] = {}
-    client.options = {
-        'auth': None,
-        'cert': None,
-        'headers': header_state,
-        'proxies': None,
-        'timeout': (10.0, 10.0),
-        'verify': True,
-        'allow_redirects': True,
-    }
-    client.tls_config = {}
-    client.trust_env = True
-    client.ignore_tls_warning = False
-    client.persist_connections = False
-
-    def _get_header(name, default=None):
-        found = default
-        for key, value in client.options['headers'].items():
-            if key.lower() == name.lower():
-                found = value
-        return found
-
-    def _set_header(name, value):
-        set_header(client.options['headers'], name, value)
-
-    def _get_cookie(name: str, default: str | None = None) -> str | None:
-        return_value = client.get_cookie.return_value
-        return default if return_value is cookie_return_value_unset else return_value
-
-    def _disable_auth():
-        client.options['auth'] = 'suppressed'
-
-    client.get_header.side_effect = _get_header
-    client.set_header.side_effect = _set_header
-    client.disable_auth.side_effect = _disable_auth
-    client.should_bypass_proxy.return_value = False
-    client.get_cookie.return_value = cookie_return_value_unset
-    client.get_cookie.side_effect = _get_cookie
-    client.close.return_value = None
-    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
-    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
-    return client
-
-
-@pytest.fixture
-def mock_openmetrics_http(mock_http, mocker):
-    """Patch the OpenMetrics v1 handler; v2 uses the AgentCheck patches from mock_http."""
+def fake_openmetrics_http(fake_http, mocker):
+    """Patch the OpenMetrics v1 handler to use the base-owned HTTP fake."""
     mocker.patch(
         'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
-        return_value=mock_http,
+        return_value=fake_http,
     )
-    return mock_http
+    return fake_http
 
 
 @pytest.fixture
-def mock_prometheus_http(mock_http, mocker):
+def fake_prometheus_http(fake_http, mocker):
+    """Patch the legacy Prometheus handler to use the base-owned HTTP fake."""
     mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
-        return_value=mock_http,
+        return_value=fake_http,
     )
-    return mock_http
+    return fake_http
 
 
 @pytest.fixture

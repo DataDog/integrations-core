@@ -5,18 +5,62 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 import os
+from collections.abc import Iterator
+from contextlib import contextmanager
 
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
+FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
+PROMETHEUS_REQUEST_OPTIONS = {
+    'extra_headers': {
+        'Accept-Encoding': 'gzip',
+        'accept': protobuf_content_type,
+    },
+    'stream': False,
+}
+PROMETHEUS_REQUEST = RecordedRequest('GET', FAKE_ENDPOINT, PROMETHEUS_REQUEST_OPTIONS)
 
 
 FIXTURES_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'fixtures', 'prometheus'))
+
+
+def _text_response(text: str, *, content_type: str = 'text/plain') -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        content=text.encode('utf-8'),
+        text=text,
+        headers={'Content-Type': content_type},
+        lines=text.splitlines(),
+    )
+
+
+def _file_response(file_path: str, *, content_type: str) -> FakeHTTPResponse:
+    with open(file_path, 'rb') as fixture:
+        return FakeHTTPResponse(content=fixture.read(), headers={'Content-Type': content_type})
+
+
+def _register_prometheus_text(fake_http: FakeHTTPClient, text: str, *, count: int = 1) -> None:
+    for _ in range(count):
+        fake_http.register_response(
+            'GET',
+            FAKE_ENDPOINT,
+            _text_response(text),
+            match_options=PROMETHEUS_REQUEST_OPTIONS,
+        )
+
+
+@contextmanager
+def _registered_prometheus_text(fake_http: FakeHTTPClient, text: str, *, count: int) -> Iterator[None]:
+    _register_prometheus_text(fake_http, text, count=count)
+    yield
+    fake_http.assert_requests([PROMETHEUS_REQUEST] * count)
+    fake_http.assert_all_responses_consumed()
 
 
 class SortedTagsPrometheusCheck(PrometheusCheck):
@@ -88,6 +132,12 @@ def text_data():
     return text_data
 
 
+@pytest.fixture
+def ksm_text() -> str:
+    with open(os.path.join(FIXTURES_PATH, 'ksm.txt')) as fixture:
+        return fixture.read()
+
+
 def test_parse_metric_family():
     f_name = os.path.join(FIXTURES_PATH, 'protobuf.bin')
     with open(f_name, 'rb') as f:
@@ -104,8 +154,8 @@ def test_check(mocked_prometheus_check):
         mocked_prometheus_check.check(None)
 
 
-def test_parse_metric_family_protobuf(bin_data_path, mocked_prometheus_check, mock_response):
-    response = mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
+def test_parse_metric_family_protobuf(bin_data_path, mocked_prometheus_check):
+    response = _file_response(bin_data_path, content_type=protobuf_content_type)
     check = mocked_prometheus_check
 
     messages = list(check.parse_metric_family(response))
@@ -121,7 +171,7 @@ def test_parse_metric_family_protobuf(bin_data_path, mocked_prometheus_check, mo
     # override the type:
     check.type_overrides = {"go_goroutines": "summary"}
 
-    response = mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
+    response = _file_response(bin_data_path, content_type=protobuf_content_type)
 
     messages = list(check.parse_metric_family(response))
 
@@ -130,11 +180,11 @@ def test_parse_metric_family_protobuf(bin_data_path, mocked_prometheus_check, mo
     assert messages[1].type == 2  # summary
 
 
-def test_parse_metric_family_text(text_data, mocked_prometheus_check, mock_response):
+def test_parse_metric_family_text(text_data, mocked_prometheus_check):
     """Test the high level method for loading metrics from text format"""
     check = mocked_prometheus_check
 
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
 
     messages = list(check.parse_metric_family(response))
     # total metrics are 41 but one is typeless and we expect it not to be
@@ -142,7 +192,7 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check, mock_respo
     assert len(messages) == 40
     # ...unless the check ovverrides the type manually
     check.type_overrides = {"go_goroutines": "gauge"}
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     messages = list(check.parse_metric_family(response))
     assert len(messages) == 41
     # Tests correct parsing of counters
@@ -231,59 +281,51 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check, mock_respo
     assert _histo in messages
 
 
-def test_parse_metric_family_unsupported(bin_data_path, mocked_prometheus_check, mock_response):
+def test_parse_metric_family_unsupported(bin_data_path, mocked_prometheus_check):
     check = mocked_prometheus_check
     with pytest.raises(UnknownFormatError):
-        response = mock_response(file_path=bin_data_path, headers={'Content-Type': 'application/json'})
+        response = _file_response(bin_data_path, content_type='application/json')
         list(check.parse_metric_family(response))
 
 
-def test_process(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
-    endpoint = "http://fake.endpoint:10055/metrics"
+def test_process(bin_data_path, mocked_prometheus_check, ref_gauge):
+    endpoint = FAKE_ENDPOINT
     check = mocked_prometheus_check
 
-    check.poll = mock.MagicMock(
-        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
-    )
+    check.poll = mock.MagicMock(return_value=_file_response(bin_data_path, content_type=protobuf_content_type))
     check.process_metric = mock.MagicMock()
     check.process(endpoint, instance=None)
     check.poll.assert_called_with(endpoint, instance={})
     check.process_metric.assert_called_with(ref_gauge, instance=None)
 
 
-def test_process_send_histograms_buckets(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
+def test_process_send_histograms_buckets(bin_data_path, mocked_prometheus_check, ref_gauge):
     """Checks that the send_histograms_buckets parameter is passed along"""
-    endpoint = "http://fake.endpoint:10055/metrics"
+    endpoint = FAKE_ENDPOINT
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(
-        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
-    )
+    check.poll = mock.MagicMock(return_value=_file_response(bin_data_path, content_type=protobuf_content_type))
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_histograms_buckets=False, instance=None)
     check.poll.assert_called_with(endpoint, instance={})
     check.process_metric.assert_called_with(ref_gauge, instance=None, send_histograms_buckets=False)
 
 
-def test_process_send_monotonic_counter(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
+def test_process_send_monotonic_counter(bin_data_path, mocked_prometheus_check, ref_gauge):
     """Checks that the send_monotonic_counter parameter is passed along"""
-    endpoint = "http://fake.endpoint:10055/metrics"
+    endpoint = FAKE_ENDPOINT
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(
-        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
-    )
+    check.poll = mock.MagicMock(return_value=_file_response(bin_data_path, content_type=protobuf_content_type))
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_monotonic_counter=False, instance=None)
     check.poll.assert_called_with(endpoint, instance={})
     check.process_metric.assert_called_with(ref_gauge, instance=None, send_monotonic_counter=False)
 
 
-def test_process_instance_with_tags(bin_data_path, mocked_prometheus_check, mock_response, ref_gauge):
+def test_process_instance_with_tags(bin_data_path, mocked_prometheus_check, ref_gauge):
     """Checks that an instances with tags passes them as custom tag"""
-    endpoint = "http://fake.endpoint:10055/metrics"
+    endpoint = FAKE_ENDPOINT
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(
-        return_value=mock_response(file_path=bin_data_path, headers={'Content-Type': protobuf_content_type})
-    )
+    check.poll = mock.MagicMock(return_value=_file_response(bin_data_path, content_type=protobuf_content_type))
     check.process_metric = mock.MagicMock()
     instance = {'endpoint': 'IgnoreMe', 'tags': ['tag1:tagValue1', 'tag2:tagValue2']}
     check.process(endpoint, instance=instance)
@@ -318,31 +360,38 @@ def test_process_metric_filtered(mocked_prometheus_check):
     check.gauge.assert_not_called()
 
 
-def test_poll_protobuf(bin_data_path, mocked_prometheus_check, mock_prometheus_http, mock_response):
+def test_poll_protobuf(bin_data_path, fake_prometheus_http, mocked_prometheus_check):
     """Tests poll using the protobuf format"""
     check = mocked_prometheus_check
-    mock_prometheus_http.get.return_value = mock_response(
-        file_path=bin_data_path, headers={'Content-Type': protobuf_content_type}
+    fake_prometheus_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        _file_response(bin_data_path, content_type=protobuf_content_type),
+        match_options=PROMETHEUS_REQUEST_OPTIONS,
     )
 
-    response = check.poll("http://fake.endpoint:10055/metrics")
+    response = check.poll(FAKE_ENDPOINT)
     messages = list(check.parse_metric_family(response))
 
     assert len(messages) == 61
     assert messages[-1].name == 'process_virtual_memory_bytes'
+    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_prometheus_http.assert_all_responses_consumed()
 
 
-def test_poll_text_plain(mocked_prometheus_check, mock_prometheus_http, mock_response, text_data):
+def test_poll_text_plain(fake_prometheus_http, mocked_prometheus_check, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    mock_prometheus_http.get.return_value = mock_response(content=text_data, headers={'Content-Type': 'text/plain'})
+    _register_prometheus_text(fake_prometheus_http, text_data)
 
-    response = check.poll("http://fake.endpoint:10055/metrics")
+    response = check.poll(FAKE_ENDPOINT)
     messages = list(check.parse_metric_family(response))
     messages.sort(key=lambda x: x.name)
 
     assert len(messages) == 40
     assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_prometheus_http.assert_all_responses_consumed()
 
 
 def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
@@ -585,7 +634,7 @@ def test_submit_rate(mocked_prometheus_check):
     check.rate.assert_called_with('prometheus.custom.rate', 42, [], hostname=None)
 
 
-def test_filter_sample_on_gauge(mock_response, p_check):
+def test_filter_sample_on_gauge(p_check):
     """
     Add a filter blacklist on the check matching one line and make sure
     only the two other lines are parsed and sent downstream.
@@ -616,7 +665,7 @@ def test_filter_sample_on_gauge(mock_response, p_check):
     label2.value = "heapster-v1.4.3"
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     check._text_filter_blacklist = ["deployment=\"kube-dns\""]
     metrics = list(check.parse_metric_family(response))
@@ -626,7 +675,7 @@ def test_filter_sample_on_gauge(mock_response, p_check):
     assert expected_metric == current_metric
 
 
-def test_parse_one_gauge(mock_response, p_check):
+def test_parse_one_gauge(p_check):
     """
     name: "etcd_server_has_leader"
     help: "Whether or not a leader exists. 1 is existence, 0 is not."
@@ -650,7 +699,7 @@ def test_parse_one_gauge(mock_response, p_check):
     expected_etcd_metric.metric.add().gauge.value = 1
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -669,7 +718,7 @@ def test_parse_one_gauge(mock_response, p_check):
     assert expected_etcd_metric == current_metric
 
 
-def test_parse_one_counter(mock_response, p_check):
+def test_parse_one_counter(p_check):
     """
     name: "go_memstats_mallocs_total"
     help: "Total number of mallocs."
@@ -693,7 +742,7 @@ def test_parse_one_counter(mock_response, p_check):
     expected_etcd_metric.metric.add().counter.value = 18713
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -707,7 +756,7 @@ def test_parse_one_counter(mock_response, p_check):
     assert expected_etcd_metric != current_metric
 
 
-def test_parse_one_histograms_with_label(mock_response, p_check):
+def test_parse_one_histograms_with_label(p_check):
     text_data = (
         '# HELP etcd_disk_wal_fsync_duration_seconds The latency distributions of fsync called by wal.\n'
         '# TYPE etcd_disk_wal_fsync_duration_seconds histogram\n'
@@ -767,7 +816,7 @@ def test_parse_one_histograms_with_label(mock_response, p_check):
     histogram_metric.histogram.sample_sum = 0.026131671
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -776,7 +825,7 @@ def test_parse_one_histograms_with_label(mock_response, p_check):
     assert expected_etcd_vault_metric == current_metric
 
 
-def test_parse_one_histogram(mock_response, p_check):
+def test_parse_one_histogram(p_check):
     """
     name: "etcd_disk_wal_fsync_duration_seconds"
     help: "The latency distributions of fsync called by wal."
@@ -902,7 +951,7 @@ def test_parse_one_histogram(mock_response, p_check):
     histogram_metric.histogram.sample_sum = 0.026131671
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -911,7 +960,7 @@ def test_parse_one_histogram(mock_response, p_check):
     assert expected_etcd_metric == current_metric
 
 
-def test_parse_two_histograms_with_label(mock_response, p_check):
+def test_parse_two_histograms_with_label(p_check):
     text_data = (
         '# HELP etcd_disk_wal_fsync_duration_seconds The latency distributions of fsync called by wal.\n'
         '# TYPE etcd_disk_wal_fsync_duration_seconds histogram\n'
@@ -1025,7 +1074,7 @@ def test_parse_two_histograms_with_label(mock_response, p_check):
     histogram_metric.histogram.sample_sum = 0.3097010759999998
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -1044,7 +1093,7 @@ def test_parse_two_histograms_with_label(mock_response, p_check):
             assert label in current_metric.metric[idx].label
 
 
-def test_parse_one_summary(mock_response, p_check):
+def test_parse_one_summary(p_check):
     """
     name: "http_response_size_bytes"
     help: "The HTTP response sizes in bytes."
@@ -1111,7 +1160,7 @@ def test_parse_one_summary(mock_response, p_check):
     quantile_099.value = 25763
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -1120,7 +1169,7 @@ def test_parse_one_summary(mock_response, p_check):
     assert expected_etcd_metric == current_metric
 
 
-def test_parse_two_summaries_with_labels(mock_response, p_check):
+def test_parse_two_summaries_with_labels(p_check):
     text_data = (
         '# HELP http_response_size_bytes The HTTP response sizes in bytes.\n'
         '# TYPE http_response_size_bytes summary\n'
@@ -1196,7 +1245,7 @@ def test_parse_two_summaries_with_labels(mock_response, p_check):
     quantile_099.value = 24627
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -1215,7 +1264,7 @@ def test_parse_two_summaries_with_labels(mock_response, p_check):
             assert label in current_metric.metric[idx].label
 
 
-def test_parse_one_summary_with_none_values(mock_response, p_check):
+def test_parse_one_summary_with_none_values(p_check):
     text_data = (
         '# HELP http_response_size_bytes The HTTP response sizes in bytes.\n'
         '# TYPE http_response_size_bytes summary\n'
@@ -1255,7 +1304,7 @@ def test_parse_one_summary_with_none_values(mock_response, p_check):
     quantile_099.value = float('nan')
 
     # Iter on the generator to get all metrics
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
+    response = _text_response(text_data, content_type='text/plain; version=0.0.4')
     check = p_check
     metrics = list(check.parse_metric_family(response))
     assert 1 == len(metrics)
@@ -1265,11 +1314,9 @@ def test_parse_one_summary_with_none_values(mock_response, p_check):
     assert expected_etcd_metric.__repr__() == current_metric.__repr__()
 
 
-def test_label_joins(mock_prometheus_http, mock_response, sorted_tags_check):
+def test_label_joins(fake_prometheus_http, ksm_text, sorted_tags_check):
     """Tests label join on text format"""
-    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
-    response = mock_response(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    with mock.patch.object(mock_prometheus_http.get, 'return_value', response):
+    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {
@@ -1610,14 +1657,9 @@ def test_label_joins(mock_prometheus_http, mock_response, sorted_tags_check):
         )
 
 
-def test_label_joins_gc(mock_prometheus_http, mock_response, sorted_tags_check):
+def test_label_joins_gc(fake_prometheus_http, ksm_text, sorted_tags_check):
     """Tests label join GC on text format"""
-    text_data = None
-    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain'})
-    with mock.patch.object(mock_prometheus_http.get, 'return_value', response):
+    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1662,21 +1704,20 @@ def test_label_joins_gc(mock_prometheus_http, mock_response, sorted_tags_check):
             any_order=True,
         )
         assert 15 == len(check._label_mapping['pod'])
-        text_data = text_data.replace('dd-agent-62bgh', 'dd-agent-1337')
+        text_data = ksm_text.replace('dd-agent-62bgh', 'dd-agent-1337')
 
-    response = mock_response(content=text_data, headers={'Content-Type': 'text/plain'})
-    mock_prometheus_http.get.return_value = response
-    check.process("http://fake.endpoint:10055/metrics")
+    _register_prometheus_text(fake_prometheus_http, text_data)
+    check.process(FAKE_ENDPOINT)
     assert 'dd-agent-1337' in check._label_mapping['pod']
     assert 'dd-agent-62bgh' not in check._label_mapping['pod']
     assert 15 == len(check._label_mapping['pod'])
+    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST] * 3)
+    fake_prometheus_http.assert_all_responses_consumed()
 
 
-def test_label_joins_missconfigured(mock_prometheus_http, mock_response, sorted_tags_check):
+def test_label_joins_missconfigured(fake_prometheus_http, ksm_text, sorted_tags_check):
     """Tests label join missconfigured label is ignored"""
-    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
-    response = mock_response(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    with mock.patch.object(mock_prometheus_http.get, 'return_value', response):
+    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}}
@@ -1720,11 +1761,9 @@ def test_label_joins_missconfigured(mock_prometheus_http, mock_response, sorted_
         )
 
 
-def test_label_join_not_existing(mock_prometheus_http, mock_response, sorted_tags_check):
+def test_label_join_not_existing(fake_prometheus_http, ksm_text, sorted_tags_check):
     """Tests label join on non existing matching label is ignored"""
-    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
-    response = mock_response(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    with mock.patch.object(mock_prometheus_http.get, 'return_value', response):
+    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1754,11 +1793,9 @@ def test_label_join_not_existing(mock_prometheus_http, mock_response, sorted_tag
         )
 
 
-def test_label_join_metric_not_existing(mock_prometheus_http, mock_response, sorted_tags_check):
+def test_label_join_metric_not_existing(fake_prometheus_http, ksm_text, sorted_tags_check):
     """Tests label join on non existing metric is ignored"""
-    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
-    response = mock_response(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    with mock.patch.object(mock_prometheus_http.get, 'return_value', response):
+    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1788,11 +1825,9 @@ def test_label_join_metric_not_existing(mock_prometheus_http, mock_response, sor
         )
 
 
-def test_label_join_with_hostname(mock_prometheus_http, mock_response, sorted_tags_check):
+def test_label_join_with_hostname(fake_prometheus_http, ksm_text, sorted_tags_check):
     """Tests label join and hostname override on a metric"""
-    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
-    response = mock_response(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    with mock.patch.object(mock_prometheus_http.get, 'return_value', response):
+    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}}
@@ -1837,54 +1872,62 @@ def test_label_join_with_hostname(mock_prometheus_http, mock_response, sorted_ta
         )
 
 
-@pytest.fixture()
-def mock_get(mock_prometheus_http, mock_response):
-    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
-    mock_prometheus_http.get.return_value = mock_response(
-        file_path=f_name,
-        headers={'Content-Type': 'text/plain'},
-    )
-    return mock_prometheus_http.get
-
-
-def test_health_service_check_ok(mock_get):
+def test_health_service_check_ok(fake_prometheus_http, ksm_text):
     """Tests endpoint health service check OK"""
+    _register_prometheus_text(fake_prometheus_http, ksm_text)
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
-    check.process("http://fake.endpoint:10055/metrics")
+    check.process(FAKE_ENDPOINT)
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.OK, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
+    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_prometheus_http.assert_all_responses_consumed()
 
 
-def test_health_service_check_failing():
+def test_health_service_check_failing(fake_prometheus_http):
     """Tests endpoint health service check failing"""
+    fake_prometheus_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        HTTPClientConnectionError('Connection failed'),
+        match_options=PROMETHEUS_REQUEST_OPTIONS,
+    )
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
     with pytest.raises(HTTPClientConnectionError):
-        check.process("http://fake.endpoint:10055/metrics")
+        check.process(FAKE_ENDPOINT)
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
+    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_prometheus_http.assert_all_responses_consumed()
 
 
-def test_health_service_check_failing_on_status_error(mock_prometheus_http):
+def test_health_service_check_failing_on_status_error(fake_prometheus_http):
+    fake_prometheus_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        HTTPClientStatusError('503 Server Error'),
+        match_options=PROMETHEUS_REQUEST_OPTIONS,
+    )
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
-    mock_prometheus_http.get.side_effect = HTTPClientStatusError('503 Server Error')
 
     with pytest.raises(HTTPClientStatusError):
-        check.process("http://fake.endpoint:10055/metrics")
+        check.process(FAKE_ENDPOINT)
 
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
+    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_prometheus_http.assert_all_responses_consumed()
 
 
 def test_set_prometheus_timeout():
@@ -1928,12 +1971,13 @@ def test_text_filter_input():
     assert filtered == expected_out
 
 
-def test_ssl_ca_cert_false_disables_verification(mocked_prometheus_check, mock_http, mocker):
+def test_ssl_ca_cert_false_disables_verification(mocked_prometheus_check, mocker):
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
+    fake_http = FakeHTTPClient()
     create_http_client = mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.create_http_client',
-        return_value=mock_http,
+        return_value=fake_http,
     )
 
     check.get_http_handler('https://httpbin.org/get', None)
@@ -1944,7 +1988,7 @@ def test_ssl_ca_cert_false_disables_verification(mocked_prometheus_check, mock_h
     assert http_config['ssl_verify'] is False
 
 
-def test_prometheus_http_config(mock_http, mock_response, mocker):
+def test_prometheus_http_config(mocker):
     instance_http = {
         'prometheus_endpoint': 'http://localhost:8080',
         'extra_headers': {'foo': 'bar'},
@@ -1955,11 +1999,18 @@ def test_prometheus_http_config(mock_http, mock_response, mocker):
     }
     init_config_http = {'timeout': 42}
     check = PrometheusCheck('prometheus_check', init_config_http, {}, [instance_http])
+    fake_http = FakeHTTPClient()
+    for _ in range(2):
+        fake_http.register_response(
+            'GET',
+            instance_http['prometheus_endpoint'],
+            FakeHTTPResponse(),
+            match_options=PROMETHEUS_REQUEST_OPTIONS,
+        )
     create_http_client = mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.create_http_client',
-        return_value=mock_http,
+        return_value=fake_http,
     )
-    mock_http.get.return_value = mock_response()
 
     check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
     check.poll(instance_http['prometheus_endpoint'])
@@ -1979,15 +2030,13 @@ def test_prometheus_http_config(mock_http, mock_response, mocker):
         check.HTTP_CONFIG_REMAPPER,
         check.log,
     )
-    expected_get = mock.call(
+    expected_request = RecordedRequest(
+        'GET',
         instance_http['prometheus_endpoint'],
-        extra_headers={
-            'Accept-Encoding': 'gzip',
-            'accept': 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited',
-        },
-        stream=False,
+        PROMETHEUS_REQUEST_OPTIONS,
     )
-    assert mock_http.get.call_args_list == [expected_get, expected_get]
+    fake_http.assert_requests([expected_request, expected_request])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_get_http_handler_negotiates_over_seeded_default_headers(p_check):

@@ -5,18 +5,23 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.openmetrics.mixins import OpenMetricsScraperMixin
+from datadog_checks.base.checks.prometheus.mixins import PrometheusScraperMixin
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.dev import http as http_testing
 
 
-def test_mock_http_patches_agentcheck(mock_http):
-    check = AgentCheck('test', {}, [{}])
-    assert check.http is mock_http
+class OpenMetricsFixtureCheck(OpenMetricsScraperMixin, AgentCheck):
+    pass
 
 
-def test_mock_http_patches_explicit_agentcheck_client(mock_http):
+class PrometheusFixtureCheck(PrometheusScraperMixin, AgentCheck):
+    pass
+
+
+def test_fake_http_patches_explicit_agentcheck_client(fake_http):
     check = AgentCheck('test', {}, [{}])
-    assert check.create_http_client({'url': 'https://example.test'}) is mock_http
+    assert check.create_http_client({'url': 'https://example.test'}) is fake_http
 
 
 def test_http_module_reexports_base_fakes():
@@ -37,30 +42,51 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_mock_http_supports_options(mock_http):
-    response = FakeHTTPResponse()
-    mock_http.options_method.return_value = response
-    check = AgentCheck('test', {}, [{}])
+def test_fake_openmetrics_http_routes_send_request(fake_openmetrics_http):
+    url = 'https://example.test/metrics'
+    response = FakeHTTPResponse(text='metric 1')
+    headers = {'Authorization': 'Bearer token'}
+    fake_openmetrics_http.register_response('GET', url, response)
+    check = OpenMetricsFixtureCheck('test', {}, [{}])
 
-    assert check.http.options_method('https://example.test') is response
+    result = check.send_request(url, {'prometheus_url': url}, headers=headers)
 
-
-@pytest.mark.parametrize('default', [None, 'fallback'])
-def test_mock_http_absent_cookie_returns_default(mock_http, default):
-    assert mock_http.get_cookie('missing', default) == default
-
-
-def test_mock_http_get_cookie_accepts_keyword_arguments(mock_http):
-    assert mock_http.get_cookie(name='missing', default='fallback') == 'fallback'
-
-
-def test_mock_http_get_cookie_return_value_is_configurable(mock_http):
-    mock_http.get_cookie.return_value = 'token'
-    assert mock_http.get_cookie('csrftoken') == 'token'
+    assert result is response
+    fake_openmetrics_http.assert_requests(
+        [RecordedRequest(method='GET', url=url, options={'headers': headers, 'stream': True})]
+    )
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_mock_http_exposes_tls_config(mock_http):
-    assert mock_http.tls_config == {}
+def test_fake_prometheus_http_routes_poll(fake_prometheus_http):
+    url = 'https://example.test/metrics'
+    response = FakeHTTPResponse(text='metric 1')
+    fake_prometheus_http.register_response('GET', url, response)
+    check = PrometheusFixtureCheck('test', {}, [{}])
+
+    result = check.poll(url, headers={'X-Test': 'value'})
+
+    assert result is response
+    fake_prometheus_http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url=url,
+                options={
+                    'extra_headers': {
+                        'X-Test': 'value',
+                        'Accept-Encoding': 'gzip',
+                        'accept': (
+                            'application/vnd.google.protobuf; '
+                            'proto=io.prometheus.client.MetricFamily; encoding=delimited'
+                        ),
+                    },
+                    'stream': False,
+                },
+            )
+        ]
+    )
+    fake_prometheus_http.assert_all_responses_consumed()
 
 
 def test_legacy_mock_response_is_a_requests_response_without_loading_base_fakes(mocker):

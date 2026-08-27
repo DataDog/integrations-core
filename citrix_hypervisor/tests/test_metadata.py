@@ -5,15 +5,15 @@ import json
 import os
 
 import mock
-import pytest
 
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 
 from . import common
 
 
-@pytest.mark.usefixtures('mock_responses')
-def test_collect_metadata(datadog_agent, instance):
+def test_collect_metadata(aggregator, datadog_agent, instance, mock_responses):
+    mock_responses(instance['url'], include_host=False, metrics_start=0)
+
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
     check.check_id = 'test:123'
     version_metadata = {
@@ -35,3 +35,4 @@ def test_collect_metadata(datadog_agent, instance):
             check.check(None)
             datadog_agent.assert_metadata('test:123', version_metadata)
             datadog_agent.assert_metadata_count(len(version_metadata))
+            aggregator.assert_service_check('citrix_hypervisor.can_connect', CitrixHypervisorCheck.OK)

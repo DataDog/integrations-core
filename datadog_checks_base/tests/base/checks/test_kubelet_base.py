@@ -9,7 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
 from datadog_checks.dev import get_here
 
 HERE = get_here()
@@ -24,58 +24,109 @@ def mock_from_file(filename):
         return f.read()
 
 
-def test_retrieve_pod_list_success(mock_http):
+def test_retrieve_pod_list_success(fake_http):
+    url = 'https://kubelet:10250/pods'
+    response = FakeHTTPResponse(content=mock_from_file('kubelet_base/pod_list_raw.dat').encode('utf-8'))
+    fake_http.register_response('GET', url, response)
     check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = "dummyurl"
+    check.pod_list_url = url
     check.kubelet_credentials = KubeletCredentials({})
-    mock_http.get.return_value = FakeHTTPResponse(
-        content=mock_from_file('kubelet_base/pod_list_raw.dat').encode('utf-8')
-    )
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))
     assert json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True)
+    fake_http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url=url,
+                options={'verify': None, 'cert': None, 'headers': None, 'params': {'verbose': True}, 'stream': True},
+            )
+        ]
+    )
+    fake_http.assert_all_responses_consumed()
 
 
-def test_retrieve_pod_list_parses_via_json(mock_http):
+def test_retrieve_pod_list_parses_via_json(fake_http):
+    url = 'http://kubelet:10255/pods'
+    fake_http.register_response('GET', url, FakeHTTPResponse(content=b'{"items": [{"name": "p1"}]}'))
     check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = 'http://kubelet:10255/pods'
+    check.pod_list_url = url
     check.kubelet_credentials = KubeletCredentials({})
-    mock_http.get.return_value = FakeHTTPResponse(content=b'{"items": [{"name": "p1"}]}')
 
     pod_list = check.retrieve_pod_list()
     assert pod_list['items'] == [{'name': 'p1'}]
+    fake_http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url=url,
+                options={'verify': None, 'cert': None, 'headers': None, 'params': {'verbose': True}, 'stream': True},
+            )
+        ]
+    )
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize('verbose', [True, False], ids=['verbose', 'terse'])
-def test_perform_kubelet_query_forwards_credentials_and_verbosity(mock_http, verbose):
+def test_perform_kubelet_query_forwards_credentials_and_verbosity(fake_http, verbose):
+    url = 'https://kubelet:10250/healthz'
+    response = FakeHTTPResponse(status_code=200)
+    fake_http.register_response('GET', url, response)
     check = KubeletBase('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials(
         {'token': 'tkn', 'ca_cert': '/ca.pem', 'client_crt': '/crt.pem', 'client_key': '/key.pem'}
     )
-    mock_http.get.return_value = FakeHTTPResponse(status_code=200)
 
-    check.perform_kubelet_query('https://kubelet:10250/healthz', verbose=verbose)
+    assert check.perform_kubelet_query(url, verbose=verbose) is response
 
-    kwargs = mock_http.get.call_args.kwargs
-    assert kwargs['params'] == {'verbose': verbose}
-    assert kwargs['verify'] == '/ca.pem'
-    assert kwargs['cert'] == ('/crt.pem', '/key.pem')
-    assert kwargs['headers'] is None
+    fake_http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url=url,
+                options={
+                    'verify': '/ca.pem',
+                    'cert': ('/crt.pem', '/key.pem'),
+                    'headers': None,
+                    'params': {'verbose': verbose},
+                    'stream': False,
+                },
+            )
+        ]
+    )
+    fake_http.assert_all_responses_consumed()
 
 
-def test_perform_kubelet_query_forwards_the_bearer_token(mock_http):
+def test_perform_kubelet_query_forwards_the_bearer_token(fake_http):
+    url = 'https://kubelet:10250/healthz'
+    fake_http.register_response('GET', url, FakeHTTPResponse(status_code=200))
     check = KubeletBase('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials({'token': 'tkn'})
-    mock_http.get.return_value = FakeHTTPResponse(status_code=200)
 
-    check.perform_kubelet_query('https://kubelet:10250/healthz')
+    check.perform_kubelet_query(url)
 
-    assert mock_http.get.call_args.kwargs['headers'] == {'Authorization': 'Bearer tkn'}
+    fake_http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url=url,
+                options={
+                    'verify': None,
+                    'cert': None,
+                    'headers': {'Authorization': 'Bearer tkn'},
+                    'params': {'verbose': True},
+                    'stream': False,
+                },
+            )
+        ]
+    )
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize('expiration_duration', ['0', '900'], ids=['no_expiration_filter', 'expiration_filter'])
-def test_retrieve_pod_list_decodes_a_utf8_body_under_a_non_utf8_encoding(mock_http, expiration_duration):
+def test_retrieve_pod_list_decodes_a_utf8_body_under_a_non_utf8_encoding(fake_http, expiration_duration):
+    url = 'http://kubelet:10255/pods'
     labels = {'owner': 'café-münchen'}
     body = json.dumps({'items': [{'metadata': {'labels': labels}}]}, ensure_ascii=False).encode('utf-8')
     assert max(body) > 127, 'the body must carry multibyte UTF-8 for this test to mean anything'
@@ -87,28 +138,39 @@ def test_retrieve_pod_list_decodes_a_utf8_body_under_a_non_utf8_encoding(mock_ht
         encoding='ISO-8859-1',
     )
     assert 'café-münchen' not in response.text
-    mock_http.get.return_value = response
+    fake_http.register_response('GET', url, response)
 
     check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = 'http://kubelet:10255/pods'
+    check.pod_list_url = url
     check.kubelet_credentials = KubeletCredentials({})
 
     with mock.patch('datadog_checks.base.checks.kubelet_base.base.get_config', return_value=expiration_duration):
         pod_list = check.retrieve_pod_list()
 
     assert pod_list['items'][0]['metadata']['labels'] == labels
+    fake_http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url=url,
+                options={'verify': None, 'cert': None, 'headers': None, 'params': {'verbose': True}, 'stream': True},
+            )
+        ]
+    )
+    fake_http.assert_all_responses_consumed()
 
 
-def test_retrieved_pod_list_failure(monkeypatch):
+def test_retrieved_pod_list_failure(caplog, monkeypatch):
     def mock_perform_kubelet_query(s, stream=False):
         raise Exception("network error")
 
     check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = "dummyurl"
+    check.pod_list_url = 'https://kubelet:10250/pods'
     monkeypatch.setattr(check, 'perform_kubelet_query', mock_perform_kubelet_query)
 
     retrieved = check.retrieve_pod_list()
     assert retrieved == {}
+    assert 'failed to retrieve pod list from the kubelet at https://kubelet:10250/pods : network error' in caplog.text
 
 
 def test_compute_pod_expiration_datetime(monkeypatch):

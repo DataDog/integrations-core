@@ -52,12 +52,25 @@ def _text_response(file_path: str | Path) -> FakeHTTPResponse:
 
 
 @pytest.fixture()
-def mock_metrics(mock_http):
-    mock_http.get.return_value = _text_response(Path(__file__).parent / 'fixtures' / 'metrics.txt')
+def mock_metrics(fake_http, instance):
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
+        _text_response(Path(__file__).parent / 'fixtures' / 'metrics.txt'),
+        match_options={'stream': True},
+    )
     yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
-def mock_label_remap(mock_http):
-    mock_http.get.return_value = _text_response(Path(__file__).parent / 'fixtures' / 'label_remap.txt')
+def mock_label_remap(fake_http, instance):
+    for _ in range(2):
+        fake_http.register_response(
+            'GET',
+            instance['openmetrics_endpoint'],
+            _text_response(Path(__file__).parent / 'fixtures' / 'label_remap.txt'),
+            match_options={'stream': True},
+        )
     yield
+    fake_http.assert_all_responses_consumed()
