@@ -6,6 +6,6 @@ from datadog_checks.dev.utils import assert_service_checks
 
 
 def test_check_dynamo_e2e(dd_agent_check, frontend_instance, worker_instance):
-    aggregator = dd_agent_check([frontend_instance, worker_instance], rate=True)
+    aggregator = dd_agent_check({'instances': [frontend_instance, worker_instance]}, rate=True)
     aggregator.assert_service_check('dynamo.openmetrics.health', ServiceCheck.OK, count=2)
     assert_service_checks(aggregator)
