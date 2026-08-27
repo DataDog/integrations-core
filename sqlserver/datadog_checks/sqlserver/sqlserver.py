@@ -1199,7 +1199,7 @@ class SQLServer(DatabaseCheck):
                 "host": self.reported_hostname,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",
