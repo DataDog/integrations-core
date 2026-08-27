@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a9a1c533-9a78-48d9-9b66-9a91d51e550a",
   "app_id": "dynamo",
+  "owner": "new-workloads",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
