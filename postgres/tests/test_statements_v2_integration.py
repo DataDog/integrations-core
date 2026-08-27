@@ -9,6 +9,7 @@ from psycopg import ClientCursor
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
+from datadog_checks.postgres.util import DDIGNORE_COMMENT
 
 from .common import (
     DB_NAME,
@@ -554,7 +555,7 @@ def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_c
         refetched_ddignore.update(replayed)
         texts = original_fetch(keys)
         for key, text in texts.items():
-            if text and text.startswith('/* DDIGNORE */'):
+            if text and text.startswith(DDIGNORE_COMMENT):
                 ddignore_keys_seen.add(key)
         return texts
 
