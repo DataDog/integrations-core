@@ -28,18 +28,24 @@ def _text_response(file_path: str | Path) -> FakeHTTPResponse:
     )
 
 
-def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance, mock_http):
+def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance, fake_http):
     check = vLLMCheck("vLLM", {}, [instance])
     check.check_id = "test:123"
 
-    mock_responses = [
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
         _text_response(get_fixture_path("vllm_metrics.txt")),
+        match_options={'stream': True},
+    )
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'].replace('/metrics', '/version'),
         FakeHTTPResponse(
             json_result=json.loads(Path(get_fixture_path("vllm_version.json")).read_text(encoding='utf-8'))
         ),
-    ]
+    )
 
-    mock_http.get.side_effect = mock_responses
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -52,20 +58,27 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance, mock_http
 
     version_metadata = _get_version_metadata("0.4.3")
     datadog_agent.assert_metadata("test:123", version_metadata)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_instance, mock_http):
+def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_instance, fake_http):
     check = vLLMCheck("vLLM", {}, [ray_instance])
     check.check_id = "test:123"
 
-    mock_responses = [
+    fake_http.register_response(
+        'GET',
+        ray_instance['openmetrics_endpoint'],
         _text_response(get_fixture_path("ray_vllm_metrics.txt")),
+        match_options={'stream': True},
+    )
+    fake_http.register_response(
+        'GET',
+        ray_instance['openmetrics_endpoint'].replace('/metrics', '/version'),
         FakeHTTPResponse(
             json_result=json.loads(Path(get_fixture_path("vllm_version.json")).read_text(encoding='utf-8'))
         ),
-    ]
+    )
 
-    mock_http.get.side_effect = mock_responses
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -78,6 +91,7 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
 
     version_metadata = _get_version_metadata("0.4.3")
     datadog_agent.assert_metadata("test:123", version_metadata)
+    fake_http.assert_all_responses_consumed()
 
 
 def _get_version_metadata(raw_version):
@@ -91,13 +105,18 @@ def _get_version_metadata(raw_version):
     }
 
 
-def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http):
+def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http.get.return_value = FakeHTTPResponse(
-        status_code=404,
-        status_error=HTTPClientStatusError('404 Client Error'),
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
+        FakeHTTPResponse(
+            status_code=404,
+            status_error=HTTPClientStatusError('404 Client Error'),
+        ),
+        match_options={'stream': True},
     )
     check = vLLMCheck("vllm", {}, [instance])
     with pytest.raises(Exception, match='HTTPClientStatusError'):
@@ -105,3 +124,4 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check("vllm.openmetrics.health", ServiceCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()

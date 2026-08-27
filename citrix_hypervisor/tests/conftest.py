@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from collections.abc import Callable, Iterator
 
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
 
@@ -53,22 +54,42 @@ def instance(request):
     return request.param
 
 
-def mock_requests_get(url, *args, **kwargs):
-    url_parts = url.split('/')
-    print(url_parts)
-
-    if url_parts[0] == 'wrong':
-        return _not_found_response()
-
-    json_file = f"rrd_updates_{url_parts[0]}.json" if url_parts[1] == "rrd_updates" else f"{url_parts[1]}.json"
-    path = os.path.join(common.HERE, 'fixtures', 'standalone', json_file)
-    if not os.path.exists(path):
-        return _not_found_response()
-
-    return _fixture_response(path)
-
-
 @pytest.fixture
-def mock_responses(mock_http):
-    mock_http.get.side_effect = mock_requests_get
-    yield
+def mock_responses(fake_http: FakeHTTPClient) -> Iterator[Callable[..., None]]:
+    fixtures_dir = os.path.join(common.HERE, 'fixtures', 'standalone')
+    host_response_path = os.path.join(fixtures_dir, 'host_rrd.json')
+    host_options = {'params': {'json': 'true'}}
+    expected_requests: list[RecordedRequest] = []
+
+    def register(base_url: str, *, include_host: bool = True, metrics_start: int | None = None) -> None:
+        if include_host:
+            host_response = _not_found_response() if base_url == 'wrong' else _fixture_response(host_response_path)
+            fake_http.register_response(
+                'GET',
+                f'{base_url}/host_rrd',
+                host_response,
+                match_options=host_options,
+            )
+            expected_requests.append(RecordedRequest('GET', f'{base_url}/host_rrd', host_options))
+
+        if metrics_start is None:
+            return
+
+        if base_url == 'wrong':
+            metrics_response = _not_found_response()
+        else:
+            metrics_response_path = os.path.join(fixtures_dir, f'rrd_updates_{base_url}.json')
+            metrics_response = _fixture_response(metrics_response_path)
+        metrics_options = {'params': {'start': metrics_start, 'host': 'true', 'json': 'true'}}
+        fake_http.register_response(
+            'GET',
+            f'{base_url}/rrd_updates',
+            metrics_response,
+            match_options=metrics_options,
+        )
+        expected_requests.append(RecordedRequest('GET', f'{base_url}/rrd_updates', metrics_options))
+
+    yield register
+
+    fake_http.assert_requests(expected_requests)
+    fake_http.assert_all_responses_consumed()

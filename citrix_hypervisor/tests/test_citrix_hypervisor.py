@@ -35,9 +35,10 @@ def test_open_session(instance, side_effect, expected_session, tag):
         assert tag == check._additional_tags
 
 
-@pytest.mark.usefixtures('mock_responses')
 @pytest.mark.parametrize('server_type', [pytest.param('master'), pytest.param('slave')])
-def test_check(aggregator, dd_run_check, instance, server_type):
+def test_check(aggregator, dd_run_check, instance, server_type, mock_responses):
+    mock_responses(instance['url'], metrics_start=1627907477)
+
     with mock.patch('datadog_checks.citrix_hypervisor.check.ServerProxy', return_value=mocked_xenserver(server_type)):
         check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
         dd_run_check(check)
@@ -48,7 +49,6 @@ def test_check(aggregator, dd_run_check, instance, server_type):
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.usefixtures('mock_responses')
 @pytest.mark.parametrize(
     'url, expected_status',
     [
@@ -56,7 +56,10 @@ def test_check(aggregator, dd_run_check, instance, server_type):
         pytest.param('wrong', AgentCheck.CRITICAL),
     ],
 )
-def test_service_check(aggregator, dd_run_check, url, expected_status):
+def test_service_check(aggregator, dd_run_check, url, expected_status, mock_responses):
+    metrics_start = 1627907477 if url == 'valid_json' else 0
+    mock_responses(url, metrics_start=metrics_start)
+
     instance = {'url': url}
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
     dd_run_check(check)
@@ -64,10 +67,11 @@ def test_service_check(aggregator, dd_run_check, url, expected_status):
     aggregator.assert_service_check('citrix_hypervisor.can_connect', expected_status, tags=[])
 
 
-@pytest.mark.usefixtures('mock_responses')
-def test_initialization(caplog):
+def test_initialization(caplog, mock_responses):
     caplog.clear()
     caplog.set_level(logging.WARNING)
+    mock_responses('mocked')
+    mock_responses('wrong')
 
     # Connection succeded
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': 'mocked'}])

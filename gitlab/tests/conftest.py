@@ -10,7 +10,7 @@ from time import sleep
 import pytest
 import requests
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -111,43 +111,49 @@ def dd_environment():
 
 
 @pytest.fixture()
-def mock_data(mock_openmetrics_http):
-    mock_openmetrics_http.get.side_effect = mocked_requests_get
-    yield
+def mock_data(fake_openmetrics_http: FakeHTTPClient):
+    fixtures_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
+    with open(os.path.join(fixtures_dir, 'readiness_check.json'), 'r') as f:
+        readiness_data = json.load(f)
+    with open(os.path.join(fixtures_dir, 'metrics.txt'), 'r') as f:
+        metrics_text = f.read()
+    with open(os.path.join(fixtures_dir, 'gitaly.txt'), 'r') as f:
+        gitaly_text = f.read()
 
+    def register_responses(
+        *,
+        use_openmetrics: bool,
+        runs: int = 1,
+        include_gitaly: bool = False,
+        include_health: bool = True,
+    ) -> FakeHTTPClient:
+        readiness_endpoint = (
+            '{}?all=1'.format(GITLAB_READINESS_ENDPOINT) if use_openmetrics else GITLAB_READINESS_ENDPOINT
+        )
+        for _ in range(runs):
+            fake_openmetrics_http.register_response(
+                'GET',
+                GITLAB_PROMETHEUS_ENDPOINT,
+                _openmetrics_response(metrics_text),
+                match_options={'stream': True},
+            )
+            if include_gitaly:
+                fake_openmetrics_http.register_response(
+                    'GET',
+                    GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+                    _openmetrics_response(gitaly_text),
+                    match_options={'stream': True},
+                )
+            if include_health:
+                fake_openmetrics_http.register_response(
+                    'GET', readiness_endpoint, FakeHTTPResponse(json_result=readiness_data)
+                )
+                fake_openmetrics_http.register_response('GET', GITLAB_LIVENESS_ENDPOINT, FakeHTTPResponse())
+                fake_openmetrics_http.register_response('GET', GITLAB_HEALTH_ENDPOINT, FakeHTTPResponse())
 
-def mocked_requests_get(*args, **kwargs):
-    url = args[0]
+        return fake_openmetrics_http
 
-    if url.startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'readiness_check.json')
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return FakeHTTPResponse(json_result=json.loads(text_data))
-
-    elif url == "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
-        HOST, GITLAB_LOCAL_PORT
-    ):
-        return FakeHTTPResponse()
-    elif url == "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return _openmetrics_response(text_data)
-    elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gitaly.txt')
-
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return _openmetrics_response(text_data)
-    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return FakeHTTPResponse(json_result=json.loads(text_data))
-
-    pytest.fail("url `{}` not registered".format(args[0]))
+    return register_responses
 
 
 @pytest.fixture()

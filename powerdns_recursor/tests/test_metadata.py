@@ -25,28 +25,51 @@ def _make_check():
     return check, config_obj
 
 
-def test_metadata_unit_timeout(datadog_agent, mock_http):
+def test_metadata_unit_timeout(datadog_agent, fake_http):
     check, config_obj = _make_check()
-    mock_http.get.side_effect = HTTPClientTimeoutError('')
+    legacy_url = "http://{}:{}/servers/localhost/statistics".format(config_obj.host, config_obj.port)
+    v4_url = "http://{}:{}/api".format(config_obj.host, config_obj.port)
+    urls = [v4_url] if config_obj.version == 4 else [legacy_url, v4_url]
+    for url in urls:
+        fake_http.register_response('GET', url, HTTPClientTimeoutError(''))
+
     check._collect_metadata(config_obj)
+
     datadog_agent.assert_metadata_count(0)
     check.log.debug.assert_called_with('Error collecting PowerDNS Recursor version: %s', '')
+    fake_http.assert_all_responses_consumed()
 
 
-def test_metadata_unit_missing_header(datadog_agent, mock_http):
+def test_metadata_unit_missing_header(datadog_agent, fake_http):
     check, config_obj = _make_check()
-    mock_http.get.return_value = FakeHTTPResponse()
+    url = (
+        "http://{}:{}/api".format(config_obj.host, config_obj.port)
+        if config_obj.version == 4
+        else "http://{}:{}/servers/localhost/statistics".format(config_obj.host, config_obj.port)
+    )
+    fake_http.register_response('GET', url, FakeHTTPResponse())
+
     check._collect_metadata(config_obj)
+
     datadog_agent.assert_metadata_count(0)
     check.log.debug.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
+    fake_http.assert_all_responses_consumed()
 
 
-def test_metadata_unit_bad_version_header(datadog_agent, mock_http):
+def test_metadata_unit_bad_version_header(datadog_agent, fake_http):
     check, config_obj = _make_check()
-    mock_http.get.return_value = FakeHTTPResponse(headers={'Server': 'wrong_stuff'})
+    url = (
+        "http://{}:{}/api".format(config_obj.host, config_obj.port)
+        if config_obj.version == 4
+        else "http://{}:{}/servers/localhost/statistics".format(config_obj.host, config_obj.port)
+    )
+    fake_http.register_response('GET', url, FakeHTTPResponse(headers={'Server': 'wrong_stuff'}))
+
     check._collect_metadata(config_obj)
+
     datadog_agent.assert_metadata_count(0)
     check.log.debug.assert_called_with('Error while decoding PowerDNS Recursor version: %s', 'list index out of range')
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.usefixtures('dd_environment')

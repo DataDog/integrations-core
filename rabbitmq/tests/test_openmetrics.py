@@ -4,13 +4,12 @@
 import os
 from itertools import product
 from pathlib import Path
-from urllib.parse import urlparse
 
 import pytest
 from packaging import version
 
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.types import ServiceCheck
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -53,6 +52,20 @@ def _text_response(file_path: str | Path) -> FakeHTTPResponse:
     )
 
 
+def _register_openmetrics_response(fake_http: FakeHTTPClient, url: str, fixture_file: str) -> None:
+    fake_http.register_response(
+        'GET',
+        url,
+        _text_response(os.path.join(OM_RESPONSE_FIXTURES, fixture_file)),
+        match_options={'stream': True},
+    )
+
+
+def _assert_openmetrics_requests(fake_http: FakeHTTPClient, *urls: str) -> None:
+    fake_http.assert_requests([RecordedRequest('GET', url, {'stream': True}) for url in urls])
+    fake_http.assert_all_responses_consumed()
+
+
 def _rmq_om_check(prom_plugin_settings):
     return RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': prom_plugin_settings}])
 
@@ -70,12 +83,13 @@ def _common_assertions(aggregator):
         pytest.param({}, id="implicitly enable by default"),
     ],
 )
-def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_http):
+def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, fake_http):
     """User only enables aggregated endpoint.
 
     We expect in this case all the metrics from the '/metrics' endpoint.
     """
-    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, "metrics.txt"))
+    metrics_url = f'{TEST_URL}/metrics'
+    _register_openmetrics_response(fake_http, metrics_url, 'metrics.txt')
     prometheus_settings = {'url': TEST_URL, **aggregated_setting}
     check = _rmq_om_check(prometheus_settings)
     dd_run_check(check)
@@ -91,14 +105,16 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
     aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
     _common_assertions(aggregator)
+    _assert_openmetrics_requests(fake_http, metrics_url)
 
 
-def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http):
+def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, fake_http):
     """Rabbitmq is configured to emit per-object metrics from the `/metrics` endpoint.
 
     We expect all metrics except the ones unique to the `/metrics` endpoint to be collected.
     """
-    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, "per-object.txt"))
+    metrics_url = f'{TEST_URL}/metrics'
+    _register_openmetrics_response(fake_http, metrics_url, 'per-object.txt')
     prometheus_settings = {'url': TEST_URL}
     check = _rmq_om_check(prometheus_settings)
     dd_run_check(check)
@@ -114,6 +130,7 @@ def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http):
     aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
     _common_assertions(aggregator)
+    _assert_openmetrics_requests(fake_http, metrics_url)
 
 
 @pytest.mark.parametrize(
@@ -133,12 +150,13 @@ def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http):
         ),
     ],
 )
-def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http):
+def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, fake_http):
     """User only enables unaggregated endpoint, e.g. '/metrics/per-object' or '/metrics/detailed'.
 
     We expect in this case only the metrics for the unaggregated endpoint, nothing from '/metrics'.
     """
-    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
+    metrics_url = f'{TEST_URL}/metrics/{endpoint}'
+    _register_openmetrics_response(fake_http, metrics_url, fixture_file)
     check = _rmq_om_check(
         {
             'url': TEST_URL,
@@ -161,6 +179,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
     )
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
     _common_assertions(aggregator)
+    _assert_openmetrics_requests(fake_http, metrics_url)
 
 
 @pytest.mark.parametrize(
@@ -178,8 +197,9 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
     RABBITMQ_VERSION < version.parse('4.0'),
     reason=f"Skipping test because RABBITMQ_VERSION is {RABBITMQ_VERSION} (not greater than 4.0)",
 )
-def test_unaggregated_endpoint_v4(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http):
-    mock_http.get.return_value = _text_response(os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
+def test_unaggregated_endpoint_v4(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, fake_http):
+    metrics_url = f'{TEST_URL}/metrics/{endpoint}'
+    _register_openmetrics_response(fake_http, metrics_url, fixture_file)
     check = _rmq_om_check(
         {
             'url': TEST_URL,
@@ -198,23 +218,7 @@ def test_unaggregated_endpoint_v4(endpoint, fixture_file, expected_metrics, aggr
         # We check that all metrics that are not in the query don't show up at all.
         aggregator.assert_metric(m, at_least=0)
 
-
-def mock_http_responses(url, **_params):
-    parsed = urlparse(url)
-    fname = {
-        '/metrics': 'metrics.txt',
-        '/metrics/per-object': 'per-object.txt',
-        '/metrics/detailed?family=queue_consumer_count': 'detailed-queue_consumer_count.txt',
-        '/metrics/detailed?family=queue_consumer_count&vhost=test': 'detailed-queue_consumer_count.txt',
-        '/metrics/detailed?family=queue_delivery_metrics': 'detailed-queue_delivery_metrics.txt',
-        (
-            '/metrics/detailed?family=queue_consumer_count&family=queue_coarse_metrics'
-        ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
-        (
-            '/metrics/detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
-        ): 'detailed-only-metrics.txt',
-    }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
-    return _text_response(os.path.join(OM_RESPONSE_FIXTURES, fname))
+    _assert_openmetrics_requests(fake_http, metrics_url)
 
 
 @pytest.mark.parametrize(
@@ -243,7 +247,7 @@ def mock_http_responses(url, **_params):
         ),
     ],
 )
-def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, mock_openmetrics_http):
+def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, fake_http):
     """Detailed and aggregated endpoints queried together.
 
     We will drop duplicate metrics coming from both endpoints in favor of the
@@ -256,7 +260,17 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
             'include_aggregated_endpoint': True,
         }
     )
-    mock_openmetrics_http.get.side_effect = mock_http_responses
+    unaggregated_url = f'{TEST_URL}/metrics/{endpoint}'
+    aggregated_url = f'{TEST_URL}/metrics'
+    fixture_file = {
+        'detailed?family=queue_consumer_count': 'detailed-queue_consumer_count.txt',
+        'detailed?family=queue_consumer_count&vhost=test': 'detailed-queue_consumer_count.txt',
+        (
+            'detailed?family=queue_consumer_count&family=queue_coarse_metrics'
+        ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
+    }[endpoint]
+    _register_openmetrics_response(fake_http, unaggregated_url, fixture_file)
+    _register_openmetrics_response(fake_http, aggregated_url, 'metrics.txt')
     dd_run_check(check)
 
     meta_metrics = {'rabbitmq.build_info', 'rabbitmq.identity_info'}
@@ -283,9 +297,10 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
     ):
         aggregator.assert_metric_has_tag(m, tag, count=1)
     _common_assertions(aggregator)
+    _assert_openmetrics_requests(fake_http, unaggregated_url, aggregated_url)
 
 
-def test_detailed_only_metrics(aggregator, dd_run_check, mock_openmetrics_http):
+def test_detailed_only_metrics(aggregator, dd_run_check, fake_http):
     """Metrics that only appear in detailed endpoint.
 
     Most metric families have metrics that are both in per-obj and detailed endpoints.
@@ -300,7 +315,10 @@ def test_detailed_only_metrics(aggregator, dd_run_check, mock_openmetrics_http):
             'include_aggregated_endpoint': True,
         }
     )
-    mock_openmetrics_http.get.side_effect = mock_http_responses
+    unaggregated_url = f'{TEST_URL}/metrics/{endpoint}'
+    aggregated_url = f'{TEST_URL}/metrics'
+    _register_openmetrics_response(fake_http, unaggregated_url, 'detailed-only-metrics.txt')
+    _register_openmetrics_response(fake_http, aggregated_url, 'metrics.txt')
     dd_run_check(check)
 
     detailed_only_metrics = (
@@ -310,6 +328,7 @@ def test_detailed_only_metrics(aggregator, dd_run_check, mock_openmetrics_http):
     )
     for m in detailed_only_metrics:
         aggregator.assert_metric(m, metric_type=aggregator.GAUGE)
+    _assert_openmetrics_requests(fake_http, unaggregated_url, aggregated_url)
 
 
 @pytest.mark.parametrize(
@@ -360,12 +379,19 @@ def test_config(prom_plugin_settings, err):
         check.load_configuration_models()
 
 
-def test_service_check_critical(aggregator, dd_run_check, mock_http):
-    mock_http.get.return_value = FakeHTTPResponse(
-        status_code=404,
-        status_error=HTTPClientStatusError('404 Client Error'),
+def test_service_check_critical(aggregator, dd_run_check, fake_http):
+    metrics_url = 'http://fail/metrics'
+    fake_http.register_response(
+        'GET',
+        metrics_url,
+        FakeHTTPResponse(
+            status_code=404,
+            status_error=HTTPClientStatusError('404 Client Error'),
+        ),
+        match_options={'stream': True},
     )
     check = _rmq_om_check({'url': 'http://fail'})
     with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
     aggregator.assert_service_check('rabbitmq.openmetrics.health', status=check.CRITICAL)
+    _assert_openmetrics_requests(fake_http, metrics_url)

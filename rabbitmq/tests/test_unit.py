@@ -7,6 +7,7 @@ import json
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
@@ -24,12 +25,15 @@ from . import common, metrics
 pytestmark = [pytest.mark.unit, common.requires_management]
 
 
-def test__get_data(check, mock_http):
-    mock_http.get.side_effect = [HTTPClientError("mocked HTTP error"), ValueError]
+def test__get_data(check, fake_http):
+    fake_http.register_response('GET', '', HTTPClientError("mocked HTTP error"))
+    fake_http.register_response('GET', '', ValueError())
     with pytest.raises(RabbitMQException):
         check._get_data('')
     with pytest.raises(RabbitMQException):
         check._get_data('')
+    fake_http.assert_requests([RecordedRequest('GET', ''), RecordedRequest('GET', '')])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_status_check(check, aggregator):

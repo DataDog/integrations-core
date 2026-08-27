@@ -16,7 +16,7 @@ from mock import patch
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
@@ -26,6 +26,7 @@ FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 
 TOKENS_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'bearer_tokens'))
 
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
+OPENMETRICS_REQUEST = RecordedRequest('GET', FAKE_ENDPOINT, {'stream': True})
 
 PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': FAKE_ENDPOINT,
@@ -43,13 +44,23 @@ OPENMETRICS_CHECK_INSTANCE = {
 }
 
 
-def _text_response(text: str) -> FakeHTTPResponse:
+def _text_response(text: str, *, content_type: str = text_content_type) -> FakeHTTPResponse:
     return FakeHTTPResponse(
         content=text.encode('utf-8'),
         text=text,
-        headers={'Content-Type': text_content_type},
+        headers={'Content-Type': content_type},
         lines=text.splitlines(),
     )
+
+
+def _register_openmetrics_text(fake_http: FakeHTTPClient, text: str, *, count: int = 1) -> None:
+    for _ in range(count):
+        fake_http.register_response(
+            'GET',
+            FAKE_ENDPOINT,
+            _text_response(text),
+            match_options={'stream': True},
+        )
 
 
 @pytest.fixture
@@ -102,12 +113,9 @@ def text_data():
 
 
 @pytest.fixture
-def mock_get(mock_openmetrics_http, mock_response):
-    response = mock_response(
-        file_path=os.path.join(FIXTURE_PATH, 'ksm.txt'), headers={'Content-Type': text_content_type}
-    )
-    mock_openmetrics_http.get.return_value = response
-    return response.text
+def ksm_text() -> str:
+    with open(os.path.join(FIXTURE_PATH, 'ksm.txt')) as fixture:
+        return fixture.read()
 
 
 def test_config_instance(mocked_prometheus_check):
@@ -160,13 +168,14 @@ def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_pro
     aggregator.assert_all_metrics_covered()
 
 
-def test_poll_text_plain(
-    mock_openmetrics_http, mock_response, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
-):
+def test_poll_text_plain(fake_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    mock_openmetrics_http.get.return_value = mock_response(
-        content=text_data, headers={'Content-Type': text_content_type}
+    fake_openmetrics_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        _text_response(text_data),
+        match_options={'stream': True},
     )
 
     response = check.poll(mocked_prometheus_scraper_config)
@@ -175,21 +184,26 @@ def test_poll_text_plain(
     messages.sort(key=lambda x: x.name)
     assert len(messages) == 40
     assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_poll_octet_stream(
-    mock_openmetrics_http, mock_response, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
-):
+def test_poll_octet_stream(fake_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    mock_openmetrics_http.get.return_value = mock_response(
-        content=text_data, headers={'Content-Type': 'application/octet-stream'}
+    fake_openmetrics_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        _text_response(text_data, content_type='application/octet-stream'),
+        match_options={'stream': True},
     )
 
     response = check.poll(mocked_prometheus_scraper_config)
     messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert len(messages) == 40
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -1673,8 +1687,7 @@ def test_ignore_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
 
 def test_ignore_metrics_multiple_wildcards(
     aggregator,
-    mock_openmetrics_http,
-    mock_response,
+    fake_openmetrics_http,
     mocked_prometheus_check,
     mocked_prometheus_scraper_config,
     text_data,
@@ -1708,9 +1721,7 @@ def test_ignore_metrics_multiple_wildcards(
     ]
 
     config = check.create_scraper_configuration(instance)
-    mock_openmetrics_http.get.return_value = mock_response(
-        content=text_data, headers={'Content-Type': text_content_type}
-    )
+    _register_openmetrics_text(fake_openmetrics_http, text_data)
 
     check.process(config)
 
@@ -1726,6 +1737,8 @@ def test_ignore_metrics_multiple_wildcards(
     aggregator.assert_metric('prometheus.go_memstats.mcache.sys_bytes', count=1)
     aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
     aggregator.assert_all_metrics_covered()
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -1797,8 +1810,7 @@ def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_che
 
 def test_metrics_with_ignore_label_values(
     aggregator,
-    mock_openmetrics_http,
-    mock_response,
+    fake_openmetrics_http,
     mocked_prometheus_check,
     mocked_prometheus_scraper_config,
     text_data,
@@ -1821,9 +1833,7 @@ def test_metrics_with_ignore_label_values(
     instance['ignore_metrics_by_labels'] = {'system': ['auth', 'recursive'], 'cache': ['*']}
     config = check.create_scraper_configuration(instance)
     expected_tags = ['cause:nxdomain']
-    mock_openmetrics_http.get.return_value = mock_response(
-        content=text_data, headers={'Content-Type': text_content_type}
-    )
+    _register_openmetrics_text(fake_openmetrics_http, text_data)
 
     check.process(config)
 
@@ -1836,6 +1846,8 @@ def test_metrics_with_ignore_label_values(
     aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=1)
 
     aggregator.assert_all_metrics_covered()
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
@@ -1855,8 +1867,7 @@ def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
 
 def test_match_metrics_multiple_wildcards(
     aggregator,
-    mock_openmetrics_http,
-    mock_response,
+    fake_openmetrics_http,
     mocked_prometheus_check,
     mocked_prometheus_scraper_config,
     text_data,
@@ -1874,9 +1885,7 @@ def test_match_metrics_multiple_wildcards(
     ]
 
     config = check.create_scraper_configuration(instance)
-    mock_openmetrics_http.get.return_value = mock_response(
-        content=text_data, headers={'Content-Type': text_content_type}
-    )
+    _register_openmetrics_text(fake_openmetrics_http, text_data)
 
     check.process(config)
 
@@ -1887,11 +1896,16 @@ def test_match_metrics_multiple_wildcards(
     aggregator.assert_metric('prometheus.go_memstats_alloc_bytes_total', count=1)
     aggregator.assert_metric('prometheus.go_memstats_lookups_total', count=1)
     aggregator.assert_all_metrics_covered()
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_joins(
+    aggregator, fake_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config, ksm_text
+):
     """Tests label join on text format"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_global_labels': {'label_to_match': '*', 'labels_to_get': ['*']},
@@ -2274,18 +2288,20 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         tags=['leader:true', 'foo:bar', 'namespace:default', 'deployment:ungaged-panther-kube-state-metrics'],
         count=1,
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_label_joins_gc(
     aggregator,
-    mock_get,
-    mock_openmetrics_http,
-    mock_response,
+    fake_openmetrics_http,
+    ksm_text,
     mocked_prometheus_check,
     mocked_prometheus_scraper_config,
 ):
     """Tests label join GC on text format"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
@@ -2327,22 +2343,25 @@ def test_label_joins_gc(
     )
 
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
-    text_data = mock_get.replace('dd-agent-62bgh', 'dd-agent-1337')
+    text_data = ksm_text.replace('dd-agent-62bgh', 'dd-agent-1337')
     pvc_replace = re.compile(r'^kube_persistentvolumeclaim_.*\n', re.MULTILINE)
     text_data = pvc_replace.sub('', text_data)
-    mock_openmetrics_http.get.return_value = mock_response(
-        content=text_data, headers={'Content-Type': text_content_type}
-    )
+    _register_openmetrics_text(fake_openmetrics_http, text_data)
 
     check.process(mocked_prometheus_scraper_config)
     assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
     assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 3)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_joins_missconfigured(
+    aggregator, fake_openmetrics_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests label join missconfigured label is ignored"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}
@@ -2377,11 +2396,16 @@ def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_
         ],
         count=1,
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_join_not_existing(
+    aggregator, fake_openmetrics_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests label join on non existing matching label is ignored"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}
@@ -2398,13 +2422,16 @@ def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_pro
     aggregator.assert_metric(
         'ksm.pod.ready', 1.0, tags=['pod:fluentd-gcp-v2.0.9-z348z', 'namespace:kube-system', 'condition:true'], count=1
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_label_join_metric_not_existing(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get
+    aggregator, fake_openmetrics_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
     """Tests label join on non existing metric is ignored"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}
@@ -2421,11 +2448,16 @@ def test_label_join_metric_not_existing(
     aggregator.assert_metric(
         'ksm.pod.ready', 1.0, tags=['pod:fluentd-gcp-v2.0.9-z348z', 'namespace:kube-system', 'condition:true'], count=1
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_join_with_hostname(
+    aggregator, fake_openmetrics_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}
@@ -2461,13 +2493,14 @@ def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_pr
         hostname='gke-foobar-test-kube-default-pool-9b4ff111-j75z',
         count=1,
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_label_join_state_change(
     aggregator,
-    mock_get,
-    mock_openmetrics_http,
-    mock_response,
+    fake_openmetrics_http,
+    ksm_text,
     mocked_prometheus_check,
     mocked_prometheus_scraper_config,
 ):
@@ -2476,6 +2509,7 @@ def test_label_join_state_change(
     If a phase changes for example, the tag should change as well.
     """
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
@@ -2492,22 +2526,23 @@ def test_label_join_state_change(
     for _, tags in mocked_prometheus_scraper_config['_label_mapping']['pod'].items():
         assert tags.get('phase') == 'Running'
 
-    text_data = mock_get.replace(
+    text_data = ksm_text.replace(
         'kube_pod_status_phase{namespace="default",phase="Running",pod="dd-agent-62bgh"} 1',
         'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1',
     )
-    mock_openmetrics_http.get.return_value = mock_response(
-        content=text_data, headers={'Content-Type': text_content_type}
-    )
+    _register_openmetrics_text(fake_openmetrics_http, text_data)
 
     check.process(mocked_prometheus_scraper_config)
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
     assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 3)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_to_match_single(benchmark, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
+    check.poll = mock.MagicMock(side_effect=lambda *_: _text_response(ksm_text))
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
@@ -2532,9 +2567,10 @@ def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_promet
         check.process(mocked_prometheus_scraper_config)
 
 
-def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_to_match_multiple(benchmark, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
+    check.poll = mock.MagicMock(side_effect=lambda *_: _text_response(ksm_text))
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
@@ -2559,9 +2595,12 @@ def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prom
         check.process(mocked_prometheus_scraper_config)
 
 
-def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+def test_health_service_check_ok(
+    aggregator, fake_openmetrics_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests endpoint health service check OK"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_openmetrics_http, ksm_text)
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
@@ -2574,11 +2613,21 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
         tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
-def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+def test_health_service_check_failing(
+    aggregator, fake_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests endpoint health service check failing"""
     check = mocked_prometheus_check
+    fake_openmetrics_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        HTTPClientConnectionError('Connection failed'),
+        match_options={'stream': True},
+    )
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
@@ -2591,13 +2640,20 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
         tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_health_service_check_failing_on_status_error(
-    aggregator, mock_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config
+    aggregator, fake_openmetrics_http, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
     check = mocked_prometheus_check
-    mock_openmetrics_http.get.side_effect = HTTPClientStatusError('503 Server Error')
+    fake_openmetrics_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        HTTPClientStatusError('503 Server Error'),
+        match_options={'stream': True},
+    )
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
@@ -2610,6 +2666,8 @@ def test_health_service_check_failing_on_status_error(
         tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -2630,12 +2688,9 @@ def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_co
 
 
 @pytest.fixture()
-def mock_filter_get(mock_openmetrics_http, mock_response):
-    response = mock_response(
-        file_path=os.path.join(FIXTURE_PATH, 'deprecated.txt'), headers={'Content-Type': text_content_type}
-    )
-    mock_openmetrics_http.get.return_value = response
-    return response.text
+def deprecated_text() -> str:
+    with open(os.path.join(FIXTURE_PATH, 'deprecated.txt')) as fixture:
+        return fixture.read()
 
 
 class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
@@ -2657,10 +2712,15 @@ def mocked_filter_openmetrics_check_scraper_config(mocked_filter_openmetrics_che
 
 
 def test_filter_metrics(
-    aggregator, mocked_filter_openmetrics_check, mocked_filter_openmetrics_check_scraper_config, mock_filter_get
+    aggregator,
+    deprecated_text,
+    fake_openmetrics_http,
+    mocked_filter_openmetrics_check,
+    mocked_filter_openmetrics_check_scraper_config,
 ):
     """Tests label join GC on text format"""
     check = mocked_filter_openmetrics_check
+    _register_openmetrics_text(fake_openmetrics_http, deprecated_text, count=2)
     mocked_filter_openmetrics_check_scraper_config['namespace'] = 'filter'
     mocked_filter_openmetrics_check_scraper_config['metrics_mapper'] = {
         'kube_pod_container_status_restarts': 'pod.restart',
@@ -2675,6 +2735,8 @@ def test_filter_metrics(
         'filter.pod.restart', tags=['pod:kube-dns-autoscaler-97162954-mf6d3', 'namespace:kube-system'], value=42
     )
     aggregator.assert_all_metrics_covered()
+    fake_openmetrics_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 def test_metadata_default(mocked_openmetrics_check_factory, text_data, datadog_agent):
@@ -2734,7 +2796,7 @@ def test_get_http_handler_applies_tls_deprecation_shims(
     assert http_handler.ignore_tls_warning is expected_ignore_warning
 
 
-def test_http_handler(mock_http, mocked_openmetrics_check_factory, mocker):
+def test_http_handler(mocked_openmetrics_check_factory, mocker):
     instance = {
         'prometheus_url': 'https://www.example.com',
         'metrics': [{'foo': 'bar'}],
@@ -2743,13 +2805,14 @@ def test_http_handler(mock_http, mocked_openmetrics_check_factory, mocker):
     }
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
-    mocker.patch('datadog_checks.base.checks.openmetrics.mixins.create_http_client', return_value=mock_http)
+    fake_http = FakeHTTPClient()
+    mocker.patch('datadog_checks.base.checks.openmetrics.mixins.create_http_client', return_value=fake_http)
 
     http_handler = check.get_http_handler(scraper_config)
 
-    assert http_handler is mock_http
-    assert mock_http.get_header('accept-encoding') == 'gzip'
-    assert mock_http.get_header('accept') == 'text/plain'
+    assert http_handler is fake_http
+    assert fake_http.get_header('accept-encoding') == 'gzip'
+    assert fake_http.get_header('accept') == 'text/plain'
 
 
 def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_openmetrics_check_factory):

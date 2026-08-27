@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from collections.abc import Iterator
 
 import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge
@@ -12,9 +13,24 @@ from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPEN
 from prometheus_client.openmetrics.exposition import generate_latest as generate_openmetrics
 
 from datadog_checks.base import ensure_unicode
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.dev import docker_run
 
 from .common import HERE, INSTANCE
+
+TEST_METRICS_ENDPOINT = 'http://localhost:10249/metrics'
+
+
+def _text_response(payload: str, *, content_type: str | None = None) -> FakeHTTPResponse:
+    content = payload.encode('utf-8')
+    headers = {'Content-Type': content_type} if content_type is not None else None
+    return FakeHTTPResponse(
+        content=content,
+        text=payload,
+        content_chunks=(content,),
+        lines=payload.splitlines(),
+        headers=headers,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -53,18 +69,26 @@ def openmetrics_payload(example_metrics_registry):
 
 
 @pytest.fixture
-def prometheus_poll_mock(mock_openmetrics_http, mock_response, prometheus_payload):
-    mock_openmetrics_http.get.return_value = mock_response(
-        prometheus_payload,
-        normalize_content=False,
-        headers={'Content-Type': PROMETHEUS_CONTENT_TYPE},
+def prometheus_poll_mock(fake_openmetrics_http, prometheus_payload) -> Iterator[FakeHTTPClient]:
+    fake_openmetrics_http.register_response(
+        'GET',
+        TEST_METRICS_ENDPOINT,
+        _text_response(prometheus_payload, content_type=PROMETHEUS_CONTENT_TYPE),
+        match_options={'stream': True},
     )
+    yield fake_openmetrics_http
+    fake_openmetrics_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
+    fake_openmetrics_http.assert_all_responses_consumed()
 
 
 @pytest.fixture
-def openmetrics_poll_mock(mock_openmetrics_http, mock_response, openmetrics_payload):
-    mock_openmetrics_http.get.return_value = mock_response(
-        openmetrics_payload,
-        normalize_content=False,
-        headers={'Content-Type': OPENMETRICS_CONTENT_TYPE},
+def openmetrics_poll_mock(fake_openmetrics_http, openmetrics_payload) -> Iterator[FakeHTTPClient]:
+    fake_openmetrics_http.register_response(
+        'GET',
+        TEST_METRICS_ENDPOINT,
+        _text_response(openmetrics_payload, content_type=OPENMETRICS_CONTENT_TYPE),
+        match_options={'stream': True},
     )
+    yield fake_openmetrics_http
+    fake_openmetrics_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
+    fake_openmetrics_http.assert_all_responses_consumed()

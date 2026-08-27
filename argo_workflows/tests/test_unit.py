@@ -106,8 +106,13 @@ def _text_response(file_path: str | Path) -> FakeHTTPResponse:
         ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
     ],
 )
-def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http, fixture_file, description):
-    mock_http.get.return_value = _text_response(fixture_file)
+def test_check_with_fixtures(dd_run_check, aggregator, instance, fake_http, fixture_file, description):
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
+        _text_response(fixture_file),
+        match_options={'stream': True},
+    )
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
 
@@ -146,14 +151,21 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http, fixt
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.OK)
     assert_service_checks(aggregator)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http):
-    mock_http.get.return_value = FakeHTTPResponse(
-        status_code=404,
-        status_error=HTTPClientStatusError('404 Client Error'),
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
+        FakeHTTPResponse(
+            status_code=404,
+            status_error=HTTPClientStatusError('404 Client Error'),
+        ),
+        match_options={'stream': True},
     )
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)
     aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()

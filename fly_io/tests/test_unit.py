@@ -69,6 +69,11 @@ def test_check(dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [pytest.param({'request_set': 'none'}, id='openmetrics only')],
+    indirect=True,
+)
 @pytest.mark.usefixtures('mock_http_get')
 def test_no_machines_endpoint(dd_run_check, aggregator, instance):
     no_rest_api = copy.deepcopy(instance)
@@ -112,11 +117,11 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps': _status_response(500)}},
+            {'request_set': 'apps_only', 'http_error': {'/v1/apps': _status_response(500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/v1/apps': _status_response(404)}},
+            {'request_set': 'apps_only', 'http_error': {'/v1/apps': _status_response(404)}},
             id='404',
         ),
     ],

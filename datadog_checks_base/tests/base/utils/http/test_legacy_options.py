@@ -6,6 +6,7 @@
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_protocol import HTTPClient
 
@@ -94,21 +95,20 @@ class TestOptionsReachTheWire:
         assert get.call_args.kwargs['verify'] is False
 
 
-class TestMockHttpLegacyOptions:
-    def test_mock_exposes_options(self, mock_http):
-        assert isinstance(mock_http.options, dict)
+class TestFakeHttpLegacyOptions:
+    def test_header_views_share_storage(self):
+        http = FakeHTTPClient()
+        http.options['headers']['X-Token'] = 'abc'
+        assert http.get_header('x-token') == 'abc'
 
-    def test_mock_header_views_share_storage(self, mock_http):
-        mock_http.options['headers']['X-Token'] = 'abc'
-        assert mock_http.get_header('x-token') == 'abc'
+        http.set_header('X-Other', 'def')
+        assert http.options['headers']['X-Other'] == 'def'
 
-        mock_http.set_header('X-Other', 'def')
-        assert mock_http.options['headers']['X-Other'] == 'def'
+    def test_set_header_collapses_duplicate_spellings(self):
+        http = FakeHTTPClient()
+        http.options['headers'].update({'x-vault-token': 'stale', 'X-Vault-Token': 'canon'})
 
-    def test_mock_set_header_collapses_duplicate_spellings(self, mock_http):
-        mock_http.options['headers'].update({'x-vault-token': 'stale', 'X-Vault-Token': 'canon'})
+        http.set_header('X-Vault-Token', 'fresh')
 
-        mock_http.set_header('X-Vault-Token', 'fresh')
-
-        assert mock_http.get_header('X-Vault-Token') == 'fresh'
-        assert sum(1 for key in mock_http.options['headers'] if key.lower() == 'x-vault-token') == 1
+        assert http.get_header('X-Vault-Token') == 'fresh'
+        assert sum(1 for key in http.options['headers'] if key.lower() == 'x-vault-token') == 1

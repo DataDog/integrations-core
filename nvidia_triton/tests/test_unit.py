@@ -27,13 +27,18 @@ def _text_response(file_path: str | Path) -> FakeHTTPResponse:
     )
 
 
-def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics, mock_http):
+def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics, fake_http):
     """
     Use static files for the metrics and version tests.
     """
 
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance_metrics])
-    mock_http.get.return_value = _text_response(get_fixture_path('metrics/metrics'))
+    fake_http.register_response(
+        'GET',
+        instance_metrics['openmetrics_endpoint'],
+        _text_response(get_fixture_path('metrics/metrics')),
+        match_options={'stream': True},
+    )
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -42,15 +47,21 @@ def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics,
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.OK)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http):
+def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http.get.return_value = FakeHTTPResponse(
-        status_code=404,
-        status_error=HTTPClientStatusError('404 Client Error'),
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
+        FakeHTTPResponse(
+            status_code=404,
+            status_error=HTTPClientStatusError('404 Client Error'),
+        ),
+        match_options={'stream': True},
     )
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     with pytest.raises(Exception, match="HTTPClientStatusError"):
@@ -58,24 +69,32 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_api_service_check_when_service_is_down(aggregator, instance, mock_http):
+def test_emits_critical_api_service_check_when_service_is_down(aggregator, instance, fake_http):
     """
     If we fail to reach the API endpoint the health service check should report as critical
     """
-    mock_http.get.return_value = FakeHTTPResponse(status_code=404)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
+    fake_http.register_response(
+        'GET',
+        f'{check.server_info_api}/v2/health/ready',
+        FakeHTTPResponse(status_code=404),
+    )
     check._check_server_health()
 
     aggregator.assert_service_check('nvidia_triton.health.status', ServiceCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http):
-    mock_http.get.return_value = FakeHTTPResponse(
-        json_result=json.loads(Path(get_fixture_path('info/v2')).read_text(encoding='utf-8'))
-    )
+def test_check_nvidia_triton_metadata(datadog_agent, instance, fake_http):
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
+    fake_http.register_response(
+        'GET',
+        f'{check.server_info_api}/v2',
+        FakeHTTPResponse(json_result=json.loads(Path(get_fixture_path('info/v2')).read_text(encoding='utf-8'))),
+    )
 
     check.check_id = 'test:123'
     check._submit_version_metadata()
@@ -90,3 +109,4 @@ def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http):
         'version.scheme': 'semver',
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
+    fake_http.assert_all_responses_consumed()

@@ -28,15 +28,22 @@ def _text_response(file_path: str | Path) -> FakeHTTPResponse:
     )
 
 
-def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance, mock_http):
+def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance, fake_http):
     check = NvidiaNIMCheck("nvidia_nim", {}, [instance])
     check.check_id = "test:123"
-    mock_http.get.side_effect = [
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
         _text_response(get_fixture_path("nim_metrics.txt")),
+        match_options={'stream': True},
+    )
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'].replace('/metrics', '/v1/version'),
         FakeHTTPResponse(
             json_result=json.loads(Path(get_fixture_path("nim_version.json")).read_text(encoding='utf-8'))
         ),
-    ]
+    )
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -57,15 +64,21 @@ def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance, moc
         "version.raw": raw_version,
     }
     datadog_agent.assert_metadata("test:123", version_metadata)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http):
+def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http.get.return_value = FakeHTTPResponse(
-        status_code=404,
-        status_error=HTTPClientStatusError('404 Client Error'),
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
+        FakeHTTPResponse(
+            status_code=404,
+            status_error=HTTPClientStatusError('404 Client Error'),
+        ),
+        match_options={'stream': True},
     )
     check = NvidiaNIMCheck("nvidia_nim", {}, [instance])
     with pytest.raises(Exception, match="HTTPClientStatusError"):
@@ -73,3 +86,4 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check("nvidia_nim.openmetrics.health", ServiceCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()
