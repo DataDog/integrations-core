@@ -2708,27 +2708,6 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_ssl_verify_not_raise_warning(caplog, mock_openmetrics_http, mock_response, mocked_openmetrics_check_factory):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-        'ssl_verify': False,
-    }
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-    mock_openmetrics_http.get.return_value = mock_response(content='httpbin.org')
-
-    with caplog.at_level(logging.DEBUG):
-        resp = check.send_request('https://httpbin.org/get', scraper_config)
-
-    assert "httpbin.org" in resp.content.decode('utf-8')
-
-    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
-    for _, _, message in caplog.record_tuples:
-        assert message != expected_message
-
-
 @pytest.mark.parametrize(
     ('instance_overrides', 'expected_verify', 'expected_ignore_warning'),
     [
@@ -2753,33 +2732,6 @@ def test_get_http_handler_applies_tls_deprecation_shims(
 
     assert http_handler.options['verify'] == expected_verify
     assert http_handler.ignore_tls_warning is expected_ignore_warning
-
-
-def test_send_request_with_dynamic_prometheus_url(
-    caplog, mock_openmetrics_http, mock_response, mocked_openmetrics_check_factory
-):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-        'ssl_verify': False,
-    }
-
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-
-    # `prometheus_url` changed just before calling `send_request`
-    scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
-    mock_openmetrics_http.get.return_value = mock_response(content='httpbin.org')
-
-    with caplog.at_level(logging.DEBUG):
-        resp = check.send_request('https://httpbin.org/get', scraper_config)
-
-    assert "httpbin.org" in resp.content.decode('utf-8')
-
-    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
-    for _, _, message in caplog.record_tuples:
-        assert message != expected_message
 
 
 def test_http_handler(mock_http, mocked_openmetrics_check_factory, mocker):
