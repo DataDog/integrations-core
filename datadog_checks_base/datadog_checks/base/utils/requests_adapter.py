@@ -117,6 +117,9 @@ def _translate_requests_exception(exc: BaseException, *, response: HTTPResponse 
     if isinstance(exc, requests_exceptions.ContentDecodingError):
         return _COMPAT_EXCEPTIONS[HTTPClientRequestError](message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):
+        backend_response = getattr(exc, 'response', None)
+        if response is None and backend_response is not None:
+            response = RequestsResponseAdapter(backend_response)
         return _COMPAT_EXCEPTIONS[HTTPClientStatusError](message, request=request, response=response)
     if isinstance(exc, requests_exceptions.RequestException):
         return _COMPAT_EXCEPTIONS[HTTPClientRequestError](message, request=request)
@@ -137,7 +140,7 @@ class RequestsResponseAdapter:
 
     __slots__ = ('_default_chunk_size', '_response')
 
-    def __init__(self, response: requests.Response, default_chunk_size: int) -> None:
+    def __init__(self, response: requests.Response, default_chunk_size: int | None = None) -> None:
         self._response = response
         self._default_chunk_size = default_chunk_size
 
