@@ -40,7 +40,13 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
+from .util import (
+    INSUFFICIENT_PRIVILEGE,
+    DatabaseConfigurationError,
+    DBExplainError,
+    trim_leading_set_stmts,
+    warning_with_tags,
+)
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
@@ -381,7 +387,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             if row['client_addr']:
                 row['client_addr'] = str(row['client_addr'])
             query = row['query']
-            if query == '<insufficient privilege>':
+            if query == INSUFFICIENT_PRIVILEGE:
                 insufficient_privilege_count += 1
                 continue
             if self._activity_last_query_start is None or (

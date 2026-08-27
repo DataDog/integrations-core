@@ -35,6 +35,8 @@ from .statements import (
     statements_query,
 )
 from .util import (
+    DDIGNORE_COMMENT,
+    INSUFFICIENT_PRIVILEGE,
     DatabaseConfigurationError,
     parse_shared_preload_libraries,
     payload_pg_version,
@@ -78,10 +80,6 @@ LIGHTWEIGHT_DESIRED_COLUMNS = (
 
 PgssKey = tuple[int, int, int]  # (queryid, dbid, userid)
 
-DDIGNORE_PREFIX = '/* DDIGNORE */'
-
-INSUFFICIENT_PRIVILEGE = '<insufficient privilege>'
-
 
 def agent_check_getter(self):
     return self._check
@@ -97,7 +95,7 @@ def pgss_key(row: dict) -> PgssKey:
 
 
 def classify_query_text(text: str) -> TextKind:
-    if text.startswith(DDIGNORE_PREFIX):
+    if text.startswith(DDIGNORE_COMMENT):
         # Queries the Agent tags for itself; monitoring artifacts rather than application traffic.
         return TextKind.EXCLUDED
     if text == INSUFFICIENT_PRIVILEGE:
