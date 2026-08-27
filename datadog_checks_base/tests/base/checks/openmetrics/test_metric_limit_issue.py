@@ -303,6 +303,17 @@ def test_missing_endpoint_does_nothing(datadog_agent: Any, caplog: Any) -> None:
     assert 'without an endpoint' in caplog.text
 
 
+def test_isolated_parent_does_not_invoke_metric_limit_state(datadog_agent: Any) -> None:
+    check = create_check()
+    check.instance['process_isolation'] = True
+    check._on_metric_limit_state = mock.Mock()
+
+    with mock.patch('datadog_checks.base.utils.replay.execute.run_with_isolation'):
+        assert check.run() == ''
+
+    check._on_metric_limit_state.assert_not_called()
+
+
 # --- Multi-endpoint and generated-endpoint reporting ---
 
 

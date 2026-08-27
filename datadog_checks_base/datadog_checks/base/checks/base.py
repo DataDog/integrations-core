@@ -1661,14 +1661,14 @@ class AgentCheck(object):
                 else:
                     self.check(instance)
 
-            if self.metric_limiter:
-                try:
-                    reached_limit = self.metric_limiter.reached_limit
-                    observed_count = self.metric_limiter.count
-                    limit = self.metric_limiter.limit
-                    self._on_metric_limit_state(reached_limit, observed_count, limit)
-                except Exception:
-                    self.log.debug('Error handling metric limit state', exc_info=True)
+                if self.metric_limiter:
+                    try:
+                        reached_limit = self.metric_limiter.reached_limit
+                        observed_count = self.metric_limiter.count
+                        limit = self.metric_limiter.limit
+                        self._on_metric_limit_state(reached_limit, observed_count, limit)
+                    except Exception:
+                        self.log.debug('Error handling metric limit state', exc_info=True)
 
             error_report = ''
         except Exception as e:
