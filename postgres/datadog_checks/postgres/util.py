@@ -57,6 +57,9 @@ class DatabaseConfigurationError(Enum):
 # Docs anchor is appended to the troubleshooting URL to land the user on the right section.
 TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting/"
 
+# Prepended to queries that should be excluded from query metrics collection.
+DDIGNORE_COMMENT = '/* DDIGNORE */'
+
 
 # Central map of diagnostic metadata for every DatabaseConfigurationError code. Used by both the
 # runtime `record_warning` path (so `agent diagnose` sees the same remediation text as `agent status`)
