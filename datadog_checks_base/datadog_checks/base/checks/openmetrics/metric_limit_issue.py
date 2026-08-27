@@ -27,37 +27,23 @@ class MetricLimitIssueReporter:
     def handle(
         self,
         check: AgentCheck,
-        endpoints: Iterable[str] | None,
+        endpoints: Iterable[str | None] | None,
         reached_limit: bool,
         observed_count: int,
         limit: int,
     ) -> None:
-        """Report or resolve an OpenMetrics configured-limit issue for one check run.
-
-        ``endpoints`` is any iterable of configured scraper endpoint strings. It is normalized to a
-        deterministic, de-duplicated, sorted tuple and empty values are discarded; the call is a no-op
-        if no endpoint remains. The metric limiter state is aggregate across the whole check run and
-        cannot attribute drops to a single scraper, so exactly one issue is reported for the entire
-        endpoint set rather than one per endpoint.
-        """
-        normalized = tuple(sorted({endpoint for endpoint in (endpoints or ()) if endpoint}))
-        if not normalized:
+        """Report or resolve one configured-limit issue for an OpenMetrics check run."""
+        endpoints = _normalize_endpoints(endpoints or ())
+        if not endpoints:
             check.log.debug('Cannot handle the OpenMetrics metric limit state without an endpoint')
             return
 
-        namespace = check.instance.get('namespace', '')
-        # Preserve the original single-endpoint public issue id; for several endpoints hash the
-        # structured ordered endpoint set rather than display text.
-        issue_id = (
-            _issue_id(check.hostname, check.name, normalized[0], namespace)
-            if len(normalized) == 1
-            else _issue_id_set(check.hostname, check.name, normalized, namespace)
-        )
+        issue_id = _issue_id(check.hostname, check.name, endpoints, check.instance.get('namespace', ''))
 
         if reached_limit:
             dropped = max(0, observed_count - limit)
             ratio = dropped / observed_count
-            title, description = _describe(check, normalized, limit, observed_count, dropped)
+            title, description = _issue_text(check.name, endpoints, limit, observed_count, dropped)
             check.report_issue(
                 id=issue_id,
                 issue_name=ISSUE_NAME,
@@ -68,7 +54,7 @@ class MetricLimitIssueReporter:
                 severity=_severity(check, ratio),
                 extra={
                     'check_name': check.name,
-                    'endpoints': list(normalized),
+                    'endpoints': list(endpoints),
                     'effective_limit': limit,
                     'observed_contexts': observed_count,
                     'dropped_contexts': dropped,
@@ -83,40 +69,29 @@ class MetricLimitIssueReporter:
         check.resolve_issue(issue_id)
 
 
-def _issue_id(hostname: str, check_name: str, endpoint: str, namespace: object) -> str:
-    identity = json.dumps((hostname, check_name, endpoint, str(namespace)), separators=(',', ':'))
+def _normalize_endpoints(endpoints: Iterable[str | None]) -> tuple[str, ...]:
+    return tuple(sorted({endpoint for endpoint in endpoints if endpoint}))
+
+
+def _issue_id(hostname: str, check_name: str, endpoints: tuple[str, ...], namespace: object) -> str:
+    # Keep the original identity for one endpoint while representing multiple endpoints structurally.
+    endpoint_identity: str | list[str] = endpoints[0] if len(endpoints) == 1 else list(endpoints)
+    identity = json.dumps((hostname, check_name, endpoint_identity, str(namespace)), separators=(',', ':'))
     digest = hashlib.sha256(identity.encode('utf-8')).hexdigest()[:16]
     return f'openmetrics-dropped-config:{digest}'
 
 
-def _issue_id_set(hostname: str, check_name: str, endpoints: tuple[str, ...], namespace: object) -> str:
-    """Identity for a multi-endpoint issue: hash the structured ordered endpoint set, not display text."""
-    identity = json.dumps((hostname, check_name, list(endpoints), str(namespace)), separators=(',', ':'))
-    digest = hashlib.sha256(identity.encode('utf-8')).hexdigest()[:16]
-    return f'openmetrics-dropped-config:{digest}'
-
-
-def _describe(
-    check: AgentCheck, endpoints: tuple[str, ...], limit: int, observed_count: int, dropped: int
+def _issue_text(
+    check_name: str, endpoints: tuple[str, ...], limit: int, observed_count: int, dropped: int
 ) -> tuple[str, str]:
-    if len(endpoints) == 1:
-        endpoint = endpoints[0]
-        title = f'Dropping {dropped} of {observed_count} metrics from {endpoint}'
-        description = (
-            f'The {check.name} check collecting {endpoint} is configured to submit at most {limit} metric '
-            f'contexts per run, but the last collection produced {observed_count}. The Agent submitted {limit} '
-            f'and discarded the remaining {dropped}.'
-        )
-        return title, description
-
-    endpoint_list = ', '.join(endpoints)
-    count = len(endpoints)
-    title = f'Dropping {dropped} of {observed_count} metrics across {count} endpoints'
+    endpoint_count = len(endpoints)
+    endpoint_noun = 'endpoint' if endpoint_count == 1 else 'endpoints'
+    title = f'Dropping {dropped} of {observed_count} OpenMetrics metrics'
     description = (
-        f'The {check.name} check collects {count} endpoints: {endpoint_list}. It is configured to submit at '
-        f'most {limit} metric contexts per run, and the last collection produced {observed_count} across all '
-        f'{count} endpoints. The reported observed and dropped counts are combined across these endpoints and '
-        f'cannot be attributed to a single one. The Agent submitted {limit} and discarded the remaining {dropped}.'
+        f'The {check_name} check collected {observed_count} metric contexts from {endpoint_count} configured '
+        f'{endpoint_noun}: {", ".join(endpoints)}. These totals cover the complete check run. The check is configured '
+        f'to submit at most {limit} metric contexts per run, so the Agent submitted {limit} and discarded the '
+        f'remaining {dropped}.'
     )
     return title, description
 

@@ -53,6 +53,7 @@ def test_openmetrics_base_classes_report_metric_limit_issue(
     assert issue['id'] == ISSUE_ID
     assert issue['issue_name'] == ISSUE_NAME
     assert issue['issue_type'] == 'openmetrics_metrics_dropped_by_configured_limit'
+    assert issue['extra']['endpoints'] == [ENDPOINT]
     assert issue['extra']['observed_contexts'] == 20
     assert issue['extra']['dropped_contexts'] == 15
     assert filter_option in issue['remediation']['steps'][0]['text']

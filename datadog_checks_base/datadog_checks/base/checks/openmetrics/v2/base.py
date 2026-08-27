@@ -106,7 +106,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         # (e.g. Cilium) still report drops against the endpoint that was scraped.
         self.metric_limit_issue_reporter.handle(
             self,
-            self.scrapers,
+            self.scrapers.keys(),
             reached_limit,
             observed_count,
             limit,
