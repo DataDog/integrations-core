@@ -38,12 +38,9 @@ from datadog_checks.postgres.statements_v2 import (
     ],
 )
 def test_classify_query_text(text, expected_kind):
-    """The kind a text maps to decides whether the resolver ever asks for that key again.
-
-    EXCLUDED is a permanent verdict, so misclassifying a privilege error as excluded would drop the
-    statement forever once the grant arrives; the reverse would re-fetch the Agent's own queries on
-    every cycle. The shared resolver's tests use a stand-in classifier, so this mapping is only
-    pinned here.
+    """The kind a text maps to decides whether the resolver ever asks for that key again: EXCLUDED is
+    a permanent verdict, UNAVAILABLE is retried. The shared resolver's own tests classify with a
+    stand-in, so this mapping is only pinned here.
     """
     assert classify_query_text(text) is expected_kind
 
@@ -176,14 +173,13 @@ class TestPostgresStatementMetricsV2:
             mock.patch.object(v2, '_sync_cache_sizes'),
             mock.patch.object(v2, '_load_lightweight_snapshot', return_value=snapshot),
         ):
-            # First call: seeds the counter baseline (no previous) → no derivatives
+            # The two calls return nothing for different reasons: the first has no baseline to diff
+            # against yet, and the second diffs an identical snapshot.
             assert v2._collect_metrics_rows() == []
-            # Second call: identical snapshot, zero counter change → no derivatives
             assert v2._collect_metrics_rows() == []
 
         gauge_names = [c[0][0] for c in v2._check.gauge.call_args_list]
 
-        # Delta gauges were still emitted with value 0 on both calls
         derivative_gauge_calls = [
             c
             for c in v2._check.gauge.call_args_list

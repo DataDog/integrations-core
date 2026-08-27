@@ -591,7 +591,7 @@ def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_c
 
 
 # ---------------------------------------------------------------------------
-# Counter resets are re-baselined instead of emitting bogus deltas
+# Shared fixtures for the collection-cycle tests below
 # ---------------------------------------------------------------------------
 
 TEST_QUERY = "SELECT city FROM persons WHERE city = %s"
@@ -620,11 +620,16 @@ def _run_cycle(check, conn):
     run_one_check(check, cancel=False)
 
 
+# ---------------------------------------------------------------------------
+# Counter resets are re-baselined instead of emitting bogus deltas
+# ---------------------------------------------------------------------------
+
+
 @requires_over_10
 def test_counter_reset_between_cycles_v2(aggregator, integration_check, dbm_instance_v2):
     """pg_stat_statements counters are cumulative, so a reset makes the next snapshot lower than the
-    previous one. That row must be dropped and re-baselined; emitting the difference would report a
-    negative or wildly inflated call count to the user."""
+    previous one. That row must be dropped and re-baselined, since diffing against the stale higher
+    baseline would report a negative call count."""
     conn = _test_query_conn()
     check = integration_check(dbm_instance_v2)
     check._connect()
@@ -696,8 +701,8 @@ def test_cache_hit_rate_stable_across_cycles_v2(aggregator, integration_check, d
 @requires_over_10
 def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, dbm_instance_v2):
     """Cache entries for statements that left pg_stat_statements must be dropped even on a cycle
-    where nothing advanced. Retention that only runs when there is output to emit lets the cache sit
-    at its maximum size indefinitely, holding obfuscated text for statements that no longer exist.
+    where nothing advanced. Retention that only runs when there is output to emit leaves those
+    entries in place on a quiet instance, spending the cache on statements that no longer exist.
     """
     conn = _test_query_conn()
     check = integration_check(dbm_instance_v2)

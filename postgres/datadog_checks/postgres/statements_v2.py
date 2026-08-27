@@ -115,9 +115,9 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
          fetch text from PG, obfuscate via FFI, cache, and discard raw text.
       4. Merge derivative rows by (query_signature, datname, rolname) and emit.
 
-    The diffing, caching, and resolution steps are the shared primitives in
-    :mod:`datadog_checks.base.utils.db.query_metrics`; this class supplies the Postgres specifics,
-    namely the pgss row key, how to read statement text, and how to classify the text it gets back.
+    Steps 2 and 3 are the shared primitives in datadog_checks.base.utils.db.query_metrics; this
+    class supplies the Postgres specifics, namely the pgss row key, how to read statement text, and
+    how to classify the text it gets back.
     """
 
     def __init__(self, check, config: InstanceConfig):
@@ -489,8 +489,8 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         )
 
         # Resolution runs even with nothing to report, because it is what prunes cache entries whose
-        # statements have left pg_stat_statements. Returning early here would let the cache sit at
-        # its bound holding obfuscated text for statements that no longer exist.
+        # statements have left pg_stat_statements. Returning early here would keep those entries
+        # until LRU pressure evicted them, spending the cache on statements that no longer exist.
         obfuscations = self._resolve_obfuscations(live_pgss_keys, delta.changed_keys)
 
         if not delta.derivative_rows:
