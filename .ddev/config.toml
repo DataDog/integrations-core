@@ -48,6 +48,7 @@ hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
+powershell = "PowerShell"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -277,4 +278,4 @@ control_m = ["linux", "windows", "mac_os"]
 nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
-
+powershell = ["windows"]

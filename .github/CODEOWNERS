@@ -225,6 +225,8 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /pdh_check/                                                          @DataDog/windows-products @DataDog/agent-integrations
 /pdh_check/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /pdh_check/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/powershell/                                                         @DataDog/windows-products @DataDog/agent-integrations
+/powershell/*.md                                                     @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /win32_event_log/                                                    @DataDog/windows-products @DataDog/agent-integrations
 /win32_event_log/*.md                                                @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /win32_event_log/manifest.json                                       @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
