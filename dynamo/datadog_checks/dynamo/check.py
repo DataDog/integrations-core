@@ -14,4 +14,6 @@ class DynamoCheck(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
+            'histogram_buckets_as_distributions': True,
+            'collect_counters_with_distributions': True,
         }

@@ -86,6 +86,10 @@ COMPONENT_METRIC_MAP = {
     'dynamo_component_total_blocks': 'component.kv_cache.total_blocks',
     'dynamo_component_gpu_cache_usage_percent': 'component.kv_cache.gpu_cache_usage_percent',
     'dynamo_component_kv_cache_hit_rate': 'component.kv_cache.hit_rate',
+    # The TensorRT-LLM engine publishes its own hit-rate gauge under this name instead of Dynamo's
+    # portable dynamo_component_kv_cache_hit_rate, which requires the KV event consolidator to be
+    # configured (kv_connector_config) and is otherwise never emitted for this backend.
+    'trtllm_kv_cache_hit_rate': 'component.kv_cache.hit_rate',
 }
 
 METRIC_MAP = {

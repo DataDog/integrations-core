@@ -117,3 +117,6 @@ dynamo_component_gpu_cache_usage_percent{component="backend",endpoint="generate"
 # HELP dynamo_component_kv_cache_hit_rate component.kv_cache.hit_rate
 # TYPE dynamo_component_kv_cache_hit_rate gauge
 dynamo_component_kv_cache_hit_rate{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+# HELP trtllm_kv_cache_hit_rate component.kv_cache.hit_rate (TensorRT-LLM engine-native name)
+# TYPE trtllm_kv_cache_hit_rate gauge
+trtllm_kv_cache_hit_rate{dynamo_component="tensorrt_llm",dynamo_endpoint="generate",dynamo_namespace="dynamo",engine_type="trtllm",model="Qwen/Qwen3-0.6B",model_name="Qwen/Qwen3-0.6B"} 0.42
