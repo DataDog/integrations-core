@@ -29,6 +29,7 @@ from .statements import (
     statements_query,
 )
 from .util import (
+    INSUFFICIENT_PRIVILEGE,
     DatabaseConfigurationError,
     parse_shared_preload_libraries,
     payload_pg_version,
@@ -365,7 +366,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                     # We want to ignore tracking query metrics for queries with the /* DDIGNORE */ comment.
                     ignorable.add(pgss_key)
                     continue
-                if text == '<insufficient privilege>':
+                if text == INSUFFICIENT_PRIVILEGE:
                     continue
                 filtered[pgss_key] = text
             if ignorable:

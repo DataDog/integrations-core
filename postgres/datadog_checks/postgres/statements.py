@@ -20,6 +20,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
 from .util import (
+    INSUFFICIENT_PRIVILEGE,
     DatabaseConfigurationError,
     parse_shared_preload_libraries,
     payload_pg_version,
@@ -39,7 +40,7 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE query != '<insufficient privilege>'
+  WHERE query != '{insufficient_privilege}'
   AND query NOT LIKE '/* DDIGNORE */%%'
   {queryid_filter}
   {filters}
@@ -59,6 +60,7 @@ def statements_query(**kwargs):
         filters=filters,
         extra_clauses=extra_clauses,
         queryid_filter="",
+        insufficient_privilege=INSUFFICIENT_PRIVILEGE,
     )
 
 
