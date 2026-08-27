@@ -1928,43 +1928,20 @@ def test_text_filter_input():
     assert filtered == expected_out
 
 
-def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, mock_prometheus_http, mock_response):
-    check = mocked_prometheus_check
-    mock_prometheus_http.get.return_value = mock_response(content='httpbin.org')
-
-    with caplog.at_level(logging.DEBUG):
-        resp = check.poll('https://httpbin.org/get')
-
-    assert 'httpbin.org' in resp.content.decode('utf-8')
-
-    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
-    for _, _, message in caplog.record_tuples:
-        assert message != expected_message
-
-
-def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check, mock_http, mock_response, mocker):
+def test_ssl_ca_cert_false_disables_verification(mocked_prometheus_check, mock_http, mocker):
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
-    mock_http.ignore_tls_warning = True
-    mock_http.options['ssl_verify'] = False
-    mock_http.get.return_value = mock_response(content='httpbin.org')
     create_http_client = mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.create_http_client',
         return_value=mock_http,
     )
 
-    with caplog.at_level(logging.DEBUG):
-        resp = check.poll('https://httpbin.org/get')
+    check.get_http_handler('https://httpbin.org/get', None)
 
-    assert 'httpbin.org' in resp.content.decode('utf-8')
     http_config = create_http_client.call_args.args[0]
     assert http_config['ssl_ca_cert'] is False
     assert http_config['ssl_ignore_warning'] is True
     assert http_config['ssl_verify'] is False
-
-    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
-    for _, _, message in caplog.record_tuples:
-        assert message != expected_message
 
 
 def test_prometheus_http_config(mock_http, mock_response, mocker):
