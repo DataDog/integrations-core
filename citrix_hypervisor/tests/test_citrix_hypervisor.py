@@ -49,10 +49,9 @@ def test_open_session_succeeds_with_tls_verify_false(tls_xenserver):
     assert check.open_session() == SESSION_MASTER
 
 
+@pytest.mark.usefixtures('mock_responses')
 @pytest.mark.parametrize('server_type', [pytest.param('master'), pytest.param('slave')])
-def test_check(aggregator, dd_run_check, instance, server_type, mock_responses):
-    mock_responses(instance['url'], metrics_start=1627907477)
-
+def test_check(aggregator, dd_run_check, instance, server_type):
     with mock.patch('datadog_checks.citrix_hypervisor.check.ServerProxy', return_value=mocked_xenserver(server_type)):
         check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
         dd_run_check(check)
@@ -63,6 +62,7 @@ def test_check(aggregator, dd_run_check, instance, server_type, mock_responses):
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.usefixtures('mock_responses')
 @pytest.mark.parametrize(
     'url, expected_status',
     [
@@ -70,10 +70,7 @@ def test_check(aggregator, dd_run_check, instance, server_type, mock_responses):
         pytest.param('wrong', AgentCheck.CRITICAL),
     ],
 )
-def test_service_check(aggregator, dd_run_check, url, expected_status, mock_responses):
-    metrics_start = 1627907477 if url == 'valid_json' else 0
-    mock_responses(url, metrics_start=metrics_start)
-
+def test_service_check(aggregator, dd_run_check, url, expected_status):
     instance = {'url': url}
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
     dd_run_check(check)
@@ -81,11 +78,10 @@ def test_service_check(aggregator, dd_run_check, url, expected_status, mock_resp
     aggregator.assert_service_check('citrix_hypervisor.can_connect', expected_status, tags=[])
 
 
-def test_initialization(caplog, mock_responses):
+@pytest.mark.usefixtures('mock_responses')
+def test_initialization(caplog):
     caplog.clear()
     caplog.set_level(logging.WARNING)
-    mock_responses('mocked')
-    mock_responses('wrong')
 
     # Connection succeded
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': 'mocked'}])
