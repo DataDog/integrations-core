@@ -19,12 +19,13 @@ RECORD_PATH = f'{DIST_INFO}/RECORD'
 REMOVED_PATHS = {
     'psycopg_c/_psycopg.c',
     'psycopg_c/pq.c',
+    'psycopg_c/types/numutils.c',
+    'psycopg_c/future/generated.c',
 }
 PRESERVED_FILES = {
     'psycopg_c/_psycopg.cpython-313-x86_64-linux-gnu.so': b'compiled extension',
     'psycopg_c/_psycopg.pyi': b'class Connection: ...\n',
     'psycopg_c/pq.pxd': b'cdef int libpq_version\n',
-    'psycopg_c/types/numutils.c': b'/* supporting source */\n',
     'other/_psycopg.c': b'/* unrelated source */\n',
 }
 
@@ -44,6 +45,8 @@ def _write_psycopg_wheel(path: Path) -> None:
         **PRESERVED_FILES,
         'psycopg_c/_psycopg.c': b'/* generated extension source */\n',
         'psycopg_c/pq.c': b'/* generated pq source */\n',
+        'psycopg_c/types/numutils.c': b'/* supporting extension source */\n',
+        'psycopg_c/future/generated.c': b'/* future extension source */\n',
         f'{DIST_INFO}/METADATA': b'Metadata-Version: 2.1\nName: psycopg-c\nVersion: 1.0.0\n',
         f'{DIST_INFO}/WHEEL': (
             b'Wheel-Version: 1.0\n'
@@ -58,7 +61,7 @@ def _write_psycopg_wheel(path: Path) -> None:
         wheel.writestr(RECORD_PATH, _record_contents(files))
 
 
-def test_clean_wheel_removes_only_generated_psycopg_sources(tmp_path: Path):
+def test_clean_wheel_removes_all_psycopg_c_sources(tmp_path: Path):
     wheel_path = tmp_path / 'psycopg_c-1.0.0-py3-none-any.whl'
     _write_psycopg_wheel(wheel_path)
 
