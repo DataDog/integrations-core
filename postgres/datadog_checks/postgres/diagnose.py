@@ -471,10 +471,9 @@ class PostgresDiagnose:
         if masked:
             self._check.diagnosis.warning(
                 name=code.value,
-                diagnosis=(
-                    "{} rows in {} are masked as '{}'; activity samples will miss "
-                    "other users' queries."
-                ).format(masked, view, INSUFFICIENT_PRIVILEGE),
+                diagnosis=("{} rows in {} are masked as '{}'; activity samples will miss other users' queries.").format(
+                    masked, view, INSUFFICIENT_PRIVILEGE
+                ),
                 category=self._category,
                 description=DIAGNOSTIC_METADATA[code]["description"],
                 remediation=build_remediation(code),
