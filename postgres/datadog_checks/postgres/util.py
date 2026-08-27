@@ -57,6 +57,9 @@ class DatabaseConfigurationError(Enum):
 # Docs anchor is appended to the troubleshooting URL to land the user on the right section.
 TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting/"
 
+# Prepended to queries that should be excluded from query metrics collection.
+DDIGNORE_COMMENT = '/* DDIGNORE */'
+
 # Query text Postgres returns when the monitoring role cannot see a statement.
 INSUFFICIENT_PRIVILEGE = '<insufficient privilege>'
 
