@@ -127,6 +127,55 @@ facets:
     name: User Name
     path: usr.name
     source: log
+  - facetType: list
+    groups:
+      - Network
+    name: Network Protocol
+    path: network.protocol
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - CrowdStrike FDR
+    name: AID
+    path: crowdstrike_fdr.aid
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - CrowdStrike FDR
+    name: CID
+    path: crowdstrike_fdr.cid
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - CrowdStrike FDR
+    name: Computer Name
+    path: crowdstrike_fdr.computer_name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - CrowdStrike FDR
+    name: Dataset
+    path: crowdstrike_fdr.dataset
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - CrowdStrike FDR
+    name: Query Status
+    path: crowdstrike_fdr.query_status
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - CrowdStrike FDR
+    name: SHA-256
+    path: crowdstrike_fdr.sha256
+    source: log
+    type: string
 pipeline:
   type: pipeline
   name: CrowdStrike FDR
@@ -610,3 +659,53 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `aid` to `crowdstrike_fdr.aid`
+      enabled: true
+      sources:
+        - aid
+      sourceType: attribute
+      target: crowdstrike_fdr.aid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `cid` to `crowdstrike_fdr.cid`
+      enabled: true
+      sources:
+        - cid
+      sourceType: attribute
+      target: crowdstrike_fdr.cid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `ComputerName` to `crowdstrike_fdr.computer_name`
+      enabled: true
+      sources:
+        - ComputerName
+      sourceType: attribute
+      target: crowdstrike_fdr.computer_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `SHA256HashData` to `crowdstrike_fdr.sha256`
+      enabled: true
+      sources:
+        - SHA256HashData
+      sourceType: attribute
+      target: crowdstrike_fdr.sha256
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `QueryStatus` to `crowdstrike_fdr.query_status`
+      enabled: true
+      sources:
+        - QueryStatus
+      sourceType: attribute
+      target: crowdstrike_fdr.query_status
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false

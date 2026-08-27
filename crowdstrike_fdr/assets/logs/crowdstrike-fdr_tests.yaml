@@ -78,10 +78,13 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "ffffffff3a5a424fa02450da53619745"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "583707537390"
           parent:
             id: "17346335177"
+        sha256: "7f326aad0ee45bfef93daede5597d70422d472084ae3295762654fb5021a8720"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -180,6 +183,8 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "fffffffff000426eb99afaa2ccdcbc17"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "223442259384"
       event_platform: "Win"
@@ -275,8 +280,11 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "31e92a267c044d57b1c1e14109079e89"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "683613242245"
+        query_status: "9003"
       dns:
         question:
           name: "metadata.google.internal"
@@ -380,6 +388,8 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "ffffffff8d2e4b4f9b21b40633a8d579"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "816054990879"
       event_platform: "Win"
@@ -494,6 +504,8 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "ffffffff73164cfa9656c4caff8a2a38"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "30254389526587"
       event_platform: "Win"
@@ -689,9 +701,12 @@ tests:
       UTCTimestamp: 1680759530000
       cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       crowdstrike_fdr:
+        cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        computer_name: "ip-172-18-63-230.ec2.internal"
         process:
           parent:
             id: "1680759529306198500"
+        sha256: "31a0333333333333333333333333333333333333333333333333333333333333"
       eid: 118
       evt:
         category: "detection"
@@ -823,6 +838,8 @@ tests:
       aip: "67.43.156.14"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "ffffffff6854438eb4181691ec47e43d"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "56042872298"
       event_platform: "Win"
@@ -916,6 +933,8 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "fffffffff000426eb99afaa2ccdcbc17"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "223442259385"
       event_platform: "Win"
@@ -1009,6 +1028,8 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "fffffffff000426eb99afaa2ccdcbc17"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "223442259386"
       event_platform: "Win"
@@ -1105,8 +1126,11 @@ tests:
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
       crowdstrike_fdr:
+        aid: "31e92a267c044d57b1c1e14109079e89"
+        cid: "ffffffff30a3407dae27d0503611022d"
         process:
           id: "683613242246"
+        query_status: "0"
       dns:
         answer:
           name: "10.20.30.43"
@@ -1220,6 +1244,10 @@ tests:
       Technique: "Known malware signature"
       UTCTimestamp: 1680759540000
       cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      crowdstrike_fdr:
+        cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        computer_name: "ip-172-18-63-231.ec2.internal"
+        sha256: "31a0333333333333333333333333333333333333333333333333333333333334"
       eid: 119
       evt:
         category: "detection"
@@ -1297,10 +1325,14 @@ tests:
       aid: "11111111111111111111111111111111"
       cid: "22222222222222222222222222222222"
       crowdstrike_fdr:
+        aid: "11111111111111111111111111111111"
+        cid: "22222222222222222222222222222222"
+        computer_name: "demo-mac-01"
         process:
           id: "987654321012345678"
           parent:
             id: "876543210123456789"
+        sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       event_platform: "Mac"
       event_platform_value: "Mac"
       evt:
@@ -1355,6 +1387,8 @@ tests:
       aid: "11111111111111111111111111111111"
       cid: "22222222222222222222222222222222"
       crowdstrike_fdr:
+        aid: "11111111111111111111111111111111"
+        cid: "22222222222222222222222222222222"
         process:
           id: "987654321012345678"
       event_platform: "Mac"
@@ -1418,8 +1452,11 @@ tests:
       aid: "11111111111111111111111111111111"
       cid: "22222222222222222222222222222222"
       crowdstrike_fdr:
+        aid: "11111111111111111111111111111111"
+        cid: "22222222222222222222222222222222"
         process:
           id: "987654321012345678"
+        query_status: "0"
       dns:
         question:
           name: "demo.example"
