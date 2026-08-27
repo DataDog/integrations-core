@@ -270,8 +270,21 @@ class SQLServer(DatabaseCheck):
         except Exception as e:
             self.log.error("Error submitting health event for initialization: %s", e)
 
-    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
+    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False, operation_tags=None):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
+        if track_operation_time and operation_tags:
+            operations = {query['query']: query['name'] for query in queries}
+            execute_query = executor
+
+            def execute_tracked_query(query: str, params: tuple | None = None) -> list[tuple]:
+                with tracked_query(self, operation=operations[query], tags=operation_tags):
+                    if params is not None:
+                        return execute_query(query, params=params)
+                    return execute_query(query)
+
+            executor = execute_tracked_query
+            track_operation_time = False
+
         return QueryExecutor(
             executor,
             self,
@@ -635,7 +648,7 @@ class SQLServer(DatabaseCheck):
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
-        if is_affirmative(self.instance.get("include_instance_metrics", True)):
+        if is_affirmative(self._config.database_metrics_config['instance_metrics']['enabled']):
             common_metrics = list(INSTANCE_METRICS)
             if year and year >= 2016:
                 common_metrics.extend(INSTANCE_METRICS_NEWER_2016)
@@ -924,6 +937,7 @@ class SQLServer(DatabaseCheck):
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
+            track_operation_time=True,
             databases=db_names,
         )
 

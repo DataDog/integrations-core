@@ -65,6 +65,7 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
     "virtual_machine": "azure_virtual_machine_instance",
 }
 AZURE_SERVER_SUFFIX = ".database.windows.net"
+SQLSERVER_PARAMETER_LIMIT = 2100
 
 
 # Metric discovery queries
