@@ -5,6 +5,7 @@
 import copy
 import logging
 from collections import defaultdict
+from email.message import Message
 from fnmatch import fnmatchcase
 from math import isinf, isnan
 
@@ -211,7 +212,9 @@ class PrometheusScraperMixin(object):
                 yield message
 
         elif 'text/plain' in response.headers['Content-Type']:
-            if response.encoding is None:
+            content_type = Message()
+            content_type['Content-Type'] = response.headers['Content-Type']
+            if content_type.get_content_charset() is None:
                 response.encoding = 'utf-8'
             input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
             if self._text_filter_blacklist:
