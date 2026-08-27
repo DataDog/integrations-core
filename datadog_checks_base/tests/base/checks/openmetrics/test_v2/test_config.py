@@ -415,28 +415,20 @@ class TestShareLabels:
             dd_run_check(check, extract_message=True)
 
 
-def _accept_header_sent(scraper):
-    # RequestsWrapper uses __slots__, so patch ``get`` on the type rather than the instance.
-    with mock.patch.object(type(scraper.http), 'get') as mock_get:
-        scraper.send_request()
-    _, kwargs = mock_get.call_args
-    return kwargs.get('extra_headers', {}).get('Accept')
-
-
 class TestUseLatestSpec:
     def test_strict_latest_spec(self, dd_run_check):
         check = get_check({'use_latest_spec': True})
         check.configure_scrapers()
         scraper = check.scrapers['test']
         assert scraper._use_latest_spec is True
-        assert _accept_header_sent(scraper) == LATEST_SPEC_ACCEPT
+        assert scraper.http.get_header('Accept') == LATEST_SPEC_ACCEPT
 
     def test_dynamic_spec(self, dd_run_check):
         check = get_check({'use_latest_spec': False})
         check.configure_scrapers()
         scraper = check.scrapers['test']
         assert scraper._use_latest_spec is False
-        assert _accept_header_sent(scraper) == 'text/plain'
+        assert scraper.http.get_header('Accept') == 'text/plain'
 
     def test_user_accept_header_is_preserved(self, dd_run_check):
         check = get_check({'use_latest_spec': True, 'headers': {'Accept': 'application/json'}})
@@ -444,7 +436,6 @@ class TestUseLatestSpec:
         scraper = check.scrapers['test']
 
         assert scraper.http.get_header('Accept') == 'application/json'
-        assert _accept_header_sent(scraper) != LATEST_SPEC_ACCEPT
 
     def test_non_canonically_cased_configured_accept_header_is_preserved(self, dd_run_check):
         check = get_check({'use_latest_spec': True, 'extra_headers': {'accept': 'application/json'}})
@@ -452,7 +443,6 @@ class TestUseLatestSpec:
         scraper = check.scrapers['test']
 
         assert scraper.http.get_header('Accept') == 'application/json'
-        assert _accept_header_sent(scraper) is None
 
     def test_per_request_accept_header_is_preserved(self, dd_run_check):
         check = get_check({'use_latest_spec': True})
@@ -465,7 +455,18 @@ class TestUseLatestSpec:
         assert mock_get.call_args.kwargs['headers'] == {'Accept': 'application/json'}
         assert 'extra_headers' not in mock_get.call_args.kwargs
 
-    def test_accept_negotiation_does_not_mutate_per_request_extra_headers(self, dd_run_check):
+    def test_unrelated_per_request_headers_replace_negotiated_accept(self, dd_run_check):
+        check = get_check({'use_latest_spec': True})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        with mock.patch.object(type(scraper.http), 'get') as mock_get:
+            scraper.send_request(headers={'Authorization': 'Bearer token'})
+
+        assert mock_get.call_args.kwargs['headers'] == {'Authorization': 'Bearer token'}
+        assert 'extra_headers' not in mock_get.call_args.kwargs
+
+    def test_per_request_extra_headers_are_not_mutated(self, dd_run_check):
         check = get_check({'use_latest_spec': True})
         check.configure_scrapers()
         scraper = check.scrapers['test']
@@ -475,10 +476,7 @@ class TestUseLatestSpec:
             scraper.send_request(extra_headers=extra_headers)
 
         assert extra_headers == {'X-Custom': 'value'}
-        assert mock_get.call_args.kwargs['extra_headers'] == {
-            'X-Custom': 'value',
-            'Accept': LATEST_SPEC_ACCEPT,
-        }
+        assert mock_get.call_args.kwargs['extra_headers'] == {'X-Custom': 'value'}
 
     def test_lowercase_per_request_accept_header_is_preserved(self, dd_run_check):
         check = get_check({'use_latest_spec': True})
