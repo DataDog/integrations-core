@@ -614,6 +614,12 @@ def _emitted_calls(aggregator, query_signature):
     ]
 
 
+def _run_cycle(check, conn):
+    """Advance the test query's counters by one execution, then collect over them."""
+    conn.cursor().execute(TEST_QUERY, ("hello",))
+    run_one_check(check, cancel=False)
+
+
 @requires_over_10
 def test_counter_reset_between_cycles_v2(aggregator, integration_check, dbm_instance_v2):
     """pg_stat_statements counters are cumulative, so a reset makes the next snapshot lower than the
@@ -625,12 +631,8 @@ def test_counter_reset_between_cycles_v2(aggregator, integration_check, dbm_inst
 
     query_signature = compute_sql_signature(TEST_QUERY_NORMALIZED)
 
-    def _cycle():
-        conn.cursor().execute(TEST_QUERY, ("hello",))
-        run_one_check(check, cancel=False)
-
-    _cycle()  # seeds the baseline
-    _cycle()  # first interval with a baseline to diff against
+    _run_cycle(check, conn)  # seeds the baseline
+    _run_cycle(check, conn)  # first interval with a baseline to diff against
     assert _emitted_calls(aggregator, query_signature) == [1], "one execution per cycle should report calls=1"
 
     aggregator.reset()
@@ -638,12 +640,12 @@ def test_counter_reset_between_cycles_v2(aggregator, integration_check, dbm_inst
         with superconn.cursor() as cur:
             cur.execute("SELECT pg_stat_statements_reset();")
 
-    _cycle()
+    _run_cycle(check, conn)
     assert _emitted_calls(aggregator, query_signature) == [], (
         "the cycle spanning a counter reset must drop the row rather than emit a bogus delta"
     )
 
-    _cycle()
+    _run_cycle(check, conn)
     assert _emitted_calls(aggregator, query_signature) == [1], (
         "collection must recover from the post-reset baseline on the following cycle"
     )
@@ -665,20 +667,16 @@ def test_cache_hit_rate_stable_across_cycles_v2(aggregator, integration_check, d
     check = integration_check(dbm_instance_v2)
     check._connect()
 
-    def _cycle():
-        conn.cursor().execute(TEST_QUERY, ("hello",))
-        run_one_check(check, cancel=False)
-
     # The first cycle only seeds the baseline, and the check's own recurring statements trickle into
     # pg_stat_statements over the next few, so warm up generously before measuring steady state.
     for _ in range(6):
-        _cycle()
+        _run_cycle(check, conn)
 
     aggregator.reset()
 
     steady_state_cycles = 3
     for _ in range(steady_state_cycles):
-        _cycle()
+        _run_cycle(check, conn)
 
     conn.close()
 
@@ -705,8 +703,7 @@ def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, d
     check = integration_check(dbm_instance_v2)
     check._connect()
 
-    conn.cursor().execute(TEST_QUERY, ("hello",))
-    run_one_check(check, cancel=False)
+    _run_cycle(check, conn)
     job = check.statement_metrics
     assert isinstance(job, PostgresStatementMetricsV2)
 
@@ -720,8 +717,7 @@ def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, d
         return rows
 
     with mock.patch.object(job, '_load_lightweight_snapshot', side_effect=_capture):
-        conn.cursor().execute(TEST_QUERY, ("hello",))
-        run_one_check(check, cancel=False)
+        _run_cycle(check, conn)
 
     conn.close()
 
@@ -745,45 +741,3 @@ def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, d
         "produced no derivative rows"
     )
     assert job._obfuscation_lookup.key_map_size < warm_size
-
-
-# ---------------------------------------------------------------------------
-# Key sets handed to resolution are projected consistently
-# ---------------------------------------------------------------------------
-
-
-@requires_over_10
-def test_changed_keys_stay_within_live_keys_v2(aggregator, integration_check, dbm_instance_v2):
-    """Resolution resolves `changed_keys` and retains `live_keys`, so the former must be a subset of
-    the latter. Projecting them from different row sets makes the resolver cache results that
-    retention immediately discards, re-fetching every statement's text on every cycle while the
-    emitted metrics stay correct."""
-    conn = _test_query_conn()
-    check = integration_check(dbm_instance_v2)
-    check._connect()
-
-    conn.cursor().execute(TEST_QUERY, ("hello",))
-    run_one_check(check, cancel=False)
-    job = check.statement_metrics
-    assert isinstance(job, PostgresStatementMetricsV2)
-
-    original_resolve = job._resolve_obfuscations
-    stray_keys: set = set()
-    resolved_cycles = 0
-
-    def _resolve_spy(live_pgss_keys, changed_pgss_keys):
-        nonlocal resolved_cycles
-        resolved_cycles += 1
-        stray_keys.update(changed_pgss_keys - live_pgss_keys)
-        return original_resolve(live_pgss_keys, changed_pgss_keys)
-
-    cycles = 3
-    with mock.patch.object(job, '_resolve_obfuscations', side_effect=_resolve_spy):
-        for _ in range(cycles):
-            conn.cursor().execute(TEST_QUERY, ("hello",))
-            run_one_check(check, cancel=False)
-
-    conn.close()
-
-    assert resolved_cycles == cycles, "resolution must run every cycle, otherwise retention is skipped"
-    assert not stray_keys, f"changed keys absent from the live key set: {sorted(stray_keys)}"

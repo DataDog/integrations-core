@@ -14,6 +14,7 @@ from unittest import mock
 import pytest
 from semver import VersionInfo
 
+from datadog_checks.base.utils.db.query_metrics import TextKind
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.statements import (
@@ -24,7 +25,27 @@ from datadog_checks.postgres.statements_v2 import (
     DEFAULT_PGSS_MAX,
     LIGHTWEIGHT_DESIRED_COLUMNS,
     PostgresStatementMetricsV2,
+    classify_query_text,
 )
+
+
+@pytest.mark.parametrize(
+    "text, expected_kind",
+    [
+        pytest.param('/* DDIGNORE */ SELECT secret', TextKind.EXCLUDED, id='ddignore'),
+        pytest.param('<insufficient privilege>', TextKind.UNAVAILABLE, id='insufficient_privilege'),
+        pytest.param('SELECT city FROM persons', TextKind.STATEMENT, id='ordinary_statement'),
+    ],
+)
+def test_classify_query_text(text, expected_kind):
+    """The kind a text maps to decides whether the resolver ever asks for that key again.
+
+    EXCLUDED is a permanent verdict, so misclassifying a privilege error as excluded would drop the
+    statement forever once the grant arrives; the reverse would re-fetch the Agent's own queries on
+    every cycle. The shared resolver's tests use a stand-in classifier, so this mapping is only
+    pinned here.
+    """
+    assert classify_query_text(text) is expected_kind
 
 
 class TestPostgresStatementMetricsV2:
@@ -82,31 +103,14 @@ class TestPostgresStatementMetricsV2:
         v2._log.warning.assert_called_once()
         assert 'dropped' in v2._log.warning.call_args[0][0].lower()
 
-    # --- statement text classification ---
+    # --- resolver wiring ---
 
-    @pytest.mark.parametrize(
-        "text, negative_cached",
-        [
-            pytest.param('/* DDIGNORE */ SELECT secret', True, id='ddignore_is_never_retried'),
-            pytest.param('<insufficient privilege>', False, id='insufficient_privilege_is_retried'),
-        ],
-    )
-    def test_resolve_obfuscations_classifies_sentinel_texts(self, text, negative_cached):
-        """Neither sentinel is reported, but only DDIGNORE is a permanent verdict.
+    def test_resolve_obfuscations_applies_the_postgres_classifier(self):
+        """The collector hands its own fetcher and classifier to the shared resolver.
 
-        A privilege error describes the role we read with rather than the statement, and the grant
-        may arrive later, so that key has to stay eligible for a future fetch instead of being
-        remembered as unusable.
+        One call covering both a sentinel and an ordinary statement shows the classifier reaching the
+        resolver per key; how each kind is then cached or retried belongs to the resolver's own tests.
         """
-        v2 = self._make()
-        key = (1, 1, 1)
-        with mock.patch.object(v2, '_fetch_query_texts', return_value={key: text}):
-            result = v2._resolve_obfuscations({key}, {key})
-        assert key not in result
-        assert (key in v2._obfuscation_lookup._ignored_keys) is negative_cached
-
-    def test_resolve_obfuscations_partial_filter(self):
-        """Only sentinel-valued keys are filtered; valid queries still appear in the result."""
         v2 = self._make()
         bad_key = (1, 1, 1)
         good_key = (2, 1, 1)
@@ -119,36 +123,6 @@ class TestPostgresStatementMetricsV2:
             result = v2._resolve_obfuscations(keys, keys)
         assert bad_key not in result
         assert good_key in result
-
-    def test_resolve_obfuscations_skips_known_ddignore_keys_on_later_cycles(self):
-        """A DDIGNORE key is fetched once, negative-cached, then skipped (no fetch) on later cycles."""
-        v2 = self._make()
-        ddignore_key = (1, 1, 1)
-
-        with mock.patch.object(
-            v2, '_fetch_query_texts', return_value={ddignore_key: '/* DDIGNORE */ SELECT 1'}
-        ) as fetch:
-            v2._resolve_obfuscations({ddignore_key}, {ddignore_key})
-            assert fetch.call_count == 1
-            assert ddignore_key in v2._obfuscation_lookup._ignored_keys
-
-            # Second cycle: same key changes again but is now skipped before the fetch.
-            result = v2._resolve_obfuscations({ddignore_key}, {ddignore_key})
-            assert result == {}
-            assert fetch.call_count == 1
-
-    def test_resolve_obfuscations_forgets_ignored_key_once_it_leaves_pgss(self):
-        """A negative-cache entry must not outlive the key it describes.
-
-        pg_stat_statements evicts entries under pressure, so a key can come back naming an entirely
-        different statement; keeping the old verdict would silently drop it forever.
-        """
-        v2 = self._make()
-        ddignore_key = (1, 1, 1)
-        v2._obfuscation_lookup.mark_ignored({ddignore_key})
-        with mock.patch.object(v2, '_fetch_query_texts', return_value={}):
-            v2._resolve_obfuscations(set(), set())
-        assert ddignore_key not in v2._obfuscation_lookup._ignored_keys
 
     # --- execute query cancel event ---
 
