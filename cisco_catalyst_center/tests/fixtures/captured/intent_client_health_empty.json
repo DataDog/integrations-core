@@ -1,0 +1,254 @@
+{
+  "response": [
+    {
+      "scoreDetail": [
+        {
+          "clientCount": 0,
+          "clientUniqueCount": 0,
+          "connectedToUdnCount": 0,
+          "duidCount": null,
+          "endtime": 1785943212635,
+          "maintenanceAffectedClientCount": null,
+          "randomMacCount": null,
+          "scoreCategory": {
+            "scoreCategory": "CLIENT_TYPE",
+            "value": "ALL"
+          },
+          "scoreValue": -1,
+          "starttime": 1785942912635,
+          "unconnectedToUdnCount": 0
+        },
+        {
+          "clientCount": 0,
+          "clientUniqueCount": 0,
+          "connectedToUdnCount": 0,
+          "duidCount": 0,
+          "endtime": 1785943212635,
+          "maintenanceAffectedClientCount": null,
+          "randomMacCount": 0,
+          "scoreCategory": {
+            "scoreCategory": "CLIENT_TYPE",
+            "value": "WIRED"
+          },
+          "scoreList": [
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "POOR"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "FAIR"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "GOOD"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "IDLE"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "NODATA"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "NEW"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            }
+          ],
+          "scoreValue": -1,
+          "starttime": 1785942912635,
+          "unconnectedToUdnCount": 0
+        },
+        {
+          "clientCount": 0,
+          "clientUniqueCount": 0,
+          "connectedToUdnCount": 0,
+          "duidCount": 0,
+          "endtime": 1785943212635,
+          "maintenanceAffectedClientCount": null,
+          "randomMacCount": 0,
+          "scoreCategory": {
+            "scoreCategory": "CLIENT_TYPE",
+            "value": "WIRELESS"
+          },
+          "scoreList": [
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "POOR"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "FAIR"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "GOOD"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "IDLE"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "NODATA"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            },
+            {
+              "clientCount": 0,
+              "clientUniqueCount": 0,
+              "connectedToUdnCount": 0,
+              "duidCount": null,
+              "endtime": 1785943212635,
+              "maintenanceAffectedClientCount": null,
+              "randomMacCount": null,
+              "scoreCategory": {
+                "scoreCategory": "SCORE_TYPE",
+                "value": "NEW"
+              },
+              "scoreValue": -1,
+              "starttime": 1785942912635,
+              "unconnectedToUdnCount": 0
+            }
+          ],
+          "scoreValue": -1,
+          "starttime": 1785942912635,
+          "unconnectedToUdnCount": 0
+        }
+      ],
+      "siteId": "global"
+    }
+  ],
+  "version": "1.0"
+}

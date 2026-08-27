@@ -1,0 +1,151 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+cisco_catalyst_center.application.health,gauge,,,,Per-application health score from 1 to 10 at a site.,1,cisco_catalyst_center,application health,,"application,site_id"
+cisco_catalyst_center.application.jitter,gauge,,,,Application jitter in milliseconds.,-1,cisco_catalyst_center,application jitter,,"application,site_id"
+cisco_catalyst_center.application.latency.client,gauge,,,,Client-side network latency in milliseconds.,-1,cisco_catalyst_center,app client latency,,"application,site_id"
+cisco_catalyst_center.application.latency.network,gauge,,,,Network latency for the application in milliseconds.,-1,cisco_catalyst_center,app network latency,,"application,site_id"
+cisco_catalyst_center.application.latency.server,gauge,,,,Server-side network latency in milliseconds.,-1,cisco_catalyst_center,app server latency,,"application,site_id"
+cisco_catalyst_center.application.latency.server_app,gauge,,,,Application server processing latency in milliseconds.,-1,cisco_catalyst_center,app server proc latency,,"application,site_id"
+cisco_catalyst_center.application.packet_loss,gauge,,percent,,Percentage of application packets lost.,-1,cisco_catalyst_center,application packet loss,,"application,site_id"
+cisco_catalyst_center.application.throughput,gauge,,,,Application throughput in bits per second.,0,cisco_catalyst_center,application throughput,,"application,site_id"
+cisco_catalyst_center.application.usage,gauge,,byte,,Data transferred by the application at a site.,0,cisco_catalyst_center,application usage,,"application,site_id"
+cisco_catalyst_center.client.count,gauge,,,,Clients of a given connection type.,0,cisco_catalyst_center,client count,,client_type
+cisco_catalyst_center.client.data_rate.avg,gauge,,,,Average client data rate in bits per second.,1,cisco_catalyst_center,client data rate,,"ssid,band"
+cisco_catalyst_center.client.health,gauge,,,,Client health score from 1 to 10 for a connection type.,1,cisco_catalyst_center,client health,,client_type
+cisco_catalyst_center.client.observed.count,gauge,,,,Distinct clients observed in the group.,0,cisco_catalyst_center,clients observed,,"ssid,band"
+cisco_catalyst_center.client.onboarding.assoc.duration,gauge,,millisecond,,Average time spent in the association phase of onboarding.,-1,cisco_catalyst_center,assoc duration,,"ssid,band"
+cisco_catalyst_center.client.onboarding.auth.duration,gauge,,millisecond,,Average time spent in the authentication phase of onboarding.,-1,cisco_catalyst_center,auth duration,,"ssid,band"
+cisco_catalyst_center.client.onboarding.dhcp.duration,gauge,,millisecond,,Average time spent acquiring an address via DHCP.,-1,cisco_catalyst_center,dhcp duration,,"ssid,band"
+cisco_catalyst_center.client.onboarding.duration,gauge,,millisecond,,Average time for a client to complete onboarding.,-1,cisco_catalyst_center,onboarding duration,,"ssid,band"
+cisco_catalyst_center.client.onboarding.duration.max,gauge,,millisecond,,Longest time for a client to complete onboarding.,-1,cisco_catalyst_center,onboarding max,,"ssid,band"
+cisco_catalyst_center.client.rssi.avg,gauge,,,,Average client received signal strength in dBm.,1,cisco_catalyst_center,client rssi,,"ssid,band"
+cisco_catalyst_center.client.snr.avg,gauge,,,,Average client signal-to-noise ratio in dB.,1,cisco_catalyst_center,client snr,,"ssid,band"
+cisco_catalyst_center.client.unique.count,gauge,,,,Unique clients of a given connection type.,0,cisco_catalyst_center,client unique count,,client_type
+cisco_catalyst_center.client.usage,gauge,,byte,,Data transferred by clients in the group.,0,cisco_catalyst_center,client usage,,"ssid,band"
+cisco_catalyst_center.device.air_quality.score,gauge,,,,Air quality health score across the device radios from 1 to 10.,1,cisco_catalyst_center,air quality score,,device_name
+cisco_catalyst_center.device.ap.count,gauge,,,,Number of access points registered to a wireless controller.,0,cisco_catalyst_center,ap count,,device_name
+cisco_catalyst_center.device.ap.radio.air_quality,gauge,,percent,,Radio channel air quality.,1,cisco_catalyst_center,radio air quality,,"device_name,radio_band,radio_slot"
+cisco_catalyst_center.device.ap.radio.client.count,gauge,,,,Number of clients associated with the radio.,0,cisco_catalyst_center,radio client count,,"device_name,radio_band,radio_slot"
+cisco_catalyst_center.device.ap.radio.interference,gauge,,percent,,Radio channel interference.,-1,cisco_catalyst_center,radio interference,,"device_name,radio_band,radio_slot"
+cisco_catalyst_center.device.ap.radio.noise,gauge,,,,Radio channel noise floor in dBm.,-1,cisco_catalyst_center,radio noise,,"device_name,radio_band,radio_slot"
+cisco_catalyst_center.device.ap.radio.traffic_utilization,gauge,,percent,,Radio channel utilization attributable to Wi-Fi traffic.,-1,cisco_catalyst_center,radio traffic utilization,,"device_name,radio_band,radio_slot"
+cisco_catalyst_center.device.ap.radio.utilization,gauge,,percent,,Total radio channel utilization.,-1,cisco_catalyst_center,radio utilization,,"device_name,radio_band,radio_slot"
+cisco_catalyst_center.device.client.count,gauge,,,,Number of clients connected to the device.,0,cisco_catalyst_center,client count,,"device_name,device_family"
+cisco_catalyst_center.device.client.wired.count,gauge,,,,Number of wired clients connected to the device.,0,cisco_catalyst_center,wired client count,,device_name
+cisco_catalyst_center.device.client.wireless.count,gauge,,,,Number of wireless clients connected to the device.,0,cisco_catalyst_center,wireless client count,,device_name
+cisco_catalyst_center.device.count,gauge,,,,Number of devices managed by Catalyst Center.,0,cisco_catalyst_center,device count,,catalyst_center_host
+cisco_catalyst_center.device.cpu.score,gauge,,,,Device CPU health score from 1 to 10.,1,cisco_catalyst_center,cpu score,,"device_name,device_family"
+cisco_catalyst_center.device.cpu.utilization,gauge,,percent,,Device CPU utilization.,-1,cisco_catalyst_center,cpu utilization,,"device_name,device_family"
+cisco_catalyst_center.device.fabric.health,gauge,,,,Composite SD-Access fabric health score for the device from 1 to 10.,1,cisco_catalyst_center,fabric health,,"device_name,site_id"
+cisco_catalyst_center.device.free_memory_buffer,gauge,,percent,,Free memory buffer on a wireless controller.,1,cisco_catalyst_center,free memory buffer,,device_name
+cisco_catalyst_center.device.free_memory_buffer.score,gauge,,,,Free memory buffer health score on a wireless controller from 1 to 10.,1,cisco_catalyst_center,free memory buffer score,,device_name
+cisco_catalyst_center.device.free_timer,gauge,,percent,,Free timer availability on a wireless controller.,1,cisco_catalyst_center,free timer,,device_name
+cisco_catalyst_center.device.free_timer.score,gauge,,,,Free timer health score on a wireless controller from 1 to 10.,1,cisco_catalyst_center,free timer score,,device_name
+cisco_catalyst_center.device.health,gauge,,,,Composite device health score from 1 to 10.,1,cisco_catalyst_center,device health,,"device_name,device_family,site_id"
+cisco_catalyst_center.device.interdevice_link.down.count,gauge,,,,Number of inter-device connected interfaces that are down.,-1,cisco_catalyst_center,interdevice link down,,device_name
+cisco_catalyst_center.device.interdevice_link.score,gauge,,,,Inter-device link health score from 1 to 10.,1,cisco_catalyst_center,interdevice link score,,device_name
+cisco_catalyst_center.device.interference.score,gauge,,,,Interference health score across the device radios from 1 to 10.,1,cisco_catalyst_center,interference score,,device_name
+cisco_catalyst_center.device.link.discard.count,gauge,,,,Number of device interfaces currently discarding packets.,-1,cisco_catalyst_center,link discard count,,device_name
+cisco_catalyst_center.device.link.discard.score,gauge,,,,Interface discard health score for the device from 1 to 10.,1,cisco_catalyst_center,link discard score,,device_name
+cisco_catalyst_center.device.link.error.count,gauge,,,,Number of device interfaces currently reporting errors.,-1,cisco_catalyst_center,link error count,,device_name
+cisco_catalyst_center.device.link.error.score,gauge,,,,Interface error health score for the device from 1 to 10.,1,cisco_catalyst_center,link error score,,device_name
+cisco_catalyst_center.device.link.high_utilization.count,gauge,,,,Number of device interfaces currently at high utilization.,-1,cisco_catalyst_center,high utilization count,,device_name
+cisco_catalyst_center.device.link.utilization.score,gauge,,,,Interface utilization health score for the device from 1 to 10.,1,cisco_catalyst_center,link utilization score,,device_name
+cisco_catalyst_center.device.memory.score,gauge,,,,Device memory health score from 1 to 10.,1,cisco_catalyst_center,memory score,,"device_name,device_family"
+cisco_catalyst_center.device.memory.utilization,gauge,,percent,,Device memory utilization.,-1,cisco_catalyst_center,memory utilization,,"device_name,device_family"
+cisco_catalyst_center.device.noise.score,gauge,,,,Noise health score across the device radios from 1 to 10.,1,cisco_catalyst_center,noise score,,device_name
+cisco_catalyst_center.device.packet_pool,gauge,,,,Packet pool size on a wireless controller.,1,cisco_catalyst_center,packet pool,,device_name
+cisco_catalyst_center.device.packet_pool.score,gauge,,,,Packet pool health score on a wireless controller from 1 to 10.,1,cisco_catalyst_center,packet pool score,,device_name
+cisco_catalyst_center.device.port.count,gauge,,,,Number of ports on the device.,0,cisco_catalyst_center,port count,,device_name
+cisco_catalyst_center.device.reachable,gauge,,,,Device reachability where 1 means reachable and 0 means unreachable.,1,cisco_catalyst_center,device reachable,,device_name
+cisco_catalyst_center.device.stack.member.count,gauge,,,,Number of switches in the stack.,0,cisco_catalyst_center,stack member count,,device_name
+cisco_catalyst_center.device.stack.member.priority,gauge,,,,Stack member election priority.,0,cisco_catalyst_center,stack member priority,,"device_name,stack_member"
+cisco_catalyst_center.device.stack.member.state,gauge,,,,Stack member readiness where 1 means READY and 0 means any other state.,1,cisco_catalyst_center,stack member state,,"device_name,stack_role"
+cisco_catalyst_center.device.stack.port.status,gauge,,,,Stack port synchronization where 1 means in sync and 0 means out of sync.,1,cisco_catalyst_center,stack port status,,"device_name,stack_port"
+cisco_catalyst_center.device.temperature.avg,gauge,,,,Average temperature across the device sensors in degrees Celsius.,-1,cisco_catalyst_center,avg temperature,,device_name
+cisco_catalyst_center.device.temperature.max,gauge,,,,Maximum temperature across the device sensors in degrees Celsius.,-1,cisco_catalyst_center,max temperature,,device_name
+cisco_catalyst_center.device.throughput.rx,gauge,,,,Sum of inbound throughput across the device interfaces in bits per second.,0,cisco_catalyst_center,device rx throughput,,device_ip
+cisco_catalyst_center.device.throughput.tx,gauge,,,,Sum of outbound throughput across the device interfaces in bits per second.,0,cisco_catalyst_center,device tx throughput,,device_ip
+cisco_catalyst_center.device.uplink.count,gauge,,,,Interfaces on the device identified as WAN uplinks.,0,cisco_catalyst_center,uplink count,,device_ip
+cisco_catalyst_center.device.uplink.throughput.rx,gauge,,,,Inbound throughput across the device uplinks in bits per second.,0,cisco_catalyst_center,uplink rx throughput,,device_ip
+cisco_catalyst_center.device.uplink.throughput.tx,gauge,,,,Outbound throughput across the device uplinks in bits per second.,0,cisco_catalyst_center,uplink tx throughput,,device_ip
+cisco_catalyst_center.device.uptime,gauge,,second,,Time since the device last rebooted.,0,cisco_catalyst_center,uptime,,device_name
+cisco_catalyst_center.device.utilization.score,gauge,,,,Utilization health score across the device radios from 1 to 10.,1,cisco_catalyst_center,radio utilization score,,device_name
+cisco_catalyst_center.device.wan_link.utilization,gauge,,percent,,WAN link utilization for the device.,-1,cisco_catalyst_center,wan link utilization,,device_name
+cisco_catalyst_center.device.wqe_pool,gauge,,,,Work queue element pool size on a wireless controller.,1,cisco_catalyst_center,wqe pool,,device_name
+cisco_catalyst_center.device.wqe_pool.score,gauge,,,,Work queue element pool health score on a wireless controller from 1 to 10.,1,cisco_catalyst_center,wqe pool score,,device_name
+cisco_catalyst_center.event.count,count,,,,Assurance events in the polled window grouped by one dimension.,-1,cisco_catalyst_center,event count,,"severity,device_family,event_name,device_name"
+cisco_catalyst_center.event.total.count,count,,,,Assurance events in the polled window across the whole deployment.,-1,cisco_catalyst_center,event total,,catalyst_center_host
+cisco_catalyst_center.fabric.device.count,gauge,,,,Devices holding a given SD-Access fabric role.,0,cisco_catalyst_center,fabric device count,,fabric_role
+cisco_catalyst_center.fabric.site.connectivity.health,gauge,,percent,,Percentage of fabric site devices with healthy connectivity.,1,cisco_catalyst_center,fabric connectivity,,fabric_site_name
+cisco_catalyst_center.fabric.site.control_plane.health,gauge,,percent,,Percentage of fabric site devices with a healthy control plane.,1,cisco_catalyst_center,fabric control plane,,fabric_site_name
+cisco_catalyst_center.fabric.site.device.count,gauge,,,,Devices in the fabric site.,0,cisco_catalyst_center,fabric site devices,,fabric_site_name
+cisco_catalyst_center.fabric.site.device.fair.count,gauge,,,,Fabric site devices in fair health.,-1,cisco_catalyst_center,fabric site fair,,fabric_site_name
+cisco_catalyst_center.fabric.site.device.good.count,gauge,,,,Fabric site devices in good health.,1,cisco_catalyst_center,fabric site good,,fabric_site_name
+cisco_catalyst_center.fabric.site.device.poor.count,gauge,,,,Fabric site devices in poor health.,-1,cisco_catalyst_center,fabric site poor,,fabric_site_name
+cisco_catalyst_center.fabric.site.health,gauge,,percent,,Percentage of devices at the fabric site in good health.,1,cisco_catalyst_center,fabric site health,,fabric_site_name
+cisco_catalyst_center.fabric.site.infra.health,gauge,,percent,,Percentage of fabric site infrastructure in good health.,1,cisco_catalyst_center,fabric infra health,,fabric_site_name
+cisco_catalyst_center.fabric.site.l2vn.count,gauge,,,,Layer 2 virtual networks associated with the fabric site.,0,cisco_catalyst_center,fabric site l2vn,,fabric_site_name
+cisco_catalyst_center.fabric.site.l3vn.count,gauge,,,,Layer 3 virtual networks associated with the fabric site.,0,cisco_catalyst_center,fabric site l3vn,,fabric_site_name
+cisco_catalyst_center.fabric.vn.bgp_peer.health,gauge,,percent,,Percentage of virtual network devices with healthy BGP peering.,1,cisco_catalyst_center,vn bgp health,,virtual_network
+cisco_catalyst_center.fabric.vn.device.count,gauge,,,,Devices in the virtual network.,0,cisco_catalyst_center,vn devices,,virtual_network
+cisco_catalyst_center.fabric.vn.device.good.count,gauge,,,,Virtual network devices in good health.,1,cisco_catalyst_center,vn good devices,,virtual_network
+cisco_catalyst_center.fabric.vn.endpoint.count,gauge,,,,Endpoints in the virtual network.,0,cisco_catalyst_center,vn endpoints,,virtual_network
+cisco_catalyst_center.fabric.vn.fabric_site.count,gauge,,,,Fabric sites the virtual network spans.,0,cisco_catalyst_center,vn fabric sites,,virtual_network
+cisco_catalyst_center.fabric.vn.health,gauge,,percent,,Percentage of virtual network devices in good health.,1,cisco_catalyst_center,vn health,,virtual_network
+cisco_catalyst_center.fabric.vn.services.health,gauge,,percent,,Percentage of virtual network services in good health.,1,cisco_catalyst_center,vn services health,,virtual_network
+cisco_catalyst_center.fabric.vn.status.health,gauge,,percent,,Percentage of virtual network devices with healthy status.,1,cisco_catalyst_center,vn status health,,virtual_network
+cisco_catalyst_center.interface.admin_status,gauge,,,,Interface administrative state where 1 means up and 0 means down.,1,cisco_catalyst_center,interface admin status,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_admin_max,gauge,,,,Administratively configured maximum power for this port in watts.,0,cisco_catalyst_center,poe power admin max,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_budget,gauge,,,,Power budgeted to the powered device on this port in watts.,0,cisco_catalyst_center,poe power budget,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_consumed,gauge,,,,Power drawn by the powered device on this port in watts.,0,cisco_catalyst_center,poe power consumed,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_max_drawn,gauge,,,,Highest power drawn by the powered device on this port in watts.,0,cisco_catalyst_center,poe power max drawn,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_remaining,gauge,,,,Power still available to this port in watts.,1,cisco_catalyst_center,poe power remaining,,"device_ip,interface"
+cisco_catalyst_center.interface.rx.discard,gauge,,percent,,Percentage of inbound packets discarded.,-1,cisco_catalyst_center,interface rx discard,,"device_ip,interface"
+cisco_catalyst_center.interface.rx.error,gauge,,percent,,Percentage of inbound packets with errors.,-1,cisco_catalyst_center,interface rx error,,"device_ip,interface"
+cisco_catalyst_center.interface.rx.rate,gauge,,bit,second,Inbound throughput on the interface.,0,cisco_catalyst_center,interface rx rate,,"device_ip,interface"
+cisco_catalyst_center.interface.rx.utilization,gauge,,percent,,Inbound utilization of the interface capacity.,-1,cisco_catalyst_center,interface rx utilization,,"device_ip,interface"
+cisco_catalyst_center.interface.speed,gauge,,bit,second,Negotiated interface speed.,0,cisco_catalyst_center,interface speed,,"device_ip,interface"
+cisco_catalyst_center.interface.status,gauge,,,,Interface operational state where 1 means up and 0 means down.,1,cisco_catalyst_center,interface status,,"device_ip,interface"
+cisco_catalyst_center.interface.tx.discard,gauge,,percent,,Percentage of outbound packets discarded.,-1,cisco_catalyst_center,interface tx discard,,"device_ip,interface"
+cisco_catalyst_center.interface.tx.error,gauge,,percent,,Percentage of outbound packets with errors.,-1,cisco_catalyst_center,interface tx error,,"device_ip,interface"
+cisco_catalyst_center.interface.tx.rate,gauge,,bit,second,Outbound throughput on the interface.,0,cisco_catalyst_center,interface tx rate,,"device_ip,interface"
+cisco_catalyst_center.interface.tx.utilization,gauge,,percent,,Outbound utilization of the interface capacity.,-1,cisco_catalyst_center,interface tx utilization,,"device_ip,interface"
+cisco_catalyst_center.issue.count,gauge,,,,Open assurance issues grouped by one dimension.,-1,cisco_catalyst_center,issue count,,"severity,category,priority"
+cisco_catalyst_center.issue.total.count,gauge,,,,Open assurance issues across the whole deployment.,-1,cisco_catalyst_center,issue total,,catalyst_center_host
+cisco_catalyst_center.network.category.device.bad.count,gauge,,,,Devices in the category in bad health.,-1,cisco_catalyst_center,network category bad,,category
+cisco_catalyst_center.network.category.device.count,gauge,,,,Devices in the category.,0,cisco_catalyst_center,network category devices,,category
+cisco_catalyst_center.network.category.device.fair.count,gauge,,,,Devices in the category in fair health.,-1,cisco_catalyst_center,network category fair,,category
+cisco_catalyst_center.network.category.device.good.count,gauge,,,,Devices in the category in good health.,1,cisco_catalyst_center,network category good,,category
+cisco_catalyst_center.network.category.device.no_health.count,gauge,,,,Devices in the category with no health data.,-1,cisco_catalyst_center,network category no health,,category
+cisco_catalyst_center.network.category.health,gauge,,,,Health score for a device category such as Access or Core.,1,cisco_catalyst_center,network category health,,category
+cisco_catalyst_center.network.device.contributing.count,gauge,,,,Devices contributing to the overall health score.,0,cisco_catalyst_center,network device contributing,,catalyst_center_host
+cisco_catalyst_center.network.device.fair.count,gauge,,,,Monitored devices in fair health.,-1,cisco_catalyst_center,network device fair,,catalyst_center_host
+cisco_catalyst_center.network.device.healthy.count,gauge,,,,Monitored devices in good health.,1,cisco_catalyst_center,network device healthy,,catalyst_center_host
+cisco_catalyst_center.network.device.monitored.count,gauge,,,,Devices actively monitored for health.,0,cisco_catalyst_center,network device monitored,,catalyst_center_host
+cisco_catalyst_center.network.device.no_health.count,gauge,,,,Devices with no health data.,-1,cisco_catalyst_center,network device no health,,catalyst_center_host
+cisco_catalyst_center.network.device.not_applicable.count,gauge,,,,Devices for which health does not apply.,0,cisco_catalyst_center,network device not applicable,,catalyst_center_host
+cisco_catalyst_center.network.device.poor.count,gauge,,,,Monitored devices in poor health.,-1,cisco_catalyst_center,network device poor,,catalyst_center_host
+cisco_catalyst_center.network.device.total.count,gauge,,,,Total devices known to Catalyst Center.,0,cisco_catalyst_center,network device total,,catalyst_center_host
+cisco_catalyst_center.network.device.unhealthy.count,gauge,,,,Monitored devices reported as unhealthy.,-1,cisco_catalyst_center,network device unhealthy,,catalyst_center_host
+cisco_catalyst_center.network.health,gauge,,,,Latest overall network health score from 1 to 10.,1,cisco_catalyst_center,network health,,catalyst_center_host
+cisco_catalyst_center.security.rogue.count,gauge,,,,Detected rogue access points and clients.,-1,cisco_catalyst_center,rogue count,,threat_level
+cisco_catalyst_center.security.threat.count,gauge,,,,aWIPS wireless intrusion threats detected.,-1,cisco_catalyst_center,threat count,,threat_type
+cisco_catalyst_center.site.client.count,gauge,,,,Clients at the site of a given connection type.,0,cisco_catalyst_center,site client count,,"site_name,client_type"
+cisco_catalyst_center.site.client.data_usage,gauge,,byte,,Data transferred by clients at the site.,0,cisco_catalyst_center,site client data usage,,site_name
+cisco_catalyst_center.site.client.health.count,gauge,,,,Clients of a given connection type at the site in good health.,1,cisco_catalyst_center,site client type healthy,,"site_name,client_type"
+cisco_catalyst_center.site.client.health.percentage,gauge,,percent,,Percentage of clients of a connection type at the site in good health.,1,cisco_catalyst_center,site client health pct,,"site_name,client_type"
+cisco_catalyst_center.site.client.total.count,gauge,,,,Total clients connected at the site.,0,cisco_catalyst_center,site client total,,site_name
+cisco_catalyst_center.site.client.total.health.count,gauge,,,,Clients at the site in good health.,1,cisco_catalyst_center,site client healthy,,site_name
+cisco_catalyst_center.site.device.count,gauge,,,,Devices at the site of a given family.,0,cisco_catalyst_center,site device count,,"site_name,device_family"
+cisco_catalyst_center.site.device.health.count,gauge,,,,Devices of a given family at the site in good health.,1,cisco_catalyst_center,site device family healthy,,"site_name,device_family"
+cisco_catalyst_center.site.device.health.percentage,gauge,,percent,,Percentage of a device family at the site in good health.,1,cisco_catalyst_center,site device family health pct,,"site_name,device_family"
+cisco_catalyst_center.site.device.total.count,gauge,,,,Total network devices assigned to the site.,0,cisco_catalyst_center,site device total,,site_name
+cisco_catalyst_center.site.device.total.health.count,gauge,,,,Network devices at the site in good health.,1,cisco_catalyst_center,site device healthy,,site_name
+cisco_catalyst_center.site.issue.count,gauge,,,,Open issues at the site of a given priority.,-1,cisco_catalyst_center,site issue count,,"site_name,priority"
+cisco_catalyst_center.site.issue.total.count,gauge,,,,Open issues at the site across all priorities.,-1,cisco_catalyst_center,site issue total,,site_name
+cisco_catalyst_center.site.network.health,gauge,,percent,,Percentage of network devices at the site in good health.,1,cisco_catalyst_center,site network health,,site_name
+cisco_catalyst_center.topology.l3.link.count,gauge,,,,Links in the layer 3 routing graph.,0,cisco_catalyst_center,l3 links,,topology_type
+cisco_catalyst_center.topology.l3.node.count,gauge,,,,Nodes in the layer 3 routing graph.,0,cisco_catalyst_center,l3 nodes,,topology_type
+cisco_catalyst_center.topology.link.count,gauge,,,,Device-to-device links discovered via CDP or LLDP.,0,cisco_catalyst_center,topology links,,catalyst_center_host
+cisco_catalyst_center.topology.link.status,gauge,,,,Topology link state where 1 means up and 0 means down.,1,cisco_catalyst_center,topology link status,,source_device_uuid
+cisco_catalyst_center.topology.site.count,gauge,,,,Sites in the location hierarchy.,0,cisco_catalyst_center,topology sites,,catalyst_center_host

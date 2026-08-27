@@ -1,0 +1,159 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Endpoint paths and the per-endpoint facts a caller must not have to remember."""
+
+from __future__ import annotations
+
+from typing import Final
+
+AUTH_ENDPOINT: Final = '/dna/system/api/v1/auth/token'
+
+# Assurance data API: bulk, org-level, paginated.
+NETWORK_DEVICES_ENDPOINT: Final = '/dna/data/api/v1/networkDevices'
+INTERFACES_ENDPOINT: Final = '/dna/data/api/v1/interfaces'
+CLIENTS_ENDPOINT: Final = '/dna/data/api/v1/clients'
+CLIENTS_SUMMARY_ANALYTICS_ENDPOINT: Final = '/dna/data/api/v1/clients/summaryAnalytics'
+SITE_HEALTH_SUMMARIES_ENDPOINT: Final = '/dna/data/api/v1/siteHealthSummaries'
+ASSURANCE_EVENTS_ENDPOINT: Final = '/dna/data/api/v1/assuranceEvents'
+ASSURANCE_ISSUES_ENDPOINT: Final = '/dna/data/api/v1/assuranceIssues'
+
+# Intent API: used only where the data API has no equivalent.
+NETWORK_APPLICATIONS_ENDPOINT: Final = '/dna/data/api/v1/networkApplications'
+FABRIC_SITE_HEALTH_ENDPOINT: Final = '/dna/data/api/v1/fabricSiteHealthSummaries'
+VIRTUAL_NETWORK_HEALTH_ENDPOINT: Final = '/dna/data/api/v1/virtualNetworkHealthSummaries'
+
+PHYSICAL_TOPOLOGY_ENDPOINT: Final = '/dna/intent/api/v1/topology/physical-topology'
+SITE_TOPOLOGY_ENDPOINT: Final = '/dna/intent/api/v1/topology/site-topology'
+L3_TOPOLOGY_ENDPOINT_TEMPLATE: Final = '/dna/intent/api/v1/topology/l3/{topology_type}'
+SECURITY_ROGUE_ENDPOINT: Final = '/dna/intent/api/v1/security/rogue/additional/details'
+SECURITY_THREATS_ENDPOINT: Final = '/dna/intent/api/v1/security/threats/details'
+
+DEVICE_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/device-health'
+STACK_ENDPOINT_TEMPLATE: Final = '/dna/intent/api/v1/network-device/{device_id}/stack'
+NETWORK_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/network-health'
+CLIENT_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/client-health'
+RELEASE_ENDPOINT: Final = '/dna/intent/api/v1/dnac-release'
+
+TOKEN_LIFETIME_SECONDS: Final = 3600
+
+# The cap is not uniform, and exceeding it fails the whole call rather than clamping:
+# networkDevices and interfaces answer `2511 Limit can't be more than 500`, siteHealthSummaries
+# answers `2005 Value must be in the range 1-20`, assuranceEvents answers `14007`. Measured
+# against the DevNet sandbox on 2026-08-05.
+DEFAULT_PAGE_LIMIT: Final = 500
+ENDPOINT_PAGE_LIMITS: Final[dict[str, int]] = {
+    NETWORK_DEVICES_ENDPOINT: 500,
+    INTERFACES_ENDPOINT: 500,
+    CLIENTS_ENDPOINT: 500,
+    SITE_HEALTH_SUMMARIES_ENDPOINT: 20,
+    ASSURANCE_EVENTS_ENDPOINT: 20,
+    # Measured live: each of these rejects the 500 default with its own ceiling, and the ceilings
+    # are all different. There is no pattern to infer -- every new list endpoint has to be probed.
+    ASSURANCE_ISSUES_ENDPOINT: 25,
+    VIRTUAL_NETWORK_HEALTH_ENDPOINT: 100,
+    FABRIC_SITE_HEALTH_ENDPOINT: 100,
+    NETWORK_APPLICATIONS_ENDPOINT: 100,
+}
+
+# Catalyst Center rejects offset=0 with `2511 Offset can't be less than 1`.
+FIRST_OFFSET: Final = 1
+
+# Device families that can be part of a switch stack. Used to bound the per-device stack
+# fan-out, which is the only fan-out in the P0 set.
+STACKABLE_DEVICE_FAMILIES: Final[frozenset[str]] = frozenset({'Switches and Hubs'})
+
+# `state` values reported for a stack member and a stack port respectively.
+STACK_MEMBER_READY_STATES: Final[frozenset[str]] = frozenset({'READY'})
+STACK_PORT_OK_VALUES: Final[frozenset[str]] = frozenset({'Yes', 'yes', 'true', 'True'})
+
+# Values the data API reports for a reachable device. The legacy endpoint answers in title
+# case (`Reachable`) while the data API answers in upper case, so both are accepted.
+DEVICE_REACHABLE_VALUES: Final[frozenset[str]] = frozenset({'REACHABLE', 'Reachable', 'reachable'})
+
+# L3 topology types the brief names.
+L3_TOPOLOGY_TYPES: Final[tuple[str, ...]] = ('ospf', 'isis', 'static')
+
+# Values Catalyst Center uses for a topology link that is up.
+TOPOLOGY_LINK_UP_VALUES: Final[frozenset[str]] = frozenset({'up', 'UP', 'Up'})
+
+# `fabricRole` is a list whose casing is inconsistent -- the schema example is
+# `['Border', 'edge']`, mixing both -- so roles are lower-cased before being tagged.
+FABRIC_ROLE_ENDPOINTS_PAGE_LIMIT: Final = 20
+
+# -- assurance events -----------------------------------------------------------------
+#
+# `deviceFamily` is mandatory (errorCode 2600 without it), and its values fall into four groups
+# that cannot be mixed in one request: asking for `Unified AP` alongside a switch family answers
+# `Device family value is not allowed`. So four calls per cycle is the floor, not a choice.
+# The groups below are the appliance's own, quoted from that error message.
+EVENT_DEVICE_FAMILY_GROUPS: Final[tuple[tuple[str, ...], ...]] = (
+    ('Switches and Hubs', 'Routers', 'Wireless Controller', 'Third Party Device'),
+    ('Unified AP',),
+    ('Wired Client',),
+    ('Wireless Client',),
+)
+
+# A hard appliance limit rather than a default: a wider window answers errorCode 14005,
+# `Difference between startTime and endTime must not be more than 7 days`. The same endpoint also
+# refuses a start earlier than 30 days ago, which this cap makes unreachable.
+EVENT_WINDOW_MAX_SECONDS: Final = 7 * 24 * 60 * 60
+
+# How far back the first cycle reaches, before there is a previous window to continue from.
+# Short on purpose: the point of the first cycle is to start the series, not to backfill.
+EVENT_DEFAULT_LOOKBACK_MINUTES: Final = 15
+
+# A page here holds 20 records, so `max_pages` -- sized for the 500-record endpoints -- would
+# permit 1000 requests per family group against an endpoint whose documented rate limit can be as
+# low as 20/minute. Events get their own, far tighter bound. This also caps how many Datadog events
+# one cycle can submit: 4 family groups x 10 pages x 20 records = 800.
+EVENT_DEFAULT_MAX_PAGES: Final = 10
+
+# `severity` is the syslog scale, quoted from the AssuranceEvents spec: 0 Emergency, 1 Alert,
+# 2 Critical, 3 Error, 4 Warning, 5 Notice, 6 Info. Note that **0 is the most severe**, not the
+# least -- the inverse of the P1-P4 convention Catalyst Center uses for assurance *issues*, which is
+# an easy and silent mistake to make when reading the two side by side.
+EVENT_SEVERITY_ALERT_TYPES: Final[dict[int, str]] = {
+    0: 'error',
+    1: 'error',
+    2: 'error',
+    3: 'error',
+    4: 'warning',
+    5: 'info',
+    6: 'info',
+}
+
+# Used when `severity` is absent or is not one of the seven documented values. Chosen over
+# 'error' so that an unrecognised scale cannot manufacture alerts.
+EVENT_DEFAULT_ALERT_TYPE: Final = 'info'
+
+# Fields carrying the diagnosis, in the order they read best in an event body. These are the ones
+# the metric breakdown cannot keep: they are free text, and several are per-client.
+EVENT_DETAIL_FIELDS: Final[tuple[tuple[str, str], ...]] = (
+    ('reasonDescription', 'Reason'),
+    ('subReasonDescription', 'Sub-reason'),
+    ('failureCategory', 'Failure category'),
+    ('resultStatus', 'Result'),
+    ('lastApDisconnectReason', 'Last AP disconnect reason'),
+    ('details', 'Details'),
+)
+
+# Tags on the Datadog event. Wider than the metric breakdown because an event is not a time series,
+# so these do not multiply into new series -- but still bounded, and still excluding the per-client
+# identifiers (`clientMac`, `ipv4`, `username`), which belong in the body where they are searchable
+# without being indexed as dimensions.
+EVENT_TAG_FIELDS: Final[tuple[tuple[str, str], ...]] = (
+    ('severity', 'severity'),
+    ('deviceFamily', 'device_family'),
+    ('name', 'event_name'),
+    ('networkDeviceName', 'device_name'),
+    ('siteHierarchy', 'site'),
+    ('ssid', 'ssid'),
+)
+
+EVENT_SOURCE_TYPE: Final = 'cisco_catalyst_center'
+EVENT_TYPE: Final = 'cisco_catalyst_center_assurance'
+
+# Keys that make up an error object. Used to tell an error apart from a real record, since both
+# arrive in the `response` slot.
+ERROR_OBJECT_KEYS: Final = frozenset({'detail', 'errorCode', 'message'})

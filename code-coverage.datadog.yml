@@ -175,6 +175,9 @@ services:
 - id: cisco_aci
   paths:
   - cisco_aci/datadog_checks/cisco_aci/
+- id: cisco_catalyst_center
+  paths:
+  - cisco_catalyst_center/datadog_checks/cisco_catalyst_center/
 - id: citrix_hypervisor
   paths:
   - citrix_hypervisor/datadog_checks/citrix_hypervisor/
