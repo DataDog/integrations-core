@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.2.0 / 2026-08-27
+
+***Added***:
+
+* Implement the ``agent_version`` property on the ``DatabaseCheck`` base class. ([#24905](https://github.com/DataDog/integrations-core/pull/24905))
+
 ## 38.1.0 / 2026-08-20
 
 ***Added***:
