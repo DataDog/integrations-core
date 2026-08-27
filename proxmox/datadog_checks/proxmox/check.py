@@ -3,15 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
-from json import JSONDecodeError as StdJSONDecodeError
+
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientInvalidURLError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.proxmox.config_models import ConfigMixin
 
@@ -156,14 +151,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             hostname_response = self.http.get(url)
             hostname_json = hostname_response.json()
             hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
-        except (
-            StdJSONDecodeError,
-            AttributeError,
-            HTTPClientStatusError,
-            HTTPClientInvalidURLError,
-            HTTPClientConnectionError,
-            HTTPClientTimeoutError,
-        ) as e:
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, AttributeError) as e:
             self.log.info(
                 "Failed to get hostname for vm %s on node %s; endpoint: %s; %s",
                 vm_id,
@@ -403,13 +391,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.set_metadata('version', version)
             self.gauge("api.up", 1, tags=self.base_tags + ['proxmox_status:up'])
 
-        except (
-            StdJSONDecodeError,
-            HTTPClientStatusError,
-            HTTPClientInvalidURLError,
-            HTTPClientConnectionError,
-            HTTPClientTimeoutError,
-        ) as e:
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
             self.log.error(
                 "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
             )

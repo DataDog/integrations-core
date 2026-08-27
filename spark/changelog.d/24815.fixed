@@ -1,1 +1,0 @@
-Catch backend-agnostic HTTP errors instead of ``requests`` exceptions, preserving the existing suppression of body-phase read timeouts.

@@ -1,21 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from json import JSONDecodeError as StdJSONDecodeError
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientInvalidURLError,
-    HTTPClientReadTimeoutError,
-    HTTPClientRequestError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
 
 from .constants import (
     APPLICATION_STATES,
@@ -450,12 +442,12 @@ class SparkCheck(AgentCheck):
                 )
                 if response is None:
                     continue
-            except HTTPClientStatusError:
+            except HTTPError:
                 self.log.debug("Got an error collecting %s", property, exc_info=True)
                 continue
             try:
                 yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
-            except (JSONDecodeError, StdJSONDecodeError):
+            except JSONDecodeError:
                 self.log.debug(
                     'Skipping metrics for %s from app %s due to unparsable JSON payload.', property, app_name
                 )
@@ -591,7 +583,7 @@ class SparkCheck(AgentCheck):
                             )
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
-            except HTTPClientStatusError as e:
+            except HTTPError as e:
                 self.log.debug("No structured streaming metrics to collect from app %s. %s", app_name, e, exc_info=True)
                 pass
 
@@ -674,10 +666,7 @@ class SparkCheck(AgentCheck):
                 response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
                 response.raise_for_status()
 
-        except HTTPClientTimeoutError as e:
-            if isinstance(e, HTTPClientReadTimeoutError) and self._should_suppress_request_error(e, tags):
-                return None
-
+        except Timeout as e:
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
@@ -686,12 +675,8 @@ class SparkCheck(AgentCheck):
             )
             raise
 
-        except (
-            HTTPClientStatusError,
-            HTTPClientInvalidURLError,
-            HTTPClientConnectionError,
-        ) as e:
-            if isinstance(e, HTTPClientConnectionError) and self._should_suppress_request_error(e, tags):
+        except (HTTPError, InvalidURL, ConnectionError) as e:
+            if isinstance(e, ConnectionError) and self._should_suppress_connection_error(e, tags):
                 return None
 
             self.service_check(
@@ -702,7 +687,7 @@ class SparkCheck(AgentCheck):
             )
             raise
 
-        except (ValueError, HTTPClientRequestError) as e:
+        except ValueError as e:
             self.service_check(service_name, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
 
@@ -721,7 +706,7 @@ class SparkCheck(AgentCheck):
         try:
             response_json = response.json()
 
-        except (JSONDecodeError, StdJSONDecodeError) as e:
+        except JSONDecodeError as e:
             response_text = response.text.strip()
             if response_text and 'spark is starting up' in response_text.lower():
                 # Handle startup message based on retry configuration
@@ -755,8 +740,8 @@ class SparkCheck(AgentCheck):
         self._startup_retry_count = 0
         return response_json
 
-    def _should_suppress_request_error(self, exception, tags):
-        """Suppress terminal-pod errors and one transient startup connection failure."""
+    def _should_suppress_connection_error(self, exception, tags):
+        """Suppress kubernetes-only connection false positives during pod shutdown."""
         pod_phase = self._get_pod_phase(tags)
         if pod_phase is None:
             return False

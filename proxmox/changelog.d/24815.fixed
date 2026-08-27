@@ -1,1 +1,0 @@
-Catch backend-agnostic HTTP errors and the standard library ``JSONDecodeError`` instead of ``requests`` exceptions.
