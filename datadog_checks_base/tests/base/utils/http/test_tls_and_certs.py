@@ -7,13 +7,17 @@ import ssl
 
 import mock
 import pytest
+import requests
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
+from datadog_checks.base.utils import _http_utils
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
+from datadog_checks.base.utils.http_exceptions import HTTPClientSSLError
+from datadog_checks.base.utils.requests_adapter import apply_tls
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -126,6 +130,15 @@ class TestCert:
 
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
+
+    def test_missing_ca_cert_file_is_reported(self, tmp_path, caplog):
+        missing_ca_cert = str(tmp_path / 'unexisting.crt')
+        http = RequestsWrapper({'tls_ca_cert': missing_ca_cert}, {})
+
+        with mock.patch('requests.Session.get'), caplog.at_level(logging.WARNING):
+            http.get('https://example.com')
+
+        assert 'TLS CA certificate file not found: {}'.format(missing_ca_cert) in caplog.text
 
     @pytest.mark.skipif(ON_WINDOWS, reason="Windows uses the default store locations.")
     def test_bad_default_verify_paths_and_fallback_to_certifi(self, monkeypatch, caplog):
@@ -344,7 +357,7 @@ class TestAIAChasing:
 
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
             with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.handle_auth_token'):
-                with pytest.raises(SSLError):
+                with pytest.raises(HTTPClientSSLError):
                     with mock.patch('requests.Session.get', side_effect=SSLError):
                         http.get('https://localhost:{}'.format(port))
 
@@ -507,10 +520,10 @@ class TestSSLContext:
 
 class TestSSLContextAdapter:
     def test_adapter_caching(self):
-        """_SSLContextAdapter should be recovered from cache when possible."""
+        """SSLContextAdapter should be recovered from cache when possible."""
 
         with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            with mock.patch('datadog_checks.base.utils.requests_adapter.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached
                 default_config_key = TlsConfig(**http.tls_config)
@@ -526,10 +539,10 @@ class TestSSLContextAdapter:
                 mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
     def test_adapter_caching_new_adapter(self):
-        """A new _SSLContextAdapter should be created when a new TLS config is requested."""
+        """A new SSLContextAdapter should be created when a new TLS config is requested."""
 
         with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            with mock.patch('datadog_checks.base.utils.requests_adapter.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached for the default TLS config
                 default_config_key = TlsConfig(**http.tls_config)
@@ -552,3 +565,32 @@ class TestSSLContextAdapter:
                 http.get('https://example.com', verify=True)
 
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+
+    def test_foreign_session_does_not_share_this_client_adapter(self):
+        """Closing a foreign session must not close this client's adapter."""
+        http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
+        own_adapter = http.session.get_adapter('https://example.com')
+        foreign_session = requests.Session()
+
+        apply_tls(http, foreign_session)
+
+        foreign_adapter = foreign_session.get_adapter('https://example.com')
+        assert foreign_adapter.ssl_context.verify_mode == ssl.CERT_REQUIRED
+        assert foreign_adapter.ssl_context.check_hostname is True
+
+        own_adapter.poolmanager.connection_from_url('https://example.com')
+        foreign_session.close()
+
+        assert len(own_adapter.poolmanager.pools) == 1
+
+    def test_foreign_session_uses_host_header_tls(self):
+        http = RequestsWrapper(
+            {'headers': {'Host': 'example.com'}, 'tls_use_host_header': True},
+            {},
+        )
+        foreign_session = requests.Session()
+
+        apply_tls(http, foreign_session)
+
+        adapter = foreign_session.get_adapter('https://example.com')
+        assert isinstance(adapter, _http_utils.HostHeaderSSLAdapter)

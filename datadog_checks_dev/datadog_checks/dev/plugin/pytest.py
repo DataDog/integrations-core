@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
+import importlib
 import json
 import os
 import re
@@ -10,6 +11,7 @@ from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
+from unittest.mock import PropertyMock
 
 import pytest
 
@@ -34,6 +36,8 @@ from datadog_checks.dev._env import (
 __aggregator = None
 __datadog_agent = None
 MockResponse = None
+
+_DEFAULT_MOCK_METHOD = 'requests.Session.get'
 
 
 @pytest.fixture
@@ -369,10 +373,9 @@ def dd_default_hostname():
 
 @pytest.fixture
 def mock_response():
-    # Lazily import `requests` as it may be costly under certain conditions
     global MockResponse
     if MockResponse is None:
-        from datadog_checks.dev.http import MockResponse
+        MockResponse = importlib.import_module('datadog_checks.dev.http_legacy').MockResponse
 
     yield MockResponse
 
@@ -380,18 +383,50 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.Session.get'), return_value=mock_response(*args, **kwargs)
+        kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
     )
+
+
+@pytest.fixture
+def fake_http(mocker):
+    """Install a base-owned HTTP fake on checks created by the test."""
+    AgentCheck = importlib.import_module('datadog_checks.base.checks.base').AgentCheck
+    FakeHTTPClient = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPClient
+    client = FakeHTTPClient()
+
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
+    return client
+
+
+@pytest.fixture
+def fake_openmetrics_http(fake_http, mocker):
+    """Patch the OpenMetrics v1 handler to use the base-owned HTTP fake."""
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=fake_http,
+    )
+    return fake_http
+
+
+@pytest.fixture
+def fake_prometheus_http(fake_http, mocker):
+    """Patch the legacy Prometheus handler to use the base-owned HTTP fake."""
+    mocker.patch(
+        'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
+        return_value=fake_http,
+    )
+    return fake_http
 
 
 @pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         *,
         mode: Literal["default"],
-        default_response: MockResponse,
+        default_response: Any,
         method: str = ...,
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
@@ -399,7 +434,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
     ): ...
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         *,
         mode: Literal["cycle", "exhaust"],
         default_response: None = None,
@@ -409,10 +444,10 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         strict: bool = ...,
     ): ...
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
-        default_response: MockResponse | None = None,
-        method: str = 'requests.Session.get',
+        default_response: Any = None,
+        method: str = _DEFAULT_MOCK_METHOD,
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
@@ -447,7 +482,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
                 if strict:
                     raise ValueError(f"Endpoint {url} not found in mocked responses")
                 else:
-                    return MockResponse(status_code=404)
+                    return mock_response(status_code=404)
             else:
                 try:
                     return next(queues[url])

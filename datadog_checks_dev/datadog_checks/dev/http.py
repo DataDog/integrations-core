@@ -1,48 +1,41 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-from io import BytesIO
-from textwrap import dedent
+"""Compatibility re-exports for backend-neutral HTTP test fakes."""
 
-from requests import Response
+import importlib
+import warnings
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    # Runtime imports stay lazy so downstream suites can still use MockResponse with an older base release.
+    from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+
+    MockHTTPResponse = FakeHTTPResponse
+
+__all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'MockHTTPResponse', 'RecordedRequest']
+
+BASE_HTTP_REEXPORTS = {
+    'FakeHTTPClient': 'FakeHTTPClient',
+    'FakeHTTPResponse': 'FakeHTTPResponse',
+    'MockHTTPResponse': 'FakeHTTPResponse',
+    'RecordedRequest': 'RecordedRequest',
+}
 
 
-class MockResponse(Response):
-    def __init__(
-        self,
-        content='',
-        file_path=None,
-        json_data=None,
-        status_code=200,
-        headers=None,
-        cookies=None,
-        normalize_content=True,
-    ):
-        super(MockResponse, self).__init__()
+def __getattr__(name: str) -> Any:
+    if target := BASE_HTTP_REEXPORTS.get(name):
+        return getattr(importlib.import_module('datadog_checks.base.stubs.http'), target)
 
-        if file_path is not None:
-            with open(file_path, 'rb') as f:
-                self._content = f.read()
-                self.raw = BytesIO(self._content)
-        elif json_data is not None:
-            self._content = json.dumps(json_data).encode('utf-8')
-            self.raw = BytesIO(self._content)
-        else:
-            # For multi-line string literals
-            if normalize_content and content.startswith('\n'):
-                content = dedent(content[1:])
+    if name == 'MockResponse':
+        legacy = importlib.import_module('datadog_checks.dev.http_legacy').MockResponse
+        warnings.warn(
+            'datadog_checks.dev.http.MockResponse is deprecated and will be removed in a future release. '
+            'Use FakeHTTPResponse from datadog_checks.base.stubs.http once your integration runs against '
+            'a datadog-checks-base release that exposes it.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return legacy
 
-            self._content = content.encode('utf-8')
-            self.raw = BytesIO(self._content)
-
-        # Add new keyword arguments to set as needed
-        self.status_code = status_code
-
-        if headers is not None:
-            self.headers.clear()
-            self.headers.update(headers)
-
-        if cookies is not None:
-            self.cookies.clear()
-            self.cookies.update(cookies)
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
