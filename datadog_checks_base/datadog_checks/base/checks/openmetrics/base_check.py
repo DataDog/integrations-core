@@ -90,7 +90,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
-            metric_filter_config='metrics / ignore_metrics'
+            filter_option_text='metrics / ignore_metrics'
         )
         self.config_map = {}
         self._http_handlers = {}

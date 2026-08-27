@@ -65,7 +65,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
         self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
-            metric_filter_config='metrics / exclude_metrics'
+            filter_option_text='metrics / exclude_metrics'
         )
 
         # All desired scraper configurations, which subclasses can override as needed
