@@ -22,6 +22,7 @@ from datadog_checks.base.utils.http_exceptions import (
 )
 from datadog_checks.base.utils.requests_adapter import (
     _COMPAT_EXCEPTIONS,
+    RequestsResponseAdapter,
     _backend_compat_type,
     _translate_requests_exception,
 )
@@ -222,12 +223,17 @@ def test_a_non_requests_failure_reaches_the_caller_untranslated():
         http.get('http://example.test/')
 
 
-def test_translate_does_not_leak_raw_response():
-    err = requests.exceptions.HTTPError('500 Server Error')
-    err.response = object()
-    result = _translate_requests_exception(err)
-    assert isinstance(result, HTTPClientStatusError)
-    assert result.response is None
+def test_translate_adapts_attached_backend_response():
+    response = requests.Response()
+    response.status_code = 401
+    response._content = b'unauthorized'
+    error = requests.HTTPError('401 Client Error', response=response)
+
+    translated = _translate_requests_exception(error)
+
+    assert isinstance(translated.response, RequestsResponseAdapter)
+    assert translated.response.status_code == 401
+    assert translated.response.content == b'unauthorized'
 
 
 def test_translate_converts_raw_request_to_agnostic_snapshot():
