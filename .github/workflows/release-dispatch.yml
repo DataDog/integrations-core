@@ -155,13 +155,13 @@ jobs:
         id: octo-sts
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
-          scope: DataDog/agent-integration-wheels-release
+          scope: ddoghq/agent-integration-wheels-release
           policy: ${{ inputs.source-repo || 'integrations-core' }}.dispatch-wheel-builds
 
       - name: Dispatch release
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
           token: ${{ steps.octo-sts.outputs.token }}
-          repository: DataDog/agent-integration-wheels-release
+          repository: ddoghq/agent-integration-wheels-release
           event-type: build-wheels
           client-payload: ${{ toJson(matrix.payload) }}
