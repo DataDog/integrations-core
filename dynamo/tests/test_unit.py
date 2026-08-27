@@ -4,13 +4,18 @@
 from unittest import mock
 
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.dynamo import DynamoCheck
 
-from .common import FRONTEND_METRICS_MOCK, WORKER_METRICS_MOCK, get_fixture_path
+from .common import (
+    FRONTEND_HISTOGRAM_BUCKETS_MOCK,
+    FRONTEND_METRICS_MOCK,
+    WORKER_HISTOGRAM_BUCKETS_MOCK,
+    WORKER_METRICS_MOCK,
+    get_fixture_path,
+)
 
 
 def test_check_dynamo_frontend(dd_run_check, aggregator, frontend_instance):
@@ -25,6 +30,11 @@ def test_check_dynamo_frontend(dd_run_check, aggregator, frontend_instance):
     for metric in FRONTEND_METRICS_MOCK:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, "test:test")
+
+    for metric in FRONTEND_HISTOGRAM_BUCKETS_MOCK:
+        aggregator.assert_histogram_bucket(
+            metric, None, None, None, monotonic=True, hostname=None, tags=None, at_least=1
+        )
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -43,6 +53,11 @@ def test_check_dynamo_worker(dd_run_check, aggregator, worker_instance):
     for metric in WORKER_METRICS_MOCK:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, "test:test")
+
+    for metric in WORKER_HISTOGRAM_BUCKETS_MOCK:
+        aggregator.assert_histogram_bucket(
+            metric, None, None, None, monotonic=True, hostname=None, tags=None, at_least=1
+        )
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

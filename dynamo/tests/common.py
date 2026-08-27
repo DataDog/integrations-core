@@ -34,25 +34,20 @@ FRONTEND_METRICS_MOCK = [
     'frontend.inflight_requests',
     'frontend.active_requests',
     'frontend.disconnected_clients',
-    'frontend.request_duration.seconds.bucket',
     'frontend.request_duration.seconds.count',
     'frontend.request_duration.seconds.sum',
     'frontend.input_sequence_tokens',
     'frontend.output_sequence_tokens',
     'frontend.output_tokens.count',
-    'frontend.time_to_first_token.seconds.bucket',
     'frontend.time_to_first_token.seconds.count',
     'frontend.time_to_first_token.seconds.sum',
-    'frontend.inter_token_latency.seconds.bucket',
     'frontend.inter_token_latency.seconds.count',
     'frontend.inter_token_latency.seconds.sum',
-    'frontend.embedding_latency.seconds.bucket',
     'frontend.embedding_latency.seconds.count',
     'frontend.embedding_latency.seconds.sum',
     'frontend.tokenizer_latency_ms',
     'frontend.cached_tokens',
     'frontend.kv_hit_rate',
-    'frontend.kv_transfer_estimated_latency.seconds.bucket',
     'frontend.kv_transfer_estimated_latency.seconds.count',
     'frontend.kv_transfer_estimated_latency.seconds.sum',
     'frontend.shared_cache_hit_rate',
@@ -94,21 +89,17 @@ WORKER_METRICS_MOCK = [
     'component.request_bytes.count',
     'component.response_bytes.count',
     'component.inflight_requests',
-    'component.request_duration.seconds.bucket',
     'component.request_duration.seconds.count',
     'component.request_duration.seconds.sum',
     'component.errors.count',
     'component.cancellation.count',
-    'component.network_transit.seconds.bucket',
     'component.network_transit.seconds.count',
     'component.network_transit.seconds.sum',
-    'component.time_to_first_response.seconds.bucket',
     'component.time_to_first_response.seconds.count',
     'component.time_to_first_response.seconds.sum',
     'component.queue_depth',
     'component.queue_capacity',
     'component.enqueue_rejected.count',
-    'component.permit_wait.seconds.bucket',
     'component.permit_wait.seconds.count',
     'component.permit_wait.seconds.sum',
     'component.pool_active_tasks',
@@ -125,5 +116,25 @@ WORKER_METRICS_MOCK = [
     'component.kv_cache.hit_rate',
 ]
 
+
+# Histograms are submitted as distributions (histogram_buckets_as_distributions=True), so the Agent
+# records them as histogram buckets under the base metric name rather than as regular `.bucket` metrics.
+FRONTEND_HISTOGRAM_BUCKETS_MOCK = [
+    'frontend.request_duration.seconds',
+    'frontend.time_to_first_token.seconds',
+    'frontend.inter_token_latency.seconds',
+    'frontend.embedding_latency.seconds',
+    'frontend.kv_transfer_estimated_latency.seconds',
+]
+
+WORKER_HISTOGRAM_BUCKETS_MOCK = [
+    'component.request_duration.seconds',
+    'component.network_transit.seconds',
+    'component.time_to_first_response.seconds',
+    'component.permit_wait.seconds',
+]
+
 FRONTEND_METRICS_MOCK = [f'dynamo.{m}' for m in FRONTEND_METRICS_MOCK]
 WORKER_METRICS_MOCK = [f'dynamo.{m}' for m in WORKER_METRICS_MOCK]
+FRONTEND_HISTOGRAM_BUCKETS_MOCK = [f'dynamo.{m}' for m in FRONTEND_HISTOGRAM_BUCKETS_MOCK]
+WORKER_HISTOGRAM_BUCKETS_MOCK = [f'dynamo.{m}' for m in WORKER_HISTOGRAM_BUCKETS_MOCK]
