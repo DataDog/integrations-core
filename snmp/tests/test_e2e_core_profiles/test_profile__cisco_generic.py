@@ -11,6 +11,7 @@ from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
+    assert_extend_cisco_bgp4_peer3,
     assert_extend_cisco_cpu_memory,
     assert_extend_generic_bgp4,
     assert_extend_generic_if,
@@ -48,6 +49,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     assert_extend_generic_udp(aggregator, common_tags)
     assert_extend_generic_ospf(aggregator, common_tags)
     assert_extend_generic_bgp4(aggregator, common_tags)
+    assert_extend_cisco_bgp4_peer3(aggregator, common_tags)
     assert_extend_generic_ip(aggregator, common_tags)
     assert_extend_cisco_cpu_memory(aggregator, common_tags)
 
