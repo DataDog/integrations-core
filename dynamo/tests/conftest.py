@@ -26,6 +26,11 @@ def gpu_monitoring_enabled():
         yield
 
 
+E2E_METADATA = {
+    'env_vars': {'DD_GPU_ENABLED': 'true'},
+}
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = COMPOSE_FILE
@@ -35,9 +40,10 @@ def dd_environment():
         CheckEndpoints(MOCKED_WORKER_INSTANCE['openmetrics_endpoint']),
     ]
     with docker_run(compose_file, conditions=conditions):
-        yield {
-            'instances': [MOCKED_FRONTEND_INSTANCE, MOCKED_WORKER_INSTANCE],
-        }
+        yield (
+            {'instances': [MOCKED_FRONTEND_INSTANCE, MOCKED_WORKER_INSTANCE]},
+            E2E_METADATA,
+        )
 
 
 @pytest.fixture
