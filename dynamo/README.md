@@ -10,7 +10,7 @@ This check collects metrics from Dynamo's built-in Prometheus endpoints, giving 
 request throughput, latency (including time to first token and inter-token latency), queueing, KV
 cache hit rate, and worker/task health across your Dynamo deployment.
 
-**Minimum Agent version:** 7.56.0
+**Minimum Agent version:** 7.84.0
 
 ## Setup
 

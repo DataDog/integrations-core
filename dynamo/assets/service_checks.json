@@ -1,6 +1,6 @@
 [
     {
-        "agent_version": "7.56.0",
+        "agent_version": "7.84.0",
         "integration": "Dynamo",
         "check": "dynamo.openmetrics.health",
         "statuses": [
