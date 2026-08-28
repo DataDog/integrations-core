@@ -165,6 +165,13 @@ facets:
   - facetType: list
     groups:
       - CrowdStrike FDR
+    name: Platform
+    path: crowdstrike_fdr.platform
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - CrowdStrike FDR
     name: Query Status
     path: crowdstrike_fdr.query_status
     source: log
@@ -706,6 +713,16 @@ pipeline:
         - QueryStatus
       sourceType: attribute
       target: crowdstrike_fdr.query_status
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `event_platform_value` to `crowdstrike_fdr.platform`
+      enabled: true
+      sources:
+        - event_platform_value
+      sourceType: attribute
+      target: crowdstrike_fdr.platform
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false

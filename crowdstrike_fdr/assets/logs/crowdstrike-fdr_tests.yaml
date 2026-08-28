@@ -80,6 +80,7 @@ tests:
       crowdstrike_fdr:
         aid: "ffffffff3a5a424fa02450da53619745"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "583707537390"
           parent:
@@ -185,6 +186,7 @@ tests:
       crowdstrike_fdr:
         aid: "fffffffff000426eb99afaa2ccdcbc17"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "223442259384"
       event_platform: "Win"
@@ -282,6 +284,7 @@ tests:
       crowdstrike_fdr:
         aid: "31e92a267c044d57b1c1e14109079e89"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "683613242245"
         query_status: "9003"
@@ -390,6 +393,7 @@ tests:
       crowdstrike_fdr:
         aid: "ffffffff8d2e4b4f9b21b40633a8d579"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "816054990879"
       event_platform: "Win"
@@ -506,6 +510,7 @@ tests:
       crowdstrike_fdr:
         aid: "ffffffff73164cfa9656c4caff8a2a38"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "30254389526587"
       event_platform: "Win"
@@ -840,6 +845,7 @@ tests:
       crowdstrike_fdr:
         aid: "ffffffff6854438eb4181691ec47e43d"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "56042872298"
       event_platform: "Win"
@@ -935,6 +941,7 @@ tests:
       crowdstrike_fdr:
         aid: "fffffffff000426eb99afaa2ccdcbc17"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "223442259385"
       event_platform: "Win"
@@ -1030,6 +1037,7 @@ tests:
       crowdstrike_fdr:
         aid: "fffffffff000426eb99afaa2ccdcbc17"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "223442259386"
       event_platform: "Win"
@@ -1128,6 +1136,7 @@ tests:
       crowdstrike_fdr:
         aid: "31e92a267c044d57b1c1e14109079e89"
         cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
         process:
           id: "683613242246"
         query_status: "0"
@@ -1328,6 +1337,7 @@ tests:
         aid: "11111111111111111111111111111111"
         cid: "22222222222222222222222222222222"
         computer_name: "demo-mac-01"
+        platform: "Mac"
         process:
           id: "987654321012345678"
           parent:
@@ -1389,6 +1399,7 @@ tests:
       crowdstrike_fdr:
         aid: "11111111111111111111111111111111"
         cid: "22222222222222222222222222222222"
+        platform: "Mac"
         process:
           id: "987654321012345678"
       event_platform: "Mac"
@@ -1454,6 +1465,7 @@ tests:
       crowdstrike_fdr:
         aid: "11111111111111111111111111111111"
         cid: "22222222222222222222222222222222"
+        platform: "Mac"
         process:
           id: "987654321012345678"
         query_status: "0"
@@ -1588,6 +1600,7 @@ tests:
         aid: "11111111111111111111111111111111"
         cid: "22222222222222222222222222222222"
         computer_name: "demo-mac-01"
+        platform: "Mac"
         process:
           id: "987654321012345678"
       event_platform: "Mac"
