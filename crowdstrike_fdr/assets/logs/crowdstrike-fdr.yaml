@@ -134,6 +134,17 @@ pipeline:
   filter:
     query: source:crowdstrike-fdr
   processors:
+    - type: category-processor
+      name: Classify the CrowdStrike FDR dataset from the S3 object path
+      enabled: true
+      categories:
+        - filter:
+            query: "s3_key:*/data/*"
+          name: sensor
+        - filter:
+            query: "s3_key:*/fdrv2/userinfo/*"
+          name: userinfo
+      target: crowdstrike_fdr.dataset
     - type: arithmetic-processor
       name: Convert `ContextTimeStamp` epoch to milliseconds epoch
       enabled: true
@@ -143,9 +154,10 @@ pipeline:
     # `UTCTimestamp` is deliberately not scaled: on the detection feed it is
     # already an epoch in milliseconds, so multiplying it would push the log
     # thousands of years into the future.
-    # `timestamp` is the last resort: it is the sensor upload time rather than the
-    # time the activity occurred, and it is the only date field present on every
-    # FDR event shape.
+    # `timestamp` is the last resort for event shapes that carry it. User inventory
+    # may contain only older vendor timestamps such as `_time`; when no supported
+    # event timestamp exists, retain intake time so newly ingested inventory remains
+    # visible in recent searches.
     - type: date-remapper
       name: Define `ContextTimeStamp`, `UTCTimestamp`, `timestamp` as the official
         date of the log
@@ -197,6 +209,29 @@ pipeline:
           name: detection
       target: evt.category
     - type: attribute-remapper
+      name: Map `ContextProcessId`, `TargetProcessId` to `crowdstrike_fdr.process.id`
+      enabled: true
+      sources:
+        - ContextProcessId
+        - TargetProcessId
+      sourceType: attribute
+      target: crowdstrike_fdr.process.id
+      targetType: attribute
+      targetFormat: string
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `ParentProcessId` to `crowdstrike_fdr.process.parent.id`
+      enabled: true
+      sources:
+        - ParentProcessId
+      sourceType: attribute
+      target: crowdstrike_fdr.process.parent.id
+      targetType: attribute
+      targetFormat: string
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
       name: Map `UserSid`, `UID`, `UserRid`, `OriginalUserSid` to `usr.id`
       enabled: true
       sources:
@@ -224,6 +259,22 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: pipeline
+      name: User Inventory
+      enabled: true
+      filter:
+        query: "@crowdstrike_fdr.dataset:userinfo"
+      processors:
+        - type: attribute-remapper
+          name: Map `UserSid_readable` to `usr.id`
+          enabled: true
+          sources:
+            - UserSid_readable
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
     - type: attribute-remapper
       name: Map `LocalAddressIP4`, `LocalAddressIP6`, `SourceEndpointAddressIP4`,
         `SourceEndpointAddressIP6` to `network.client.ip`
@@ -366,6 +417,16 @@ pipeline:
             58,ICMPV6
             255,UNKNOWN
           type: lookup-processor
+        - type: attribute-remapper
+          name: Map `ProtocolValue` to `network.protocol`
+          enabled: true
+          sources:
+            - ProtocolValue
+          sourceType: attribute
+          target: network.protocol
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
         - name: Lookup on `ConnectionDirection` Field
           enabled: true
           source: ConnectionDirection
