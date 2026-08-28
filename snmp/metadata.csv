@@ -150,7 +150,7 @@ snmp.bfdSessPerfCtrlPktOut,count,,,,[Arista] [Cisco] [F5 BIG-IP] [Juniper] [NEC 
 snmp.bfdSessPerfSessUpCount,count,,,,[Arista] [Cisco] [F5 BIG-IP] [Juniper] [NEC Univerge] The number of times this BFD session has gone into the Up state since the system last rebooted.,0,snmp,,
 snmp.bfdSessReqMinRxInterval,gauge,,microsecond,,[Arista] [Cisco] [F5 BIG-IP] [Juniper] [NEC Univerge] The minimum interval in microseconds between received BFD Control packets that the local system is capable of supporting.,0,snmp,,
 snmp.bfdSessState,gauge,,,,[Arista] [Cisco] [F5 BIG-IP] [Juniper] [NEC Univerge] The configured state of the BFD session.,0,snmp,,
-snmp.bfdSessionByState,gauge,,,,[Arista] [Cisco] [F5 BIG-IP] [Juniper] [NEC Univerge] The number of BFD sessions, tagged by their current state.,0,snmp,,
+snmp.bfdSessionByState,gauge,,,,"[Arista] [Cisco] [F5 BIG-IP] [Juniper] [NEC Univerge] The number of BFD sessions, tagged by their current state.",0,snmp,,
 snmp.bgpPeerAdminStatus,gauge,,,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] [Juniper MX] [Juniper EX] [Juniper SRX] The desired state of the BGP connection.,0,snmp,,
 snmp.bgpPeerConnectRetryInterval,gauge,,second,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] [Juniper MX] [Juniper EX] [Juniper SRX] The time interval in seconds for the ConnectRetry timer.,0,snmp,,
 snmp.bgpPeerFsmEstablishedTime,gauge,,second,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] [Juniper MX] [Juniper EX] [Juniper SRX] This timer indicates how long (in seconds) this peer has been in the Established state or how long since this peer was last in the Established state.,0,snmp,,
