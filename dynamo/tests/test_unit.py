@@ -4,6 +4,7 @@
 from unittest import mock
 
 import pytest
+
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
