@@ -556,3 +556,77 @@ metrics:
           1: true
           2: false
 
+  # VRF-aware BGP peer table (supersedes cbgpPeerTable/cbgpPeer2Table)
+  - MIB: CISCO-BGP4-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.187.1.2.9
+      name: cbgpPeer3Table
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.6
+        name: cbgpPeer3AdminStatus
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.7
+        name: cbgpPeer3NegotiatedVersion
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.13
+        name: cbgpPeer3RemoteAs
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.10
+        name: cbgpPeer3LocalAs
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.5
+        name: cbgpPeer3State
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.15
+        name: cbgpPeer3InUpdates
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.16
+        name: cbgpPeer3OutUpdates
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.17
+        name: cbgpPeer3InTotalMessages
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.18
+        name: cbgpPeer3OutTotalMessages
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.20
+        name: cbgpPeer3FsmEstablishedTransitions
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.21
+        name: cbgpPeer3FsmEstablishedTime
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.22
+        name: cbgpPeer3ConnectRetryInterval
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.23
+        name: cbgpPeer3HoldTime
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.24
+        name: cbgpPeer3KeepAlive
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.25
+        name: cbgpPeer3HoldTimeConfigured
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.26
+        name: cbgpPeer3KeepAliveConfigured
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.27
+        name: cbgpPeer3MinASOriginationInterval
+      - OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.28
+        name: cbgpPeer3MinRouteAdvertisementInterval
+    metric_tags:
+      - tag: remote_as
+        symbol:
+          OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.13
+          name: cbgpPeer3RemoteAs
+      - tag: admin_status
+        symbol:
+          OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.6
+          name: cbgpPeer3AdminStatus
+        mapping:
+          1: stop
+          2: start
+      - tag: peer_state
+        symbol:
+          OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.5
+          name: cbgpPeer3State
+        mapping:
+          1: idle
+          2: connect
+          3: active
+          4: opensent
+          5: openconfirm
+          6: established
+      - tag: neighbor
+        symbol:
+          OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.3
+          name: cbgpPeer3RemoteAddr
+      - tag: vrf_name
+        symbol:
+          OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.4
+          name: cbgpPeer3VrfName
+
