@@ -4,8 +4,8 @@
 from unittest import mock
 
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.dynamo import DynamoCheck
@@ -78,3 +78,9 @@ def test_emits_critical_openmetrics_service_check_when_service_is_down(
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check("dynamo.openmetrics.health", ServiceCheck.CRITICAL)
+
+
+def test_check_skipped_when_gpu_monitoring_disabled(frontend_instance):
+    with mock.patch('datadog_checks.dynamo.check.datadog_agent.get_config', return_value='false'):
+        with pytest.raises(SkipInstanceError):
+            DynamoCheck("dynamo", {}, [frontend_instance])

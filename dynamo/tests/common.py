@@ -46,7 +46,8 @@ FRONTEND_METRICS_MOCK = [
     'frontend.embedding_latency.seconds.count',
     'frontend.embedding_latency.seconds.sum',
     'frontend.tokenizer_latency_ms',
-    'frontend.cached_tokens',
+    'frontend.cached_tokens.count',
+    'frontend.cached_tokens.sum',
     'frontend.kv_hit_rate',
     'frontend.kv_transfer_estimated_latency.seconds.count',
     'frontend.kv_transfer_estimated_latency.seconds.sum',
@@ -125,6 +126,7 @@ FRONTEND_HISTOGRAM_BUCKETS_MOCK = [
     'frontend.inter_token_latency.seconds',
     'frontend.embedding_latency.seconds',
     'frontend.kv_transfer_estimated_latency.seconds',
+    'frontend.cached_tokens',
 ]
 
 WORKER_HISTOGRAM_BUCKETS_MOCK = [
