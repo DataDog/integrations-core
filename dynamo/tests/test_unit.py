@@ -4,6 +4,7 @@
 from unittest import mock
 
 import pytest
+
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.dev.http import MockResponse

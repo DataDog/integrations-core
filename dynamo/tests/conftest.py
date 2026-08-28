@@ -5,6 +5,7 @@ import copy
 from unittest import mock
 
 import pytest
+
 from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
