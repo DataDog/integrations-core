@@ -154,9 +154,10 @@ pipeline:
     # `UTCTimestamp` is deliberately not scaled: on the detection feed it is
     # already an epoch in milliseconds, so multiplying it would push the log
     # thousands of years into the future.
-    # `timestamp` is the last resort: it is the sensor upload time rather than the
-    # time the activity occurred, and it is the only date field present on every
-    # FDR event shape.
+    # `timestamp` is the last resort for event shapes that carry it. User inventory
+    # may contain only older vendor timestamps such as `_time`; when no supported
+    # event timestamp exists, retain intake time so newly ingested inventory remains
+    # visible in recent searches.
     - type: date-remapper
       name: Define `ContextTimeStamp`, `UTCTimestamp`, `timestamp` as the official
         date of the log
