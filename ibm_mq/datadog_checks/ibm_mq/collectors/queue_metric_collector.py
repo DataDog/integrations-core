@@ -47,6 +47,28 @@ class QueueMetricCollector(object):
         queues = self.discover_queues(queue_manager)
         self.queue_manager_stats(queue_manager, self.config.tags)
 
+        # AGENT-16599: collect the per-queue PCF data in bulk. IBM PCF supports generic (wildcard)
+        # queue names on INQUIRE_Q, INQUIRE_Q_STATUS and RESET_Q_STATS, so one command per queue
+        # manager returns a row per queue instead of issuing 2-3 commands per queue. Each map is
+        # keyed by queue name; a queue absent from a map (or a bulk command that failed, which
+        # yields an empty map) makes the corresponding per-queue method fall back to its original
+        # single-queue PCF call, preserving behaviour and per-queue error isolation.
+        stats_by_queue = self._bulk_inquire_indexed(
+            queue_manager,
+            'MQCMD_INQUIRE_Q',
+            {pymqi.CMQC.MQCA_Q_NAME: b'*', pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL},
+        )
+        status_by_queue = self._bulk_inquire_indexed(
+            queue_manager,
+            'MQCMD_INQUIRE_Q_STATUS',
+            {pymqi.CMQC.MQCA_Q_NAME: b'*', pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL},
+        )
+        reset_by_queue = (
+            self._bulk_inquire_indexed(queue_manager, 'MQCMD_RESET_Q_STATS', {pymqi.CMQC.MQCA_Q_NAME: b'*'})
+            if self.config.collect_reset_queue_metrics
+            else {}
+        )
+
         for queue_name in queues:
             queue_tags = self.config.tags + ["queue:{}".format(queue_name)]
 
@@ -55,15 +77,21 @@ class QueueMetricCollector(object):
                     queue_tags.extend(q_tags)
 
             try:
-                enriched_tags = self.queue_stats(queue_manager, queue_name, queue_tags)
+                enriched_tags = self.queue_stats(
+                    queue_manager, queue_name, queue_tags, queue_info=stats_by_queue.get(queue_name)
+                )
                 # some system queues don't have PCF metrics
                 # so we don't collect those metrics from those queues
                 if queue_name not in self.config.DISALLOWED_QUEUES:
-                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, enriched_tags)
+                    self.get_pcf_queue_status_metrics(
+                        queue_manager, queue_name, enriched_tags, queue_info=status_by_queue.get(queue_name)
+                    )
 
                     # if collect queue reset metrics is disabled, skip this
                     if self.config.collect_reset_queue_metrics:
-                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, enriched_tags)
+                        self.get_pcf_queue_reset_metrics(
+                            queue_manager, queue_name, enriched_tags, queue_info=reset_by_queue.get(queue_name)
+                        )
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
@@ -74,6 +102,34 @@ class QueueMetricCollector(object):
                     message=str(e),
                     hostname=self.config.hostname,
                 )
+
+    def _bulk_inquire_indexed(self, queue_manager, command, args):
+        # type: (pymqi.QueueManager, str, Dict) -> Dict[str, Dict]
+        """Issue a single wildcard PCF command and index the response rows by queue name.
+
+        Returns a ``{queue_name: row}`` map. Returns an empty map when the queue manager reports no
+        matching objects or the command fails, which makes each per-queue collection method fall
+        back to its original single-queue PCF call (AGENT-16599).
+        """
+        pcf = None
+        try:
+            pcf = pymqi.PCFExecute(
+                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+            )
+            response = getattr(pcf, command)(args)
+        except pymqi.MQMIError as e:
+            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+                self.log.debug("Bulk %s failed (%s); falling back to per-queue collection", command, e)
+            return {}
+        finally:
+            if pcf is not None:
+                pcf.disconnect()
+
+        indexed = {}
+        for row in response:
+            if pymqi.CMQC.MQCA_Q_NAME in row:
+                indexed[to_string(row[pymqi.CMQC.MQCA_Q_NAME]).strip()] = row
+        return indexed
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
@@ -247,26 +303,41 @@ class QueueMetricCollector(object):
                     hostname=self.config.hostname,
                 )
 
-    def queue_stats(self, queue_manager, queue_name, tags):
+    def queue_stats(self, queue_manager, queue_name, tags, queue_info=None):
         """
-        Grab stats from queues
+        Grab stats from queues.
+
+        When ``queue_info`` is provided (a row from the bulk wildcard INQUIRE_Q in
+        ``collect_queue_metrics``) it is used directly; otherwise a per-queue INQUIRE_Q is issued as
+        a fallback (AGENT-16599).
         """
         enriched_tags = list(tags)
+        response = None
         pcf = None
-        try:
-            args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
-            pcf = pymqi.PCFExecute(
-                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
-            )
-            response = pcf.MQCMD_INQUIRE_Q(args)
-        except pymqi.MQMIError as e:
-            # Don't warn if no messages, see:
-            # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
-                self.log.debug("No stat messages available for queue %s", queue_name)
-            else:
-                self.warning("Error getting queue stats for %s: %s", queue_name, e)
+        if queue_info is not None:
+            response = [queue_info]
         else:
+            try:
+                args = {
+                    pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
+                    pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
+                }
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
+                response = pcf.MQCMD_INQUIRE_Q(args)
+            except pymqi.MQMIError as e:
+                # Don't warn if no messages, see:
+                # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                    self.log.debug("No stat messages available for queue %s", queue_name)
+                else:
+                    self.warning("Error getting queue stats for %s: %s", queue_name, e)
+            finally:
+                if pcf is not None:
+                    pcf.disconnect()
+
+        if response is not None:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
                 usage = KNOWN_USAGES.get(queue_info.get(pymqi.CMQC.MQIA_USAGE), 'unknown')
@@ -282,9 +353,6 @@ class QueueMetricCollector(object):
                             enriched_tags.append('queue_desc:{}'.format(queue_desc))
 
                 self._submit_queue_stats(queue_info, queue_name, enriched_tags)
-        finally:
-            if pcf is not None:
-                pcf.disconnect()
 
         return enriched_tags
 
@@ -304,26 +372,37 @@ class QueueMetricCollector(object):
                 else:
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
-    def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
+    def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags, queue_info=None):
+        # When queue_info is provided (a row from the bulk wildcard INQUIRE_Q_STATUS in
+        # collect_queue_metrics) it is used directly; otherwise a per-queue INQUIRE_Q_STATUS is
+        # issued as a fallback (AGENT-16599).
+        response = None
         pcf = None
-        try:
-            args = {
-                pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
-                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
-                pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
-            }
-            pcf = pymqi.PCFExecute(
-                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
-            )
-            response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
-        except pymqi.MQMIError as e:
-            # Don't warn if no messages, see:
-            # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
-                self.log.debug("No PCF queue status messages available for queue %s", queue_name)
-            else:
-                self.warning("Error getting pcf queue status for %s: %s", queue_name, e)
+        if queue_info is not None:
+            response = [queue_info]
         else:
+            try:
+                args = {
+                    pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
+                    pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
+                    pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
+                }
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
+                response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
+            except pymqi.MQMIError as e:
+                # Don't warn if no messages, see:
+                # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                    self.log.debug("No PCF queue status messages available for queue %s", queue_name)
+                else:
+                    self.warning("Error getting pcf queue status for %s: %s", queue_name, e)
+            finally:
+                if pcf is not None:
+                    pcf.disconnect()
+
+        if response is not None:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
                 for mname, values in metrics.pcf_metrics().items():
@@ -353,31 +432,36 @@ class QueueMetricCollector(object):
                     except Exception as e:
                         msg = "Unable to get metric {} from queue {}. Error is {}.".format(metric_name, queue_name, e)
                         self.log.warning(msg)
-        finally:
-            if pcf is not None:
-                pcf.disconnect()
 
-    def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
+    def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags, queue_info=None):
+        # When queue_info is provided (a row from the bulk wildcard RESET_Q_STATS in
+        # collect_queue_metrics) it is used directly; otherwise a per-queue RESET_Q_STATS is issued
+        # as a fallback (AGENT-16599).
+        response = None
         pcf = None
-        try:
-            args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
-            pcf = pymqi.PCFExecute(
-                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
-            )
-            response = pcf.MQCMD_RESET_Q_STATS(args)
-        except pymqi.MQMIError as e:
-            # Don't warn if no messages, see:
-            # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
-                self.log.debug("No PCF queue reset metrics messages available for queue %s", queue_name)
-            else:
-                self.warning("Error getting pcf queue reset metrics for %s: %s", queue_name, e)
+        if queue_info is not None:
+            response = [queue_info]
         else:
+            try:
+                args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
+                response = pcf.MQCMD_RESET_Q_STATS(args)
+            except pymqi.MQMIError as e:
+                # Don't warn if no messages, see:
+                # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                    self.log.debug("No PCF queue reset metrics messages available for queue %s", queue_name)
+                else:
+                    self.warning("Error getting pcf queue reset metrics for %s: %s", queue_name, e)
+            finally:
+                if pcf is not None:
+                    pcf.disconnect()
+
+        if response is not None:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
                 metrics_map = metrics.pcf_status_reset_metrics()
                 prefix = "{}.queue".format(metrics.METRIC_PREFIX)
                 self.send_metrics_from_properties(queue_info, metrics_map, prefix, tags)
-        finally:
-            if pcf is not None:
-                pcf.disconnect()
