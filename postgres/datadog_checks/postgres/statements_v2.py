@@ -38,12 +38,6 @@ from .util import (
 )
 from .version_utils import V9_4, V14
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-
 LIGHTWEIGHT_SNAPSHOT_QUERY = """
 SELECT {cols}
   FROM pg_stat_statements(false) AS pg_stat_statements
@@ -437,7 +431,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
-                'ddagentversion': datadog_agent.get_version(),
+                'ddagentversion': self._check.agent_version,
                 'service': self._config.service,
             }
 
@@ -542,7 +536,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
