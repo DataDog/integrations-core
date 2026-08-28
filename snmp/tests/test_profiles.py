@@ -2257,6 +2257,9 @@ def test_checkpoint(aggregator):
     for metric in fw_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
+    aggregator.assert_metric('snmp.haStatCode', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.GAUGE, tags=common_tags)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -2332,6 +2335,9 @@ def test_checkpoint_firewall(aggregator):
     fw_gauge_metrics = ['fwNumConn', 'fwPeakNumConn']
     for metric in fw_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+
+    aggregator.assert_metric('snmp.haStatCode', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
