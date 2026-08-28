@@ -39,6 +39,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
         'device_vendor:checkpoint',
+        'ha_state:active',
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -61,6 +62,8 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     aggregator.assert_metric('snmp.fwNumConn', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.fwPeakNumConn', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.fwRejected', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.haStatCode', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memActiveReal64', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memActiveVirtual64', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memFreeReal64', metric_type=aggregator.GAUGE, tags=common_tags)
