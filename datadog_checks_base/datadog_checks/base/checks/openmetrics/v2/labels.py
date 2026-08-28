@@ -21,7 +21,7 @@ class LabelAggregator:
 
         self.cache_shared_labels = config.get('cache_shared_labels', True)
         self.shared_labels_cached = False
-        self.info_metric = {'target_info': {}}
+        self.info_metric = {'target_info': {}} if self.target_info else {}
         self.metric_config = {}
         for metric, config in share_labels.items():
             data = self.metric_config[metric] = {}
@@ -88,38 +88,35 @@ class LabelAggregator:
             if self.shared_labels_cached:
                 yield from metrics
             else:
-                metric_config, target_info_metric = self.copy_configs()
-                cached_metrics = []
-
-                # Buffer only until every configured source has been found, so tagging doesn't depend on
-                # where it appears relative to the metrics it tags, without buffering the whole payload.
-                for metric in metrics:
-                    self.process_metric(metric, metric_config, target_info_metric)
-                    cached_metrics.append(metric)
-
-                    if not (metric_config or target_info_metric):
-                        break
-
+                cached_metrics = self.collect_until_configs_found(metrics)
                 self.shared_labels_cached = True
                 yield from cached_metrics
                 yield from metrics
         else:
             try:
-                metric_config, target_info_metric = self.copy_configs()
-                cached_metrics = []
-
-                for metric in metrics:
-                    self.process_metric(metric, metric_config, target_info_metric)
-                    cached_metrics.append(metric)
-
-                    if not (metric_config or target_info_metric):
-                        break
-
+                cached_metrics = self.collect_until_configs_found(metrics)
                 yield from cached_metrics
                 yield from metrics
             finally:
                 self.label_sets.clear()
                 self.unconditional_labels.clear()
+
+    def collect_until_configs_found(self, metrics):
+        """
+        Buffer metrics only until every configured share_labels/target_info source has been found,
+        so tagging doesn't depend on where a source appears relative to the metrics it tags.
+        """
+        metric_config, target_info_metric = self.copy_configs()
+        cached_metrics = []
+
+        for metric in metrics:
+            self.process_metric(metric, metric_config, target_info_metric)
+            cached_metrics.append(metric)
+
+            if not (metric_config or target_info_metric):
+                break
+
+        return cached_metrics
 
     def copy_configs(self):
         return self.metric_config.copy(), self.info_metric.copy()
