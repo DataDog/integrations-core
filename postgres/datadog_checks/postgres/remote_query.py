@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
@@ -639,6 +640,14 @@ REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT = (
     REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS,
 )
 
+# A valid aggregate SHA-256 hex digest is exactly 64 lowercase hexadecimal characters, matching
+# the its-agent contract and the lowercase digest intake emits. The intake finalize response
+# only carries it when full-object readback is enabled (debug-only/default-off); when absent or
+# empty the field is omitted from the emitted receipt, and when present it is validated strictly
+# (lowercase 64-hex) so a malformed digest -- including uppercase hex -- fails closed rather than
+# forwarding garbage.
+_AGGREGATE_SHA256_PATTERN = re.compile(r'\A[0-9a-f]{64}\Z')
+
 
 @dataclass(frozen=True)
 class _UploadCredentials:
@@ -786,7 +795,7 @@ def _multipart_part_count(total_bytes: int, part_bytes: int) -> int:
 
 
 def _intake_receipt_to_camel(resp: Mapping[str, Any]) -> dict[str, Any]:
-    return {
+    receipt: dict[str, Any] = {
         'mode': resp.get('mode', 'POC_PUBLIC_MULTIPART_UPLOAD'),
         'uploadId': resp.get('upload_id', ''),
         'bucketName': resp.get('bucket_name', ''),
@@ -794,8 +803,25 @@ def _intake_receipt_to_camel(resp: Mapping[str, Any]) -> dict[str, Any]:
         'totalBytes': resp.get('total_bytes', 0),
         'totalRows': resp.get('total_rows', 0),
         'partCount': resp.get('part_count', 0),
-        'sha256': resp.get('sha256', ''),
     }
+    # Full-object readback is debug-only/default-off, so the intake finalize response may omit
+    # the aggregate sha256 or return it empty. Omit the field from the receipt when absent/empty;
+    # when present, validate it strictly so a malformed digest fails closed.
+    aggregate_sha256 = _parse_aggregate_sha256(resp.get('sha256'))
+    if aggregate_sha256 is not None:
+        receipt['sha256'] = aggregate_sha256
+    return receipt
+
+
+def _parse_aggregate_sha256(value: Any) -> str | None:
+    # Treat a missing or empty aggregate sha256 as absent (readback off) and omit it; any other
+    # present value must be a valid lowercase 64-char hex digest, otherwise the receipt is
+    # untrustworthy.
+    if value is None or value == '':
+        return None
+    if not isinstance(value, str) or _AGGREGATE_SHA256_PATTERN.match(value) is None:
+        raise _CopyStreamFailure('invalid_receipt', 'intake finalize response carried a malformed aggregate sha256')
+    return value
 
 
 def _safe_abort(client: _UploadClient, creds: _UploadCredentials) -> None:

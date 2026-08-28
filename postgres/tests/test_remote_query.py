@@ -166,7 +166,6 @@ class FakeUploadClient:
             'total_bytes': 0,
             'total_rows': 0,
             'part_count': 0,
-            'sha256': 'aggregate',
             'format': 'csv',
             'compression': 'none',
             'completed_at': '2026-08-20T00:00:00Z',
@@ -991,6 +990,9 @@ def test_copy_stream_upload_mode_accepts_baseurl_and_token():
 def test_agent_rpc_stream_copy_upload_mode_uploads_parts_directly(monkeypatch):
     patch_upload_credentials(monkeypatch)
     pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    # The intake computes the aggregate sha256 over the finalized object (the concatenated part
+    # bodies); in debug/readback-on mode it returns a valid 64-char hex digest that is forwarded.
+    aggregate_sha256 = hashlib.sha256(b'abcdefghijklmnopqr').hexdigest()
     fake = FakeUploadClient(
         finalize_resp={
             'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
@@ -1000,7 +1002,7 @@ def test_agent_rpc_stream_copy_upload_mode_uploads_parts_directly(monkeypatch):
             'total_bytes': 18,
             'total_rows': 0,
             'part_count': 3,
-            'sha256': 'aggregate-sha',
+            'sha256': aggregate_sha256,
             'format': 'csv',
             'compression': 'none',
             'completed_at': '2026-08-20T00:00:00Z',
@@ -1039,7 +1041,7 @@ def test_agent_rpc_stream_copy_upload_mode_uploads_parts_directly(monkeypatch):
         'totalBytes': 18,
         'totalRows': 0,
         'partCount': 3,
-        'sha256': 'aggregate-sha',
+        'sha256': aggregate_sha256,
     }
 
 
@@ -1788,7 +1790,7 @@ def test_copy_stream_upload_mode_aggregates_many_copy_reads_into_64_mib_parts(mo
                 'total_bytes': 18,
                 'total_rows': 3,
                 'part_count': 1,
-                'sha256': 'aggregate-sha',
+                'sha256': hashlib.sha256(b'').hexdigest(),
             },
             'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
         ),
@@ -1814,6 +1816,148 @@ def test_intake_receipt_to_camel_does_not_preserve_obsolete_object_key():
         'total_bytes': 18,
         'total_rows': 3,
         'part_count': 1,
-        'sha256': 'aggregate-sha',
+        'sha256': hashlib.sha256(b'').hexdigest(),
     }
     assert _intake_receipt_to_camel(resp)['objectPath'] == ''
+
+
+# ---------------------------------------------------------------------------
+# Optional aggregate SHA-256 in the intake finalize receipt
+#
+# Full-object readback is debug-only/default-off, so the intake finalize response may omit
+# the aggregate sha256 or return it empty. These tests pin the parsing and emission behavior:
+# the field is omitted from the receipt when absent/empty, forwarded when valid, and rejected
+# (fail closed) when malformed. Per-part X-DD-Part-SHA256 behavior is unchanged either way.
+# ---------------------------------------------------------------------------
+
+
+def test_intake_receipt_to_camel_omits_aggregate_sha256_when_absent():
+    resp = {
+        'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
+        'upload_id': 'upload-01k',
+        'bucket_name': 'rq-bucket',
+        'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+        'total_bytes': 18,
+        'total_rows': 0,
+        'part_count': 1,
+    }
+    receipt = _intake_receipt_to_camel(resp)
+    assert 'sha256' not in receipt
+
+
+def test_intake_receipt_to_camel_omits_aggregate_sha256_when_empty():
+    resp = {
+        'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+        'sha256': '',
+    }
+    assert 'sha256' not in _intake_receipt_to_camel(resp)
+
+
+def test_intake_receipt_to_camel_forwards_valid_aggregate_sha256():
+    digest = hashlib.sha256(b'abcdefghijklmnopqr').hexdigest()
+    resp = {
+        'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+        'sha256': digest,
+    }
+    assert _intake_receipt_to_camel(resp)['sha256'] == digest
+
+
+@pytest.mark.parametrize(
+    'bad_value',
+    [
+        'aggregate-sha',  # non-hex, wrong length
+        'a' * 63,  # too short
+        'a' * 65,  # too long
+        'g' * 64,  # 64 chars but non-hex
+        'A' * 64,  # 64 uppercase hex chars: valid hex but not the lowercase its-agent/intake contract
+        'a' * 63 + ' ',  # 64 chars with trailing whitespace (not stripped)
+        12345,  # non-string
+        ['not-a-string'],  # non-string (list)
+    ],
+)
+def test_intake_receipt_to_camel_fails_on_malformed_aggregate_sha256(bad_value):
+    resp = {
+        'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+        'sha256': bad_value,
+    }
+    with pytest.raises(remote_query._CopyStreamFailure) as excinfo:
+        _intake_receipt_to_camel(resp)
+    assert excinfo.value.code == 'invalid_receipt'
+
+
+def test_copy_stream_upload_mode_omits_aggregate_sha256_when_intake_omits_it(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    # The intake omits the aggregate sha256 (default-off readback); the emitted receipt omits
+    # the field entirely rather than carrying an empty placeholder.
+    fake = FakeUploadClient(
+        finalize_resp={
+            'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
+            'upload_id': 'upload-01k',
+            'bucket_name': 'rq-bucket',
+            'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'total_bytes': 18,
+            'total_rows': 0,
+            'part_count': 3,
+            'format': 'csv',
+            'compression': 'none',
+            'completed_at': '2026-08-20T00:00:00Z',
+        }
+    )
+    events = []
+
+    _execute_upload_stream(
+        valid_upload_copy_request(), make_check(pool=pool), lambda *event: events.append(event), http_client=fake
+    )
+
+    # The final receipt omits sha256; the rest of the Agent-shaped receipt is unchanged.
+    receipt = json.loads(events[-1][1])['upload_receipt']
+    assert 'sha256' not in receipt
+    assert receipt['partCount'] == 3
+    assert receipt['totalBytes'] == 18
+    assert receipt['uploadId'] == 'upload-01k'
+
+    # Per-part checksums are unchanged: each part still carries the SHA-256 of its own body,
+    # independent of whether the intake supplied an aggregate digest.
+    assert len(fake.put_calls) == 3
+    for _part_number, payload, sha256_hex, _rows in fake.put_calls:
+        assert sha256_hex == hashlib.sha256(payload).hexdigest()
+    assert fake.finalize_calls == 1
+    assert fake.abort_calls == 0
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_upload_mode_fails_on_malformed_aggregate_sha256(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop', b'qr'])
+    fake = FakeUploadClient(
+        finalize_resp={
+            'mode': 'POC_PUBLIC_MULTIPART_UPLOAD',
+            'upload_id': 'upload-01k',
+            'bucket_name': 'rq-bucket',
+            'object_path': 'its-agent-intake/poc/org-1/task-t/run-r/upload-upload-01k/result.csv',
+            'total_bytes': 18,
+            'total_rows': 0,
+            'part_count': 3,
+            'sha256': 'aggregate-sha',
+            'format': 'csv',
+            'compression': 'none',
+            'completed_at': '2026-08-20T00:00:00Z',
+        }
+    )
+    events = []
+
+    _execute_upload_stream(
+        valid_upload_copy_request(), make_check(pool=pool), lambda *event: events.append(event), http_client=fake
+    )
+
+    # All parts upload and finalize is called, but the malformed aggregate sha256 fails closed:
+    # the session is aborted and an error event (not a final receipt) is emitted.
+    assert len(fake.put_calls) == 3
+    assert fake.finalize_calls == 1
+    assert fake.abort_calls == 1
+    assert events[-1][0] == 'error'
+    final_metadata = json.loads(events[-1][1])
+    assert final_metadata['error']['code'] == 'invalid_receipt'
+    assert 'upload_receipt' not in final_metadata
+    assert pool.closed_copies == 1
