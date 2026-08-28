@@ -85,8 +85,19 @@ dynamo_frontend_embedding_latency_seconds_sum{model="meta-llama/Llama-3-8B-Instr
 # TYPE dynamo_frontend_tokenizer_latency_ms gauge
 dynamo_frontend_tokenizer_latency_ms{model="meta-llama/Llama-3-8B-Instruct"} 3.14
 # HELP dynamo_frontend_cached_tokens frontend.cached_tokens
-# TYPE dynamo_frontend_cached_tokens gauge
-dynamo_frontend_cached_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# TYPE dynamo_frontend_cached_tokens histogram
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.05"} 6
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.1"} 9
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.25"} 12
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.5"} 15
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1.0"} 18
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2.5"} 21
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5.0"} 24
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10.0"} 27
+dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
+dynamo_frontend_cached_tokens_count{model="meta-llama/Llama-3-8B-Instruct"} 30
+dynamo_frontend_cached_tokens_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
 # HELP dynamo_frontend_kv_hit_rate frontend.kv_hit_rate
 # TYPE dynamo_frontend_kv_hit_rate gauge
 dynamo_frontend_kv_hit_rate{model="meta-llama/Llama-3-8B-Instruct"} 3.14
