@@ -14,6 +14,12 @@ ISSUE_ID = 'openmetrics-dropped-config:5505571e531f7cf6'
 
 
 class GenericLimitedCheck(AgentCheck):
+    """A non-OpenMetrics check that exceeds its metric limit.
+
+    This verifies that AgentCheck does not report an Agent Health issue by
+    default; only OpenMetrics checks do so by overriding _on_metric_limit_state.
+    """
+
     def check(self, _: Any) -> None:
         for value in range(12):
             self.gauge('generic.metric', value)
