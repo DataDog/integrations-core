@@ -8,7 +8,7 @@ from psycopg import ClientCursor
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
-from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2, pgss_key
 from datadog_checks.postgres.util import DDIGNORE_COMMENT
 
 from .common import (
@@ -724,25 +724,50 @@ def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, d
     with mock.patch.object(job, '_load_lightweight_snapshot', side_effect=_capture):
         _run_cycle(check, conn)
 
-    conn.close()
-
+    # The reported row carries the statement's queryid, and the snapshot row it came from completes
+    # the pgss key, so the key under test is derived from what the collector emitted.
     query_signature = compute_sql_signature(TEST_QUERY_NORMALIZED)
-    key_map = job._obfuscation_lookup._key_to_sig
-    cached_key = next((key for key, sig in key_map.items() if sig == query_signature), None)
-    assert cached_key is not None, "the test query should be cached after a cycle that reported it"
-    warm_size = job._obfuscation_lookup.key_map_size
+    reported = [
+        row
+        for event in aggregator.get_event_platform_events("dbm-metrics")
+        for row in event['postgres_rows']
+        if row['query_signature'] == query_signature
+    ]
+    assert reported, "the test query should be reported before it is removed from the snapshot"
+    departed = [row for row in captured_snapshot if row['queryid'] == reported[0]['queryid']]
+    assert len(departed) == 1, f"expected one snapshot row for the reported statement, got {departed}"
+    departed_key = pgss_key(departed[0])
 
     # Replaying the same snapshot leaves every counter unchanged, so the cycle produces no
     # derivative rows; dropping one row makes that key absent from the table while the rest of the
     # snapshot stays live.
-    quiet_snapshot = [row for row in captured_snapshot if (row['queryid'], row['dbid'], row['userid']) != cached_key]
-    assert len(quiet_snapshot) == len(captured_snapshot) - 1, "exactly one row should have been dropped"
+    quiet_snapshot = [row for row in captured_snapshot if pgss_key(row) != departed_key]
 
+    aggregator.reset()
     with mock.patch.object(job, '_load_lightweight_snapshot', return_value=quiet_snapshot):
         run_one_check(check, cancel=False)
 
-    assert cached_key not in job._obfuscation_lookup._key_to_sig, (
-        "a key absent from pg_stat_statements must be dropped from the cache even on a cycle that "
-        "produced no derivative rows"
+    assert _emitted_calls(aggregator, query_signature) == [], "the replayed snapshot should report nothing"
+    dropped = [m.value for m in aggregator.metrics("dd.postgres.statement_metrics.lookup.dropped")]
+    assert sum(dropped) >= 1, f"retention did not run on a cycle that produced no derivative rows: {dropped}"
+
+    # The statement is back in the table. One cycle re-establishes its counter baseline and the next
+    # sees it advance, at which point its text has to be read from Postgres again -- which only
+    # happens if retention discarded the cached result rather than merely counting it.
+    fetched_keys: set = set()
+    original_fetch = job._fetch_query_texts
+
+    def _fetch_spy(keys):
+        fetched_keys.update(keys)
+        return original_fetch(keys)
+
+    with mock.patch.object(job, '_fetch_query_texts', side_effect=_fetch_spy):
+        _run_cycle(check, conn)
+        _run_cycle(check, conn)
+
+    conn.close()
+
+    assert departed_key in fetched_keys, (
+        "a key dropped by retention must be re-fetched once its statement returns, but its text was "
+        "served from the cache"
     )
-    assert job._obfuscation_lookup.key_map_size < warm_size
