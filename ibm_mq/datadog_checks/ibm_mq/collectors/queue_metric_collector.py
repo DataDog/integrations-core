@@ -85,7 +85,12 @@ class QueueMetricCollector(object):
         )
 
         discovered_queues = set()
-        if self.config.auto_discover_queues and not self.config.queue_patterns or self.config.queue_regex:
+        # Run the full '*' sweep only when we are not narrowing discovery with queue_patterns.
+        # queue_regex is a Python-side post-filter (applied below), so it still needs the sweep as
+        # its input, but queue_patterns discovers via MQ-side generic names and must suppress the
+        # sweep. The previous expression parsed as `(auto_discover and not patterns) or regex`, so
+        # setting queue_regex forced a full sweep even alongside queue_patterns (AGENT-16599, issue 3).
+        if (self.config.auto_discover_queues or self.config.queue_regex) and not self.config.queue_patterns:
             discovered_queues.update(_discover(queue_manager, '*'))
 
         if self.config.queue_patterns:
