@@ -10,6 +10,7 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.http_check import HTTPCheck, http_check
 
 
@@ -106,6 +107,30 @@ def _make_check(**extra):
     instance = {'name': 'http_outcome_tag', 'url': URL, 'timeout': 1}
     instance.update(extra)
     return HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance]), instance
+
+
+def test_missing_response_cert_does_not_open_second_connection(aggregator, caplog):
+    instance = {
+        'name': 'missing_response_cert',
+        'url': 'https://example.com',
+        'timeout': 1,
+        'use_cert_from_response': True,
+    }
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+    message = 'Unable to retrieve the peer certificate from the HTTP response.'
+    caplog.set_level('DEBUG')
+
+    with (
+        mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', return_value=FakeHTTPResponse()),
+        mock.patch.object(
+            check, '_fetch_cert', side_effect=AssertionError('opened a second TLS connection')
+        ) as fetch_cert,
+    ):
+        check.check(instance)
+
+    fetch_cert.assert_not_called()
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=AgentCheck.UNKNOWN, message=message, count=1)
+    assert message in caplog.text
 
 
 def test_http_outcome_tag_absent_by_default(aggregator):
