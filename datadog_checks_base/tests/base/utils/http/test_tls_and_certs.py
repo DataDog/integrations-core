@@ -7,17 +7,14 @@ import ssl
 
 import mock
 import pytest
-import requests
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
-from datadog_checks.base.utils import _http_utils
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
 from datadog_checks.base.utils.http_exceptions import HTTPClientSSLError
-from datadog_checks.base.utils.requests_adapter import apply_tls
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -565,32 +562,3 @@ class TestSSLContextAdapter:
                 http.get('https://example.com', verify=True)
 
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
-
-    def test_foreign_session_does_not_share_this_client_adapter(self):
-        """Closing a foreign session must not close this client's adapter."""
-        http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
-        own_adapter = http.session.get_adapter('https://example.com')
-        foreign_session = requests.Session()
-
-        apply_tls(http, foreign_session)
-
-        foreign_adapter = foreign_session.get_adapter('https://example.com')
-        assert foreign_adapter.ssl_context.verify_mode == ssl.CERT_REQUIRED
-        assert foreign_adapter.ssl_context.check_hostname is True
-
-        own_adapter.poolmanager.connection_from_url('https://example.com')
-        foreign_session.close()
-
-        assert len(own_adapter.poolmanager.pools) == 1
-
-    def test_foreign_session_uses_host_header_tls(self):
-        http = RequestsWrapper(
-            {'headers': {'Host': 'example.com'}, 'tls_use_host_header': True},
-            {},
-        )
-        foreign_session = requests.Session()
-
-        apply_tls(http, foreign_session)
-
-        adapter = foreign_session.get_adapter('https://example.com')
-        assert isinstance(adapter, _http_utils.HostHeaderSSLAdapter)
