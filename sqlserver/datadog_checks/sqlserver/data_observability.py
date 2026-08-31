@@ -50,22 +50,35 @@ Mode = Literal["cron", "interval"]
 
 
 @dataclass
-class ScheduledQuery:
+class CronScheduledQuery:
     query: Query
-    scheduler: CronScheduler | None
+    scheduler: CronScheduler
+    pending_retry: DueQuery | None = None
+
+
+@dataclass
+class IntervalScheduledQuery:
+    query: Query
+    interval_seconds: int
     last_execution: float | None = None
     pending_retry: DueQuery | None = None
+
+
+ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
 
 
 @dataclass(frozen=True)
 class DueQuery:
     scheduled_query: ScheduledQuery
     scheduled_time: float
-    mode: Mode
 
     @property
     def query(self) -> Query:
         return self.scheduled_query.query
+
+    @property
+    def mode(self) -> Mode:
+        return "cron" if isinstance(self.scheduled_query, CronScheduledQuery) else "interval"
 
 
 _EXPECTED_DB_EXCEPTIONS: list[type[Exception]] = [SQLConnectionError]
@@ -105,7 +118,6 @@ class SqlServerDataObservability(DBMAsyncJob):
     def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[ScheduledQuery, ...]:
         valid: list[ScheduledQuery] = []
         for q in queries:
-            scheduler = None
             if q.schedule:
                 try:
                     scheduler = CronScheduler(q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
@@ -119,43 +131,39 @@ class SqlServerDataObservability(DBMAsyncJob):
                         q.monitor_id,
                     )
                     continue
-            elif not (q.interval_seconds and q.interval_seconds > 0):
+                valid.append(CronScheduledQuery(query=q, scheduler=scheduler))
+                continue
+
+            interval_seconds = q.interval_seconds
+            if not interval_seconds or interval_seconds <= 0:
                 self._log.warning(
                     "Skipping DO query monitor_id=%d: neither schedule nor positive interval_seconds set",
                     q.monitor_id,
                 )
                 continue
-            valid.append(ScheduledQuery(query=q, scheduler=scheduler))
+            valid.append(IntervalScheduledQuery(query=q, interval_seconds=interval_seconds))
         return tuple(valid)
 
     def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
         due: list[DueQuery] = []
         for scheduled_query in self._scheduled_queries:
-            q = scheduled_query.query
             newly_due = None
-            if q.schedule:
-                scheduler = scheduled_query.scheduler
-                if scheduler is None:
-                    self._log.error(
-                        "Skipping DO query monitor_id=%d: cron scheduler is unavailable",
-                        q.monitor_id,
-                    )
-                    continue
+            if isinstance(scheduled_query, CronScheduledQuery):
                 # +0.001 so a poll landing exactly on a tick boundary is treated
                 # as due (CronScheduler.previous_tick uses strict less-than).
-                ticks = scheduler.due_ticks(now + 0.001)
+                ticks = scheduled_query.scheduler.due_ticks(now + 0.001)
                 if ticks:
                     # Take the latest elapsed tick; earlier ones are already in the past
                     # and do not need separate execution.
-                    newly_due = DueQuery(scheduled_query, ticks[-1], "cron")
+                    newly_due = DueQuery(scheduled_query, ticks[-1])
             else:
                 last = scheduled_query.last_execution
-                if last is None or now - last >= q.interval_seconds:
+                if last is None or now - last >= scheduled_query.interval_seconds:
                     # Seed: treat first sight as if the previous interval just completed,
                     # so the scheduled_time for DueQuery is now and lateness is 0.
-                    scheduled = (last + q.interval_seconds) if last is not None else now
-                    newly_due = DueQuery(scheduled_query, scheduled, "interval")
+                    scheduled = (last + scheduled_query.interval_seconds) if last is not None else now
+                    newly_due = DueQuery(scheduled_query, scheduled)
 
             if newly_due is not None:
                 scheduled_query.pending_retry = None
@@ -289,7 +297,7 @@ class SqlServerDataObservability(DBMAsyncJob):
         # Advance scheduling state before emission so an emit-side error cannot
         # leave the query stuck re-firing the same tick.
         # For cron mode, due_ticks() already advanced the scheduler's internal state.
-        if due.mode == "interval":
+        if isinstance(due.scheduled_query, IntervalScheduledQuery):
             due.scheduled_query.last_execution = time.time()
 
         try:

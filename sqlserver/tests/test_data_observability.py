@@ -1015,7 +1015,7 @@ def test_lateness_clamped_at_zero(aggregator, monkeypatch):
     with patch.object(
         check.data_observability,
         '_get_due_queries',
-        return_value=[DueQuery(scheduled_query, skewed_scheduled, "cron")],
+        return_value=[DueQuery(scheduled_query, skewed_scheduled)],
     ):
         aggregator.reset()
         check.data_observability.run_job()
