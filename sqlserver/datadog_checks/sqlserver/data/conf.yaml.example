@@ -830,8 +830,7 @@ instances:
         # enabled: false
 
         ## @param collect_views - boolean - optional - default: true
-        ## Enable collection of SQL Server views. Set to false to continue collecting table schemas
-        ## without collecting views. Defaults to true.
+        ## Enable collection of SQL Server views when schema collection is enabled. Defaults to true.
         #
         # collect_views: true
 
