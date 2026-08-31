@@ -14,6 +14,11 @@ facets:
     source: log
   - groups:
       - Database
+    name: Statement
+    path: db.statement
+    source: log
+  - groups:
+      - Database
     name: User
     path: db.user
     source: log
@@ -32,6 +37,9 @@ facets:
     name: Session ID
     path: postgres.session_id
     source: log
+  # No Measure facet for postgres.txid: it is 0 for any statement outside an
+  # explicit transaction, which would aggregate as if it were transaction 0.
+  # session_id, pid, vxid and query_id are unfaceted as unbounded identifiers.
 pipeline:
   type: pipeline
   name: Postgresql
@@ -39,8 +47,37 @@ pipeline:
   filter:
     query: source:postgresql
   processors:
+    # ════════════════════════════════════════════════════════════════════
+    # STAGE 1 — the contract.
+    #
+    # Parse a text log line into exactly the attributes jsonlog would have
+    # emitted for the same line, under jsonlog's OWN TOP-LEVEL KEY NAMES.
+    # Nothing else: no db.*, no network.*, no duration.
+    #
+    # WHY BARE NAMES AND NOT postgres.*. Datadog's intake preprocessing parses a
+    # JSON log body before any pipeline runs, leaving jsonlog's keys at top level
+    # -- `pid`, `user`, `dbname`, and so on. Nothing downstream can undo that. So
+    # a log_destination=jsonlog record and a log_destination=stderr line describing
+    # THE SAME EVENT converge here for free, with zero normalizing processors,
+    # only if Stage 1 writes the names preprocessing already produced. Namespacing
+    # under postgres.* would mean ~25 attribute-remappers whose only job is to
+    # relocate what the platform just placed.
+    #
+    # Measured on the paired corpus (same event captured to both destinations),
+    # all 13 fleet formats: identical values and identical types on every field a
+    # prefix can express, no absent/null disagreement. The one exception is
+    # `timestamp` on the three %t formats, which carry seconds where jsonlog
+    # always carries milliseconds.
+    #
+    # This is also the extension seam. A log_line_prefix not among the 15 shapes
+    # below can be handled by a customer's own grok-parser in their own pipeline;
+    # as long as it writes these names, all of Stage 2 works unchanged.
+    #
+    # Not derivable from a single text line, so never emitted here: detail, hint,
+    # context, statement, internal_query, internal_position (each arrives as its
+    # own line, tagged with the matching error_severity) and query_id (needs %Q).
     - type: grok-parser
-      name: Parsing Postgresql logs
+      name: 'Stage 1: parse log_line_prefix formats into jsonlog''s attribute names'
       enabled: true
       source: message
       samples:
@@ -48,45 +85,223 @@ pipeline:
         - '2017-11-07 17:37:22 UTC FATAL:  role "myrole" does not exist'
         - '2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;'
         - '2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter'
-        - '2025-09-15 19:05:58.892 UTC:10.0.216.218(36378):shopper_1@dbmorders_1:[20337]:395:00000:2025-09-15 19:02:57 UTC:384/39221:0:68c862e1.4f71:[unknown]:LOCATION:  exec_simple_query, postgres.c:1075'
-        - '2025-09-16 18:26:45.429 UTC:192.168.65.1(31674):postgres@postgres:[87]:34853:00000:2025-09-16 18:25:58 UTC:5/2050:2823:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);'
+        - '2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:44 UTC-6a8372f8.38-LOG:  checkpoint starting: shutdown immediate'
+        - '<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;'
+        - '<2026-08-17 20:47:01 UTC     56 6a837345.38 >LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:45:57.031 UTC [106] pgllp_db pgllp_app pgllp_user 172.17.0.1 6a837305.6a LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:55.896 UTC [55]     6a837303.37 LOG:  checkpoint starting: shutdown immediate'
+        - ' sql_error_code = 00000 time_ms = "2026-08-17 20:47:13.749 UTC" pid="108" proc_start_time="2026-08-17 20:47:13 UTC" session_id="6a837351.6c" vtid="4/5" tid="0" log_line="10" database="pgllp_db" connection_source="172.17.0.1(42336)" user="pgllp_user" application_name="pgllp_app" LOG:  statement: SELECT 2 AS c02;'
+        - ' sql_error_code = 00000 time_ms = "2026-08-17 20:47:12.517 UTC" pid="56" proc_start_time="2026-08-17 20:47:12 UTC" session_id="6a837350.38" vtid="" tid="0" log_line="2" LOG:  checkpoint starting: shutdown immediate'
+        - 'pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=172.17.0.1 LOG:  statement: SELECT 2 AS c02;'
+        - 'pid=56,user=,db=,app=,client= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:11 UTC::@:[56]:LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-18 19:43:22 FOO:BAR:fd42::3(49152):alice@db:[72]:LOG:  ipv6 boundary regression'
+        - '2026-08-18 19:43:22.905 UTC:2001:db8::3:alice@db:[72]:LOG:  autovacuum: VACUUM public.t (1)'
+        - '2026-08-18 19:43:22.905 UTC:db.example:pgbench(1)@db:[72]:LOG:  m'
+        - '2026-08-28 12:19:21.018 :::1(46904):postgres@postgres:[88]:LOG:  hello'
+        - '2026-08-17 20:45:23.980 UTC:172.17.0.1(54222):pgllp_user@pgllp_db:[107]:10:00000:2026-08-17 20:45:23 UTC:4/5:0:6a8372e3.6b:pgllp_app:LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:22.912 UTC::@:[56]:2:00000:2026-08-17 20:45:22 UTC::0:6a8372e2.38:LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:28.967 UTC [63][checkpointer]: [2-1] db=,user= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=172.17.0.1 LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:17.855 UTC [64]: [2-1] db=,user=,host= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:06.977 UTC [64]: [2-1] db=,user= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:39.837 UTC [63] LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:33.812 UTC [54] LOG:  checkpoint starting: shutdown immediate'
       grok:
         supportRules: |
-          _timestamp %{date("yyyy-MM-dd HH:mm:ss z"):db.date}
-          _timestamp_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.date}
-          _betimestamp %{date("yyyy-MM-dd HH:mm:ss z"):db.backend_start}
-          _database %{notSpace:db.instance}
-          _raw_query %{data:db.statement}
-          _duration %{numberExt:duration}
-          _severity %{?>notSpace:db.severity}
-          _user %{notSpace:db.user}
-          _client_ip %{notSpace:network.client.ip}
-          _proc_id %{notSpace:postgres.proc_id}
-          _session_id %{notSpace:postgres.session_id}
-          _app %{notSpace:postgres.appname}
-          _prefix %{_timestamp_ms} \[%{_proc_id}\] %{_database} %{_app} %{_user} %{_client_ip} %{_session_id}
+          # One helper per log_line_prefix escape. Do NOT split these matchRules
+          # across several grok-parsers: supportRules are processor-scoped, so
+          # every rule referencing a helper defined in another processor breaks
+          # with "Unknown matcher" at pipeline-creation time.
+          #
+          # Helpers for the open-ended specs (%u %d %a %h %b) are delimiter-
+          # agnostic -- a lazy %{data:...} stops at whatever literal follows it in
+          # the consuming rule -- so there are no per-delimiter variants.
+          _pg_pid %{integer:pid}
+          _pg_line_num %{integer:line_num}
+          _pg_txid %{integer:txid}
+          _pg_session_id %{regex("[0-9a-f]+\\.[0-9a-f]+"):session_id}
+          _pg_vxid (?:%{regex("[0-9]+/[0-9]+"):vxid})?
+          _pg_state_code %{regex("[A-Z0-9]{5}"):state_code:nullIf("00000")}
+          _pg_timestamp %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)? (?:[0-9A-Za-z+-]+)?"):timestamp}
+          _pg_session_start %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)? (?:[0-9A-Za-z+-]+)?"):session_start}
+          _pg_remote (?:(?:%{ipOrHost:remote_host}\(%{integer:remote_port}\))|%{regex("\\[local\\]"):remote_host}|%{ipOrHost:remote_host})?
+          _pg_user %{regex("\\S*"):user:nullIf("[unknown]")}
+          _pg_dbname %{regex("\\S*"):dbname:nullIf("[unknown]")}
+          _pg_app_name %{data:application_name:nullIf("[unknown]")}
+          _pg_remote_host %{regex("\\S*"):remote_host}
+          _pg_backend_type %{data:backend_type}
+          _pg_ps %{data:ps}
+          _pg_body %{word:error_severity}:  %{data:message}(?: at character %{integer:cursor_position})?
+          # Same prefix as pgprefix_datadog below; ordered first so the shipped
+          # rule wins, matching pre-refactor behaviour.
+          _prefix %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id}
         matchRules: |
-          #Check documentation for the setup of the suggested format
-          suggested_format_with_duration %{_prefix} %{_severity}:\s+duration:\s+%{_duration}\s+ms\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          # Was suggested_format + suggested_format_with_duration; duration and
+          # statement extraction now happens once, in Stage 2.
+          suggested_format %{_prefix} %{_pg_body}
 
-          suggested_format %{_prefix} %{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          # Optional pid: startup/fatal lines have none. Overlaps pgprefix_default
+          # below -- same built-in prefix, same helpers, so the redundancy is inert.
+          default_format %{_pg_timestamp}\s+(?:\[%{_pg_pid}\]\s+)?%{_pg_body}
 
-          #See RDS documentation for more data-rich format
-          enhanced_rds_with_duration %{_timestamp_ms}:%{_client_ip}\(%{port:network.client.port:integer}\):%{_user}@%{_database}:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname})?:%{_severity}:\s*(%{integer}:\s*)?duration:\s+%{_duration}\s+ms\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          pgprefix_azure %{_pg_timestamp}-%{_pg_session_id}-%{_pg_body}
 
-          enhanced_rds %{_timestamp_ms}:(%{_client_ip}\(%{port:network.client.port:integer}\))?:(%{_user})?@(%{_database})?:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname}:)?%{_severity}:\s*(%{integer}:\s*)?(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          pgprefix_bracket <%{_pg_timestamp} %{_pg_remote} %{_pg_app_name} %{_pg_dbname} %{_pg_user} %{_pg_pid} %{_pg_session_id} %{_pg_ps}>%{_pg_body}
 
-          default_format (%{_timestamp}|%{_timestamp_ms} \[%{_proc_id}])\s+%{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          pgprefix_datadog %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id} %{_pg_body}
 
-          #Sample
-          #2017-11-07 17:30:39 UTC LOG:  incomplete startup packet
-          #2017-11-07 17:37:22 UTC FATAL:  role "myrole" does not exist
+          pgprefix_heroku \s*sql_error_code = %{_pg_state_code} time_ms = "%{_pg_timestamp}" pid="%{_pg_pid}" proc_start_time="%{_pg_session_start}" session_id="%{_pg_session_id}" vtid="%{_pg_vxid}" tid="%{_pg_txid}" log_line="%{_pg_line_num}" (?:database="%{_pg_dbname}" connection_source="%{_pg_remote}" user="%{_pg_user}" application_name="%{_pg_app_name}" )?%{_pg_body}
 
-          #Sample suggested format
-          #2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;
+          pgprefix_kv_client pid=%{_pg_pid},user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name},client=%{_pg_remote_host} %{_pg_body}
 
-          #Sample suggested format with duration included
-          #2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter
+          pgprefix_rds %{_pg_timestamp}:%{_pg_remote}:%{_pg_user}@%{_pg_dbname}:\[%{_pg_pid}\]:%{_pg_body}
+
+          pgprefix_rds_enhanced %{_pg_timestamp}:%{_pg_remote}:%{_pg_user}@%{_pg_dbname}:\[%{_pg_pid}\]:%{_pg_line_num}:%{_pg_state_code}:%{_pg_session_start}:%{_pg_vxid}:%{_pg_txid}:%{_pg_session_id}:(?:%{_pg_app_name}:)?%{_pg_body}
+
+          pgprefix_verbose_user_backend %{_pg_timestamp} \[%{_pg_pid}\]\[%{_pg_backend_type}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
+
+          # atdb / default / pganalyze cannot be told apart on a background-process
+          # line -- %q truncates all three to exactly '%m [%p] '. Ordered
+          # most-specific-first; keep them adjacent and in this order.
+          pgprefix_verbose_user_host %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user},host=%{_pg_remote_host} %{_pg_body}
+
+          pgprefix_verbose_user %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
+
+          pgprefix_atdb %{_pg_timestamp} \[%{_pg_pid}\] (?:%{_pg_user}@%{_pg_dbname} )?%{_pg_body}
+
+          pgprefix_default %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_body}
+
+          pgprefix_pganalyze %{_pg_timestamp} \[%{_pg_pid}\] (?:\[user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name}\] )?%{_pg_body}
+
+          # LAST RESORT, and it must stay last: matchRules are first-match-wins, so
+          # this only fires when no prefix above recognised the line. It puts the
+          # WHOLE raw line into message -- prefix included, which is not
+          # what jsonlog would have emitted, but for a prefix we cannot parse there
+          # is no way to know what it would have emitted. Without it, an
+          # unrecognised prefix leaves message unset and Stage 2 (which
+          # reads only *) can extract nothing at all, losing the
+          # best-effort db.statement the pre-refactor pipeline produced by scanning
+          # the raw text.
+          pgprefix_unparsed %{data:message}
+    # ════════════════════════════════════════════════════════════════════
+    # STAGE 2 — promotion to standard attributes.
+    #
+    # A pure function of postgres.*: read only postgres.* (or a Stage 2 output
+    # derived from it), write only outside it. Nothing here may read the raw
+    # `message` or consume a postgres.* field -- doing either would make Stage 1's
+    # contract untrue for anyone supplying postgres.* from their own parser.
+    #
+    # postgres.severity_category and postgres.service_name are the two exceptions.
+    # Neither is a jsonlog key; both exist because Datadog's two-step processors
+    # communicate through an attribute (category-processor -> status-remapper,
+    # string-builder -> service-remapper) and there is no way to wire them
+    # directly. There is also no processor that deletes an attribute, so both
+    # persist on the output.
+    # Runs before the message-remapper, off the reserved message -- which at this
+    # point is the whole raw line for a prefix log and the record's own `message`
+    # for jsonlog. Both contain `duration: N ms` when there is one, so a single
+    # `.*duration:` rule covers both shapes.
+    #
+    # It captures TWO things: the millisecond value, and everything after it --
+    # writing the remainder straight back over `message`. grok is last-write-wins,
+    # so that REPLACES the body Stage 1 captured rather than parking a second copy
+    # beside it, and the message-remapper below then promotes the stripped text.
+    # `duration: 0.003 ms  ` therefore disappears from the message while staying
+    # available as a first-class `duration` attribute. Postgres itself, and parsers built on
+    # its output, keep duration inline; dropping it here is a deliberate local
+    # choice, applied to BOTH input shapes so they stay identical.
+    #
+    # Do NOT add grok `scale()`: pipelines are not exclusive, so the ms -> ns
+    # arithmetic-processor at the end would multiply an already-scaled value twice.
+    - type: grok-parser
+      name: 'Stage 2: extract `duration`, and the message text that follows it'
+      enabled: true
+      source: message
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_duration_and_rest .*duration:\s+%{number:duration}\s+ms\s+%{data:message}
+
+          pg_duration_only .*duration:\s+%{number:duration}\s+ms\s*%{data}
+      samples:
+        - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
+        - '2025-09-16 18:26:45.429 UTC:1.2.3.4(31674):p@p:[87]:1:00000:2025-09-16 18:25:58 UTC:5/2050:0:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
+        - 'duration: 12.345 ms'
+    # Promotes the body, duration already stripped from it if there was one. For jsonlog, preprocessing already set the
+    # reserved message to the record's `message` key. For a prefix line the
+    # reserved message is still the WHOLE RAW LINE, so this replaces it with the
+    # body Stage 1 extracted. After this point `source: message` is the same
+    # prefix-free text for both input shapes, which is what lets the rest of
+    # Stage 2 exist once instead of twice.
+    #
+    # message-remapper consumes its source, so no `message` attribute survives --
+    # matching jsonlog, where preprocessing consumed it before the pipeline began.
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: grok-parser
+      name: 'Stage 2: parse `timestamp` into `db.date`'
+      enabled: true
+      source: timestamp
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_date_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.date}
+
+          pg_date %{date("yyyy-MM-dd HH:mm:ss z"):db.date}
+      samples:
+        - 2026-08-17 20:45:57.031 UTC
+        - 2026-08-17 20:45:45 UTC
+    # A `date()` match does not set the official log date; the date-remapper
+    # further down is still required.
+    - type: grok-parser
+      name: 'Stage 2: extract `db.statement` from the message body'
+      enabled: true
+      source: message
+      grok:
+        supportRules: |
+        matchRules: |
+          # Duration was taken by the processor above, which also removed it from
+          # the message, so only `statement:` is left to find here. The anchored
+          # rule matches a normalised body; the `.*` fallback exists for a
+          # log_line_prefix no Stage 1 rule recognised, where the message is still
+          # the whole raw line.
+          pg_statement statement:\s+%{data:db.statement}
+
+          pg_statement_unanchored .*statement:\s+%{data:db.statement}
+      samples:
+        - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
+        - 'statement: SELECT 2 AS c02;'
+        - 'duration: 12.345 ms'
+        - 'checkpoint starting: shutdown immediate'
+    # remote_host is `[local]` for unix sockets and a hostname under
+    # log_hostname=on; neither belongs in an IP facet. `%{ip:...}` must match the
+    # whole value, so it fails closed and postgres.remote_host keeps the original.
+    - type: grok-parser
+      name: 'Stage 2: promote `remote_host` to `network.client.ip` when it is an IP'
+      enabled: true
+      source: remote_host
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_client_ip %{ip:network.client.ip}
+      samples:
+        - 172.17.0.1
+        - fd42::3
+        - '[local]'
+        - db-client.internal
+    # `db.statement` collides with DBM's own live-sampled-query field of the same
+    # name. Kept as-is because the shipped pipeline already populates it; a
+    # candidate for Stage 3 quarantine once that overlap is settled.
     - type: grok-parser
       name: Extract db.operation from statement
       enabled: true
@@ -98,21 +313,120 @@ pipeline:
       samples:
         - SELECT * FROM playground;
         - select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter
+    # error_severity (bare, per Stage 1) cannot go straight to a status-remapper: that is a
+    # first-LETTER heuristic, and it mis-maps five of Postgres's twelve tags --
+    # PANIC -> info (no rule matches, so the most severe event Postgres emits is
+    # excluded from Error Tracking), FATAL -> emerg, DETAIL -> debug,
+    # CONTEXT -> critical, and STATEMENT, which is not a severity at all.
+    #
+    # A category-processor, not a lookup-processor: mapping tables draw on a 100Kb
+    # budget shared across the whole platform, which a 12-value enum in an
+    # everywhere-installed integration has no business spending.
+    #
+    # The category names are the canonical status strings on purpose -- the
+    # status-remapper's own published prefix table then maps each one to itself
+    # ('emerg'->emerg, 'c'->critical, 'err'->error, 'w', 'n', 'd', 'i').
+    # Matching stops at the first category, so these run specific -> general, with a
+    # catch-all last so an unrecognised tag is explicitly info rather than incidentally so.
+    - type: category-processor
+      name: Map Postgres severity to an intermediate status category
+      enabled: true
+      target: postgres.severity_category
+      categories:
+        - filter:
+            query: '@error_severity:PANIC'
+          name: emergency
+        - filter:
+            query: '@error_severity:FATAL'
+          name: critical
+        - filter:
+            query: '@error_severity:ERROR'
+          name: error
+        - filter:
+            query: '@error_severity:WARNING'
+          name: warning
+        - filter:
+            query: '@error_severity:NOTICE'
+          name: notice
+        - filter:
+            query: '@error_severity:DEBUG1 OR @error_severity:DEBUG2 OR @error_severity:DEBUG3 OR @error_severity:DEBUG4 OR @error_severity:DEBUG5'
+          name: debug
+        - filter:
+            query: '@error_severity:INFO OR @error_severity:LOG OR @error_severity:DETAIL OR @error_severity:HINT OR @error_severity:QUERY OR @error_severity:STATEMENT OR @error_severity:CONTEXT OR @error_severity:LOCATION'
+          name: info
+        - filter:
+            query: '*'
+          name: info_default
+    # Status remappers are first-write-wins, so ordering this above Stage 3's
+    # legacy `db.severity` remapper makes that one a no-op rather than a conflict.
+    - type: status-remapper
+      name: Define `postgres.severity_category` as the official status of the log
+      enabled: true
+      sources:
+        - postgres.severity_category
     - type: date-remapper
       name: Define `db.date` as the official date of the log
       enabled: true
       sources:
         - db.date
-    - type: message-remapper
-      name: Define `msg` as the official message of the log
+    # Error Tracking requires a `service`, which Postgres logs do not carry -- so
+    # without this every Postgres error stays excluded whatever its status.
+    #
+    # The value is the constant `postgresql`, NOT application_name, which would
+    # split one service into N.
+    #
+    # The intermediate attribute is unavoidable, not an oversight. Measured live
+    # 2026-08-31, both shortcuts fail: pointing the service-remapper at `ddsource`
+    # (which this pipeline's own source:postgresql filter guarantees is already
+    # exactly `postgresql`) leaves the submitted service untouched, because
+    # reserved attributes are not readable as remapper sources; and giving the
+    # string-builder `target: service` merely creates an ordinary attribute called
+    # `service` beside the reserved one, which keeps its original value. Only a
+    # remapper can write a reserved field, and remappers read only attributes.
+    # The same floor applies to the category-processor / status-remapper pair.
+    #
+    # Service-remappers are first-write-wins across pipelines, so a customer
+    # pipeline ordered above this one can still override it.
+    - type: string-builder-processor
+      name: Build the constant service name `postgresql`
+      enabled: true
+      template: postgresql
+      target: postgres.service_name
+      replaceMissing: false
+    - type: service-remapper
+      name: Define `postgres.service_name` as the official service of the log
       enabled: true
       sources:
-        - msg
-    - type: status-remapper
-      name: Define `db.severity` as the official status of the log
+        - postgres.service_name
+    - type: arithmetic-processor
+      name: Convert duration from ms to ns
+      enabled: true
+      expression: duration * 1000000
+      target: duration
+      replaceMissing: false
+    # ════════════════════════════════════════════════════════════════════
+    # STAGE 3 — legacy quarantine. Not endorsed; kept for compatibility.
+    #
+    # `db.instance` and `db.user` are DBM-registered paths, reused here for
+    # log-derived values collected by a completely different method (grok on a log
+    # line vs. DBM's session sampling). That reuse has never been signed off with
+    # DBM. `db.severity` is an invented name that is not in the registry at all.
+    #
+    # Isolated on purpose: every processor here reads postgres.* and writes only
+    # into the legacy name. Deleting this entire block removes db.instance,
+    # db.user, db.severity, the `db` tag, postgres.proc_id and postgres.appname
+    # from the pipeline's output with ZERO changes required to Stage 1 or Stage 2
+    # -- Stage 2 never reads any of those names.
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): reuse DBM-registered `db.instance` for the log-derived database name'
       enabled: true
       sources:
-        - db.severity
+        - dbname
+      target: db.instance
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
     - type: attribute-remapper
       name: Map attribute `db.instance` to tag `db`
       enabled: true
@@ -123,9 +437,151 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
-    - type: arithmetic-processor
-      name: Convert duration from ms to ns
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): reuse DBM-registered `db.user` for the log-derived role name'
       enabled: true
-      expression: duration * 1000000
-      target: duration
+      sources:
+        - user
+      target: db.user
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): invented, unregistered `db.severity` name, kept only for anyone already querying or dashboarding on it'
+      enabled: true
+      sources:
+        - error_severity
+      target: db.severity
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    # db.backend_start is an epoch-millis DATE on the shipped side, where
+    # `session_start` is jsonlog's string, so this is a date parse and not a
+    # mirror. Same two shapes as db.date: %m carries milliseconds, %t does not.
+    - type: grok-parser
+      name: 'Stage 3 (quarantined): parse `session_start` into `db.backend_start`'
+      enabled: true
+      source: session_start
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_backend_start_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.backend_start}
+
+          pg_backend_start %{date("yyyy-MM-dd HH:mm:ss z"):db.backend_start}
+      samples:
+        - 2025-09-15 19:02:57 UTC
+        - 2026-08-17 20:45:57.031 UTC
+    # A no-op in practice -- Stage 2's status-remapper always fires first. Kept
+    # so db.severity keeps the remapper the pre-refactor pipeline gave it.
+    - type: status-remapper
+      name: 'Stage 3 (quarantined): define `db.severity` as the official status of the log'
+      enabled: true
+      sources:
+        - db.severity
+    # The two postgres.* names the pre-refactor pipeline published that are NOT
+    # jsonlog spellings -- jsonlog calls them `pid` and `application_name`, which
+    # is what Stage 1 now emits. Mirrored here so existing queries, dashboards and
+    # monitors on @postgres.proc_id / @postgres.appname keep working; they are
+    # deprecated aliases, not part of the Stage 1 contract, and belong in this
+    # block for the same reason db.severity does.
+    # A string-builder, not an attribute-remapper, purely to preserve the TYPE.
+    # The shipped pipeline captured this with %{notSpace:...}, so postgres.proc_id
+    # has always been a string; postgres.pid is an integer, which is what jsonlog
+    # emits and what the contract requires. A plain remap would silently change the
+    # type of a field with shipped history -- term, wildcard and range queries all
+    # survive that, but a customer-declared string facet on @postgres.proc_id would
+    # start reporting a type mismatch. Templating keeps the alias byte-compatible.
+    - type: string-builder-processor
+      name: 'Stage 3 (quarantined): mirror `pid` to the legacy `postgres.proc_id`'
+      enabled: true
+      template: '%{pid}'
+      target: postgres.proc_id
       replaceMissing: false
+    # postgres.session_id is the only postgres.* attribute the shipped pipeline
+    # FACETS, so the facet declaration at the top of this file keeps pointing at
+    # it and this alias keeps it populated.
+    # The remaining paths integrations-core's hand-written enhanced_rds rules
+    # publish. Stage 1 extracts every one of these already, under jsonlog's name;
+    # these mirrors keep the shipped path populated too.
+    #
+    # `sql_state` inherits _pg_state_code's nullIf("00000"), so unlike the shipped
+    # rule it is absent rather than "00000" when there is no error -- 00000 means
+    # "successful completion", and recording it is the same mistake as recording
+    # `[local]` as an IP address.
+    # A string-builder, not a remapper, to preserve the TYPE: the shipped rule
+    # captures this with %{regex("[^:]+")}, so postgres.xid has always been a
+    # string, while jsonlog emits `txid` as a JSON number.
+    - type: string-builder-processor
+      name: 'Stage 3 (quarantined): mirror `txid` to `postgres.xid`'
+      enabled: true
+      template: '%{txid}'
+      target: postgres.xid
+      replaceMissing: false
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): mirror `vxid` to `postgres.vxid`'
+      enabled: true
+      sources:
+        - vxid
+      target: postgres.vxid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): mirror `line_num` to `session_lineno`'
+      enabled: true
+      sources:
+        - line_num
+      target: session_lineno
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): mirror `remote_port` to `network.client.port`'
+      enabled: true
+      sources:
+        - remote_port
+      target: network.client.port
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): mirror `state_code` to `sql_state`'
+      enabled: true
+      sources:
+        - state_code
+      target: sql_state
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): mirror `session_id` to the legacy `postgres.session_id`'
+      enabled: true
+      sources:
+        - session_id
+      target: postgres.session_id
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: 'Stage 3 (quarantined): mirror `application_name` to the legacy `postgres.appname`'
+      enabled: true
+      sources:
+        - application_name
+      target: postgres.appname
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+# 20 processors (Stage 1: 1, Stage 2: 12, Stage 3: 7).
+#
+# 15 matchRules in one grok-parser exceeds the recommended 10, deliberately:
+# supportRules are processor-scoped, so splitting them is what breaks the shared
+# _pg_* helpers. Both the 10-rule and 20-processor figures are recommendations,
+# not enforced limits.
