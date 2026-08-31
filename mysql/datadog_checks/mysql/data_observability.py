@@ -38,22 +38,35 @@ Mode = Literal["cron", "interval"]
 
 
 @dataclass
-class ScheduledQuery:
+class CronScheduledQuery:
     query: Query
-    scheduler: CronScheduler | None
+    scheduler: CronScheduler
+    pending_retry: DueQuery | None = None
+
+
+@dataclass
+class IntervalScheduledQuery:
+    query: Query
+    interval_seconds: int
     last_execution: float | None = None
     pending_retry: DueQuery | None = None
+
+
+ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
 
 
 @dataclass(frozen=True)
 class DueQuery:
     scheduled_query: ScheduledQuery
     scheduled_time: float
-    mode: Mode
 
     @property
     def query(self) -> Query:
         return self.scheduled_query.query
+
+    @property
+    def mode(self) -> Mode:
+        return "cron" if isinstance(self.scheduled_query, CronScheduledQuery) else "interval"
 
 
 class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
@@ -116,7 +129,6 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             except ValueError as e:
                 self._log.warning("Skipping DO query monitor_id=%d: %s", query.monitor_id, e)
                 continue
-            scheduler = None
             if query.schedule:
                 try:
                     scheduler = CronScheduler(query.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
@@ -130,37 +142,33 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                         query.monitor_id,
                     )
                     continue
-            elif not (query.interval_seconds and query.interval_seconds > 0):
+                valid.append(CronScheduledQuery(query=query, scheduler=scheduler))
+                continue
+
+            interval_seconds = query.interval_seconds
+            if not interval_seconds or interval_seconds <= 0:
                 self._log.warning(
                     "Skipping DO query monitor_id=%d: neither schedule nor positive interval_seconds set",
                     query.monitor_id,
                 )
                 continue
-            valid.append(ScheduledQuery(query=query, scheduler=scheduler))
+            valid.append(IntervalScheduledQuery(query=query, interval_seconds=interval_seconds))
         return tuple(valid)
 
     def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
         due: list[DueQuery] = []
         for scheduled_query in self._scheduled_queries:
-            query = scheduled_query.query
             newly_due = None
-            if query.schedule:
-                scheduler = scheduled_query.scheduler
-                if scheduler is None:
-                    self._log.error(
-                        "Skipping DO query monitor_id=%d: cron scheduler is unavailable",
-                        query.monitor_id,
-                    )
-                    continue
-                ticks = scheduler.due_ticks(now + 0.001)
+            if isinstance(scheduled_query, CronScheduledQuery):
+                ticks = scheduled_query.scheduler.due_ticks(now + 0.001)
                 if ticks:
-                    newly_due = DueQuery(scheduled_query, ticks[-1], "cron")
+                    newly_due = DueQuery(scheduled_query, ticks[-1])
             else:
                 last = scheduled_query.last_execution
-                if last is None or now - last >= query.interval_seconds:
-                    scheduled = last + query.interval_seconds if last is not None else now
-                    newly_due = DueQuery(scheduled_query, scheduled, "interval")
+                if last is None or now - last >= scheduled_query.interval_seconds:
+                    scheduled = last + scheduled_query.interval_seconds if last is not None else now
+                    newly_due = DueQuery(scheduled_query, scheduled)
 
             if newly_due is not None:
                 scheduled_query.pending_retry = None
@@ -308,7 +316,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                     pending.scheduled_query.pending_retry = pending
                 raise
             now_at_fire_end = time.time()
-            if due.mode == "interval":
+            if isinstance(due.scheduled_query, IntervalScheduledQuery):
                 due.scheduled_query.last_execution = now_at_fire_end
 
             try:

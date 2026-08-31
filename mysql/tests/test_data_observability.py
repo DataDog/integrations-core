@@ -180,15 +180,17 @@ def test_queries_are_sorted_to_minimize_database_and_timeout_changes(instance_ba
 
 
 @pytest.mark.parametrize('dbname', ['bad-name', 'bad`name', 'db.name', 'db name', '', 'db;DROP TABLE users'])
-def test_invalid_database_name_is_skipped_without_blocking_valid_query(aggregator, instance_basic, dbname):
+def test_invalid_database_name_is_skipped_without_blocking_valid_query(aggregator, instance_basic, dbname, caplog):
     invalid_query = {**deepcopy(BASE_QUERY), 'monitor_id': 2, 'dbname': dbname}
-    _, _, cursor = _setup_and_run(instance_basic, queries=[invalid_query, deepcopy(BASE_QUERY)])
+    with caplog.at_level(logging.WARNING):
+        _, _, cursor = _setup_and_run(instance_basic, queries=[invalid_query, deepcopy(BASE_QUERY)])
 
     assert [call.args[0] for call in cursor.execute.call_args_list] == [
         'USE `test_db`',
         BASE_QUERY['query'],
     ]
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
+    assert any('Skipping DO query monitor_id=2: Invalid database name' in record.message for record in caplog.records)
 
 
 @pytest.mark.parametrize('dbname', ['shopist', 'shopist_analytics', 'shopist$raw', 'DB123'])
@@ -583,7 +585,7 @@ def test_lateness_clamped_at_zero(instance_basic, aggregator, monkeypatch):
     with patch.object(
         check.data_observability,
         '_get_due_queries',
-        return_value=[DueQuery(scheduled_query, current_time[0] + 100, 'cron')],
+        return_value=[DueQuery(scheduled_query, current_time[0] + 100)],
     ):
         check.data_observability.run_job()
 
