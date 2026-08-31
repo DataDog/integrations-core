@@ -70,7 +70,7 @@ files:
               type: string
 
           - name: dbm
-            display_priority: 2
+            display_priority: 0
             fleet_configurable: true
             description: |
               Set to `true` to enable Database Monitoring.
@@ -79,6 +79,125 @@ files:
               type: boolean
               example: false
               display_default: false
+          - name: data_observability
+            display_priority: 0
+            fleet_configurable: true
+            description: |
+              Configure the Data Observability async job, which executes monitoring
+              queries delivered via Remote Configuration.
+              Enabling Data Observability with Database Monitoring uses one additional
+              connection. Increase MAX_USER_CONNECTIONS from 5 to 6 for the monitoring user.
+            options:
+              - name: enabled
+                fleet_configurable: true
+                description: Enable the Data Observability job.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: collection_interval
+                fleet_configurable: true
+                description: |
+                  How often (in seconds) the job wakes up to check which queries are
+                  due. Individual queries define when they are due using either
+                  interval_seconds or a cron schedule. Set this value no greater than
+                  the shortest query interval or the shortest gap between scheduled
+                  executions. Longer collection intervals delay queries and can skip
+                  earlier cron ticks when several become due between collection cycles.
+                value:
+                  type: number
+                  example: 10
+                  display_default: 10
+              - name: run_sync
+                hidden: true
+                description: Run the job synchronously (for testing).
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+                fleet_configurable: false
+              - name: config_id
+                hidden: true
+                description: |
+                  Unique identifier of the Remote Configuration payload that populated
+                  this data_observability block. Set automatically by the Datadog Agent
+                  Go RC handler when it delivers query configuration; do not set this
+                  field manually. It is forwarded as-is on every emitted event so that
+                  the intake can correlate results back to the originating RC config.
+                value:
+                  type: string
+                fleet_configurable: false
+              - name: queries
+                hidden: true
+                description: |
+                  List of monitor queries to execute. Populated automatically by the
+                  Datadog Agent Go RC handler when Remote Configuration delivers a
+                  DO_QUERY_ACTIONS payload; do not set this field manually. Each entry
+                  describes one SQL monitoring query along with its scheduling
+                  parameters and entity metadata.
+                value:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - monitor_id
+                      - dbname
+                      - query
+                      - query_timeout
+                      - entity
+                    properties:
+                      - name: monitor_id
+                        type: integer
+                      - name: dbname
+                        type: string
+                      - name: type
+                        type: string
+                      - name: query
+                        type: string
+                      - name: interval_seconds
+                        description: |
+                          How often (in seconds) to run this query. Ignored when schedule is set
+                          (see schedule for the precedence rule).
+                        type: integer
+                      - name: schedule
+                        description: |
+                          A standard 5-field cron expression (minute hour dom month dow) specifying
+                          when to run this query. When both schedule and interval_seconds are set,
+                          schedule wins and interval_seconds is ignored. If neither is set, the
+                          query is skipped at runtime with a warning.
+                        type: string
+                      - name: query_timeout
+                        description: |
+                          Statement timeout for this query in milliseconds. Overrides the instance-level
+                          query_timeout for this query only.
+                        type: integer
+                      - name: entity
+                        type: object
+                        required:
+                          - platform
+                          - account
+                          - database
+                          - schema
+                          - table
+                        properties:
+                          - name: platform
+                            type: string
+                          - name: account
+                            type: string
+                          - name: database
+                            type: string
+                          - name: schema
+                            type: string
+                          - name: table
+                            type: string
+                      - name: custom_sql_select_fields
+                        type: object
+                        properties:
+                          - name: metric_config_id
+                            type: integer
+                          - name: entity_id
+                            type: string
+                fleet_configurable: false
           - name: propagate_agent_tags
             display_priority: 0
             description: |
@@ -358,6 +477,19 @@ files:
                   example: false
                 fleet_configurable: false
 
+              - name: binlog_size_metrics
+                description: |
+                  Set to `false` to disable the collection of binary log size metrics.
+
+                  When binary logging is enabled, the check runs `SHOW BINARY LOGS;` to compute the
+                  `mysql.binlog.disk_use` metric. This query relies on binary log mutexes and can be slower on
+                  high traffic MySQL databases and Aurora instances, due to the number of binary log files to
+                  load and iterate. Set this to `false` to skip that query if it impacts your database performance.
+                value:
+                  type: boolean
+                  example: true
+                fleet_configurable: false
+
               - name: schema_size_metrics
                 description: |
                   Set to `true` to collect schema size metrics.
@@ -463,7 +595,8 @@ files:
             options:
               - name: enabled
                 description: |
-                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                  Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+                  Defaults to false.
                 value:
                   type: boolean
                   example: false
@@ -495,7 +628,8 @@ files:
             options:
               - name: enabled
                 description: |
-                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                  Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+                  Defaults to false.
                 value:
                   type: boolean
                   example: false
@@ -1023,7 +1157,7 @@ files:
                   tags:
                     - test:mysql
                   metric_prefix: mysql
-              custom_queries.display_priority: 1
+              custom_queries.display_priority: 0
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
@@ -1032,7 +1166,7 @@ files:
                 Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
                 other integrations tags.
 
-              tags.display_priority: 3
+              tags.display_priority: 0
       - template: logs
         example:
           - type: file

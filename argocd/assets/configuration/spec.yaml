@@ -56,6 +56,17 @@ files:
         display_default: null
         example: http://argocd-commit-server:8087/metrics
         type: string
+    - name: collect_openmetrics
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Collect the Argo CD Prometheus (OpenMetrics) endpoints, the check's
+        default metrics. Enabled by default. Set to ``false`` to run only the
+        generic resources collector (``collect_genresources``) without scraping
+        metrics; in that mode the ``*_endpoint`` options are not required.
+      value:
+        type: boolean
+        example: true
     - name: collect_genresources
       hidden: true
       fleet_configurable: false
@@ -94,24 +105,42 @@ files:
       hidden: true
       fleet_configurable: false
       description: |
-        Time-to-live in seconds applied to every emitted resource.
-        Resources expire ``ttl_seconds`` after the last observation.
+        Time-to-live in seconds applied to every emitted resource. Resources
+        expire this many seconds after their last observation, so it also bounds
+        how long a deleted resource lingers in Datadog. Must be at least as long
+        as the longest scrape interval, or resources expire before their next
+        refresh. Defaults to 1800 (three times the application full scrape interval).
         Minimum of 1.
       value:
         type: integer
-        example: 21600
+        example: 1800
         minimum: 1
-    - name: genresources_collection_interval_seconds
+    - name: genresources_application_poll_interval_seconds
       hidden: true
       fleet_configurable: false
       description: |
-        Minimum number of seconds between generic resources collection cycles.
-        The collector polls the ArgoCD API at most once per interval,
-        independent of the check's metrics scrape frequency, to limit load on
-        the ArgoCD API server in large deployments. Minimum of 1.
+        Seconds between dedup polls of Applications when streaming is disabled
+        (``genresources_stream_applications_enabled: false``). Each poll fetches
+        Applications and submits only the ones that changed. Ignored when
+        streaming is enabled, since the stream delivers changes in real time.
+        Minimum of 1.
       value:
         type: integer
         example: 120
+        minimum: 1
+    - name: genresources_application_full_scrape_interval_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Seconds between full Application scrapes, in both streaming and polling
+        modes. A full scrape re-submits every Application to refresh its
+        time-to-live (TTL) and backfill anything the stream missed. While
+        streaming, the dedup poll is disabled, so during a stream outage a newly
+        created Application is not collected until the next full scrape. This
+        value is the worst-case discovery lag. Minimum of 1.
+      value:
+        type: integer
+        example: 600
         minimum: 1
     - name: genresources_max_resources_per_cycle
       hidden: true
@@ -159,6 +188,66 @@ files:
         items:
           type: string
         example: []
+    - name: genresources_stream_applications_enabled
+      hidden: true
+      fleet_configurable: false
+      description: |
+        When enabled, the check maintains a persistent stream to the Argo CD
+        ``/api/v1/stream/applications`` endpoint and emits Application changes in
+        near real time instead of waiting for the next poll. When disabled,
+        Applications are polled every ``genresources_application_poll_interval_seconds``
+        instead. Clusters and Repositories are always polled regardless of this
+        setting. Enabled by default; only takes effect when ``collect_genresources``
+        is ``true``.
+      value:
+        type: boolean
+        example: true
+    - name: genresources_cluster_scrape_interval_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Seconds between full Cluster scrapes. Clusters are always polled (never
+        streamed); each scrape re-submits every Cluster to refresh its
+        time-to-live (TTL). Minimum of 1.
+      value:
+        type: integer
+        example: 300
+        minimum: 1
+    - name: genresources_repository_scrape_interval_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Seconds between full Repository scrapes. Repositories are always polled
+        (never streamed); each scrape re-submits every Repository to refresh its
+        time-to-live (TTL). Minimum of 1.
+      value:
+        type: integer
+        example: 300
+        minimum: 1
+    - name: genresources_stream_backoff_max_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Maximum backoff, in seconds, between application stream reconnection
+        attempts. Backoff starts at 1 second and doubles up to this cap,
+        resetting on a successful connection. Minimum of 1.
+      value:
+        type: integer
+        example: 30
+        minimum: 1
+    - name: genresources_stream_read_timeout_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Socket read timeout, in seconds, for the application watch stream. Argo CD
+        does not send keepalives on an idle stream, so this is effectively how long
+        an idle but healthy connection is held before it is treated as dead and
+        reconnected. Larger values reduce reconnect churn on low-traffic instances;
+        smaller values detect a silently dropped connection sooner. Minimum of 1.
+      value:
+        type: integer
+        example: 300
+        minimum: 1
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

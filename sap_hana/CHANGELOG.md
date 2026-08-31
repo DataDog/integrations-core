@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 5.7.0 / 2026-08-05
+
+***Added***:
+
+* Add Data Observability RC query actions support: execute Remote Configuration-delivered monitoring queries against SAP HANA and forward results as `do-query-results` events.
+  Bump the minimum `datadog-checks-base` requirement to 37.39.0 for the `CronScheduler` used to schedule Data Observability queries. ([#23965](https://github.com/DataDog/integrations-core/pull/23965))
+* Run SAP HANA schema collection in a background thread to avoid blocking the main check loop. ([#24128](https://github.com/DataDog/integrations-core/pull/24128))
+* Add a `database_identifier.template` option to control how the database is identified in Data Observability. ([#24146](https://github.com/DataDog/integrations-core/pull/24146))
+
+## 5.6.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add Data Quality schema collection (schemas, tables, views, and columns) and startup diagnostics. ([#23934](https://github.com/DataDog/integrations-core/pull/23934))
+
 ## 5.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

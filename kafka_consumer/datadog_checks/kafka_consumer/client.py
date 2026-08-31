@@ -42,6 +42,9 @@ class KafkaClient:
         return self._kafka_client
 
     def open_consumer(self, consumer_group):
+        if self._consumer is not None:
+            return
+
         config = {
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
@@ -55,8 +58,11 @@ class KafkaClient:
         self.log.debug("Consumer instance %s created for group %s", self._consumer, consumer_group)
 
     def close_consumer(self):
+        if self._consumer is None:
+            return
         self.log.debug("Closing consumer instance %s", self._consumer)
         self._consumer.close()
+        self._consumer = None
 
     def __get_authentication_config(self):
         config = {
@@ -166,11 +172,28 @@ class KafkaClient:
         )
 
         results = []
+        negative = []
         for tp, future in futures.items():
             try:
-                results.append((tp.topic, tp.partition, future.result().offset))
+                partition_offset = future.result().offset
             except Exception as e:
                 self.log.debug("Skipping offsets for %s/%s: %s", tp.topic, tp.partition, e)
+                continue
+            if partition_offset < 0:
+                negative.append((tp.topic, tp.partition, partition_offset))
+                continue
+            results.append((tp.topic, tp.partition, partition_offset))
+        if negative:
+            # A Kafka offset is never negative, so the client library mangled these: it narrows
+            # ListOffsets results through a C long, which is 32 bits wide on Windows x64.
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1696
+            self.log.warning(
+                "Discarding %d/%d negative offset(s): broker_offset and consumer_lag will be "
+                "missing for those partitions (up to 5 shown): %s",
+                len(negative),
+                len(request),
+                negative[:5],
+            )
         return results
 
     def _list_topics(self):

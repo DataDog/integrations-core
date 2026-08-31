@@ -2,10 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
 from collections import defaultdict
@@ -130,8 +126,8 @@ class DatabasesData:
         )
         base_event = {
             "host": None,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "mysql",
+            "agent_version": self._check.agent_version,
+            "dbms": self._check.dbms,
             "kind": "mysql_databases",
             "collection_interval": collection_interval,
             "dbms_version": None,
@@ -144,11 +140,11 @@ class DatabasesData:
             config.schemas_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
         )
 
-    def shut_down(self):
-        self._data_submitter.submit()
-
     def _cursor_run(self, cursor, query, params=None):
         """Run the query, log it, and emit a metric on database error."""
+        cancel_event = getattr(self._metadata, '_cancel_event', None)
+        if cancel_event is not None and cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         try:
             params_repr = "({} params)".format(len(params)) if isinstance(params, list) else params
             self._log.debug("Running query [{}] params={}".format(query, params_repr))
@@ -279,7 +275,7 @@ class DatabasesData:
                     )
                 )
                 return
-            except Exception as e:
+            except pymysql.DatabaseError as e:
                 self._log.error(
                     "While executing fetch database data for database {}, the following exception occurred {}".format(
                         db_info['name'], e

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import warnings
+from pprint import pformat
 from typing import Any, Dict, List, Tuple
 
 import yaml
@@ -395,11 +396,8 @@ class ModelConsumer:
     def _emit_candidate_body(candidate: dict[str, Any]) -> list[str]:
         """Emit the model-backed candidate construction for one candidate mapping."""
         lines = ['        instance_data = {']
-        for field_name, template in candidate.items():
-            if '{' in str(template):
-                rendered = f"{template!r}.format(service=service, **ctx)"
-            else:
-                rendered = repr(template)
+        for field_name, value in candidate.items():
+            rendered = ModelConsumer._render_candidate_value(value)
             lines.append(f'            {field_name!r}: {rendered},')
         lines.append('        }')
         lines.append('        instance = InstanceConfig.model_validate(')
@@ -407,3 +405,14 @@ class ModelConsumer:
         lines.append("        ).model_dump(by_alias=True, mode='json', exclude_none=True)")
         lines.append("        yield {'init_config': shared, 'instances': [instance]}")
         return lines
+
+    @staticmethod
+    def _render_candidate_value(value: Any) -> str:
+        """Render a discovery candidate value as a Python expression."""
+        if isinstance(value, str):
+            if '{' in value:
+                return f'{value!r}.format(service=service, **ctx)'
+
+            return repr(value)
+
+        return pformat(value, width=120, sort_dicts=False)

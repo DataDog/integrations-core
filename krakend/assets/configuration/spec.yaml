@@ -80,4 +80,12 @@ files:
     overrides:
       value.example:
       - krakend
+  - template: auto_conf/cel_selector
+    overrides:
+      cel_selector.example:
+        processes:
+          - "process.name == 'krakend'"
   - template: auto_conf/discovery
+    overrides:
+      discovery.example:
+        metrics_prefix: krakend.api

@@ -9,11 +9,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
+from datadog_checks.sqlserver.utils import raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 15
 DEFAULT_ROW_LIMIT = 10000
@@ -121,12 +117,15 @@ class SqlserverAgentHistory(DBMAsyncJob):
             enabled=self._config.agent_jobs_config.get('enabled', False),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name="agent-jobs-history",
             shutdown_callback=self._close_db_conn,
         )
         self._conn_key_prefix = "dbm-agent-jobs-"
+
+    def shutdown(self) -> None:
+        self._check = None
 
     def _close_db_conn(self):
         pass
@@ -155,7 +154,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": "agent_jobs",
             "collection_interval": self.collection_interval,
@@ -175,6 +174,8 @@ class SqlserverAgentHistory(DBMAsyncJob):
         Collects all current agent activity for the SQLServer intance.
         :return:
         """
+        raise_if_cancelled(self._cancel_event)
+
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 history_rows = self._get_new_agent_job_history(cursor)

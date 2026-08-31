@@ -48,9 +48,9 @@ POSTGRES_IMAGE = "alpine"
 POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
 POSTGRES_IMAGE_TAG = os.environ.get('POSTGRES_IMAGE_TAG', None)
 
-REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
-REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
-REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
+REPLICA_CONTAINER_1_NAME = 'postgres-postgres_replica-1'
+REPLICA_CONTAINER_2_NAME = 'postgres-postgres_replica2-1'
+REPLICA_LOGICAL_1_NAME = 'postgres-postgres_logical_replica-1'
 USING_LATEST = False
 
 if POSTGRES_IMAGE_TAG is not None:
@@ -173,6 +173,8 @@ def _get_expected_tags(
     )
     if role:
         base_tags.append(f'replication_role:{role}')
+        if check.is_aurora:
+            base_tags.append(f'aurora_role:{"reader" if role == "standby" else "writer"}')
     if with_db:
         base_tags.append(f'db:{pg_instance["dbname"]}')
     if with_host:
@@ -536,4 +538,4 @@ def check_stat_io_metrics(aggregator, expected_tags, count=1):
 
 def check_metrics_metadata(aggregator):
     exclude = ['dd.postgres.operation.time']
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude, check_submission_type=True)

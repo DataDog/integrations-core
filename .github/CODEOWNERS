@@ -154,6 +154,15 @@ datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations 
 datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring-agent @DataDog/agent-integrations
 **/base/utils/db/statement_metrics.py               @DataDog/database-monitoring-agent @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/query_metrics/                     @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/query_metrics/         @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/checks/db.py                                @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_database_check.py @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/health.py                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/schemas.py                         @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/db/test_schemas.py     @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/sql_commenter.py                   @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_sql_commenter.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/                                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/*.md                                      @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /postgres/manifest.json                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
@@ -336,10 +345,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /have_i_been_pwned/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
 /have_i_been_pwned/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/incident_io/                                                        @DataDog/saas-integrations
-/incident_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
-/incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
-/incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/incident_io/                                                        @DataDog/saas-integrations @DataDog/collaboration-integrations
+/incident_io/*.md                                                    @DataDog/saas-integrations @DataDog/collaboration-integrations @DataDog/documentation
+/incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/collaboration-integrations @DataDog/documentation
+/incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/collaboration-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /kandji/                                                             @DataDog/saas-integrations
 /kandji/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
@@ -769,10 +778,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/cyberark_endpoint_privilege_manager/                                @DataDog/saas-integrations
-/cyberark_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
-/cyberark_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
-/cyberark_endpoint_privilege_manager/assets/logs/                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/idira_endpoint_privilege_manager/                                @DataDog/saas-integrations
+/idira_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
+/idira_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
+/idira_endpoint_privilege_manager/assets/logs/                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /beyondtrust_privileged_remote_access/                               @DataDog/agent-integrations
 /beyondtrust_privileged_remote_access/*.md                           @DataDog/agent-integrations @DataDog/documentation
@@ -804,6 +813,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /ide-shepherd/manifest.json                                           @DataDog/agent-integrations @DataDog/documentation
 /ide-shepherd/assets/logs/                                            @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/anomali_threatstream/                                               @DataDog/cloud-siem
+/anomali_threatstream/*.md                                           @DataDog/cloud-siem @DataDog/documentation
+/anomali_threatstream/manifest.json                                  @DataDog/cloud-siem @DataDog/documentation
+
+
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
 /palo_alto_networks_cortex_xsoar/*.md                                 @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_networks_cortex_xsoar/manifest.json                        @DataDog/saas-integrations @DataDog/documentation
@@ -821,6 +835,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 docs/developer/process/integration-release.md                         @DataDog/agent-integrations
 # As well as the pipelines.
 /.github/chainguard/                                                  @DataDog/agent-integrations
+/.github/chainguard/agentrelease-worker.*                             @DataDog/agent-delivery
 /.github/workflows/                                                   @DataDog/agent-integrations
 /.github/workflows/resolve-build-deps.yml                             @DataDog/agent-integrations @DataDog/agent-build
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations

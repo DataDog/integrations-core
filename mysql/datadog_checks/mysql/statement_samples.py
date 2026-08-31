@@ -218,7 +218,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
             enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
             min_collection_interval=config.min_collection_interval,
-            dbms="mysql",
+            dbms=check.dbms,
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             job_name="statement-samples",
             shutdown_callback=self._close_db_conn,
@@ -290,6 +290,11 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 self._global_status_table = "performance_schema.global_status"
             self._version_processed = True
 
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
+
     def _close_db_conn(self):
         if self._db:
             try:
@@ -330,6 +335,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             logged_query = obfuscated_query if obfuscated_query else query
             self._log.debug("Running query [%s] %s", logged_query, obfuscated_params if obfuscated_params else params)
@@ -459,7 +465,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 "timestamp": event_timestamp,
                 "dbm_type": "plan",
                 "host": self._check.reported_hostname,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
                 "duration": row['timer_wait_ns'],

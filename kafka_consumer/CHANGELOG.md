@@ -2,7 +2,56 @@
 
 <!-- towncrier release notes start -->
 
-## 8.0.0 / 2026-06-09
+## 9.0.0 / 2026-08-05
+
+***Changed***:
+
+* Redact Kafka Connect connector configuration with a known-safe allowlist instead of a sensitive-key denylist. Configuration keys not on the allowlist are now hidden in Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Add connector failure trace and tracked topics to Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Emit a `consumer_membership` data-streams-message per consumer group with the Kafka cluster id, group id and current member ids. ([#24601](https://github.com/DataDog/integrations-core/pull/24601))
+
+***Fixed***:
+
+* Reduce cluster-check-runner memory churn by persisting the DSM broker timestamps cache in a compact binary format (marshal) instead of serializing it as JSON on every run. ([#24471](https://github.com/DataDog/integrations-core/pull/24471))
+* Cap the total DSM broker timestamps history per cluster with a memory budget that scales the per-partition depth by partition count, bounding cluster-check-runner memory on large clusters. ([#24508](https://github.com/DataDog/integrations-core/pull/24508))
+
+## 8.1.2 / 2026-07-23 / Agent 7.82.0
+
+***Fixed***:
+
+* Call malloc_trim after each run to return librdkafka's per-arena free memory to the OS and curb agent memory growth. ([#24553](https://github.com/DataDog/integrations-core/pull/24553))
+* Keep the DSM broker_timestamps cache in memory and persist it at most every 5 minutes to reduce per-run allocation churn and memory growth. ([#24554](https://github.com/DataDog/integrations-core/pull/24554))
+
+## 8.1.1 / 2026-07-17
+
+***Fixed***:
+
+* Cache the earliest (log-start) offset used for `kafka.topic.size` and `kafka.partition.size` across collection intervals instead of refetching it from the broker on every run. ([#24515](https://github.com/DataDog/integrations-core/pull/24515))
+* Allow reusing the Kafka AdminClient and Consumer across check runs (via close_admin_client: false) to avoid unbounded agent memory growth from librdkafka thread churn. ([#24552](https://github.com/DataDog/integrations-core/pull/24552))
+
+## 8.1.0 / 2026-07-08
+
+***Added***:
+
+* Add consumer group rebalance detection and membership-change counting metrics, plus partition assignor, group type, simple-group, and static-membership tags, when cluster monitoring is enabled. (DSM only) ([#23915](https://github.com/DataDog/integrations-core/pull/23915))
+* Add Kafka Connect connector monitoring via the Kafka Connect REST API, including connector health metrics and configuration events. ([#24013](https://github.com/DataDog/integrations-core/pull/24013))
+* Support monitoring Confluent Cloud managed connectors by pointing kafka_connect_url at the Confluent Cloud Connect REST API. ([#24033](https://github.com/DataDog/integrations-core/pull/24033))
+
+***Fixed***:
+
+* Fix kafka.broker_offset and kafka.topic.message_rate not being collected when enable_cluster_monitoring is true and the consumer context count exceeds max_partition_contexts. ([#24149](https://github.com/DataDog/integrations-core/pull/24149))
+* Improve the accuracy of ``estimated_consumer_lag`` for consumers that are far behind: cap interpolation for offsets older than the cached broker history, use the low watermark as a floor for the lag offset when cluster monitoring is enabled, and retain a longer broker-timestamp history by compacting the cache (Visvalingam-Whyatt) and pruning samples below the lowest readable offset (the low watermark, or the earliest consumer offset when cluster monitoring is disabled) instead of evicting the oldest one. ([#24167](https://github.com/DataDog/integrations-core/pull/24167))
+* Continue collecting high-watermark offsets for healthy partitions when an individual partition's offset lookup fails, instead of aborting the check. ([#24263](https://github.com/DataDog/integrations-core/pull/24263))
+
+## 8.0.0 / 2026-06-09 / Agent 7.81.0
 
 ***Removed***:
 

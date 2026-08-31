@@ -56,7 +56,7 @@ def run_docker_e2e(env_vars: dict[str, str], conditions: list[LazyFunction]):
             {
                 "instances": [{"openmetrics_endpoint": OPEN_METRICS_ENDPOINT}],
             },
-            get_e2e_discovery_metadata(),
+            get_e2e_discovery_metadata(process=True),
         )
 
 
