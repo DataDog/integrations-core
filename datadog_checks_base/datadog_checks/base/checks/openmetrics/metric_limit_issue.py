@@ -107,7 +107,7 @@ def _severity(check: AgentCheck, ratio: float) -> int:
 def _remediation(*, filter_option_text: str) -> dict[str, str | list[dict[str, int | str]]]:
     return {
         'summary': (
-            "Reduce what this endpoint sends to Datadog, or raise this instance's metric limit after checking the cost."
+            'Reduce the metrics submitted by this check instance, or raise its metric limit after checking the cost.'
         ),
         'steps': [
             {
