@@ -19,18 +19,26 @@ class PrometheusFixtureCheck(PrometheusCheck):
     pass
 
 
-def test_fake_http_preserves_client_configuration_and_isolation(fake_http):
-    check = AgentCheck('test', {}, [{'headers': {'X-Client': 'default'}}])
+def test_fake_http_does_not_construct_backend_clients(fake_http, mocker):
+    backend_client = mocker.patch('datadog_checks.base.utils.http.RequestsWrapper')
+    check = AgentCheck('test', {}, [{}])
+
+    assert isinstance(check.http, FakeHTTPClient)
+    assert isinstance(check.create_http_client(), FakeHTTPClient)
+
+    backend_client.assert_not_called()
+
+
+def test_fake_http_creates_isolated_clients(fake_http):
+    check = AgentCheck('test', {}, [{}])
 
     default_client = check.http
-    explicit_client = check.create_http_client({'headers': {'X-Client': 'explicit'}})
+    explicit_client = check.create_http_client()
 
     assert check.http is default_client
     assert default_client is not explicit_client
     assert default_client is not fake_http
     assert explicit_client is not fake_http
-    assert default_client.get_header('X-Client') == 'default'
-    assert explicit_client.get_header('X-Client') == 'explicit'
 
     default_client.set_header('X-Default-Only', 'value')
     assert explicit_client.get_header('X-Default-Only') is None

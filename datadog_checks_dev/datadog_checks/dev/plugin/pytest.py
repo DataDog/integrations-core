@@ -386,9 +386,9 @@ def mock_http_response(mocker, mock_response):
     )
 
 
-def _create_fake_http_client_factory(fake_http: Any, configured_client_factory: Any) -> Any:
-    def create_client(*args: Any, **kwargs: Any) -> Any:
-        return fake_http.create_client(configured_client_factory(*args, **kwargs))
+def _create_fake_http_client_factory(fake_http: Any) -> Any:
+    def create_client(*_args: Any, **_kwargs: Any) -> Any:
+        return fake_http.create_client()
 
     return create_client
 
@@ -396,18 +396,15 @@ def _create_fake_http_client_factory(fake_http: Any, configured_client_factory: 
 @pytest.fixture
 def fake_http(mocker):
     """Install a base-owned HTTP fake on checks created by the test."""
+    AgentCheck = importlib.import_module('datadog_checks.base').AgentCheck
     FakeHTTPClient = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPClient
-    http_module = importlib.import_module('datadog_checks.base.utils.http')
     client = FakeHTTPClient()
 
-    # Load module-local factory aliases before patching the canonical factory so fixture teardown
-    # never restores an alias to a mock owned by an earlier test.
-    importlib.import_module('datadog_checks.base.checks.openmetrics.mixins')
-    importlib.import_module('datadog_checks.base.checks.prometheus.mixins')
     mocker.patch.object(
-        http_module,
+        AgentCheck,
         'create_http_client',
-        side_effect=_create_fake_http_client_factory(client, http_module.create_http_client),
+        autospec=True,
+        side_effect=_create_fake_http_client_factory(client),
     )
     return client
 
@@ -419,7 +416,7 @@ def fake_openmetrics_http(fake_http, mocker):
     mocker.patch.object(
         mixins,
         'create_http_client',
-        side_effect=_create_fake_http_client_factory(fake_http, mixins.create_http_client),
+        side_effect=_create_fake_http_client_factory(fake_http),
     )
     return fake_http
 
@@ -431,7 +428,7 @@ def fake_prometheus_http(fake_http, mocker):
     mocker.patch.object(
         mixins,
         'create_http_client',
-        side_effect=_create_fake_http_client_factory(fake_http, mixins.create_http_client),
+        side_effect=_create_fake_http_client_factory(fake_http),
     )
     return fake_http
 
