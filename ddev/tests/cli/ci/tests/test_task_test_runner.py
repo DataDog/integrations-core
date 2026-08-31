@@ -725,8 +725,11 @@ async def test_a_run_still_going_when_the_batch_is_cancelled_is_cancelled_too(tm
 
     task = asyncio.create_task(runner.process_message(make_batch(batch_id="batch-1")))
     await asyncio.sleep(0)
-    while not client.calls_to("create_check_run"):
-        await asyncio.sleep(0)
+    # Bounded, so a regression that never creates the check run fails here instead of spinning until
+    # the CI job's own timeout, which reports nothing useful.
+    async with asyncio.timeout(5):
+        while not client.calls_to("create_check_run"):
+            await asyncio.sleep(0)
     task.cancel()
     with pytest.raises(asyncio.CancelledError):
         await task

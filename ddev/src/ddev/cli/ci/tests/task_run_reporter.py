@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
@@ -162,6 +163,8 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
             log_extra: dict[str, object] = {"revision": self._latest_revision, "cancelled": True}
             # Before the write, and read by the run summary, so both places say the same thing.
             self._latest_body = body
+            # Held in state rather than left to call order, so a later revision cannot overwrite it.
+            self._latest_revision = sys.maxsize
 
             pr_number = self._options.pr_number
             if pr_number is None:

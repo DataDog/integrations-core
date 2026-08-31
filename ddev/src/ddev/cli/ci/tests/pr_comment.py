@@ -148,7 +148,8 @@ def render_cancelled_notice() -> str:
 
     There is no snapshot to render, and the comment is the only place a reader learns the run existed.
     """
-    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}"
+    footer = _footer(None, cancelled=True)
+    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}\n\n{footer}"
 
 
 def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
@@ -450,14 +451,14 @@ def _list_section(heading: str, entries: list[str], budget: int, noun: str) -> s
 # ---------------------------------------------------------------------------
 
 
-def _footer(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
+def _footer(progress: DispatcherProgress | None, *, cancelled: bool = False) -> str:
     """Whether this is the last word, and where the run that produced it lives.
 
     No status emoji on a finished run: the outcome is the heading's job, and a ✅ here read as "all
     good" on a run that had failed. What a reader cannot get anywhere else in the comment is which
     commit was tested and where Dispatcher itself ran, so that is what this says.
     """
-    if not cancelled and not progress.done:
+    if not cancelled and (progress is None or not progress.done):
         return f"<sub>\n⏳ {FOOTER_RUNNING_NOTE}\n</sub>"
 
     note = "Dispatcher was cancelled" if cancelled else "Dispatcher finished"

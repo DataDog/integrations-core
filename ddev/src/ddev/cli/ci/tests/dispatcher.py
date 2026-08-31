@@ -180,10 +180,12 @@ class Dispatcher(EventBusOrchestrator):
 
         self._cancelled = True
         self._logger.warning("Received %s: cancelling the run", received.name)
-        # Relaxed before the stop, because stopping is what makes each batch close its check run, and
-        # those calls would otherwise be paced for a run that still had its whole window ahead of it.
-        self._client.relax_rate_limits(max_wait_seconds=CANCELLED_MAX_WAIT_SECONDS, max_rate=CANCELLED_MAX_RATE)
+        # Stop first: this runs as a signal-handler callback, so anything raised here goes to the
+        # loop's exception handler, and the second signal would find `_cancelled` already set and
+        # return without retrying. Relaxing still lands in time, because the stop only sets an event
+        # the loop acts on later, and it is what makes each batch close its check run.
         self.request_stop()
+        self._client.relax_rate_limits(max_wait_seconds=CANCELLED_MAX_WAIT_SECONDS, max_rate=CANCELLED_MAX_RATE)
 
     async def on_message_received(self, message: BaseMessage):
         self._logger.debug("Message received: %s(%s)", type(message).__name__, message.id)
@@ -219,9 +221,16 @@ class Dispatcher(EventBusOrchestrator):
             self._runner.cancel_dispatched_runs(),
             return_exceptions=True,
         )
+        # A cancellation is not a failed step, and must not be reported as one or swallowed: it is
+        # returned as a value here rather than raised, so it needs picking out by hand.
+        cancellation: asyncio.CancelledError | None = None
         for outcome in outcomes:
-            if isinstance(outcome, BaseException):
-                self._logger.error("Cancellation cleanup step failed: %s", outcome)
+            if isinstance(outcome, asyncio.CancelledError):
+                cancellation = outcome
+            elif isinstance(outcome, BaseException):
+                self._logger.error("Cancellation cleanup step failed: %s", outcome, exc_info=outcome)
+        if cancellation is not None:
+            raise cancellation
 
 
 def build_dispatcher(

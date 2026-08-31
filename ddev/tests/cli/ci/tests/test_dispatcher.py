@@ -8,11 +8,18 @@ from __future__ import annotations
 import os
 import signal
 import sys
+import time
 from pathlib import Path
 
 import pytest
 
-from ddev.cli.ci.tests.dispatcher import Dispatcher, DispatcherContext, RunContext
+from ddev.cli.ci.tests.dispatcher import (
+    CANCELLED_MAX_RATE,
+    CANCELLED_MAX_WAIT_SECONDS,
+    Dispatcher,
+    DispatcherContext,
+    RunContext,
+)
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
@@ -207,6 +214,12 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
         pytest.fail("SIGINT reached the interpreter: the run handled no cancellation signal")
 
     assert dispatcher.cancelled
+    # The cleanup competes with a ~10s kill using a bucket the run has been spending all along, so
+    # without this it is paced for a run that still had its whole window ahead of it.
+    assert client.last_call("relax_rate_limits").kwargs == {
+        "max_wait_seconds": CANCELLED_MAX_WAIT_SECONDS,
+        "max_rate": CANCELLED_MAX_RATE,
+    }
     # The initial plan already created the comment, so the cancelled report edits that one.
     assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
     assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
@@ -214,3 +227,39 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
     assert client.last_call("update_check_run").kwargs["conclusion"] == "cancelled"
     # The run page is rendered from the same report, so it cannot claim the run is still going.
     assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
+
+
+def test_a_run_still_winds_down_when_the_rate_limiter_cannot_be_relaxed(client, tmp_path):
+    """The signal handler's own failures are invisible: the loop logs them and the next signal, which
+    finds the run already cancelling, returns without retrying. So the stop cannot be left downstream
+    of anything that might raise, or the run waits to be killed instead of winding down.
+    """
+    batch = make_batch(make_job())
+    dispatcher = build_bus(client, tmp_path, [batch])
+    client.mock_response("relax_rate_limits", RuntimeError("the limiter is not what we think it is"))
+    client.mock_response(
+        "get_workflow_run",
+        WorkflowRun(
+            id=123,
+            name="test-batch",
+            status="in_progress",
+            conclusion=None,
+            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
+        ),
+    )
+    created_check_run = client.create_check_run
+
+    async def cancel_once_the_check_run_exists(*args, **kwargs):
+        response = await created_check_run(*args, **kwargs)
+        os.kill(os.getpid(), signal.SIGINT)
+        return response
+
+    client.create_check_run = cancel_once_the_check_run_exists  # type: ignore[method-assign]
+
+    start = time.perf_counter()
+    dispatcher.run()
+    elapsed = time.perf_counter() - start
+
+    # The bus's own timeout is 30s, so anything near it means the stop never arrived.
+    assert elapsed < 5
+    assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]

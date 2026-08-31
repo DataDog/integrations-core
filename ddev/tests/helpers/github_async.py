@@ -118,6 +118,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         # Cancelling returns nothing, and a run already terminal is the outcome asked for.
         'cancel_workflow_run': lambda: None,
+        'relax_rate_limits': lambda: None,
         'create_issue_comment': lambda: GitHubResponse(
             data=IssueComment(
                 id=DEFAULT_COMMENT_ID,
@@ -450,6 +451,9 @@ class FakeAsyncGitHubClient:
             run_id=run_id,
             timeout=timeout,
         )
+
+    def relax_rate_limits(self, *, max_wait_seconds: float, max_rate: float) -> None:
+        self._call('relax_rate_limits', max_wait_seconds=max_wait_seconds, max_rate=max_rate)
 
     async def create_check_run(
         self,

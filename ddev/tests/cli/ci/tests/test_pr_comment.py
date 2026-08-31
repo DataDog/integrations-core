@@ -855,16 +855,22 @@ def test_the_budget_is_measured_in_bytes_not_characters():
     assert len(body) < len(body.encode("utf-8"))
 
 
-def test_a_cancelled_run_with_nothing_gathered_still_says_it_ran():
+def test_a_cancelled_run_with_nothing_gathered_still_says_it_ran(monkeypatch):
     """The comment is the only place a reader learns the run existed.
 
     No comment at all is indistinguishable from a job that hung, and the marker has to be there or
-    the next run creates a second comment instead of editing this one.
+    the next run creates a second comment instead of editing this one. With no results to go on, the
+    footer's link is all a reader has to find out what happened.
     """
+    monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "DataDog/integrations-core")
+    monkeypatch.setenv("GITHUB_RUN_ID", "12345")
+
     body = render_cancelled_notice()
 
     assert body.startswith(COMMENT_MARKER)
     assert CANCELLED_HEADING in body
+    assert "https://github.com/DataDog/integrations-core/actions/runs/12345" in body
 
 
 def test_a_cancelled_run_keeps_what_it_gathered_without_still_reading_as_running():
