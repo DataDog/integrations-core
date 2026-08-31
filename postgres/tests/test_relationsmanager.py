@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import mock
 import pytest
 
 from datadog_checks.postgres.relationsmanager import (
@@ -105,6 +106,18 @@ def test_relation_filter_limit():
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
     assert 'LIMIT 300' in query_filter
+
+
+def test_filtered_query_is_built_once():
+    """A query is filtered once and reused, however many databases it is run against."""
+    query = "Select foo from bar where {relations}"
+    relations = RelationsManager([{'relation_regex': 'ix.*', 'schemas': ['public']}], default_max_relations)
+
+    with mock.patch.object(relations, '_build_filtered_query', wraps=relations._build_filtered_query) as build:
+        queries = {relations.filter_relation_query(query, SCHEMA_NAME) for _ in range(3)}
+
+    assert build.call_count == 1
+    assert queries == {"Select foo from bar where (( relname ~ 'ix.*' AND schemaname = ANY(array['public']::text[]) ))"}
 
 
 def test_relkind_does_not_apply_to_index_metrics():
