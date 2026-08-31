@@ -361,6 +361,112 @@ def test_discovery_rejects_boolean_port_hints():
     assert 'test, test.yaml, discovery, strategy #1: Attribute `port_hints` must be an array of integers' in spec.errors
 
 
+def test_discovery_named_ports_valid():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_named_ports
+              port_names:
+              - metrics
+              - http-monitoring
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_rejects_non_string_port_names():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_named_ports
+              port_names:
+              - metrics
+              - 8080
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1: Attribute `port_names` must be a non-empty array of non-empty strings'
+        in spec.errors
+    )
+
+
+def test_discovery_rejects_empty_port_names():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_named_ports
+              port_names: []
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1: Attribute `port_names` must be a non-empty array of non-empty strings'
+        in spec.errors
+    )
+
+
+def test_discovery_rejects_blank_port_names():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_named_ports
+              port_names:
+              - ''
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1: Attribute `port_names` must be a non-empty array of non-empty strings'
+        in spec.errors
+    )
+
+
 def test_discovery_unsupported_strategy():
     spec = get_spec(
         """
@@ -409,6 +515,81 @@ def test_discovery_unknown_placeholder():
     assert (
         'test, test.yaml, discovery, strategy #1, candidate #1, openmetrics_endpoint: '
         'Unknown placeholder `service.hostname`'
+    ) in spec.errors
+
+
+def test_discovery_rejects_unknown_conversion() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host!x}"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1, candidate #1, server: Unknown conversion `!x`' in spec.errors
+
+
+def test_discovery_accepts_str_conversion() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host!s}"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert spec.errors == []
+
+
+def test_discovery_rejects_malformed_template() -> None:
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - server: "{service.host"
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        "test, test.yaml, discovery, strategy #1, candidate #1, server: Invalid candidate template: "
+        "expected '}' before end of string"
     ) in spec.errors
 
 

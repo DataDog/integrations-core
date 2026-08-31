@@ -154,6 +154,15 @@ datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations 
 datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring-agent @DataDog/agent-integrations
 **/base/utils/db/statement_metrics.py               @DataDog/database-monitoring-agent @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/query_metrics/                     @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/query_metrics/         @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/checks/db.py                                @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_database_check.py @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/health.py                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/schemas.py                         @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/db/test_schemas.py     @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/sql_commenter.py                   @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_sql_commenter.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/                                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/*.md                                      @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /postgres/manifest.json                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
@@ -804,10 +813,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /ide-shepherd/manifest.json                                           @DataDog/agent-integrations @DataDog/documentation
 /ide-shepherd/assets/logs/                                            @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/anomali_threatstream/                                               @DataDog/saas-integrations
-/anomali_threatstream/*.md                                           @DataDog/saas-integrations @DataDog/documentation
-/anomali_threatstream/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
-/anomali_threatstream/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/anomali_threatstream/                                               @DataDog/cloud-siem
+/anomali_threatstream/*.md                                           @DataDog/cloud-siem @DataDog/documentation
+/anomali_threatstream/manifest.json                                  @DataDog/cloud-siem @DataDog/documentation
+
 
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
 /palo_alto_networks_cortex_xsoar/*.md                                 @DataDog/saas-integrations @DataDog/documentation
@@ -826,6 +835,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 docs/developer/process/integration-release.md                         @DataDog/agent-integrations
 # As well as the pipelines.
 /.github/chainguard/                                                  @DataDog/agent-integrations
+/.github/chainguard/agentrelease-worker.*                             @DataDog/agent-delivery
 /.github/workflows/                                                   @DataDog/agent-integrations
 /.github/workflows/resolve-build-deps.yml                             @DataDog/agent-integrations @DataDog/agent-build
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations

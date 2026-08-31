@@ -1,0 +1,1 @@
+Add the `system.crypto.fips_enabled` metric reporting whether the kernel is running in FIPS mode, read from `/proc/sys/crypto/fips_enabled`.

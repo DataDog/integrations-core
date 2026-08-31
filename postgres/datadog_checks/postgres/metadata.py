@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from typing import TYPE_CHECKING
 
 import psycopg
 from psycopg.rows import dict_row
@@ -13,13 +14,6 @@ from psycopg.rows import dict_row
 from .column_statistics import PostgresColumnStatisticsCollector
 from .schemas import PostgresSchemaCollector
 from .util import collection_interval_gcd
-
-try:
-    import datadog_agent  # type: ignore
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -32,7 +26,8 @@ from .util import payload_pg_version
 
 # PG_EXTENSION_INFO_QUERY is used to collect extension names and versions from
 # the pg_extension table. Schema names and roles are retrieved from their re-
-# spective catalog tables.
+# spective catalog tables. Extensions are installed per logical database, so
+# each row records the database the query ran against.
 PG_EXTENSION_INFO_QUERY = """
 SELECT
 e.oid::text AS id,
@@ -40,7 +35,8 @@ e.extname AS name,
 r.rolname AS owner,
 ns.nspname AS schema_name,
 e.extrelocatable AS relocatable,
-e.extversion AS version
+e.extversion AS version,
+current_database() AS logical_database
 FROM pg_extension e
 LEFT JOIN pg_namespace ns on e.extnamespace = ns.oid
      JOIN pg_roles r ON e.extowner = r.oid;
@@ -135,7 +131,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._tags_no_db = None
         self.tags = None
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._schema_collector = None
         self._column_statistics_collector = None
@@ -176,7 +172,7 @@ class PostgresMetadata(DBMAsyncJob):
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self._check.agent_version,
                 "dbms": self._check.dbms,
                 "kind": "pg_extension",
                 "collection_interval": self.pg_extensions_collection_interval,
@@ -213,7 +209,7 @@ class PostgresMetadata(DBMAsyncJob):
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self._check.agent_version,
                 "dbms": self._check.dbms,
                 "kind": "pg_settings",
                 "collection_interval": self.pg_settings_collection_interval,

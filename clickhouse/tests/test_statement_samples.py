@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.statement_samples import ClickhouseStatementSamples
+from datadog_checks.clickhouse.statement_samples import BUFFER_PAYLOAD_KIND, ClickhouseStatementSamples
 
 pytestmark = pytest.mark.unit
 
@@ -123,9 +123,7 @@ def test_create_samples_event(check_with_dbm):
 
     active_connections = [{'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 5}]
 
-    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        event = samples._create_samples_event(rows, active_connections)
+    event = samples._create_samples_event(rows, active_connections)
 
     # Verify event structure
     assert event['ddsource'] == 'clickhouse'
@@ -321,3 +319,383 @@ def test_defaults_applied():
     assert check.statement_samples._config.collection_interval == 1
     assert check.statement_samples._config.payload_row_limit == 1000
     assert check.statement_samples._config.run_sync is False
+
+
+def test_buffer_defaults_applied():
+    """Test that default buffer snapshot config values are applied correctly"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'collect_pending_async_inserts': {
+            'enabled': True,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    samples = check.statement_samples
+
+    # Verify defaults are applied
+    assert samples._buffer_enabled is True
+    assert samples._buffer_collection_interval == 10
+    assert samples._buffer_max_samples_per_collection == 1000
+
+
+def test_buffer_only_constructs_job():
+    """Test that the job is constructed when only the buffer snapshot is enabled"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 15,
+            'max_samples_per_collection': 500,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    samples = check.statement_samples
+    assert samples._config.enabled is False
+    assert samples._buffer_enabled is True
+    assert samples._buffer_collection_interval == 15
+    assert samples._buffer_max_samples_per_collection == 500
+
+
+def test_collection_interval_gcd():
+    """Test that the job's collection interval is the GCD of the enabled sub-feature intervals"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': True,
+            'collection_interval': 10,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 15,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    assert check.statement_samples._expected_collection_interval == 5
+
+
+def test_query_samples_collection_interval():
+    """Test that query samples collect on their own interval, unaffected by buffer snapshot sharing the job"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': True,
+            'collection_interval': 10,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 15,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    with (
+        mock.patch.object(samples, '_collect_samples') as mock_collect_samples,
+        mock.patch.object(samples, '_collect_buffer_snapshot'),
+    ):
+        for current_time in (10.0, 15.0, 20.0):
+            with mock.patch('datadog_checks.clickhouse.statement_samples.time.time', return_value=current_time):
+                samples.run_job()
+
+        assert mock_collect_samples.call_count == 2
+
+
+def test_buffer_only_skips_query_samples():
+    """Test that query samples are not collected when only the buffer snapshot is enabled"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 15,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    with (
+        mock.patch.object(samples, '_collect_samples') as mock_collect_samples,
+        mock.patch.object(samples, '_collect_buffer_snapshot') as mock_collect_buffer,
+    ):
+        samples.run_job()
+
+        mock_collect_samples.assert_not_called()
+        mock_collect_buffer.assert_called_once()
+
+
+def test_buffer_collection_interval():
+    """Test that buffer snapshot collects on its own interval, unaffected by query samples sharing the job"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 15,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._dbms_version = '24.8'
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    with (
+        mock.patch.object(samples, '_query_buffer_snapshot', return_value=[]) as mock_query_buffer,
+        mock.patch.object(samples, '_emit_buffer_events') as mock_emit_buffer,
+    ):
+        for current_time in (15.0, 20.0, 30.0):
+            with mock.patch('datadog_checks.clickhouse.statement_samples.time.time', return_value=current_time):
+                samples._collect_buffer_snapshot()
+
+        assert mock_query_buffer.call_count == 2
+        assert mock_emit_buffer.call_count == 2
+        assert samples._last_buffer_snapshot_time == 30.0
+
+
+@pytest.mark.parametrize(
+    'server_version, expect_collection',
+    [
+        ('21.8.15.7', False),
+        ('21.10.6.2', False),
+        ('21.11.11.1', True),
+        ('24.8.4.13', True),
+    ],
+)
+def test_buffer_snapshot_skipped_below_min_version(server_version, expect_collection):
+    """Test that the buffer snapshot is only collected on servers that have system.asynchronous_inserts"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 10,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._dbms_version = server_version
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    with (
+        mock.patch.object(samples, '_query_buffer_snapshot', return_value=[]) as mock_query_buffer,
+        mock.patch.object(samples, '_emit_buffer_events') as mock_emit_buffer,
+        mock.patch('datadog_checks.clickhouse.statement_samples.time.time', return_value=10.0),
+    ):
+        samples._collect_buffer_snapshot()
+
+    assert mock_query_buffer.called is expect_collection
+    assert mock_emit_buffer.called is expect_collection
+
+
+def test_buffer_snapshot_stops_collecting_when_table_missing():
+    """Test that an unknown table error stops further buffer snapshot collection instead of retrying"""
+    from clickhouse_connect.driver.exceptions import DatabaseError
+
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_samples': {
+            'enabled': False,
+        },
+        'collect_pending_async_inserts': {
+            'enabled': True,
+            'collection_interval': 10,
+        },
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._dbms_version = '24.8'
+    samples = check.statement_samples
+    samples._tags = ['test:clickhouse']
+
+    # Shaped like a real driver error: the code lives in the message text, not on the exception.
+    error = DatabaseError(
+        'HTTPDriver for https://host:8443 received ClickHouse error code 60\n'
+        " Code: 60. DB::Exception: Unknown table expression identifier 'system.asynchronous_inserts'. "
+        '(UNKNOWN_TABLE)'
+    )
+
+    db_client = mock.MagicMock()
+    db_client.query.side_effect = error
+    samples._db_client = db_client
+
+    with mock.patch.object(samples, '_emit_buffer_events') as mock_emit_buffer:
+        for current_time in (10.0, 20.0, 30.0):
+            with mock.patch('datadog_checks.clickhouse.statement_samples.time.time', return_value=current_time):
+                samples._collect_buffer_snapshot()
+
+    # The table is queried once, then collection is skipped for the rest of the check's lifetime
+    assert samples._buffer_unavailable is True
+    assert db_client.query.call_count == 1
+    assert mock_emit_buffer.call_count == 1
+
+
+def test_buffer_snapshot_query_format():
+    """Test that the buffer snapshot query is properly formatted"""
+    from datadog_checks.clickhouse.statement_samples import BUFFER_SNAPSHOT_QUERY
+
+    # Verify query uses placeholders for the table and row limit
+    assert '{asynchronous_inserts_table}' in BUFFER_SNAPSHOT_QUERY
+    assert '{max_samples_per_collection}' in BUFFER_SNAPSHOT_QUERY
+
+    # Verify selected columns
+    assert 'database' in BUFFER_SNAPSHOT_QUERY
+    assert 'table' in BUFFER_SNAPSHOT_QUERY
+    assert 'format' in BUFFER_SNAPSHOT_QUERY
+    assert 'query' in BUFFER_SNAPSHOT_QUERY
+    assert 'total_bytes' in BUFFER_SNAPSHOT_QUERY
+    assert 'entry_count' in BUFFER_SNAPSHOT_QUERY
+    assert 'flush_deadline_us' in BUFFER_SNAPSHOT_QUERY
+    assert 'now_us' in BUFFER_SNAPSHOT_QUERY
+
+
+def test_obfuscate_buffer_query(check_with_dbm):
+    """Test that buffer insert queries are obfuscated"""
+    samples = check_with_dbm.statement_samples
+
+    obfuscated = samples._obfuscate_buffer_query("INSERT INTO users VALUES (12345, 'secret')")
+
+    # Verify that query and query_signature are set
+    assert obfuscated is not None
+    assert obfuscated['query'] is not None
+    assert obfuscated['query_signature'] is not None
+
+    # Verify metadata was collected
+    assert 'dd_tables' in obfuscated
+    assert 'dd_commands' in obfuscated
+    assert 'dd_comments' in obfuscated
+
+
+def test_create_buffer_event(check_with_dbm):
+    """Test creation of the buffer snapshot event payload"""
+    samples = check_with_dbm.statement_samples
+    samples._tags_no_db = ['test:clickhouse', 'server:localhost']
+
+    buffer_snapshot = [
+        {
+            'database': 'default',
+            'table': 'events',
+            'server_node': 'node1',
+            'format': 'JSONEachRow',
+            'query': "INSERT INTO events VALUES (1, 'x')",
+            'total_bytes': 2048,
+            'entry_count': 5,
+            'flush_deadline_us': 1700000000000000,
+            'now_us': 1699999997000000,
+        }
+    ]
+
+    payload = samples._create_buffer_event(buffer_snapshot)
+
+    # Verify event structure
+    assert payload['ddsource'] == 'clickhouse'
+    assert payload['kind'] == BUFFER_PAYLOAD_KIND
+    assert payload['min_collection_interval'] == samples._buffer_collection_interval
+    assert payload['tags'] == samples._tags_no_db
+    assert payload['now_us'] == 1699999997000000
+
+    # Verify buffers payload
+    assert len(payload['clickhouse_rows']) == 1
+
+    buffer = payload['clickhouse_rows'][0]
+    assert buffer['database'] == 'default'
+    assert buffer['table'] == 'events'
+    assert buffer['total_bytes'] == 2048
+    assert buffer['entry_count'] == 5
+    assert buffer['flush_deadline_us'] == 1700000000000000
+    assert 'query_signature' in buffer
+
+
+def test_emit_buffer_events_empty_snapshot(check_with_dbm):
+    """Test that no event is submitted when the buffer snapshot is empty"""
+    samples = check_with_dbm.statement_samples
+
+    with mock.patch.object(check_with_dbm, 'database_monitoring_query_metrics') as mock_submit:
+        samples._emit_buffer_events([])
+
+    mock_submit.assert_not_called()
+
+
+def test_record_buffer_counts(check_with_dbm):
+    """Test that a successful buffer snapshot emission reports the submitted buffer count metric"""
+    samples = check_with_dbm.statement_samples
+    samples.tags = ['test:clickhouse']
+    samples._tags_no_db = ['server:localhost']
+
+    buffer_snapshot = [
+        {'database': 'default', 'table': 'events'},
+        {'database': 'default', 'table': 'events'},
+    ]
+
+    with (
+        mock.patch.object(samples, '_create_buffer_event', return_value={'kind': BUFFER_PAYLOAD_KIND}),
+        mock.patch.object(check_with_dbm, 'database_monitoring_query_metrics'),
+        mock.patch.object(check_with_dbm, 'count') as mock_count,
+    ):
+        samples._emit_buffer_events(buffer_snapshot)
+
+    mock_count.assert_any_call(
+        "dd.clickhouse.async_inserts_buffer.buffers_submitted.count",
+        2,
+        tags=['test:clickhouse', 'server:localhost'],
+        raw=True,
+    )

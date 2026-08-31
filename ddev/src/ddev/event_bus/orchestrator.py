@@ -7,9 +7,11 @@ import asyncio
 import contextlib
 import logging
 import math
+import threading
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
-from concurrent.futures import Executor, ThreadPoolExecutor
+from concurrent.futures import Executor, Future, ThreadPoolExecutor
+from concurrent.futures import wait as wait_for_futures
 from dataclasses import dataclass
 from typing import assert_never, cast
 
@@ -51,7 +53,8 @@ class BaseMessage:
 class BaseProcessor[T: BaseMessage]:
     def __init__(self, name: str):
         self.name = name
-        self.queue: asyncio.Queue[BaseMessage] | None = None
+        # Set by the bus at registration.
+        self.bus: EventBusOrchestrator | None = None
 
     async def on_success(self, message: T) -> None:
         pass
@@ -76,9 +79,20 @@ class BaseProcessor[T: BaseMessage]:
         raise error
 
     def submit_message(self, message: BaseMessage) -> None:
-        if self.queue is None:
+        """Put *message* on the bus this processor was registered in, from any thread."""
+        if self.bus is None:
             raise ProcessorQueueError("This processor has not been added to an active event bus")
-        self.queue.put_nowait(message)
+
+        self.bus.submit_message(message)
+
+    @property
+    def stopping(self) -> bool:
+        """Whether the bus is shutting down.
+
+        A `SyncProcessor` runs in a thread, where cancelling its task cannot interrupt it, so long
+        work should check this between units and return rather than finish work nobody will read.
+        """
+        return self.bus is not None and self.bus.stopping
 
     def should_process_message(self, message: BaseMessage) -> bool:
         return True
@@ -134,12 +148,21 @@ class EventBusOrchestrator(ABC):
         self._logger = logger
         self._max_timeout = resolved_max_timeout
         self._grace_period = grace_period
+        # An executor we were given belongs to the caller, who may reuse it; one we made is ours to
+        # shut down, and nobody else can.
+        self._owns_executor = executor is None
         self._executor = executor or ThreadPoolExecutor(max_workers=4)
+        # Work we put on the pool, so shutdown can wait for it whoever the pool belongs to. Guarded
+        # because the pool's own threads discard from it as they finish.
+        self._sync_work: set[Future] = set()
+        self._sync_work_lock = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._stopping = threading.Event()
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
         """
@@ -152,17 +175,27 @@ class EventBusOrchestrator(ABC):
         if max_timeout <= grace_period:
             raise ValueError("max_timeout must be greater than grace_period")
 
+    @property
+    def stopping(self) -> bool:
+        """Whether the bus has begun shutting down, readable from any thread."""
+        return self._stopping.is_set()
+
     def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
         """Registers a processor to receive specific message types."""
-        processor.queue = self._queue
+        processor.bus = self
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
 
     def submit_message(self, message: BaseMessage):
+        """Adds a message to the queue, from any thread.
+
+        ``asyncio.Queue`` is not thread-safe, and a put it loses leaves the bus spinning on a message
+        it never reads, so while the bus runs the loop thread makes every put.
         """
-        Adds a message to the queue.
-        """
-        self._queue.put_nowait(message)
+        if self._loop is not None and self._loop.is_running():
+            self._loop.call_soon_threadsafe(self._queue.put_nowait, message)
+        else:
+            self._queue.put_nowait(message)
 
     def run(self):
         """
@@ -205,6 +238,10 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_INITIALIZE, e),
                 self.on_error,
             )
+        # Only now, so what the hook submitted is already queued. A deferred put is read because the
+        # callback that queues it precedes the task completion that wakes the loop, and the hook has
+        # no task to be ordered behind: a zero grace period would stop the bus before it ran.
+        self._loop = asyncio.get_running_loop()
 
     @abstractmethod
     async def on_initialize(self):  # pragma: no cover
@@ -220,6 +257,10 @@ class EventBusOrchestrator(ABC):
         In the case that the execution failed, the exception will be passed to the method
         """
         self._running = False
+        self._stopping.set()
+        # Before the hook, so it reports settled state: a sync processor still running would otherwise
+        # keep mutating what the hook has already published.
+        await self._drain_executor()
         try:
             await self.on_finalize(exception)
         except (FatalProcessingError, asyncio.CancelledError):
@@ -229,6 +270,53 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_FINALIZE, e),
                 self.on_error,
             )
+
+    async def _run_in_worker[T: BaseMessage](self, work: Callable[[T], None], message: T) -> None:
+        """Run blocking work on the processor pool, tracked until it finishes.
+
+        Tracked through the pool's own future rather than this call, because cancelling the caller
+        only cancels work the pool has not started yet; anything already running carries on.
+        """
+        future = self._executor.submit(work, message)
+        with self._sync_work_lock:
+            self._sync_work.add(future)
+        future.add_done_callback(self._forget_sync_work)
+        await asyncio.wrap_future(future)
+
+    def _forget_sync_work(self, future: Future) -> None:
+        """Drop work that has finished, called by the pool thread that finished it."""
+        with self._sync_work_lock:
+            self._sync_work.discard(future)
+
+    def _pending_sync_work(self) -> set[Future]:
+        """The work still on the pool.
+
+        Copied under the lock rather than iterated in place: the done callbacks run on worker threads,
+        so iterating the live set is iterating one another thread is mutating, which CPython raises on.
+        """
+        with self._sync_work_lock:
+            in_flight = set(self._sync_work)
+
+        return {future for future in in_flight if not future.done()}
+
+    async def _drain_executor(self) -> None:
+        """Wait for sync processors still running, and retire the pool if it is ours.
+
+        Cancelling a task cannot interrupt a `process_message` already running in a thread, and the
+        threads outlive the loop, so without this the process blocks on them at interpreter exit,
+        after the run has reported. Waiting here makes that time attributable instead.
+
+        Waiting is not conditional on ownership: a pool lent to us still runs our work, and the hook
+        reports state that work is still writing.
+        """
+        pending = self._pending_sync_work()
+        if pending:
+            self._logger.debug("Waiting for %s sync processor(s) still running...", len(pending))
+            await asyncio.to_thread(wait_for_futures, pending)
+
+        if self._owns_executor:
+            self._logger.debug("Retiring the processor thread pool...")
+            await asyncio.to_thread(self._executor.shutdown, wait=True)
 
     @abstractmethod
     async def on_finalize(self, exception: Exception | None):  # pragma: no cover
@@ -488,7 +576,7 @@ class EventBusOrchestrator(ABC):
                 case AsyncProcessor():
                     await cast(AsyncProcessor, processor).process_message(message)
                 case SyncProcessor():
-                    await asyncio.get_running_loop().run_in_executor(self._executor, processor.process_message, message)
+                    await self._run_in_worker(processor.process_message, message)
                 case _:
                     assert_never(processor)
         except (FatalProcessingError, asyncio.CancelledError):

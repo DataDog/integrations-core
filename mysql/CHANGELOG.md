@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 15.18.0 / 2026-07-08
+## 15.20.0 / 2026-08-24
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+## 15.19.0 / 2026-08-05
+
+***Added***:
+
+* Add the `binlog_size_metrics` option to skip binary log size collection. ([#24082](https://github.com/DataDog/integrations-core/pull/24082))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+***Fixed***:
+
+* Fix MySQL query metrics inflation when new digest variants share a normalized query signature. ([#24194](https://github.com/DataDog/integrations-core/pull/24194))
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
+## 15.18.0 / 2026-07-08 / Agent 7.82.0
 
 ***Added***:
 

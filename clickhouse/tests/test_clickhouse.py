@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.utils import CLUSTER_TAG
+from datadog_checks.clickhouse.utils import CLUSTER_TAG, HOSTING_TYPE_TAG
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -55,6 +55,7 @@ def test_custom_queries(aggregator, instance, dd_run_check):
         'test:clickhouse',
         'database_hostname:{}'.format(check.database_hostname),
         'database_instance:{}:{}:default'.format(instance['server'], instance['port']),
+        '{}:{}'.format(HOSTING_TYPE_TAG, check.hosting_type),
     ]
     # ClickHouse ships a built-in is_local `default` cluster on some versions (and Cloud reports one
     # too), so every metric carries the clickhouse_cluster tag when a cluster resolves.
@@ -134,3 +135,8 @@ def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_
     assert 'dbm' in event['metadata']
     assert 'connection_host' in event['metadata']
     assert event['metadata']['connection_host'] == instance['server']
+    assert event['metadata']['hosting_type'] == check.hosting_type
+    assert event['metadata']['single_endpoint_mode'] is False
+    assert event['metadata']['connect_node']
+    assert event['metadata']['nodes']
+    assert event['metadata']['connect_node'] in event['metadata']['nodes']

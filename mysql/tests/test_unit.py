@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gc
+import inspect
 import json
 import subprocess
 import time
+import weakref
 
 import mock
 import psutil
@@ -13,6 +16,7 @@ import pytest
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
+from datadog_checks.mysql.util import supports_explain_json_format_version
 from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
@@ -464,14 +468,16 @@ def test_get_tables_data_uses_parameterized_queries():
         assert query.count('%s') == len(table_list) + 1
 
 
-def test_exception_handling_by_do_for_dbs():
+def test_fetch_for_databases_continues_after_database_error():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
     with mock.patch(
         'datadog_checks.mysql.databases_data.DatabasesData._fetch_database_data',
-        side_effect=Exception("Can't connect to DB"),
-    ):
-        databases_data._fetch_for_databases([{"name": "my_db"}], "dummy_cursor")
+        side_effect=[pymysql.DatabaseError("Can't connect to DB"), None],
+    ) as fetch_database_data:
+        databases_data._fetch_for_databases([{"name": "first_db"}, {"name": "second_db"}], "dummy_cursor")
+
+    assert [call.args[2] for call in fetch_database_data.call_args_list] == ['first_db', 'second_db']
 
 
 def test_update_aurora_replication_role():
@@ -516,15 +522,39 @@ def test_database_identifier(template, expected, tags):
     assert check.database_identifier == expected
 
 
-def test__eliminate_duplicate_rows():
-    rows = [
-        {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
-        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
-    ]
-    second_pass = {1: {'event_timer_start': 2001}}
-    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == [
-        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
-    ]
+@pytest.mark.parametrize(
+    'rows,second_pass,expected',
+    [
+        pytest.param(
+            [
+                {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+                {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+            ],
+            {1: {'event_timer_start': 2001}},
+            [{'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'}],
+            id='drops_statement_that_ended_before_the_newest_one_started',
+        ),
+        pytest.param(
+            [
+                {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+                {'thread_id': 1, 'event_timer_start': 2001, 'sql_text': 'SELECT 1'},
+            ],
+            {1: {'event_timer_start': 2001}},
+            [{'thread_id': 1, 'event_timer_start': 2001, 'sql_text': 'SELECT 1'}],
+            id='keeps_row_missing_event_timer_end',
+        ),
+        pytest.param(
+            [{'thread_id': 2, 'sql_text': 'SELECT 2'}],
+            {2: {'event_timer_start': None}},
+            [{'thread_id': 2, 'sql_text': 'SELECT 2'}],
+            id='keeps_row_with_no_timers_at_all',
+        ),
+    ],
+)
+def test__eliminate_duplicate_rows(rows, second_pass, expected):
+    # `_sanitize_row` drops keys whose value is NULL before rows reach `_eliminate_duplicate_rows`,
+    # so rows produced by an instrument with `TIMED = NO` arrive without any event timer at all
+    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == expected
 
 
 @pytest.mark.parametrize(
@@ -910,3 +940,160 @@ class TestReplicaReplicationStatusParameterized:
         for call in mock_cursor.execute.call_args_list:
             query_str = call[0][0]
             assert channel not in query_str
+
+
+class TestSupportsExplainJsonFormatVersion:
+    """The explain_json_format_version variable only exists on MySQL/Percona 8.3.0 and above."""
+
+    @pytest.mark.parametrize(
+        'raw_version,version_comment,expected',
+        [
+            pytest.param('5.7.30', 'MySQL Community Server', False, id='mysql_5_7'),
+            pytest.param('8.0.36', 'MySQL Community Server', False, id='mysql_8_0'),
+            pytest.param('8.2.0', 'MySQL Community Server', False, id='mysql_8_2'),
+            pytest.param('8.3.0', 'MySQL Community Server', True, id='mysql_8_3'),
+            pytest.param('8.4.0', 'MySQL Community Server', True, id='mysql_8_4'),
+            pytest.param('9.7.2', 'MySQL Community Server', True, id='mysql_9_7'),
+            pytest.param('8.0.42', 'Percona Server (GPL)', False, id='percona_8_0'),
+            pytest.param('8.4.0', 'Percona Server (GPL)', True, id='percona_8_4'),
+            # MariaDB never has the variable, even though its version numbers sort above 8.3.0
+            pytest.param('10.11.0-MariaDB', 'MariaDB', False, id='mariadb_10_11'),
+            pytest.param('11.4.0-MariaDB', 'MariaDB', False, id='mariadb_11_4'),
+        ],
+    )
+    def test_supported_versions(self, raw_version, version_comment, expected):
+        version = parse_version(raw_version, version_comment)
+        assert supports_explain_json_format_version(version) is expected
+
+    def test_unknown_version(self):
+        """The variable cannot be set safely before the server version has been detected."""
+        assert supports_explain_json_format_version(None) is False
+
+
+DBM_JOBS = ['statement-metrics', 'statement-samples', 'query-activity', 'database-metadata']
+
+
+@pytest.mark.parametrize(
+    'dbm, data_observability, expected_jobs',
+    [
+        pytest.param(False, False, [], id='neither'),
+        pytest.param(True, False, DBM_JOBS, id='dbm'),
+        pytest.param(False, True, ['database-metadata', 'data-observability'], id='data_observability'),
+        pytest.param(True, True, DBM_JOBS + ['data-observability'], id='both'),
+    ],
+)
+def test_async_job_registry_matches_config(dbm, data_observability, expected_jobs):
+    """Only the jobs enabled by the instance config are built and registered.
+
+    Each job's own enabled flag defaults to true, so a registered job starts collecting. Data
+    Observability relies on the metadata job for schema collection, so either feature registers it.
+    """
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': dbm,
+        'data_observability': {'enabled': data_observability},
+    }
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+
+    registered = check._async_job_registry
+    assert list(registered) == expected_jobs
+    assert check.statement_metrics is registered.get('statement-metrics')
+    assert check.statement_samples is registered.get('statement-samples')
+    assert check.mysql_metadata is registered.get('database-metadata')
+    assert check.query_activity is registered.get('query-activity')
+    assert check.data_observability is registered.get('data-observability')
+
+
+@pytest.mark.parametrize(
+    'job_attr',
+    ['statement_metrics', 'statement_samples', 'mysql_metadata', 'query_activity', 'data_observability'],
+)
+def test_job_shutdown_closes_connection(job_attr):
+    """Each job must close its own connection on shutdown; the GC test would not catch a leak."""
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': True,
+        'data_observability': {'enabled': True},
+    }
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    job = getattr(check, job_attr)
+    conn = mock.MagicMock()
+    job._db = conn
+
+    job.shutdown()
+
+    conn.close.assert_called_once()
+    assert job._db is None
+
+
+@pytest.mark.parametrize(
+    'job_attr, invoke',
+    [
+        ('statement_samples', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('mysql_metadata', lambda job, cursor: job._cursor_run(cursor, 'SELECT 1')),
+        ('statement_metrics', lambda job, cursor: job._get_statement_count([])),
+        ('query_activity', lambda job, cursor: job._get_activity(cursor)),
+    ],
+)
+def test_job_aborts_query_when_cancelled(job_attr, invoke):
+    """Cancelling a job must stop collection queries before they hit the database."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+    job = getattr(check, job_attr)
+    job.cancel()
+    job._get_db_connection = mock.MagicMock()
+    cursor = mock.MagicMock()
+
+    with pytest.raises(Exception, match='cancelled'):
+        invoke(job, cursor)
+
+    job._get_db_connection.assert_not_called()
+    cursor.execute.assert_not_called()
+
+
+def test_check_gc_after_cancel():
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': True,
+        'query_samples': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'query_metrics': {'enabled': True, 'run_sync': True, 'collection_interval': 10},
+        'query_activity': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'collect_settings': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'data_observability': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+    }
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()

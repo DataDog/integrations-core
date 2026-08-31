@@ -1,0 +1,1 @@
+Fan out over the cluster the instance actually belongs to in single endpoint mode, instead of assuming it is named ``default``, and read local system tables when no cluster can be resolved.
