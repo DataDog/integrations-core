@@ -431,10 +431,9 @@ class RelationsManager(object):
         self.config = self._build_relations_config(yamlconfig)
         self.max_relations = max_relations
         self.has_relations = len(self.config) > 0
-        self._filtered_queries_cache = {}
+        self._filtered_queries_cache: dict[tuple[str, str], str] = {}
 
-    def filter_relation_query(self, query, schema_field):
-        # type (str, str) -> str
+    def filter_relation_query(self, query: str, schema_field: str) -> str:
         """
         Get a filtered query from cache, building it if not already cached. The filter comes from the
         relations configuration, which is fixed for the lifetime of the check, so a query only has to
@@ -445,8 +444,7 @@ class RelationsManager(object):
             self._filtered_queries_cache[cache_key] = self._build_filtered_query(query, schema_field)
         return self._filtered_queries_cache[cache_key]
 
-    def _build_filtered_query(self, query, schema_field):
-        # type (str, str) -> str
+    def _build_filtered_query(self, query: str, schema_field: str) -> str:
         """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
         for r in self.config:
