@@ -10,8 +10,11 @@ from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 
 @pytest.fixture(autouse=True)
 def _github_actions_env(monkeypatch):
-    """A consistent GitHub Actions environment, so a real one cannot leak into these tests."""
-    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    """A consistent GitHub Actions environment, so a real one cannot leak into these tests.
+
+    `GITHUB_STEP_SUMMARY` is not set here: every test below picks either `step_summary` or
+    `without_step_summary`, and a default would just be a third source of truth for the same variable.
+    """
     monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
     monkeypatch.setenv("GITHUB_REPOSITORY", "DataDog/integrations-core")
     monkeypatch.setenv("GITHUB_RUN_ID", "12345")
@@ -33,26 +36,20 @@ def test_get_workflow_run_url_returns_none_when_env_missing(monkeypatch, missing
 # --- write_step_summary ---
 
 
-def test_write_step_summary_writes_to_file(tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
+def test_write_step_summary_writes_to_file(step_summary):
     write_step_summary("## Report\nAll good")
-    assert summary_file.read_text(encoding="utf-8") == "## Report\nAll good\n"
+    assert step_summary.read_text(encoding="utf-8") == "## Report\nAll good\n"
 
 
-def test_write_step_summary_appends(tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    summary_file.write_text("existing\n", encoding="utf-8")
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
+def test_write_step_summary_appends(step_summary):
+    step_summary.write_text("existing\n", encoding="utf-8")
 
     write_step_summary("new content")
-    assert "existing\n" in summary_file.read_text(encoding="utf-8")
-    assert "new content\n" in summary_file.read_text(encoding="utf-8")
+    assert "existing\n" in step_summary.read_text(encoding="utf-8")
+    assert "new content\n" in step_summary.read_text(encoding="utf-8")
 
 
-def test_write_step_summary_noop_without_env(monkeypatch):
-    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+def test_write_step_summary_noop_without_env(without_step_summary):
     write_step_summary("should not error")
 
 
@@ -62,16 +59,13 @@ def test_write_step_summary_survives_an_unwritable_summary_file(tmp_path, monkey
     write_step_summary("should not error")
 
 
-def test_the_step_summary_is_written_as_utf8_whatever_the_locale(tmp_path, monkeypatch):
+def test_the_step_summary_is_written_as_utf8_whatever_the_locale(step_summary):
     """The Dispatcher report is emoji-dense, so the encoding is part of the contract.
 
     Asserted in bytes, because reading it back as text would use the locale encoding and agree with
     whatever was written. Only fails where it matters — Windows CI, or ``LC_ALL=C PYTHONUTF8=0``.
     """
-    summary_file = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
     write_step_summary("## ✅ passed · ❌ failed")
 
     # The trailing newline is excluded deliberately: text mode translates it to CRLF on Windows.
-    assert summary_file.read_bytes().startswith("## ✅ passed · ❌ failed".encode())
+    assert step_summary.read_bytes().startswith("## ✅ passed · ❌ failed".encode())
