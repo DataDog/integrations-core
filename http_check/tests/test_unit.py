@@ -7,10 +7,18 @@ from datetime import timedelta
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientInvalidURLError,
+    HTTPClientRequestError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 from datadog_checks.http_check import HTTPCheck, http_check
 
 
@@ -88,19 +96,61 @@ def test_message_when_content_is_disabled():
     assert content not in message
 
 
+def test_invalid_url_submits_critical_service_check(aggregator, fake_http) -> None:
+    instance = {'name': 'invalid_url', 'url': 'https://example.com', 'check_certificate_expiration': False}
+    fake_http.register_response('GET', instance['url'], HTTPClientInvalidURLError('Invalid URL'))
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    check.check(instance)
+
+    tags = ['url:https://example.com', 'instance:invalid_url']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=tags, count=1)
+
+
+def test_generic_request_error_submits_critical_service_check(aggregator, fake_http) -> None:
+    instance = {'name': 'request_error', 'url': 'https://example.com', 'check_certificate_expiration': False}
+    fake_http.register_response('GET', instance['url'], HTTPClientRequestError('Request failed'))
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    check.check(instance)
+
+    tags = ['url:https://example.com', 'instance:request_error']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=tags, count=1)
+
+
+def test_check_closes_http_client(aggregator, fake_http):
+    instance = {'name': 'lifecycle', 'url': 'https://example.com', 'check_certificate_expiration': False}
+    fake_http.register_response('GET', instance['url'], _mock_response(200))
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    check.check(instance)
+
+    assert check.http.closed is True
+
+
+def test_post_sets_content_type_header(fake_http):
+    instance = {
+        'name': 'content_type',
+        'url': 'https://example.com/submit',
+        'method': 'post',
+        'check_certificate_expiration': False,
+    }
+    fake_http.register_response('POST', instance['url'], _mock_response(200))
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    check.check(instance)
+
+    assert check.http.get_header('Content-Type') == 'application/x-www-form-urlencoded'
+
+
 URL = 'http://foo.bar'
 URL_TAG = 'url:{}'.format(URL)
 INSTANCE_TAG = 'instance:http_outcome_tag'
 
 
 def _mock_response(status_code):
-    """Build a response that behaves like a consumed `requests` response."""
-    response = requests.Response()
-    response.status_code = status_code
-    response._content = b'hello'
-    response._content_consumed = True
-    response.elapsed = timedelta(seconds=0.5)
-    return response
+    """Build an agnostic response carrying a fixed body and elapsed time."""
+    return FakeHTTPResponse(content=b'hello', text='hello', status_code=status_code, elapsed=timedelta(seconds=0.5))
 
 
 def _make_check(**extra):
@@ -109,23 +159,21 @@ def _make_check(**extra):
     return HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance]), instance
 
 
-def test_missing_response_cert_does_not_open_second_connection(aggregator, caplog):
+def test_missing_response_cert_does_not_open_second_connection(aggregator, fake_http, caplog):
     instance = {
         'name': 'missing_response_cert',
         'url': 'https://example.com',
         'timeout': 1,
         'use_cert_from_response': True,
     }
-    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
     message = 'Unable to retrieve the peer certificate from the HTTP response.'
     caplog.set_level('DEBUG')
+    fake_http.register_response('GET', instance['url'], FakeHTTPResponse())
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
 
-    with (
-        mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', return_value=FakeHTTPResponse()),
-        mock.patch.object(
-            check, '_fetch_cert', side_effect=AssertionError('opened a second TLS connection')
-        ) as fetch_cert,
-    ):
+    with mock.patch.object(
+        check, '_fetch_cert', side_effect=AssertionError('opened a second TLS connection')
+    ) as fetch_cert:
         check.check(instance)
 
     fetch_cert.assert_not_called()
@@ -133,12 +181,12 @@ def test_missing_response_cert_does_not_open_second_connection(aggregator, caplo
     assert message in caplog.text
 
 
-def test_http_outcome_tag_absent_by_default(aggregator):
+def test_http_outcome_tag_absent_by_default(aggregator, fake_http):
     """Without `enable_http_outcome_tag`, no metric carries an `http_outcome` tag."""
     check, instance = _make_check()
+    fake_http.register_response('GET', URL, _mock_response(200))
 
-    with mock.patch('requests.Session.get', return_value=_mock_response(200)):
-        check.check(instance)
+    check.check(instance)
 
     expected_tags = [URL_TAG, INSTANCE_TAG]
     aggregator.assert_metric('network.http.can_connect', value=1.0, tags=expected_tags, count=1)
@@ -153,12 +201,12 @@ def test_http_outcome_tag_absent_by_default(aggregator):
         pytest.param(500, 0.0, 1.0, id='non-2xx response'),
     ],
 )
-def test_http_outcome_tag_added_when_enabled(aggregator, status_code, can_connect, cant_connect):
+def test_http_outcome_tag_added_when_enabled(aggregator, fake_http, status_code, can_connect, cant_connect):
     """All three metrics carry the numeric status code, including for error responses."""
     check, instance = _make_check(enable_http_outcome_tag=True)
+    fake_http.register_response('GET', URL, _mock_response(status_code))
 
-    with mock.patch('requests.Session.get', return_value=_mock_response(status_code)):
-        check.check(instance)
+    check.check(instance)
 
     expected_tags = [URL_TAG, INSTANCE_TAG, 'http_outcome:{}'.format(status_code)]
     aggregator.assert_metric('network.http.can_connect', value=can_connect, tags=expected_tags, count=1)
@@ -166,12 +214,12 @@ def test_http_outcome_tag_added_when_enabled(aggregator, status_code, can_connec
     aggregator.assert_metric('network.http.response_time', value=0.5, tags=expected_tags, count=1)
 
 
-def test_http_outcome_tag_reports_status_code_when_content_match_fails(aggregator):
+def test_http_outcome_tag_reports_status_code_when_content_match_fails(aggregator, fake_http):
     """`http_outcome` is what HTTP returned, not the verdict: a 200 that fails `content_match` is down."""
     check, instance = _make_check(enable_http_outcome_tag=True, content_match='not in the body')
+    fake_http.register_response('GET', URL, _mock_response(200))
 
-    with mock.patch('requests.Session.get', return_value=_mock_response(200)):
-        check.check(instance)
+    check.check(instance)
 
     expected_tags = [URL_TAG, INSTANCE_TAG, 'http_outcome:200']
     aggregator.assert_metric('network.http.can_connect', value=0.0, tags=expected_tags, count=1)
@@ -183,26 +231,35 @@ def test_http_outcome_tag_reports_status_code_when_content_match_fails(aggregato
 @pytest.mark.parametrize(
     'error, expected_value',
     [
-        pytest.param(requests.exceptions.SSLError('bad cert'), 'ssl_error', id='ssl_error'),
-        # ConnectTimeout subclasses both ConnectionError and Timeout, and must map to `timeout`
-        pytest.param(requests.exceptions.ConnectTimeout('too slow'), 'timeout', id='connect_timeout'),
-        pytest.param(requests.exceptions.Timeout('too slow'), 'timeout', id='timeout'),
+        pytest.param(HTTPClientSSLError('bad cert'), 'ssl_error', id='ssl_error'),
+        pytest.param(HTTPClientConnectTimeoutError('too slow'), 'timeout', id='connect_timeout'),
+        pytest.param(HTTPClientTimeoutError('too slow'), 'timeout', id='timeout'),
         pytest.param(socket.timeout('too slow'), 'timeout', id='socket_timeout'),
-        pytest.param(requests.exceptions.ConnectionError('refused'), 'connection_error', id='connection_error'),
+        pytest.param(HTTPClientConnectionError('refused'), 'connection_error', id='connection_error'),
         pytest.param(OSError('no such file'), 'socket_error', id='socket_error'),
+        pytest.param(HTTPClientStatusError('503 Server Error'), 'socket_error', id='status_error'),
     ],
 )
-def test_http_outcome_tag_on_failure_paths(aggregator, error, expected_value):
+def test_http_outcome_tag_on_failure_paths(aggregator, fake_http, error, expected_value):
     """When no response is received the tag falls back to a sentinel and no response time is reported."""
     check, instance = _make_check(enable_http_outcome_tag=True)
+    fake_http.register_response('GET', URL, error)
 
-    # Patch the wrapper rather than `requests.Session` so the base library's AIA chasing,
-    # which swallows `SSLError` to go fetch intermediate certs, stays out of the way.
-    with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', side_effect=error):
-        check.check(instance)
+    check.check(instance)
 
     expected_tags = [URL_TAG, INSTANCE_TAG, 'http_outcome:{}'.format(expected_value)]
     aggregator.assert_metric('network.http.can_connect', value=0.0, tags=expected_tags, count=1)
     aggregator.assert_metric('network.http.cant_connect', value=1.0, tags=expected_tags, count=1)
     aggregator.assert_metric('network.http.response_time', count=0)
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL, count=1)
+
+
+def test_use_cert_from_response_reads_peer_cert(aggregator, dd_run_check, fake_http):
+    instance = {'name': 'cert', 'url': 'https://example.com', 'use_cert_from_response': True}
+    fake_http.register_response('GET', instance['url'], FakeHTTPResponse(status_code=200))
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', return_value='bar'):
+        check = HTTPCheck('http_check', {}, [instance])
+        dd_run_check(check)
+
+    # Unparseable peer cert from the fake response yields UNKNOWN, not an exception.
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, count=1)
