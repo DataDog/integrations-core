@@ -27,6 +27,21 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # macOS 14 SDK. Built here they honor MACOSX_DEPLOYMENT_TARGET and come out at 12.0.
     # (The libddwaf dylib ddtrace downloads prebuilt is stripped in repair_wheels.py instead.)
     always_build+=("ddtrace")
+
+    # WORKAROUND (INC-59892): PyPI's JSON Simple index is intermittently dropping the
+    # ddtrace 4.13.2 *sdist* listing, so `pip wheel --no-binary ddtrace` can't resolve it
+    # and the macOS build fails with ResolutionImpossible. The sdist file itself is always
+    # served, so pre-fetch it and expose it to pip via find-links, leaving the
+    # `ddtrace==4.13.2` pin untouched. The SHA-256 is PyPI's published value for the file;
+    # `shasum --check` fails the build loudly if the fetched bytes ever diverge from it.
+    # Remove once PyPI reconciles its index for this release.
+    ddtrace_sdist_dir="${DD_MOUNT_DIR}/ddtrace-sdist"
+    ddtrace_sdist_sha256="b35f196250426177c933fd15ab119f8cffa984b7b14d6ff7e7b0559cb46a0316"
+    mkdir -p "${ddtrace_sdist_dir}"
+    curl -fsSL "https://files.pythonhosted.org/packages/57/0d/3881cffeea1077dc41b77939691153b175790d1b204902c238ca54a5fb7f/ddtrace-4.13.2.tar.gz" \
+      -o "${ddtrace_sdist_dir}/ddtrace-4.13.2.tar.gz"
+    echo "${ddtrace_sdist_sha256}  ${ddtrace_sdist_dir}/ddtrace-4.13.2.tar.gz" | shasum -a 256 --check
+    echo "PIP_FIND_LINKS=${ddtrace_sdist_dir}" >> $DD_ENV_FILE
 fi
 
 # Make sure IBM MQ libraries are found under /opt/mqm even when we're using the builder cache
