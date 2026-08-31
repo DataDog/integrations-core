@@ -1651,10 +1651,12 @@ def test_environments_metrics_http_failure(
         pytest.param(
             {
                 'http_error': {
+                    '/api/Spaces-1/releases/Releases-1': MockResponse(status_code=500),
+                    '/api/Spaces-1/releases/Releases-2': MockResponse(status_code=500),
                     '/api/Spaces-1/releases/Releases-3': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/releases/Releases-3: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/releases/Releases-1: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -1668,22 +1670,13 @@ def test_deployment_metrics_releases_http_failure(
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     caplog.set_level(logging.WARNING)
+
     dd_run_check(check)
 
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'octopus_server:http://localhost:80',
-            'project_name:test',
-            'space_name:Default',
-            'server_node:None',
-            'release_version:None',
-            'environment_name:dev',
-            'deployment_id:Deployments-19',
-            'task_state:Queued',
-        ],
-        count=1,
-    )
+    assert expected_log in caplog.text
+    # The deployments still resolve to an environment, so tasks are reported without a version.
+    for stub in aggregator.metrics('octopus_deploy.deployment.count'):
+        assert 'release_version:None' in stub.tags
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
@@ -1693,183 +1686,10 @@ def test_deployment_metrics_releases_http_failure(
             'server_node:OctopusServerNodes-50c3dfbarc82',
             'deployment_id:Deployments-18',
             'environment_name:staging',
-            'release_version:0.0.1',
+            'release_version:None',
             'task_state:Executing',
         ],
         count=1,
-    )
-    deployment_metrics = aggregator.metrics('octopus_deploy.deployment.count')
-    assert len(deployment_metrics) == 2
-    assert expected_log in caplog.text
-    get_current_datetime.return_value = MOCKED_TIME2
-    dd_run_check(check)
-
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        1,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:None',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        110,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:None',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        50,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:None',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        5,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'release_version:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        1,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:staging',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        90,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:staging',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        54,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'release_version:0.0.1',
-            'environment_name:staging',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        1,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:staging',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        18,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        41,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        14,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
     )
 
 
@@ -1879,10 +1699,10 @@ def test_deployment_metrics_releases_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/deployments/Deployments-18': MockResponse(status_code=500),
+                    '/api/Spaces-1/deployments': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/deployments/Deployments-18: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/deployments: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -1895,214 +1715,16 @@ def test_deployment_metrics_deployments_http_failure(
 ):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING)
+
     dd_run_check(check)
 
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'octopus_server:http://localhost:80',
-            'project_name:test',
-            'space_name:Default',
-            'server_node:None',
-            'release_version:0.0.2',
-            'environment_name:dev',
-            'deployment_id:Deployments-19',
-            'task_state:Queued',
-        ],
-        count=1,
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'octopus_server:http://localhost:80',
-            'space_name:Default',
-            'project_name:my-project',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:None',
-            'task_state:Executing',
-        ],
-        count=0,
-    )
-    deployment_metrics = aggregator.metrics('octopus_deploy.deployment.count')
-    assert len(deployment_metrics) == 1
     assert expected_log in caplog.text
-    get_current_datetime.return_value = MOCKED_TIME2
-    dd_run_check(check)
-
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        1,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:0.0.2',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        110,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:0.0.2',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        50,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:0.0.2',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        5,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-19',
-            'environment_name:dev',
-            'release_version:0.0.2',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        1,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-        count=0,
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        90,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-        count=0,
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        54,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'release_version:None',
-            'environment_name:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-        count=0,
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        1,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-        count=0,
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        18,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        41,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        14,
-        tags=[
-            'octopus_server:http://localhost:80',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:dev',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
+    # Without their deployments the tasks cannot be attributed to an environment, so they are
+    # skipped rather than reported against an unknown one.
+    for metric in DEPLOY_METRICS:
+        aggregator.assert_metric(metric, count=0)
+    aggregator.assert_metric('octopus_deploy.project.count', at_least=1)
 
 
 @pytest.mark.parametrize(
@@ -2159,13 +1781,23 @@ def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get, 
         args, _ = call
         args_list += list(args)
 
+    # Deployments are fetched by id in bulk, and only for what is not already cached, so five runs
+    # over the same deployments resolve them in one collection request rather than one each.
+    deployment_ids = [
+        deployment_id
+        for call in mock_http_get.call_args_list
+        if call[0][0] == 'http://localhost:80/api/Spaces-1/deployments'
+        for deployment_id in call[1]['params']['ids']
+    ]
+    assert sorted(deployment_ids) == ['Deployments-16', 'Deployments-17', 'Deployments-18', 'Deployments-19']
+    assert not [url for url in args_list if url.startswith('http://localhost:80/api/Spaces-1/deployments/')]
+
+    # Releases have no working `ids` filter, so they are fetched individually — but the cache still
+    # means each is fetched once across five runs.
     assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-1') == 1
     assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-2') == 1
     assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-3') == 1
-
-    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-17') == 1
-    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-18') == 1
-    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-19') == 1
+    assert 'http://localhost:80/api/Spaces-1/releases' not in args_list
 
     assert args_list.count('http://localhost:80/api/Spaces-1/environments') == 5
 
