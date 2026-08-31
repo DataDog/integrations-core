@@ -151,6 +151,7 @@ class KubernetesAgent(AgentInterface):
         env_vars = env_vars.copy()
         env_vars.setdefault('DD_API_KEY', 'a' * 32)
         env_vars.setdefault('DD_APM_ENABLED', 'false')
+        env_vars.setdefault('DD_AGENT_TELEMETRY_ENABLED', 'false')
         env_vars.setdefault('DD_AUTOCONFIG_FROM_ENVIRONMENT', 'true')
         env_vars.setdefault('DD_HOSTNAME', self._namespace)
         env_vars.setdefault('DD_KUBELET_TLS_VERIFY', 'false')

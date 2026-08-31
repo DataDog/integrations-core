@@ -184,6 +184,9 @@ class DockerAgent(AgentInterface):
         env_vars.setdefault(AgentEnvVars.TELEMETRY_ENABLED, '1')
         env_vars.setdefault(AgentEnvVars.EXPVAR_PORT, '5000')
 
+        # Disable Agent telemetry by default so E2E Agents do not pollute COAT stats
+        env_vars.setdefault(AgentEnvVars.AGENT_TELEMETRY_ENABLED, 'false')
+
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
                 env_vars[AgentEnvVars.PROXY_HTTP] = http_proxy

@@ -161,6 +161,35 @@ class TestStart:
         assert 'export DD_API_KEY="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"' in exported_env_vars_str
         assert 'export DD_APM_ENABLED="false"' in exported_env_vars_str
         assert 'export DD_TELEMETRY_ENABLED="true"' in exported_env_vars_str
+        assert 'export DD_AGENT_TELEMETRY_ENABLED="false"' in exported_env_vars_str
+
+    def test_agent_telemetry_can_be_overridden_by_metadata(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+        mocker,
+        mock_env_data_storage,
+        mock_vagrantfile_template,
+        mock_platform_run,
+        vagrant_env_cleanup,
+    ):
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        integration = 'glusterfs'
+        environment = 'py3.12'
+        metadata = {'dd_agent_telemetry_enabled': 'true'}
+
+        agent = VagrantAgent(app, get_integration(integration), environment, metadata, config_file)
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+        # Verify Vagrantfile was generated with the overridden exported env var
+        mock_vagrantfile_template.render.assert_called_once()
+        render_kwargs = mock_vagrantfile_template.render.call_args.kwargs
+        exported_env_vars_str = render_kwargs['exported_env_vars_str']
+        assert 'export DD_AGENT_TELEMETRY_ENABLED="true"' in exported_env_vars_str
 
     def test_without_config_file_does_not_add_synced_folder(
         self,
