@@ -161,6 +161,30 @@ def test_format_base_package_double_quotes_local_path_on_windows(monkeypatch):
 
 
 @pytest.mark.parametrize(
+    'package_name, expects_flag',
+    [
+        pytest.param(None, True, id='integration_uses_explicit_package_bases'),
+        pytest.param('ddev', False, id='ddev_infers_its_own_package_bases'),
+    ],
+)
+def test_explicit_package_bases_is_only_used_for_the_namespace_packaged_integrations(
+    fake_checkout, package_name, expects_flag
+):
+    """ddev's `src` layout resolves its own module names; the flag would name every module `src.ddev.*`.
+
+    A `from ddev...` import then resolves to nothing and `ignore_missing_imports` turns it into `Any`,
+    so mypy reports success while checking nothing that crosses a module boundary.
+    """
+    integrations_core, integration_root = fake_checkout(*([package_name] if package_name else []))
+    package_root = integrations_core / package_name if package_name else integration_root
+
+    collector = DatadogChecksEnvironmentCollector(package_root, {'check-types': True})
+    [command] = collector.get_initial_config()['lint']['scripts']['typing']
+
+    assert ('--explicit-package-bases' in tokenize(command)) is expects_flag
+
+
+@pytest.mark.parametrize(
     'script_name, config_flag',
     [
         pytest.param('style', '--config', id='ruff_style'),
