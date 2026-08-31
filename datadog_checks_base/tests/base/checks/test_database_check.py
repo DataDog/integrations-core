@@ -100,6 +100,15 @@ def test_agent_hostname_resolves_once_and_caches():
         assert get_hostname.call_count == 1
 
 
+def test_agent_version_resolves_once_and_caches():
+    check = FakeDatabaseCheck("test", {}, [{}])
+    # The version comes from an FFI call, so it should only be resolved once and cached.
+    with mock.patch.object(datadog_agent, "get_version", return_value="7.70.0") as get_version:
+        assert check.agent_version == "7.70.0"
+        assert check.agent_version == "7.70.0"
+        assert get_version.call_count == 1
+
+
 @pytest.mark.parametrize(
     ("tags", "template", "connection_params", "expected"),
     [

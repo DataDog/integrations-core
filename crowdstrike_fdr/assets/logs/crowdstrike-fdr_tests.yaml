@@ -77,6 +77,15 @@ tests:
       aid: "ffffffff3a5a424fa02450da53619745"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "ffffffff3a5a424fa02450da53619745"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "583707537390"
+          parent:
+            id: "17346335177"
+        sha256: "7f326aad0ee45bfef93daede5597d70422d472084ae3295762654fb5021a8720"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -174,6 +183,12 @@ tests:
       aid: "fffffffff000426eb99afaa2ccdcbc17"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "fffffffff000426eb99afaa2ccdcbc17"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "223442259384"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -190,6 +205,7 @@ tests:
           geoip: {}
           ip: "10.20.30.40"
           port: "443"
+        protocol: "TCP"
       timestamp: "1604855116942"
     message: |-
       {
@@ -265,6 +281,13 @@ tests:
       aid: "31e92a267c044d57b1c1e14109079e89"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "31e92a267c044d57b1c1e14109079e89"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "683613242245"
+        query_status: "9003"
       dns:
         question:
           name: "metadata.google.internal"
@@ -367,6 +390,12 @@ tests:
       aid: "ffffffff8d2e4b4f9b21b40633a8d579"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "ffffffff8d2e4b4f9b21b40633a8d579"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "816054990879"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -478,6 +507,12 @@ tests:
       aid: "ffffffff73164cfa9656c4caff8a2a38"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "ffffffff73164cfa9656c4caff8a2a38"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "30254389526587"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -670,6 +705,13 @@ tests:
       Technique: "Sensor-based ML"
       UTCTimestamp: 1680759530000
       cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      crowdstrike_fdr:
+        cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        computer_name: "ip-172-18-63-230.ec2.internal"
+        process:
+          parent:
+            id: "1680759529306198500"
+        sha256: "31a0333333333333333333333333333333333333333333333333333333333333"
       eid: 118
       evt:
         category: "detection"
@@ -800,6 +842,12 @@ tests:
       aid: "ffffffff6854438eb4181691ec47e43d"
       aip: "67.43.156.14"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "ffffffff6854438eb4181691ec47e43d"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "56042872298"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -816,6 +864,7 @@ tests:
           geoip: {}
           ip: "2606:4700:4700::1111"
           port: "443"
+        protocol: "TCP"
       timestamp: "1604855199798"
     message: |-
       {
@@ -889,6 +938,12 @@ tests:
       aid: "fffffffff000426eb99afaa2ccdcbc17"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "fffffffff000426eb99afaa2ccdcbc17"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "223442259385"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -905,6 +960,7 @@ tests:
           geoip: {}
           ip: "10.20.30.41"
           port: "445"
+        protocol: "TCP"
       timestamp: "1604855120310"
     message: |-
       {
@@ -978,6 +1034,12 @@ tests:
       aid: "fffffffff000426eb99afaa2ccdcbc17"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "fffffffff000426eb99afaa2ccdcbc17"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "223442259386"
       event_platform: "Win"
       event_platform_value: "Windows"
       evt:
@@ -994,6 +1056,7 @@ tests:
           geoip: {}
           ip: "10.20.30.42"
           port: "8080"
+        protocol: "UDP"
       timestamp: "1604855124638"
     message: |-
       {
@@ -1070,6 +1133,13 @@ tests:
       aid: "31e92a267c044d57b1c1e14109079e89"
       aip: "10.10.10.10"
       cid: "ffffffff30a3407dae27d0503611022d"
+      crowdstrike_fdr:
+        aid: "31e92a267c044d57b1c1e14109079e89"
+        cid: "ffffffff30a3407dae27d0503611022d"
+        platform: "Windows"
+        process:
+          id: "683613242246"
+        query_status: "0"
       dns:
         answer:
           name: "10.20.30.43"
@@ -1183,6 +1253,10 @@ tests:
       Technique: "Known malware signature"
       UTCTimestamp: 1680759540000
       cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      crowdstrike_fdr:
+        cid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        computer_name: "ip-172-18-63-231.ec2.internal"
+        sha256: "31a0333333333333333333333333333333333333333333333333333333333334"
       eid: 119
       evt:
         category: "detection"
@@ -1231,3 +1305,238 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1680759540000
+ # The following fixtures are sanitized reconstructions of processed Log Explorer
+ # exports. They preserve only fields needed to exercise deterministic processors
+ # and do not claim byte-for-byte fidelity with the raw CrowdStrike objects.
+ # The sensor-shaped fixtures omit S3 tags to verify unknown datasets stay unclassified.
+ -
+  sample: |-
+    {
+      "ComputerName" : "demo-mac-01",
+      "ContextProcessId" : "987654321012345678",
+      "ParentProcessId" : "876543210123456789",
+      "SHA256HashData" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "TargetProcessId" : "765432101234567890",
+      "aid" : "11111111111111111111111111111111",
+      "cid" : "22222222222222222222222222222222",
+      "event_platform" : "Mac",
+      "event_simpleName" : "ProcessRollup2",
+      "name" : "ProcessRollup2MacV12",
+      "timestamp" : "1787000000000"
+    }
+  result:
+    custom:
+      ComputerName: "demo-mac-01"
+      ContextProcessId: "987654321012345678"
+      ParentProcessId: "876543210123456789"
+      SHA256HashData: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      TargetProcessId: "765432101234567890"
+      aid: "11111111111111111111111111111111"
+      cid: "22222222222222222222222222222222"
+      crowdstrike_fdr:
+        aid: "11111111111111111111111111111111"
+        cid: "22222222222222222222222222222222"
+        computer_name: "demo-mac-01"
+        platform: "Mac"
+        process:
+          id: "987654321012345678"
+          parent:
+            id: "876543210123456789"
+        sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      event_platform: "Mac"
+      event_platform_value: "Mac"
+      evt:
+        category: "process"
+        name: "ProcessRollup2"
+      name: "ProcessRollup2MacV12"
+      timestamp: "1787000000000"
+    message: |-
+      {
+        "event_simpleName" : "ProcessRollup2",
+        "event_platform" : "Mac",
+        "TargetProcessId" : "765432101234567890",
+        "ContextProcessId" : "987654321012345678",
+        "ParentProcessId" : "876543210123456789",
+        "ComputerName" : "demo-mac-01",
+        "name" : "ProcessRollup2MacV12",
+        "SHA256HashData" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "aid" : "11111111111111111111111111111111",
+        "cid" : "22222222222222222222222222222222",
+        "timestamp" : "1787000000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1787000000000
+ -
+  sample: |-
+    {
+      "ConnectionDirection" : "0",
+      "ConnectionFlags" : "0",
+      "ContextProcessId" : "987654321012345678",
+      "LocalAddressIP4" : "192.0.2.10",
+      "LocalPort" : "51515",
+      "Protocol" : "6",
+      "RemoteAddressIP4" : "198.51.100.20",
+      "RemotePort" : "443",
+      "aid" : "11111111111111111111111111111111",
+      "cid" : "22222222222222222222222222222222",
+      "event_platform" : "Mac",
+      "event_simpleName" : "NetworkConnectIP4",
+      "name" : "NetworkConnectIP4V15",
+      "timestamp" : "1787000001000"
+    }
+  result:
+    custom:
+      ConnectionDirection: "0"
+      ConnectionDirectionValue: "DIRECTION_OUTBOUND"
+      ConnectionFlags: "0"
+      ConnectionFlagsValue: "NONE"
+      ContextProcessId: "987654321012345678"
+      Protocol: "6"
+      ProtocolValue: "TCP"
+      aid: "11111111111111111111111111111111"
+      cid: "22222222222222222222222222222222"
+      crowdstrike_fdr:
+        aid: "11111111111111111111111111111111"
+        cid: "22222222222222222222222222222222"
+        platform: "Mac"
+        process:
+          id: "987654321012345678"
+      event_platform: "Mac"
+      event_platform_value: "Mac"
+      evt:
+        category: "network"
+        name: "NetworkConnectIP4"
+      name: "NetworkConnectIP4V15"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.10"
+          port: "51515"
+        destination:
+          geoip: {}
+          ip: "198.51.100.20"
+          port: "443"
+        protocol: "TCP"
+      timestamp: "1787000001000"
+    message: |-
+      {
+        "LocalAddressIP4" : "192.0.2.10",
+        "event_simpleName" : "NetworkConnectIP4",
+        "ConnectionFlags" : "0",
+        "ContextProcessId" : "987654321012345678",
+        "RemotePort" : "443",
+        "event_platform" : "Mac",
+        "LocalPort" : "51515",
+        "name" : "NetworkConnectIP4V15",
+        "Protocol" : "6",
+        "RemoteAddressIP4" : "198.51.100.20",
+        "aid" : "11111111111111111111111111111111",
+        "ConnectionDirection" : "0",
+        "cid" : "22222222222222222222222222222222",
+        "timestamp" : "1787000001000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1787000001000
+ -
+  sample: |-
+    {
+      "ContextBaseFileName" : "demo-resolver",
+      "ContextProcessId" : "987654321012345678",
+      "DomainName" : "demo.example",
+      "QueryStatus" : "0",
+      "RequestType" : "1",
+      "aid" : "11111111111111111111111111111111",
+      "cid" : "22222222222222222222222222222222",
+      "event_platform" : "Mac",
+      "event_simpleName" : "DnsRequest",
+      "name" : "DnsRequestMacV6",
+      "timestamp" : "1787000002000"
+    }
+  result:
+    custom:
+      ContextBaseFileName: "demo-resolver"
+      ContextProcessId: "987654321012345678"
+      QueryStatus: "0"
+      RequestType: "1"
+      aid: "11111111111111111111111111111111"
+      cid: "22222222222222222222222222222222"
+      crowdstrike_fdr:
+        aid: "11111111111111111111111111111111"
+        cid: "22222222222222222222222222222222"
+        platform: "Mac"
+        process:
+          id: "987654321012345678"
+        query_status: "0"
+      dns:
+        question:
+          name: "demo.example"
+          type: "A"
+      event_platform: "Mac"
+      event_platform_value: "Mac"
+      evt:
+        category: "dns"
+        name: "DnsRequest"
+      name: "DnsRequestMacV6"
+      timestamp: "1787000002000"
+    message: |-
+      {
+        "ContextBaseFileName" : "demo-resolver",
+        "event_simpleName" : "DnsRequest",
+        "event_platform" : "Mac",
+        "ContextProcessId" : "987654321012345678",
+        "DomainName" : "demo.example",
+        "name" : "DnsRequestMacV6",
+        "QueryStatus" : "0",
+        "aid" : "11111111111111111111111111111111",
+        "RequestType" : "1",
+        "cid" : "22222222222222222222222222222222",
+        "timestamp" : "1787000002000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1787000002000
+ -
+  sample: |-
+    {
+      "LogonTime" : "1735689600",
+      "PasswordLastSet" : "1704067200",
+      "User" : "DEMO\\demo.user",
+      "UserName" : "demo.user",
+      "UserSid_readable" : "S-1-5-21-111111111-222222222-333333333-1001",
+      "_time" : "1735689600",
+      "crowdstrike_fdr" : {
+        "dataset" : "userinfo"
+      },
+      "timestamp" : "1787000003000"
+    }
+  result:
+    custom:
+      LogonTime: "1735689600"
+      PasswordLastSet: "1704067200"
+      User: "DEMO\\demo.user"
+      UserSid_readable: "S-1-5-21-111111111-222222222-333333333-1001"
+      _time: "1735689600"
+      crowdstrike_fdr:
+        dataset: "userinfo"
+      timestamp: "1787000003000"
+      usr:
+        id: "S-1-5-21-111111111-222222222-333333333-1001"
+        name: "demo.user"
+    message: |-
+      {
+        "User" : "DEMO\\demo.user",
+        "UserName" : "demo.user",
+        "LogonTime" : "1735689600",
+        "PasswordLastSet" : "1704067200",
+        "UserSid_readable" : "S-1-5-21-111111111-222222222-333333333-1001",
+        "crowdstrike_fdr" : {
+          "dataset" : "userinfo"
+        },
+        "_time" : "1735689600",
+        "timestamp" : "1787000003000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1787000003000
