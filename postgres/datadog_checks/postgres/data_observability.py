@@ -110,7 +110,12 @@ class PostgresDataObservability(DBMAsyncJob):
             q = scheduled_query.query
             if q.schedule:
                 scheduler = scheduled_query.scheduler
-                assert scheduler is not None
+                if scheduler is None:
+                    self._log.error(
+                        "Skipping DO query monitor_id=%d: cron scheduler is unavailable",
+                        q.monitor_id,
+                    )
+                    continue
                 # +0.001 so a poll landing exactly on a tick boundary is treated
                 # as due (CronScheduler.previous_tick uses strict less-than).
                 ticks = scheduler.due_ticks(now + 0.001)

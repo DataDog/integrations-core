@@ -904,15 +904,30 @@ def test_cron_queries_with_same_monitor_id_have_independent_schedulers(pg_instan
 
 def test_interval_queries_with_same_monitor_id_track_execution_independently(pg_instance, monkeypatch):
     queries = [
-        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT 1'},
-        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT 2'},
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT 1', 'interval_seconds': 60},
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT 2', 'interval_seconds': 100},
     ]
-    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: 1_000.0)
+    current_time = [1_000.0]
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
+    mock_conn, mock_cursor = _make_mock_conn()
     check = _create_check(pg_instance, queries=queries)
+    check.db_pool = _mock_db_pool(mock_conn)
 
-    check.data_observability._scheduled_queries[0].last_execution = 1_000.0
+    check.data_observability.run_job()
+    mock_cursor.execute.reset_mock()
 
-    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT 2']
+    current_time[0] = 1_060.0
+    check.data_observability.run_job()
+    executed = [call.args[0] for call in mock_cursor.execute.call_args_list]
+    assert 'SELECT 1' in executed
+    assert 'SELECT 2' not in executed
+    mock_cursor.execute.reset_mock()
+
+    current_time[0] = 1_100.0
+    check.data_observability.run_job()
+    executed = [call.args[0] for call in mock_cursor.execute.call_args_list]
+    assert 'SELECT 1' not in executed
+    assert 'SELECT 2' in executed
 
 
 # ---------------------------------------------------------------------------
