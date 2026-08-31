@@ -21,12 +21,12 @@
       - name: rename
         prompt_ref: phase1_rename
         goal_ref: phase1_rename_goal
-        max_goal_attempts: 3
+        max_validation_attempts: 3
       - name: metadata
         prompt_ref: phase1_metadata
         clear_context_before: true
         goal_ref: phase1_metadata_goal
-        max_goal_attempts: 3
+        max_validation_attempts: 3
     checkpoint:
       memory_prompt_ref: phase1_memory
 
@@ -51,7 +51,7 @@
         prompt_ref: phase2_code
         clear_context_before: true
         goal_ref: phase2_code_goal
-        max_goal_attempts: 3
+        max_validation_attempts: 3
     checkpoint:
       memory_prompt_ref: phase2_memory
 
@@ -70,7 +70,7 @@
       - name: write_tests
         prompt_ref: phase3_tests
         goal_ref: phase3_tests_goal
-        max_goal_attempts: 3
+        max_validation_attempts: 3
     checkpoint:
       memory_prompt_ref: phase3_memory
 
