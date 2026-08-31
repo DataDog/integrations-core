@@ -170,20 +170,9 @@ class FakeHTTPClient:
         self.requests: list[RecordedRequest] = []
         self._responses: list[RegisteredResponse] = []
 
-    def create_client(self, configured_client: HTTPClient | None = None) -> FakeHTTPClient:
+    def create_client(self) -> FakeHTTPClient:
         """Create an isolated client that shares registered responses and recorded requests."""
-        if configured_client is None:
-            client = FakeHTTPClient()
-        else:
-            client = FakeHTTPClient(
-                options=configured_client.options,
-                tls_config=configured_client.tls_config,
-                should_bypass_proxy=configured_client.should_bypass_proxy,
-            )
-            client.trust_env = configured_client.trust_env
-            client.ignore_tls_warning = configured_client.ignore_tls_warning
-            client.persist_connections = configured_client.persist_connections
-
+        client = FakeHTTPClient()
         client.requests = self.requests
         client._responses = self._responses
         return client
