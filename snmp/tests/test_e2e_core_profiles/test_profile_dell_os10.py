@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .. import common
-from ..metrics import IF_BANDWIDTH_USAGE, IF_CUSTOM_SPEED_GAUGES
+from ..metrics import IF_BANDWIDTH_USAGE, IF_COUNTS, IF_CUSTOM_SPEED_GAUGES, IF_GAUGES, IF_RATES
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_all_profile_metrics_and_tags_covered,
@@ -135,28 +135,18 @@ def test_e2e_profile_dell_os10(dd_agent_check):
         (10, 'Jaded Jaded forward', 'Jaded driving acted Jaded Jaded'),
         (20, 'acted quaintly kept quaintly quaintly', 'Jaded oxen'),
     ]
-    if_counts = [
-        'ifHCInOctets',
-        'ifHCInUcastPkts',
-        'ifHCInMulticastPkts',
-        'ifHCInBroadcastPkts',
-        'ifHCOutOctets',
-        'ifHCOutUcastPkts',
-        'ifHCOutMulticastPkts',
-        'ifHCOutBroadcastPkts',
-    ]
-    if_rates = ['ifHCInOctets.rate', 'ifHCOutOctets.rate']
     for index, interface, alias in interfaces:
         interface_tags = common_tags + [
             'interface:{}'.format(interface),
             'interface_alias:{}'.format(alias),
             'interface_index:{}'.format(index),
         ]
-        for metric in if_counts:
+        for metric in IF_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=interface_tags)
-        for metric in if_rates:
+        for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags)
-        aggregator.assert_metric('snmp.ifHighSpeed', metric_type=aggregator.GAUGE, tags=interface_tags)
+        for metric in IF_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags)
         for metric in IF_CUSTOM_SPEED_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags)
         for metric in IF_BANDWIDTH_USAGE:
