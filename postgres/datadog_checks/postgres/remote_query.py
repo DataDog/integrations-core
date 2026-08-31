@@ -2,21 +2,42 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+"""Remote query JSON page producer for the Postgres integration.
+
+Executes one validated query through a named (server-side) cursor, normalizes PostgreSQL
+values into the pinned cross-language JSON contract, splits the rows into byte-bounded JSON
+page files, and streams each page's bytes as multipart parts directly to its-agent-intake
+over HTTP. Bulk page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP
+action output; the emit callback carries only ``metadata``/``final``/``error`` events, and
+the final event carries only the compact run receipt.
+"""
+
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import logging
+import math
 import re
 import time
+import uuid
+from collections import deque
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
+from datetime import date, datetime, timezone
+from datetime import time as dt_time
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
+import psycopg.errors as psycopg_errors
+import psycopg.types.json as psycopg_json
+from psycopg.types.string import TextLoader
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    StrictBool,
     StrictInt,
     StrictStr,
     ValidationError,
@@ -27,9 +48,14 @@ from pydantic import (
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
 
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
+LOGGER = logging.getLogger(__name__)
+
 REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY = 'remote_queries.execute.enable_query_allowlist'
 REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES = frozenset(('false', 'no', '0', 'n', 'off'))
-REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
+REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
     (
         'SELECT 1 AS value',
         'SELECT city, country FROM cities ORDER BY city',
@@ -42,27 +68,33 @@ REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
         "SELECT repeat('x', 8388608) AS payload",
         "SELECT repeat('x', 16777216) AS payload",
         "SELECT repeat('x', 33554432) AS payload",
-        "SELECT i, repeat('x', 1000) AS payload FROM generate_series(1, 3000) AS i",
+        'SELECT i, repeat(\'x\', 1000) AS payload FROM generate_series(1, 3000) AS i',
     )
 )
 
-# Server-owned maximums for the POC multipart upload path. The backend selects/clamps these,
-# not the caller. The multipart part size is independent of the COPY read chunk size
-# (limits.chunkBytes); it may be up to 128 MiB. maxBytes must not exceed the caller/backend COPY
-# safety cap (limits.maxBytes).
+# Server-owned maximums. The backend selects/clamps every injected limit; the integration only
+# fails closed when an injected instruction exceeds a known platform ceiling, which would
+# indicate a backend/integration contract version mismatch.
 REMOTE_QUERY_UPLOAD_MAX_PART_BYTES = 128 * 1024 * 1024
-REMOTE_QUERY_UPLOAD_MAX_TOTAL_BYTES = 10 * 1024 * 1024 * 1024
+REMOTE_QUERY_UPLOAD_MAX_FILE_BYTES = 128 * 1024 * 1024
+REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 10 * 1024 * 1024 * 1024
+REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
+# Rows fetched per bounded batch from the server-side cursor. A producer detail, not a
+# server-owned limit.
+REMOTE_QUERY_FETCH_BATCH_ROWS = 500
 
-CopyStreamFormat = Literal['csv', 'binary']
-ResultDeliveryMode = Literal['POC_PUBLIC_MULTIPART_UPLOAD']
-ResultDeliveryFormat = Literal['csv']
-ResultDeliveryCompression = Literal['none']
-CopyStreamEmit = Callable[[str, str, bytes], None]
+# Page artifact contract (version 1). One complete UTF-8 JSON document per page:
+#
+#   {"version":1,"run_id":"...","task_id":"...","batch_index":0,"record_offset":0,
+#    "schema":[{"column_name":"...","vendor_data_type":"..."}],
+#    "data":{"items":[{...row...},...]}}
+#
+# ``schema`` repeats identically in every page when includeSchema is enabled and is omitted
+# entirely (never ``null``/``[]``) when disabled. There is no ``total_records`` field.
+REMOTE_QUERY_ARTIFACT_VERSION = 1
+PAGE_SUFFIX = b']}}'
 
-if TYPE_CHECKING:
-    from datadog_checks.postgres import PostgreSql
-
-LOGGER = logging.getLogger(__name__)
+RemoteQueryEmit = Callable[[str, str, bytes], None]
 
 
 class RemoteQueryTarget(BaseModel):
@@ -110,9 +142,9 @@ class RemoteQueryTarget(BaseModel):
     @model_validator(mode='after')
     def validate_selector_mode(self) -> 'RemoteQueryTarget':
         null_fields = [
-            field
-            for field in ('host', 'port', 'dbname', 'database_instance')
-            if field in self.model_fields_set and getattr(self, field) is None
+            field_name
+            for field_name in ('host', 'port', 'dbname', 'database_instance')
+            if field_name in self.model_fields_set and getattr(self, field_name) is None
         ]
         if null_fields:
             raise ValueError('{} must not be null'.format(', '.join(null_fields)))
@@ -128,79 +160,85 @@ class RemoteQueryTarget(BaseModel):
         return self
 
 
-class RemoteQueryCopyLimits(BaseModel):
-    """Validate byte-streaming limits for COPY export mode."""
+class RemoteQueryUploadLimits(BaseModel):
+    """Backend-injected effective limits. Server-owned; never invented by the integration."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    chunk_bytes: StrictInt = Field(default=1_048_576, alias='chunkBytes', ge=1)
-    max_bytes: StrictInt = Field(default=64 * 1_048_576, alias='maxBytes', ge=1)
-    max_row_bytes: StrictInt = Field(default=8 * 1_048_576, alias='maxRowBytes', ge=1)
-    timeout_ms: StrictInt = Field(default=30_000, alias='timeoutMs', ge=1)
+    max_file_bytes: StrictInt = Field(alias='maxFileBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_FILE_BYTES)
+    max_result_bytes: StrictInt = Field(alias='maxResultBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES)
+    max_row_bytes: StrictInt = Field(alias='maxRowBytes', ge=1)
+    max_columns: StrictInt = Field(alias='maxColumns', ge=1)
+    max_schema_bytes: StrictInt = Field(alias='maxSchemaBytes', ge=1)
+    max_pages: StrictInt = Field(alias='maxPages', ge=1)
+    timeout_ms: StrictInt = Field(default=REMOTE_QUERY_DEFAULT_TIMEOUT_MS, alias='timeoutMs', ge=1)
+
+    @model_validator(mode='after')
+    def validate_limit_relations(self) -> 'RemoteQueryUploadLimits':
+        if self.max_row_bytes > self.max_file_bytes:
+            raise ValueError('maxRowBytes must not exceed maxFileBytes: a row must fit inside one page')
+        if self.max_file_bytes > self.max_result_bytes:
+            raise ValueError('maxFileBytes must not exceed maxResultBytes')
+        return self
 
 
 class RemoteQueryResultDelivery(BaseModel):
-    """Validate optional result-delivery upload instructions for direct upload to its-agent-intake.
+    """Backend-injected upload instructions and artifact contract metadata.
 
-    When present, the integration uploads bounded COPY bytes directly to its-agent-intake over
-    HTTP. The Agent forwards the intake base URL and scoped upload token here; the integration
-    reads the org API key and POC application key from Agent config via ``datadog_agent.get_config``
-    and attaches them to its own HTTP upload requests. The integration performs the HTTP upload
-    itself; bulk part bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action
-    output. Omitting ``resultDelivery`` keeps the existing inline streaming behavior unchanged.
+    The Agent forwards the run-scoped intake session instructions (``uploadId``, ``baseUrl``,
+    ``token``, ``partBytes``), the effective server-owned limits, the artifact contract
+    version, and the authoritative run/task identity used in every page envelope. Every field
+    is server-owned: the integration validates what it receives and never invents values.
     """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    mode: ResultDeliveryMode
+    run_id: StrictStr = Field(alias='runId', min_length=1)
+    task_id: StrictStr = Field(alias='taskId', min_length=1)
+    artifact_version: Literal[REMOTE_QUERY_ARTIFACT_VERSION] = Field(alias='artifactVersion')
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
     token: StrictStr = Field(alias='token', min_length=1)
     part_bytes: StrictInt = Field(alias='partBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_PART_BYTES)
-    max_bytes: StrictInt = Field(alias='maxBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_TOTAL_BYTES)
-    format: ResultDeliveryFormat = 'csv'
-    compression: ResultDeliveryCompression = 'none'
+    limits: RemoteQueryUploadLimits
 
     @model_validator(mode='after')
-    def validate_part_within_max(self) -> 'RemoteQueryResultDelivery':
-        if self.part_bytes > self.max_bytes:
-            raise ValueError('partBytes must not exceed maxBytes')
+    def validate_part_within_page(self) -> 'RemoteQueryResultDelivery':
+        # Parts are fragments of a page, so the injected part size must not exceed the page cap.
+        if self.part_bytes > self.limits.max_file_bytes:
+            raise ValueError('partBytes must not exceed limits.maxFileBytes')
         return self
 
 
-class RemoteQueryCopyRequest(BaseModel):
-    """Accept only explicit COPY byte-stream export requests."""
+class RemoteQueryRequest(BaseModel):
+    """A single remote query execution producing bounded JSON result pages."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    operation: Literal['copy_stream'] = Field(alias='operation')
+    operation: Literal['produce_json_pages'] = Field(alias='operation')
     target: RemoteQueryTarget
     query: StrictStr = Field(min_length=1)
-    format: CopyStreamFormat = 'csv'
-    limits: RemoteQueryCopyLimits = Field(default_factory=RemoteQueryCopyLimits)
-    result_delivery: RemoteQueryResultDelivery | None = Field(default=None, alias='resultDelivery')
+    include_schema: StrictBool = Field(default=False, alias='includeSchema')
+    result_delivery: RemoteQueryResultDelivery = Field(alias='resultDelivery')
 
-    @model_validator(mode='after')
-    def validate_format_consistency(self) -> 'RemoteQueryCopyRequest':
-        # When resultDelivery is present, the COPY stream format must match the upload format so the
-        # emitted bytes and the finalized object agree. The current contract allows only ``csv`` for
-        # upload, so upload mode is CSV-only; a ``binary`` COPY stream with a ``csv`` upload is rejected.
-        if self.result_delivery is not None and self.format != self.result_delivery.format:
-            raise ValueError('format must match resultDelivery.format when resultDelivery is present')
-        return self
 
-    @model_validator(mode='after')
-    def validate_max_within_limits(self) -> 'RemoteQueryCopyRequest':
-        # The upload byte cap must not widen the caller/backend COPY safety cap. Fail closed so a
-        # backend-injected resultDelivery cannot raise the integration's configured byte ceiling;
-        # an equal or smaller upload maxBytes is accepted. ``partBytes`` (the multipart part size)
-        # and ``limits.chunkBytes`` (the COPY streaming chunk size) are distinct concepts, so
-        # partBytes may exceed chunkBytes: the COPY stream emits chunkBytes-sized events that the
-        # upload client aggregates into partBytes-sized parts.
-        if self.result_delivery is not None:
-            if self.result_delivery.max_bytes > self.limits.max_bytes:
-                raise ValueError('resultDelivery.maxBytes must not exceed limits.maxBytes')
-        return self
+@dataclass(frozen=True)
+class ResultColumn:
+    """One described result field: its column name, type OID, and type modifier."""
+
+    name: str
+    type_oid: int
+    type_modifier: int | None
+
+
+@dataclass
+class RemoteQueryRunStats:
+    """Mutable run accounting shared with the page writer so failures can report partials."""
+
+    rows_emitted: int = 0
+    pages_emitted: int = 0
+    parts_emitted: int = 0
+    bytes_emitted: int = 0
 
 
 @dataclass(frozen=True)
@@ -212,20 +250,13 @@ class StaticPostgresCheckRegistry:
 
 
 @dataclass(frozen=True)
-class _CopyStreamState:
-    sequence: int = 0
-    chunks_emitted: int = 0
-    bytes_emitted: int = 0
-
-
-@dataclass(frozen=True)
-class CopyStreamEvent:
+class RemoteQueryEvent:
     event_type: str
     metadata: Mapping[str, Any]
     payload: bytes = b''
 
 
-class _CopyStreamFailure(Exception):
+class RemoteQueryFailure(Exception):
     def __init__(self, code: str, message: str, retryable: bool = False):
         self.code = code
         self.message = message
@@ -237,88 +268,669 @@ class PostgresCheckRegistry(Protocol):
     def iter_postgres_checks(self) -> Iterable['PostgreSql']: ...
 
 
-def execute_agent_rpc_stream_copy(
-    request_json: str | bytes | bytearray, check: 'PostgreSql', emit: CopyStreamEmit
-) -> None:
-    """Execute an explicit COPY byte-stream request and emit chunk events."""
-    try:
-        request = json.loads(request_json)
-    except (TypeError, ValueError):
-        _emit_copy_event(
-            emit,
-            _stream_failed_event(
-                'invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'
-            ),
+# ---------------------------------------------------------------------------
+# PostgreSQL value contract (pinned, cross-language)
+#
+#   PostgreSQL family        JSON representation
+#   NULL                    null
+#   boolean                 JSON boolean
+#   integral numerics       JSON number with the exact database text
+#   finite numeric/float4/8  JSON number with the exact database text
+#   non-finite numerics     string: "NaN", "Infinity", or "-Infinity"
+#   text/enum/UUID/inet     JSON string (inet/cidr keep their exact server text)
+#   date/time/timestamp     documented ISO-8601 strings; timestamptz in UTC with a "Z" suffix
+#   interval                documented PostgreSQL interval string (exact server text)
+#   json / jsonb            nested JSON value (arbitrary-precision numbers preserved)
+#   arrays                  JSON array with recursive element conversion
+#   bytea                   base64 string (schema identifies bytea)
+#   ranges/extensions       documented string form (unknown types arrive as their text)
+#
+# Fail closed on anything that cannot be converted deliberately: never silently stringify
+# via a driver default.
+
+
+class RawJsonNumber(str):
+    """A PostgreSQL numeric whose exact server text is emitted as a JSON number token.
+
+    Subclasses ``str`` so any generic serialization path still yields the value as a string
+    rather than corrupting it; the page encoder recognizes the type and emits the text
+    verbatim (rejecting the non-finite spellings, which must be JSON strings).
+    """
+
+
+class RawJsonNumberLoader(TextLoader):
+    """Load float4/float8 as their exact server text instead of a parsed float.
+
+    PostgreSQL float output is already a shortest-roundtrip decimal text, so keeping it raw
+    preserves the exact database representation without any float round-trip.
+    """
+
+    def load(self, data: Any) -> Any:
+        value = super().load(data)
+        if not isinstance(value, str):
+            # SQL_ASCII databases yield bytes from the text loader; numeric text is ASCII.
+            value = bytes(value).decode('utf-8')
+        return RawJsonNumber(value)
+
+
+class RawTextLoader(TextLoader):
+    """Load interval/inet/cidr/ranges as their exact server text (the documented string forms).
+
+    psycopg's object loaders are lossy or non-contractual for these families: interval would
+    collapse into a timedelta (losing year/month components), inet would grow a
+    psycopg-added prefix length, and ranges would become psycopg Range objects instead of
+    the documented string form. The contract keeps the server's own string spelling.
+    """
+
+    def load(self, data: Any) -> Any:
+        value = super().load(data)
+        if not isinstance(value, str):
+            value = bytes(value).decode('utf-8')
+        return value
+
+
+def _json_loads_exact(data: Any) -> Any:
+    # parse_float=Decimal keeps arbitrary-precision numbers inside json/jsonb as their exact
+    # text instead of rounding through a float.
+    return json.loads(data, parse_float=Decimal)
+
+
+class ExactJsonLoader(psycopg_json.JsonLoader):
+    _loads = staticmethod(_json_loads_exact)
+
+
+class ExactJsonbLoader(psycopg_json.JsonbLoader):
+    _loads = staticmethod(_json_loads_exact)
+
+
+# Range and multirange type names known to psycopg's builtin registry; older psycopg or
+# PostgreSQL builds may not know every one, and missing names are simply skipped.
+RANGE_TYPE_NAMES = (
+    'int4range',
+    'int8range',
+    'numrange',
+    'daterange',
+    'tsrange',
+    'tstzrange',
+    'int4multirange',
+    'int8multirange',
+    'nummultirange',
+    'datemultirange',
+    'tsmultirange',
+    'tstzmultirange',
+)
+
+
+def register_exact_loaders(cursor: Any) -> None:
+    """Register cursor-scoped loaders that keep exact server text for lossy families.
+
+    Registration is scoped to the named query cursor only, so the shared pooled connection's
+    behavior for the rest of the check is untouched. Arrays of these types load their
+    elements through the same cursor adapters, so array elements keep exact text too.
+    """
+    adapters = cursor.adapters
+    adapters.register_loader('float4', RawJsonNumberLoader)
+    adapters.register_loader('float8', RawJsonNumberLoader)
+    adapters.register_loader('interval', RawTextLoader)
+    adapters.register_loader('inet', RawTextLoader)
+    adapters.register_loader('cidr', RawTextLoader)
+    for range_type_name in RANGE_TYPE_NAMES:
+        try:
+            adapters.register_loader(range_type_name, RawTextLoader)
+        except KeyError:
+            LOGGER.debug('psycopg type registry does not know %s', range_type_name)
+    adapters.register_loader('json', ExactJsonLoader)
+    adapters.register_loader('jsonb', ExactJsonbLoader)
+
+
+BYTEA_OID = 17
+
+# A JSON number per RFC 8259: no leading zeros, optional fraction and exponent. Server
+# numeric text must already satisfy this; anything else fails closed.
+_JSON_NUMBER_PATTERN = re.compile(r'\A-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?\Z')
+_NON_FINITE_NUMERIC_TEXT = frozenset(('NaN', 'Infinity', '-Infinity'))
+
+
+def _encode_non_finite_text(out: bytearray, text: str) -> None:
+    out += json.dumps(text).encode('utf-8')
+
+
+def _encode_raw_number_text(out: bytearray, text: str) -> None:
+    if not _JSON_NUMBER_PATTERN.match(text):
+        raise RemoteQueryFailure(
+            'unsupported_value', 'PostgreSQL sent numeric text {!r} that is not a JSON number.'.format(text)
         )
-        return
+    out += text.encode('utf-8')
 
-    if not isinstance(request, Mapping):
-        _emit_copy_event(
-            emit,
-            _stream_failed_event(
-                'invalid_request', 'Invalid remote query request: request_json must be a JSON object.'
-            ),
+
+def _encode_decimal(out: bytearray, value: Decimal) -> None:
+    if value.is_finite():
+        _encode_raw_number_text(out, str(value))
+        return
+    if value.is_nan():
+        _encode_non_finite_text(out, 'NaN')
+    elif value > 0:
+        _encode_non_finite_text(out, 'Infinity')
+    else:
+        _encode_non_finite_text(out, '-Infinity')
+
+
+def _encode_float(out: bytearray, value: float) -> None:
+    if math.isfinite(value):
+        # Python repr is the shortest string that round-trips the float.
+        _encode_raw_number_text(out, repr(value))
+    elif math.isnan(value):
+        _encode_non_finite_text(out, 'NaN')
+    elif value > 0:
+        _encode_non_finite_text(out, 'Infinity')
+    else:
+        _encode_non_finite_text(out, '-Infinity')
+
+
+def _encode_datetime_text(value: datetime) -> str:
+    if value.tzinfo is None:
+        return value.isoformat()
+    # Timestamptz is canonicalized to UTC so the page does not depend on the session
+    # TimeZone, and the zero offset is spelled "Z" per the v1 contract example.
+    utc_value = value.astimezone(timezone.utc)
+    text = utc_value.isoformat()
+    if text.endswith('+00:00'):
+        text = text[:-6] + 'Z'
+    return text
+
+
+def _encode_bytea(out: bytearray, value: bytes) -> None:
+    out += b'"'
+    out += base64.b64encode(value)
+    out += b'"'
+
+
+def _encode_json_value(out: bytearray, value: Any, *, top_type_oid: int | None, in_array: bool) -> None:
+    """Encode one normalized PostgreSQL value into ``out`` as JSON bytes.
+
+    ``top_type_oid`` is the described column OID for row fields (used to accept bytea
+    precisely); inside arrays and json values binary buffers can only come from bytea, so
+    ``in_array`` licenses them there. Everything unrecognized fails closed.
+    """
+    if value is None:
+        out += b'null'
+    elif isinstance(value, bool):
+        out += b'true' if value else b'false'
+    elif isinstance(value, RawJsonNumber):
+        text = str(value)
+        if text in _NON_FINITE_NUMERIC_TEXT:
+            _encode_non_finite_text(out, text)
+        else:
+            _encode_raw_number_text(out, text)
+    elif isinstance(value, int):
+        _encode_raw_number_text(out, str(value))
+    elif isinstance(value, Decimal):
+        _encode_decimal(out, value)
+    elif isinstance(value, float):
+        _encode_float(out, value)
+    elif isinstance(value, str):
+        out += json.dumps(value).encode('utf-8')
+    elif isinstance(value, (bytes, bytearray, memoryview)):
+        if top_type_oid == BYTEA_OID or in_array:
+            _encode_bytea(out, bytes(value))
+        else:
+            raise RemoteQueryFailure(
+                'unsupported_value',
+                'Binary value from a non-bytea column (type oid {}) cannot be converted.'.format(top_type_oid),
+            )
+    elif isinstance(value, datetime):
+        out += json.dumps(_encode_datetime_text(value)).encode('utf-8')
+    elif isinstance(value, date):
+        out += json.dumps(value.isoformat()).encode('utf-8')
+    elif isinstance(value, dt_time):
+        out += json.dumps(value.isoformat()).encode('utf-8')
+    elif isinstance(value, uuid.UUID):
+        out += json.dumps(str(value)).encode('utf-8')
+    elif isinstance(value, (list, tuple)):
+        out += b'['
+        for index, item in enumerate(value):
+            if index:
+                out += b','
+            _encode_json_value(out, item, top_type_oid=None, in_array=True)
+        out += b']'
+    elif isinstance(value, dict):
+        out += b'{'
+        first = True
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise RemoteQueryFailure('unsupported_value', 'JSON object keys must be strings.')
+            if not first:
+                out += b','
+            first = False
+            out += json.dumps(key).encode('utf-8')
+            out += b':'
+            _encode_json_value(out, item, top_type_oid=None, in_array=True)
+        out += b'}'
+    else:
+        raise RemoteQueryFailure(
+            'unsupported_value',
+            'PostgreSQL value of type {} has no conversion in the JSON contract.'.format(type(value).__name__),
         )
-        return
-
-    if _is_upload_request(request):
-        _execute_upload_stream(request, check, emit)
-        return
-
-    events = iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check]))
-    try:
-        for event in events:
-            _emit_copy_event(emit, event)
-    except BaseException:
-        events.close()
-        raise
 
 
-def iter_agent_rpc_stream_copy_events(request: Any, registry: PostgresCheckRegistry) -> Iterator[CopyStreamEvent]:
-    """Yield COPY byte-stream events for unit tests and callback adaptation."""
-    started_at = time.monotonic()
-    try:
-        parsed_request = RemoteQueryCopyRequest.model_validate(request)
-    except ValidationError as e:
-        yield _stream_failed_event('invalid_request', _validation_message(e), elapsed_ms=_elapsed_ms(started_at))
-        return
+def encode_row(row: Sequence[Any], columns: Sequence[ResultColumn], out: bytearray) -> None:
+    """Encode one result row as a JSON object keyed by result-column name."""
+    if len(row) != len(columns):
+        raise RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
+    out += b'{'
+    for index, (column, value) in enumerate(zip(columns, row)):
+        if index:
+            out += b','
+        out += json.dumps(column.name).encode('utf-8')
+        out += b':'
+        _encode_json_value(out, value, top_type_oid=column.type_oid, in_array=False)
+    out += b'}'
 
-    if not _is_query_allowed(parsed_request.query):
-        yield _stream_failed_event(
-            'invalid_request',
-            'Invalid remote query request: query is not allowlisted.',
-            elapsed_ms=_elapsed_ms(started_at),
+
+# ---------------------------------------------------------------------------
+# Result description and schema
+# ---------------------------------------------------------------------------
+
+VENDOR_TYPE_QUERY = (
+    'SELECT t.type_oid::oid, t.type_mod::int4, '
+    'pg_catalog.format_type(t.type_oid::oid, t.type_mod::int4) AS vendor_data_type '
+    'FROM unnest(%s::text[], %s::text[]) AS t(type_oid, type_mod)'
+)
+
+
+def described_columns(cursor: Any) -> list[ResultColumn]:
+    """Read the ordered result column names, type OIDs, and type modifiers.
+
+    A named cursor's description is available immediately after the DECLARE, including for
+    zero-row results, so a schema-bearing empty page can still be produced. psycopg keeps
+    the raw RowDescription type modifier on the ``Column`` object (``_fmod``); it is the
+    exact value ``pg_catalog.format_type`` expects.
+    """
+    description = getattr(cursor, 'description', None)
+    if not description:
+        raise RemoteQueryFailure('query_failed', 'Query returned no result description.')
+
+    columns = []
+    for described in description:
+        name = described.name
+        if not isinstance(name, str) or not name:
+            raise RemoteQueryFailure('schema_unavailable', 'Result description carried an empty column name.')
+        type_oid = described.type_code
+        if not isinstance(type_oid, int):
+            raise RemoteQueryFailure('schema_unavailable', 'Result description carried a non-integer type oid.')
+        columns.append(ResultColumn(name=name, type_oid=type_oid, type_modifier=getattr(described, '_fmod', None)))
+    return columns
+
+
+def validate_columns(columns: Sequence[ResultColumn], max_columns: int) -> None:
+    if len(columns) > max_columns:
+        raise RemoteQueryFailure(
+            'max_columns_exceeded',
+            'Query described {} result columns; the limit is {}.'.format(len(columns), max_columns),
         )
-        return
+    seen = set()
+    for column in columns:
+        if column.name in seen:
+            raise RemoteQueryFailure(
+                'duplicate_columns',
+                'Duplicate result-column name {!r} cannot key a JSON row object.'.format(column.name),
+            )
+        seen.add(column.name)
 
-    target = parsed_request.target
-    matches = _resolve_matches(target, registry.iter_postgres_checks())
-    LOGGER.debug('Remote query COPY stream target match count: %d', len(matches))
-    if not matches:
-        yield _stream_failed_event(
-            'target_not_found',
-            'No loaded Postgres integration instance matched target selector.',
-            elapsed_ms=_elapsed_ms(started_at),
-        )
-        return
-    if len(matches) > 1:
-        yield _stream_failed_event(
-            'target_ambiguous',
-            'More than one loaded Postgres integration instance matched target selector.',
-            elapsed_ms=_elapsed_ms(started_at),
-        )
-        return
 
-    execution_dbname = _dbname_from_check(matches[0])
-    if execution_dbname is None:
-        yield _stream_failed_event(
-            'target_unavailable',
-            'Matched Postgres check does not expose a configured database name.',
-            elapsed_ms=_elapsed_ms(started_at),
-        )
-        return
+def resolve_vendor_types(control_cursor: Any, columns: Sequence[ResultColumn]) -> dict[tuple[int, int], str]:
+    """Resolve every DISTINCT (type_oid, type_modifier) pair with one parameterized lookup.
 
-    yield from _iter_copy_stream_events(matches[0], parsed_request, execution_dbname, started_at)
+    The catalog query runs in the same read-only transaction and statement timeout scope as
+    the user query. Types are passed as text arrays and cast element-wise (text -> oid and
+    text -> int4 both cast via I/O), which is version-stable and avoids psycopg's
+    element-width-dependent int array dump OIDs.
+    """
+    distinct_pairs = sorted({(column.type_oid, column.type_modifier) for column in columns})
+    if any(pair[1] is None for pair in distinct_pairs):
+        raise RemoteQueryFailure(
+            'schema_unavailable', 'Result description did not expose type modifiers for every column.'
+        )
+
+    oids = [str(pair[0]) for pair in distinct_pairs]
+    type_modifiers = [str(pair[1]) for pair in distinct_pairs]
+    control_cursor.execute(VENDOR_TYPE_QUERY, (oids, type_modifiers))
+    rows = control_cursor.fetchall()
+
+    type_map: dict[tuple[int, int], str] = {}
+    for row in rows:
+        oid, type_modifier, vendor_data_type = row[0], row[1], row[2]
+        if not isinstance(vendor_data_type, str) or not vendor_data_type:
+            raise RemoteQueryFailure('schema_unavailable', 'pg_catalog.format_type returned an unusable type name.')
+        type_map[(oid, type_modifier)] = vendor_data_type
+
+    missing = [pair for pair in distinct_pairs if pair not in type_map]
+    if missing:
+        raise RemoteQueryFailure(
+            'schema_unavailable',
+            'pg_catalog.format_type lookup did not resolve {} requested type(s).'.format(len(missing)),
+        )
+    return type_map
+
+
+def build_schema_json(
+    control_cursor: Any, columns: Sequence[ResultColumn], delivery: RemoteQueryResultDelivery
+) -> bytes:
+    """Build the ordered schema entries, rejecting incomplete metadata and oversize schemas.
+
+    The encoded schema repeats in every page, so it must fit both ``maxSchemaBytes`` and the
+    smallest valid page frame; both are enforced before any row data is written.
+    """
+    type_map = resolve_vendor_types(control_cursor, columns)
+    entries = [
+        {'column_name': column.name, 'vendor_data_type': type_map[(column.type_oid, column.type_modifier)]}
+        for column in columns
+    ]
+    schema_json = json.dumps(entries, separators=(',', ':')).encode('utf-8')
+    limits = delivery.limits
+    if len(schema_json) > limits.max_schema_bytes:
+        raise RemoteQueryFailure(
+            'max_schema_bytes_exceeded',
+            'Encoded schema is {} bytes; the limit is {}.'.format(len(schema_json), limits.max_schema_bytes),
+        )
+    prefix_len = len(
+        page_prefix(
+            run_id=delivery.run_id,
+            task_id=delivery.task_id,
+            batch_index=0,
+            record_offset=0,
+            schema_json=schema_json,
+        )
+    )
+    if prefix_len + len(PAGE_SUFFIX) > limits.max_file_bytes:
+        raise RemoteQueryFailure(
+            'max_file_bytes_exceeded',
+            'The repeated schema plus the minimal page envelope exceeds maxFileBytes.',
+        )
+    return schema_json
+
+
+def page_prefix(*, run_id: str, task_id: str, batch_index: int, record_offset: int, schema_json: bytes | None) -> bytes:
+    """The envelope bytes through the opening of ``data.items``, with no trailing space."""
+    head = (
+        '{"version":1,"run_id":%s,"task_id":%s,"batch_index":%d,"record_offset":%d,'
+        % (json.dumps(run_id), json.dumps(task_id), batch_index, record_offset)
+    ).encode('utf-8')
+    parts = [head]
+    if schema_json is not None:
+        parts.append(b'"schema":')
+        parts.append(schema_json)
+        parts.append(b',')
+    parts.append(b'"data":{"items":[')
+    return b''.join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Page writer: byte-bounded pages streamed into bounded multipart parts
+# ---------------------------------------------------------------------------
+
+
+class PageWriter:
+    """Split encoded rows into byte-bounded JSON pages and stream page bytes to intake.
+
+    At most one page and one part are active at a time. Page bytes stream into
+    ``partBytes``-sized parts, so a part boundary may fall anywhere in the byte stream
+    (including inside an encoded row or UTF-8 sequence); the object-store completion
+    concatenates part bytes exactly, so only the completed page is JSON.
+
+    Row completions are tracked explicitly with row-end offsets: a row belongs to the part
+    that contains its final byte, and page row counts are never inferred by counting
+    newlines. Before writing a row the writer accounts for the comma, the encoded row, and
+    the required closing suffix; a row that cannot fit a fresh page's minimal envelope fails
+    with ``row_too_large``.
+    """
+
+    def __init__(
+        self,
+        delivery: RemoteQueryResultDelivery,
+        creds: UploadCredentials,
+        client: UploadClient,
+        schema_json: bytes | None,
+        guard: Callable[[], None],
+        stats: RemoteQueryRunStats,
+    ):
+        self._delivery = delivery
+        self._creds = creds
+        self._client = client
+        self._schema_json = schema_json
+        self._guard = guard
+        self._stats = stats
+        # Active page state. ``_page_bytes`` counts prefix + rows written so far; the
+        # closing suffix is appended at close time.
+        self._page_open = False
+        self._pending = bytearray()
+        self._page_bytes = 0
+        self._page_rows = 0
+        self._page_flushed_bytes = 0
+        self._part_number = 1
+        self._row_end_offsets: deque[int] = deque()
+
+    def add_row(self, row_bytes: bytes) -> None:
+        self._ensure_page()
+        suffix_len = len(PAGE_SUFFIX)
+        comma_len = 1 if self._page_rows else 0
+        page_needed = self._page_bytes + comma_len + len(row_bytes) + suffix_len
+        if (
+            page_needed > self._delivery.limits.max_file_bytes
+            or self._stats.bytes_emitted + page_needed > self._delivery.limits.max_result_bytes
+        ):
+            # The row does not fit the current page (or would push the run over the total
+            # byte cap): close the current NON-EMPTY page and retry the row on a fresh
+            # page. An empty page holds nothing but the envelope, so a row that still does
+            # not fit cannot be split further and fails the run.
+            if self._page_rows:
+                self._close_page()
+                self._begin_page()
+                page_needed = self._page_bytes + len(row_bytes) + suffix_len
+            if page_needed > self._delivery.limits.max_file_bytes:
+                raise RemoteQueryFailure(
+                    'row_too_large',
+                    'A single row plus the minimal page envelope exceeds maxFileBytes ({} > {} bytes).'.format(
+                        page_needed, self._delivery.limits.max_file_bytes
+                    ),
+                )
+            if self._stats.bytes_emitted + page_needed > self._delivery.limits.max_result_bytes:
+                raise RemoteQueryFailure(
+                    'max_result_bytes_exceeded',
+                    'A single row plus the minimal page envelope exceeds maxResultBytes ({} > {} bytes).'.format(
+                        self._stats.bytes_emitted + page_needed, self._delivery.limits.max_result_bytes
+                    ),
+                )
+
+        if self._page_rows:
+            self._pending += b','
+            self._page_bytes += 1
+        self._pending += row_bytes
+        self._page_bytes += len(row_bytes)
+        self._row_end_offsets.append(self._page_bytes)
+        self._page_rows += 1
+        self._stats.rows_emitted += 1
+        self._flush_full_parts()
+
+    def finish(self) -> dict[str, Any]:
+        """Close the active page, apply zero-row behavior, and finalize the run.
+
+        Returns the compact run receipt: only ``uploadId``, ``pageCount``, ``totalRows``,
+        ``totalBytes``. No schema and no bulk bytes ever appear in the receipt.
+        """
+        if self._page_open:
+            self._close_page()
+        elif self._schema_json is not None and self._stats.pages_emitted == 0:
+            # Zero-row query with schema requested: one schema-bearing empty page so the
+            # consumer can still discover the query's columns.
+            self._begin_page()
+            self._close_page()
+        response = self._client.finalize_run(self._creds)
+        verify_run_finalize_response(response, self._creds.upload_id)
+        return {
+            'uploadId': self._creds.upload_id,
+            'pageCount': self._stats.pages_emitted,
+            'totalRows': self._stats.rows_emitted,
+            'totalBytes': self._stats.bytes_emitted,
+        }
+
+    def _ensure_page(self) -> None:
+        if not self._page_open:
+            self._begin_page()
+
+    def _begin_page(self) -> None:
+        if self._stats.pages_emitted >= self._delivery.limits.max_pages:
+            raise RemoteQueryFailure(
+                'max_pages_exceeded',
+                'Page count reached the limit of {} pages.'.format(self._delivery.limits.max_pages),
+            )
+        prefix = page_prefix(
+            run_id=self._delivery.run_id,
+            task_id=self._delivery.task_id,
+            batch_index=self._stats.pages_emitted,
+            record_offset=self._stats.rows_emitted,
+            schema_json=self._schema_json,
+        )
+        self._page_open = True
+        self._pending += prefix
+        self._page_bytes = len(prefix)
+        self._page_rows = 0
+        self._page_flushed_bytes = 0
+        self._part_number = 1
+        self._row_end_offsets.clear()
+
+    def _close_page(self) -> None:
+        self._guard()
+        self._pending += PAGE_SUFFIX
+        self._page_bytes += len(PAGE_SUFFIX)
+        self._flush_full_parts()
+        if self._pending:
+            # The final part of a page may be shorter than partBytes; empty pages cannot
+            # happen because the prefix plus suffix are always non-empty bytes.
+            self._put_part(bytes(self._pending))
+            self._pending.clear()
+        self._client.finalize_page(self._creds, self._stats.pages_emitted)
+        self._stats.pages_emitted += 1
+        self._stats.bytes_emitted += self._page_bytes
+        self._page_open = False
+
+    def _flush_full_parts(self) -> None:
+        part_bytes = self._delivery.part_bytes
+        while len(self._pending) >= part_bytes:
+            self._put_part(bytes(self._pending[:part_bytes]))
+            del self._pending[:part_bytes]
+
+    def _put_part(self, payload: bytes) -> None:
+        self._guard()
+        self._page_flushed_bytes += len(payload)
+        # Row completions are tracked explicitly: a row belongs to the part containing its
+        # final byte. Row-end offsets are absolute within the page and strictly increasing,
+        # so each row is counted exactly once, in the part where it completes.
+        rows_in_part = 0
+        while self._row_end_offsets and self._row_end_offsets[0] <= self._page_flushed_bytes:
+            rows_in_part += 1
+            self._row_end_offsets.popleft()
+        self._client.put_part(
+            self._creds,
+            batch_index=self._stats.pages_emitted,
+            part_number=self._part_number,
+            payload=payload,
+            sha256_hex=hashlib.sha256(payload).hexdigest(),
+            rows=rows_in_part,
+        )
+        self._part_number += 1
+        self._stats.parts_emitted += 1
+
+
+# ---------------------------------------------------------------------------
+# Producer: one validated query execution through a named server-side cursor
+# ---------------------------------------------------------------------------
+
+
+def produce_remote_query(
+    request: RemoteQueryRequest,
+    check: 'PostgreSql',
+    creds: UploadCredentials,
+    client: UploadClient,
+    execution_dbname: str,
+    started_at: float,
+    stats: RemoteQueryRunStats,
+) -> dict[str, Any]:
+    """Execute the validated query once and return the compact run receipt.
+
+    The query runs exactly once, through a named server-side cursor declared inside the
+    existing read-only transaction with the statement timeout applied; it is never wrapped in
+    a probe and never executed twice. Bounded row batches are fetched from the same cursor
+    and encoded one row at a time.
+    """
+    delivery = request.result_delivery
+    limits = delivery.limits
+    deadline = started_at + limits.timeout_ms / 1000
+
+    def guard() -> None:
+        _raise_if_timed_out(deadline)
+        _raise_if_cancelled(check)
+
+    cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
+    with check.db_pool.get_connection(execution_dbname) as conn:
+        with conn.cursor() as control:
+            in_transaction = False
+            try:
+                control.execute('BEGIN READ ONLY')
+                in_transaction = True
+                # SET statements do not accept bind parameters, so the timeout is inlined; it
+                # is a validated positive int from the server-injected limits, never raw text.
+                control.execute('SET LOCAL statement_timeout = {}'.format(limits.timeout_ms))
+                with conn.cursor(name=cursor_name) as server_cursor:
+                    register_exact_loaders(server_cursor)
+                    server_cursor.execute(request.query)
+                    columns = described_columns(server_cursor)
+                    validate_columns(columns, limits.max_columns)
+                    schema_json = None
+                    if request.include_schema:
+                        schema_json = build_schema_json(control, columns, delivery)
+
+                    writer = PageWriter(delivery, creds, client, schema_json, guard, stats)
+                    guard()
+                    while True:
+                        rows = server_cursor.fetchmany(REMOTE_QUERY_FETCH_BATCH_ROWS)
+                        if not rows:
+                            break
+                        for row in rows:
+                            guard()
+                            row_buffer = bytearray()
+                            encode_row(row, columns, row_buffer)
+                            if len(row_buffer) > limits.max_row_bytes:
+                                raise RemoteQueryFailure(
+                                    'row_too_large',
+                                    'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
+                                        len(row_buffer), limits.max_row_bytes
+                                    ),
+                                )
+                            writer.add_row(bytes(row_buffer))
+                    return writer.finish()
+            finally:
+                if in_transaction:
+                    try:
+                        control.execute('ROLLBACK')
+                    except Exception:
+                        LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
+
+
+def _raise_if_timed_out(deadline: float) -> None:
+    if time.monotonic() > deadline:
+        raise RemoteQueryFailure('timeout', 'Remote query exceeded timeoutMs.', retryable=True)
+
+
+def _raise_if_cancelled(check: 'PostgreSql') -> None:
+    is_cancelled = getattr(check, 'is_cancelled', None)
+    if is_cancelled is not None and is_cancelled():
+        raise RemoteQueryFailure('cancelled', 'Remote query run was cancelled.', retryable=True)
+
+
+# ---------------------------------------------------------------------------
+# Target resolution
+# ---------------------------------------------------------------------------
 
 
 def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
@@ -350,177 +962,13 @@ def _dbname_from_check(check: 'PostgreSql') -> str | None:
     return getattr(config, 'dbname', None)
 
 
-def _started_metadata(request: RemoteQueryCopyRequest) -> dict[str, Any]:
-    result_delivery = request.result_delivery
-    max_bytes = result_delivery.max_bytes if result_delivery is not None else request.limits.max_bytes
-    metadata: dict[str, Any] = {
-        'status': 'STARTED',
-        'format': request.format,
-        'operation': request.operation,
-        'chunkBytes': request.limits.chunk_bytes,
-        'maxBytes': max_bytes,
-        'maxRowBytes': request.limits.max_row_bytes,
-    }
-    if result_delivery is not None:
-        metadata['resultDelivery'] = {
-            'mode': result_delivery.mode,
-            'uploadId': result_delivery.upload_id,
-            'partBytes': result_delivery.part_bytes,
-            'maxBytes': result_delivery.max_bytes,
-            'format': result_delivery.format,
-            'compression': result_delivery.compression,
-        }
-    return metadata
-
-
-def _succeeded_metadata(state: _CopyStreamState, started_at: float, request: RemoteQueryCopyRequest) -> dict[str, Any]:
-    metadata: dict[str, Any] = {'status': 'SUCCEEDED', 'stats': _copy_stream_stats(state, started_at, request.format)}
-    result_delivery = request.result_delivery
-    if result_delivery is not None:
-        # Provisional receipt aligned to the Agent-owned uploadReceipt shape
-        # {mode, uploadId, bucketName, objectPath, totalBytes, totalRows, partCount, sha256}.
-        # Python owns only the fields it can compute from the byte stream; the Agent Go side
-        # enriches it with bucketName, objectPath, totalRows, and the aggregate sha256 after
-        # it finalizes the upload session.
-        metadata['uploadReceipt'] = {
-            'mode': result_delivery.mode,
-            'uploadId': result_delivery.upload_id,
-            'totalBytes': state.bytes_emitted,
-            'partCount': _multipart_part_count(state.bytes_emitted, result_delivery.part_bytes),
-        }
-    return metadata
-
-
-def _iter_copy_stream_events(
-    check: 'PostgreSql', request: RemoteQueryCopyRequest, execution_dbname: str, started_at: float
-) -> Iterator[CopyStreamEvent]:
-    db_pool = getattr(check, 'db_pool', None)
-    if db_pool is None:
-        yield _stream_failed_event(
-            'credentials_unavailable',
-            'Matched Postgres check does not expose a connection pool.',
-            elapsed_ms=_elapsed_ms(started_at),
-        )
-        return
-    if getattr(db_pool, 'is_closed', lambda: False)():
-        yield _stream_failed_event(
-            'target_unavailable',
-            'Matched Postgres check connection pool is closed.',
-            retryable=False,
-            elapsed_ms=_elapsed_ms(started_at),
-        )
-        return
-
-    yield CopyStreamEvent('metadata', _started_metadata(request))
-
-    state = _CopyStreamState()
-    error: _CopyStreamFailure | None = None
-    try:
-        for event, next_state in _copy_stream_data_events(check, request, execution_dbname, state, started_at):
-            state = next_state
-            yield event
-    except _CopyStreamFailure as e:
-        error = e
-    except RuntimeError:
-        error = _CopyStreamFailure(
-            'target_unavailable', 'Matched Postgres check connection pool is unavailable.', retryable=False
-        )
-    except Exception:
-        LOGGER.exception('Remote query COPY stream execution failed')
-        error = _CopyStreamFailure('query_failed', 'Remote query COPY stream execution failed.')
-
-    if error is not None:
-        yield _stream_failed_event(
-            error.code,
-            error.message,
-            retryable=error.retryable,
-            stats=_copy_stream_stats(state, started_at, request.format),
-        )
-        return
-
-    yield CopyStreamEvent('final', _succeeded_metadata(state, started_at, request))
-
-
-def _copy_stream_data_events(
-    check: 'PostgreSql',
-    request: RemoteQueryCopyRequest,
-    execution_dbname: str,
-    state: _CopyStreamState,
-    started_at: float,
-) -> Iterator[tuple[CopyStreamEvent, _CopyStreamState]]:
-    limits = request.limits
-    result_delivery = request.result_delivery
-    chunk_bytes = limits.chunk_bytes
-    max_bytes = result_delivery.max_bytes if result_delivery is not None else limits.max_bytes
-    max_row_bytes = limits.max_row_bytes
-    timeout_ms = limits.timeout_ms
-    deadline = started_at + (timeout_ms / 1000)
-    copy_sql = _copy_stdout_sql(request.query, request.format)
-    pending = bytearray()
-
-    with check.db_pool.get_connection(execution_dbname) as conn:
-        with conn.cursor() as cursor:
-            in_transaction = False
-            try:
-                cursor.execute('BEGIN READ ONLY')
-                in_transaction = True
-                cursor.execute('SET LOCAL statement_timeout = %s', (timeout_ms,))
-                with cursor.copy(copy_sql) as copy:
-                    for block in copy:
-                        _raise_if_timed_out(deadline)
-                        block_view = memoryview(block)
-                        if len(block_view) > max_row_bytes:
-                            raise _CopyStreamFailure(
-                                'max_row_bytes_exceeded',
-                                'COPY stream row exceeded maxRowBytes; psycopg exposes COPY data at row granularity.',
-                            )
-
-                        offset = 0
-                        while offset < len(block_view):
-                            _raise_if_timed_out(deadline)
-                            remaining_allowed = max_bytes - state.bytes_emitted - len(pending)
-                            if remaining_allowed <= 0:
-                                raise _CopyStreamFailure('max_bytes_exceeded', 'COPY stream exceeded maxBytes.')
-
-                            remaining_chunk = chunk_bytes - len(pending)
-                            take = min(remaining_chunk, remaining_allowed, len(block_view) - offset)
-                            pending.extend(block_view[offset : offset + take])
-                            offset += take
-
-                            if len(pending) >= chunk_bytes:
-                                event, state = _copy_data_event(pending, state, result_delivery)
-                                pending.clear()
-                                yield event, state
-
-                            if offset < len(block_view) and state.bytes_emitted + len(pending) >= max_bytes:
-                                if pending:
-                                    event, state = _copy_data_event(pending, state, result_delivery)
-                                    pending.clear()
-                                    yield event, state
-                                raise _CopyStreamFailure('max_bytes_exceeded', 'COPY stream exceeded maxBytes.')
-
-                    if pending:
-                        event, state = _copy_data_event(pending, state, result_delivery)
-                        pending.clear()
-                        yield event, state
-            finally:
-                if in_transaction:
-                    try:
-                        cursor.execute('ROLLBACK')
-                    except Exception:
-                        LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
-
-
-def _copy_stdout_sql(query: str, stream_format: CopyStreamFormat) -> str:
-    if stream_format == 'csv':
-        return f'COPY ({query}) TO STDOUT WITH (FORMAT CSV)'
-    if stream_format == 'binary':
-        return f'COPY ({query}) TO STDOUT WITH (FORMAT BINARY)'
-    raise _CopyStreamFailure('invalid_request', 'Unsupported COPY stream format.')
+# ---------------------------------------------------------------------------
+# Query allowlist
+# ---------------------------------------------------------------------------
 
 
 def _is_query_allowed(query: str) -> bool:
-    return not _is_query_allowlist_enabled() or query in REMOTE_QUERY_COPY_SQL_ALLOWLIST
+    return not _is_query_allowlist_enabled() or query in REMOTE_QUERY_QUERY_ALLOWLIST
 
 
 def _is_query_allowlist_enabled() -> bool:
@@ -539,91 +987,14 @@ def _is_query_allowlist_enabled() -> bool:
     return is_affirmative(config_value)
 
 
-def _raise_if_timed_out(deadline: float) -> None:
-    if time.monotonic() > deadline:
-        raise _CopyStreamFailure('timeout', 'COPY stream exceeded timeoutMs.', retryable=True)
-
-
-def _copy_data_event(
-    data: bytearray, state: _CopyStreamState, result_delivery: RemoteQueryResultDelivery | None = None
-) -> tuple[CopyStreamEvent, _CopyStreamState]:
-    payload = bytes(data)
-    metadata: dict[str, Any] = {
-        'sequence': state.sequence,
-        'offset': state.bytes_emitted,
-        'bytes': len(payload),
-    }
-    if result_delivery is not None:
-        metadata['sha256'] = hashlib.sha256(payload).hexdigest()
-    event = CopyStreamEvent('data', metadata, payload)
-    next_state = _CopyStreamState(
-        sequence=state.sequence + 1,
-        chunks_emitted=state.chunks_emitted + 1,
-        bytes_emitted=state.bytes_emitted + len(payload),
-    )
-    return event, next_state
-
-
-def _copy_stream_stats(state: _CopyStreamState, started_at: float, stream_format: CopyStreamFormat) -> dict[str, Any]:
-    return {
-        'format': stream_format,
-        'bytesEmitted': state.bytes_emitted,
-        'chunksEmitted': state.chunks_emitted,
-        'elapsedMs': _elapsed_ms(started_at),
-    }
-
-
-def _elapsed_ms(started_at: float) -> int:
-    return max(0, int((time.monotonic() - started_at) * 1000))
-
-
-def _stream_failed_event(
-    code: str,
-    message: str,
-    retryable: bool = False,
-    stats: Mapping[str, Any] | None = None,
-    elapsed_ms: int | None = None,
-) -> CopyStreamEvent:
-    metadata = {
-        'status': 'FAILED',
-        'error': {'code': code, 'message': message, 'retryable': retryable},
-    }
-    if stats is not None:
-        metadata['stats'] = dict(stats)
-    elif elapsed_ms is not None:
-        metadata['stats'] = {'elapsedMs': elapsed_ms}
-    return CopyStreamEvent('error', metadata)
-
-
-def _emit_copy_event(emit: CopyStreamEmit, event: CopyStreamEvent) -> None:
-    emit(event.event_type, json.dumps(event.metadata, default=str), event.payload)
-
-
-def _validation_message(error: ValidationError) -> str:
-    details = []
-    for item in error.errors(include_input=False):
-        location = _validation_location(item.get('loc', ()))
-        message = item.get('msg', 'Invalid value')
-        if location:
-            details.append(f'{location}: {message}')
-        else:
-            details.append(message)
-    return 'Invalid remote query request: {}'.format('; '.join(details))
-
-
-def _validation_location(location: tuple[Any, ...]) -> str:
-    return '.'.join(str(part) for part in location)
-
-
 # ---------------------------------------------------------------------------
-# Direct multipart upload to its-agent-intake (POC_PUBLIC_MULTIPART_UPLOAD)
+# Direct multipart upload to its-agent-intake (page-aware)
 #
-# When resultDelivery is present, the integration uploads bounded COPY parts
-# directly to its-agent-intake over HTTP. The Agent forwards the intake base
-# URL and scoped upload token in resultDelivery, and the integration reads the
-# org API key and POC application key from Agent config via datadog_agent.get_config.
-# Bulk part bytes never traverse the native emit bridge, AgentSecure, PAR, or
-# AP action output; only the compact final receipt is emitted back.
+# The integration uploads page parts directly to its-agent-intake over HTTP. The Agent
+# forwards the intake base URL and scoped upload token in resultDelivery, and the
+# integration reads the org API key and POC application key from Agent config via
+# datadog_agent.get_config. Bulk part bytes never traverse the native emit bridge,
+# AgentSecure, PAR, or AP action output; only the compact final receipt is emitted back.
 
 REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER = 'test-drive-its-agent-intake-poc'
 REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive_selector'
@@ -640,17 +1011,9 @@ REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT = (
     REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS,
 )
 
-# A valid aggregate SHA-256 hex digest is exactly 64 lowercase hexadecimal characters, matching
-# the its-agent contract and the lowercase digest intake emits. The intake finalize response
-# only carries it when full-object readback is enabled (debug-only/default-off); when absent or
-# empty the field is omitted from the emitted receipt, and when present it is validated strictly
-# (lowercase 64-hex) so a malformed digest -- including uppercase hex -- fails closed rather than
-# forwarding garbage.
-_AGGREGATE_SHA256_PATTERN = re.compile(r'\A[0-9a-f]{64}\Z')
-
 
 @dataclass(frozen=True)
-class _UploadCredentials:
+class UploadCredentials:
     base_url: str
     upload_id: str
     api_key: str
@@ -659,23 +1022,25 @@ class _UploadCredentials:
     test_drive_selector: str | None
 
 
-class _UploadClient(Protocol):
+class UploadClient(Protocol):
     def put_part(
-        self, creds: _UploadCredentials, part_number: int, payload: bytes, sha256_hex: str, rows: int
+        self, creds: UploadCredentials, batch_index: int, part_number: int, payload: bytes, sha256_hex: str, rows: int
     ) -> None: ...
 
-    def finalize(self, creds: _UploadCredentials) -> Mapping[str, Any]: ...
+    def finalize_page(self, creds: UploadCredentials, batch_index: int) -> None: ...
 
-    def abort(self, creds: _UploadCredentials) -> None: ...
+    def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]: ...
+
+    def abort(self, creds: UploadCredentials) -> None: ...
 
 
-class _RequestsUploadClient:
-    """HTTP upload client for its-agent-intake. Imports requests lazily."""
+class RequestsUploadClient:
+    """Page-aware HTTP upload client for its-agent-intake. Imports requests lazily."""
 
     def __init__(self, timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT) -> None:
         self._timeout = timeout
 
-    def _headers(self, creds: _UploadCredentials, content_type: str | None = None) -> dict[str, str]:
+    def _headers(self, creds: UploadCredentials, content_type: str | None = None) -> dict[str, str]:
         headers = {
             'dd-api-key': creds.api_key,
             'dd-application-key': creds.app_key,
@@ -687,27 +1052,67 @@ class _RequestsUploadClient:
             headers[REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER] = creds.test_drive_selector
         return headers
 
-    def put_part(self, creds: _UploadCredentials, part_number: int, payload: bytes, sha256_hex: str, rows: int) -> None:
+    def put_part(
+        self, creds: UploadCredentials, batch_index: int, part_number: int, payload: bytes, sha256_hex: str, rows: int
+    ) -> None:
         headers = self._headers(creds, 'application/octet-stream')
         headers['X-DD-Part-SHA256'] = sha256_hex
         headers['X-DD-Part-Bytes'] = str(len(payload))
         headers['X-DD-Part-Rows'] = str(rows)
-        url = '{}/uploads/{}/parts/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, part_number)
+        url = '{}/uploads/{}/pages/{}/parts/{}'.format(
+            creds.base_url.rstrip('/'), creds.upload_id, batch_index, part_number
+        )
         _upload_with_retry('PUT', url, headers, payload, self._timeout)
 
-    def finalize(self, creds: _UploadCredentials) -> Mapping[str, Any]:
+    def finalize_page(self, creds: UploadCredentials, batch_index: int) -> None:
+        headers = self._headers(creds, 'application/json')
+        url = '{}/uploads/{}/pages/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id, batch_index)
+        _upload_with_retry('POST', url, headers, b'{}', self._timeout)
+
+    def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
         _status, body = _upload_with_retry('POST', url, headers, b'{}', self._timeout)
-        return json.loads(body.decode('utf-8'))
+        return parse_finalize_run_body(body)
 
-    def abort(self, creds: _UploadCredentials) -> None:
+    def abort(self, creds: UploadCredentials) -> None:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
         try:
             _upload_with_retry('POST', url, headers, b'{}', self._timeout)
-        except _CopyStreamFailure:
+        except RemoteQueryFailure:
             LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
+
+
+def parse_finalize_run_body(body: bytes) -> Mapping[str, Any]:
+    """Parse the run-finalize response, failing closed on a non-JSON or non-object body."""
+    if not body or not body.strip():
+        return {}
+    try:
+        parsed = json.loads(body.decode('utf-8'))
+    except (UnicodeDecodeError, ValueError):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not valid JSON.')
+    if not isinstance(parsed, Mapping):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
+    return parsed
+
+
+def verify_run_finalize_response(response: Mapping[str, Any], upload_id: str) -> None:
+    """Fail closed when intake's authoritative response reports a different upload session."""
+    if not isinstance(response, Mapping):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
+    reported_upload_id = response.get('upload_id')
+    if reported_upload_id is None or reported_upload_id == '':
+        # The compact receipt is the integration's own accounting; intake's authoritative
+        # result is verified by its-agent, so an absent identity echo is accepted.
+        return
+    if str(reported_upload_id) != upload_id:
+        raise RemoteQueryFailure(
+            'invalid_receipt',
+            'its-agent-intake run finalize response reported upload id {!r} instead of {!r}.'.format(
+                str(reported_upload_id), upload_id
+            ),
+        )
 
 
 def _is_transient_upload_status(status: int) -> bool:
@@ -734,7 +1139,7 @@ def _upload_with_retry(
             if 200 <= resp.status_code < 300:
                 return resp.status_code, resp.content
             if not _is_transient_upload_status(resp.status_code):
-                raise _CopyStreamFailure(
+                raise RemoteQueryFailure(
                     'upload_failed', 'upload to its-agent-intake rejected with status {}'.format(resp.status_code)
                 )
             last_err = 'status {}'.format(resp.status_code)
@@ -742,16 +1147,11 @@ def _upload_with_retry(
             break
         time.sleep(backoff)
         backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
-    raise _CopyStreamFailure(
+    raise RemoteQueryFailure(
         'upload_failed',
         'upload to its-agent-intake failed after {} attempts: {}'.format(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1, last_err),
         retryable=True,
     )
-
-
-def _is_upload_request(request: Mapping[str, Any]) -> bool:
-    delivery = request.get('resultDelivery')
-    return isinstance(delivery, Mapping) and delivery.get('mode') == 'POC_PUBLIC_MULTIPART_UPLOAD'
 
 
 def _get_agent_config(key: str) -> str:
@@ -765,66 +1165,23 @@ def _get_agent_config(key: str) -> str:
     return str(value)
 
 
-def _resolve_upload_credentials(request: Mapping[str, Any]) -> _UploadCredentials:
-    delivery = request.get('resultDelivery') or {}
+def _resolve_upload_credentials(delivery: RemoteQueryResultDelivery) -> UploadCredentials:
     selector = _get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY)
-    return _UploadCredentials(
-        base_url=str(delivery.get('baseUrl') or ''),
-        upload_id=str(delivery.get('uploadId') or ''),
+    return UploadCredentials(
+        base_url=delivery.base_url,
+        upload_id=delivery.upload_id,
         api_key=_get_agent_config('api_key'),
         app_key=_get_agent_config('app_key'),
-        token=str(delivery.get('token') or ''),
+        token=delivery.token,
         test_drive_selector=selector or None,
     )
 
 
-def _default_upload_client() -> _UploadClient:
-    return _RequestsUploadClient()
+def _default_upload_client() -> UploadClient:
+    return RequestsUploadClient()
 
 
-def _count_newlines(payload: bytes) -> int:
-    return payload.count(b'\n')
-
-
-def _multipart_part_count(total_bytes: int, part_bytes: int) -> int:
-    # Number of multipart parts for ``total_bytes`` aggregated at ``part_bytes``: full parts of
-    # exactly partBytes plus a final short part, or zero parts for an empty result.
-    if total_bytes <= 0:
-        return 0
-    return (total_bytes + part_bytes - 1) // part_bytes
-
-
-def _intake_receipt_to_camel(resp: Mapping[str, Any]) -> dict[str, Any]:
-    receipt: dict[str, Any] = {
-        'mode': resp.get('mode', 'POC_PUBLIC_MULTIPART_UPLOAD'),
-        'uploadId': resp.get('upload_id', ''),
-        'bucketName': resp.get('bucket_name', ''),
-        'objectPath': resp.get('object_path', ''),
-        'totalBytes': resp.get('total_bytes', 0),
-        'totalRows': resp.get('total_rows', 0),
-        'partCount': resp.get('part_count', 0),
-    }
-    # Full-object readback is debug-only/default-off, so the intake finalize response may omit
-    # the aggregate sha256 or return it empty. Omit the field from the receipt when absent/empty;
-    # when present, validate it strictly so a malformed digest fails closed.
-    aggregate_sha256 = _parse_aggregate_sha256(resp.get('sha256'))
-    if aggregate_sha256 is not None:
-        receipt['sha256'] = aggregate_sha256
-    return receipt
-
-
-def _parse_aggregate_sha256(value: Any) -> str | None:
-    # Treat a missing or empty aggregate sha256 as absent (readback off) and omit it; any other
-    # present value must be a valid lowercase 64-char hex digest, otherwise the receipt is
-    # untrustworthy.
-    if value is None or value == '':
-        return None
-    if not isinstance(value, str) or _AGGREGATE_SHA256_PATTERN.match(value) is None:
-        raise _CopyStreamFailure('invalid_receipt', 'intake finalize response carried a malformed aggregate sha256')
-    return value
-
-
-def _safe_abort(client: _UploadClient, creds: _UploadCredentials) -> None:
+def _safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
     if not creds.base_url or not creds.upload_id or not creds.token:
         return
     try:
@@ -833,115 +1190,247 @@ def _safe_abort(client: _UploadClient, creds: _UploadCredentials) -> None:
         LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
 
 
-@dataclass(frozen=True)
-class _MultipartPart:
-    part_number: int
-    payload: bytes
+# ---------------------------------------------------------------------------
+# Event entry points
+# ---------------------------------------------------------------------------
 
 
-class _MultipartBuffer:
-    """Aggregate COPY chunk bytes into server-clamped multipart parts.
-
-    The COPY stream emits ``limits.chunkBytes``-sized chunks; this buffer accumulates them into
-    ``partBytes``-sized parts (the multipart part size), which may exceed the COPY chunk size.
-    At most one part is buffered at a time. Part numbers are contiguous and 1-based to match
-    provider multipart conventions.
-    """
-
-    def __init__(self, part_bytes: int) -> None:
-        self._part_bytes = part_bytes
-        self._pending = bytearray()
-        self._next_part_number = 1
-
-    def extend(self, data: bytes) -> None:
-        self._pending.extend(data)
-
-    def _take(self) -> _MultipartPart:
-        payload = bytes(self._pending[: self._part_bytes])
-        del self._pending[: self._part_bytes]
-        part = _MultipartPart(self._next_part_number, payload)
-        self._next_part_number += 1
-        return part
-
-    def full_parts(self) -> Iterator[_MultipartPart]:
-        while len(self._pending) >= self._part_bytes:
-            yield self._take()
-
-    def flush_final(self) -> _MultipartPart | None:
-        if not self._pending:
-            return None
-        return self._take()
-
-
-def _upload_one_part(client: _UploadClient, creds: _UploadCredentials, part: _MultipartPart) -> None:
-    # The part SHA-256 is over the aggregated part body (all chunks combined), not the
-    # individual COPY chunks, so the intake can verify the part it receives.
-    client.put_part(
-        creds, part.part_number, part.payload, hashlib.sha256(part.payload).hexdigest(), _count_newlines(part.payload)
-    )
-
-
-def _finalize_upload(
-    client: _UploadClient, creds: _UploadCredentials, event: CopyStreamEvent, emit: CopyStreamEmit
+def execute_agent_rpc_stream_copy(
+    request_json: str | bytes | bytearray, check: 'PostgreSql', emit: RemoteQueryEmit
 ) -> None:
-    receipt = _intake_receipt_to_camel(client.finalize(creds))
-    metadata = dict(event.metadata)
-    # The iterator's provisional receipt uses the camelCase key; replace it with the
-    # server-expected snake_case outer key carrying the Agent-shaped camelCase receipt.
-    metadata.pop('uploadReceipt', None)
-    metadata['upload_receipt'] = receipt
-    _emit_copy_event(emit, CopyStreamEvent('final', metadata))
+    """Execute a remote query request and emit page producer events.
+
+    The entry point name is kept for the Agent's rtloader bridge, which resolves this
+    function by name. Emits ``metadata`` (STARTED), then one ``final`` (SUCCEEDED with the
+    compact receipt) or ``error`` (FAILED) event; bulk page bytes never cross the callback.
+    """
+    try:
+        request = json.loads(request_json)
+    except (TypeError, ValueError):
+        _emit_event(
+            emit,
+            _failed_event('invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'),
+        )
+        return
+
+    if not isinstance(request, Mapping):
+        _emit_event(
+            emit,
+            _failed_event('invalid_request', 'Invalid remote query request: request_json must be a JSON object.'),
+        )
+        return
+
+    _execute_upload_stream(request, check, emit)
 
 
 def _execute_upload_stream(
-    request: Mapping[str, Any],
-    check: 'PostgreSql',
-    emit: CopyStreamEmit,
-    http_client: _UploadClient | None = None,
+    request: Mapping[str, Any], check: 'PostgreSql', emit: RemoteQueryEmit, http_client: UploadClient | None = None
 ) -> None:
-    """Upload COPY parts directly to its-agent-intake; emit only metadata/final/error events."""
-    creds = _resolve_upload_credentials(request)
-    if not creds.api_key or not creds.app_key:
-        _emit_copy_event(
-            emit,
-            _stream_failed_event(
-                'credentials_unavailable',
-                'Remote query upload requires api_key and app_key to be configured on the Agent.',
-            ),
-        )
-        return
-    client = http_client if http_client is not None else _default_upload_client()
-    events = iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check]))
-    buffer: _MultipartBuffer | None = None
+    """Drive the producer with the default (or injected) upload client and emit its events."""
+    events = iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), http_client)
     try:
         for event in events:
-            if event.event_type == 'metadata':
-                # The STARTED metadata carries the backend-validated partBytes; the COPY stream
-                # emits chunkBytes-sized events that this client aggregates into partBytes parts.
-                delivery_meta = event.metadata.get('resultDelivery') or {}
-                buffer = _MultipartBuffer(int(delivery_meta.get('partBytes') or 0))
-                _emit_copy_event(emit, event)
-            elif event.event_type == 'data':
-                if buffer is not None:
-                    buffer.extend(event.payload)
-                    for part in buffer.full_parts():
-                        _upload_one_part(client, creds, part)
-            elif event.event_type == 'final':
-                if buffer is not None:
-                    final_part = buffer.flush_final()
-                    if final_part is not None:
-                        _upload_one_part(client, creds, final_part)
-                _finalize_upload(client, creds, event, emit)
-            elif event.event_type == 'error':
-                _safe_abort(client, creds)
-                _emit_copy_event(emit, event)
-            else:
-                _emit_copy_event(emit, event)
-    except _CopyStreamFailure as e:
-        _safe_abort(client, creds)
-        _emit_copy_event(emit, _stream_failed_event(e.code, e.message, retryable=e.retryable))
-        events.close()
+            _emit_event(emit, event)
     except BaseException:
-        _safe_abort(client, creds)
         events.close()
         raise
+
+
+def iter_agent_rpc_stream_events(
+    request: Any, registry: PostgresCheckRegistry, http_client: UploadClient | None = None
+) -> Iterator[RemoteQueryEvent]:
+    """Yield producer events for unit tests and callback adaptation."""
+    started_at = time.monotonic()
+    try:
+        parsed_request = RemoteQueryRequest.model_validate(request)
+    except ValidationError as e:
+        yield _failed_event('invalid_request', _validation_message(e), elapsed_ms=_elapsed_ms(started_at))
+        return
+
+    if not _is_query_allowed(parsed_request.query):
+        yield _failed_event(
+            'invalid_request',
+            'Invalid remote query request: query is not allowlisted.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+
+    target = parsed_request.target
+    matches = _resolve_matches(target, registry.iter_postgres_checks())
+    LOGGER.debug('Remote query target match count: %d', len(matches))
+    if not matches:
+        yield _failed_event(
+            'target_not_found',
+            'No loaded Postgres integration instance matched target selector.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+    if len(matches) > 1:
+        yield _failed_event(
+            'target_ambiguous',
+            'More than one loaded Postgres integration instance matched target selector.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+
+    check = matches[0]
+    execution_dbname = _dbname_from_check(check)
+    if execution_dbname is None:
+        yield _failed_event(
+            'target_unavailable',
+            'Matched Postgres check does not expose a configured database name.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+
+    creds = _resolve_upload_credentials(parsed_request.result_delivery)
+    if not creds.api_key or not creds.app_key:
+        yield _failed_event(
+            'credentials_unavailable',
+            'Remote query upload requires api_key and app_key to be configured on the Agent.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+
+    db_pool = getattr(check, 'db_pool', None)
+    if db_pool is None:
+        yield _failed_event(
+            'credentials_unavailable',
+            'Matched Postgres check does not expose a connection pool.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+    if getattr(db_pool, 'is_closed', lambda: False)():
+        yield _failed_event(
+            'target_unavailable',
+            'Matched Postgres check connection pool is closed.',
+            retryable=False,
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+
+    client = http_client if http_client is not None else _default_upload_client()
+    stats = RemoteQueryRunStats()
+    yield RemoteQueryEvent('metadata', _started_metadata(parsed_request))
+
+    try:
+        receipt = produce_remote_query(parsed_request, check, creds, client, execution_dbname, started_at, stats)
+    except RemoteQueryFailure as e:
+        _safe_abort(client, creds)
+        yield _failed_event(e.code, e.message, retryable=e.retryable, stats=_stats_metadata(stats, started_at))
+        return
+    except psycopg_errors.QueryCanceled:
+        # SQLSTATE class 57014: the server canceled the statement (statement timeout or an
+        # explicit cancel); both are retryable query timeouts for the run.
+        _safe_abort(client, creds)
+        yield _failed_event(
+            'timeout',
+            'Remote query was canceled by the server (statement timeout or cancellation).',
+            retryable=True,
+            stats=_stats_metadata(stats, started_at),
+        )
+        return
+    except RuntimeError:
+        _safe_abort(client, creds)
+        yield _failed_event(
+            'target_unavailable',
+            'Matched Postgres check connection pool is unavailable.',
+            retryable=False,
+            stats=_stats_metadata(stats, started_at),
+        )
+        return
+    except BaseException as e:
+        _safe_abort(client, creds)
+        if not isinstance(e, Exception):
+            raise
+        LOGGER.exception('Remote query execution failed')
+        yield _failed_event('query_failed', 'Remote query execution failed.', stats=_stats_metadata(stats, started_at))
+        return
+
+    yield RemoteQueryEvent('final', _succeeded_metadata(receipt, stats, started_at))
+
+
+def _started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
+    delivery = request.result_delivery
+    limits = delivery.limits
+    return {
+        'status': 'STARTED',
+        'operation': request.operation,
+        'includeSchema': request.include_schema,
+        'resultDelivery': {
+            'runId': delivery.run_id,
+            'taskId': delivery.task_id,
+            'uploadId': delivery.upload_id,
+            'artifactVersion': delivery.artifact_version,
+            'partBytes': delivery.part_bytes,
+            'limits': {
+                'maxFileBytes': limits.max_file_bytes,
+                'maxResultBytes': limits.max_result_bytes,
+                'maxRowBytes': limits.max_row_bytes,
+                'maxColumns': limits.max_columns,
+                'maxSchemaBytes': limits.max_schema_bytes,
+                'maxPages': limits.max_pages,
+                'timeoutMs': limits.timeout_ms,
+            },
+        },
+    }
+
+
+def _succeeded_metadata(receipt: Mapping[str, Any], stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:
+    return {
+        'status': 'SUCCEEDED',
+        'upload_receipt': dict(receipt),
+        'stats': _stats_metadata(stats, started_at),
+    }
+
+
+def _stats_metadata(stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:
+    return {
+        'rowsEmitted': stats.rows_emitted,
+        'pagesEmitted': stats.pages_emitted,
+        'partsEmitted': stats.parts_emitted,
+        'bytesEmitted': stats.bytes_emitted,
+        'elapsedMs': _elapsed_ms(started_at),
+    }
+
+
+def _failed_event(
+    code: str,
+    message: str,
+    retryable: bool = False,
+    stats: Mapping[str, Any] | None = None,
+    elapsed_ms: int | None = None,
+) -> RemoteQueryEvent:
+    metadata: dict[str, Any] = {
+        'status': 'FAILED',
+        'error': {'code': code, 'message': message, 'retryable': retryable},
+    }
+    if stats is not None:
+        metadata['stats'] = dict(stats)
+    elif elapsed_ms is not None:
+        metadata['stats'] = {'elapsedMs': elapsed_ms}
+    return RemoteQueryEvent('error', metadata)
+
+
+def _emit_event(emit: RemoteQueryEmit, event: RemoteQueryEvent) -> None:
+    emit(event.event_type, json.dumps(event.metadata, default=str), event.payload)
+
+
+def _elapsed_ms(started_at: float) -> int:
+    return max(0, int((time.monotonic() - started_at) * 1000))
+
+
+def _validation_message(error: ValidationError) -> str:
+    details = []
+    for item in error.errors(include_input=False):
+        location = _validation_location(item.get('loc', ()))
+        message = item.get('msg', 'Invalid value')
+        if location:
+            details.append(f'{location}: {message}')
+        else:
+            details.append(message)
+    return 'Invalid remote query request: {}'.format('; '.join(details))
+
+
+def _validation_location(location: tuple[Any, ...]) -> str:
+    return '.'.join(str(part) for part in location)
