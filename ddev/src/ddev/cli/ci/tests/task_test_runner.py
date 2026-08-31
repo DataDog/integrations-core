@@ -12,10 +12,10 @@ from pathlib import Path
 from typing import Any
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch
-from ddev.cli.ci.tests.status import conclusion_to_status
+from ddev.cli.ci.tests.status import conclusion_to_check_run_conclusion, conclusion_to_status
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
-from ddev.utils.github_async.models import WorkflowJob, WorkflowRun
+from ddev.utils.github_async.models import CheckRunConclusion, CheckRunStatus, WorkflowJob, WorkflowRun
 
 
 @dataclass(frozen=True)
@@ -70,14 +70,14 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             self._options.repo,
             name=f"test-batch/{message.batch_id}",
             head_sha=self._options.base_sha,
-            status="in_progress",
+            status=CheckRunStatus.IN_PROGRESS,
             details_url=workflow_url,
         )
         check_run_id = check.data.id
         log_extra["check_run_id"] = check_run_id
         self._logger.info("Check run created", extra=log_extra)
 
-        final_conclusion: str = "cancelled"
+        final_conclusion = CheckRunConclusion.CANCELLED
         finished: BatchFinished | None = None
         try:
             if run.data.status != "completed":
@@ -88,7 +88,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             raw = run.data.conclusion
             if raw is None:
                 self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
-            final_conclusion = raw or "neutral"
+            final_conclusion = conclusion_to_check_run_conclusion(raw)
 
             artifact_dirs = await self._download_artifacts(run_id, log_extra)
             self._logger.info("Artifacts downloaded", extra=log_extra)
@@ -111,7 +111,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                     self._options.owner,
                     self._options.repo,
                     check_run_id,
-                    status="completed",
+                    status=CheckRunStatus.COMPLETED,
                     conclusion=final_conclusion,
                     details_url=workflow_url,
                 )

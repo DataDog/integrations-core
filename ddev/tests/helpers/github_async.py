@@ -46,6 +46,8 @@ from ddev.utils.github_async import COMMENT_BODY_LIMIT, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
+    CheckRunConclusion,
+    CheckRunStatus,
     IssueComment,
     Label,
     PullRequest,
@@ -438,7 +440,7 @@ class FakeAsyncGitHubClient:
         repo: str,
         name: str,
         head_sha: str,
-        status: str,
+        status: CheckRunStatus,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
@@ -460,13 +462,13 @@ class FakeAsyncGitHubClient:
         owner: str,
         repo: str,
         check_run_id: int,
-        status: str | None = None,
-        conclusion: str | None = None,
+        status: CheckRunStatus | None = None,
+        conclusion: CheckRunConclusion | None = None,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
     ) -> GitHubResponse[CheckRun]:
-        if status == 'completed' and conclusion is None:
+        if status == CheckRunStatus.COMPLETED and conclusion is None:
             raise ValueError("A conclusion is required when a check run status is 'completed'.")
         return self._call(
             'update_check_run',
