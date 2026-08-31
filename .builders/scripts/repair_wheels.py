@@ -123,6 +123,9 @@ def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str
         {
             # pymqi
             'libmqic_r.so',
+            # The Agent package provides these libraries in its embedded runtime.
+            'libcurl.so.4',
+            'libodbc.so.2',
         }
     )
 

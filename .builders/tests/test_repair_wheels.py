@@ -4,7 +4,7 @@ import io
 import shutil
 import sys
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 from zipfile import ZIP_DEFLATED
 from zipfile import ZipFile
 from zipfile import ZipInfo
@@ -38,6 +38,51 @@ def write_wheel(path: Path) -> None:
             info.external_attr = 0o644 << 16
             wheel.writestr(info, contents)
         wheel.writestr(record_path, record.getvalue())
+
+
+def test_repair_linux_excludes_agent_provided_libraries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source_built_dir = tmp_path / 'source-built'
+    source_external_dir = tmp_path / 'source-external'
+    built_dir = tmp_path / 'built'
+    external_dir = tmp_path / 'external'
+    for directory in (source_built_dir, source_external_dir, built_dir, external_dir):
+        directory.mkdir()
+    (source_built_dir / 'package-1.0.0-cp313-cp313-linux_x86_64.whl').touch()
+
+    captured_exclusions: list[frozenset[str]] = []
+
+    class FakePolicies:
+        def get_policy_by_name(self, name: str) -> dict:
+            assert name == 'manylinux2014_x86_64'
+            return {
+                'name': name,
+                'aliases': [],
+                'lib_whitelist': ['libz.so.1'],
+                'symbol_versions': {'ZLIB': []},
+            }
+
+    class NonPlatformWheel(Exception):
+        pass
+
+    def fake_repair_wheel(*_args, exclude: frozenset[str], **_kwargs) -> None:
+        captured_exclusions.append(exclude)
+
+    auditwheel = ModuleType('auditwheel')
+    auditwheel.__path__ = []
+    monkeypatch.setitem(sys.modules, 'auditwheel', auditwheel)
+    monkeypatch.setitem(sys.modules, 'auditwheel.patcher', SimpleNamespace(Patchelf=object))
+    monkeypatch.setitem(sys.modules, 'auditwheel.policy', SimpleNamespace(WheelPolicies=FakePolicies))
+    monkeypatch.setitem(sys.modules, 'auditwheel.repair', SimpleNamespace(repair_wheel=fake_repair_wheel))
+    monkeypatch.setitem(sys.modules, 'auditwheel.wheel_abi', SimpleNamespace(NonPlatformWheel=NonPlatformWheel))
+    monkeypatch.setenv('MANYLINUX_POLICY', 'manylinux2014_x86_64')
+
+    repair_wheels.repair_linux(
+        str(source_built_dir), str(source_external_dir), str(built_dir), str(external_dir)
+    )
+
+    assert captured_exclusions == [frozenset({'libmqic_r.so', 'libcurl.so.4', 'libodbc.so.2'})]
 
 
 def test_strip_macos_ddtrace_libddwaf_removes_only_dylib_and_record_entry(tmp_path: Path) -> None:
