@@ -1206,6 +1206,7 @@ async def test_pending_sync_work_can_be_read_while_workers_finish_underneath_it(
 
     assert orchestrator._pending_sync_work() == set()
 
+
 class StopRequester(AsyncProcessor[Memo]):
     """Asks the bus to stop from inside a processor, then submits as the runner's `finally` does."""
 
@@ -1220,7 +1221,9 @@ class StopRequester(AsyncProcessor[Memo]):
         self.submit_message(Memo("after_stop", subject="late"))
 
 
-def test_a_requested_stop_ends_an_idle_bus_without_waiting_out_the_grace_period(secretary: Secretary):
+def test_a_requested_stop_ends_an_idle_bus_without_waiting_out_the_grace_period(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+):
     """A caller under a deadline it does not control cannot afford the grace period.
 
     The dispatcher's default grace is 30s against the ~10s a cancelled CI job gets, so a stop that
@@ -1234,11 +1237,14 @@ def test_a_requested_stop_ends_an_idle_bus_without_waiting_out_the_grace_period(
     threading.Timer(0.3, orchestrator.request_stop).start()
 
     start = time.perf_counter()
-    orchestrator.run()
+    with caplog.at_level(logging.INFO):
+        orchestrator.run()
     elapsed = time.perf_counter() - start
 
     assert elapsed < grace_period / 2
     assert "finalize" in orchestrator.events
+    # Said at the exit, or this reads in the logs like the grace period expiring on its own.
+    assert "Stopping on request while idle." in caplog.text
 
 
 def test_work_submitted_after_a_stop_request_is_reported_rather_than_lost(

@@ -509,6 +509,10 @@ class EventBusOrchestrator(ABC):
                 # but capped by max_timeout
                 wait_time = min(self._grace_period, remaining)
                 if not await self.__wait_for_message(get_task, wait_time):
+                    if self.stopping:
+                        # Said here too, or a stop seen inside the wait leaves through this branch and
+                        # reads like the grace period simply expiring.
+                        self._logger.info("Stopping on request while idle.")
                     get_task.cancel()
                     return True
             except Exception:
