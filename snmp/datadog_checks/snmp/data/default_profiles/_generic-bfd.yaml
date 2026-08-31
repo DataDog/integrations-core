@@ -4,30 +4,30 @@ metrics:
   - MIB: BFD-STD-MIB
     table:
       name: bfdSessTable
-      OID: 1.3.6.1.2.1.222.1.2
+      OID: 1.3.6.1.2.1.223.1.2
     symbols:
       - name: bfdSessionByState
         constant_value_one: true
-      - OID: 1.3.6.1.2.1.222.1.2.1.9
+      - OID: 1.3.6.1.2.1.223.1.2.1.9
         name: bfdSessAdminStatus
-      - OID: 1.3.6.1.2.1.222.1.2.1.10
+      - OID: 1.3.6.1.2.1.223.1.2.1.10
         name: bfdSessOperStatus
-      - OID: 1.3.6.1.2.1.222.1.2.1.11
+      - OID: 1.3.6.1.2.1.223.1.2.1.11
         name: bfdSessState
-      - OID: 1.3.6.1.2.1.222.1.2.1.13
+      - OID: 1.3.6.1.2.1.223.1.2.1.13
         name: bfdSessDiag
-      - OID: 1.3.6.1.2.1.222.1.2.1.25
+      - OID: 1.3.6.1.2.1.223.1.2.1.25
         name: bfdSessDesiredMinTxInterval
-      - OID: 1.3.6.1.2.1.222.1.2.1.26
+      - OID: 1.3.6.1.2.1.223.1.2.1.26
         name: bfdSessReqMinRxInterval
-      - OID: 1.3.6.1.2.1.222.1.2.1.28
+      - OID: 1.3.6.1.2.1.223.1.2.1.28
         name: bfdSessDetectMult
-      - OID: 1.3.6.1.2.1.222.1.2.1.29
+      - OID: 1.3.6.1.2.1.223.1.2.1.29
         name: bfdSessNegotiatedInterval
     metric_tags:
       - tag: bfd_session_admin_status
         symbol:
-          OID: 1.3.6.1.2.1.222.1.2.1.9
+          OID: 1.3.6.1.2.1.223.1.2.1.9
           name: bfdSessAdminStatus
         mapping:
           1: enabled
@@ -36,7 +36,7 @@ metrics:
           4: down
       - tag: bfd_session_oper_status
         symbol:
-          OID: 1.3.6.1.2.1.222.1.2.1.10
+          OID: 1.3.6.1.2.1.223.1.2.1.10
           name: bfdSessOperStatus
         mapping:
           1: up
@@ -44,7 +44,7 @@ metrics:
           3: admin_down
       - tag: bfd_session_state
         symbol:
-          OID: 1.3.6.1.2.1.222.1.2.1.11
+          OID: 1.3.6.1.2.1.223.1.2.1.11
           name: bfdSessState
         mapping:
           1: admin_down
@@ -54,7 +54,7 @@ metrics:
           5: failing
       - tag: bfd_session_diag
         symbol:
-          OID: 1.3.6.1.2.1.222.1.2.1.13
+          OID: 1.3.6.1.2.1.223.1.2.1.13
           name: bfdSessDiag
         mapping:
           0: no_diagnostic
@@ -69,21 +69,22 @@ metrics:
           9: mis_connectivity_defect
       - tag: neighbor
         symbol:
-          OID: 1.3.6.1.2.1.222.1.2.1.22
+          OID: 1.3.6.1.2.1.223.1.2.1.22
           name: bfdSessDstAddr
+          format: ip_address
       - tag: bfd_session_index
         index: 1
 
   - MIB: BFD-STD-MIB
     table:
       name: bfdSessPerfTable
-      OID: 1.3.6.1.2.1.222.1.3
+      OID: 1.3.6.1.2.1.223.1.3
     symbols:
-      - OID: 1.3.6.1.2.1.222.1.3.1.1
+      - OID: 1.3.6.1.2.1.223.1.3.1.1
         name: bfdSessPerfCtrlPktIn
-      - OID: 1.3.6.1.2.1.222.1.3.1.2
+      - OID: 1.3.6.1.2.1.223.1.3.1.2
         name: bfdSessPerfCtrlPktOut
-      - OID: 1.3.6.1.2.1.222.1.3.1.12
+      - OID: 1.3.6.1.2.1.223.1.3.1.12
         name: bfdSessPerfSessUpCount
     metric_tags:
       - tag: bfd_session_index
