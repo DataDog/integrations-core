@@ -77,6 +77,8 @@ class BaseProcessor[T: BaseMessage]:
 
         The default implementation re-raises so unmodified processors fall through to
         the orchestrator-level ``fail_fast`` policy.
+
+        Can be cancelled part-way when the bus it belongs to is asked to stop.
         """
         raise error
 
@@ -385,6 +387,9 @@ class EventBusOrchestrator(ABC):
 
         The default implementation re-raises so unmodified orchestrators fall through
         to the ``fail_fast`` policy.
+
+        Best-effort once a stop has been requested: whoever asked may be working to a deadline, and
+        the process can be killed before this returns. Keep it short.
         """
         raise error
 
