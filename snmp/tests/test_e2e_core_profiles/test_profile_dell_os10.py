@@ -148,7 +148,9 @@ def test_e2e_profile_dell_os10(dd_agent_check):
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags)
         for metric in IF_CUSTOM_SPEED_GAUGES:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags)
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags + ['speed_source:device']
+            )
         for metric in IF_BANDWIDTH_USAGE:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags)
 
