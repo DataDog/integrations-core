@@ -6,6 +6,7 @@ import psycopg
 
 from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
 from datadog_checks.postgres.encoding import decode_with_encodings
+from datadog_checks.postgres.util import DDIGNORE_COMMENT
 
 DD_QUERY_ATTRIBUTES = {
     'service': 'datadog-agent',
@@ -19,12 +20,12 @@ class BaseCommenterCursor:
 
     def execute(self, query, params=None, ignore_query_metric=False, binary=False, prepare=None):
         '''
-        When ignore is True, a /* DDIGNORE */ comment will be added to the query.
+        When ignore is True, a DDIGNORE comment will be added to the query.
         This comment indicates that the query should be ignored in query metrics.
         '''
         query = add_sql_comment(query, prepand=True, **self.__attributes)
         if ignore_query_metric:
-            query = '{} {}'.format('/* DDIGNORE */', query)
+            query = '{} {}'.format(DDIGNORE_COMMENT, query)
         return super().execute(query, params, binary=binary, prepare=prepare)
 
 
