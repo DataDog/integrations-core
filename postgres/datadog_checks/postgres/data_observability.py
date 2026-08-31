@@ -7,7 +7,7 @@ import json
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import psycopg
 
@@ -31,17 +31,17 @@ CRON_STARTUP_LOOKBACK_SECONDS = 300
 # Fallback per-query statement timeout.
 DEFAULT_DO_QUERY_TIMEOUT_S = 60
 
-Mode = Literal["cron", "interval"]
-
 
 @dataclass
 class CronScheduledQuery:
+    mode: ClassVar[Literal["cron"]] = "cron"
     query: Query
     scheduler: CronScheduler
 
 
 @dataclass
 class IntervalScheduledQuery:
+    mode: ClassVar[Literal["interval"]] = "interval"
     query: Query
     interval_seconds: int
     last_execution: float | None = None
@@ -58,10 +58,6 @@ class DueQuery:
     @property
     def query(self) -> Query:
         return self.scheduled_query.query
-
-    @property
-    def mode(self) -> Mode:
-        return "cron" if isinstance(self.scheduled_query, CronScheduledQuery) else "interval"
 
 
 class PostgresDataObservability(DBMAsyncJob):
@@ -284,7 +280,7 @@ class PostgresDataObservability(DBMAsyncJob):
                 self._check.gauge(
                     'dd.postgres.data_observability.query_fire_lateness_seconds',
                     lateness,
-                    tags=tags + [f'mode:{due.mode}'],
+                    tags=tags + [f'mode:{due.scheduled_query.mode}'],
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )
