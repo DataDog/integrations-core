@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
 from copy import deepcopy
 
@@ -8,7 +9,12 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+    HTTPClientStatusError,
+)
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
 from datadog_checks.elastic.metrics import INDEX_STATS_METRICS
@@ -18,6 +24,13 @@ from .common import URL
 log = logging.getLogger('test_elastic')
 
 pytestmark = pytest.mark.unit
+
+
+def _status_error_response(status_code, message):
+    return FakeHTTPResponse(
+        status_code=status_code,
+        status_error=HTTPClientStatusError(message),
+    )
 
 
 def test__join_url():
@@ -97,10 +110,19 @@ def test__get_urls(instance, url_fix):
     ],
 )
 def test_aws_auth_url(instance, expected_aws_host, expected_aws_service):
-    check = ESCheck('elastic', {}, instances=[instance])
+    auth = mock.Mock()
+    configs = []
 
-    assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
-    assert getattr(check.http.options.get('auth'), 'service', None) == expected_aws_service
+    def fake_aws_auth(config):
+        configs.append(config)
+        return auth
+
+    with mock.patch.dict('datadog_checks.base.utils.http.AUTH_TYPES', {'aws': fake_aws_auth}):
+        check = ESCheck('elastic', {}, instances=[instance])
+        assert check.http.options['auth'] is auth
+        assert configs[0]['aws_host'] == expected_aws_host
+        assert configs[0]['aws_region'] == instance['aws_region']
+        assert configs[0]['aws_service'] == expected_aws_service
 
     # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
     assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
@@ -134,12 +156,79 @@ def test_get_template_metrics(aggregator, instance, dd_run_check, mock_es_endpoi
 
 def test_get_template_metrics_raise_exception(aggregator, instance, dd_run_check, mock_es_endpoints):
     # A failing templates endpoint must not abort the check; the metric is simply not emitted.
-    mock_es_endpoints({'{}/_cat/templates?format=json'.format(URL): [MockResponse(status_code=403)]})
+    mock_es_endpoints(
+        {
+            '{}/_cat/templates?format=json'.format(URL): [
+                _status_error_response(403, '403 Client Error'),
+            ]
+        }
+    )
     check = ESCheck('elastic', {}, instances=[instance])
 
     dd_run_check(check)
 
     aggregator.assert_metric("elasticsearch.templates.count", count=0)
+
+
+def test_get_template_metrics_non_json_body(aggregator, instance, dd_run_check, mock_es_endpoints):
+    # A 200 carrying a body that is not JSON is an upstream fault, not a reason to abort the run.
+    mock_es_endpoints(
+        {
+            '{}/_cat/templates?format=json'.format(URL): [
+                FakeHTTPResponse(
+                    content=b'<html>proxy error</html>',
+                    text='<html>proxy error</html>',
+                    json_error=json.JSONDecodeError('Expecting value', 'doc', 0),
+                )
+            ]
+        }
+    )
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    dd_run_check(check)
+
+    aggregator.assert_metric("elasticsearch.templates.count", count=0)
+    aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK)
+
+
+@pytest.mark.parametrize(
+    'error, should_raise',
+    [
+        pytest.param(HTTPClientReadTimeoutError('slow read'), False, id='read-timeout-is-graceful'),
+        pytest.param(HTTPClientConnectTimeoutError('slow connect'), True, id='connect-timeout-propagates'),
+    ],
+)
+def test_pshard_graceful_timeout_is_read_specific(instance: dict, error: Exception, should_raise: bool) -> None:
+    instance = deepcopy(instance)
+    instance.update(
+        {
+            'cat_allocation_stats': False,
+            'custom_queries': [],
+            'index_stats': False,
+            'pending_task_stats': False,
+            'pshard_graceful_timeout': True,
+            'pshard_stats': True,
+            'slm_stats': False,
+        }
+    )
+    check = ESCheck('elastic', {}, instances=[instance])
+    check._get_es_version = mock.Mock(return_value=[7, 4, 0])
+    check._get_template_metrics = mock.Mock()
+    check._process_stats_data = mock.Mock()
+    check._process_health_data = mock.Mock()
+
+    def get_data(url: str, *_args: object, **_kwargs: object) -> dict:
+        if url.endswith('/_stats'):
+            raise error
+        return {'cluster_name': 'test', 'nodes': {}}
+
+    check._get_data = mock.Mock(side_effect=get_data)
+
+    if should_raise:
+        with pytest.raises(HTTPClientConnectTimeoutError, match='slow connect'):
+            check.check(instance)
+    else:
+        check.check(instance)
 
 
 @pytest.mark.parametrize(
@@ -166,7 +255,7 @@ def test_run_custom_queries_root_data_path(aggregator, instance, dd_run_check, m
     instance['custom_queries'] = [custom_query]
 
     mock_es_endpoints(
-        {'{}/my-index/_count'.format(URL): [MockResponse(json_data={'count': 42, '_shards': {'total': 5}})]}
+        {'{}/my-index/_count'.format(URL): [FakeHTTPResponse(json_result={'count': 42, '_shards': {'total': 5}})]}
     )
 
     check = ESCheck('elastic', {}, instances=[instance])
@@ -175,33 +264,27 @@ def test_run_custom_queries_root_data_path(aggregator, instance, dd_run_check, m
     aggregator.assert_metric('elasticsearch.custom.count', value=42, count=1)
 
 
-def test__get_data_throws_authentication_error(instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=MockResponse(status_code=400),
-    ):
-        check = ESCheck('elastic', {}, instances=[instance])
+def test__get_data_throws_authentication_error(instance, fake_http):
+    fake_http.register_response('GET', 'test.com', _status_error_response(400, '400 Client Error'))
+    check = ESCheck('elastic', {}, instances=[instance])
 
-        with pytest.raises(AuthenticationError):
-            check._get_data(url='test.com')
+    with pytest.raises(AuthenticationError):
+        check._get_data(url='test.com')
 
 
-def test__get_data_creates_critical_service_alert(aggregator, instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=MockResponse(status_code=500),
-    ):
-        check = ESCheck('elastic', {}, instances=[instance])
+def test__get_data_creates_critical_service_alert(aggregator, instance, fake_http):
+    fake_http.register_response('GET', 'test.com', _status_error_response(500, '500 Server Error'))
+    check = ESCheck('elastic', {}, instances=[instance])
 
-        with pytest.raises(Exception):
-            check._get_data(url='test.com')
+    with pytest.raises(Exception):
+        check._get_data(url='test.com')
 
-        aggregator.assert_service_check(
-            check.SERVICE_CHECK_CONNECT_NAME,
-            status=check.CRITICAL,
-            tags=check._config.service_check_tags,
-            message="Error 500 Server Error: None for url: None when hitting test.com",
-        )
+    aggregator.assert_service_check(
+        check.SERVICE_CHECK_CONNECT_NAME,
+        status=check.CRITICAL,
+        tags=check._config.service_check_tags,
+        message="Error 500 Server Error when hitting test.com",
+    )
 
 
 @pytest.mark.parametrize(
@@ -217,27 +300,24 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
         ),
     ],
 )
-def test_disable_legacy_sc_tags(aggregator, es_instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=MockResponse(status_code=500),
-    ):
-        check = ESCheck('elastic', {}, instances=[es_instance])
+def test_disable_legacy_sc_tags(aggregator, es_instance, fake_http):
+    fake_http.register_response('GET', 'test.com', _status_error_response(500, '500 Server Error'))
+    check = ESCheck('elastic', {}, instances=[es_instance])
 
-        with pytest.raises(Exception):
-            check._get_data(url='test.com')
+    with pytest.raises(Exception):
+        check._get_data(url='test.com')
 
-        if is_affirmative(es_instance['disable_legacy_service_check_tags']):
-            expected_tags = ['url:http://localhost:9200']
-        else:
-            expected_tags = ['host:localhost', 'port:9200']
+    if is_affirmative(es_instance['disable_legacy_service_check_tags']):
+        expected_tags = ['url:http://localhost:9200']
+    else:
+        expected_tags = ['host:localhost', 'port:9200']
 
-        aggregator.assert_service_check(
-            check.SERVICE_CHECK_CONNECT_NAME,
-            status=check.CRITICAL,
-            tags=expected_tags,
-            message="Error 500 Server Error: None for url: None when hitting test.com",
-        )
+    aggregator.assert_service_check(
+        check.SERVICE_CHECK_CONNECT_NAME,
+        status=check.CRITICAL,
+        tags=expected_tags,
+        message="Error 500 Server Error when hitting test.com",
+    )
 
 
 @pytest.mark.parametrize(
@@ -269,22 +349,26 @@ def test_v8_process_stats_data(aggregator, instance, dd_run_check, mock_es_endpo
     )
 
 
-def test__get_index_metrics_empty_key(aggregator, instance, mock_http_response):
-    mock_http_response(
-        json_data=[
-            {
-                # 'docs.count' is missing
-                'docs.deleted': '0',
-                'health': 'yellow',
-                'index': 'testindex',
-                'pri': '1',
-                'pri.store.size': '225',
-                'rep': '1',
-                'status': 'open',
-                'store.size': '225',
-                'uuid': 'AHSf1ILbSHucwl2X6og55g',
-            },
-        ]
+def test__get_index_metrics_empty_key(aggregator, instance, fake_http):
+    fake_http.register_response(
+        'GET',
+        '{}/_cat/indices?format=json&bytes=b'.format(URL),
+        FakeHTTPResponse(
+            json_result=[
+                {
+                    # 'docs.count' is missing
+                    'docs.deleted': '0',
+                    'health': 'yellow',
+                    'index': 'testindex',
+                    'pri': '1',
+                    'pri.store.size': '225',
+                    'rep': '1',
+                    'status': 'open',
+                    'store.size': '225',
+                    'uuid': 'AHSf1ILbSHucwl2X6og55g',
+                },
+            ]
+        ),
     )
     check = ESCheck('elastic', {}, instances=[instance])
     # Focus only on index metrics, so mock out index search stats.
