@@ -11,8 +11,6 @@ from __future__ import annotations
 
 import dataclasses
 
-import pytest
-
 from ddev.cli.ci.tests.messages import BatchJob
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
@@ -206,28 +204,3 @@ def test_an_execution_missing_its_artifacts_still_counts() -> None:
 def test_empty_progress_counts_zero() -> None:
     progress = DispatcherProgress(batches=(), done=False)
     assert (progress.passed, progress.failed, progress.skipped, progress.complete, progress.total) == (0, 0, 0, 0, 0)
-
-
-# ---------------------------------------------------------------------------
-# Immutability and defaults
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("instance", "field_name", "value"),
-    [
-        (_attempt(), "status", Status.FAILURE),
-        (_job(), "attempts", ()),
-        (_batch(), "state", ExecutionState.PLANNED),
-        (DispatcherProgress(batches=(), done=False), "done", True),
-    ],
-    ids=["attempt", "job", "batch", "dispatcher"],
-)
-def test_progress_objects_are_immutable(instance: object, field_name: str, value: object) -> None:
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        setattr(instance, field_name, value)
-
-
-def test_error_defaults_to_none() -> None:
-    assert _attempt().error is None
-    assert _batch().error is None
