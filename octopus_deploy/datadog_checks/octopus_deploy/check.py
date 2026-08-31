@@ -47,6 +47,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._projects_discovery = {}
         self._environments_discovery = {}
         self._environments_cache = {}
+        self._space_projects_cache = {}
         self._deployments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         self._releases_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         endpoint = self.instance.get("octopus_endpoint")
@@ -56,6 +57,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def check(self, _):
         self._update_times()
+        self._space_projects_cache.clear()
         self._process_spaces()
         self._collect_server_nodes_metrics()
 
@@ -144,16 +146,30 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 key=lambda project_group: project_group.get("Name"),
             )
 
+    def _get_project_group_projects(self, space_id, project_group_id):
+        """Return the projects belonging to a project group.
+
+        The space is listed once per check run and the result reused for each of its project groups,
+        because listing a space's projects costs one request whereas asking for the projects of each
+        project group in turn costs one request per group.
+        """
+        if space_id not in self._space_projects_cache:
+            self._space_projects_cache[space_id] = self._process_paginated_endpoint(f"api/{space_id}/projects").get(
+                'Items', []
+            )
+        return [
+            project
+            for project in self._space_projects_cache[space_id]
+            if project.get("ProjectGroupId") == project_group_id
+        ]
+
     def _init_default_projects_discovery(self, space_id, project_group_id):
         self.log.info("Default Projects discovery: %s", self.config.projects)
         if space_id not in self._default_projects_discovery:
             self._default_projects_discovery[space_id] = {}
         if project_group_id not in self._default_projects_discovery[space_id]:
             self._default_projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_paginated_endpoint(
-                    f"api/{space_id}/projectgroups/{project_group_id}/projects",
-                    report_service_check=True,
-                ).get('Items', []),
+                lambda: self._get_project_group_projects(space_id, project_group_id),
                 limit=self.config.projects.limit,
                 include=normalize_discover_config_include(self.config.projects),
                 exclude=self.config.projects.exclude,
@@ -167,10 +183,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._projects_discovery[space_id] = {}
         if project_group_id not in self._projects_discovery[space_id]:
             self._projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_paginated_endpoint(
-                    f"api/{space_id}/projectgroups/{project_group_id}/projects",
-                    report_service_check=True,
-                ).get('Items', []),
+                lambda: self._get_project_group_projects(space_id, project_group_id),
                 limit=projects_config.limit,
                 include=normalize_discover_config_include(projects_config),
                 exclude=projects_config.exclude,
@@ -247,9 +260,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             else:
                 projects = [
                     (None, project.get("Name"), project, None)
-                    for project in self._process_paginated_endpoint(
-                        f"api/{space_id}/projectgroups/{project_group_id}/projects"
-                    ).get('Items', [])
+                    for project in self._get_project_group_projects(space_id, project_group_id)
                 ]
         self.log.debug("Monitoring %s Projects for %s in %s", len(projects), project_group_name, space_name)
         for _, _, project, _ in projects:
