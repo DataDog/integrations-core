@@ -850,7 +850,7 @@ snmp.fwRejected,count,,packet,,[Checkpoint Firewall] Number of rejected packets.
 snmp.haAPHbtTunnels,gauge,,,,"[WLSX-HA-MIB] The number of AP hbt GRE tunnels.",0,snmp,,
 snmp.haActiveAPs,gauge,,,,"[WLSX-HA-MIB] The number of active APs.",0,snmp,,
 snmp.haActiveVapTunnels,gauge,,,,"[WLSX-HA-MIB] The number of active per VAP GRE tunnels.",0,snmp,,
-snmp.haClusterXLFailover,gauge,,,,[CHECKPOINT-MIB] ClusterXL failover counter.,0,snmp,,
+snmp.haClusterXLFailover,count,,,,[CHECKPOINT-MIB] ClusterXL failover counter.,0,snmp,,
 snmp.haStandbyAPs,gauge,,,,"[WLSX-HA-MIB] The number of standby APs.",0,snmp,,
 snmp.haStandbyVapTunnels,gauge,,,,"[WLSX-HA-MIB] The number of standby per VAP GRE tunnels.",0,snmp,,
 snmp.haStatCode,gauge,,,,[CHECKPOINT-MIB] Check Point High Availability status code.,0,snmp,,

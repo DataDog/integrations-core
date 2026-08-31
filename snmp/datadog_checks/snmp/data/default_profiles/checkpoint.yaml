@@ -236,7 +236,7 @@ metrics:
       OID: 1.3.6.1.4.1.2620.1.5.101
       name: haStatCode
   - MIB: CHECKPOINT-MIB
-    metric_type: gauge
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.2620.1.5.17
       name: haClusterXLFailover

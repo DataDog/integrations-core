@@ -2258,7 +2258,7 @@ def test_checkpoint(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_metric('snmp.haStatCode', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -2337,7 +2337,7 @@ def test_checkpoint_firewall(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_metric('snmp.haStatCode', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
