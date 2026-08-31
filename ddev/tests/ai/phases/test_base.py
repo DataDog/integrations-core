@@ -2,13 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
+import logging
 from datetime import UTC, datetime
+
+import pytest
 
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
+    CancelledCheckpoint,
     CheckpointManager,
     CheckpointTokenInfo,
     FailedCheckpoint,
@@ -257,3 +262,65 @@ async def test_process_message_writes_memory_and_checkpoint(flow_dir, flow_conte
     assert checkpoint.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
     assert checkpoint.started_at
     assert checkpoint.finished_at
+
+
+async def test_process_message_writes_cancelled_checkpoint_and_reraises(
+    flow_dir, flow_context, message_queue, monkeypatch
+):
+    phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue)
+
+    async def cancel(_context):
+        raise asyncio.CancelledError("maximum runtime reached")
+
+    monkeypatch.setattr(phase, "execute", cancel)
+
+    with pytest.raises(asyncio.CancelledError, match="maximum runtime reached"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    checkpoint = mgr.read()["p1"]
+    assert isinstance(checkpoint, CancelledCheckpoint)
+    assert checkpoint.reason == "maximum runtime reached"
+    assert checkpoint.started_at
+    assert checkpoint.finished_at
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=0, total_output=0)
+    assert message_queue.empty()
+
+
+async def test_process_message_writes_cancelled_checkpoint_with_no_reason(
+    flow_dir, flow_context, message_queue, monkeypatch
+):
+    """A bare CancelledError (e.g. a plain Ctrl+C) carries no message, so reason stays None."""
+    phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue)
+
+    async def cancel(_context):
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(phase, "execute", cancel)
+
+    with pytest.raises(asyncio.CancelledError):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    checkpoint = mgr.read()["p1"]
+    assert isinstance(checkpoint, CancelledCheckpoint)
+    assert checkpoint.reason is None
+
+
+async def test_cancellation_checkpoint_failure_does_not_mask_cancellation(
+    flow_dir, flow_context, message_queue, monkeypatch, caplog
+):
+    phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue)
+
+    async def cancel(_context):
+        raise asyncio.CancelledError("stop")
+
+    def fail_to_write(*_args):
+        raise OSError("read only")
+
+    monkeypatch.setattr(phase, "execute", cancel)
+    monkeypatch.setattr(mgr, "write_phase_checkpoint", fail_to_write)
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(asyncio.CancelledError, match="stop"):
+            await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert any("Failed to write cancellation checkpoint for phase p1" in r.getMessage() for r in caplog.records)
