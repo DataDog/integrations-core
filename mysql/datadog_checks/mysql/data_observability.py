@@ -147,7 +147,12 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             newly_due = None
             if query.schedule:
                 scheduler = scheduled_query.scheduler
-                assert scheduler is not None
+                if scheduler is None:
+                    self._log.error(
+                        "Skipping DO query monitor_id=%d: cron scheduler is unavailable",
+                        query.monitor_id,
+                    )
+                    continue
                 ticks = scheduler.due_ticks(now + 0.001)
                 if ticks:
                     newly_due = DueQuery(scheduled_query, ticks[-1], "cron")
