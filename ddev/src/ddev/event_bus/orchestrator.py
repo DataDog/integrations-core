@@ -152,8 +152,10 @@ class EventBusOrchestrator(ABC):
         # shut down, and nobody else can.
         self._owns_executor = executor is None
         self._executor = executor or ThreadPoolExecutor(max_workers=4)
-        # Work we put on the pool, so shutdown can wait for it whoever the pool belongs to.
+        # Work we put on the pool, so shutdown can wait for it whoever the pool belongs to. Guarded
+        # because the pool's own threads discard from it as they finish.
         self._sync_work: set[Future] = set()
+        self._sync_work_lock = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         # These will be initialized in the running loop
@@ -276,9 +278,26 @@ class EventBusOrchestrator(ABC):
         only cancels work the pool has not started yet; anything already running carries on.
         """
         future = self._executor.submit(work, message)
-        self._sync_work.add(future)
-        future.add_done_callback(self._sync_work.discard)
+        with self._sync_work_lock:
+            self._sync_work.add(future)
+        future.add_done_callback(self._forget_sync_work)
         await asyncio.wrap_future(future)
+
+    def _forget_sync_work(self, future: Future) -> None:
+        """Drop work that has finished, called by the pool thread that finished it."""
+        with self._sync_work_lock:
+            self._sync_work.discard(future)
+
+    def _pending_sync_work(self) -> set[Future]:
+        """The work still on the pool.
+
+        Copied under the lock rather than iterated in place: the done callbacks run on worker threads,
+        so iterating the live set is iterating one another thread is mutating, which CPython raises on.
+        """
+        with self._sync_work_lock:
+            in_flight = set(self._sync_work)
+
+        return {future for future in in_flight if not future.done()}
 
     async def _drain_executor(self) -> None:
         """Wait for sync processors still running, and retire the pool if it is ours.
@@ -290,7 +309,7 @@ class EventBusOrchestrator(ABC):
         Waiting is not conditional on ownership: a pool lent to us still runs our work, and the hook
         reports state that work is still writing.
         """
-        pending = {future for future in self._sync_work if not future.done()}
+        pending = self._pending_sync_work()
         if pending:
             self._logger.debug("Waiting for %s sync processor(s) still running...", len(pending))
             await asyncio.to_thread(wait_for_futures, pending)

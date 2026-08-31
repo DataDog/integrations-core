@@ -1179,3 +1179,29 @@ def test_should_process_message_is_independent_per_processor(bare_orchestrator: 
     assert len(secretary.delivered_memos) == 2
     assert len(urgent_proc.processed) == 1
     assert urgent_proc.processed[0].id == "memo2"
+
+
+def brief_work(message: BaseMessage) -> None:
+    time.sleep(0.001)
+
+
+async def test_pending_sync_work_can_be_read_while_workers_finish_underneath_it():
+    """Each future's done callback discards on the worker thread that ran it, racing this snapshot.
+
+    Read straight off the live set, CPython raises `Set changed size during iteration`. That lands in
+    `_drain_executor`, which runs before the `try` around `on_finalize`, so the hook and every
+    error-policy path with it would be skipped.
+    """
+    with ThreadPoolExecutor(max_workers=16) as lent:
+        orchestrator = MockOrchestrator(logging.getLogger("test_sync_work"), executor=lent)
+        running = [
+            asyncio.create_task(orchestrator._run_in_worker(brief_work, Memo(id=str(index)))) for index in range(200)
+        ]
+        await asyncio.sleep(0)
+
+        for _ in range(500):
+            orchestrator._pending_sync_work()
+
+        await asyncio.gather(*running)
+
+    assert orchestrator._pending_sync_work() == set()
