@@ -1,1 +1,1 @@
-Harden Postgres remote query COPY execution.
+Harden Postgres remote query request validation and execution.
