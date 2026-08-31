@@ -5,7 +5,10 @@
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import logging
+import signal
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -28,6 +31,14 @@ if TYPE_CHECKING:
     from ddev.utils.github_async import AsyncGitHubClient
 
 logger = logging.getLogger(__name__)
+
+# Signals a cancelled GitHub Actions job sends: SIGINT first, SIGTERM about 7.5s later, then a hard
+# kill about 2.5s after that.
+CANCELLATION_SIGNALS = (signal.SIGINT, signal.SIGTERM)
+
+# A call that cannot go out within this is one the process will not live to see answered.
+CANCELLED_MAX_WAIT_SECONDS = 2.0
+CANCELLED_MAX_RATE = 10_000.0
 
 
 class RunContext(StrEnum):
@@ -109,9 +120,11 @@ class Dispatcher(EventBusOrchestrator):
         super().__init__(run_logger or logger, max_timeout=max_timeout, grace_period=grace_period)
         self._batches = batches
         self._client = client
+        self._runner = runner
         self._gatherer = gatherer
         self._reporter = reporter
         self._outcome: DispatcherOutcome | None = None
+        self._cancelled = False
 
         self.register_processor(runner, [TestBatch])
         self.register_processor(gatherer, [BatchFinished])
@@ -122,17 +135,63 @@ class Dispatcher(EventBusOrchestrator):
         """The result of the execution, or None before `run` has finished."""
         return self._outcome
 
+    @property
+    def cancelled(self) -> bool:
+        """Whether the run was cancelled from outside rather than finishing or timing out."""
+        return self._cancelled
+
     async def on_initialize(self):
+        self._listen_for_cancellation()
         self.submit_message(self._gatherer.build_initial_update())
         for batch in self._batches:
             self.submit_message(batch)
         self._logger.info("Dispatched %s batches", len(self._batches))
+
+    def _listen_for_cancellation(self) -> None:
+        """Handle the cancellation signals, so the run winds down instead of being killed mid-flight.
+
+        Handling SIGINT here also means it no longer arrives as `KeyboardInterrupt`, so shutdown takes
+        the same path whichever signal came first.
+        """
+        loop = asyncio.get_running_loop()
+        for received in CANCELLATION_SIGNALS:
+            # Only Unix event loops can do this. The Dispatcher runs on Linux runners, but ddev's own
+            # tests run on Windows too, where a run simply cannot be cancelled cleanly.
+            try:
+                loop.add_signal_handler(received, self._cancel, received)
+            except NotImplementedError:
+                self._logger.debug("This event loop cannot handle %s; cancellation will not be clean", received.name)
+
+    def _stop_listening_for_cancellation(self) -> None:
+        loop = asyncio.get_running_loop()
+        for received in CANCELLATION_SIGNALS:
+            with contextlib.suppress(NotImplementedError, RuntimeError):
+                loop.remove_signal_handler(received)
+
+    def _cancel(self, received: signal.Signals) -> None:
+        """Start winding down, and let the cleanup outrun the pacing built for a whole run.
+
+        Idempotent because both signals arrive on a cancelled job, seconds apart, and the second must
+        not restart anything the first began.
+        """
+        if self._cancelled:
+            self._logger.info("Already cancelling; ignoring %s", received.name)
+            return
+
+        self._cancelled = True
+        self._logger.warning("Received %s: cancelling the run", received.name)
+        # Relaxed before the stop, because stopping is what makes each batch close its check run, and
+        # those calls would otherwise be paced for a run that still had its whole window ahead of it.
+        self._client.relax_rate_limits(max_wait_seconds=CANCELLED_MAX_WAIT_SECONDS, max_rate=CANCELLED_MAX_RATE)
+        self.request_stop()
 
     async def on_message_received(self, message: BaseMessage):
         self._logger.debug("Message received: %s(%s)", type(message).__name__, message.id)
 
     async def on_finalize(self, exception: Exception | None):
         try:
+            if self._cancelled:
+                await self._report_cancellation()
             progress = self._gatherer.progress
             self._outcome = DispatcherOutcome(
                 progress=progress,
@@ -142,7 +201,27 @@ class Dispatcher(EventBusOrchestrator):
             if (body := self._reporter.latest_body) is not None:
                 write_step_summary(render_run_summary(body, pr_comment_failed=self._reporter.pr_comment_failed))
         finally:
+            self._stop_listening_for_cancellation()
             await self._client.aclose()
+
+    async def _report_cancellation(self) -> None:
+        """Say the run was cancelled, and stop the work it started.
+
+        Concurrent because both are independent calls competing for the same few seconds, and neither
+        is allowed to abandon the other: without `return_exceptions` the first failure would return
+        from here while the rest were still in flight, racing the kill.
+
+        Check runs are not closed here. Each batch closes its own on the way out, and that happens
+        before this hook runs, once the bus has awaited the tasks it cancelled.
+        """
+        outcomes = await asyncio.gather(
+            self._reporter.publish_cancelled(),
+            self._runner.cancel_dispatched_runs(),
+            return_exceptions=True,
+        )
+        for outcome in outcomes:
+            if isinstance(outcome, BaseException):
+                self._logger.error("Cancellation cleanup step failed: %s", outcome)
 
 
 def build_dispatcher(

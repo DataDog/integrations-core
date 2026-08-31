@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
@@ -690,3 +691,46 @@ async def test_failure_at_submit_message_closes_check_run_as_success(tmp_path: P
     assert len(update_calls) == 1
     assert update_calls[0].kwargs["status"] == "completed"
     assert update_calls[0].kwargs["conclusion"] == "success"
+
+
+async def test_a_run_that_finished_on_its_own_is_not_cancelled(tmp_path: Path):
+    """Nothing to cancel once a run reached a terminal state, and asking wastes a call.
+
+    Under cancellation the budget is a few seconds shared by every cleanup call, so spending one on a
+    run that is already done costs one that is not.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run()))
+    mock_artifacts(client, [])
+    mock_jobs(client, [])
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    await runner.process_message(make_batch(batch_id="batch-1"))
+    await runner.cancel_dispatched_runs()
+
+    assert client.calls_to("cancel_workflow_run") == []
+
+
+async def test_a_run_still_going_when_the_batch_is_cancelled_is_cancelled_too(tmp_path: Path):
+    """A dispatched run outlives the process that asked for it and keeps burning runner minutes.
+
+    The batch's own `finally` runs when its task is cancelled, so anything cleared there would be gone
+    before the cleanup looked, which is exactly when there is something to cancel.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    task = asyncio.create_task(runner.process_message(make_batch(batch_id="batch-1")))
+    await asyncio.sleep(0)
+    while not client.calls_to("create_check_run"):
+        await asyncio.sleep(0)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    await runner.cancel_dispatched_runs()
+
+    assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]

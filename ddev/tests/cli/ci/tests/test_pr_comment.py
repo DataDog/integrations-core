@@ -16,7 +16,10 @@ from collections.abc import Callable
 import pytest
 
 from ddev.cli.ci.tests.pr_comment import (
+    CANCELLED_HEADING,
     COMMENT_MARKER,
+    FOOTER_RUNNING_NOTE,
+    render_cancelled_notice,
     render_comment,
     render_compact_comment,
     render_minimal_comment,
@@ -25,7 +28,14 @@ from ddev.cli.ci.tests.pr_comment import (
 )
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
-from tests.cli.ci.tests.helpers import attempt, batch_progress, failing_report, job_progress, planned_batch
+from tests.cli.ci.tests.helpers import (
+    attempt,
+    batch_progress,
+    failing_report,
+    job_progress,
+    planned_batch,
+    uniform_progress,
+)
 
 # GitHub's own ceiling, from the 422 it returns: "body is too long (maximum is 65536 characters)".
 # Not imported from the renderer on purpose — a test that reads the same constant it is checking
@@ -843,3 +853,34 @@ def test_the_budget_is_measured_in_bytes_not_characters():
     assert len(body.encode("utf-8")) <= GITHUB_COMMENT_HARD_LIMIT
     # Characters alone would have left room that the bytes do not, which is the bug this rules out.
     assert len(body) < len(body.encode("utf-8"))
+
+
+def test_a_cancelled_run_with_nothing_gathered_still_says_it_ran():
+    """The comment is the only place a reader learns the run existed.
+
+    No comment at all is indistinguishable from a job that hung, and the marker has to be there or
+    the next run creates a second comment instead of editing this one.
+    """
+    body = render_cancelled_notice()
+
+    assert body.startswith(COMMENT_MARKER)
+    assert CANCELLED_HEADING in body
+
+
+def test_a_cancelled_run_keeps_what_it_gathered_without_still_reading_as_running():
+    """A partial report is worth keeping, but every part of it claims the run is still going.
+
+    The heading, the alert and the footer all derive from `done`, so a cancelled report that keeps
+    any of them invites waiting for results that will never arrive.
+    """
+    progress = uniform_progress(done=False, complete=6)
+    assert "Tests are still running" in render_comment(progress)
+
+    body = render_comment(progress, cancelled=True)
+
+    assert CANCELLED_HEADING in body
+    assert "Dispatcher tests · in progress" not in body
+    assert "Tests are still running" not in body
+    assert FOOTER_RUNNING_NOTE not in body
+    # Per-batch rows keep their own last-known state, which the alert explains was cancelled with it.
+    assert "batch-01" in body

@@ -321,6 +321,20 @@ class InstrumentedAsyncLimiter:
         self.budget_governor = budget_governor
         self.name = name
 
+    def relax(self, *, max_wait_seconds: float, max_rate: float) -> None:
+        """Stop pacing ourselves, and cap how long a provider pause may block.
+
+        For a process that will not live long enough to spend the budget being protected: rationing
+        spreads what is left over the window, which is longer than the time remaining. The provider's
+        own pauses are still honoured, but bounded, so a doomed call fails instead of blocking.
+        """
+        self.limiter.max_rate = max_rate
+        if self.budget_governor is None:
+            return
+
+        self.budget_governor.reserve_fraction = 0.0
+        self.budget_governor.max_wait_seconds = max_wait_seconds
+
     async def __aenter__(self) -> InstrumentedAsyncLimiter:
         if self.budget_governor is not None:
             await self.budget_governor.wait()
