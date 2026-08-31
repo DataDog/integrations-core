@@ -8,7 +8,7 @@ import time
 from collections.abc import Callable, Iterable, Mapping
 from contextlib import closing
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import pymysql
 
@@ -34,11 +34,10 @@ DEFAULT_COLLECTION_INTERVAL_SECONDS = 10
 
 DBNAME_PATTERN = re.compile(r'^[A-Za-z0-9_$]+$')
 
-Mode = Literal["cron", "interval"]
-
 
 @dataclass
 class CronScheduledQuery:
+    mode: ClassVar[Literal["cron"]] = "cron"
     query: Query
     scheduler: CronScheduler
     pending_retry: DueQuery | None = None
@@ -46,6 +45,7 @@ class CronScheduledQuery:
 
 @dataclass
 class IntervalScheduledQuery:
+    mode: ClassVar[Literal["interval"]] = "interval"
     query: Query
     interval_seconds: int
     last_execution: float | None = None
@@ -63,10 +63,6 @@ class DueQuery:
     @property
     def query(self) -> Query:
         return self.scheduled_query.query
-
-    @property
-    def mode(self) -> Mode:
-        return "cron" if isinstance(self.scheduled_query, CronScheduledQuery) else "interval"
 
 
 class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
@@ -339,7 +335,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                 self._check.gauge(
                     'dd.mysql.data_observability.query_fire_lateness_seconds',
                     lateness,
-                    tags=tags + [f'mode:{due.mode}'],
+                    tags=tags + [f'mode:{due.scheduled_query.mode}'],
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )
