@@ -1,0 +1,1 @@
+Fix OpenMetrics V2 checks flushing a monotonic counter's full raw value on the scrape following its first observation, when ``share_labels``/``target_info`` is configured and the shared-label source metric is ordered after the metrics it tags in the scrape payload.
