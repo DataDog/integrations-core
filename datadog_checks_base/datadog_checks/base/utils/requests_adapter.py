@@ -14,7 +14,6 @@ import requests
 from requests import exceptions as requests_exceptions
 from urllib3.exceptions import ReadTimeoutError as Urllib3ReadTimeoutError
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils import _http_utils
 
 from .http_exceptions import (
@@ -28,7 +27,7 @@ from .http_exceptions import (
     HTTPClientStatusError,
     HTTPClientTimeoutError,
 )
-from .http_protocol import HTTPClient, HTTPRequestSnapshot, HTTPResponse
+from .http_protocol import HTTPRequestSnapshot, HTTPResponse
 from .tls import create_ssl_context
 
 
@@ -315,14 +314,3 @@ def create_https_adapter(
         return SSLContextHostHeaderAdapter(context)
 
     return SSLContextAdapter(context)
-
-
-def apply_tls(client: HTTPClient, session: requests.Session) -> None:
-    """Apply an HTTP client's TLS behavior to a requests session."""
-    use_host_header = (
-        is_affirmative(client.tls_config.get('tls_use_host_header')) and client.get_header('Host') is not None
-    )
-    session.mount(
-        'https://',
-        create_https_adapter(client.tls_config, use_host_header=use_host_header),
-    )
