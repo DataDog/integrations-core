@@ -730,6 +730,25 @@ async def test_a_cancelled_run_is_reported_even_with_nothing_gathered():
     assert CANCELLED_HEADING in created.kwargs["body"]
 
 
+async def test_nothing_supersedes_a_cancelled_report():
+    """A batch finishing as the run is cancelled must not put the report back to "still running".
+
+    Batches report concurrently, so a revision can be rendered after the cancellation notice went
+    out. Leaving that to call order would have the last word on the pull request claim the run is
+    still going, on a run that has already been cancelled.
+    """
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client)
+    await reporter.process_message(_update(1))
+    await reporter.publish_cancelled()
+
+    await reporter.process_message(_update(2))
+
+    assert reporter.latest_body is not None
+    assert CANCELLED_HEADING in reporter.latest_body
+    assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
+
+
 async def test_a_cancelled_run_reports_what_it_had_gathered():
     """A partial report is still worth publishing, and the run summary must not contradict it.
 

@@ -176,27 +176,20 @@ def test_the_report_is_written_to_the_run_summary(client, tmp_path, step_summary
     assert jobs_reported(step_summary.read_text(encoding="utf-8")) == 1
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="The Dispatcher only runs on Linux CI runners")
-def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tmp_path, step_summary):
-    """A cancelled job gets about ten seconds before it is killed, and must not go quietly.
+# Cancellation tests send a real SIGINT to their own process, which needs two things every time.
+# On Windows no handler can be installed, and `os.kill` with a signal other than `CTRL_*` calls
+# `TerminateProcess`, so the pytest process would die rather than the test failing. And an escaped
+# `KeyboardInterrupt` aborts the session, taking every test after it. Both live here so a new
+# cancellation test gets them by construction.
+requires_signals = pytest.mark.skipif(sys.platform == "win32", reason="The Dispatcher only runs on Linux CI runners")
 
-    The signal is sent from inside the run, once the run's own handlers are installed and there is a
-    dispatched run to stop, so the two things only this process can do still happen: say so on the
-    pull request, and cancel the workflow runs it started.
+
+def run_cancelled_by_sigint(dispatcher: Dispatcher, client: FakeAsyncGitHubClient) -> None:
+    """Run *dispatcher* to completion, signalling it once it has a dispatched run to clean up.
+
+    The signal goes out from inside `create_check_run`, so the run's handlers are already installed
+    and there is something in flight for the cleanup to find.
     """
-    batch = make_batch(make_job())
-    dispatcher = build_bus(client, tmp_path, [batch])
-    # Never completes, so the batch is still polling when the signal lands.
-    client.mock_response(
-        "get_workflow_run",
-        WorkflowRun(
-            id=123,
-            name="test-batch",
-            status="in_progress",
-            conclusion=None,
-            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
-        ),
-    )
     created_check_run = client.create_check_run
 
     async def cancel_once_the_check_run_exists(*args, **kwargs):
@@ -212,6 +205,33 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
         # Reported rather than left to propagate, which would abort the whole session instead of
         # failing this test.
         pytest.fail("SIGINT reached the interpreter: the run handled no cancellation signal")
+
+
+def a_run_that_never_finishes(client: FakeAsyncGitHubClient) -> None:
+    """Keep every dispatched run `in_progress`, so a batch is still polling when the signal lands."""
+    client.mock_response(
+        "get_workflow_run",
+        WorkflowRun(
+            id=123,
+            name="test-batch",
+            status="in_progress",
+            conclusion=None,
+            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
+        ),
+    )
+
+
+@requires_signals
+def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tmp_path, step_summary):
+    """A cancelled job gets about ten seconds before it is killed, and must not go quietly.
+
+    The two things only this process can do still happen: say so on the pull request, and cancel the
+    workflow runs it started.
+    """
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())])
+    a_run_that_never_finishes(client)
+
+    run_cancelled_by_sigint(dispatcher, client)
 
     assert dispatcher.cancelled
     # The cleanup competes with a ~10s kill using a bucket the run has been spending all along, so
@@ -229,35 +249,18 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
     assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
 
 
+@requires_signals
 def test_a_run_still_winds_down_when_the_rate_limiter_cannot_be_relaxed(client, tmp_path):
     """The signal handler's own failures are invisible: the loop logs them and the next signal, which
     finds the run already cancelling, returns without retrying. So the stop cannot be left downstream
     of anything that might raise, or the run waits to be killed instead of winding down.
     """
-    batch = make_batch(make_job())
-    dispatcher = build_bus(client, tmp_path, [batch])
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())])
+    a_run_that_never_finishes(client)
     client.mock_response("relax_rate_limits", RuntimeError("the limiter is not what we think it is"))
-    client.mock_response(
-        "get_workflow_run",
-        WorkflowRun(
-            id=123,
-            name="test-batch",
-            status="in_progress",
-            conclusion=None,
-            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
-        ),
-    )
-    created_check_run = client.create_check_run
-
-    async def cancel_once_the_check_run_exists(*args, **kwargs):
-        response = await created_check_run(*args, **kwargs)
-        os.kill(os.getpid(), signal.SIGINT)
-        return response
-
-    client.create_check_run = cancel_once_the_check_run_exists  # type: ignore[method-assign]
 
     start = time.perf_counter()
-    dispatcher.run()
+    run_cancelled_by_sigint(dispatcher, client)
     elapsed = time.perf_counter() - start
 
     # The bus's own timeout is 30s, so anything near it means the stop never arrived.
