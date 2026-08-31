@@ -61,6 +61,13 @@ class GlobalVariables:
         value = self._get_variable(variable_name)
         return is_affirmative(value.lower().strip() if value is not None else value)
 
+    def _get_int_variable(self, variable_name: str) -> Optional[int]:
+        value = self._get_variable(variable_name)
+        try:
+            return int(value) if value is not None else None
+        except (ValueError, TypeError):
+            return None
+
     @property
     def version(self) -> Optional[str]:
         return self._get_variable('version')
@@ -99,19 +106,15 @@ class GlobalVariables:
 
     @property
     def key_buffer_size(self) -> Optional[int]:
-        value = self._get_variable('key_buffer_size')
-        try:
-            return int(value) if value is not None else None
-        except (ValueError, TypeError):
-            return None
+        return self._get_int_variable('key_buffer_size')
 
     @property
     def key_cache_block_size(self) -> Optional[int]:
-        value = self._get_variable('key_cache_block_size')
-        try:
-            return int(value) if value is not None else None
-        except (ValueError, TypeError):
-            return None
+        return self._get_int_variable('key_cache_block_size')
+
+    @property
+    def performance_schema_digests_size(self) -> Optional[int]:
+        return self._get_int_variable('performance_schema_digests_size')
 
     @property
     def all_variables(self) -> Dict[str, Any]:

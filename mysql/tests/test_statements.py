@@ -103,7 +103,14 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
 )
 @pytest.mark.parametrize("default_schema", [None, "testdb"])
 @pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
-@pytest.mark.parametrize("only_query_recent_statements", [False, True])
+@pytest.mark.parametrize(
+    "only_query_recent_statements, incremental_query_metrics",
+    [
+        pytest.param(False, False, id='legacy'),
+        pytest.param(True, False, id='legacy-recent-only'),
+        pytest.param(False, True, id='incremental'),
+    ],
+)
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics(
     aggregator,
@@ -114,8 +121,10 @@ def test_statement_metrics(
     datadog_agent,
     aurora_replication_role,
     only_query_recent_statements,
+    incremental_query_metrics,
 ):
     dbm_instance['query_metrics']['only_query_recent_statements'] = only_query_recent_statements
+    dbm_instance['query_metrics']['incremental_query_metrics'] = incremental_query_metrics
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -199,14 +208,16 @@ def _obfuscate_sql(query, options=None):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("collect_prepared_statements", [True, False])
+@pytest.mark.parametrize("incremental_query_metrics", [False, True])
 def test_statement_metrics_prepared_statements(
-    aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements
+    aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements, incremental_query_metrics
 ):
     if MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION_PARSED < parse_version('10.5.0'):
         pytest.skip("prepared_statements_instances is unavailable on MariaDB < 10.5")
 
     dbm_instance['query_metrics']['only_query_recent_statements'] = False
     dbm_instance['query_metrics']['collect_prepared_statements'] = collect_prepared_statements
+    dbm_instance['query_metrics']['incremental_query_metrics'] = incremental_query_metrics
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     prepared_sql = DEFAULT_FQ_SUCCESS_QUERY

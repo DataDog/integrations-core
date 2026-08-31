@@ -62,6 +62,7 @@ def test_global_variables_uninitialized_state(instance_basic):
     assert global_vars.log_bin_enabled is False
     assert global_vars.key_buffer_size is None
     assert global_vars.key_cache_block_size is None
+    assert global_vars.performance_schema_digests_size is None
     assert global_vars.all_variables == {}
 
 
@@ -163,6 +164,31 @@ def _test_numeric_properties(global_vars, expected_variables):
             assert global_vars.key_cache_block_size is None
     else:
         assert global_vars.key_cache_block_size is None
+
+    expected_digests_size = expected_variables.get('performance_schema_digests_size')
+    if expected_digests_size:
+        try:
+            assert global_vars.performance_schema_digests_size == int(expected_digests_size)
+        except ValueError:
+            assert global_vars.performance_schema_digests_size is None
+    else:
+        assert global_vars.performance_schema_digests_size is None
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'value, expected',
+    [
+        pytest.param('10000', 10000, id='numeric-string'),
+        pytest.param(-1, -1, id='autosized'),
+        pytest.param(None, None, id='missing'),
+        pytest.param('invalid', None, id='malformed'),
+    ],
+)
+def test_performance_schema_digests_size(value, expected):
+    global_vars = GlobalVariables()
+    global_vars._variables = {'performance_schema_digests_size': value} if value is not None else {}
+    assert global_vars.performance_schema_digests_size == expected
 
 
 def _test_aurora_properties(global_vars, expected_variables):

@@ -695,6 +695,16 @@ files:
                   type: boolean
                   example: true
                   display_default: true
+              - name: incremental_query_metrics
+                hidden: true
+                description: |
+                  Enable incremental query metrics collection. The incremental collector reads cumulative counters first
+                  and only fetches and obfuscates query text for statements that executed since the previous collection.
+                  This option is experimental and defaults to false.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
 
           - name: query_samples
             display_priority: 0

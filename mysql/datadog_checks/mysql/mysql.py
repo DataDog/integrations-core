@@ -87,6 +87,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
+from .statements_v2 import MySQLStatementMetricsV2
 from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
 from .version_utils import parse_version
 
@@ -188,8 +189,13 @@ class MySql(DatabaseCheck):
     def _register_async_jobs(self):
         """Build and register the async jobs enabled by this check's configuration."""
         if self._config.dbm_enabled:
+            statement_metrics_class = (
+                MySQLStatementMetricsV2
+                if is_affirmative(self._config.statement_metrics_config.get('incremental_query_metrics', False))
+                else MySQLStatementMetrics
+            )
             self.statement_metrics = self.register_async_job(
-                MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+                statement_metrics_class(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
             )
             self.statement_samples = self.register_async_job(
                 MySQLStatementSamples(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
