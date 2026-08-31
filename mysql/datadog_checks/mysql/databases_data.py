@@ -2,10 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
 from collections import defaultdict
@@ -130,7 +126,7 @@ class DatabasesData:
         )
         base_event = {
             "host": None,
-            "agent_version": datadog_agent.get_version(),
+            "agent_version": self._check.agent_version,
             "dbms": self._check.dbms,
             "kind": "mysql_databases",
             "collection_interval": collection_interval,
@@ -287,13 +283,14 @@ class DatabasesData:
                 )
 
         # Check if we found databases but no tables across all of them.
-        # This happens when the datadog user has permissions to see databases
-        # but lacks SELECT privileges on the tables themselves, which prevents
-        # the agent from collecting table metadata.
+        # This happens when the datadog user has permissions to see databases but holds no privilege
+        # on the tables themselves. MySQL only exposes a table in INFORMATION_SCHEMA to users that
+        # hold some privilege on it, so without one the agent cannot collect table metadata.
         if db_infos and not self._data_submitter.any_tables_found:
             self._log.warning(
                 "No tables were found across any of the {} databases. This may indicate insufficient privileges "
-                "to view table metadata. The datadog user needs SELECT privileges on the tables.".format(len(db_infos))
+                "to view table metadata. The datadog user needs REFERENCES (or SELECT) privileges on the "
+                "tables.".format(len(db_infos))
             )
 
     @tracked_method(agent_check_getter=agent_check_getter)

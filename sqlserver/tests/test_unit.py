@@ -3,15 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
 import copy
+import gc
+import inspect
 import logging
 import os
 import re
+import weakref
 from collections import namedtuple
 
 import mock
 import pytest
 
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
+from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -28,6 +32,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
 )
+from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseStatsMetrics
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFractionMetric, SqlSimpleMetric
 from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -71,6 +76,69 @@ def test_construct_use_statement(db_name, expected):
     use_stmt = construct_use_statement(db_name)
 
     assert use_stmt == expected
+
+
+@pytest.mark.parametrize('database_count', [1, 1000])
+def test_autodiscovery_database_service_check_batch_count_is_bounded(instance_autodiscovery, database_count):
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    database_names = [f'database_{index}' for index in range(database_count)]
+    check.databases = {Database(name) for name in database_names}
+    cursor = mock.MagicMock()
+    cursor.fetchall.return_value = [(name, 1) for name in database_names]
+    check._connection = mock.MagicMock()
+    check.connection.get_managed_cursor.return_value.__enter__.return_value = cursor
+    check.handle_service_check = mock.MagicMock()
+
+    check._check_connections_by_use_db()
+
+    cursor.execute.assert_called_once()
+    query, params = cursor.execute.call_args.args
+    assert query.count('?') == 1
+    assert 'USE ' not in query
+    assert params[0].count('<database>') == database_count
+    assert check.handle_service_check.call_count == database_count
+
+
+def test_autodiscovery_database_service_check_preserves_per_database_status(instance_autodiscovery):
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    check.databases = {Database('available'), Database('unavailable')}
+    cursor = mock.MagicMock()
+    cursor.fetchall.return_value = [('available', 1), ('unavailable', 0)]
+    check._connection = mock.MagicMock()
+    check.connection.get_managed_cursor.return_value.__enter__.return_value = cursor
+    check.connection.get_host_with_port = mock.MagicMock(return_value='sql.example:1433')
+    check.handle_service_check = mock.MagicMock()
+
+    check._check_connections_by_use_db()
+
+    check.handle_service_check.assert_has_calls(
+        [
+            mock.call(check.OK, 'sql.example:1433', 'available', False),
+            mock.call(
+                check.CRITICAL,
+                'sql.example:1433',
+                'unavailable',
+                'Database unavailable connection service check failed: database is not accessible',
+                False,
+            ),
+        ],
+        any_order=True,
+    )
+
+
+def test_execute_query_raw_collects_multiple_result_sets(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    cursor = mock.MagicMock()
+    cursor.description = [('value',)]
+    cursor.fetchall.side_effect = [[('first',)], [('second',)]]
+    cursor.nextset.side_effect = [True, False]
+    check._connection = mock.MagicMock()
+    check.connection.get_managed_cursor.return_value.__enter__.return_value = cursor
+
+    rows = check.execute_query_raw('SELECT 1; SELECT 2', fetch_multiple_results=True)
+
+    assert rows == [('first',), ('second',)]
+    assert cursor.fetchall.call_count == 2
 
 
 def create_schema_collector(static_info_cache: dict | None = None) -> SQLServerSchemaCollector:
@@ -772,6 +840,31 @@ def test_autodiscovery_resets_database_metrics_on_db_addition(instance_autodisco
     assert changed is True
     assert check.databases == {Database('master'), Database('tempdb'), Database('newdb')}
     assert check._database_metrics is None
+
+
+def test_autodiscovery_resets_database_metrics_after_initial_empty_result(instance_autodiscovery):
+    """Database metric executors must refresh when an initially empty discovery later finds a database."""
+    _, mock_cursor = _mock_database_list()
+    instance_autodiscovery['autodiscovery_include'] = ['newdb$']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is False
+    assert check.databases == set()
+
+    assert check.database_metrics
+
+    Row = namedtuple('Row', 'name')
+    mock_cursor.fetchall.return_value = iter([Row('newdb')])
+    check._ad_last_check = 0
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is True
+    assert check.databases == {Database('newdb')}
+    database_stats_metrics = next(
+        metric for metric in check.database_metrics if isinstance(metric, SqlserverDatabaseStatsMetrics)
+    )
+    assert [query.get('params') for query in database_stats_metrics.queries] == [('newdb',)]
 
 
 @pytest.mark.parametrize(
@@ -1587,6 +1680,20 @@ def test_database_identifier(instance_docker, template, expected, tags):
     assert check.database_identifier == expected
 
 
+def test_legacy_instance_metrics_option_emits_deprecation_warning(instance_docker_defaults):
+    instance_docker_defaults['include_instance_metrics'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker_defaults])
+
+    check.load_configuration_models()
+
+    assert check.warnings == [
+        """Option `include_instance_metrics` in `instances` is deprecated ->
+Agent version: 7.84.0
+Migration: Use `database_metrics.instance_metrics.enabled` instead.
+"""
+    ]
+
+
 def test_only_custom_queries_validation_warnings(caplog):
     """Test that appropriate warning logs are emitted when only_custom_queries conflicts with other configurations."""
     from datadog_checks.sqlserver.config import SQLServerConfig
@@ -1738,3 +1845,150 @@ def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected
     with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
         check = SQLServer(CHECK_NAME, {}, [instance])
     assert check.debug_stats_kwargs()['hostname'] == expected_hostname
+
+
+DBM_JOB_NAMES = [
+    'query-metrics',
+    'procedure-metrics',
+    'database-metadata',
+    'query-activity',
+    'agent-jobs-history',
+    'deadlocks',
+]
+
+
+@pytest.mark.parametrize(
+    'dbm, data_observability_enabled, expected_jobs',
+    [
+        (False, False, []),
+        (False, True, ['data-observability']),
+        (True, False, DBM_JOB_NAMES),
+        (True, True, DBM_JOB_NAMES + ['data-observability']),
+    ],
+    ids=['neither', 'data-observability-only', 'dbm-only', 'both'],
+)
+def test_async_job_registry_matches_config(instance_docker, dbm, data_observability_enabled, expected_jobs):
+    """Only the jobs enabled by the instance config are built and registered.
+
+    Data observability is deliberately outside the DBM gate: it collects for instances that have
+    not turned DBM on. Every other job requires DBM, and each one's own enabled flag defaults to
+    true, so without the gate a non-DBM instance would start collecting.
+    """
+    instance_docker['dbm'] = dbm
+    instance_docker['data_observability'] = {'enabled': data_observability_enabled, 'queries': []}
+
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    registered = check._async_job_registry
+    assert list(registered) == expected_jobs
+    assert check.statement_metrics is registered.get('query-metrics')
+    assert check.procedure_metrics is registered.get('procedure-metrics')
+    assert check.sql_metadata is registered.get('database-metadata')
+    assert check.activity is registered.get('query-activity')
+    assert check.agent_history is registered.get('agent-jobs-history')
+    assert check.deadlocks is registered.get('deadlocks')
+    assert check.data_observability is registered.get('data-observability')
+
+
+@pytest.mark.parametrize('dbm', [True, False], ids=['dbm', 'no-dbm'])
+def test_xe_session_handlers_registered_only_with_dbm(instance_docker, dbm):
+    """XE handlers are built during check initialization, so they have to register themselves.
+
+    They only ever ran under the DBM gate in check(), so a non-DBM instance must not get them.
+    """
+    instance_docker['dbm'] = dbm
+    instance_docker['xe_collection'] = {'query_completions': {'enabled': True}, 'query_errors': {'enabled': True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    check.initialize_xe_session_handlers()
+
+    expected = ['xe_datadog_query_completions', 'xe_datadog_query_errors'] if dbm else []
+    assert [handler.job_name for handler in check.xe_session_handlers] == expected
+    assert [name for name in check._async_job_registry if name.startswith('xe_')] == expected
+
+
+@pytest.mark.parametrize(
+    'job_attr, invoke',
+    [
+        ('statement_metrics', lambda job: job.collect_statement_metrics_and_plans()),
+        ('procedure_metrics', lambda job: job.collect_procedure_metrics()),
+        ('sql_metadata', lambda job: job.report_sqlserver_metadata()),
+        ('activity', lambda job: job.collect_activity()),
+        ('agent_history', lambda job: job.collect_agent_history()),
+        ('deadlocks', lambda job: job._query_deadlocks()),
+    ],
+)
+def test_job_aborts_collection_when_cancelled(instance_docker, job_attr, invoke):
+    """A cancelled job must stop before it queries.
+
+    Teardown waits for the job loop, so a tick that works through its remaining queries after a
+    cancel holds up the Agent's unschedule for as long as those queries take.
+    """
+    instance_docker['dbm'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    job = getattr(check, job_attr)
+    job.cancel()
+    check._connection = mock.MagicMock()
+
+    with pytest.raises(Exception, match='cancelled'):
+        invoke(job)
+
+    check._connection.open_managed_default_connection.assert_not_called()
+
+
+def _build_run_state(check):
+    """Bring a freshly constructed check up to the state a collection leaves it in.
+
+    Everything here is built lazily by ``check()``, and each piece holds the check, so without it
+    the reclaim test would pass while the real teardown still leaked.
+    """
+    check.initialize_xe_session_handlers()
+    check._query_manager = QueryManager(check, check.execute_query_raw)
+    assert check.database_metrics
+    check.instance_metrics = [
+        check.typed_metric(
+            cfg_inst={'name': 'sqlserver.stats.connections', 'counter_name': 'User Connections', 'tags': []},
+            table=DEFAULT_PERFORMANCE_TABLE,
+            sql_counter_type=PERF_COUNTER_BULK_COUNT,
+        )
+    ]
+
+
+def test_check_gc_after_cancel(instance_docker):
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    instance_docker['dbm'] = True
+    instance_docker['xe_collection'] = {'query_completions': {'enabled': True}, 'query_errors': {'enabled': True}}
+    instance_docker['data_observability'] = {'enabled': True, 'queries': []}
+
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _build_run_state(check)
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()

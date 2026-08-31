@@ -1,0 +1,1 @@
+Add ``index_usage_table_names`` and ``table_size_table_names`` to bound the tables scanned by index usage and table size metrics.

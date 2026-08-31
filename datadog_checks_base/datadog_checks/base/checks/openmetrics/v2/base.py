@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import yaml
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.http_exceptions import HTTPClientError
 from datadog_checks.base.utils.tracing import traced_class
@@ -63,6 +64,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         When overriding, make sure to call this (the parent's) __init__ first!
         """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
+        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
+            filter_option_text='metrics / exclude_metrics'
+        )
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]
@@ -95,6 +99,18 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                 except (ConnectionError, HTTPClientError) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
+        # Use the actual configured scraper endpoint keys rather than the raw instance field, so
+        # integrations that synthesize ``scraper_configs`` from options such as ``agent_endpoint``
+        # (e.g. Cilium) still report drops against the endpoint that was scraped.
+        self.metric_limit_issue_reporter.handle(
+            self,
+            self.scrapers.keys(),
+            reached_limit,
+            observed_count,
+            limit,
+        )
 
     def configure_scrapers(self):
         """

@@ -1,0 +1,1 @@
+Add an Agent Health issue when OpenMetrics checks drop metrics at the configured limit.

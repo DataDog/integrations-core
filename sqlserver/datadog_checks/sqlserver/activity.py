@@ -20,12 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
+from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery, raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
@@ -216,6 +211,9 @@ class SqlserverActivity(DBMAsyncJob):
             ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
         )
 
+    def shutdown(self) -> None:
+        self._check = None
+
     def _close_db_conn(self):
         pass
 
@@ -320,7 +318,7 @@ class SqlserverActivity(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
                 "dbm_type": "rqt",
                 "ddtags": ",".join(self._check.tag_manager.get_tags()),
@@ -468,7 +466,7 @@ class SqlserverActivity(DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
@@ -489,6 +487,7 @@ class SqlserverActivity(DBMAsyncJob):
         Collects all current activity for the SQLServer intance.
         :return:
         """
+        raise_if_cancelled(self._cancel_event)
 
         # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.

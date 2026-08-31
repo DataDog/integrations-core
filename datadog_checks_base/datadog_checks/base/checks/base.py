@@ -1670,6 +1670,15 @@ class AgentCheck(object):
                 else:
                     self.check(instance)
 
+                if self.metric_limiter:
+                    try:
+                        reached_limit = self.metric_limiter.reached_limit
+                        observed_count = self.metric_limiter.count
+                        limit = self.metric_limiter.limit
+                        self._on_metric_limit_state(reached_limit, observed_count, limit)
+                    except Exception:
+                        self.log.debug('Error handling metric limit state', exc_info=True)
+
             error_report = ''
         except Exception as e:
             message = self.sanitize(str(e))
@@ -1690,6 +1699,10 @@ class AgentCheck(object):
                 self.metric_limiter.reset()
 
         return error_report
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
+        """Called once per run for checks with an active metric limiter."""
+        pass
 
     def run_check_initializations(self):
         while self.check_initializations:
@@ -1886,6 +1899,8 @@ class AgentCheck(object):
     # Remediation *Remediation `protobuf:"bytes,11,opt,name=remediation,proto3" json:"remediation,omitempty"`
     # // Tags are additional labels for the issue
     # Tags []string `protobuf:"bytes,12,rep,name=tags,proto3" json:"tags,omitempty"`
+    # // IssueType snake_case version of issue name
+    # IssueType string `protobuf:"bytes,14,opt,name=issue_type,json=issueType,proto3" json:"issue_type,omitempty"`
 
     # Remediation should be a dict with the following keys:
     # - summary: str
@@ -1900,6 +1915,7 @@ class AgentCheck(object):
         self,
         id: str,
         issue_name: str,
+        issue_type: str,
         title: str = None,
         description: str = None,
         category: str = None,
@@ -1908,14 +1924,17 @@ class AgentCheck(object):
         remediation: dict = None,
         tags: list = None,
     ):
-        # Issue ID and Name are required
+        # Issue ID, Name, and Type are required
         if not id:
             raise ValueError("Issue ID is required")
         if not issue_name:
             raise ValueError("Issue Name is required")
+        if not issue_type:
+            raise ValueError("Issue Type is required")
         issue = {
             'id': id,
             'issue_name': issue_name,
+            'issue_type': issue_type,
             'title': title,
             'description': description,
             'category': category,

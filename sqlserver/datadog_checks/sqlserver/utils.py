@@ -6,6 +6,7 @@ import re
 import shutil
 import sys
 from typing import Dict, Optional, Sequence
+from xml.etree import ElementTree
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
@@ -27,6 +28,13 @@ DBM_COMMENT_MARKERS = (
 )
 
 
+def serialize_database_names(database_names: list[str]) -> str:
+    root = ElementTree.Element('databases')
+    for database_name in database_names:
+        ElementTree.SubElement(root, 'database').text = database_name
+    return ElementTree.tostring(root, encoding='unicode')
+
+
 # Database is used to store both the name and physical_database_name
 # for a database, which is discovered via autodiscovery
 class Database:
@@ -44,6 +52,17 @@ class Database:
 
     def __str__(self):
         return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
+
+
+def raise_if_cancelled(cancel_event):
+    """Abort before issuing a query once the Agent has unscheduled the check owning the job.
+
+    Teardown waits for the job loop to stop, so a tick that keeps querying after a cancel holds up
+    the Agent. ``DBMAsyncJob._job_loop`` reports an exception raised after a cancel as a
+    cancellation rather than a crash, so raising here is how a job bails out of a tick.
+    """
+    if cancel_event.is_set():
+        raise Exception("Job loop cancelled. Aborting query.")
 
 
 def get_unixodbc_sysconfig(python_executable):

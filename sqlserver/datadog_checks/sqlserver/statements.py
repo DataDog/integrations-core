@@ -23,14 +23,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
@@ -311,6 +305,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / int(self._check.instance.get('samples_per_hour_per_query', 4)),
         )
 
+    def shutdown(self) -> None:
+        self._check = None
+
     def _close_db_conn(self):
         pass
 
@@ -528,7 +525,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'service': self._config.service,
         }
 
@@ -538,6 +535,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         Collects statement metrics and plans.
         :return:
         """
+        raise_if_cancelled(self._cancel_event)
+
         plans_submitted = 0
         deadline = time.time() + self.collection_interval
 
@@ -586,7 +585,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
@@ -639,6 +638,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
+                raise_if_cancelled(self._cancel_event)
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan = None
                 collection_errors = []
@@ -686,7 +686,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_plan_event = {
                     "host": self._check.reported_hostname,
                     "database_instance": self._check.database_identifier,
-                    "ddagentversion": datadog_agent.get_version(),
+                    "ddagentversion": self._check.agent_version,
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,
