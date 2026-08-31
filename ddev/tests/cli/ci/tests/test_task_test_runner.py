@@ -12,12 +12,13 @@ from typing import Any
 import pytest
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
-from ddev.cli.ci.tests.status import Status, conclusion_to_status
+from ddev.cli.ci.tests.status import Status, conclusion_to_check_run_conclusion, conclusion_to_status
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
+    CheckRunConclusion,
     WorkflowJob,
     WorkflowJobsList,
     WorkflowRun,
@@ -157,6 +158,24 @@ def test_conclusion_to_status(conclusion: str | None, expected: Status):
     result = conclusion_to_status(conclusion)
     assert result is expected
     assert isinstance(result, Status)
+
+
+@pytest.mark.parametrize(
+    ("conclusion", "expected"),
+    [
+        ("success", CheckRunConclusion.SUCCESS),
+        ("timed_out", CheckRunConclusion.TIMED_OUT),
+        (None, CheckRunConclusion.NEUTRAL),
+        ("startup_failure", CheckRunConclusion.FAILURE),
+    ],
+)
+def test_conclusion_to_check_run_conclusion(conclusion: str | None, expected: CheckRunConclusion):
+    """A workflow run's conclusion is a free-form string, a check run's is a closed set of eight.
+
+    `startup_failure` is a real workflow conclusion with no check-run member, so passing it through
+    would have GitHub reject the request that closes the check run.
+    """
+    assert conclusion_to_check_run_conclusion(conclusion) is expected
 
 
 # ---------------------------------------------------------------------------

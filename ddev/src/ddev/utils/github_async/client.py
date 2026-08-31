@@ -39,6 +39,7 @@ from .models import (
     ArtifactsList,
     CheckRun,
     CheckRunConclusion,
+    CheckRunStatus,
     IssueComment,
     Label,
     PullRequest,
@@ -993,7 +994,7 @@ class AsyncGitHubClient:
         repo: str,
         name: str,
         head_sha: str,
-        status: Literal["queued", "in_progress", "completed"],
+        status: CheckRunStatus,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
@@ -1011,7 +1012,8 @@ class AsyncGitHubClient:
             repo: Repository name.
             name: Display name of the check.
             head_sha: SHA of the commit the check is attached to.
-            status: Initial status of the check.
+            status: Initial status of the check. Only GitHub Actions can set `waiting`, `pending` or
+                `requested`; every other caller is limited to `queued`, `in_progress` and `completed`.
             details_url: Optional URL the check title links to.
             output: Optional structured output (title, summary, ...).
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
@@ -1039,7 +1041,7 @@ class AsyncGitHubClient:
         owner: str,
         repo: str,
         check_run_id: int,
-        status: Literal["queued", "in_progress", "completed"] | None = None,
+        status: CheckRunStatus | None = None,
         conclusion: CheckRunConclusion | None = None,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
@@ -1057,8 +1059,10 @@ class AsyncGitHubClient:
             owner: Repository owner (user or organisation).
             repo: Repository name.
             check_run_id: Numeric ID of the check run to update.
-            status: New status (``"queued"`` | ``"in_progress"`` | ``"completed"``).
-            conclusion: Final conclusion. Required when ``status="completed"``.
+            status: New status. Only GitHub Actions can set `waiting`, `pending` or `requested`; every
+                other caller is limited to `queued`, `in_progress` and `completed`.
+            conclusion: Final conclusion. Required when `status` is `completed`, and providing one
+                sets that status. `stale` is rejected: only GitHub can conclude a check run as stale.
             details_url: Optional URL the check title links to.
             output: Optional structured output (title, summary, ...).
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
