@@ -161,7 +161,7 @@ metrics:
       # sensor and device model, so only the leading numeric portion is extracted.
       - OID: 1.3.6.1.4.1.12356.101.4.3.2.1.3
         name: fgHwSensorValue
-        extract_value: '(\d+(?:\.\d+)?)'
+        extract_value: '(-?\d+(?:\.\d+)?)'
     metric_tags:
       - tag: sensor_index
         symbol:
