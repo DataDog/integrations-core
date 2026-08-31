@@ -56,15 +56,15 @@ No host port is published, to avoid clashing with a local Redis; reach it over t
 Compose network, or add `--publish 6379:6379` to inspect by hand. Source in
 `proxy/` (`main.go` request loop, `resp.go` framing).
 
-## Driving full coverage: the activity-gen service
+## Drive full coverage with the activity-gen service
 
 The `seed` service primes the fixture once, but most rate/counter metrics stay
 zero on an idle instance. The `activity-gen` service (`activity-gen.sh`) runs
-continuously inside `full-coverage.compose`, looping over keyspace, command
+continuously inside `full-coverage.compose`. It loops over keyspace, command
 variety, eviction, expiry, net bytes, blocked clients, forks/RDB, slowlog, and
-client-side caching so both scrapers see non-zero values across scrapes. It is
+client-side caching. As a result, both scrapers see non-zero values across scrapes. It is
 part of the fixture, so any consumer of `redis-full` gets it automatically with no
-extra wiring. Tunable via `ACTIVITY_DB` / `ACTIVITY_DURATION`.
+extra wiring. You can configure it using `ACTIVITY_DB` / `ACTIVITY_DURATION`.
 
 For a quiescent `redis-full` (no generated traffic), set `ACTIVITY_GEN=0` in the
 host environment before starting the fixture; the container stays up but does
