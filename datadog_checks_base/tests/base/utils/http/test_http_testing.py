@@ -5,23 +5,58 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.checks.openmetrics.mixins import OpenMetricsScraperMixin
-from datadog_checks.base.checks.prometheus.mixins import PrometheusScraperMixin
+from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
+from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.dev import http as http_testing
 
 
-class OpenMetricsFixtureCheck(OpenMetricsScraperMixin, AgentCheck):
+class OpenMetricsFixtureCheck(OpenMetricsBaseCheck):
     pass
 
 
-class PrometheusFixtureCheck(PrometheusScraperMixin, AgentCheck):
+class PrometheusFixtureCheck(PrometheusCheck):
     pass
 
 
-def test_fake_http_patches_explicit_agentcheck_client(fake_http):
+def test_fake_http_preserves_client_configuration_and_isolation(fake_http):
+    check = AgentCheck('test', {}, [{'headers': {'X-Client': 'default'}}])
+
+    default_client = check.http
+    explicit_client = check.create_http_client({'headers': {'X-Client': 'explicit'}})
+
+    assert check.http is default_client
+    assert default_client is not explicit_client
+    assert default_client is not fake_http
+    assert explicit_client is not fake_http
+    assert default_client.get_header('X-Client') == 'default'
+    assert explicit_client.get_header('X-Client') == 'explicit'
+
+    default_client.set_header('X-Default-Only', 'value')
+    assert explicit_client.get_header('X-Default-Only') is None
+
+    default_client.close()
+    assert default_client.closed
+    assert not explicit_client.closed
+
+
+def test_fake_http_aggregates_interactions_from_isolated_clients(fake_http):
+    first_url = 'https://example.test/first'
+    second_url = 'https://example.test/second'
+    first_response = FakeHTTPResponse()
+    second_response = FakeHTTPResponse()
+    fake_http.register_response('GET', first_url, first_response)
+    fake_http.register_response('GET', second_url, second_response)
     check = AgentCheck('test', {}, [{}])
-    assert check.create_http_client({'url': 'https://example.test'}) is fake_http
+
+    default_client = check.http
+    explicit_client = check.create_http_client()
+
+    assert default_client is not explicit_client
+    assert default_client.get(first_url) is first_response
+    assert explicit_client.get(second_url) is second_response
+    fake_http.assert_requests([RecordedRequest('GET', first_url), RecordedRequest('GET', second_url)])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_http_module_reexports_base_fakes():
@@ -47,9 +82,10 @@ def test_fake_openmetrics_http_routes_send_request(fake_openmetrics_http):
     response = FakeHTTPResponse(text='metric 1')
     headers = {'Authorization': 'Bearer token'}
     fake_openmetrics_http.register_response('GET', url, response)
-    check = OpenMetricsFixtureCheck('test', {}, [{}])
+    check = OpenMetricsFixtureCheck('test', {}, {}, [])
+    scraper_config = check.create_scraper_configuration({'prometheus_url': url, 'namespace': 'test'})
 
-    result = check.send_request(url, {'prometheus_url': url}, headers=headers)
+    result = check.send_request(url, scraper_config, headers=headers)
 
     assert result is response
     fake_openmetrics_http.assert_requests(
@@ -58,11 +94,27 @@ def test_fake_openmetrics_http_routes_send_request(fake_openmetrics_http):
     fake_openmetrics_http.assert_all_responses_consumed()
 
 
+def test_fake_openmetrics_http_preserves_handler_cache_and_isolation(fake_openmetrics_http):
+    first_config = {'prometheus_url': 'https://example.test/first', 'namespace': 'test'}
+    second_config = {'prometheus_url': 'https://example.test/second', 'namespace': 'test'}
+    check = OpenMetricsFixtureCheck('test', {}, {}, [])
+    first_config = check.create_scraper_configuration(first_config)
+    second_config = check.create_scraper_configuration(second_config)
+
+    first_handler = check.get_http_handler(first_config)
+    second_handler = check.get_http_handler(second_config)
+
+    assert check.get_http_handler(first_config) is first_handler
+    assert first_handler is not second_handler
+    first_handler.set_header('X-First-Only', 'value')
+    assert second_handler.get_header('X-First-Only') is None
+
+
 def test_fake_prometheus_http_routes_poll(fake_prometheus_http):
     url = 'https://example.test/metrics'
     response = FakeHTTPResponse(text='metric 1')
     fake_prometheus_http.register_response('GET', url, response)
-    check = PrometheusFixtureCheck('test', {}, [{}])
+    check = PrometheusFixtureCheck('test', {}, {}, [])
 
     result = check.poll(url, headers={'X-Test': 'value'})
 
@@ -87,6 +139,20 @@ def test_fake_prometheus_http_routes_poll(fake_prometheus_http):
         ]
     )
     fake_prometheus_http.assert_all_responses_consumed()
+
+
+def test_fake_prometheus_http_preserves_handler_cache_and_isolation(fake_prometheus_http):
+    first_url = 'https://example.test/first'
+    second_url = 'https://example.test/second'
+    check = PrometheusFixtureCheck('test', {}, {}, [])
+
+    first_handler = check.get_http_handler(first_url, {})
+    second_handler = check.get_http_handler(second_url, {})
+
+    assert check.get_http_handler(first_url, {}) is first_handler
+    assert first_handler is not second_handler
+    first_handler.set_header('X-First-Only', 'value')
+    assert second_handler.get_header('X-First-Only') is None
 
 
 def test_legacy_mock_response_is_a_requests_response_without_loading_base_fakes(mocker):

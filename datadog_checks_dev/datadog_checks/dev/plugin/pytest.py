@@ -11,7 +11,6 @@ from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
-from unittest.mock import PropertyMock
 
 import pytest
 
@@ -387,24 +386,40 @@ def mock_http_response(mocker, mock_response):
     )
 
 
+def _create_fake_http_client_factory(fake_http: Any, configured_client_factory: Any) -> Any:
+    def create_client(*args: Any, **kwargs: Any) -> Any:
+        return fake_http.create_client(configured_client_factory(*args, **kwargs))
+
+    return create_client
+
+
 @pytest.fixture
 def fake_http(mocker):
     """Install a base-owned HTTP fake on checks created by the test."""
-    AgentCheck = importlib.import_module('datadog_checks.base.checks.base').AgentCheck
     FakeHTTPClient = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPClient
+    http_module = importlib.import_module('datadog_checks.base.utils.http')
     client = FakeHTTPClient()
 
-    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
-    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
+    # Load module-local factory aliases before patching the canonical factory so fixture teardown
+    # never restores an alias to a mock owned by an earlier test.
+    importlib.import_module('datadog_checks.base.checks.openmetrics.mixins')
+    importlib.import_module('datadog_checks.base.checks.prometheus.mixins')
+    mocker.patch.object(
+        http_module,
+        'create_http_client',
+        side_effect=_create_fake_http_client_factory(client, http_module.create_http_client),
+    )
     return client
 
 
 @pytest.fixture
 def fake_openmetrics_http(fake_http, mocker):
     """Patch the OpenMetrics v1 handler to use the base-owned HTTP fake."""
-    mocker.patch(
-        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
-        return_value=fake_http,
+    mixins = importlib.import_module('datadog_checks.base.checks.openmetrics.mixins')
+    mocker.patch.object(
+        mixins,
+        'create_http_client',
+        side_effect=_create_fake_http_client_factory(fake_http, mixins.create_http_client),
     )
     return fake_http
 
@@ -412,9 +427,11 @@ def fake_openmetrics_http(fake_http, mocker):
 @pytest.fixture
 def fake_prometheus_http(fake_http, mocker):
     """Patch the legacy Prometheus handler to use the base-owned HTTP fake."""
-    mocker.patch(
-        'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
-        return_value=fake_http,
+    mixins = importlib.import_module('datadog_checks.base.checks.prometheus.mixins')
+    mocker.patch.object(
+        mixins,
+        'create_http_client',
+        side_effect=_create_fake_http_client_factory(fake_http, mixins.create_http_client),
     )
     return fake_http
 

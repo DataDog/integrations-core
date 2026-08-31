@@ -62,6 +62,11 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     )
     aggregator.assert_all_metrics_covered()
 
+    scraper = check.scrapers[instance_new['openmetrics_endpoint']]
+    assert check.http.get_header('Accept') == '*/*'
+    assert scraper.http.get_header('Accept') == 'text/plain'
+    assert scraper.http is not check.http
+
 
 def test_openmetrics_use_latest_spec(aggregator, dd_run_check, fake_http, openmetrics_payload, caplog):
     # We want to make sure that when `use_latest_spec` is enabled, we use the OpenMetrics parser
@@ -99,10 +104,13 @@ def test_openmetrics_use_latest_spec(aggregator, dd_run_check, fake_http, openme
     )
     aggregator.assert_all_metrics_covered()
 
+    scraper = check.scrapers[instance_new_strict['openmetrics_endpoint']]
+    assert check.http.get_header('Accept') == '*/*'
     assert caplog.text == ''
-    assert fake_http.get_header('accept') == (
+    assert scraper.http.get_header('accept') == (
         'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
     )
+    assert scraper.http is not check.http
     fake_http.assert_requests([RecordedRequest('GET', instance_new_strict['openmetrics_endpoint'], {'stream': True})])
     fake_http.assert_all_responses_consumed()
 
