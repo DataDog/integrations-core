@@ -324,6 +324,7 @@ MIRROR_CALLS = [
         {'workflow_id': 'wf.yml'},
     ),
     ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
     (
         'create_check_run',
         lambda f, _: f.create_check_run('o', 'r', 'unit', 'abc123', 'in_progress'),
