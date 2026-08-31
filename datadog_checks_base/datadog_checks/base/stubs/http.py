@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from datetime import timedelta
 from types import MappingProxyType
@@ -146,7 +146,7 @@ class FakeHTTPClient:
         options: Mapping[str, Any] | None = None,
         tls_config: Mapping[str, Any] | None = None,
         cookies: Mapping[str, str] | None = None,
-        should_bypass_proxy: bool = False,
+        should_bypass_proxy: bool | Callable[[str], bool] = False,
     ) -> None:
         self.options: dict[str, Any] = {
             'auth': None,
@@ -164,11 +164,29 @@ class FakeHTTPClient:
         self.trust_env = True
         self.ignore_tls_warning = False
         self.persist_connections = False
-        self.requests: list[RecordedRequest] = []
         self.closed = False
         self._cookies = dict(cookies or {})
         self._should_bypass_proxy = should_bypass_proxy
+        self.requests: list[RecordedRequest] = []
         self._responses: list[RegisteredResponse] = []
+
+    def create_client(self, configured_client: HTTPClient | None = None) -> FakeHTTPClient:
+        """Create an isolated client that shares registered responses and recorded requests."""
+        if configured_client is None:
+            client = FakeHTTPClient()
+        else:
+            client = FakeHTTPClient(
+                options=configured_client.options,
+                tls_config=configured_client.tls_config,
+                should_bypass_proxy=configured_client.should_bypass_proxy,
+            )
+            client.trust_env = configured_client.trust_env
+            client.ignore_tls_warning = configured_client.ignore_tls_warning
+            client.persist_connections = configured_client.persist_connections
+
+        client.requests = self.requests
+        client._responses = self._responses
+        return client
 
     def register_response(
         self,
@@ -237,6 +255,8 @@ class FakeHTTPClient:
         return self._cookies.get(name, default)
 
     def should_bypass_proxy(self, url: str) -> bool:
+        if callable(self._should_bypass_proxy):
+            return self._should_bypass_proxy(url)
         return self._should_bypass_proxy
 
     def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
