@@ -625,6 +625,7 @@ metrics:
         symbol:
           OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.3
           name: cbgpPeer3RemoteAddr
+          format: ip_address
       - tag: vrf_name
         symbol:
           OID: 1.3.6.1.4.1.9.9.187.1.2.9.1.4
