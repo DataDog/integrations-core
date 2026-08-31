@@ -38,6 +38,18 @@ class MetricLimitOpenMetricsCheck(OpenMetricsBaseCheckV2):
             self.gauge('openmetrics.metric', value)
 
 
+class IsolatedMetricLimitOpenMetricsCheck(MetricLimitOpenMetricsCheck):
+    """Submits a fixed number of contexts.
+
+    The isolated child process reconstructs the check from serialized configuration
+    alone, so parent-object attributes such as ``observed`` do not reach it.
+    """
+
+    def check(self, _: Any) -> None:
+        for value in range(20):
+            self.gauge('openmetrics.metric', value)
+
+
 def create_check(limit: int = 5, endpoint: str = ENDPOINT) -> MetricLimitOpenMetricsCheck:
     instance = {
         'openmetrics_endpoint': endpoint,
@@ -250,3 +262,35 @@ def test_isolated_parent_does_not_invoke_metric_limit_state(datadog_agent: Any) 
         assert check.run() == ''
 
     check._on_metric_limit_state.assert_not_called()
+
+
+def test_isolated_check_reports_metric_limit_issue(datadog_agent: Any) -> None:
+    """The over-limit condition is observed by the isolated child process, whose
+    report_issue call is replayed back to this process through the Agent stub."""
+    check = IsolatedMetricLimitOpenMetricsCheck(
+        'openmetrics_test',
+        {},
+        [
+            {
+                'openmetrics_endpoint': ENDPOINT,
+                'namespace': 'demo',
+                'max_returned_metrics': 5,
+                'process_isolation': True,
+            }
+        ],
+    )
+    check.check_id = 'test:123'
+
+    assert check.run() == ''
+
+    # The parent never submitted metrics, so its limiter stayed untouched; the
+    # issue below could only have been reported by the isolated child process.
+    assert check.metric_limiter.count == 0
+
+    [issue] = reported_issues(datadog_agent)
+    assert issue['id'] == ISSUE_ID
+    assert issue['issue_name'] == ISSUE_NAME
+    assert issue['issue_type'] == 'openmetrics_metrics_dropped_by_configured_limit'
+    assert issue['extra']['observed_contexts'] == 20
+    assert issue['extra']['dropped_contexts'] == 15
+    assert datadog_agent._sent_resolved_issues == []
