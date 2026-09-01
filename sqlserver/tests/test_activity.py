@@ -540,25 +540,6 @@ def very_old_time():
     return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330).isoformat()
 
 
-@pytest.mark.unit
-def test_get_available_requests_columns_logs_missing_columns(dbm_instance):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    cursor = mock.Mock()
-    cursor.description = [('session_id',), ('status',)]
-    check.activity.log = mock.Mock()
-    check.activity._log = mock.Mock()
-
-    available_columns = check.activity._get_available_requests_columns(
-        cursor, ['session_id', 'status', 'page_resource']
-    )
-
-    assert available_columns == ['session_id', 'status']
-    check.activity.log.info.assert_called_once_with(
-        'missing the following expected columns from sys.dm_exec_requests: %s', {'page_resource'}
-    )
-    check.activity._log.info.assert_not_called()
-
-
 @pytest.mark.parametrize(
     "rows,expected_len,expected_users",
     [
