@@ -4,6 +4,8 @@
 import copy
 import gc
 import weakref
+from collections import Counter
+from itertools import groupby
 
 import mock
 import psycopg
@@ -524,22 +526,55 @@ def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
     assert after > before
 
 
-def test_autodiscovery_visits_each_database_once_and_isolates_group_failures(pg_instance):
+def _autodiscovery_scope(name):
+    return {'name': name, 'query': 'SELECT {metrics_columns} FROM fake', 'metrics': {}, 'descriptors': []}
+
+
+def test_autodiscovery_groups_connection_acquisitions_by_database(pg_instance):
     """
-    All scope groups are collected in a single pass over the discovered databases, and a group that
-    raises for one database does not stop the remaining groups for that same database.
+    Every scope group for a database is collected while that database's connection pool is the most
+    recently used one, so the pool is acquired in a single contiguous block instead of being
+    re-created once per group when the pool cap evicts it in between.
+    """
+    pg_instance['reported_hostname'] = 'stubbed-host'
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.version = VersionInfo(14, 0, 0)
+    check.autodiscovery = mock.MagicMock()
+    check.autodiscovery.get_items.return_value = ['db1', 'db2']
+
+    check.db_pool = mock.MagicMock()
+    cursor = check.db_pool.get_connection.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+    cursor.fetchall.return_value = []
+
+    check._collect_metric_autodiscovery(
+        [],
+        scope_groups=[
+            ('_collect_relations_autodiscovery', [_autodiscovery_scope('relation_scope')]),
+            ('_collect_stat_autodiscovery', [_autodiscovery_scope('stat_scope')]),
+        ],
+    )
+
+    acquired = [call.args[0] for call in check.db_pool.get_connection.call_args_list]
+    assert Counter(acquired) == {'db1': 2, 'db2': 2}, "every group should still run against every database"
+    assert [dbname for dbname, _ in groupby(acquired)] == ['db1', 'db2'], "each database should be acquired once"
+
+
+def test_autodiscovery_group_failure_does_not_skip_later_groups(pg_instance):
+    """
+    A group that raises for a database must not abort that database's remaining groups, otherwise
+    one unreadable relation would silently drop the database's stat metrics too.
     """
     pg_instance['reported_hostname'] = 'stubbed-host'
     check = PostgreSql('postgres', {}, [pg_instance])
     check.autodiscovery = mock.MagicMock()
-    check.autodiscovery.get_items.return_value = ['db1', 'db2']
+    check.autodiscovery.get_items.return_value = ['db1']
 
-    relation_scope = {'name': 'relation_scope'}
-    stat_scope = {'name': 'stat_scope'}
+    relation_scope = _autodiscovery_scope('relation_scope')
+    stat_scope = _autodiscovery_scope('stat_scope')
     collected = []
 
     def query_scope(scope, instance_tags, is_custom_metrics, dbname=None):
-        if scope is relation_scope and dbname == 'db1':
+        if scope is relation_scope:
             raise psycopg.errors.InsufficientPrivilege('relation scope failed')
         collected.append((dbname, scope['name']))
 
@@ -552,10 +587,4 @@ def test_autodiscovery_visits_each_database_once_and_isolates_group_failures(pg_
         ],
     )
 
-    # db1's stat scope still runs despite its relation scope failing, and each database is visited
-    # once with every group rather than once per group.
-    assert collected == [
-        ('db1', 'stat_scope'),
-        ('db2', 'relation_scope'),
-        ('db2', 'stat_scope'),
-    ]
+    assert collected == [('db1', 'stat_scope')]
