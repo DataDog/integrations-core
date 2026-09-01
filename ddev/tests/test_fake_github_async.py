@@ -386,6 +386,15 @@ def test_every_mirror_is_in_the_call_table():
     assert {name for name, _, _ in MIRROR_CALLS} == mirrors
 
 
+MIRRORED_METHODS = frozenset(
+    {
+        name
+        for name, member in vars(AsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member) and hasattr(FakeAsyncGitHubClient, name)
+    }
+)
+
+
 def test_every_client_method_has_a_mirror():
     """A client method with no mirror is the one gap the other two checks cannot see.
 
@@ -406,6 +415,21 @@ def test_every_client_method_has_a_mirror():
     }
 
     assert real - NON_MIRRORS <= fake
+
+
+@pytest.mark.parametrize('name', sorted(MIRRORED_METHODS), ids=sorted(MIRRORED_METHODS))
+def test_a_mirror_accepts_what_the_real_method_accepts(name: str):
+    """A mirror missing a parameter fails only in the test that passes it, and never in type checking.
+
+    `mypy-files` is `src/ddev`, so nothing checks a call into the fake. Every mirror went a whole
+    release with no `retry` parameter and nothing noticed, because no test had passed one yet.
+    """
+    real = inspect.signature(getattr(AsyncGitHubClient, name)).parameters
+    fake = inspect.signature(getattr(FakeAsyncGitHubClient, name)).parameters
+
+    assert [p for p in real if p not in fake] == []
+    # The reverse too, or the fake grows arguments no caller can ever pass.
+    assert [p for p in fake if p not in real] == []
 
 
 def test_no_real_client_method_is_excused_from_the_table():

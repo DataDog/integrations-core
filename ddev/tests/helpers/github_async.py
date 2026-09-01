@@ -56,6 +56,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
+from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
@@ -268,6 +269,8 @@ class FakeAsyncGitHubClient:
         repo: str,
         pull_number: int,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[PullRequest]:
         return self._call(
             'get_pull_request',
@@ -286,6 +289,8 @@ class FakeAsyncGitHubClient:
         base: str | None = None,
         per_page: int = 100,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[list[PullRequest]]:
         return self._call(
             'list_pull_requests',
@@ -308,6 +313,8 @@ class FakeAsyncGitHubClient:
         body: str = '',
         draft: bool = False,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[PullRequest]:
         return self._call(
             'create_pull_request',
@@ -328,6 +335,8 @@ class FakeAsyncGitHubClient:
         issue_number: int,
         body: str,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[IssueComment]:
         _ensure_body_fits(body)
         return self._call(
@@ -351,6 +360,8 @@ class FakeAsyncGitHubClient:
         line: int | None = None,
         side: Literal['LEFT', 'RIGHT'] | None = None,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[PullRequestReviewComment]:
         return self._call(
             'create_pr_review_comment',
@@ -373,6 +384,8 @@ class FakeAsyncGitHubClient:
         comment_id: int,
         body: str,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[IssueComment]:
         _ensure_body_fits(body)
         return self._call(
@@ -391,6 +404,8 @@ class FakeAsyncGitHubClient:
         issue_number: int,
         per_page: int = 100,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
         """Async-generator mirror.
 
@@ -422,6 +437,8 @@ class FakeAsyncGitHubClient:
         issue_number: int,
         labels: list[str],
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[list[Label]]:
         return self._call(
             'add_labels_to_issue',
@@ -441,6 +458,7 @@ class FakeAsyncGitHubClient:
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
         *,
+        retry: RetryPolicy | None = None,
         return_run_details: bool = False,
     ) -> GitHubResponse[Any]:
         return self._call(
@@ -460,6 +478,8 @@ class FakeAsyncGitHubClient:
         repo: str,
         run_id: int,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[WorkflowRun]:
         return self._call(
             'get_workflow_run',
@@ -475,6 +495,8 @@ class FakeAsyncGitHubClient:
         repo: str,
         run_id: int,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> None:
         self._call(
             'cancel_workflow_run',
@@ -497,6 +519,8 @@ class FakeAsyncGitHubClient:
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[CheckRun]:
         return self._call(
             'create_check_run',
@@ -520,6 +544,8 @@ class FakeAsyncGitHubClient:
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[CheckRun]:
         if status == CheckRunStatus.COMPLETED and conclusion is None:
             raise ValueError("A conclusion is required when a check run status is 'completed'.")
@@ -542,6 +568,8 @@ class FakeAsyncGitHubClient:
         run_id: int,
         per_page: int = 30,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> AsyncIterator[GitHubResponse[ArtifactsList]]:
         """Async-generator mirror. A registered response may be a single page or a list of pages."""
         self._record(
@@ -572,6 +600,8 @@ class FakeAsyncGitHubClient:
         run_id: int,
         per_page: int = 30,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> AsyncIterator[GitHubResponse[WorkflowJobsList]]:
         """Async-generator mirror. A registered response may be a single page or a list of pages."""
         self._record(
@@ -600,6 +630,8 @@ class FakeAsyncGitHubClient:
         archive_download_url: str,
         dest_path: Any,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> None:
         """Side-effecting mirror that returns ``None``; registered exceptions are raised."""
         self._record(
