@@ -10,6 +10,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.sqlserver.config_models.instance import DataObservability
+from datadog_checks.sqlserver.connection import sanitize_connection_string
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     DEFAULT_LONG_METRICS_COLLECTION_INTERVAL,
@@ -317,5 +318,7 @@ def sanitize(config: dict) -> dict:
     """
     sanitized = copy.deepcopy(config)
     sanitized['password'] = '***' if sanitized.get('password') else None
-    sanitized['connection_string'] = '***' if sanitized.get('connection_string') else None
+    sanitized['connection_string'] = (
+        sanitize_connection_string(sanitized['connection_string']) if sanitized.get('connection_string') else None
+    )
     return sanitized

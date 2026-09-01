@@ -1,1 +1,1 @@
-Redact connection strings from DBM initialization health events.
+Redact credentials in connection strings included in DBM initialization health events.

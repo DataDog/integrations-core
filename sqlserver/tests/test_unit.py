@@ -61,7 +61,7 @@ except ImportError:
 pytestmark = pytest.mark.unit
 
 
-def test_sanitize_config_redacts_connection_string():
+def test_sanitize_config_redacts_connection_string_credentials():
     config = {
         'password': 'top-secret',
         'connection_string': 'UID=datadog;PWD=connection-secret;TrustServerCertificate=yes',
@@ -69,7 +69,10 @@ def test_sanitize_config_redacts_connection_string():
 
     sanitized = sanitize(config)
 
-    assert sanitized == {'password': '***', 'connection_string': '***'}
+    assert sanitized == {
+        'password': '***',
+        'connection_string': 'UID=datadog;PWD=***;TrustServerCertificate=yes',
+    }
     assert config['connection_string'] == 'UID=datadog;PWD=connection-secret;TrustServerCertificate=yes'
 
 
