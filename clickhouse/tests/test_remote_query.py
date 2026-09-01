@@ -4,6 +4,7 @@
 
 import hashlib
 import json
+import re
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -220,6 +221,9 @@ def bounded_request(query='SELECT 1 AS value', part_bytes=64, **limit_overrides)
         maxFileBytes=1024, maxResultBytes=8192, maxRowBytes=64, maxColumns=8, maxSchemaBytes=256, maxPages=4
     )
     limits.update(limit_overrides)
+    # Overrides may shrink maxFileBytes below the default schema budget; the executor
+    # rejects a schema budget beyond the page budget, so keep the pair consistent.
+    limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
     request = valid_request(query=query)
     request['resultDelivery']['partBytes'] = part_bytes
     request['resultDelivery']['limits'] = limits
@@ -756,11 +760,45 @@ def test_query_allowlist_disabled_by_explicit_negative_values(monkeypatch, confi
     assert remote_query._is_query_allowlist_enabled() is False
 
 
+def test_query_allowlist_holds_exactly_nine_proof_queries():
+    # The Agent-side allowlist mirrors these queries one for one, so the count and the
+    # three fixed queries are cross-repo contract, not local convenience.
+    assert len(remote_query.REMOTE_QUERY_QUERY_ALLOWLIST) == 9
+    for query in (
+        remote_query.REMOTE_QUERY_SEED_QUERY,
+        remote_query.REMOTE_QUERY_IDENTITY_QUERY,
+        remote_query.REMOTE_QUERY_BINARY_QUERY,
+    ):
+        assert query in remote_query.REMOTE_QUERY_QUERY_ALLOWLIST
+
+
+def test_proof_payload_queries_are_deterministic_bounded_and_exact():
+    # The intended sizes are the pinned power-of-two byte counts, 1 MiB through 32 MiB.
+    assert remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES == tuple(1024 * 1024 << shift for shift in range(6))
+    for size_bytes in remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES:
+        query = remote_query._proof_payload_query(size_bytes)
+        # Deterministic construction: one size builds one stable SQL string, and the
+        # allowlist carries exactly that string.
+        assert query == remote_query._proof_payload_query(size_bytes)
+        assert query in remote_query.REMOTE_QUERY_QUERY_ALLOWLIST
+        repeat_arguments = [int(match) for match in re.findall(r"repeat\('x', (\d+)\)", query)]
+        # Real servers reject repeat() counts above the hard 1,000,000 cap (Code 131).
+        assert repeat_arguments
+        assert all(argument <= remote_query.REMOTE_QUERY_REPEAT_CAP for argument in repeat_arguments)
+        # The concatenated parts sum to exactly the intended payload byte count.
+        assert sum(repeat_arguments) == size_bytes
+
+
+def test_proof_payload_query_rejects_non_positive_sizes():
+    with pytest.raises(ValueError):
+        remote_query._proof_payload_query(0)
+
+
 def test_stream_accepts_large_payload_proof_queries(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    for size in (1048576, 2097152, 4194304, 8388608, 16777216, 33554432):
+    for size_bytes in remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES:
         clickhouse_client = make_client(names=('payload',), types=('String',), rows=[['x']])
-        request = valid_request(query=f"SELECT repeat('x', {size}) AS payload")
+        request = valid_request(query=remote_query._proof_payload_query(size_bytes))
 
         events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
 
@@ -769,16 +807,65 @@ def test_stream_accepts_large_payload_proof_queries(monkeypatch):
 
 def test_stream_accepts_identity_and_binary_proof_queries(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    for query in (
-        'SELECT hostName() AS host, currentUser() AS user, version() AS version',
-        "SELECT unhex('00ff80') AS payload",
-    ):
+    for query in (remote_query.REMOTE_QUERY_IDENTITY_QUERY, remote_query.REMOTE_QUERY_BINARY_QUERY):
         clickhouse_client = make_client(names=('v',), types=('String',), rows=[['x']])
         request = valid_request(query=query)
 
         events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
 
         assert_success(events)
+
+
+def test_stream_accepts_every_allowlisted_query(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    for query in sorted(remote_query.REMOTE_QUERY_QUERY_ALLOWLIST):
+        clickhouse_client = make_client(names=('payload',), types=('String',), rows=[['x']])
+        request = valid_request(query=query)
+
+        events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
+
+        assert_success(events)
+
+
+@pytest.mark.parametrize(
+    'query',
+    [
+        # Within the repeat cap and executable on a real server, but not allowlisted.
+        "SELECT repeat('x', 1000000) AS payload",
+        # The same 1 MiB total as an allowlisted query but built differently: the allowlist
+        # matches exact query strings, not payload sizes.
+        "SELECT concat(repeat('x', 500000), repeat('x', 548576)) AS payload",
+    ],
+)
+def test_stream_rejects_nearby_non_allowlisted_queries(query):
+    clickhouse_client = make_client(rows=[[1]])
+    request = valid_request(query=query)
+
+    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
+
+    assert_failed_event(events, 'invalid_request', 'query is not allowlisted')
+    assert clickhouse_client.raw_stream_calls == []
+
+
+def test_stream_binary_proof_query_preserves_nul_payload_exactly(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    # Real ClickHouse (22.7/24.8/26.3) renders unhex('006162') in the stream format as
+    # ["\u0000ab"]: the NUL is JSON-escaped, never a raw control byte. The executor must
+    # keep the payload exactly, with the NUL still escaped in the page JSON.
+    clickhouse_client = FakeClickhouseClient(raw_stream_body('["payload"]', '["String"]', '["\\u0000ab"]'))
+    fake = FakeUploadClient()
+
+    events = collect_events(
+        valid_request(query=remote_query.REMOTE_QUERY_BINARY_QUERY),
+        make_check(),
+        upload_client=fake,
+        clickhouse_client=clickhouse_client,
+    )
+
+    assert_success(events)
+    (page,) = assembled_pages(fake).values()
+    assert json.loads(page)['data']['items'] == [{'payload': '\x00ab'}]
+    assert b'"payload":"\\u0000ab"' in page
 
 
 # ---------------------------------------------------------------------------
@@ -1254,9 +1341,12 @@ def two_row_boundary_request(monkeypatch, extra_file_bytes=0):
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request(part_bytes=32)
-    request['resultDelivery']['limits']['maxFileBytes'] = (
+    limits = request['resultDelivery']['limits']
+    limits['maxFileBytes'] = (
         prefix_len + len(ROW_BYTES) + 1 + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX) + extra_file_bytes
     )
+    # Same constraint as bounded_request: the schema budget must stay within the page budget.
+    limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
     return request
 
 
@@ -2215,7 +2305,7 @@ def test_entry_propagates_callback_failure_without_upload(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Integration: one focused case against a real ClickHouse (docker fixture)
+# Integration: focused cases against a real ClickHouse (docker fixture)
 # ---------------------------------------------------------------------------
 
 # Remote query execution needs the JSONCompactEachRowWithNamesAndTypes format, whose
@@ -2237,11 +2327,35 @@ pytestmark_integration = pytest.mark.skipif(
 )
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytestmark_integration
-def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monkeypatch):
-    """End-to-end producer path against a real server: schema, values, parts, receipt."""
+def real_server_request(instance, query, include_schema=False, part_bytes=1024 * 1024):
+    """A request whose limits admit single-row multi-MiB proof payloads.
+
+    ``maxRowBytes``/``maxFileBytes`` are sized for one 32 MiB payload row plus its envelope,
+    parts are bounded to 1 MiB, and the timeout allows the largest payload to stream through.
+    """
+    limits = valid_limits(maxRowBytes=40 * 1024 * 1024, maxFileBytes=64 * 1024 * 1024, timeoutMs=30_000)
+    request = {
+        'operation': 'produce_json_pages',
+        'target': {'host': instance['server'], 'port': int(instance['port']), 'dbname': 'default'},
+        'query': query,
+        'resultDelivery': {
+            'runId': RUN_ID,
+            'taskId': TASK_ID,
+            'artifactVersion': 1,
+            'uploadId': UPLOAD_ID,
+            'baseUrl': BASE_URL,
+            'token': TOKEN,
+            'partBytes': part_bytes,
+            'limits': limits,
+        },
+    }
+    if include_schema:
+        request['includeSchema'] = True
+    return request
+
+
+def patch_real_check(monkeypatch, instance):
+    """Configure Agent credentials and build a real check for the running fixture."""
     from datadog_checks.clickhouse import ClickhouseCheck
 
     def get_config(key):
@@ -2252,7 +2366,15 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
         return None
 
     monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
-    check = ClickhouseCheck('clickhouse', {}, [instance])
+    return ClickhouseCheck('clickhouse', {}, [instance])
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytestmark_integration
+def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monkeypatch):
+    """End-to-end producer path against a real server: schema, values, parts, receipt."""
+    check = patch_real_check(monkeypatch, instance)
 
     request = {
         'operation': 'produce_json_pages',
@@ -2297,3 +2419,69 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
         'totalRows': 1,
         'totalBytes': len(pages[0]),
     }
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytestmark_integration
+def test_remote_query_binary_proof_query_preserves_nul_payload_against_real_clickhouse(instance, monkeypatch):
+    """The binary proof query's NUL payload survives the real server's JSON stream exactly."""
+    check = patch_real_check(monkeypatch, instance)
+    fake = FakeUploadClient()
+
+    request = real_server_request(instance, remote_query.REMOTE_QUERY_BINARY_QUERY)
+    events = list(iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([check]), fake, None))
+
+    assert_success(events)
+    (page,) = assembled_pages(fake).values()
+    # The payload is the exact three bytes NUL, 'a', 'b': the page JSON value equals the
+    # decoded payload, with the NUL escaped the same way the server rendered it.
+    assert json.loads(page)['data']['items'] == [{'payload': '\x00ab'}]
+    assert b'"payload":"\\u0000ab"' in page
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytestmark_integration
+@pytest.mark.parametrize(
+    'query, expected_payload_bytes, include_schema',
+    [
+        (remote_query.REMOTE_QUERY_SEED_QUERY, None, False),
+        (remote_query.REMOTE_QUERY_IDENTITY_QUERY, None, True),
+        (remote_query.REMOTE_QUERY_BINARY_QUERY, None, False),
+    ]
+    + [
+        (remote_query._proof_payload_query(size_bytes), size_bytes, False)
+        for size_bytes in remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES
+    ],
+    ids=['seed', 'identity-schema', 'binary', '1mib', '2mib', '4mib', '8mib', '16mib', '32mib'],
+)
+def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
+    instance, monkeypatch, query, expected_payload_bytes, include_schema
+):
+    """Every allowlisted proof query executes on a real server and produces one exact row."""
+    check = patch_real_check(monkeypatch, instance)
+    fake = FakeUploadClient()
+
+    request = real_server_request(instance, query, include_schema=include_schema)
+    events = list(iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([check]), fake, None))
+
+    final = assert_success(events)
+    pages = assembled_pages(fake)
+    # Every proof query is a single row: one page, bounded parts, contiguous numbering.
+    assert list(pages) == [0]
+    assert final['upload_receipt']['totalRows'] == 1
+    assert final['upload_receipt']['totalBytes'] == len(pages[0])
+    assert all(len(payload) <= 1024 * 1024 for _b, _p, payload, _sha, _rows in fake.put_part_calls)
+    assert [call[1] for call in fake.put_part_calls] == list(range(1, len(fake.put_part_calls) + 1))
+    assert fake.page_finalize_calls == [0]
+    assert fake.run_finalize_calls == 1
+    (item,) = json.loads(pages[0])['data']['items']
+    if expected_payload_bytes is not None:
+        # The single payload column carries exactly the intended byte count of 'x' bytes.
+        assert item == {'payload': 'x' * expected_payload_bytes}
+    elif query == remote_query.REMOTE_QUERY_IDENTITY_QUERY:
+        # The identity query proves the matched server without a fixture: real host, user,
+        # and version strings ride through the pinned String value contract.
+        assert set(item) == {'host', 'user', 'version'}
+        assert all(isinstance(value, str) and value for value in item.values())

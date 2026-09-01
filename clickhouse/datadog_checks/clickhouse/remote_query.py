@@ -107,22 +107,49 @@ LOGGER = logging.getLogger(__name__)
 
 REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY = 'remote_queries.execute.enable_query_allowlist'
 REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES = frozenset(('false', 'no', '0', 'n', 'off'))
-# ClickHouse counterparts of the proof queries the Agent-side allowlist tracks. The fixture
-# and identity proof queries are absent on purpose: they need harness-created tables
-# (Postgres ``cities``/``remote_query_identity``); hostName()/currentUser()/version() prove
-# the matched server without any fixture.
+# ClickHouse hard cap on repeat() counts: the server rejects anything above 1,000,000 with
+# Code 131 (TOO_LARGE_STRING_SIZE), and no setting lifts it, verified on 22.7, 24.8, and
+# 26.3. Proof payloads larger than the cap concatenate bounded repeat() parts instead.
+REMOTE_QUERY_REPEAT_CAP = 1_000_000
+# Exactly nine proof queries, mirrored one for one by the Agent-side allowlist: the seed,
+# the identity/schema query, one binary-sensitive UTF-8 payload, and six single-row payload
+# queries at the pinned power-of-two sizes. The fixture proof queries are absent on
+# purpose: they need harness-created tables (Postgres ``cities``/``remote_query_identity``);
+# hostName()/currentUser()/version() prove the matched server without any fixture.
+REMOTE_QUERY_SEED_QUERY = 'SELECT 1 AS value'
+REMOTE_QUERY_IDENTITY_QUERY = 'SELECT hostName() AS host, currentUser() AS user, version() AS version'
+# Binary-sensitive but valid-UTF-8 payload: a NUL byte followed by ASCII text. Real servers
+# render the NUL as ``\u0000`` in the stream format, so the row is valid JSON, the pinned
+# value contract accepts it, and the page preserves the payload exactly. A non-UTF-8 payload
+# (such as ``unhex('00ff80')``) is rejected by the value contract by design, so it cannot
+# appear on the allowlist.
+REMOTE_QUERY_BINARY_QUERY = "SELECT unhex('006162') AS payload"
+# The pinned proof payload sizes in bytes: 1, 2, 4, 8, 16, and 32 MiB.
+REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES = (1048576, 2097152, 4194304, 8388608, 16777216, 33554432)
+
+
+def _proof_payload_query(size_bytes: int) -> str:
+    """Build the single-row proof query producing exactly ``size_bytes`` payload bytes.
+
+    Every repeat() count must stay within the server's hard 1,000,000 cap (see
+    REMOTE_QUERY_REPEAT_CAP), so a payload of ``size_bytes`` is the concatenation of
+    ``size_bytes // 1,000,000`` million-byte parts and one remainder part when the size is
+    not a multiple of the cap. The construction is a pure function of ``size_bytes``, so the
+    Agent-side allowlist mirrors the resulting strings byte-for-byte by reproducing this
+    algorithm; hand-maintained large SQL strings would drift instead.
+    """
+    if size_bytes <= 0:
+        raise ValueError('Proof payload size must be a positive byte count.')
+    whole, remainder = divmod(size_bytes, REMOTE_QUERY_REPEAT_CAP)
+    parts = [REMOTE_QUERY_REPEAT_CAP] * whole
+    if remainder:
+        parts.append(remainder)
+    return "SELECT concat({}) AS payload".format(', '.join("repeat('x', {})".format(part) for part in parts))
+
+
 REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
-    (
-        'SELECT 1 AS value',
-        'SELECT hostName() AS host, currentUser() AS user, version() AS version',
-        "SELECT unhex('00ff80') AS payload",
-        "SELECT repeat('x', 1048576) AS payload",
-        "SELECT repeat('x', 2097152) AS payload",
-        "SELECT repeat('x', 4194304) AS payload",
-        "SELECT repeat('x', 8388608) AS payload",
-        "SELECT repeat('x', 16777216) AS payload",
-        "SELECT repeat('x', 33554432) AS payload",
-    )
+    (REMOTE_QUERY_SEED_QUERY, REMOTE_QUERY_IDENTITY_QUERY, REMOTE_QUERY_BINARY_QUERY)
+    + tuple(_proof_payload_query(size_bytes) for size_bytes in REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES)
 )
 
 # Server-owned maximums. The backend selects/clamps every injected limit; the integration only
