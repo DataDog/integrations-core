@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from collections.abc import Iterator
 from unittest import mock
 
 import pytest
 
 from datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper import OpenMetricsScraper
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientConnectTimeoutError,
@@ -53,14 +53,11 @@ def test_connection_error_reraised_when_not_ignored(error_cls):
 
 
 def test_mid_stream_read_timeout_swallowed_when_connection_errors_are_ignored() -> None:
-    def lines() -> Iterator[str]:
-        yield 'first'
-        raise HTTPClientReadTimeoutError('slow')
-
-    connection = mock.MagicMock()
-    connection.__enter__.return_value = connection
-    connection.headers = {'Content-Type': 'text/plain'}
-    connection.iter_lines.return_value = lines()
+    connection = FakeHTTPResponse(
+        headers={'Content-Type': 'text/plain'},
+        lines=('first',),
+        stream_error=HTTPClientReadTimeoutError('slow'),
+    )
 
     scraper = _scraper(ignore_connection_errors=True)
     scraper.get_connection = mock.Mock(return_value=connection)
@@ -71,14 +68,11 @@ def test_mid_stream_read_timeout_swallowed_when_connection_errors_are_ignored() 
 
 
 def test_mid_stream_read_timeout_reraised_when_connection_errors_are_not_ignored() -> None:
-    def lines() -> Iterator[str]:
-        yield 'first'
-        raise HTTPClientReadTimeoutError('slow')
-
-    connection = mock.MagicMock()
-    connection.__enter__.return_value = connection
-    connection.headers = {'Content-Type': 'text/plain'}
-    connection.iter_lines.return_value = lines()
+    connection = FakeHTTPResponse(
+        headers={'Content-Type': 'text/plain'},
+        lines=('first',),
+        stream_error=HTTPClientReadTimeoutError('slow'),
+    )
 
     scraper = _scraper(ignore_connection_errors=False)
     scraper.get_connection = mock.Mock(return_value=connection)

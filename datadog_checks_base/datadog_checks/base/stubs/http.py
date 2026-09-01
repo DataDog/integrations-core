@@ -53,6 +53,7 @@ class FakeHTTPResponse:
         json_error: Exception | None = None,
         content_chunks: Iterable[bytes | str] = (),
         lines: Iterable[bytes | str] = (),
+        stream_error: Exception | None = None,
         status_error: HTTPClientStatusError | None = None,
         encoding: str | None = None,
         elapsed: timedelta = timedelta(),
@@ -80,6 +81,7 @@ class FakeHTTPResponse:
         self._json_error = json_error
         self._content_chunks = tuple(content_chunks)
         self._lines = tuple(lines)
+        self._stream_error = stream_error
         self._status_error = status_error
         self._reason = reason
         self._peer_cert = peer_cert
@@ -114,6 +116,8 @@ class FakeHTTPResponse:
 
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
         yield from self._content_chunks
+        if self._stream_error is not None:
+            raise self._stream_error
 
     def iter_lines(
         self,
@@ -122,6 +126,8 @@ class FakeHTTPResponse:
         delimiter: bytes | str | None = None,
     ) -> Iterator[bytes | str]:
         yield from self._lines
+        if self._stream_error is not None:
+            raise self._stream_error
 
     def __enter__(self) -> HTTPResponse:
         return self
