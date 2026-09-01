@@ -1149,7 +1149,7 @@ def test_perform_kubelet_check(monkeypatch, fake_http):
     fake_http.register_response(
         'GET',
         check.kube_health_url,
-        FakeHTTPResponse(status_code=200),
+        FakeHTTPResponse(status_code=200, lines=()),
         match_options=options,
     )
 

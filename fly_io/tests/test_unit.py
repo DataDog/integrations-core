@@ -117,11 +117,11 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'request_set': 'apps_only', 'http_error': {'/v1/apps': _status_response(500)}},
+            {'request_set': 'apps_only', 'response_overrides': {'/v1/apps': _status_response(500)}},
             id='500',
         ),
         pytest.param(
-            {'request_set': 'apps_only', 'http_error': {'/v1/apps': _status_response(404)}},
+            {'request_set': 'apps_only', 'response_overrides': {'/v1/apps': _status_response(404)}},
             id='404',
         ),
     ],
@@ -146,7 +146,7 @@ def test_rest_api_exception(dd_run_check, instance, aggregator):
     [
         pytest.param(
             {
-                'http_error': {
+                'response_overrides': {
                     '/v1/apps/example-app-1/machines': FakeHTTPResponse(
                         json_result=[{'state': 'started', 'config': None}]
                     )
@@ -181,7 +181,7 @@ def test_bad_response_exception(dd_run_check, instance, aggregator, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-1/volumes': _status_response(404)}},
+            {'response_overrides': {'/v1/apps/example-app-1/volumes': _status_response(404)}},
             id='http error',
         ),
     ],
@@ -212,7 +212,7 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-1/volumes': _invalid_json_response('<html>gateway</html>')}},
+            {'response_overrides': {'/v1/apps/example-app-1/volumes': _invalid_json_response('<html>gateway</html>')}},
             id='non-json body',
         ),
     ],
@@ -264,7 +264,7 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
     ('mock_http_get, log_lines'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-2': _status_response(404)}},
+            {'response_overrides': {'/v1/apps/example-app-2': _status_response(404)}},
             [
                 "Encountered an HTTP error in '_get_app_status'"
                 " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
@@ -274,7 +274,7 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
         ),
         pytest.param(
             {
-                'http_error': {
+                'response_overrides': {
                     '/v1/apps/example-app-1': _status_response(404),
                     '/v1/apps/example-app-2': _status_response(500),
                 }

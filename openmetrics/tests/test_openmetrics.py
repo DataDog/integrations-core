@@ -78,6 +78,7 @@ def test_openmetrics_use_latest_spec(aggregator, dd_run_check, fake_http, openme
         FakeHTTPResponse(
             content=content,
             text=openmetrics_payload,
+            headers={'Content-Type': 'text/plain'},
             content_chunks=(content,),
             lines=openmetrics_payload.splitlines(),
         ),
@@ -119,7 +120,7 @@ def test_openmetrics_empty_response(aggregator, dd_run_check, fake_http):
     fake_http.register_response(
         'GET',
         instance_new['openmetrics_endpoint'],
-        FakeHTTPResponse(),
+        FakeHTTPResponse(content=b'', lines=()),
         match_options={'stream': True},
     )
 
