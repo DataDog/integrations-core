@@ -65,6 +65,10 @@ DEFAULT_BASE_URL = "https://api.github.com"
 # number; neither the OpenAPI description nor the REST docs state it. Measured in UTF-8 bytes, which is
 # never below the character count GitHub means, so it errs only towards refusing a body it might take.
 COMMENT_BODY_LIMIT = 65_536
+# GitHub answers a cancel with 409 once the run has reached a terminal state, which is what was asked for.
+RUN_ALREADY_TERMINAL_STATUS = 409
+# The caller is a run being cancelled, so the whole ladder has to fit in the seconds it has left.
+CANCEL_RETRY_TIMEOUT = 5.0
 
 # How an expired signed URL presents from the artifact storage host.
 SIGNED_URL_EXPIRED_STATUS = 403
@@ -575,6 +579,51 @@ class AsyncGitHubClient:
             "GET", f"/repos/{owner}/{repo}/actions/runs/{run_id}", timeout=timeout, retry=retry
         )
         return self._parse_response(response, WorkflowRun)
+
+    def relax_rate_limits(self, *, max_wait_seconds: float, max_rate: float) -> None:
+        """Stop pacing our own requests, and cap how long a GitHub pause may block one.
+
+        For a process that will not live long enough to spend the budget being paced: see
+        :meth:`InstrumentedAsyncLimiter.relax`. GitHub's own limits are still honoured, only bounded.
+        """
+        self._rate_limiter.relax(max_wait_seconds=max_wait_seconds, max_rate=max_rate)
+
+    async def cancel_workflow_run(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> None:
+        """
+        Calls the GitHub API to cancel a workflow run.
+
+        GitHub replies 409 when the run already reached a terminal state, which is the outcome asked
+        for, so it is not treated as a failure.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-runs#cancel-a-workflow-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            run_id: Numeric ID of the workflow run to cancel.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the replayable policy, since cancelling twice cancels once. The ladder is
+                shortened because the caller is usually a run being torn down with seconds to spare.
+        """
+        try:
+            await self._request(
+                "POST",
+                f"/repos/{owner}/{repo}/actions/runs/{run_id}/cancel",
+                timeout=timeout,
+                retry=retry if retry is not None else self._retry_policies.safe.replace(timeout=CANCEL_RETRY_TIMEOUT),
+            )
+        except httpx.HTTPStatusError as error:
+            if error.response.status_code != RUN_ALREADY_TERMINAL_STATUS:
+                raise
 
     async def list_workflow_run_artifacts(
         self,

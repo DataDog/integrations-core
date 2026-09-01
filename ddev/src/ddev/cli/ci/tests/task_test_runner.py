@@ -17,6 +17,11 @@ from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import CheckRunConclusion, CheckRunStatus, WorkflowJob, WorkflowRun
 
+# A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
+# The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
+# goes quiet would hold this for the client's default and take every other cancellation with it.
+CANCEL_REQUEST_TIMEOUT = 3.0
+
 
 @dataclass(frozen=True)
 class TestRunnerOptions:
@@ -43,6 +48,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         super().__init__(name)
         self._client = client
         self._options = options
+        self._runs_in_flight: dict[str, int] = {}
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
     async def process_message(self, message: TestBatch):
@@ -59,6 +65,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         )
         run_id = dispatch.data.workflow_run_id
         log_extra["run_id"] = run_id
+        self._runs_in_flight[message.batch_id] = run_id
         self._logger.info("Dispatched batch", extra=log_extra)
 
         run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
@@ -84,6 +91,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 run = await self._poll_until_complete(run_id, log_extra)
             else:
                 self._logger.info("Workflow completed", extra=log_extra)
+
+            # Not in the `finally`, which also runs when this task is cancelled with the run still
+            # going, and that is when there is something to cancel.
+            self._runs_in_flight.pop(message.batch_id, None)
 
             raw = run.data.conclusion
             if raw is None:
@@ -122,6 +133,33 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         if finished is not None:
             self.submit_message(finished)
             self._logger.info("BatchFinished emitted", extra=log_extra)
+
+    async def cancel_dispatched_runs(self) -> None:
+        """Cancel the runs this runner dispatched that have not finished.
+
+        Left running they would keep burning runner minutes long after the run that asked for them is
+        gone. Concurrent, because whatever budget the caller has is shared by all of them.
+        """
+        if not self._runs_in_flight:
+            return
+
+        self._logger.info("Cancelling %s dispatched run(s)", len(self._runs_in_flight))
+        await asyncio.gather(
+            *(self._cancel_run(batch_id, run_id) for batch_id, run_id in tuple(self._runs_in_flight.items()))
+        )
+
+    async def _cancel_run(self, batch_id: str, run_id: int) -> None:
+        """Cancel one run, reporting rather than raising: one that will not cancel must not stop the rest."""
+        log_extra = {"batch_id": batch_id, "run_id": run_id}
+        try:
+            await self._client.cancel_workflow_run(
+                self._options.owner, self._options.repo, run_id, timeout=CANCEL_REQUEST_TIMEOUT
+            )
+        except Exception:
+            self._logger.exception("Failed to cancel dispatched run", extra=log_extra)
+        else:
+            self._runs_in_flight.pop(batch_id, None)
+            self._logger.info("Dispatched run cancelled", extra=log_extra)
 
     async def _poll_until_complete(self, run_id: int, log_extra: dict[str, Any]) -> GitHubResponse[WorkflowRun]:
         while True:
