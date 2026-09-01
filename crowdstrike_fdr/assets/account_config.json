@@ -1,21 +1,28 @@
 {
+  "supported_auth_methods": [
+    {
+      "auth_name": "aws_credentials",
+      "basic": {
+        "user_setting": {
+          "key": "aws_access_key_id",
+          "label": "AWS Access Key ID",
+          "help": "The AWS Access Key ID generated for your CrowdStrike FDR feed.",
+          "required": true,
+          "editable": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "aws_secret_key",
+          "label": "AWS Secret Key",
+          "help": "The AWS Secret Key generated for your CrowdStrike FDR feed.",
+          "required": true,
+          "editable": true,
+          "password": {}
+        }
+      }
+    }
+  ],
   "additional_config_fields": [
-    {
-      "key": "aws_access_key_id",
-      "label": "AWS Access Key ID",
-      "help": "The AWS Access Key ID generated for your CrowdStrike FDR feed.",
-      "required": true,
-      "editable": true,
-      "password": {}
-    },
-    {
-      "key": "aws_secret_key",
-      "label": "AWS Secret Key",
-      "help": "The AWS Secret Key generated for your CrowdStrike FDR feed.",
-      "required": true,
-      "editable": true,
-      "password": {}
-    },
     {
       "key": "sqs_queue_url",
       "label": "SQS Queue URL",
