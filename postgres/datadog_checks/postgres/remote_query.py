@@ -1002,8 +1002,21 @@ def _is_query_allowlist_enabled() -> bool:
 # datadog_agent.get_config. Bulk part bytes never traverse the native emit bridge,
 # AgentSecure, PAR, or AP action output; only the compact final receipt is emitted back.
 
-REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER = 'test-drive-its-agent-intake-poc'
-REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive_selector'
+#
+# Test Drive routing is a narrow development knob, not a production request field: the
+# Agent config value names a Test Drive, and the uploader emits the header
+# ``test-drive-<validated-name>: 1``. The name never travels through resultDelivery or AP
+# action input. When the config is absent or invalid, no Test Drive header is emitted, so
+# the upload follows the permanent-service path.
+
+REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive'
+# The header name is built from the validated Test Drive name as ``test-drive-<name>`` with
+# the fixed value ``1``. The name is validated against REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN
+# so it cannot inject arbitrary headers (no colons, spaces, CR/LF, or other control characters).
+REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_PREFIX = 'test-drive-'
+REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_VALUE = '1'
+REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH = 63
+REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN = re.compile(r'[a-z0-9](?:[a-z0-9-]*[a-z0-9])?')
 REMOTE_QUERY_UPLOAD_MAX_RETRIES = 4
 REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS = 0.1
 REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
@@ -1025,7 +1038,7 @@ class UploadCredentials:
     api_key: str
     app_key: str
     token: str
-    test_drive_selector: str | None
+    test_drive: str | None
 
 
 class UploadClient(Protocol):
@@ -1054,8 +1067,9 @@ class RequestsUploadClient:
         }
         if content_type is not None:
             headers['Content-Type'] = content_type
-        if creds.test_drive_selector:
-            headers[REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER] = creds.test_drive_selector
+        if creds.test_drive:
+            test_drive_header = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_PREFIX + creds.test_drive
+            headers[test_drive_header] = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_VALUE
         return headers
 
     def put_part(
@@ -1171,15 +1185,43 @@ def _get_agent_config(key: str) -> str:
     return str(value)
 
 
+def _validate_test_drive_name(value: str | None) -> str | None:
+    """Normalize and validate the configured intake Test Drive name.
+
+    The Agent config value names a Test Drive to route intake uploads to. When valid, the
+    uploader emits the header ``test-drive-<name>: 1``; when absent or invalid, no Test Drive
+    header is emitted so the upload follows the permanent-service path. The name is restricted
+    to lowercase ASCII alphanumerics and hyphens so it cannot inject arbitrary headers.
+    """
+    if value is None:
+        return None
+    name = value.strip().lower()
+    if not name:
+        return None
+    valid = (
+        len(name) <= REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH
+        and REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN.fullmatch(name) is not None
+    )
+    if not valid:
+        LOGGER.warning(
+            'Ignoring invalid remote query intake Test Drive name %r: it must be 1-%d '
+            'lowercase ASCII alphanumerics or hyphens, starting and ending with an alphanumeric.',
+            value,
+            REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH,
+        )
+        return None
+    return name
+
+
 def _resolve_upload_credentials(delivery: RemoteQueryResultDelivery) -> UploadCredentials:
-    selector = _get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY)
+    test_drive = _validate_test_drive_name(_get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY))
     return UploadCredentials(
         base_url=delivery.base_url,
         upload_id=delivery.upload_id,
         api_key=_get_agent_config('api_key'),
         app_key=_get_agent_config('app_key'),
         token=delivery.token,
-        test_drive_selector=selector or None,
+        test_drive=test_drive,
     )
 
 
