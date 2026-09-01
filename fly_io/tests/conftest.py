@@ -71,8 +71,12 @@ def _openmetrics_response(file_path: str) -> FakeHTTPResponse:
     return FakeHTTPResponse(content=content, text=text, lines=text.splitlines())
 
 
-def _not_found_error(url: str) -> HTTPClientStatusError:
-    return HTTPClientStatusError('404 Client Error', response=FakeHTTPResponse(status_code=404, url=url))
+def _not_found_response(url: str) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
+        url=url,
+    )
 
 
 @pytest.fixture
@@ -104,7 +108,7 @@ def mock_http_get(request, fake_http: FakeHTTPClient) -> Iterator[FakeHTTPClient
         response = overrides.get(path)
         if response is None:
             response = (
-                _not_found_error(url)
+                _not_found_response(url)
                 if fixture_path is None
                 else _json_response(os.path.join(fixtures_dir, 'machines-api', 'GET', fixture_path))
             )

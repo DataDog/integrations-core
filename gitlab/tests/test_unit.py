@@ -141,11 +141,9 @@ def test_parse_readiness_service_checks_with_invalid_payload(dd_run_check, aggre
     # Manually init the check
     check.parse_config()
 
-    mocked_response = MagicMock()
-    mocked_response.json.side_effect = ValueError("invalid readiness payload")
+    response = FakeHTTPResponse(json_error=ValueError("invalid readiness payload"))
 
-    check.parse_readiness_service_checks(mocked_response)
-    mocked_response.json.assert_called_once()
+    check.parse_readiness_service_checks(response)
 
     for service_check in check.READINESS_SERVICE_CHECKS.values():
         aggregator.assert_service_check(
@@ -202,10 +200,9 @@ def test_parse_readiness_service_checks(
     # Manually init the check
     check.parse_config()
 
-    mocked_response = MagicMock()
-    mocked_response.json.return_value = service_check
+    response = FakeHTTPResponse(json_result=service_check)
 
-    check.parse_readiness_service_checks(mocked_response)
+    check.parse_readiness_service_checks(response)
 
     aggregator.assert_service_check(
         'gitlab.readiness.redis',
