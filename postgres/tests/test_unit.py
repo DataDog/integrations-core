@@ -522,3 +522,40 @@ def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
         after = metadata._last_column_statistics_query_time
 
     assert after > before
+
+
+def test_autodiscovery_visits_each_database_once_and_isolates_group_failures(pg_instance):
+    """
+    All scope groups are collected in a single pass over the discovered databases, and a group that
+    raises for one database does not stop the remaining groups for that same database.
+    """
+    pg_instance['reported_hostname'] = 'stubbed-host'
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.autodiscovery = mock.MagicMock()
+    check.autodiscovery.get_items.return_value = ['db1', 'db2']
+
+    relation_scope = {'name': 'relation_scope'}
+    stat_scope = {'name': 'stat_scope'}
+    collected = []
+
+    def query_scope(scope, instance_tags, is_custom_metrics, dbname=None):
+        if scope is relation_scope and dbname == 'db1':
+            raise psycopg.errors.InsufficientPrivilege('relation scope failed')
+        collected.append((dbname, scope['name']))
+
+    check._query_scope = query_scope
+    check._collect_metric_autodiscovery(
+        [],
+        scope_groups=[
+            ('_collect_relations_autodiscovery', [relation_scope]),
+            ('_collect_stat_autodiscovery', [stat_scope]),
+        ],
+    )
+
+    # db1's stat scope still runs despite its relation scope failing, and each database is visited
+    # once with every group rather than once per group.
+    assert collected == [
+        ('db1', 'stat_scope'),
+        ('db2', 'relation_scope'),
+        ('db2', 'stat_scope'),
+    ]
