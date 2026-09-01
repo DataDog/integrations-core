@@ -47,7 +47,7 @@ def test_metadata_unit_missing_header(datadog_agent, fake_http):
         if config_obj.version == 4
         else "http://{}:{}/servers/localhost/statistics".format(config_obj.host, config_obj.port)
     )
-    fake_http.register_response('GET', url, FakeHTTPResponse())
+    fake_http.register_response('GET', url, FakeHTTPResponse(headers={}))
 
     check._collect_metadata(config_obj)
 

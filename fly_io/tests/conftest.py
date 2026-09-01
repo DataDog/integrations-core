@@ -82,7 +82,7 @@ def _not_found_response(url: str) -> FakeHTTPResponse:
 @pytest.fixture
 def mock_http_get(request, fake_http: FakeHTTPClient) -> Iterator[FakeHTTPClient]:
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
-    overrides = param.get('http_error', {})
+    response_overrides = param.get('response_overrides', {})
     request_set = param.get('request_set', 'full')
     fixtures_dir = os.path.join(get_here(), 'fixtures')
     intended_requests: list[RecordedRequest] = []
@@ -105,7 +105,7 @@ def mock_http_get(request, fake_http: FakeHTTPClient) -> Iterator[FakeHTTPClient
     api_endpoint = INSTANCE['machines_api_endpoint']
     for path, fixture_path, match_options in API_REQUEST_SETS[request_set]:
         url = f'{api_endpoint}{path}'
-        response = overrides.get(path)
+        response = response_overrides.get(path)
         if response is None:
             response = (
                 _not_found_response(url)

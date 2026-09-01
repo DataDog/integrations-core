@@ -168,7 +168,7 @@ def test_missing_response_cert_does_not_open_second_connection(aggregator, fake_
     }
     message = 'Unable to retrieve the peer certificate from the HTTP response.'
     caplog.set_level('DEBUG')
-    fake_http.register_response('GET', instance['url'], FakeHTTPResponse())
+    fake_http.register_response('GET', instance['url'], FakeHTTPResponse(peer_cert=None))
     check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
 
     with mock.patch.object(
