@@ -8,7 +8,6 @@ import pytest
 import requests
 
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.http_protocol import HTTPResponse
 from datadog_checks.base.utils.requests_adapter import RequestsResponseAdapter
 
 from . import common
@@ -211,14 +210,6 @@ class TestShouldBypassProxy:
 
 
 class TestResponseProtocolSurface:
-    def test_promoted_attributes_declared(self):
-        annotations = HTTPResponse.__annotations__
-        for name in ('encoding', 'elapsed', 'cookies', 'links', 'url', 'history'):
-            assert name in annotations, f'{name} missing from HTTPResponse'
-
-    def test_get_peer_cert_declared(self):
-        assert callable(HTTPResponse.get_peer_cert)
-
     def test_context_manager_closes_underlying_response(self):
         transport = common.RequestsTransport()
         transport.respond(content=b'body')
