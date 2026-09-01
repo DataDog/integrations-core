@@ -3,10 +3,7 @@ name: Measure Disk Usage
 # Triggered by Measure Disk Usage Trigger.
 
 on:
-  workflow_run:
-    workflows:
-      - 'Measure Disk Usage Trigger'
-    types: [completed]
+  pull_request:
 
 env:
   PYTHON_VERSION: "3.13"
@@ -14,9 +11,6 @@ env:
 
 jobs:
   measure-disk-usage:
-    if: >-
-      github.event.workflow_run.conclusion == 'success'
-      && github.event.workflow_run.head_repository.fork == false
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -25,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -35,7 +29,7 @@ jobs:
 
       - name: Get Datadog credentials
         id: dd-sts
-        if: github.event.workflow_run.event == 'push'
+        if: false
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
           policy: integrations-core-api-key
@@ -52,8 +46,8 @@ jobs:
       - name: Measure disk usage (Uncompressed)
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
-          SEND: ${{ github.event.workflow_run.event == 'push' }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          SEND: 'false'
         run: |
           args=(-v size status --format json)
           if [ "$SEND" = "true" ]; then
@@ -64,8 +58,8 @@ jobs:
       - name: Measure disk usage (Compressed)
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
-          SEND: ${{ github.event.workflow_run.event == 'push' }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          SEND: 'false'
         run: |
           args=(-v size status --format json --compressed)
           if [ "$SEND" = "true" ]; then
@@ -76,14 +70,9 @@ jobs:
       - name: Resolve the commit to diff against
         id: base
         env:
-          SHA: ${{ github.event.workflow_run.head_sha }}
-          EVENT: ${{ github.event.workflow_run.event }}
+          SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if [ "$EVENT" = "push" ]; then
-            base_sha=$(git rev-parse "${SHA}^1")
-          else
-            base_sha=$(git merge-base origin/master "$SHA")
-          fi
+          base_sha=$(git merge-base origin/master "$SHA")
           echo "sha=$base_sha" >> "$GITHUB_OUTPUT"
           echo "Diffing $SHA against $base_sha"
 
@@ -92,9 +81,9 @@ jobs:
         continue-on-error: true
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
+          SHA: ${{ github.event.pull_request.head.sha }}
           BASE_SHA: ${{ steps.base.outputs.sha }}
-          SEND: ${{ github.event.workflow_run.event == 'push' }}
+          SEND: 'false'
         run: |
           args=(-v size diff "$BASE_SHA" "$SHA" --format markdown)
           if [ "$SEND" = "true" ]; then
@@ -107,9 +96,9 @@ jobs:
         continue-on-error: true
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
+          SHA: ${{ github.event.pull_request.head.sha }}
           BASE_SHA: ${{ steps.base.outputs.sha }}
-          SEND: ${{ github.event.workflow_run.event == 'push' }}
+          SEND: 'false'
         run: |
           args=(-v size diff "$BASE_SHA" "$SHA" --format markdown --compressed)
           if [ "$SEND" = "true" ]; then
@@ -118,9 +107,8 @@ jobs:
           ddev "${args[@]}"
 
       - name: Build the size difference comment
-        if: github.event.workflow_run.event == 'pull_request'
         env:
-          SHA: ${{ github.event.workflow_run.head_sha }}
+          SHA: ${{ github.event.pull_request.head.sha }}
           BASE_SHA: ${{ steps.base.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           UNCOMPRESSED_OUTCOME: ${{ steps.diff-uncompressed.outcome }}
@@ -149,7 +137,6 @@ jobs:
           } > pr-comment/body.md
 
       - name: Upload PR comment artifact
-        if: github.event.workflow_run.event == 'pull_request'
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: pr-comment
