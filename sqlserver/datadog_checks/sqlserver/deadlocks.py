@@ -222,10 +222,11 @@ class Deadlocks(DBMAsyncJob):
             try:
                 root = ET.fromstring(row[DEADLOCK_XML_ALIAS])
             except Exception as e:
-                self._log.error(
-                    """An error occurred while collecting SQLServer deadlocks.
-                        One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(e, row)
-                )
+                error = "An error occurred while collecting SQLServer deadlocks. "
+                error += "One of the deadlock XMLs couldn't be parsed. The error: {}".format(e)
+                if self._config.log_unobfuscated_queries:
+                    error += ". XML: {}".format(row)
+                self._log.error(error)
                 continue
             query_signatures = {}
             try:

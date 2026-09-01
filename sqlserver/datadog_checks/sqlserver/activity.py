@@ -421,7 +421,6 @@ class SqlserverActivity(DBMAsyncJob):
             if row.get('procedure_name') and row.get('schema_name'):
                 row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
         except Exception as e:
-            print(e)
             if self._config.log_unobfuscated_queries:
                 self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
             else:

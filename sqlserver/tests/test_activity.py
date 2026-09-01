@@ -749,6 +749,23 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
         assert result_rows[0]['procedure_signature'] == '__procedure_obfuscation_error__'
 
 
+@pytest.mark.unit
+def test_activity_obfuscation_failure_does_not_write_stdout(dbm_instance, datadog_agent, capsys):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    row = {
+        'statement_text': "SELECT * FROM customers WHERE token = 'activity-secret'",
+        'query_hash': b'\x01',
+        'query_plan_hash': b'\x02',
+    }
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=Exception('obfuscation failed')):
+        check.activity._obfuscate_and_sanitize_row(row)
+
+    captured = capsys.readouterr()
+    assert captured.out == ''
+    assert captured.err == ''
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(

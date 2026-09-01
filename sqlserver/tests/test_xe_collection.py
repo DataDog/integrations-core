@@ -1195,6 +1195,42 @@ class TestRunJob:
                 query_details = event["query_details"]
                 assert "xe_type" in query_details, "Missing 'xe_type' in query_details"
 
+    def test_debug_logs_do_not_include_raw_sql(self, query_completion_handler):
+        raw_sql = "SELECT * FROM customers WHERE token = 'xe-secret'"
+        events = [
+            {
+                'event_name': 'sql_batch_completed',
+                'timestamp': '2023-01-01T12:00:00.123Z',
+                'batch_text': raw_sql,
+            }
+        ]
+        obfuscated_event = {
+            'event_name': 'sql_batch_completed',
+            'timestamp': '2023-01-01T12:00:00.123Z',
+            'batch_text': 'SELECT * FROM customers WHERE token = ?',
+            'database_name': 'customers',
+            'query_signature': 'signature',
+        }
+
+        with (
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value='<events />'),
+            patch.object(query_completion_handler, '_process_events', return_value=events),
+            patch.object(query_completion_handler._log, 'isEnabledFor', return_value=True),
+            patch.object(query_completion_handler._log, 'debug') as log_debug,
+            patch.object(
+                query_completion_handler,
+                '_obfuscate_sql_fields',
+                return_value=(obfuscated_event, {'batch_text': raw_sql}, 'batch_text'),
+            ),
+            patch('datadog_checks.sqlserver.xe_collection.base.json.dumps', return_value='{}'),
+        ):
+            query_completion_handler._collect_raw_query = False
+            query_completion_handler.run_job()
+
+        logged = ' '.join(str(call) for call in log_debug.call_args_list)
+        assert 'xe-secret' not in logged
+
     def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
         """Test behavior when session doesn't exist"""
         with patch.object(query_completion_handler, 'session_exists', return_value=False):

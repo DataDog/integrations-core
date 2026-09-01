@@ -523,20 +523,6 @@ class XESessionBase(DBMAsyncJob):
             self._last_event_timestamp = events[-1]['timestamp']
             self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
 
-        # Log a sample of events (up to max configured limit) for debugging
-        if self._log.isEnabledFor(logging.DEBUG):
-            sample_size = min(self.debug_sample_events, len(events))
-            sample_events = events[:sample_size]
-
-            try:
-                formatted_json = json_module.dumps(sample_events, indent=2, default=str)
-                self._log.debug(
-                    f"Sample events from {self.session_name} session (limit={self.debug_sample_events}):\n"
-                    f"{formatted_json}"
-                )
-            except Exception as e:
-                self._log.error(f"Error formatting events for logging: {e}")
-
         # Determine the key for the batched events array based on session name
         batch_key = (
             "sqlserver_query_errors" if self.session_name == "datadog_query_errors" else "sqlserver_query_completions"
@@ -544,9 +530,6 @@ class XESessionBase(DBMAsyncJob):
 
         # Create a list to collect all query details
         all_query_details = []
-
-        # Track if we've logged an RQT sample for this batch
-        rqt_sample_logged = False
 
         # Process all events and collect them for batching
         for event in events:
@@ -571,15 +554,6 @@ class XESessionBase(DBMAsyncJob):
                     rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
 
                     if rqt_event:
-                        # Log the first successful RQT event we encounter in this batch
-                        if not rqt_sample_logged and self._log.isEnabledFor(logging.DEBUG):
-                            try:
-                                rqt_payload_json = json_module.dumps(rqt_event, default=str, indent=2)
-                                self._log.debug(f"Sample {self.session_name} RQT event payload:\n{rqt_payload_json}")
-                                rqt_sample_logged = True
-                            except Exception as e:
-                                self._log.error(f"Error serializing RQT payload for logging: {e}")
-
                         self._log.debug(
                             f"Created RQT event for query_signature={obfuscated_event.get('query_signature')}"
                         )

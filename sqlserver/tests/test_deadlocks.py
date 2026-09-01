@@ -293,6 +293,21 @@ def test_deadlock_xml_bad_format(deadlocks_collection_instance):
         AssertionError("Should have raised an exception for bad XML format")
 
 
+def test_deadlock_parse_failure_does_not_log_xml(deadlocks_collection_instance):
+    deadlocks_obj = _get_deadlock_obj(deadlocks_collection_instance)
+    raw_xml = "<deadlock><inputbuf>SELECT 'deadlock-secret'</inputbuf>"
+    rows = [{DEADLOCK_TIMESTAMP_ALIAS: "2024-09-20T12:07:16.647000", DEADLOCK_XML_ALIAS: raw_xml}]
+
+    with (
+        patch.object(Deadlocks, '_query_deadlocks', return_value=rows),
+        patch.object(deadlocks_obj._log, 'error') as log_error,
+    ):
+        assert deadlocks_obj._create_deadlock_rows() == []
+
+    logged = ' '.join(str(call) for call in log_error.call_args_list)
+    assert 'deadlock-secret' not in logged
+
+
 def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
     test_xml = """
     <event name="xml_deadlock_report" package="sqlserver" timestamp="2024-08-20T08:30:35.762Z">
