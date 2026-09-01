@@ -22,7 +22,6 @@ jobs:
       contents: read
       # needed for dd-sts
       id-token: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -118,22 +117,8 @@ jobs:
           fi
           ddev "${args[@]}"
 
-      - name: Resolve the pull request number
-        id: pr
-        if: github.event.workflow_run.event == 'pull_request'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          number=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}/pulls" \
-            --jq '[.[] | select(.state == "open")][0].number // empty')
-          if [ -z "$number" ]; then
-            echo "No open pull request matches $SHA; nothing to comment on."
-          fi
-          echo "number=$number" >> "$GITHUB_OUTPUT"
-
       - name: Build the size difference comment
-        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
+        if: github.event.workflow_run.event == 'pull_request'
         env:
           SHA: ${{ github.event.workflow_run.head_sha }}
           BASE_SHA: ${{ steps.base.outputs.sha }}
@@ -155,32 +140,21 @@ jobs:
             printf '\n</details>\n\n'
           }
 
+          mkdir -p pr-comment
           {
             printf '## Disk usage change\n\n'
             printf 'Commit `%s` compared against `%s`.\n\n' "${SHA:0:7}" "${BASE_SHA:0:7}"
             section 'Uncompressed' diff_uncompressed.md "$UNCOMPRESSED_OUTCOME"
             section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
-          } > size_diff_comment.md
+          } > pr-comment/body.md
 
-      - name: Find the previous size difference comment
-        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
-        id: find-comment
-        continue-on-error: true
-        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+      - name: Upload PR comment artifact
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          issue-number: ${{ steps.pr.outputs.number }}
-          comment-author: github-actions[bot]
-          body-includes: Disk usage change
-
-      - name: Comment the size difference on the pull request
-        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
-        continue-on-error: true
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
-        with:
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ steps.pr.outputs.number }}
-          body-path: size_diff_comment.md
-          edit-mode: replace
+          name: pr-comment
+          path: pr-comment/body.md
+          if-no-files-found: error
 
       - name: Upload JSON uncompressed sizes artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
