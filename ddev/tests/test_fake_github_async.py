@@ -14,7 +14,7 @@ from typing import Any
 import httpx
 import pytest
 
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
 from tests.cli.ci.tests.helpers import comment_page
 from tests.helpers.github_async import FakeAsyncGitHubClient
@@ -324,6 +324,17 @@ MIRROR_CALLS = [
         {'workflow_id': 'wf.yml'},
     ),
     ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
+    (
+        'create_pr_review_comment',
+        lambda f, _: f.create_pr_review_comment('o', 'r', 1, 'body', 'abc123', 'file.py', line=10, side='RIGHT'),
+        {'commit_id': 'abc123', 'line': 10},
+    ),
+    (
+        'relax_rate_limits',
+        lambda f, _: f.relax_rate_limits(max_wait_seconds=2.0, max_rate=10_000.0),
+        {'max_rate': 10_000.0},
+    ),
     (
         'create_check_run',
         lambda f, _: f.create_check_run('o', 'r', 'unit', 'abc123', 'in_progress'),
@@ -344,17 +355,93 @@ MIRROR_CALLS = [
 ]
 
 
+# Helpers the fake adds for tests to assert with. Everything else public on the fake mirrors a real
+# client method and therefore belongs in the call table.
+NON_MIRRORS = frozenset(
+    {
+        'aclose',
+        'assert_all_responses_consumed',
+        'assert_called_once_with',
+        'assert_called_with',
+        'assert_not_called',
+        'calls_to',
+        'last_call',
+        'mock_response',
+    }
+)
+
+
 def test_every_mirror_is_in_the_call_table():
-    """A mirror missing from the table is an untested mirror, so the omission has to fail loudly."""
+    """A mirror missing from the table is an untested mirror, so the omission has to fail loudly.
+
+    Discriminated by name rather than by whether the mirror is a coroutine: the client has sync
+    methods too, and filtering on `iscoroutinefunction` made those invisible to this check.
+    """
     mirrors = {
         name
         for name, member in vars(FakeAsyncGitHubClient).items()
-        if not name.startswith('_')
-        and name != 'aclose'
-        and (inspect.iscoroutinefunction(member) or inspect.isasyncgenfunction(member))
+        if not name.startswith('_') and name not in NON_MIRRORS and inspect.isfunction(member)
     }
 
     assert {name for name, _, _ in MIRROR_CALLS} == mirrors
+
+
+MIRRORED_METHODS = frozenset(
+    {
+        name
+        for name, member in vars(AsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member) and hasattr(FakeAsyncGitHubClient, name)
+    }
+)
+
+
+def test_every_client_method_has_a_mirror():
+    """A client method with no mirror is the one gap the other two checks cannot see.
+
+    They compare the fake against the call table and the exemption list against the client, so a
+    method that exists only on the real client is absent from both sides of both. That is how a
+    caller reached a mirror that was never written: the code raised `AttributeError` mid-run and the
+    test around it still passed.
+    """
+    real = {
+        name
+        for name, member in vars(AsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member)
+    }
+    fake = {
+        name
+        for name, member in vars(FakeAsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member)
+    }
+
+    assert real - NON_MIRRORS <= fake
+
+
+@pytest.mark.parametrize('name', sorted(MIRRORED_METHODS), ids=sorted(MIRRORED_METHODS))
+def test_a_mirror_accepts_what_the_real_method_accepts(name: str):
+    """A mirror missing a parameter fails only in the test that passes it, and never in type checking.
+
+    `mypy-files` is `src/ddev`, so nothing checks a call into the fake. Every mirror went a whole
+    release with no `retry` parameter and nothing noticed, because no test had passed one yet.
+    """
+    real = inspect.signature(getattr(AsyncGitHubClient, name)).parameters
+    fake = inspect.signature(getattr(FakeAsyncGitHubClient, name)).parameters
+
+    assert [p for p in real if p not in fake] == []
+    # The reverse too, or the fake grows arguments no caller can ever pass.
+    assert [p for p in fake if p not in real] == []
+
+
+def test_no_real_client_method_is_excused_from_the_table():
+    """`NON_MIRRORS` excuses a name from the check above, so it must only ever name test helpers.
+
+    Without this, adding a client method to `NON_MIRRORS` would silently exempt it from needing a
+    mirror at all. `aclose` is the one legitimate overlap: both classes have it, and the fake's is
+    a no-op with no arguments worth recording.
+    """
+    real = {name for name, member in vars(AsyncGitHubClient).items() if inspect.isfunction(member)}
+
+    assert NON_MIRRORS & real == {'aclose'}
 
 
 @pytest.mark.parametrize(('method', 'call', 'expected'), MIRROR_CALLS, ids=[name for name, _, _ in MIRROR_CALLS])
@@ -367,7 +454,9 @@ async def test_a_mirror_records_the_arguments_it_was_called_with(
 ):
     """Recording happens before the response resolves, so a mirror whose default raises still records."""
     with contextlib.suppress(httpx.HTTPStatusError):
-        await call(fake, tmp_path)
+        # Sync mirrors return nothing to await, so the table can hold both shapes.
+        if inspect.isawaitable(result := call(fake, tmp_path)):
+            await result
 
     recorded = fake.last_call(method).kwargs
     assert expected.items() <= recorded.items()

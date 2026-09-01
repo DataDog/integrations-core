@@ -970,20 +970,30 @@ class TestSupportsExplainJsonFormatVersion:
         assert supports_explain_json_format_version(None) is False
 
 
+DBM_JOBS = ['statement-metrics', 'statement-samples', 'query-activity', 'database-metadata']
+
+
 @pytest.mark.parametrize(
-    'dbm, expected_jobs',
+    'dbm, data_observability, expected_jobs',
     [
-        (False, []),
-        (True, ['statement-metrics', 'statement-samples', 'database-metadata', 'query-activity']),
+        pytest.param(False, False, [], id='neither'),
+        pytest.param(True, False, DBM_JOBS, id='dbm'),
+        pytest.param(False, True, ['database-metadata', 'data-observability'], id='data_observability'),
+        pytest.param(True, True, DBM_JOBS + ['data-observability'], id='both'),
     ],
 )
-def test_async_job_registry_matches_config(dbm, expected_jobs):
+def test_async_job_registry_matches_config(dbm, data_observability, expected_jobs):
     """Only the jobs enabled by the instance config are built and registered.
 
-    Every job requires DBM, and each job's own enabled flag defaults to true, so without the
-    DBM gate a non-DBM instance would start collecting.
+    Each job's own enabled flag defaults to true, so a registered job starts collecting. Data
+    Observability relies on the metadata job for schema collection, so either feature registers it.
     """
-    instance = {'server': 'localhost', 'user': 'datadog', 'dbm': dbm}
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': dbm,
+        'data_observability': {'enabled': data_observability},
+    }
 
     check = MySql(common.CHECK_NAME, {}, instances=[instance])
 
@@ -993,15 +1003,22 @@ def test_async_job_registry_matches_config(dbm, expected_jobs):
     assert check.statement_samples is registered.get('statement-samples')
     assert check.mysql_metadata is registered.get('database-metadata')
     assert check.query_activity is registered.get('query-activity')
+    assert check.data_observability is registered.get('data-observability')
 
 
 @pytest.mark.parametrize(
     'job_attr',
-    ['statement_metrics', 'statement_samples', 'mysql_metadata', 'query_activity'],
+    ['statement_metrics', 'statement_samples', 'mysql_metadata', 'query_activity', 'data_observability'],
 )
 def test_job_shutdown_closes_connection(job_attr):
     """Each job must close its own connection on shutdown; the GC test would not catch a leak."""
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': True,
+        'data_observability': {'enabled': True},
+    }
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
     job = getattr(check, job_attr)
     conn = mock.MagicMock()
     job._db = conn
@@ -1058,6 +1075,7 @@ def test_check_gc_after_cancel():
         'query_metrics': {'enabled': True, 'run_sync': True, 'collection_interval': 10},
         'query_activity': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
         'collect_settings': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'data_observability': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
     }
 
     check = MySql(common.CHECK_NAME, {}, instances=[instance])

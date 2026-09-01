@@ -19,11 +19,6 @@ if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import CollectPendingAsyncInserts, QuerySamples
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
@@ -459,7 +454,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "clickhouse",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
@@ -666,7 +661,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         return {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "clickhouse",
             "kind": BUFFER_PAYLOAD_KIND,
             "min_collection_interval": self._buffer_collection_interval,

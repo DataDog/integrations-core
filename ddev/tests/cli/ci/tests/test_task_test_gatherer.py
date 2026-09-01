@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 import shutil
 import threading
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -31,7 +32,7 @@ from ddev.cli.ci.tests.messages import (
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
-from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
+from ddev.cli.ci.tests.task_test_gatherer import INITIAL_UPDATE_MESSAGE_ID, TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.utils.github_async.models import JobStep, WorkflowJob
 from ddev.utils.junit import TestStatus
@@ -184,6 +185,57 @@ def _find_result(gatherer: TaskTestGatherer, integration: str) -> JobResult:
 # ---------------------------------------------------------------------------
 # process_message
 # ---------------------------------------------------------------------------
+
+
+def _stopping_before_gathering(gatherer: TaskTestGatherer, bus: RecordingBus) -> None:
+    bus.stopping = True
+
+
+def _stopping_once_the_last_job_is_gathered(gatherer: TaskTestGatherer, bus: RecordingBus) -> None:
+    """Flips after the per-job loop, the window that loop's own check cannot see."""
+    build_status = gatherer._build_workflow_status
+
+    def cancelled_while_building(*args, **kwargs):
+        bus.stopping = True
+        return build_status(*args, **kwargs)
+
+    gatherer._build_workflow_status = cancelled_while_building  # type: ignore[method-assign]
+
+
+@pytest.mark.parametrize(
+    "start_stopping",
+    [
+        pytest.param(_stopping_before_gathering, id="before_gathering"),
+        pytest.param(_stopping_once_the_last_job_is_gathered, id="after_the_last_job"),
+    ],
+)
+def test_a_shutting_down_bus_abandons_gathering_without_registering_the_batch(
+    tmp_path: Path, start_stopping: Callable[[TaskTestGatherer, RecordingBus], None]
+):
+    """Gathering runs in a thread the bus cannot interrupt, so it has to give up on its own.
+
+    Registering what it managed to gather would be worse than registering nothing: the batch would
+    read as finished while holding a fraction of its jobs, and a run that never completed could then
+    report as done.
+    """
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1")
+
+    gatherer = _make_gatherer(tmp_path)
+    bus = RecordingBus()
+    gatherer.bus = bus  # type: ignore[assignment]
+    start_stopping(gatherer, bus)
+
+    gatherer.process_message(
+        _batch_finished(
+            artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+        )
+    )
+
+    assert drain_queue(bus.queue) == []
+    assert _registry(gatherer) == []
+    # Still planned, so nothing downstream can read the batch as one that finished.
+    assert gatherer._progress_by_batch["batch-1"].state is ExecutionState.PLANNED
 
 
 def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path):
@@ -553,7 +605,7 @@ def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
 
     assert drain_queue(gatherer.bus.queue) == []
     assert gatherer._revision == 0
-    assert [batch.batch_id for batch in gatherer.build_initial_update("initial").progress.batches] == ["batch-1"]
+    assert [batch.batch_id for batch in gatherer.build_initial_update().progress.batches] == ["batch-1"]
     # Nor may it write into the output tree the planned batches publish from.
     assert not (tmp_path / "out").exists()
 
@@ -665,8 +717,8 @@ def test_initial_update_is_revision_zero_over_the_whole_plan(tmp_path: Path) -> 
     plan = {"b1": [_batch_job("j1"), _batch_job("j2", target="kafka")], "b2": [_batch_job("j3", target="redis")]}
     gatherer = _make_gatherer(tmp_path, plan)
 
-    update = gatherer.build_initial_update("initial")
-    assert (update.id, update.revision) == ("initial", 0)
+    update = gatherer.build_initial_update()
+    assert (update.id, update.revision) == (INITIAL_UPDATE_MESSAGE_ID, 0)
     assert _registry(gatherer) == []
 
     progress = update.progress
@@ -1088,7 +1140,7 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     bus.register_processor(gatherer, [BatchFinished])
     bus.register_processor(reporter, [UpdatePRComment])
 
-    bus.submit_message(gatherer.build_initial_update("initial"))
+    bus.submit_message(gatherer.build_initial_update())
     for index, (batch_id, jobs) in enumerate(plan.items(), start=1):
         artifacts = tmp_path / "artifacts" / batch_id
         results = [_scenario_job(artifacts, job.target, "success", JUNIT_PASSING, run_id=index) for job in jobs]

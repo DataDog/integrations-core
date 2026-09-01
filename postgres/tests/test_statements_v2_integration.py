@@ -8,7 +8,8 @@ from psycopg import ClientCursor
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
-from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2, pgss_key
+from datadog_checks.postgres.util import DDIGNORE_COMMENT
 
 from .common import (
     DB_NAME,
@@ -83,11 +84,11 @@ def test_statement_metrics_v2(
     check = integration_check(dbm_instance_v2)
     check._connect()
 
-    # First check: seeds DeltaDetector with initial snapshot (no derivatives)
+    # First check: seeds the counter baseline with an initial snapshot (no derivatives)
     _run_queries()
     run_one_check(check, cancel=False)
 
-    # Second check: queries run again, DeltaDetector produces derivatives
+    # Second check: queries run again, so diffing against the baseline produces derivatives
     _run_queries()
     run_one_check(check, cancel=False)
 
@@ -434,16 +435,12 @@ def test_internal_telemetry_gauges_v2(aggregator, integration_check, dbm_instanc
         tags=expected_tags + debug_tags,
         hostname='stubbed.hostname',
     )
-    aggregator.assert_metric(
-        "dd.postgres.statement_metrics.lookup.hits",
-        tags=expected_tags + debug_tags,
-        hostname='stubbed.hostname',
-    )
-    aggregator.assert_metric(
-        "dd.postgres.statement_metrics.lookup.misses",
-        tags=expected_tags + debug_tags,
-        hostname='stubbed.hostname',
-    )
+    for stat in ("hits", "misses", "fetched", "ignored", "failed", "dropped"):
+        aggregator.assert_metric(
+            "dd.postgres.statement_metrics.lookup.{}".format(stat),
+            tags=expected_tags + debug_tags,
+            hostname='stubbed.hostname',
+        )
 
     conn.close()
 
@@ -495,7 +492,7 @@ def test_fqt_cache_deduplication_v2(aggregator, integration_check, dbm_instance_
     check = integration_check(dbm_instance_v2)
     check._connect()
 
-    # Cycle 1: seeds DeltaDetector snapshot (no derivatives yet)
+    # Cycle 1: seeds the counter baseline (no derivatives yet)
     conn.cursor().execute("SELECT city FROM persons WHERE city = %s", ("hello",))
     run_one_check(check, cancel=False)
 
@@ -558,15 +555,20 @@ def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_c
         refetched_ddignore.update(replayed)
         texts = original_fetch(keys)
         for key, text in texts.items():
-            if text and text.startswith('/* DDIGNORE */'):
+            if text and text.startswith(DDIGNORE_COMMENT):
                 ddignore_keys_seen.add(key)
         return texts
 
     original_resolve = job._resolve_obfuscations
+    previous_live_keys: set = set()
 
-    def _resolve_spy(changed_pgss_keys, vanished_pgss_keys):
-        vanished_before_fetch.update(vanished_pgss_keys)
-        return original_resolve(changed_pgss_keys, vanished_pgss_keys)
+    def _resolve_spy(live_pgss_keys, changed_pgss_keys):
+        # Retention is driven by the live key set, so a key that left pgss is whatever was live on
+        # the previous cycle but is not live now.
+        vanished_before_fetch.update(previous_live_keys - live_pgss_keys)
+        previous_live_keys.clear()
+        previous_live_keys.update(live_pgss_keys)
+        return original_resolve(live_pgss_keys, changed_pgss_keys)
 
     with (
         mock.patch.object(job, '_fetch_query_texts', side_effect=_spy),
@@ -585,4 +587,187 @@ def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_c
         pytest.skip("No /* DDIGNORE */ queries surfaced in pg_stat_statements on this version")
     assert not refetched_ddignore, (
         f"DDIGNORE keys were re-fetched on later cycles instead of being skipped: {sorted(refetched_ddignore)}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Shared fixtures for the collection-cycle tests below
+# ---------------------------------------------------------------------------
+
+TEST_QUERY = "SELECT city FROM persons WHERE city = %s"
+TEST_QUERY_NORMALIZED = "SELECT city FROM persons WHERE city = $1"
+
+
+def _test_query_conn():
+    return psycopg.connect(
+        host=HOST, dbname=DB_NAME, user="bob", password="bob", autocommit=True, cursor_factory=ClientCursor
+    )
+
+
+def _emitted_calls(aggregator, query_signature):
+    """Every `calls` value emitted for one query signature across all collected payloads."""
+    return [
+        row['calls']
+        for event in aggregator.get_event_platform_events("dbm-metrics")
+        for row in event['postgres_rows']
+        if row['query_signature'] == query_signature
+    ]
+
+
+def _run_cycle(check, conn):
+    """Advance the test query's counters by one execution, then collect over them."""
+    conn.cursor().execute(TEST_QUERY, ("hello",))
+    run_one_check(check, cancel=False)
+
+
+# ---------------------------------------------------------------------------
+# Counter resets are re-baselined instead of emitting bogus deltas
+# ---------------------------------------------------------------------------
+
+
+@requires_over_10
+def test_counter_reset_between_cycles_v2(aggregator, integration_check, dbm_instance_v2):
+    """pg_stat_statements counters are cumulative, so a reset makes the next snapshot lower than the
+    previous one. That row must be dropped and re-baselined, since diffing against the stale higher
+    baseline would report a negative call count."""
+    conn = _test_query_conn()
+    check = integration_check(dbm_instance_v2)
+    check._connect()
+
+    query_signature = compute_sql_signature(TEST_QUERY_NORMALIZED)
+
+    _run_cycle(check, conn)  # seeds the baseline
+    _run_cycle(check, conn)  # first interval with a baseline to diff against
+    assert _emitted_calls(aggregator, query_signature) == [1], "one execution per cycle should report calls=1"
+
+    aggregator.reset()
+    with _get_superconn(dbm_instance_v2) as superconn:
+        with superconn.cursor() as cur:
+            cur.execute("SELECT pg_stat_statements_reset();")
+
+    _run_cycle(check, conn)
+    assert _emitted_calls(aggregator, query_signature) == [], (
+        "the cycle spanning a counter reset must drop the row rather than emit a bogus delta"
+    )
+
+    _run_cycle(check, conn)
+    assert _emitted_calls(aggregator, query_signature) == [1], (
+        "collection must recover from the post-reset baseline on the following cycle"
+    )
+
+    conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Steady-state cache hit rate
+# ---------------------------------------------------------------------------
+
+
+@requires_over_10
+def test_cache_hit_rate_stable_across_cycles_v2(aggregator, integration_check, dbm_instance_v2):
+    """Once a statement's text is cached, later cycles must serve it from the cache rather than
+    re-fetching it from Postgres. If live entries are dropped prematurely the emitted metrics stay
+    correct, so only the hit rate reveals that every cycle is re-fetching and re-obfuscating."""
+    conn = _test_query_conn()
+    check = integration_check(dbm_instance_v2)
+    check._connect()
+
+    # The first cycle only seeds the baseline, and the check's own recurring statements trickle into
+    # pg_stat_statements over the next few, so warm up generously before measuring steady state.
+    for _ in range(6):
+        _run_cycle(check, conn)
+
+    aggregator.reset()
+
+    steady_state_cycles = 3
+    for _ in range(steady_state_cycles):
+        _run_cycle(check, conn)
+
+    conn.close()
+
+    hits = [m.value for m in aggregator.metrics("dd.postgres.statement_metrics.lookup.hits")]
+    misses = [m.value for m in aggregator.metrics("dd.postgres.statement_metrics.lookup.misses")]
+
+    assert len(hits) == steady_state_cycles, f"expected one hits gauge per cycle, got {hits}"
+    assert all(hit > 0 for hit in hits), f"steady-state cycles served nothing from cache: hits={hits}"
+    assert sum(misses) == 0, f"steady-state cycles re-fetched statement text: misses={misses}"
+
+
+# ---------------------------------------------------------------------------
+# Retention on a cycle that produced no derivative rows
+# ---------------------------------------------------------------------------
+
+
+@requires_over_10
+def test_retention_drops_keys_that_left_pgss_v2(aggregator, integration_check, dbm_instance_v2):
+    """Cache entries for statements that left pg_stat_statements must be dropped even on a cycle
+    where nothing advanced. Retention that only runs when there is output to emit leaves those
+    entries in place on a quiet instance, spending the cache on statements that no longer exist.
+    """
+    conn = _test_query_conn()
+    check = integration_check(dbm_instance_v2)
+    check._connect()
+
+    _run_cycle(check, conn)
+    job = check.statement_metrics
+    assert isinstance(job, PostgresStatementMetricsV2)
+
+    # Capture the snapshot of the cycle that populates the cache so it can be replayed below.
+    captured_snapshot: list = []
+    original_snapshot = job._load_lightweight_snapshot
+
+    def _capture():
+        rows = original_snapshot()
+        captured_snapshot[:] = rows
+        return rows
+
+    with mock.patch.object(job, '_load_lightweight_snapshot', side_effect=_capture):
+        _run_cycle(check, conn)
+
+    # The reported row carries the statement's queryid, and the snapshot row it came from completes
+    # the pgss key, so the key under test is derived from what the collector emitted.
+    query_signature = compute_sql_signature(TEST_QUERY_NORMALIZED)
+    reported = [
+        row
+        for event in aggregator.get_event_platform_events("dbm-metrics")
+        for row in event['postgres_rows']
+        if row['query_signature'] == query_signature
+    ]
+    assert reported, "the test query should be reported before it is removed from the snapshot"
+    departed = [row for row in captured_snapshot if row['queryid'] == reported[0]['queryid']]
+    assert len(departed) == 1, f"expected one snapshot row for the reported statement, got {departed}"
+    departed_key = pgss_key(departed[0])
+
+    # Replaying the same snapshot leaves every counter unchanged, so the cycle produces no
+    # derivative rows; dropping one row makes that key absent from the table while the rest of the
+    # snapshot stays live.
+    quiet_snapshot = [row for row in captured_snapshot if pgss_key(row) != departed_key]
+
+    aggregator.reset()
+    with mock.patch.object(job, '_load_lightweight_snapshot', return_value=quiet_snapshot):
+        run_one_check(check, cancel=False)
+
+    assert _emitted_calls(aggregator, query_signature) == [], "the replayed snapshot should report nothing"
+    dropped = [m.value for m in aggregator.metrics("dd.postgres.statement_metrics.lookup.dropped")]
+    assert sum(dropped) >= 1, f"retention did not run on a cycle that produced no derivative rows: {dropped}"
+
+    # The statement is back in the table. One cycle re-establishes its counter baseline and the next
+    # sees it advance, at which point its text has to be read from Postgres again -- which only
+    # happens if retention discarded the cached result rather than merely counting it.
+    fetched_keys: set = set()
+    original_fetch = job._fetch_query_texts
+
+    def _fetch_spy(keys):
+        fetched_keys.update(keys)
+        return original_fetch(keys)
+
+    with mock.patch.object(job, '_fetch_query_texts', side_effect=_fetch_spy):
+        _run_cycle(check, conn)
+        _run_cycle(check, conn)
+
+    conn.close()
+
+    assert departed_key in fetched_keys, (
+        "a key dropped by retention must be re-fetched once its statement returns, but its text was "
+        "served from the cache"
     )

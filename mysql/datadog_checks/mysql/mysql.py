@@ -27,12 +27,14 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
+from datadog_checks.mysql.data_observability import MySQLDataObservability
 from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig, sanitize
+from .config_models.instance import DataObservability
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -149,10 +151,20 @@ class MySql(DatabaseCheck):
             and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
         )
 
+        self._do_config = DataObservability(
+            **{
+                'enabled': False,
+                'run_sync': False,
+                'collection_interval': 10,
+                **(self.instance.get('data_observability') or {}),
+            }
+        )
+
         self.statement_metrics = None
         self.statement_samples = None
         self.mysql_metadata = None
         self.query_activity = None
+        self.data_observability = None
         self._register_async_jobs()
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -175,21 +187,30 @@ class MySql(DatabaseCheck):
 
     def _register_async_jobs(self):
         """Build and register the async jobs enabled by this check's configuration."""
-        if not self._config.dbm_enabled:
-            return
+        if self._config.dbm_enabled:
+            self.statement_metrics = self.register_async_job(
+                MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+            self.statement_samples = self.register_async_job(
+                MySQLStatementSamples(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+            self.query_activity = self.register_async_job(
+                MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
 
-        self.statement_metrics = self.register_async_job(
-            MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        )
-        self.statement_samples = self.register_async_job(
-            MySQLStatementSamples(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        )
-        self.mysql_metadata = self.register_async_job(
-            MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        )
-        self.query_activity = self.register_async_job(
-            MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        )
+        # Data Observability needs the schema collection the metadata job performs, so either
+        # feature brings it along.
+        if self._config.dbm_enabled or self._do_config.enabled:
+            self.mysql_metadata = self.register_async_job(
+                MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+
+        if self._do_config.enabled:
+            self.data_observability = self.register_async_job(
+                MySQLDataObservability(
+                    self, self._do_config, self._config, self._get_connection_args, self._uses_aws_managed_auth
+                )
+            )
 
     def _submit_initialization_health_event(self):
         try:
@@ -416,9 +437,7 @@ class MySql(DatabaseCheck):
                     if self._get_runtime_queries(db):
                         self._get_runtime_queries(db).execute(extra_tags=tags)
 
-                if self._config.dbm_enabled:
-                    dbm_tags = list(set(self.service_check_tags) | set(tags))
-                    self.run_async_jobs(dbm_tags)
+                self.run_async_jobs(list(set(self.service_check_tags) | set(tags)))
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -1411,7 +1430,7 @@ class MySql(DatabaseCheck):
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",

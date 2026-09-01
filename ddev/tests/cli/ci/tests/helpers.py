@@ -10,7 +10,7 @@ import re
 from collections.abc import Iterable, Sequence
 
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
-from ddev.cli.ci.tests.messages import BatchJob
+from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
     DispatcherProgress,
@@ -91,6 +91,17 @@ def make_job(
     )
 
 
+def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
+    job_list = list(batch_jobs) or [make_job()]
+    return TestBatch(
+        id=batch_id,
+        batch_id=batch_id,
+        job_list=job_list,
+        jobs_count=len(job_list),
+        integrations=sorted({job.target for job in job_list}),
+    )
+
+
 def jobs(target: str, count: int) -> list[BatchJob]:
     # Each job carries a distinct environment, as production jobs within an integration do, so
     # names and artifact identities are unique within the target.
@@ -160,8 +171,9 @@ def copied(source: str, destination: str) -> ChangedFile:
 class RecordingBus:
     """Stands in for the event bus in processor unit tests, recording what the processor submits."""
 
-    def __init__(self):
+    def __init__(self, stopping: bool = False):
         self.queue: asyncio.Queue[BaseMessage] = asyncio.Queue()
+        self.stopping = stopping
 
     def submit_message(self, message: BaseMessage) -> None:
         self.queue.put_nowait(message)
