@@ -180,15 +180,17 @@ def test_queries_are_sorted_to_minimize_database_and_timeout_changes(instance_ba
 
 
 @pytest.mark.parametrize('dbname', ['bad-name', 'bad`name', 'db.name', 'db name', '', 'db;DROP TABLE users'])
-def test_invalid_database_name_is_skipped_without_blocking_valid_query(aggregator, instance_basic, dbname):
+def test_invalid_database_name_is_skipped_without_blocking_valid_query(aggregator, instance_basic, dbname, caplog):
     invalid_query = {**deepcopy(BASE_QUERY), 'monitor_id': 2, 'dbname': dbname}
-    _, _, cursor = _setup_and_run(instance_basic, queries=[invalid_query, deepcopy(BASE_QUERY)])
+    with caplog.at_level(logging.WARNING):
+        _, _, cursor = _setup_and_run(instance_basic, queries=[invalid_query, deepcopy(BASE_QUERY)])
 
     assert [call.args[0] for call in cursor.execute.call_args_list] == [
         'USE `test_db`',
         BASE_QUERY['query'],
     ]
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
+    assert any('Skipping DO query monitor_id=2: Invalid database name' in record.message for record in caplog.records)
 
 
 @pytest.mark.parametrize('dbname', ['shopist', 'shopist_analytics', 'shopist$raw', 'DB123'])
@@ -269,6 +271,22 @@ def test_query_failure_does_not_block_subsequent(aggregator, instance_basic):
 
     _setup_and_run(instance_basic, queries=deepcopy(MULTI_QUERIES), mock_conn=mock_conn)
 
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 2
+
+
+def test_queries_with_same_monitor_id_all_execute(aggregator, instance_basic):
+    queries = [
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT first_query'},
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT second_query'},
+    ]
+
+    _, _, cursor = _setup_and_run(instance_basic, queries=queries)
+
+    assert [call.args[0] for call in cursor.execute.call_args_list] == [
+        'USE `test_db`',
+        'SELECT first_query',
+        'SELECT second_query',
+    ]
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 2
 
 
@@ -406,7 +424,7 @@ def test_failed_query_updates_last_execution(aggregator, instance_basic):
     check.data_observability._db = mock_conn
 
     check.data_observability.run_job()
-    assert check.data_observability._last_execution[1] > 0
+    assert check.data_observability._scheduled_queries[0].last_execution > 0
 
     aggregator.reset()
     check.data_observability.run_job()
@@ -476,12 +494,30 @@ def test_schedule_takes_precedence_over_interval(instance_basic, aggregator, mon
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
 
 
+def test_cron_queries_with_same_monitor_id_have_independent_schedulers(instance_basic, monkeypatch):
+    queries = [
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT first_query', 'schedule': '50 * * * *'},
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT second_query', 'schedule': '51 * * * *'},
+    ]
+    current_time = [float(_BASE_EPOCH)]
+    monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
+    check = _create_check(instance_basic, queries=queries)
+
+    assert check.data_observability._get_due_queries() == []
+
+    current_time[0] = _BASE_EPOCH + 65
+    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT first_query']
+
+    current_time[0] = _BASE_EPOCH + 125
+    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT second_query']
+
+
 def test_invalid_cron_filtered_at_init(instance_basic, aggregator, caplog):
     bad = {**deepcopy(CRON_QUERY), 'monitor_id': 20, 'schedule': 'not-a-cron'}
     with caplog.at_level(logging.WARNING):
         check = _create_check(instance_basic, queries=[bad, deepcopy(BASE_QUERY)])
 
-    assert {query.monitor_id for query in check.data_observability._queries} == {1}
+    assert {scheduled.query.monitor_id for scheduled in check.data_observability._scheduled_queries} == {1}
     assert any('invalid cron schedule' in record.message for record in caplog.records)
 
     mock_conn, _ = _make_mock_conn()
@@ -496,7 +532,7 @@ def test_missing_schedule_and_interval_filtered_at_init(instance_basic, caplog):
     with caplog.at_level(logging.WARNING):
         check = _create_check(instance_basic, queries=[query])
 
-    assert check.data_observability._queries == ()
+    assert check.data_observability._scheduled_queries == ()
     assert any('neither schedule nor positive interval_seconds' in record.message for record in caplog.records)
 
 
@@ -507,7 +543,7 @@ def test_lateness_metric_for_cron(instance_basic, aggregator, monkeypatch):
     check = _make_cron_check(instance_basic)
     check.data_observability._db = mock_conn
     check.data_observability.run_job()
-    scheduled_tick = check.data_observability._schedulers[10].next_tick
+    scheduled_tick = check.data_observability._scheduled_queries[0].scheduler.next_tick
 
     current_time[0] = _BASE_EPOCH + 180
     check.data_observability.run_job()
@@ -544,12 +580,12 @@ def test_lateness_clamped_at_zero(instance_basic, aggregator, monkeypatch):
     mock_conn, _ = _make_mock_conn()
     check = _make_cron_check(instance_basic)
     check.data_observability._db = mock_conn
-    query = check._do_config.queries[0]
+    scheduled_query = check.data_observability._scheduled_queries[0]
 
     with patch.object(
         check.data_observability,
         '_get_due_queries',
-        return_value=[DueQuery(query, current_time[0] + 100, 'cron')],
+        return_value=[DueQuery(scheduled_query, current_time[0] + 100)],
     ):
         check.data_observability.run_job()
 
@@ -599,12 +635,13 @@ def test_failed_cron_query_advances_scheduler(instance_basic, aggregator, monkey
     check.data_observability._db = mock_conn
 
     check.data_observability.run_job()
-    next_tick = check.data_observability._schedulers[10].next_tick
+    scheduler = check.data_observability._scheduled_queries[0].scheduler
+    next_tick = scheduler.next_tick
 
     aggregator.reset()
     check.data_observability.run_job()
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
-    assert check.data_observability._schedulers[10].next_tick == next_tick
+    assert scheduler.next_tick == next_tick
 
 
 def test_cron_query_is_retried_after_connection_failure(instance_basic, aggregator, monkeypatch):
@@ -624,6 +661,34 @@ def test_cron_query_is_retried_after_connection_failure(instance_basic, aggregat
 
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
     assert [call.args[0] for call in cursor.execute.call_args_list] == ['USE `test_db`', CRON_QUERY['query']]
+
+
+def test_cron_queries_with_same_monitor_id_are_retried_independently(instance_basic, aggregator, monkeypatch):
+    queries = [
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT first_query'},
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT second_query'},
+    ]
+    monkeypatch.setattr(
+        'datadog_checks.mysql.data_observability.time.time',
+        lambda: float(_BASE_EPOCH + 65),
+    )
+    mock_conn, cursor = _make_mock_conn()
+    check = _create_check(instance_basic, queries=queries)
+    check.data_observability._get_db_connection = MagicMock(
+        side_effect=[pymysql.err.OperationalError('Connection refused'), mock_conn]
+    )
+
+    with pytest.raises(pymysql.err.OperationalError, match='Connection refused'):
+        check.data_observability.run_job()
+
+    check.data_observability.run_job()
+
+    assert [call.args[0] for call in cursor.execute.call_args_list] == [
+        'USE `test_db`',
+        'SELECT first_query',
+        'SELECT second_query',
+    ]
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 2
 
 
 @pytest.mark.parametrize('collection_interval', [None, -5, 0])
@@ -661,6 +726,6 @@ def test_cancelled_job_aborts_query_before_execution(instance_basic):
     job.cancel()
 
     with pytest.raises(Exception, match='cancelled'):
-        job._execute_single_query(conn, job._queries[0])
+        job._execute_single_query(conn, job._scheduled_queries[0].query)
 
     cursor.execute.assert_not_called()

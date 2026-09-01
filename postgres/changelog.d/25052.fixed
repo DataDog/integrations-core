@@ -1,0 +1,1 @@
+Build and cache relation queries once instead of rebuilding them for each database on every check run.

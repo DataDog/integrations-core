@@ -171,8 +171,9 @@ def copied(source: str, destination: str) -> ChangedFile:
 class RecordingBus:
     """Stands in for the event bus in processor unit tests, recording what the processor submits."""
 
-    def __init__(self):
+    def __init__(self, stopping: bool = False):
         self.queue: asyncio.Queue[BaseMessage] = asyncio.Queue()
+        self.stopping = stopping
 
     def submit_message(self, message: BaseMessage) -> None:
         self.queue.put_nowait(message)
