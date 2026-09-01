@@ -55,3 +55,29 @@ METRICS = [
         "tags": TAGS + ["tm_id:tm-1", "job_name:wordcount", "task_name:Source: KafkaSource", "subtask_index:0"],
     },
 ]
+
+_TASK_TAGS = TAGS + ["tm_id:tm-1", "job_name:wordcount", "task_name:Source: KafkaSource", "subtask_index:0"]
+_OPERATOR_TAGS = TAGS + ["tm_id:tm-1", "job_name:wordcount", "operator_name:Source", "subtask_index:0"]
+
+# Flink Counters (see metrics.py's COUNTER_METRICS). Flink's Prometheus reporter
+# always describes these as `# TYPE ... gauge` in the raw scrape (see
+# fixtures/metrics.txt), so asserting MONOTONIC_COUNT here is what actually locks
+# in the bug 1 fix -- without the type_override wiring in check.py, these would
+# be submitted (and fail this assertion) as GAUGE.
+COUNTER_METRICS = [
+    {"name": "task.numRecordsIn", "value": 12345.0, "tags": _TASK_TAGS},
+    {"name": "task.numRecordsOut", "value": 12345.0, "tags": _TASK_TAGS},
+    {"name": "task.numBytesOut", "value": 999999.0, "tags": _TASK_TAGS},
+    {"name": "task.numBuffersOut", "value": 500.0, "tags": _TASK_TAGS},
+    {"name": "task.numLateRecordsDropped", "value": 3.0, "tags": _TASK_TAGS},
+    {"name": "task.Shuffle.Netty.Input.numBytesInLocal", "value": 1000.0, "tags": _TASK_TAGS},
+    {"name": "task.Shuffle.Netty.Input.numBytesInRemote", "value": 2000.0, "tags": _TASK_TAGS},
+    {"name": "task.Shuffle.Netty.Input.numBuffersInLocal", "value": 10.0, "tags": _TASK_TAGS},
+    {"name": "task.Shuffle.Netty.Input.numBuffersInRemote", "value": 20.0, "tags": _TASK_TAGS},
+    {"name": "operator.numRecordsIn", "value": 12345.0, "tags": _OPERATOR_TAGS},
+    {"name": "operator.numRecordsOut", "value": 6789.0, "tags": _OPERATOR_TAGS},
+    {"name": "operator.numLateRecordsDropped", "value": 1.0, "tags": _OPERATOR_TAGS},
+    {"name": "operator.numSplitsProcessed", "value": 7.0, "tags": _OPERATOR_TAGS},
+    {"name": "operator.commitsSucceeded", "value": 15.0, "tags": _OPERATOR_TAGS},
+    {"name": "operator.commitsFailed", "value": 0.0, "tags": _OPERATOR_TAGS},
+]

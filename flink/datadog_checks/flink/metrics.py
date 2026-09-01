@@ -117,3 +117,32 @@ METRIC_MAP = {
     'flink_taskmanager_job_task_operator_numRecordsOutPerSecond': 'operator.numRecordsOutPerSec',
     'flink_taskmanager_job_task_operator_numSplitsProcessed': 'operator.numSplitsProcessed',
 }
+
+# Raw Prometheus names that are Flink Counters (per Flink's own metric type docs:
+# https://nightlies.apache.org/flink/flink-docs-stable/docs/ops/metrics/). Flink's
+# `flink-metrics-prometheus` reporter maps Counter, Gauge, and Meter alike to a
+# Prometheus Gauge collector -- "Prometheus counters cannot be decremented" -- so
+# every metric's scraped `# TYPE` line reads `gauge` regardless of its real Flink
+# type. That line can't be used to tell them apart; this list has to be hardcoded
+# from Flink's documented semantics and submitted as `monotonic_count` explicitly
+# (see check.py). Restarts/checkpoint counts are deliberately excluded: Flink itself
+# classifies those as Gauge, since they can reset on a JobManager failover.
+COUNTER_METRICS = frozenset(
+    {
+        'flink_taskmanager_job_task_numRecordsIn',
+        'flink_taskmanager_job_task_numRecordsOut',
+        'flink_taskmanager_job_task_numBytesOut',
+        'flink_taskmanager_job_task_numBuffersOut',
+        'flink_taskmanager_job_task_numLateRecordsDropped',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInLocal',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInRemote',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInLocal',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInRemote',
+        'flink_taskmanager_job_task_operator_numRecordsIn',
+        'flink_taskmanager_job_task_operator_numRecordsOut',
+        'flink_taskmanager_job_task_operator_numLateRecordsDropped',
+        'flink_taskmanager_job_task_operator_numSplitsProcessed',
+        'flink_taskmanager_job_task_operator_commitsSucceeded',
+        'flink_taskmanager_job_task_operator_commitsFailed',
+    }
+)
