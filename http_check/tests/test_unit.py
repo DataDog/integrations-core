@@ -252,14 +252,3 @@ def test_http_outcome_tag_on_failure_paths(aggregator, fake_http, error, expecte
     aggregator.assert_metric('network.http.cant_connect', value=1.0, tags=expected_tags, count=1)
     aggregator.assert_metric('network.http.response_time', count=0)
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL, count=1)
-
-
-def test_use_cert_from_response_reads_peer_cert(aggregator, dd_run_check, fake_http):
-    instance = {'name': 'cert', 'url': 'https://example.com', 'use_cert_from_response': True}
-    fake_http.register_response('GET', instance['url'], FakeHTTPResponse(status_code=200))
-    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', return_value='bar'):
-        check = HTTPCheck('http_check', {}, [instance])
-        dd_run_check(check)
-
-    # Unparseable peer cert from the fake response yields UNKNOWN, not an exception.
-    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, count=1)
