@@ -692,11 +692,11 @@ class PostgreSql(DatabaseCheck):
                         # if this is a relation-specific query, we need to list all relations last
                         if is_relations:
                             schema_field = get_schema_field(descriptors)
-                            formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                            cursor.execute(formatted_query)
+                            query = self._relations_manager.filter_relation_query(query, schema_field)
                         else:
-                            self.log.debug("Running query: %s", str(query))
-                            cursor.execute(query.replace(r'%', r'%%'))
+                            query = query.replace(r'%', r'%%')
+                        self.log.debug("Running query: %s", query)
+                        cursor.execute(query)
 
                         results = cursor.fetchall()
                         if not results:
@@ -1123,7 +1123,7 @@ class PostgreSql(DatabaseCheck):
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",

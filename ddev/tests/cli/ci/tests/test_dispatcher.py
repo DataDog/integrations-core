@@ -18,6 +18,10 @@ from ddev.utils.github_async.models import ArtifactsList, WorkflowJob, WorkflowJ
 from tests.cli.ci.tests.helpers import jobs_reported, make_batch, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
+# Every test here runs a Dispatcher to completion, and `on_finalize` writes the run summary. Without
+# this the reports land in the real job summary whenever the suite runs inside a workflow.
+pytestmark = pytest.mark.usefixtures("step_summary")
+
 CONTEXT = DispatcherContext(
     owner="DataDog",
     repo="integrations-core",
@@ -149,10 +153,8 @@ def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
     assert outcome.progress.failed == 1
 
 
-def test_the_report_is_written_to_the_run_summary(client, tmp_path, monkeypatch):
+def test_the_report_is_written_to_the_run_summary(client, tmp_path, step_summary):
     """A run with no pull request has the run summary as its only report."""
-    summary = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
     job = make_job()
     mock_job_result(client, job, "success")
     dispatcher = build_bus(client, tmp_path, [make_batch(job)], pr_number=None)
@@ -160,4 +162,4 @@ def test_the_report_is_written_to_the_run_summary(client, tmp_path, monkeypatch)
     dispatcher.run()
 
     client.assert_not_called("create_issue_comment")
-    assert jobs_reported(summary.read_text(encoding="utf-8")) == 1
+    assert jobs_reported(step_summary.read_text(encoding="utf-8")) == 1

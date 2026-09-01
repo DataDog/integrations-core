@@ -11,11 +11,6 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 DEFAULT_COLLECTION_INTERVAL = 15
 DEFAULT_ROW_LIMIT = 10000
 
@@ -159,7 +154,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": "agent_jobs",
             "collection_interval": self.collection_interval,
