@@ -1,0 +1,46 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Key ID and Secret",
+      "basic": {
+        "user_setting": {
+          "key": "api_key_id",
+          "label": "API key ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "api_key_secret",
+          "label": "API key secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "BlazeMeter",
+      "fixed": {
+        "fixed_base_url": "https://a.blazemeter.com/api"
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "blazemeter-metrics"
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/v4/search",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
+}
