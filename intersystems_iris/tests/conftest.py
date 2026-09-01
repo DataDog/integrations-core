@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import Any
 
 import pytest
 import requests
@@ -15,9 +16,10 @@ from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.intersystems_iris import IrisCheck
 
+from .common import FIXTURE_PATH
+
 HERE = Path(__file__).parent
 COMPOSE_FILE = HERE / "docker" / "docker-compose.yaml"
-FIXTURE_PATH = str(HERE / "fixtures" / "metrics.txt")
 
 
 def _interop_metrics_present(endpoint: str) -> None:
@@ -33,14 +35,17 @@ def _interop_metrics_present(endpoint: str) -> None:
 
 
 @pytest.fixture(scope='session')
-def dd_environment() -> Iterator[dict]:
+def dd_environment() -> Iterator[dict[str, Any]]:
     host = get_docker_hostname()
     port = find_free_port(host)
     endpoint = f"http://{host}:{port}/api/monitor/metrics"
 
     conditions = [
         CheckEndpoints(endpoint, attempts=120, wait=2),
-        WaitFor(lambda: _interop_metrics_present(endpoint), attempts=60, wait=5),
+        # Pass the function and its argument through rather than closing over `endpoint` in a
+        # lambda: `WaitFor` formats its `RetryError` from `func.__name__`, `args` and `kwargs`,
+        # so a lambda reduces a CI timeout to `Function: <lambda>, Args: (), Kwargs: {}`.
+        WaitFor(_interop_metrics_present, args=(endpoint,), attempts=60, wait=5),
     ]
 
     with docker_run(

@@ -39,7 +39,7 @@ For containerized environments, follow the instructions on the [Kubernetes Log C
 
 ### Tags
 
-Two labels from the IRIS metrics endpoint are submitted under a different tag key, because their original names collide with the special meaning Datadog attaches to `host` and `version`. The values are preserved; only the key changes:
+Two labels from the IRIS metrics endpoint are submitted under a different tag key, because their original names collide with the special meaning Datadog attaches to `host` and `version`. The values are preserved. Only the key changes:
 
 | IRIS label | Datadog tag     | Metrics affected                | Description                                        |
 | ---------- | --------------- | ------------------------------- | -------------------------------------------------- |

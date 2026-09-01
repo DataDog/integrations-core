@@ -16,7 +16,7 @@ files:
           has been secured, use the `auth_token`, `username` and `password`, or `headers` options
           below.
 
-          Note: interoperability metrics (`interop.*`) are only emitted once the "Record Statistics
+          Note: Interoperability metrics (`interop.*`) are only emitted once the "Record Statistics
           for SAM" (System Alerting and Monitoring) setting is enabled
           (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a running production.
   - template: logs

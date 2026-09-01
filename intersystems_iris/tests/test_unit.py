@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 
 import pytest
 
@@ -12,11 +11,9 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.intersystems_iris import IrisCheck
 
-from .common import assert_healthy_scrape
+from .common import FIXTURE_PATH, assert_healthy_scrape
 
 pytestmark = pytest.mark.unit
-
-FIXTURE_PATH = str(Path(__file__).parent / 'fixtures' / 'metrics.txt')
 
 # The fixture was captured from a busy ECP data server with a live client attached and a
 # running interoperability production, so the always-on `iris_interop_*` interface family, the
@@ -40,7 +37,7 @@ def test_interop_host_label_renamed(scraped_aggregator: AggregatorStub) -> None:
         'intersystems_iris.interop.last_activity',
         'intersystems_iris.interop.messages.count',
         'intersystems_iris.interop.messages.errored',
-        'intersystems_iris.interop.messages.per_sec.count',
+        'intersystems_iris.interop.messages.per_sec',
     )
     for metric_name in interop_host_metrics:
         scraped_aggregator.assert_metric_has_tag_prefix(metric_name, 'interop_host:')
@@ -68,16 +65,6 @@ def test_system_info_version_label_renamed(scraped_aggregator: AggregatorStub) -
         assert any(tag.startswith('build_date:') for tag in metric.tags)
 
 
-def test_id_label_passthrough(scraped_aggregator: AggregatorStub) -> None:
-    """
-    Unlike `host`/`version`, the generic `id` label is deliberately left unrenamed across every
-    family that carries it, since it means different things per family and a global rename
-    would not add real disambiguation.
-    """
-    scraped_aggregator.assert_metric_has_tag('intersystems_iris.cpu.pct', 'id:AUXWD')
-    scraped_aggregator.assert_metric_has_tag('intersystems_iris.cpu.pct', 'id:CSPSRV')
-
-
 @pytest.mark.parametrize(
     'metric_name, tag',
     [
@@ -89,13 +76,17 @@ def test_id_label_passthrough(scraped_aggregator: AggregatorStub) -> None:
         ('intersystems_iris.interop.hosts', 'production:Demo.MonitorProduction'),
         ('intersystems_iris.interop.hosts', 'status:OK'),
         ('intersystems_iris.ecps.glo_ref.count', 'id:IRISAPP:IRIS-APP-01:IRIS'),
+        ('intersystems_iris.cpu.pct', 'id:AUXWD'),
+        ('intersystems_iris.cpu.pct', 'id:CSPSRV'),
     ],
 )
 def test_other_labels_passthrough(scraped_aggregator: AggregatorStub, metric_name: str, tag: str) -> None:
     """
     All other labels (`dir`, `namespace`, `jobtype`, `routine`, `state`, the ECP data-server
-    connection `id`, and, on interop metrics, `production`/`status`) pass through verbatim,
-    unlike `host`/`version`.
+    connection `id`, the per-process `id`, and, on interop metrics, `production`/`status`) pass
+    through verbatim, unlike `host`/`version`. `id` in particular is deliberately left unrenamed
+    even though it means something different per family, since a global rename would not add real
+    disambiguation.
     """
     scraped_aggregator.assert_metric_has_tag(metric_name, tag)
 

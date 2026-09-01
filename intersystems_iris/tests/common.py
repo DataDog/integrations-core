@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
 from typing import Any
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
+
+FIXTURE_PATH = str(Path(__file__).parent / 'fixtures' / 'metrics.txt')
 
 # `metadata.csv` catalogs every metric IRIS can publish on `/api/monitor/metrics`, which is a
 # superset of what any single instance emits: some families only appear once the instance takes
@@ -79,7 +82,7 @@ STATE_GATED = frozenset(
 )
 
 
-def partition_metadata_metrics(
+def _partition_metadata_metrics(
     metadata_metrics: dict[str, Any], emitted_prefixes: tuple[str, ...] = ()
 ) -> tuple[dict[str, Any], list[str]]:
     """
@@ -103,9 +106,13 @@ def partition_metadata_metrics(
     a single filter is what guarantees they cannot drift apart.
     """
     conditional = SAMPLING_GATED | STATE_GATED
-    gated = tuple(
-        prefix for prefix in TOPOLOGY_GATED_PREFIXES + ACTIVITY_GATED_PREFIXES if prefix not in emitted_prefixes
-    )
+    gated_prefixes = TOPOLOGY_GATED_PREFIXES + ACTIVITY_GATED_PREFIXES
+    # Re-admission is an exact string match against the tables above, so a prefix that is not one
+    # of them -- a missing trailing dot, a renamed constant -- would silently re-excuse the whole
+    # family and leave the caller asserting strictly less while still passing. Fail loudly instead.
+    if unknown := set(emitted_prefixes) - set(gated_prefixes):
+        raise ValueError(f"emitted_prefixes contains prefixes that are not gated: {sorted(unknown)}")
+    gated = tuple(prefix for prefix in gated_prefixes if prefix not in emitted_prefixes)
     expected = {
         name: metadata
         for name, metadata in metadata_metrics.items()
@@ -115,7 +122,7 @@ def partition_metadata_metrics(
     return expected, excused
 
 
-def assert_metrics_match_metadata(aggregator: AggregatorStub, emitted_prefixes: tuple[str, ...] = ()) -> None:
+def _assert_metrics_match_metadata(aggregator: AggregatorStub, emitted_prefixes: tuple[str, ...] = ()) -> None:
     """
     Assert the two halves of the metadata.csv contract for a completed scrape.
 
@@ -125,7 +132,7 @@ def assert_metrics_match_metadata(aggregator: AggregatorStub, emitted_prefixes: 
     environment emits, so `emitted_prefixes` is the single knob between them.
     """
     metadata_metrics = get_metadata_metrics()
-    expected, excused = partition_metadata_metrics(metadata_metrics, emitted_prefixes)
+    expected, excused = _partition_metadata_metrics(metadata_metrics, emitted_prefixes)
 
     # Nothing may be submitted that metadata.csv does not declare, and the declared types must
     # match what the check submits.
@@ -152,5 +159,5 @@ def assert_healthy_scrape(aggregator: AggregatorStub, emitted_prefixes: tuple[st
     All three test tiers make exactly this pair of assertions, so they share one entry point
     rather than each repeating the service check name.
     """
-    assert_metrics_match_metadata(aggregator, emitted_prefixes)
+    _assert_metrics_match_metadata(aggregator, emitted_prefixes)
     aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)

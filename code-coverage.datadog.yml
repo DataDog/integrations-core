@@ -23,6 +23,7 @@ gates:
     - '!silverstripe_cms'
     - '!snmp'
     - '!varnish'
+# New custom gates for services whose thresholds had to be lowered when migrating to Datadog Code Coverage.
 - type: total_coverage_percentage
   config:
     threshold: 74
@@ -78,6 +79,7 @@ gates:
     threshold: 52
     services:
     - datadog_checks_dev
+# Existing custom gates.
 - type: total_coverage_percentage
   config:
     threshold: 45
