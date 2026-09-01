@@ -317,4 +317,5 @@ def sanitize(config: dict) -> dict:
     """
     sanitized = copy.deepcopy(config)
     sanitized['password'] = '***' if sanitized.get('password') else None
+    sanitized['connection_string'] = '***' if sanitized.get('connection_string') else None
     return sanitized
