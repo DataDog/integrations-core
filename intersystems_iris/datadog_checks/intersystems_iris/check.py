@@ -48,4 +48,5 @@ class IrisCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     METRICS_MAP = (MetricsMapping(Path('metrics/default.yaml')),)
 
     def get_default_config(self) -> dict:
-        return {'rename_labels': RENAME_LABELS_MAP}
+        # Copy so the shared module-level map cannot be mutated through a scraper's config.
+        return {'rename_labels': dict(RENAME_LABELS_MAP)}
