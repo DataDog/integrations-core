@@ -1,0 +1,112 @@
+# Metric name mappings for the vLLM check, discovered by convention by OpenMetricsBaseCheckV2
+# (see docs/developer/base/openmetrics-metrics-files.md).
+#
+# vLLM exposes these under the `vllm:` prefix on its own OpenAI-compatible server, or under
+# `ray_vllm:` when vLLM runs as a library inside a Ray Serve deployment. Both prefixes are kept
+# for every vLLM-specific metric below so either deployment mode is covered.
+# Source: https://github.com/vllm-project/vllm vllm/v1/metrics/loggers.py / vllm/engine/metrics.py
+
+# Metrics exposed by the underlying Python process (no vllm:/ray_vllm: prefix; the same regardless
+# of deployment mode).
+python_gc_objects_collected: python.gc.objects.collected
+python_gc_objects_uncollectable: python.gc.objects.uncollectable
+python_gc_collections: python.gc.collections
+python_info: python.info
+process_virtual_memory_bytes: process.virtual_memory_bytes
+process_resident_memory_bytes: process.resident_memory_bytes
+process_start_time_seconds: process.start_time_seconds
+process_cpu_seconds: process.cpu_seconds
+process_open_fds: process.open_fds
+process_max_fds: process.max_fds
+
+vllm:cache_config_info: cache_config_info
+ray_vllm:cache_config_info: cache_config_info
+vllm:num_requests_running: num_requests.running
+ray_vllm:num_requests_running: num_requests.running
+vllm:num_requests_waiting: num_requests.waiting
+ray_vllm:num_requests_waiting: num_requests.waiting
+# Removed in newer vLLM releases in favor of the unified vllm:kv_cache_usage_perc below; kept for
+# deployments still running older vLLM versions that only expose the split gauges.
+vllm:num_requests_swapped: num_requests.swapped
+ray_vllm:num_requests_swapped: num_requests.swapped
+vllm:gpu_cache_usage_perc: gpu_cache_usage_perc
+ray_vllm:gpu_cache_usage_perc: gpu_cache_usage_perc
+vllm:cpu_cache_usage_perc: cpu_cache_usage_perc
+ray_vllm:cpu_cache_usage_perc: cpu_cache_usage_perc
+# Unified KV-cache usage gauge that replaced the GPU/CPU split above.
+vllm:kv_cache_usage_perc: kv_cache_usage_perc
+ray_vllm:kv_cache_usage_perc: kv_cache_usage_perc
+vllm:engine_sleep_state: engine_sleep_state
+ray_vllm:engine_sleep_state: engine_sleep_state
+vllm:num_preemptions: num_preemptions
+ray_vllm:num_preemptions: num_preemptions
+vllm:prompt_tokens: prompt_tokens
+ray_vllm:prompt_tokens: prompt_tokens
+vllm:prompt_tokens_by_source: prompt_tokens_by_source
+ray_vllm:prompt_tokens_by_source: prompt_tokens_by_source
+vllm:prompt_tokens_cached: prompt_tokens_cached
+ray_vllm:prompt_tokens_cached: prompt_tokens_cached
+vllm:prompt_tokens_recomputed: prompt_tokens_recomputed
+ray_vllm:prompt_tokens_recomputed: prompt_tokens_recomputed
+vllm:generation_tokens: generation_tokens
+ray_vllm:generation_tokens: generation_tokens
+# Prefix cache stats (in-process KV cache reuse).
+vllm:prefix_cache_queries: prefix_cache.queries
+ray_vllm:prefix_cache_queries: prefix_cache.queries
+vllm:prefix_cache_hits: prefix_cache.hits
+ray_vllm:prefix_cache_hits: prefix_cache.hits
+# Cross-instance KV cache sharing via a KV connector.
+vllm:external_prefix_cache_queries: external_prefix_cache.queries
+ray_vllm:external_prefix_cache_queries: external_prefix_cache.queries
+vllm:external_prefix_cache_hits: external_prefix_cache.hits
+ray_vllm:external_prefix_cache_hits: external_prefix_cache.hits
+# Multi-modal input cache stats.
+vllm:mm_cache_queries: mm_cache.queries
+ray_vllm:mm_cache_queries: mm_cache.queries
+vllm:mm_cache_hits: mm_cache.hits
+ray_vllm:mm_cache_hits: mm_cache.hits
+vllm:time_to_first_token_seconds: time_to_first_token.seconds
+ray_vllm:time_to_first_token_seconds: time_to_first_token.seconds
+vllm:inter_token_latency_seconds: inter_token_latency.seconds
+ray_vllm:inter_token_latency_seconds: inter_token_latency.seconds
+# Removed in newer vLLM releases in favor of vllm:request_time_per_output_token_seconds below;
+# kept for deployments still running older vLLM versions.
+vllm:time_per_output_token_seconds: time_per_output_token.seconds
+ray_vllm:time_per_output_token_seconds: time_per_output_token.seconds
+vllm:request_time_per_output_token_seconds: request.time_per_output_token.seconds
+ray_vllm:request_time_per_output_token_seconds: request.time_per_output_token.seconds
+vllm:e2e_request_latency_seconds: e2e_request_latency.seconds
+ray_vllm:e2e_request_latency_seconds: e2e_request_latency.seconds
+vllm:request_queue_time_seconds: request.queue_time.seconds
+ray_vllm:request_queue_time_seconds: request.queue_time.seconds
+vllm:request_inference_time_seconds: request.inference_time.seconds
+ray_vllm:request_inference_time_seconds: request.inference_time.seconds
+vllm:request_prefill_time_seconds: request.prefill_time.seconds
+ray_vllm:request_prefill_time_seconds: request.prefill_time.seconds
+vllm:request_decode_time_seconds: request.decode_time.seconds
+ray_vllm:request_decode_time_seconds: request.decode_time.seconds
+vllm:request_prompt_tokens: request.prompt_tokens
+ray_vllm:request_prompt_tokens: request.prompt_tokens
+vllm:request_prefill_kv_computed_tokens: request.prefill_kv_computed_tokens
+ray_vllm:request_prefill_kv_computed_tokens: request.prefill_kv_computed_tokens
+vllm:request_generation_tokens: request.generation_tokens
+ray_vllm:request_generation_tokens: request.generation_tokens
+vllm:request_max_num_generation_tokens: request.max_num_generation_tokens
+ray_vllm:request_max_num_generation_tokens: request.max_num_generation_tokens
+# Cumulative token count per scheduler engine step, despite the "_total" in its upstream name.
+vllm:iteration_tokens_total: iteration_tokens_total
+ray_vllm:iteration_tokens_total: iteration_tokens_total
+# Removed in newer vLLM releases; kept for deployments still running older vLLM versions.
+vllm:request_params_best_of: request.params.best_of
+ray_vllm:request_params_best_of: request.params.best_of
+vllm:request_params_n: request.params.n
+ray_vllm:request_params_n: request.params.n
+vllm:request_params_max_tokens: request.params.max_tokens
+ray_vllm:request_params_max_tokens: request.params.max_tokens
+vllm:request_success: request.success
+ray_vllm:request_success: request.success
+# Removed in newer vLLM releases; kept for deployments still running older vLLM versions.
+vllm:avg_prompt_throughput_toks_per_s: avg.prompt.throughput.toks_per_s
+ray_vllm:avg_prompt_throughput_toks_per_s: avg.prompt.throughput.toks_per_s
+vllm:avg_generation_throughput_toks_per_s: avg.generation_throughput.toks_per_s
+ray_vllm:avg_generation_throughput_toks_per_s: avg.generation_throughput.toks_per_s

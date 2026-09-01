@@ -195,3 +195,110 @@ ray_vllm:cache_config_info{block_size="16",cache_dtype="auto",cpu_kvcache_space_
 # HELP ray_vllm:num_preemptions_total Cumulative number of preemption from the engine.
 # TYPE ray_vllm:num_preemptions_total counter
 ray_vllm:num_preemptions_total{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:kv_cache_usage_perc KV-cache usage. 1 means 100 percent usage.
+# TYPE ray_vllm:kv_cache_usage_perc gauge
+ray_vllm:kv_cache_usage_perc{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:engine_sleep_state Engine sleep state; awake = 0 means engine is sleeping; awake = 1 means engine is awake; weights_offloaded = 1 means sleep level 1; discard_all = 1 means sleep level 2.
+# TYPE ray_vllm:engine_sleep_state gauge
+ray_vllm:engine_sleep_state{model_name="facebook/opt-125m",sleep_state="awake"} 1.0
+ray_vllm:engine_sleep_state{model_name="facebook/opt-125m",sleep_state="weights_offloaded"} 0.0
+ray_vllm:engine_sleep_state{model_name="facebook/opt-125m",sleep_state="discard_all"} 0.0
+# HELP ray_vllm:prefix_cache_queries_total Prefix cache queries, in terms of number of queried tokens.
+# TYPE ray_vllm:prefix_cache_queries_total counter
+ray_vllm:prefix_cache_queries_total{model_name="facebook/opt-125m"} 117.0
+# HELP ray_vllm:prefix_cache_hits_total Prefix cache hits, in terms of number of cached tokens.
+# TYPE ray_vllm:prefix_cache_hits_total counter
+ray_vllm:prefix_cache_hits_total{model_name="facebook/opt-125m"} 64.0
+# HELP ray_vllm:external_prefix_cache_queries_total External prefix cache queries from KV connector cross-instance cache sharing, in terms of number of queried tokens.
+# TYPE ray_vllm:external_prefix_cache_queries_total counter
+ray_vllm:external_prefix_cache_queries_total{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:external_prefix_cache_hits_total External prefix cache hits from KV connector cross-instance cache sharing, in terms of number of cached tokens.
+# TYPE ray_vllm:external_prefix_cache_hits_total counter
+ray_vllm:external_prefix_cache_hits_total{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:mm_cache_queries_total Multi-modal cache queries, in terms of number of queried items.
+# TYPE ray_vllm:mm_cache_queries_total counter
+ray_vllm:mm_cache_queries_total{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:mm_cache_hits_total Multi-modal cache hits, in terms of number of cached items.
+# TYPE ray_vllm:mm_cache_hits_total counter
+ray_vllm:mm_cache_hits_total{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:prompt_tokens_by_source_total Number of prompt tokens by source.
+# TYPE ray_vllm:prompt_tokens_by_source_total counter
+ray_vllm:prompt_tokens_by_source_total{model_name="facebook/opt-125m",source="local_compute"} 53.0
+ray_vllm:prompt_tokens_by_source_total{model_name="facebook/opt-125m",source="local_cache_hit"} 64.0
+ray_vllm:prompt_tokens_by_source_total{model_name="facebook/opt-125m",source="external_kv_transfer"} 0.0
+# HELP ray_vllm:prompt_tokens_cached_total Number of cached prompt tokens (local + external).
+# TYPE ray_vllm:prompt_tokens_cached_total counter
+ray_vllm:prompt_tokens_cached_total{model_name="facebook/opt-125m"} 64.0
+# HELP ray_vllm:prompt_tokens_recomputed_total Number of cached tokens recomputed for forward pass.
+# TYPE ray_vllm:prompt_tokens_recomputed_total counter
+ray_vllm:prompt_tokens_recomputed_total{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:iteration_tokens_total Histogram of number of tokens per engine_step.
+# TYPE ray_vllm:iteration_tokens_total histogram
+ray_vllm:iteration_tokens_total_bucket{le="1.0",model_name="facebook/opt-125m"} 19.0
+ray_vllm:iteration_tokens_total_bucket{le="8.0",model_name="facebook/opt-125m"} 67.0
+ray_vllm:iteration_tokens_total_bucket{le="16.0",model_name="facebook/opt-125m"} 68.0
+ray_vllm:iteration_tokens_total_bucket{le="32.0",model_name="facebook/opt-125m"} 69.0
+ray_vllm:iteration_tokens_total_bucket{le="64.0",model_name="facebook/opt-125m"} 71.0
+ray_vllm:iteration_tokens_total_bucket{le="+Inf",model_name="facebook/opt-125m"} 71.0
+ray_vllm:iteration_tokens_total_count{model_name="facebook/opt-125m"} 71.0
+ray_vllm:iteration_tokens_total_sum{model_name="facebook/opt-125m"} 267.0
+# HELP ray_vllm:request_max_num_generation_tokens Histogram of maximum number of requested generation tokens.
+# TYPE ray_vllm:request_max_num_generation_tokens histogram
+ray_vllm:request_max_num_generation_tokens_bucket{le="1.0",model_name="facebook/opt-125m"} 0.0
+ray_vllm:request_max_num_generation_tokens_bucket{le="20.0",model_name="facebook/opt-125m"} 2.0
+ray_vllm:request_max_num_generation_tokens_bucket{le="50.0",model_name="facebook/opt-125m"} 5.0
+ray_vllm:request_max_num_generation_tokens_bucket{le="+Inf",model_name="facebook/opt-125m"} 5.0
+ray_vllm:request_max_num_generation_tokens_count{model_name="facebook/opt-125m"} 5.0
+ray_vllm:request_max_num_generation_tokens_sum{model_name="facebook/opt-125m"} 130.0
+# HELP ray_vllm:request_params_max_tokens Histogram of the max_tokens request parameter.
+# TYPE ray_vllm:request_params_max_tokens histogram
+ray_vllm:request_params_max_tokens_bucket{le="1.0",model_name="facebook/opt-125m"} 0.0
+ray_vllm:request_params_max_tokens_bucket{le="20.0",model_name="facebook/opt-125m"} 3.0
+ray_vllm:request_params_max_tokens_bucket{le="50.0",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_params_max_tokens_bucket{le="+Inf",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_params_max_tokens_count{model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_params_max_tokens_sum{model_name="facebook/opt-125m"} 150.0
+# HELP ray_vllm:inter_token_latency_seconds Histogram of inter-token latency in seconds.
+# TYPE ray_vllm:inter_token_latency_seconds histogram
+ray_vllm:inter_token_latency_seconds_bucket{le="0.01",model_name="facebook/opt-125m"} 141.0
+ray_vllm:inter_token_latency_seconds_bucket{le="0.1",model_name="facebook/opt-125m"} 144.0
+ray_vllm:inter_token_latency_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 144.0
+ray_vllm:inter_token_latency_seconds_count{model_name="facebook/opt-125m"} 144.0
+ray_vllm:inter_token_latency_seconds_sum{model_name="facebook/opt-125m"} 0.6237391703762114
+# HELP ray_vllm:request_time_per_output_token_seconds Histogram of time_per_output_token_seconds per request.
+# TYPE ray_vllm:request_time_per_output_token_seconds histogram
+ray_vllm:request_time_per_output_token_seconds_bucket{le="0.01",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_time_per_output_token_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_time_per_output_token_seconds_count{model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_time_per_output_token_seconds_sum{model_name="facebook/opt-125m"} 0.02554149661946724
+# HELP ray_vllm:request_queue_time_seconds Histogram of time spent in WAITING phase for request.
+# TYPE ray_vllm:request_queue_time_seconds histogram
+ray_vllm:request_queue_time_seconds_bucket{le="0.3",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_queue_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_queue_time_seconds_count{model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_queue_time_seconds_sum{model_name="facebook/opt-125m"} 7.358146831393242e-05
+# HELP ray_vllm:request_inference_time_seconds Histogram of time spent in RUNNING phase for request.
+# TYPE ray_vllm:request_inference_time_seconds histogram
+ray_vllm:request_inference_time_seconds_bucket{le="0.3",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_inference_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_inference_time_seconds_count{model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_inference_time_seconds_sum{model_name="facebook/opt-125m"} 0.8377432837150991
+# HELP ray_vllm:request_prefill_time_seconds Histogram of time spent in PREFILL phase for request.
+# TYPE ray_vllm:request_prefill_time_seconds histogram
+ray_vllm:request_prefill_time_seconds_bucket{le="0.3",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_prefill_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_prefill_time_seconds_count{model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_prefill_time_seconds_sum{model_name="facebook/opt-125m"} 0.2140041133388877
+# HELP ray_vllm:request_decode_time_seconds Histogram of time spent in DECODE phase for request.
+# TYPE ray_vllm:request_decode_time_seconds histogram
+ray_vllm:request_decode_time_seconds_bucket{le="0.3",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_decode_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_decode_time_seconds_count{model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_decode_time_seconds_sum{model_name="facebook/opt-125m"} 0.6237391703762114
+# HELP ray_vllm:request_prefill_kv_computed_tokens Histogram of new KV tokens computed during prefill (excluding cached tokens).
+# TYPE ray_vllm:request_prefill_kv_computed_tokens histogram
+ray_vllm:request_prefill_kv_computed_tokens_bucket{le="1.0",model_name="facebook/opt-125m"} 0.0
+ray_vllm:request_prefill_kv_computed_tokens_bucket{le="20.0",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_prefill_kv_computed_tokens_bucket{le="+Inf",model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_prefill_kv_computed_tokens_count{model_name="facebook/opt-125m"} 6.0
+ray_vllm:request_prefill_kv_computed_tokens_sum{model_name="facebook/opt-125m"} 53.0
