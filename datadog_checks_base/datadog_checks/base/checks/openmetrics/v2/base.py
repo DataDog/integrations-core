@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections import ChainMap
+from collections.abc import Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -19,8 +20,6 @@ from datadog_checks.base.utils.tracing import traced_class
 from .scraper import OpenMetricsScraper
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from .metrics_mapping import MetricsMapping, _RawMetricsConfig
 
 
@@ -147,10 +146,22 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
         otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
         silently skipped.
+
+        The instance config wins option by option, except ``rename_labels``: the instance's renames
+        are merged into the check's declared ones entry by entry, with the instance winning on a key
+        collision. A ``ChainMap`` resolves keys shallowly, so without the merge an instance that sets
+        ``rename_labels`` at all would shadow the class default wholesale and silently drop renames
+        the check depends on. The trade-off is that ``rename_labels: {}`` cannot opt out of them.
         """
         defaults = dict(self.get_default_config())
         if file_metrics := self._load_file_based_metrics(config):
             defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
+
+        default_renames = defaults.get('rename_labels')
+        instance_renames = config.get('rename_labels')
+        if isinstance(default_renames, Mapping) and isinstance(instance_renames, Mapping):
+            config = {**config, 'rename_labels': {**default_renames, **instance_renames}}
+
         return ChainMap(config, defaults)
 
     def get_default_config(self) -> dict:
@@ -159,6 +170,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         The returned dict can be mutated by the framework before being wrapped
         in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
         state leakage between check executions.
+
+        A ``rename_labels`` default is merged with the instance's renames; every other default is
+        replaced outright. See ``get_config_with_defaults``.
         """
         return {}
 
