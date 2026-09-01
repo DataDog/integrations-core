@@ -105,7 +105,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
     async def process_message(self, message: UpdatePRComment):
         # Rendering is pure, so it happens outside the lock.
         body = render_comment(message.progress)
-        log_extra = {"revision": message.revision, "done": message.progress.done}
+        log_extra: dict[str, object] = {"revision": message.revision, "done": message.progress.done}
 
         # The lock spans revision validation, the write and the retained report, all of which may
         # only move forwards. Batches finish concurrently, so without this a slow early revision
