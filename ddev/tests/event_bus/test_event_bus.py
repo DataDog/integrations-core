@@ -1205,3 +1205,109 @@ async def test_pending_sync_work_can_be_read_while_workers_finish_underneath_it(
         await asyncio.gather(*running)
 
     assert orchestrator._pending_sync_work() == set()
+
+
+class StopRequester(AsyncProcessor[Memo]):
+    """Asks the bus to stop from inside a processor, then submits as the runner's `finally` does."""
+
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.processed: list[Memo] = []
+
+    async def process_message(self, message: Memo):
+        self.processed.append(message)
+        assert self.bus is not None
+        self.bus.request_stop()
+        self.submit_message(Memo("after_stop", subject="late"))
+
+
+def test_a_requested_stop_ends_an_idle_bus_without_waiting_out_the_grace_period(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+):
+    """A caller under a deadline it does not control cannot afford the grace period.
+
+    The dispatcher's default grace is 30s against the ~10s a cancelled CI job gets, so a stop that
+    lands while the bus sits idle has to interrupt that wait rather than be seen once it expires.
+    """
+    grace_period = 10.0
+    orchestrator = MockOrchestrator(logging.getLogger("test_request_stop"), max_timeout=60, grace_period=grace_period)
+    orchestrator.register_processor(secretary, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+    # From a thread, and only once the bus is already idle inside the grace wait.
+    threading.Timer(0.3, orchestrator.request_stop).start()
+
+    start = time.perf_counter()
+    with caplog.at_level(logging.INFO):
+        orchestrator.run()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < grace_period / 2
+    assert "finalize" in orchestrator.events
+    # Said at the exit, or this reads in the logs like the grace period expiring on its own.
+    assert "Stopping on request while idle." in caplog.text
+
+
+def test_work_submitted_after_a_stop_request_is_reported_rather_than_lost(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+):
+    """A stopping bus exits before draining its queue, so a late put is never read by anyone.
+
+    Processors submit follow-up work from `finally` blocks, and without refusing it at the door that
+    work disappears with nothing in the log to say the run dropped it.
+    """
+    requester = StopRequester("requester")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_guard"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(requester, [Memo])
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("memo1"))
+    with caplog.at_level(logging.WARNING):
+        orchestrator.run()
+
+    assert [message.id for message in requester.processed] == ["memo1"]
+    assert "Dropped Memo(after_stop)" in caplog.text
+
+
+def test_a_processor_is_not_dispatched_to_after_a_stop_request(secretary: Secretary):
+    """Both processors' tasks are created together, so the second is scheduled after the stop.
+
+    Refusing centrally is what makes that hold for every processor, including ones that never learn
+    to check the flag themselves.
+    """
+    requester = StopRequester("requester")
+    orchestrator = MockOrchestrator(logging.getLogger("test_dispatch_guard"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(requester, [Memo])
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("memo1"))
+    orchestrator.run()
+
+    assert [message.id for message in requester.processed] == ["memo1"]
+    assert secretary.delivered_memos == []
+
+
+def test_a_hook_waiting_on_io_does_not_hold_up_a_requested_stop(secretary: Secretary):
+    """The loop awaits this hook directly, so one waiting on I/O holds shutdown for as long as it takes.
+
+    A caller working to a deadline it does not control would never reach `finalize`, which is where the
+    run reports and cleans up.
+    """
+
+    class Bus(MockOrchestrator):
+        async def on_message_received(self, message: BaseMessage):
+            await super().on_message_received(message)
+            await asyncio.sleep(30)
+
+    orchestrator = Bus(logging.getLogger("test_hook_stop"), max_timeout=60, grace_period=1)
+    orchestrator.register_processor(secretary, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+    threading.Timer(0.3, orchestrator.request_stop).start()
+
+    start = time.perf_counter()
+    orchestrator.run()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < 5
+    assert "finalize" in orchestrator.events
+    # Abandoned before dispatch, so the message it was about never reaches a processor.
+    assert secretary.delivered_memos == []
