@@ -1,0 +1,89 @@
+# Metric name mappings for the Dynamo check, discovered by convention by OpenMetricsBaseCheckV2
+# (see docs/developer/base/openmetrics-metrics-files.md).
+#
+# Metrics exposed by the Dynamo HTTP frontend (default: http://<host>:8000/metrics).
+# Source: https://github.com/ai-dynamo/dynamo
+#   lib/runtime/src/metrics/prometheus_names.rs (frontend_service module)
+dynamo_frontend_requests: frontend.requests
+dynamo_frontend_requests_started: frontend.requests_started
+dynamo_frontend_queued_requests: frontend.queued_requests
+dynamo_frontend_inflight_requests: frontend.inflight_requests
+dynamo_frontend_active_requests: frontend.active_requests
+dynamo_frontend_disconnected_clients: frontend.disconnected_clients
+dynamo_frontend_request_duration_seconds: frontend.request_duration.seconds
+dynamo_frontend_input_sequence_tokens: frontend.input_sequence_tokens
+dynamo_frontend_output_sequence_tokens: frontend.output_sequence_tokens
+dynamo_frontend_output_tokens: frontend.output_tokens
+dynamo_frontend_time_to_first_token_seconds: frontend.time_to_first_token.seconds
+dynamo_frontend_inter_token_latency_seconds: frontend.inter_token_latency.seconds
+dynamo_frontend_embedding_latency_seconds: frontend.embedding_latency.seconds
+dynamo_frontend_tokenizer_latency_ms: frontend.tokenizer_latency_ms
+dynamo_frontend_cached_tokens: frontend.cached_tokens
+dynamo_frontend_kv_hit_rate: frontend.kv_hit_rate
+dynamo_frontend_kv_transfer_estimated_latency_seconds: frontend.kv_transfer_estimated_latency.seconds
+dynamo_frontend_shared_cache_hit_rate: frontend.shared_cache_hit_rate
+dynamo_frontend_shared_cache_beyond_blocks: frontend.shared_cache_beyond_blocks
+dynamo_frontend_non_max_overlap_selections: frontend.non_max_overlap_selections
+dynamo_frontend_overlap_blocks_lost: frontend.overlap_blocks_lost
+dynamo_frontend_images_per_request: frontend.images_per_request
+dynamo_frontend_videos_per_request: frontend.videos_per_request
+dynamo_frontend_audio_per_request: frontend.audio_per_request
+dynamo_frontend_image_tokens_per_request: frontend.image_tokens_per_request
+dynamo_frontend_model_total_kv_blocks: frontend.model.total_kv_blocks
+dynamo_frontend_model_max_num_seqs: frontend.model.max_num_seqs
+dynamo_frontend_model_max_num_batched_tokens: frontend.model.max_num_batched_tokens
+dynamo_frontend_model_context_length: frontend.model.context_length
+dynamo_frontend_model_kv_cache_block_size: frontend.model.kv_cache_block_size
+dynamo_frontend_model_migration_limit: frontend.model.migration_limit
+dynamo_frontend_model_migration: frontend.model.migration
+dynamo_frontend_model_migration_max_seq_len_exceeded: frontend.model.migration_max_seq_len_exceeded
+dynamo_frontend_model_cancellation: frontend.model.cancellation
+dynamo_frontend_model_rejection: frontend.model.rejection
+dynamo_frontend_worker_active_decode_blocks: frontend.worker.active_decode_blocks
+dynamo_frontend_worker_active_prefill_tokens: frontend.worker.active_prefill_tokens
+dynamo_frontend_worker_last_time_to_first_token_seconds: frontend.worker.last_time_to_first_token_seconds
+dynamo_frontend_worker_last_input_sequence_tokens: frontend.worker.last_input_sequence_tokens
+dynamo_frontend_worker_last_inter_token_latency_seconds: frontend.worker.last_inter_token_latency_seconds
+dynamo_frontend_router_queue_pending_requests: frontend.router_queue_pending_requests
+dynamo_frontend_lora_replica_factor: frontend.lora.replica_factor
+dynamo_frontend_lora_is_active: frontend.lora.is_active
+dynamo_frontend_lora_estimated_load: frontend.lora.estimated_load
+dynamo_frontend_lora_raw_arrival_count: frontend.lora.raw_arrival_count
+dynamo_frontend_lora_active_requests: frontend.lora.active_requests
+dynamo_frontend_lora_churn_loads: frontend.lora.churn_loads
+dynamo_frontend_lora_churn_unloads: frontend.lora.churn_unloads
+dynamo_frontend_lora_overflow_count: frontend.lora.overflow_count
+
+# Metrics exposed by Dynamo backend workers (python -m dynamo.vllm/dynamo.sglang/dynamo.trtllm) on the
+# system status server enabled via the DYN_SYSTEM_PORT env var (commonly 8081, or 9090 under the k8s operator).
+# Source: lib/runtime/src/metrics/prometheus_names.rs (work_handler, task_tracker, distributed_runtime, kvstats)
+dynamo_component_requests: component.requests
+dynamo_component_request_bytes: component.request_bytes
+dynamo_component_response_bytes: component.response_bytes
+dynamo_component_inflight_requests: component.inflight_requests
+dynamo_component_request_duration_seconds: component.request_duration.seconds
+dynamo_component_errors: component.errors
+dynamo_component_cancellation: component.cancellation
+dynamo_component_network_transit_seconds: component.network_transit.seconds
+dynamo_component_time_to_first_response_seconds: component.time_to_first_response.seconds
+dynamo_component_queue_depth: component.queue_depth
+dynamo_component_queue_capacity: component.queue_capacity
+dynamo_component_enqueue_rejected: component.enqueue_rejected
+dynamo_component_permit_wait_seconds: component.permit_wait.seconds
+dynamo_component_pool_active_tasks: component.pool_active_tasks
+dynamo_component_pool_capacity: component.pool_capacity
+dynamo_component_uptime_seconds: component.uptime_seconds
+dynamo_component_tasks_issued: component.tasks_issued
+dynamo_component_tasks_started: component.tasks_started
+dynamo_component_tasks_success: component.tasks_success
+dynamo_component_tasks_cancelled: component.tasks_cancelled
+dynamo_component_tasks_failed: component.tasks_failed
+dynamo_component_tasks_rejected: component.tasks_rejected
+# KV cache stats, portable across the vLLM / SGLang / TensorRT-LLM backends Dynamo can drive.
+dynamo_component_total_blocks: component.kv_cache.total_blocks
+dynamo_component_gpu_cache_usage_percent: component.kv_cache.gpu_cache_usage_percent
+dynamo_component_kv_cache_hit_rate: component.kv_cache.hit_rate
+# The TensorRT-LLM engine publishes its own hit-rate gauge under this name instead of Dynamo's
+# portable dynamo_component_kv_cache_hit_rate, which requires the KV event consolidator to be
+# configured (kv_connector_config) and is otherwise never emitted for this backend.
+trtllm_kv_cache_hit_rate: component.kv_cache.hit_rate

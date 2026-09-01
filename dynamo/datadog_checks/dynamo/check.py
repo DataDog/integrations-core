@@ -9,8 +9,6 @@ except ImportError:
 from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
 from datadog_checks.base.errors import SkipInstanceError
 
-from .metrics import METRIC_MAP
-
 
 class DynamoCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
@@ -25,7 +23,6 @@ class DynamoCheck(OpenMetricsBaseCheckV2):
 
     def get_default_config(self):
         return {
-            'metrics': [METRIC_MAP],
             'histogram_buckets_as_distributions': True,
             'collect_counters_with_distributions': True,
         }
