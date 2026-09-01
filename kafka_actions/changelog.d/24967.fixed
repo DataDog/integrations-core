@@ -1,0 +1,1 @@
+Fix unintended config resets by switching from deprecated alter_configs (PUT semantics) to incremental_alter_configs (PATCH semantics) in update_topic_config and delete_topic_config.
