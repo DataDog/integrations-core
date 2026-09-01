@@ -35,6 +35,9 @@ UNUSABLE_COMMENT_STATUSES = (403, 404)
 # comment tiers, plus giving up on a comment we may not edit, which can repeat because the
 # replacement can itself be refused. One more than the sum, for the pass that lands.
 MAX_WRITE_PASSES = 5
+# The cancelled report competes with cancelling the dispatched runs for the same few seconds, and the
+# tier ladder can make several requests, so the whole write is bounded rather than each request.
+CANCELLED_WRITE_TIMEOUT = 4.0
 
 
 class CommentRenderer(Protocol):
@@ -171,7 +174,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 self._logger.warning("Run cancelled; no pull request to report it on", extra=log_extra)
                 return
 
-            published = await self._write(pr_number, body, progress, log_extra, cancelled=True)
+            # Recorded before the attempt, not after: the caller gathers this with `return_exceptions`,
+            # so anything raised here is absorbed and the run summary would otherwise be rendered as
+            # though the comment were current. `RateLimitWaitAbandoned` is the expected one, since the
+            # cancellation path shortens the limiter's wait precisely so it fires.
+            self._pr_comment_failed = True
+            async with asyncio.timeout(CANCELLED_WRITE_TIMEOUT):
+                published = await self._write(pr_number, body, progress, log_extra, cancelled=True)
             self._pr_comment_failed = not published
             if published:
                 self._logger.info("Run reported as cancelled", extra=log_extra)

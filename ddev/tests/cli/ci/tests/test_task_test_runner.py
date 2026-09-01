@@ -14,7 +14,7 @@ import pytest
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.status import Status, conclusion_to_check_run_conclusion, conclusion_to_status
-from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
+from ddev.cli.ci.tests.task_test_runner import CANCEL_REQUEST_TIMEOUT, TaskTestRunner, TestRunnerOptions
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
@@ -710,6 +710,31 @@ async def test_a_run_that_finished_on_its_own_is_not_cancelled(tmp_path: Path):
     await runner.cancel_dispatched_runs()
 
     assert client.calls_to("cancel_workflow_run") == []
+
+
+async def test_cancelling_a_run_does_not_wait_out_the_clients_default_timeout(tmp_path: Path):
+    """A GitHub that accepts the connection then stalls must not consume the whole teardown budget.
+
+    The retry policy's timeout bounds the ladder, not an attempt in flight, so without a per-request
+    timeout this inherits the client's 30s default. The process is killed after roughly ten, so one
+    stalled call would mean no run is cancelled at all.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    task = asyncio.create_task(runner.process_message(make_batch(batch_id="batch-1")))
+    async with asyncio.timeout(5):
+        while not client.calls_to("create_check_run"):
+            await asyncio.sleep(0)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    await runner.cancel_dispatched_runs()
+
+    assert client.last_call("cancel_workflow_run").kwargs["timeout"] == CANCEL_REQUEST_TIMEOUT
 
 
 async def test_a_run_still_going_when_the_batch_is_cancelled_is_cancelled_too(tmp_path: Path):

@@ -17,6 +17,11 @@ from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import CheckRunConclusion, CheckRunStatus, WorkflowJob, WorkflowRun
 
+# A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
+# The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
+# goes quiet would hold this for the client's default and take every other cancellation with it.
+CANCEL_REQUEST_TIMEOUT = 3.0
+
 
 @dataclass(frozen=True)
 class TestRunnerOptions:
@@ -147,7 +152,9 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         """Cancel one run, reporting rather than raising: one that will not cancel must not stop the rest."""
         log_extra = {"batch_id": batch_id, "run_id": run_id}
         try:
-            await self._client.cancel_workflow_run(self._options.owner, self._options.repo, run_id)
+            await self._client.cancel_workflow_run(
+                self._options.owner, self._options.repo, run_id, timeout=CANCEL_REQUEST_TIMEOUT
+            )
         except Exception:
             self._logger.exception("Failed to cancel dispatched run", extra=log_extra)
         else:

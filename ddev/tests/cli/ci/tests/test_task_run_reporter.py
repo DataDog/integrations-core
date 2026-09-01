@@ -730,6 +730,26 @@ async def test_a_cancelled_run_is_reported_even_with_nothing_gathered():
     assert CANCELLED_HEADING in created.kwargs["body"]
 
 
+async def test_a_cancelled_report_that_never_landed_says_so_on_the_run_page():
+    """The run page is the only place left to say the pull request was not updated.
+
+    `_report_cancellation` gathers this with `return_exceptions`, so a write that raises is absorbed
+    and never reaches the caller. `RateLimitWaitAbandoned` is the one to expect, because cancelling
+    shortens the limiter's wait so a GitHub pause fails fast instead of outliving the process. With
+    the failure recorded only after the write, the summary would claim the comment was current.
+    """
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client)
+    await reporter.process_message(_update(1))
+    for method in ("update_issue_comment", "create_issue_comment", "list_issue_comments"):
+        client.mock_response(method, RateLimitWaitAbandoned(2.0, 58.0))
+
+    with pytest.raises(RateLimitWaitAbandoned):
+        await reporter.publish_cancelled()
+
+    assert reporter.pr_comment_failed
+
+
 async def test_nothing_supersedes_a_cancelled_report():
     """A batch finishing as the run is cancelled must not put the report back to "still running".
 
