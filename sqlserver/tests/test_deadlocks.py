@@ -21,6 +21,7 @@ from datadog_checks.sqlserver.deadlocks import (
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
     Deadlocks,
+    NoXESessionError,
 )
 from datadog_checks.sqlserver.queries import (
     DEADLOCK_TIMESTAMP_ALIAS,
@@ -265,6 +266,13 @@ def test__create_deadlock_rows(deadlocks_collection_instance):
         first_mapping = query_signatures[0]
         assert "spid" in first_mapping, "Should have spid in query signatures"
         assert isinstance(first_mapping["spid"], int), "spid should be an int"
+
+
+def test_missing_xe_session_returns_no_deadlocks(deadlocks_collection_instance):
+    deadlocks_obj = _get_deadlock_obj(deadlocks_collection_instance)
+
+    with patch.object(deadlocks_obj, '_set_xe_session_name', side_effect=NoXESessionError('missing XE session')):
+        assert deadlocks_obj._create_deadlock_rows() == []
 
 
 def test_deadlock_xml_bad_format(deadlocks_collection_instance):
