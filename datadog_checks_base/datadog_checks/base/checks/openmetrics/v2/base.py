@@ -131,17 +131,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
         silently skipped.
 
-        The instance config takes precedence over the defaults, option by option. ``rename_labels``
-        is the exception: the instance's renames are merged entry by entry with the check's declared
-        renames rather than replacing them wholesale. A ``ChainMap`` resolves keys shallowly, so an
-        instance that sets ``rename_labels`` at all would otherwise shadow the whole class default and
-        silently drop renames the check depends on -- such as the ones that keep endpoint labels off
-        Datadog's reserved tag keys. Renames are additive by nature, so the instance's own entries
-        still win on a per-key basis. One consequence: ``rename_labels: {}`` cannot disable the
-        check's declared renames -- it merges to the defaults unchanged -- so an instance can override
-        an individual key but cannot opt out of all declared renames wholesale. Other mapping-valued
-        options keep wholesale-replace semantics, so an instance can still fully override them (e.g.
-        disable ``share_labels`` with ``{}``).
+        The instance config wins option by option, except ``rename_labels``: the instance's renames
+        are merged into the check's declared ones entry by entry, with the instance winning on a key
+        collision. A ``ChainMap`` resolves keys shallowly, so without the merge an instance that sets
+        ``rename_labels`` at all would shadow the class default wholesale and silently drop renames
+        the check depends on. The trade-off is that ``rename_labels: {}`` cannot opt out of them.
         """
         defaults = dict(self.get_default_config())
         if file_metrics := self._load_file_based_metrics(config):
@@ -161,10 +155,8 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
         state leakage between check executions.
 
-        A ``rename_labels`` default is merged with the instance's renames rather than replaced; any
-        other default -- including other mapping-valued options such as ``share_labels`` -- is
-        replaced outright by an instance-level value. See ``get_config_with_defaults`` for the exact
-        merge rule.
+        A ``rename_labels`` default is merged with the instance's renames; every other default is
+        replaced outright. See ``get_config_with_defaults``.
         """
         return {}
 

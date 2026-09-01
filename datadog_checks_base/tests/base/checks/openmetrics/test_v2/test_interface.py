@@ -45,11 +45,9 @@ def test_default_rename_labels_merged_with_instance(
     aggregator, dd_run_check, mock_http_response, instance_renames, expected_tags
 ):
     """
-    A `rename_labels` default is merged with the instance's `rename_labels`, entry by entry: disjoint
-    keys union together, and on a key collision the instance's entry wins. The instance config is
-    layered over the defaults in a `ChainMap`, which resolves keys shallowly, so without the merge an
-    instance that sets `rename_labels` at all would shadow the class default wholesale and silently
-    lose renames the check depends on.
+    A `rename_labels` default is merged with the instance's, entry by entry: disjoint keys union
+    together, and on a collision the instance's entry wins. Without the merge, the `ChainMap` would
+    let an instance that sets `rename_labels` at all shadow the class default wholesale.
     """
 
     class Check(OpenMetricsBaseCheckV2):
@@ -80,10 +78,8 @@ def test_default_rename_labels_merged_with_instance(
 
 def test_default_config_mapping_not_shared_between_scrapers(aggregator, dd_run_check, mock_http_response):
     """
-    A check with several scraper configs must not let one scraper's merged renames leak into
-    another. The merge builds a fresh mapping per scraper instead of writing back into the dict
-    `get_default_config` returns, so a second scraper that renames nothing keeps `qux` as `qux`
-    even after a first scraper renamed it to `corge`.
+    One scraper's merged renames must not leak into another. The merge builds a fresh mapping per
+    scraper rather than writing back into the dict `get_default_config` returns.
     """
     default_renames = {'foo': 'bar'}
 
@@ -124,9 +120,8 @@ def test_default_config_mapping_not_shared_between_scrapers(aggregator, dd_run_c
 
 def test_default_config_only_rename_labels_is_merged():
     """
-    Only `rename_labels` is merged with the check's declared default. Other mapping-valued options
-    keep wholesale-replace semantics, so an instance can still fully override them -- e.g. disable a
-    check's `share_labels` default by passing `{}`.
+    Only `rename_labels` is merged. Other mapping-valued options keep wholesale-replace semantics, so
+    an instance can still disable a check's `share_labels` default by passing `{}`.
     """
 
     class Check(OpenMetricsBaseCheckV2):
