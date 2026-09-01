@@ -8,7 +8,7 @@ import requests
 from mock import patch
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
@@ -48,6 +48,7 @@ def dd_environment(e2e_instance):
     expected_log = "http server Running on"
     conditions = [
         CheckDockerLogs(compose_file, expected_log, wait=3, service='core'),
+        CheckEndpoints(PING_URL.format(base_url=URL), wait=5),
         WaitFor(create_simple_user, wait=5),
     ]
     e2e_metadata = {}
@@ -59,7 +60,7 @@ def dd_environment(e2e_instance):
 
 
 def create_simple_user():
-    requests.post(
+    response = requests.post(
         URL + USERS_PATH,
         auth=("admin", "Harbor12345"),
         json={
@@ -70,6 +71,7 @@ def create_simple_user():
         },
         verify=False,
     )
+    response.raise_for_status()
 
 
 @pytest.fixture(scope='session')
