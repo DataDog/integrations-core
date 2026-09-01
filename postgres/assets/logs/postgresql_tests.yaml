@@ -32,6 +32,9 @@ tests:
         user: "postgres"
       dbname: "postgres"
       error_severity: "LOG"
+      network:
+        client:
+          hostname: "[local]"
       pid: 5237
       postgres:
         appname: "psql"
@@ -79,7 +82,7 @@ tests:
       session_id: "5defc7c5.72"
       timestamp: "2019-12-10 18:27:45.389 UTC"
       user: "datadog"
-    message: "statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
+    message: "duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
     service: "postgresql"
     status: "info"
     tags:
@@ -164,7 +167,7 @@ tests:
       txid: 2823
       user: "postgres"
       vxid: "5/2050"
-    message: "execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
+    message: "duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
     service: "postgresql"
     status: "info"
     tags:
@@ -208,7 +211,7 @@ tests:
       txid: 276953619
       user: "service_catalog_rw"
       vxid: "15/174689"
-    message: "plan: {}"
+    message: "duration: 1626.107 ms  plan: {}"
     service: "postgresql"
     status: "info"
     tags:
