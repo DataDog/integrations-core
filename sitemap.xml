@@ -61,6 +61,10 @@
          <lastmod>2020-02-02</lastmod>
     </url>
     <url>
+         <loc>https://datadoghq.dev/integrations-core/base/openmetrics-metrics-files/</loc>
+         <lastmod>2020-02-02</lastmod>
+    </url>
+    <url>
          <loc>https://datadoghq.dev/integrations-core/base/openmetrics/</loc>
          <lastmod>2020-02-02</lastmod>
     </url>
