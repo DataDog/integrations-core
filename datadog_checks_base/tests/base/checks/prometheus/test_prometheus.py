@@ -45,20 +45,6 @@ def _file_response(file_path: str, *, content_type: str) -> FakeHTTPResponse:
         return FakeHTTPResponse(content=fixture.read(), headers={'Content-Type': content_type})
 
 
-class EncodingAwareResponse(FakeHTTPResponse):
-    def iter_lines(
-        self,
-        chunk_size: int | None = None,
-        decode_unicode: bool = False,
-        delimiter: bytes | str | None = None,
-    ) -> Iterator[bytes | str]:
-        for line in self.content.splitlines():
-            if decode_unicode and self.encoding is not None:
-                yield line.decode(self.encoding)
-            else:
-                yield line
-
-
 def _register_prometheus_text(fake_http: FakeHTTPClient, text: str, *, count: int = 1) -> None:
     for _ in range(count):
         fake_http.register_response(
@@ -296,26 +282,27 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
 
 
 @pytest.mark.parametrize(
-    ('content_type', 'wire_encoding'),
+    ('content_type', 'expected_encoding'),
     [
         ('text/plain; version=0.0.4', 'utf-8'),
         ('text/plain; version=0.0.4; charset=iso-8859-1', 'iso-8859-1'),
     ],
 )
-def test_parse_metric_family_text_encoding(mocked_prometheus_check, content_type, wire_encoding):
+def test_parse_metric_family_text_encoding(mocked_prometheus_check, content_type, expected_encoding):
     text = (
         '# HELP temperature_celsius Température actuelle.\n'
         '# TYPE temperature_celsius gauge\n'
         'temperature_celsius{city="München"} 21\n'
     )
-    response = EncodingAwareResponse(
-        content=text.encode(wire_encoding),
+    response = FakeHTTPResponse(
         headers={'Content-Type': content_type},
         encoding='iso-8859-1',
+        lines=text.splitlines(),
     )
 
     [metric] = list(mocked_prometheus_check.parse_metric_family(response))
 
+    assert response.encoding == expected_encoding
     assert metric.help == 'Température actuelle.'
     assert metric.metric[0].label[0].name == 'city'
     assert metric.metric[0].label[0].value == 'München'
