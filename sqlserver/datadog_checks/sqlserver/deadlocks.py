@@ -94,6 +94,7 @@ class Deadlocks(DBMAsyncJob):
         if process_list is None:
             raise Exception("process-list element not found. The deadlock XML is in an unexpected format.")
         query_signatures = []
+        seen_spids = set()
         for process in process_list.findall('process'):
             spid = process.get('spid')
             if spid is not None:
@@ -102,8 +103,9 @@ class Deadlocks(DBMAsyncJob):
                 except ValueError:
                     self._log.error("spid not an integer. Skipping query signature computation.")
                     continue
-                if spid in query_signatures:
+                if spid in seen_spids:
                     continue
+                seen_spids.add(spid)
             else:
                 self._log.error("spid not found in process element. Skipping query signature computation.")
 
@@ -112,7 +114,7 @@ class Deadlocks(DBMAsyncJob):
             for frame in process.findall('.//frame'):
                 if frame.text is not None and frame.text != "unknown":
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
-                    if signature is not None and frame.text != OBFUSCATION_ERROR:
+                    if signature is None and frame.text != OBFUSCATION_ERROR:
                         signature = compute_sql_signature(frame.text)
 
             for inputbuf in process.findall('.//inputbuf'):
