@@ -1,0 +1,1 @@
+Prevent raw SQL text from being written to SQL Server DBM logs.
