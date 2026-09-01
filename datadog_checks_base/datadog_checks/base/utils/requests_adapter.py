@@ -47,7 +47,6 @@ def _translate_requests_request(
 def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[BaseException]) -> type[T]:
     """Add requests bases so released checks' exception handlers keep matching."""
     bases = tuple(dict.fromkeys((agnostic, *backend)))
-    # Keep only the most-derived bases to avoid an invalid parent-before-child MRO.
     most_derived_bases = tuple(
         base for base in bases if not any(base is not candidate and issubclass(candidate, base) for candidate in bases)
     )
@@ -81,7 +80,6 @@ _COMPAT_EXCEPTIONS: dict[type[HTTPClientError], type[HTTPClientError]] = {
     HTTPClientSSLError: _backend_compat_type(HTTPClientSSLError, requests_exceptions.SSLError),
 }
 
-# stdlib and requests JSONDecodeError are siblings, so the compatibility type carries both.
 _COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
 
 
