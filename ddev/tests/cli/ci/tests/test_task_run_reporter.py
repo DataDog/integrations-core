@@ -17,7 +17,7 @@ import pytest
 
 from ddev.cli.ci.tests import pr_comment
 from ddev.cli.ci.tests.messages import UpdatePRComment
-from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING, COMMENT_MARKER
+from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING, CANCELLED_WITHOUT_RESULTS_NOTE, COMMENT_MARKER
 from ddev.cli.ci.tests.progress import JobAttemptProgress, JobProgress, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
@@ -770,10 +770,11 @@ async def test_nothing_supersedes_a_cancelled_report():
 
 
 async def test_a_cancelled_run_reports_what_it_had_gathered():
-    """A partial report is still worth publishing, and the run summary must not contradict it.
+    """A partial report is worth keeping, so cancelling renders the snapshot rather than discarding it.
 
-    `on_finalize` renders the run summary from `latest_body`, so leaving it at the last in-progress
-    body would have the summary claim the run was still going while the comment says cancelled.
+    The heading alone cannot tell the two cancelled bodies apart, since the no-results notice carries
+    it too. The job count is what identifies the snapshot behind a body, so that is what says the
+    partial results survived instead of being replaced by the notice.
     """
     client = FakeAsyncGitHubClient()
     reporter = _reporter(client)
@@ -783,7 +784,8 @@ async def test_a_cancelled_run_reports_what_it_had_gathered():
 
     assert reporter.latest_body is not None
     assert CANCELLED_HEADING in reporter.latest_body
-    assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
+    assert jobs_reported(reporter.latest_body) == 1
+    assert CANCELLED_WITHOUT_RESULTS_NOTE not in reporter.latest_body
 
 
 async def test_a_write_that_raises_still_leaves_the_report_behind():
@@ -801,4 +803,7 @@ async def test_a_write_that_raises_still_leaves_the_report_behind():
         await reporter.process_message(_update(3))
 
     assert reporter.latest_body is not None
-    assert reporter._latest_revision == 3
+    # The revision advanced with the retained body, so the earlier snapshot that follows is refused
+    # and the only write attempted is the one that failed.
+    await reporter.process_message(_update(2))
+    assert len(client.calls_to("create_issue_comment")) == 1
