@@ -6,11 +6,10 @@ from typing import Any, Callable
 
 import pytest
 
-from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.intersystems_iris import IrisCheck
 
-from .common import assert_metrics_match_metadata
+from .common import assert_healthy_scrape
 
 
 @pytest.mark.integration
@@ -27,6 +26,4 @@ def test_check(
     # The Docker environment auto-enables interoperability SAM sampling and starts a demo
     # production with traffic (see tests/docker/init/iris-init.sh), so this single endpoint
     # exposes the base families alongside the always-on `iris_interop_*` interface family.
-    assert_metrics_match_metadata(aggregator)
-
-    aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)
+    assert_healthy_scrape(aggregator)

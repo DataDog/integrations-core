@@ -25,13 +25,23 @@ run_objectscript() {
         printf '%s\n' "$output" | grep '^FATAL:' >&2
         exit 1
     fi
+    # A %Status check can only report the failures an API returns as a status. An unhandled
+    # runtime error -- <UNDEFINED>, a compile error from a bad class reference -- aborts the block
+    # where it happens, prints an interactive error, and leaves `iris session` to exit 0 at EOF
+    # without ever writing a FATAL line. Requiring each block's own terminating DONE marker turns
+    # that into a failure too, and unlike matching on known error strings it catches every form of
+    # early exit, including ones we have not thought to enumerate.
+    if ! printf '%s\n' "$output" | grep -q '^DONE:'; then
+        echo "[iris-init] $label did not run to completion (no DONE marker); see session output above" >&2
+        exit 1
+    fi
 }
 
 echo "[iris-init] enabling interoperability on USER namespace"
 run_objectscript "enable interoperability" %SYS <<'OSCRIPT'
 set sc=##class(%Library.EnsembleMgr).EnableNamespace("USER")
 if '$system.Status.IsOK(sc) { write "FATAL: EnableNamespace: ",$system.Status.GetOneStatusText(sc),! halt }
-write "EnableNamespace: ok",!
+write "DONE: EnableNamespace",!
 halt
 OSCRIPT
 
@@ -52,7 +62,7 @@ set sc=##class(Ens.Director).CreateBusinessService("EnsLib.Testing.Service",.svc
 if '$system.Status.IsOK(sc) { write "FATAL: CreateBusinessService: ",$system.Status.GetOneStatusText(sc),! halt }
 set ok=0 for i=1:1:200 { set req=##class(Ens.StringRequest).%New(),req.StringValue="init-load-"_i set s=svc.SendRequestAsync("TestProcess",req) if $system.Status.IsOK(s) { set ok=ok+1 } }
 if ok=0 { write "FATAL: no test messages were accepted by TestProcess",! halt }
-write "messages sent: ",ok,!
+write "DONE: messages sent: ",ok,!
 halt
 OSCRIPT
 

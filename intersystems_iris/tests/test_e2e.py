@@ -6,9 +6,7 @@ from typing import Any
 
 import pytest
 
-from datadog_checks.base.constants import ServiceCheck
-
-from .common import assert_metrics_match_metadata
+from .common import assert_healthy_scrape
 
 
 @pytest.mark.e2e
@@ -22,6 +20,4 @@ def test_e2e(dd_agent_check: Any) -> None:
     # exposes both the base families and the always-on `iris_interop_*` interface family. This
     # runs against the same standalone, non-mirrored container as the integration test, so the
     # gated families are excused here in the same way.
-    assert_metrics_match_metadata(aggregator)
-
-    aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)
+    assert_healthy_scrape(aggregator)

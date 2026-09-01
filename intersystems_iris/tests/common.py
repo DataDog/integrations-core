@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any
 
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -78,14 +79,15 @@ STATE_GATED = frozenset(
 )
 
 
-def unconditional_metadata_metrics(
+def partition_metadata_metrics(
     metadata_metrics: dict[str, Any], emitted_prefixes: tuple[str, ...] = ()
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], list[str]]:
     """
-    `metadata_metrics` minus the deployment-conditional families above, i.e. exactly what a
-    reachable standalone IRIS instance is expected to publish.
+    Split the catalog into the metrics this environment is expected to publish and the ones it
+    excuses, i.e. exactly what a reachable standalone IRIS instance emits versus the
+    deployment-conditional families above.
 
-    Asserting symmetric inclusion against this subset keeps `metadata.csv` honest -- a declared
+    Asserting symmetric inclusion against the first half keeps `metadata.csv` honest -- a declared
     metric with no emitter behind it still fails the build -- while tolerating the families this
     environment cannot produce. If a future test topology starts emitting one of the excused
     families, the corresponding entry should move out of the sets above.
@@ -95,29 +97,22 @@ def unconditional_metadata_metrics(
     asserts the full `intersystems_iris.ecps.*` and `intersystems_iris.wqm.*` families, while the
     container-backed integration and E2E tests -- standalone instances with no ECP peers, which
     may or may not have driven the work queue by the time they are scraped -- do not.
+
+    Both halves are returned together because they are complements of one another: the caller
+    passes the first as the expected mapping and the second as `exclude=`, and deriving them from
+    a single filter is what guarantees they cannot drift apart.
     """
     conditional = SAMPLING_GATED | STATE_GATED
     gated = tuple(
         prefix for prefix in TOPOLOGY_GATED_PREFIXES + ACTIVITY_GATED_PREFIXES if prefix not in emitted_prefixes
     )
-    return {
+    expected = {
         name: metadata
         for name, metadata in metadata_metrics.items()
         if name not in conditional and (name in TOPOLOGY_INDEPENDENT or not name.startswith(gated))
     }
-
-
-def conditional_metric_names(metadata_metrics: dict[str, Any], emitted_prefixes: tuple[str, ...] = ()) -> list[str]:
-    """
-    The complement of `unconditional_metadata_metrics`: the names it excused.
-
-    Pass this as `assert_metrics_using_metadata(exclude=...)` alongside the trimmed catalog.
-    Excusing a family is only half the job -- an activity-gated metric that *does* show up would
-    otherwise be reported as submitted but undeclared, since the assertion checks submissions
-    against the trimmed mapping it was handed rather than against metadata.csv itself.
-    """
-    unconditional = unconditional_metadata_metrics(metadata_metrics, emitted_prefixes)
-    return [name for name in metadata_metrics if name not in unconditional]
+    excused = [name for name in metadata_metrics if name not in expected]
+    return expected, excused
 
 
 def assert_metrics_match_metadata(aggregator: AggregatorStub, emitted_prefixes: tuple[str, ...] = ()) -> None:
@@ -130,6 +125,7 @@ def assert_metrics_match_metadata(aggregator: AggregatorStub, emitted_prefixes: 
     environment emits, so `emitted_prefixes` is the single knob between them.
     """
     metadata_metrics = get_metadata_metrics()
+    expected, excused = partition_metadata_metrics(metadata_metrics, emitted_prefixes)
 
     # Nothing may be submitted that metadata.csv does not declare, and the declared types must
     # match what the check submits.
@@ -137,9 +133,24 @@ def assert_metrics_match_metadata(aggregator: AggregatorStub, emitted_prefixes: 
 
     # Conversely, every metric the catalog declares for this environment must have been
     # collected -- this is what catches a metadata.csv entry with no emitter behind it.
+    # Excusing a family is only half the job: an activity-gated metric that *does* show up would
+    # otherwise be reported as submitted but undeclared, since the assertion checks submissions
+    # against the trimmed mapping it was handed rather than against metadata.csv itself.
     aggregator.assert_metrics_using_metadata(
-        unconditional_metadata_metrics(metadata_metrics, emitted_prefixes),
-        exclude=conditional_metric_names(metadata_metrics, emitted_prefixes),
+        expected,
+        exclude=excused,
         check_submission_type=True,
         check_symmetric_inclusion=True,
     )
+
+
+def assert_healthy_scrape(aggregator: AggregatorStub, emitted_prefixes: tuple[str, ...] = ()) -> None:
+    """
+    Assert that a scrape completed cleanly: the metadata.csv contract holds and the endpoint
+    reported healthy.
+
+    All three test tiers make exactly this pair of assertions, so they share one entry point
+    rather than each repeating the service check name.
+    """
+    assert_metrics_match_metadata(aggregator, emitted_prefixes)
+    aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)

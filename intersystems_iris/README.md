@@ -35,6 +35,19 @@ For containerized environments, follow the instructions on the [Kubernetes Log C
               pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
    ```
 
+## Data collected
+
+### Tags
+
+Two labels from the IRIS metrics endpoint are submitted under a different tag key, because their original names collide with the special meaning Datadog attaches to `host` and `version`. The values are preserved; only the key changes:
+
+| IRIS label | Datadog tag     | Metrics affected                | Description                                        |
+| ---------- | --------------- | ------------------------------- | -------------------------------------------------- |
+| `host`     | `interop_host`  | `intersystems_iris.interop.*`   | Business host name, not the reporting infrastructure host. |
+| `version`  | `iris_version`  | `intersystems_iris.system.info` | IRIS product version, not the Agent version.       |
+
+Scope your dashboards and monitors on the Datadog tag key. Every other endpoint label is submitted under its original name.
+
 ## Support
 
 Need help? Contact [Datadog support][3].

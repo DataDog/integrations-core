@@ -12,7 +12,9 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.intersystems_iris import IrisCheck
 
-from .common import assert_metrics_match_metadata
+from .common import assert_healthy_scrape
+
+pytestmark = pytest.mark.unit
 
 FIXTURE_PATH = str(Path(__file__).parent / 'fixtures' / 'metrics.txt')
 
@@ -24,9 +26,7 @@ FIXTURE_EMITTED_PREFIXES = ('intersystems_iris.ecps.', 'intersystems_iris.wqm.')
 
 
 def test_check(scraped_aggregator: AggregatorStub) -> None:
-    assert_metrics_match_metadata(scraped_aggregator, FIXTURE_EMITTED_PREFIXES)
-
-    scraped_aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)
+    assert_healthy_scrape(scraped_aggregator, FIXTURE_EMITTED_PREFIXES)
 
 
 def test_interop_host_label_renamed(scraped_aggregator: AggregatorStub) -> None:
