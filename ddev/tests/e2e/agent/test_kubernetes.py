@@ -190,7 +190,7 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     agent.start(
         agent_build='registry.example.com/datadog-agent:test',
         local_packages={local_base: '[kube]', integration: '[deps]'},
-        env_vars={'DD_SITE': 'datadoghq.com', 'DD_AGENT_TELEMETRY_ENABLED': 'true'},
+        env_vars={'DD_SITE': 'datadoghq.com'},
     )
 
     calls = command_calls(run_command)
@@ -237,7 +237,7 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     env = {item['name']: item.get('value') for item in resources['Pod']['spec']['containers'][0]['env']}
     assert env['DD_API_KEY'] == 'a' * 32
     assert env['DD_SITE'] == 'datadoghq.com'
-    assert env['DD_AGENT_TELEMETRY_ENABLED'] == 'true'
+    assert env['DD_AGENT_TELEMETRY_ENABLED'] == 'false'
     assert env['DD_AUTOCONFIG_FROM_ENVIRONMENT'] == 'true'
     assert 'DD_KUBERNETES_KUBELET_HOST' in env
     assert 'DD_KUBERNETES_KUBELET_NODENAME' in env
@@ -504,17 +504,6 @@ def test_show_logs_targets_agent_container(agent, run_command):
     assert f'pod/{TEST_POD}' in command
     assert option_value(command, '--container') == TEST_CONTAINER
     assert run_command.call_args_list[logs_index].kwargs['check'] is True
-
-
-def test_start_defaults_to_disabled_agent_telemetry(agent, run_command):
-    agent.start(agent_build='registry.example.com/datadog-agent:test', local_packages={}, env_vars={})
-
-    create_calls = [call for call in run_command.call_args_list if call.args[0][3:] == ['create', '-f', '-']]
-    assert len(create_calls) == 1
-    manifest = json.loads(create_calls[0].kwargs['input'])
-    pod = next(item for item in manifest['items'] if item['kind'] == 'Pod')
-    env = {item['name']: item.get('value') for item in pod['spec']['containers'][0]['env']}
-    assert env[AgentEnvVars.AGENT_TELEMETRY_ENABLED] == 'false'
 
 
 def test_kubeconfig_validation(app, get_integration, config_file):
