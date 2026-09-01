@@ -1,0 +1,1 @@
+Fix Vagrant E2E Agents not receiving their environment variables; they are now persisted in the Agent systemd service ``EnvironmentFile``.
