@@ -51,6 +51,7 @@ from ddev.utils.github_async.models import (
     IssueComment,
     Label,
     PullRequest,
+    PullRequestReviewComment,
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
@@ -125,6 +126,10 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
                 body='',
                 html_url='https://github.com/test/repo/issues/1#issuecomment-1',
             ),
+            headers={},
+        ),
+        'create_pr_review_comment': lambda: GitHubResponse(
+            data=PullRequestReviewComment(id=1, body='', path='file.py', commit_id='abc123'),
             headers={},
         ),
         'update_issue_comment': lambda: GitHubResponse(
@@ -331,6 +336,33 @@ class FakeAsyncGitHubClient:
             repo=repo,
             issue_number=issue_number,
             body=body,
+            timeout=timeout,
+        )
+
+    async def create_pr_review_comment(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        body: str,
+        commit_id: str,
+        path: str,
+        position: int | None = None,
+        line: int | None = None,
+        side: Literal['LEFT', 'RIGHT'] | None = None,
+        timeout: float | None = None,
+    ) -> GitHubResponse[PullRequestReviewComment]:
+        return self._call(
+            'create_pr_review_comment',
+            owner=owner,
+            repo=repo,
+            pull_number=pull_number,
+            body=body,
+            commit_id=commit_id,
+            path=path,
+            position=position,
+            line=line,
+            side=side,
             timeout=timeout,
         )
 

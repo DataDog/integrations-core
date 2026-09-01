@@ -68,6 +68,24 @@ async def test_a_server_error_is_replayed_only_where_replaying_is_safe(case) -> 
         assert len(calls) == 1
 
 
+async def test_cancelling_a_run_replays_a_server_error() -> None:
+    """Cancelling twice cancels once, so a 503 that may have landed is worth repeating.
+
+    The caller is a run being torn down to stop workflows it started. On the mutating default a
+    transport failure after the POST reached GitHub is not replayed, and the run it meant to cancel
+    keeps consuming runner minutes.
+
+    Not in `ENDPOINT_CALLS` because this endpoint returns nothing, and the registry's
+    header-forwarding case needs a response to read.
+    """
+    transport, calls = recording_transport([httpx.Response(503), httpx.Response(202)])
+    client = AsyncGitHubClient(token=TOKEN, transport=transport)
+
+    await client.cancel_workflow_run("o", "r", 42)
+
+    assert len(calls) == 2
+
+
 @pytest.mark.parametrize("case", ENDPOINT_CALLS, ids=lambda case: case.id)
 async def test_a_request_that_never_left_is_replayed_by_every_endpoint(case) -> None:
     """A refused connection proves GitHub never saw the request, so even a create can safely repeat.

@@ -326,6 +326,11 @@ MIRROR_CALLS = [
     ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
     ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
     (
+        'create_pr_review_comment',
+        lambda f, _: f.create_pr_review_comment('o', 'r', 1, 'body', 'abc123', 'file.py', line=10, side='RIGHT'),
+        {'commit_id': 'abc123', 'line': 10},
+    ),
+    (
         'relax_rate_limits',
         lambda f, _: f.relax_rate_limits(max_wait_seconds=2.0, max_rate=10_000.0),
         {'max_rate': 10_000.0},
@@ -379,6 +384,28 @@ def test_every_mirror_is_in_the_call_table():
     }
 
     assert {name for name, _, _ in MIRROR_CALLS} == mirrors
+
+
+def test_every_client_method_has_a_mirror():
+    """A client method with no mirror is the one gap the other two checks cannot see.
+
+    They compare the fake against the call table and the exemption list against the client, so a
+    method that exists only on the real client is absent from both sides of both. That is how a
+    caller reached a mirror that was never written: the code raised `AttributeError` mid-run and the
+    test around it still passed.
+    """
+    real = {
+        name
+        for name, member in vars(AsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member)
+    }
+    fake = {
+        name
+        for name, member in vars(FakeAsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member)
+    }
+
+    assert real - NON_MIRRORS <= fake
 
 
 def test_no_real_client_method_is_excused_from_the_table():
