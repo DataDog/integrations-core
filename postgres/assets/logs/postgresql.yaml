@@ -149,8 +149,8 @@ pipeline:
           pgprefix_unparsed %{data:message}
     # ════════════════════════════════════════════════════════════════════
     # Stage 2 promotes jsonlog-compatible fields to standard attributes. Duration
-    # extraction precedes the message remapper so it works for both raw prefix
-    # lines and jsonlog messages, and rewrites `message` without the duration.
+    # is copied to an attribute and left in `message`, so the body stays byte-for-byte
+    # what Postgres emitted and downstream log parsers see the shape they expect.
     # Scaling happens only in the arithmetic processor at the end of this stage.
     - type: grok-parser
       name: Extract `duration` from `message`
@@ -160,8 +160,8 @@ pipeline:
         supportRules: |
         matchRules: |
           # `%{data}` is lazy; a greedy `.*` anchors on the LAST `duration: N ms`,
-          # which query text can supply. The optional tail leaves a bare duration alone.
-          pg_duration %{data}duration:\s+%{number:duration}\s+ms(?:\s+%{data:message})?
+          # which query text can supply. Captures nothing into `message`.
+          pg_duration %{data}duration:\s+%{number:duration}\s+ms%{data}
       samples:
         - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
         - '2025-09-16 18:26:45.429 UTC:1.2.3.4(31674):p@p:[87]:1:00000:2025-09-16 18:25:58 UTC:5/2050:0:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
@@ -201,10 +201,8 @@ pipeline:
       grok:
         supportRules: |
         matchRules: |
-          # The unanchored rule supports raw lines preserved by the Stage 1 fallback.
-          pg_statement statement:\s+%{data:db.statement}
-
-          pg_statement_unanchored .*statement:\s+%{data:db.statement}
+          # Lazy: a greedy `.*` would take a `statement:` inside the query text.
+          pg_statement %{data}statement:\s+%{data:db.statement}
       samples:
         - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
         - 'statement: SELECT 2 AS c02;'
