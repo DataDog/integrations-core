@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
     node.vm.provision "shell", inline: <<-SHELL, run: "always"
       sudo apt update
       {{ agent_install_env_vars_str }} bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+{{ systemd_env_vars_str }}
       sudo service datadog-agent start && echo "Agent started successfully"
       echo "VM {{ vm_hostname }} is ready"
     SHELL

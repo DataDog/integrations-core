@@ -176,6 +176,15 @@ class VagrantAgent(AgentInterface):
             else ""
         )
 
+        # The Agent runs as a systemd service, which does not source login-shell profile scripts,
+        # so persist the env vars in the service's EnvironmentFile to make sure the Agent receives them.
+        # The heredoc terminators must stay at the start of the line.
+        systemd_env_vars_str = ""
+        if exported_env_vars and not self._is_windows_vm:
+            systemd_env_vars_str = "sudo tee /etc/datadog-agent/environment > /dev/null <<EOF\n"
+            systemd_env_vars_str += "\n".join(f"{key}={value}" for key, value in sorted(exported_env_vars.items()))
+            systemd_env_vars_str += "\nEOF\nsudo chmod 600 /etc/datadog-agent/environment"
+
         vm_hostname = self._vm_name  # Already sanitized and unique
         vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
 
@@ -198,6 +207,7 @@ class VagrantAgent(AgentInterface):
 
         return template.render(
             exported_env_vars_str=exported_env_vars_str,
+            systemd_env_vars_str=systemd_env_vars_str,
             vagrant_box=vagrant_box,
             synced_folders_str=synced_folders_str,
             vm_hostname=vm_hostname,

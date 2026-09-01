@@ -324,6 +324,74 @@ class TestStart:
         assert 'export DD_PROXY_HTTP="http://localhost:8080"' in exported_env_vars_str
         assert 'export DD_PROXY_HTTPS="https://localhost:4443"' in exported_env_vars_str
 
+    def test_persists_env_vars_in_agent_service_environment_file(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+        mocker,
+        mock_env_data_storage,
+        mock_vagrantfile_template,
+        mock_platform_run,
+        vagrant_env_cleanup,
+    ):
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        integration = 'glusterfs'
+        environment = 'py3.12'
+        metadata = {}
+
+        agent = VagrantAgent(app, get_integration(integration), environment, metadata, config_file)
+        agent.start(agent_build='', local_packages={}, env_vars={'DD_LOGS_ENABLED': 'true'})
+
+        # The Agent runs as a systemd service, which does not source login-shell profile scripts,
+        # so the env vars must be persisted in the service's EnvironmentFile.
+        mock_vagrantfile_template.render.assert_called_once()
+        render_kwargs = mock_vagrantfile_template.render.call_args.kwargs
+        systemd_env_vars_str = render_kwargs['systemd_env_vars_str']
+        assert systemd_env_vars_str.startswith('sudo tee /etc/datadog-agent/environment > /dev/null <<EOF\n')
+        assert 'DD_LOGS_ENABLED=true' in systemd_env_vars_str
+        assert 'DD_APM_ENABLED=false' in systemd_env_vars_str
+        assert 'DD_API_KEY=' in systemd_env_vars_str
+        assert systemd_env_vars_str.endswith('\nEOF\nsudo chmod 600 /etc/datadog-agent/environment')
+
+    @pytest.mark.parametrize(
+        'guest_os, expected_systemd_env_vars_str',
+        [
+            pytest.param(None, 'sudo tee /etc/datadog-agent/environment > /dev/null <<EOF\n', id='linux'),
+            pytest.param('windows', '', id='windows'),
+        ],
+    )
+    def test_systemd_environment_file_by_guest_os(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+        mocker,
+        mock_env_data_storage,
+        mock_vagrantfile_template,
+        mock_platform_run,
+        vagrant_env_cleanup,
+        guest_os,
+        expected_systemd_env_vars_str,
+    ):
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        integration = 'glusterfs'
+        environment = 'py3.12'
+        metadata = {'vagrant_guest_os': guest_os} if guest_os else {}
+
+        agent = VagrantAgent(app, get_integration(integration), environment, metadata, config_file)
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+        mock_vagrantfile_template.render.assert_called_once()
+        render_kwargs = mock_vagrantfile_template.render.call_args.kwargs
+        assert render_kwargs['systemd_env_vars_str'].startswith(expected_systemd_env_vars_str)
+
     def test_executes_start_commands_after_vagrant_up(
         self,
         app,
