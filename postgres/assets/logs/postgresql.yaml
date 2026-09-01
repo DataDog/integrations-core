@@ -412,6 +412,25 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
+    - type: grok-parser
+      name: 'Stage 3 (quarantined): promote `remote_host` to `network.client.hostname` when it is not an IP'
+      enabled: true
+      source: remote_host
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_client_local %{regex("\\[local\\]"):network.client.hostname}
+
+          pg_client_fqdn %{regex("[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.[A-Za-z][A-Za-z0-9-]*"):network.client.hostname}
+
+          pg_client_hostname %{regex("[A-Za-z][A-Za-z0-9_-]*"):network.client.hostname}
+      samples:
+        - '[local]'
+        - db-client.internal
+        - localhost
+        - 172.17.0.1
+        - fd42::3
+        - 2001:db8::3
     - type: attribute-remapper
       name: Map `state_code` to `sql_state`
       enabled: true
