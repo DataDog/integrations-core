@@ -8,10 +8,9 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.intersystems_iris import IrisCheck
 
-from .common import unconditional_metadata_metrics
+from .common import assert_metrics_match_metadata
 
 
 @pytest.mark.integration
@@ -28,16 +27,6 @@ def test_check(
     # The Docker environment auto-enables interoperability SAM sampling and starts a demo
     # production with traffic (see tests/docker/init/iris-init.sh), so this single endpoint
     # exposes the base families alongside the always-on `iris_interop_*` interface family.
-    # Nothing may be submitted that metadata.csv does not declare.
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-
-    # The container is a standalone, non-mirrored instance with no ECP peers, so the catalog's
-    # topology-gated families cannot appear here; everything else it declares must have been
-    # collected. See `common.py` for what is excused and why.
-    aggregator.assert_metrics_using_metadata(
-        unconditional_metadata_metrics(get_metadata_metrics()),
-        check_submission_type=True,
-        check_symmetric_inclusion=True,
-    )
+    assert_metrics_match_metadata(aggregator)
 
     aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)

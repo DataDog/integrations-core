@@ -10,32 +10,21 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.intersystems_iris import IrisCheck
 
-from .common import unconditional_metadata_metrics
+from .common import assert_metrics_match_metadata
 
 FIXTURE_PATH = str(Path(__file__).parent / 'fixtures' / 'metrics.txt')
 
-# The fixture was captured with a running interoperability production and from an ECP data
-# server with a live client attached, so the always-on `iris_interop_*` interface family and the
-# per-connection `iris_ecps_*` family are both present alongside the base families.
-FIXTURE_TOPOLOGY_PREFIXES = ('intersystems_iris.ecps.',)
+# The fixture was captured from a busy ECP data server with a live client attached and a
+# running interoperability production, so the always-on `iris_interop_*` interface family, the
+# per-connection `iris_ecps_*` family and the work queue family are all present alongside the
+# base families.
+FIXTURE_EMITTED_PREFIXES = ('intersystems_iris.ecps.', 'intersystems_iris.wqm.')
 
 
 def test_check(scraped_aggregator: AggregatorStub) -> None:
-    # Nothing may be submitted that metadata.csv does not declare, and the declared types must
-    # match what the check submits.
-    scraped_aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-
-    # Conversely, every metric the catalog declares for this exposition must have been
-    # collected -- this is what catches a metadata.csv entry with no emitter behind it. The
-    # families the fixture cannot cover are documented in `common.py`.
-    scraped_aggregator.assert_metrics_using_metadata(
-        unconditional_metadata_metrics(get_metadata_metrics(), FIXTURE_TOPOLOGY_PREFIXES),
-        check_submission_type=True,
-        check_symmetric_inclusion=True,
-    )
+    assert_metrics_match_metadata(scraped_aggregator, FIXTURE_EMITTED_PREFIXES)
 
     scraped_aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)
 
@@ -141,7 +130,10 @@ def test_health_service_check_critical_then_ok(
     """
     mock_http_response(status_code=500)
     check = IrisCheck('intersystems_iris', {}, [instance])
-    with pytest.raises(Exception):
+    # `dd_run_check` re-raises the check's failure as a bare `Exception` carrying the formatted
+    # traceback, so the concrete `requests.HTTPError` never reaches us -- match on the message to
+    # confirm the scrape really is what failed, rather than accepting any error at all.
+    with pytest.raises(Exception, match='500 Server Error'):
         dd_run_check(check)
 
     aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.CRITICAL)

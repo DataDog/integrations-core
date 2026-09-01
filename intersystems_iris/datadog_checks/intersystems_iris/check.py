@@ -5,6 +5,7 @@
 from collections import ChainMap
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.metrics_mapping import MetricsMapping
@@ -50,7 +51,7 @@ class IrisCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     METRICS_MAP = (MetricsMapping(Path('metrics/default.yaml')),)
 
-    def get_config_with_defaults(self, config: InstanceType) -> Mapping:
+    def get_config_with_defaults(self, config: InstanceType) -> Mapping[str, Any]:
         # Merge per label rather than letting the instance replace the whole mapping, so an
         # instance that renames one label does not silently lose the collision-avoiding renames
         # it did not mention. The copy also keeps the shared module-level map immutable.
