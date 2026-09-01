@@ -167,9 +167,21 @@ pipeline:
 
           pgprefix_verbose_user_backend %{_pg_timestamp} \[%{_pg_pid}\]\[%{_pg_backend_type}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
 
-          # atdb / default / pganalyze cannot be told apart on a background-process
-          # line -- %q truncates all three to exactly '%m [%p] '. Ordered
-          # most-specific-first; keep them adjacent and in this order.
+          # atdb / default / pganalyze are a %q-truncation equivalence class: on a
+          # background-process line %q collapses all three to exactly '%m [%p] ',
+          # so the bytes are identical and NO ordering can attribute them to the
+          # right format. That is a property of %q, not a defect -- timestamp, pid,
+          # severity and message is all such a line carries, and all three rules
+          # produce exactly that, so whichever wins the field map is the same.
+          #
+          # On a FULL line they do not collide: atdb needs `user@db` (an `@`), and
+          # pganalyze needs `[user=..,db=..,app=..]`, which atdb's optional group
+          # cannot match and _pg_body cannot start on. Verified live -- pganalyze
+          # populates user/dbname/application_name from last position.
+          #
+          # The order below is alphabetical, the tie-break from the ordering
+          # derivation, NOT most-specific-first. Keep them adjacent so the
+          # equivalence class stays visible.
           pgprefix_verbose_user_host %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user},host=%{_pg_remote_host} %{_pg_body}
 
           pgprefix_verbose_user %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
