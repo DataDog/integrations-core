@@ -2000,18 +2000,33 @@ def test_stream_maps_server_statement_cancellation_to_timeout(monkeypatch):
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
 
 
-def test_stream_reports_cancellation_as_retryable(monkeypatch):
+@pytest.mark.parametrize('is_cancelled', [lambda: True, True], ids=['callable', 'bool'])
+def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     check = make_check(pool=pool)
-    check.is_cancelled = lambda: True
+    # Both runtime shapes: the Agent check object carries a bool ``is_cancelled`` attribute;
+    # a callable hook is the other supported shape. Both must fail the run as retryable.
+    check.is_cancelled = is_cancelled
 
     events = collect_events(valid_request(), check, client=FakeUploadClient())
 
     assert_failed_event(events, 'cancelled')
     assert event_metadata(events[-1])['error']['retryable'] is True
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
+
+
+def test_stream_proceeds_when_bool_is_cancelled_is_false(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(pool=pool)
+    check.is_cancelled = False
+
+    events = collect_events(valid_request(), check, client=FakeUploadClient())
+
+    assert_success(events)
 
 
 def test_stream_ignores_check_without_cancel_hook(monkeypatch):

@@ -923,8 +923,14 @@ def _raise_if_timed_out(deadline: float) -> None:
 
 
 def _raise_if_cancelled(check: 'PostgreSql') -> None:
+    # The Agent runtime exposes ``is_cancelled`` as a plain bool attribute on the check
+    # object, while other runtimes (and test doubles) may expose a callable hook; honor
+    # both shapes. An absent attribute carries no cancellation signal.
     is_cancelled = getattr(check, 'is_cancelled', None)
-    if is_cancelled is not None and is_cancelled():
+    if is_cancelled is None:
+        return
+    cancelled = is_cancelled() if callable(is_cancelled) else is_cancelled
+    if cancelled:
         raise RemoteQueryFailure('cancelled', 'Remote query run was cancelled.', retryable=True)
 
 
