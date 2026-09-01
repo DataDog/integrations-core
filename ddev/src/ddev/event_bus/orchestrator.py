@@ -198,7 +198,7 @@ class EventBusOrchestrator(ABC):
         ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
         loop awaits them directly and would otherwise be held for as long as they take.
         """
-        if self._stopping.is_set():
+        if self.stopping:
             return
 
         self._logger.info("Stop requested; the bus will wind down")
