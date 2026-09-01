@@ -16,13 +16,9 @@ from .common import COMPOSE_FILE, MOCKED_FRONTEND_INSTANCE, MOCKED_WORKER_INSTAN
 @pytest.fixture(autouse=True)
 def gpu_monitoring_enabled():
     # Dynamo only runs when the Agent's GPU monitoring SKU is enabled; default it on for tests
-    # that aren't specifically exercising that gating behavior.
-    real_get_config = datadog_agent.get_config
-
-    def fake_get_config(option):
-        return 'true' if option == 'gpu.enabled' else real_get_config(option)
-
-    with mock.patch('datadog_checks.dynamo.check.datadog_agent.get_config', side_effect=fake_get_config):
+    # that aren't specifically exercising that gating behavior. Patching the one key on the stub's
+    # config dict leaves every other option answering normally.
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': True}):
         yield
 
 

@@ -1,3 +1,20 @@
+# Synthesized fixture — NOT a live capture.
+#
+# Dynamo cannot run in CI (it needs GPUs, etcd, NATS, and model weights, and this repo has no GPU
+# runner), so metric names, types, labels, and histogram bucket ladders here are transcribed from
+# the upstream source rather than scraped from a running frontend:
+#
+#   ai-dynamo/dynamo @ fb7169ed65d9586c16a13c837564df568e61a25e (v1.4.2)
+#     lib/llm/src/http/service/metrics.rs          — metric types, labels, bucket ladders
+#     lib/runtime/src/metrics/prometheus_names.rs  — metric name and label name constants
+#
+# Bucket ladders: the explicit arrays (tokenizer_latency_ms, images/videos/audio_per_request,
+# image_tokens_per_request) are copied verbatim from metrics.rs. input_sequence_tokens and
+# output_sequence_tokens are generated upstream by generate_log_buckets, so they are reproduced
+# here from its documented defaults (50..128000 over 12 buckets, and 50..32000 over 10).
+#
+# Sample values are synthetic. Replace this file with a real trimmed scrape when a Dynamo
+# deployment is available; that is strictly better than this and should be preferred.
 # HELP dynamo_frontend_requests_total frontend.requests.count
 # TYPE dynamo_frontend_requests_total counter
 dynamo_frontend_requests_total{model="meta-llama/Llama-3-8B-Instruct"} 42
@@ -30,12 +47,40 @@ dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Ins
 dynamo_frontend_request_duration_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
 dynamo_frontend_request_duration_seconds_count{model="meta-llama/Llama-3-8B-Instruct"} 30
 dynamo_frontend_request_duration_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
-# HELP dynamo_frontend_input_sequence_tokens frontend.input_sequence_tokens
-# TYPE dynamo_frontend_input_sequence_tokens gauge
-dynamo_frontend_input_sequence_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
-# HELP dynamo_frontend_output_sequence_tokens frontend.output_sequence_tokens
-# TYPE dynamo_frontend_output_sequence_tokens gauge
-dynamo_frontend_output_sequence_tokens{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_input_sequence_tokens Input sequence length in tokens
+# TYPE dynamo_frontend_input_sequence_tokens histogram
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0"} 8
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="50"} 15
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="100"} 21
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="210"} 26
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="430"} 30
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="870"} 33
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1800"} 35
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="3600"} 36
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="7400"} 36
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="15000"} 36
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="31000"} 36
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="63000"} 36
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="130000"} 36
+dynamo_frontend_input_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 36
+dynamo_frontend_input_sequence_tokens_count{model="meta-llama/Llama-3-8B-Instruct"} 36
+dynamo_frontend_input_sequence_tokens_sum{model="meta-llama/Llama-3-8B-Instruct"} 13534.0
+# HELP dynamo_frontend_output_sequence_tokens Output sequence length in tokens
+# TYPE dynamo_frontend_output_sequence_tokens histogram
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0"} 8
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="50"} 15
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="100"} 21
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="210"} 26
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="430"} 30
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="880"} 33
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1800"} 35
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="3700"} 36
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="7600"} 36
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="16000"} 36
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="32000"} 36
+dynamo_frontend_output_sequence_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 36
+dynamo_frontend_output_sequence_tokens_count{model="meta-llama/Llama-3-8B-Instruct"} 36
+dynamo_frontend_output_sequence_tokens_sum{model="meta-llama/Llama-3-8B-Instruct"} 13664.0
 # HELP dynamo_frontend_output_tokens_total frontend.output_tokens.count
 # TYPE dynamo_frontend_output_tokens_total counter
 dynamo_frontend_output_tokens_total{model="meta-llama/Llama-3-8B-Instruct"} 42
@@ -81,9 +126,36 @@ dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-In
 dynamo_frontend_embedding_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 30
 dynamo_frontend_embedding_latency_seconds_count{model="meta-llama/Llama-3-8B-Instruct"} 30
 dynamo_frontend_embedding_latency_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
-# HELP dynamo_frontend_tokenizer_latency_ms frontend.tokenizer_latency_ms
-# TYPE dynamo_frontend_tokenizer_latency_ms gauge
-dynamo_frontend_tokenizer_latency_ms{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_tokenizer_latency_ms Tokenizer operation latency in milliseconds
+# TYPE dynamo_frontend_tokenizer_latency_ms histogram
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="0.5"} 8
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="1"} 15
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="2"} 21
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="4"} 26
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="8"} 30
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="16"} 33
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="32"} 35
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="64"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="128"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="256"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="512"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="tokenize",le="+Inf"} 36
+dynamo_frontend_tokenizer_latency_ms_count{operation="tokenize"} 36
+dynamo_frontend_tokenizer_latency_ms_sum{operation="tokenize"} 251.0
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="0.5"} 8
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="1"} 15
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="2"} 21
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="4"} 26
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="8"} 30
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="16"} 33
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="32"} 35
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="64"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="128"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="256"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="512"} 36
+dynamo_frontend_tokenizer_latency_ms_bucket{operation="detokenize",le="+Inf"} 36
+dynamo_frontend_tokenizer_latency_ms_count{operation="detokenize"} 36
+dynamo_frontend_tokenizer_latency_ms_sum{operation="detokenize"} 251.0
 # HELP dynamo_frontend_cached_tokens frontend.cached_tokens
 # TYPE dynamo_frontend_cached_tokens histogram
 dynamo_frontend_cached_tokens_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
@@ -127,18 +199,89 @@ dynamo_frontend_non_max_overlap_selections_total{model="meta-llama/Llama-3-8B-In
 # HELP dynamo_frontend_overlap_blocks_lost frontend.overlap_blocks_lost
 # TYPE dynamo_frontend_overlap_blocks_lost gauge
 dynamo_frontend_overlap_blocks_lost{model="meta-llama/Llama-3-8B-Instruct"} 3.14
-# HELP dynamo_frontend_images_per_request frontend.images_per_request
-# TYPE dynamo_frontend_images_per_request gauge
-dynamo_frontend_images_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
-# HELP dynamo_frontend_videos_per_request frontend.videos_per_request
-# TYPE dynamo_frontend_videos_per_request gauge
-dynamo_frontend_videos_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
-# HELP dynamo_frontend_audio_per_request frontend.audio_per_request
-# TYPE dynamo_frontend_audio_per_request gauge
-dynamo_frontend_audio_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
-# HELP dynamo_frontend_image_tokens_per_request frontend.image_tokens_per_request
-# TYPE dynamo_frontend_image_tokens_per_request gauge
-dynamo_frontend_image_tokens_per_request{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# HELP dynamo_frontend_images_per_request Number of images per request
+# TYPE dynamo_frontend_images_per_request histogram
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0"} 8
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1"} 15
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2"} 21
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="3"} 26
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="4"} 30
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5"} 33
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="6"} 35
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="7"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="8"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="9"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="20"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="30"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="40"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="50"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="100"} 36
+dynamo_frontend_images_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 36
+dynamo_frontend_images_per_request_count{model="meta-llama/Llama-3-8B-Instruct"} 36
+dynamo_frontend_images_per_request_sum{model="meta-llama/Llama-3-8B-Instruct"} 88.0
+# HELP dynamo_frontend_videos_per_request Number of videos per request
+# TYPE dynamo_frontend_videos_per_request histogram
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0"} 8
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1"} 15
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2"} 21
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="3"} 26
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="4"} 30
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5"} 33
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="6"} 35
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="7"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="8"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="9"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="20"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="30"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="40"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="50"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="100"} 36
+dynamo_frontend_videos_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 36
+dynamo_frontend_videos_per_request_count{model="meta-llama/Llama-3-8B-Instruct"} 36
+dynamo_frontend_videos_per_request_sum{model="meta-llama/Llama-3-8B-Instruct"} 88.0
+# HELP dynamo_frontend_audio_per_request Number of audio clips per request
+# TYPE dynamo_frontend_audio_per_request histogram
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0"} 8
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1"} 15
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2"} 21
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="3"} 26
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="4"} 30
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="5"} 33
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="6"} 35
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="7"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="8"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="9"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="10"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="20"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="30"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="40"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="50"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="100"} 36
+dynamo_frontend_audio_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 36
+dynamo_frontend_audio_per_request_count{model="meta-llama/Llama-3-8B-Instruct"} 36
+dynamo_frontend_audio_per_request_sum{model="meta-llama/Llama-3-8B-Instruct"} 88.0
+# HELP dynamo_frontend_image_tokens_per_request Number of image tokens per request
+# TYPE dynamo_frontend_image_tokens_per_request histogram
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="4"} 8
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="8"} 15
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="16"} 21
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="32"} 26
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="64"} 30
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="128"} 33
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="256"} 35
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="512"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="1024"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="2048"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="4096"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="8192"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="16384"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="32768"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="65536"} 36
+dynamo_frontend_image_tokens_per_request_bucket{model="meta-llama/Llama-3-8B-Instruct",le="+Inf"} 36
+dynamo_frontend_image_tokens_per_request_count{model="meta-llama/Llama-3-8B-Instruct"} 36
+dynamo_frontend_image_tokens_per_request_sum{model="meta-llama/Llama-3-8B-Instruct"} 2008
 # HELP dynamo_frontend_model_total_kv_blocks frontend.model.total_kv_blocks
 # TYPE dynamo_frontend_model_total_kv_blocks gauge
 dynamo_frontend_model_total_kv_blocks{model="meta-llama/Llama-3-8B-Instruct"} 3.14

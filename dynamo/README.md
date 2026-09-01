@@ -3,12 +3,12 @@
 ## Overview
 
 [NVIDIA Dynamo][1] is an open-source, distributed inference-serving framework for large language
-models. It routes requests across disaggregated prefill/decode workers, manages KV cache reuse,
+models. It routes requests across disaggregated prefill and decode workers, manages KV cache reuse,
 and supports backends such as vLLM, SGLang, and TensorRT-LLM.
 
 This check collects metrics from Dynamo's built-in Prometheus endpoints, giving you visibility into
 request throughput, latency (including time to first token and inter-token latency), queueing, KV
-cache hit rate, and worker/task health across your Dynamo deployment.
+cache hit rate, and worker and task health across your Dynamo deployment.
 
 **Minimum Agent version:** 7.84.0
 
@@ -17,6 +17,19 @@ cache hit rate, and worker/task health across your Dynamo deployment.
 Follow the instructions below to install and configure this check for an Agent running on a host.
 For containerized environments, see the [Autodiscovery integration templates][3] for guidance on
 applying these instructions.
+
+### Prerequisites
+
+This integration is part of [GPU monitoring][10] and only runs when GPU monitoring is enabled in the
+Datadog Agent configuration:
+
+```yaml
+gpu:
+  enabled: true
+```
+
+The equivalent environment variable is `DD_GPU_ENABLED=true`. When GPU monitoring is off, the check
+skips every configured instance and reports no metrics.
 
 ### Installation
 
@@ -33,7 +46,7 @@ its own instance if you want both:
 - **Backend workers** (`python -m dynamo.vllm`, `python -m dynamo.sglang`, `python -m dynamo.trtllm`,
   etc.), which expose a separate system status server enabled via the `DYN_SYSTEM_PORT` environment
   variable (commonly `8081` for local development, or `9090` under the Kubernetes operator). These
-  report worker-level metrics such as task/queue health and KV cache block usage under the
+  report worker-level metrics such as task and queue health and KV cache block usage under the
   `dynamo.component.*` namespace.
 
 1. Edit the `dynamo.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's
@@ -43,6 +56,11 @@ its own instance if you want both:
    [sample dynamo.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+This check matches Dynamo's default metric names. If your deployment sets `DYN_METRICS_PREFIX` to
+rename the frontend's `dynamo_frontend_` prefix, set `raw_metric_prefix` on the frontend instance to
+that value so the metrics still map. Worker metrics are unaffected: Dynamo always emits those with
+the `dynamo_component_` prefix.
 
 ### Validation
 
@@ -76,3 +94,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/dynamo/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/dynamo/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/gpu_monitoring/

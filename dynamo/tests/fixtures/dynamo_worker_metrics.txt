@@ -1,122 +1,133 @@
+# Synthesized fixture — NOT a live capture. See dynamo_frontend_metrics.txt for the full rationale.
+#
+# Transcribed from ai-dynamo/dynamo @ fb7169ed65d9586c16a13c837564df568e61a25e (v1.4.2),
+# lib/runtime/src/metrics/prometheus_names.rs.
+#
+# Label names use the auto-injected form the runtime actually emits — dynamo_component,
+# dynamo_namespace, dynamo_endpoint (see the `labels` module in prometheus_names.rs) — not the
+# bare component/namespace/endpoint spellings. The OpenMetrics check turns label names into tag
+# names verbatim, so anything built off this file must target the dynamo_-prefixed keys.
+#
+# Sample values are synthetic.
 # HELP dynamo_component_requests_total component.requests.count
 # TYPE dynamo_component_requests_total counter
-dynamo_component_requests_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_requests_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_request_bytes_total component.request_bytes.count
 # TYPE dynamo_component_request_bytes_total counter
-dynamo_component_request_bytes_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_request_bytes_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_response_bytes_total component.response_bytes.count
 # TYPE dynamo_component_response_bytes_total counter
-dynamo_component_response_bytes_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_response_bytes_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_inflight_requests component.inflight_requests
 # TYPE dynamo_component_inflight_requests gauge
-dynamo_component_inflight_requests{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_inflight_requests{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_request_duration_seconds component.request_duration.seconds
 # TYPE dynamo_component_request_duration_seconds histogram
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.025"} 3
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.05"} 6
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.1"} 9
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.25"} 12
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.5"} 15
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="1.0"} 18
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="2.5"} 21
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="5.0"} 24
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="10.0"} 27
-dynamo_component_request_duration_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="+Inf"} 30
-dynamo_component_request_duration_seconds_count{component="backend",endpoint="generate",namespace="dynamo"} 30
-dynamo_component_request_duration_seconds_sum{component="backend",endpoint="generate",namespace="dynamo"} 5.4
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_request_duration_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_request_duration_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
 # HELP dynamo_component_errors_total component.errors.count
 # TYPE dynamo_component_errors_total counter
-dynamo_component_errors_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_errors_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_cancellation_total component.cancellation.count
 # TYPE dynamo_component_cancellation_total counter
-dynamo_component_cancellation_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_cancellation_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_network_transit_seconds component.network_transit.seconds
 # TYPE dynamo_component_network_transit_seconds histogram
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.025"} 3
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.05"} 6
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.1"} 9
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.25"} 12
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.5"} 15
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="1.0"} 18
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="2.5"} 21
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="5.0"} 24
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="10.0"} 27
-dynamo_component_network_transit_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="+Inf"} 30
-dynamo_component_network_transit_seconds_count{component="backend",endpoint="generate",namespace="dynamo"} 30
-dynamo_component_network_transit_seconds_sum{component="backend",endpoint="generate",namespace="dynamo"} 5.4
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_network_transit_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_network_transit_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
 # HELP dynamo_component_time_to_first_response_seconds component.time_to_first_response.seconds
 # TYPE dynamo_component_time_to_first_response_seconds histogram
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.025"} 3
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.05"} 6
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.1"} 9
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.25"} 12
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.5"} 15
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="1.0"} 18
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="2.5"} 21
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="5.0"} 24
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="10.0"} 27
-dynamo_component_time_to_first_response_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="+Inf"} 30
-dynamo_component_time_to_first_response_seconds_count{component="backend",endpoint="generate",namespace="dynamo"} 30
-dynamo_component_time_to_first_response_seconds_sum{component="backend",endpoint="generate",namespace="dynamo"} 5.4
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_time_to_first_response_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_time_to_first_response_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
 # HELP dynamo_component_queue_depth component.queue_depth
 # TYPE dynamo_component_queue_depth gauge
-dynamo_component_queue_depth{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_queue_depth{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_queue_capacity component.queue_capacity
 # TYPE dynamo_component_queue_capacity gauge
-dynamo_component_queue_capacity{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_queue_capacity{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_enqueue_rejected_total component.enqueue_rejected.count
 # TYPE dynamo_component_enqueue_rejected_total counter
-dynamo_component_enqueue_rejected_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_enqueue_rejected_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_permit_wait_seconds component.permit_wait.seconds
 # TYPE dynamo_component_permit_wait_seconds histogram
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.025"} 3
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.05"} 6
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.1"} 9
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.25"} 12
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="0.5"} 15
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="1.0"} 18
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="2.5"} 21
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="5.0"} 24
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="10.0"} 27
-dynamo_component_permit_wait_seconds_bucket{component="backend",endpoint="generate",namespace="dynamo",le="+Inf"} 30
-dynamo_component_permit_wait_seconds_count{component="backend",endpoint="generate",namespace="dynamo"} 30
-dynamo_component_permit_wait_seconds_sum{component="backend",endpoint="generate",namespace="dynamo"} 5.4
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_permit_wait_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_permit_wait_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
 # HELP dynamo_component_pool_active_tasks component.pool_active_tasks
 # TYPE dynamo_component_pool_active_tasks gauge
-dynamo_component_pool_active_tasks{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_pool_active_tasks{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_pool_capacity component.pool_capacity
 # TYPE dynamo_component_pool_capacity gauge
-dynamo_component_pool_capacity{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_pool_capacity{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_uptime_seconds component.uptime_seconds
 # TYPE dynamo_component_uptime_seconds gauge
-dynamo_component_uptime_seconds{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_uptime_seconds{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_tasks_issued_total component.tasks_issued.count
 # TYPE dynamo_component_tasks_issued_total counter
-dynamo_component_tasks_issued_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_tasks_issued_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_tasks_started_total component.tasks_started.count
 # TYPE dynamo_component_tasks_started_total counter
-dynamo_component_tasks_started_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_tasks_started_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_tasks_success_total component.tasks_success.count
 # TYPE dynamo_component_tasks_success_total counter
-dynamo_component_tasks_success_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_tasks_success_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_tasks_cancelled_total component.tasks_cancelled.count
 # TYPE dynamo_component_tasks_cancelled_total counter
-dynamo_component_tasks_cancelled_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_tasks_cancelled_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_tasks_failed_total component.tasks_failed.count
 # TYPE dynamo_component_tasks_failed_total counter
-dynamo_component_tasks_failed_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_tasks_failed_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_tasks_rejected_total component.tasks_rejected.count
 # TYPE dynamo_component_tasks_rejected_total counter
-dynamo_component_tasks_rejected_total{component="backend",endpoint="generate",namespace="dynamo"} 42
+dynamo_component_tasks_rejected_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
 # HELP dynamo_component_total_blocks component.kv_cache.total_blocks
 # TYPE dynamo_component_total_blocks gauge
-dynamo_component_total_blocks{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_total_blocks{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_gpu_cache_usage_percent component.kv_cache.gpu_cache_usage_percent
 # TYPE dynamo_component_gpu_cache_usage_percent gauge
-dynamo_component_gpu_cache_usage_percent{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_gpu_cache_usage_percent{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP dynamo_component_kv_cache_hit_rate component.kv_cache.hit_rate
 # TYPE dynamo_component_kv_cache_hit_rate gauge
-dynamo_component_kv_cache_hit_rate{component="backend",endpoint="generate",namespace="dynamo"} 3.14
+dynamo_component_kv_cache_hit_rate{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
 # HELP trtllm_kv_cache_hit_rate component.kv_cache.hit_rate (TensorRT-LLM engine-native name)
 # TYPE trtllm_kv_cache_hit_rate gauge
 trtllm_kv_cache_hit_rate{dynamo_component="tensorrt_llm",dynamo_endpoint="generate",dynamo_namespace="dynamo",engine_type="trtllm",model="Qwen/Qwen3-0.6B",model_name="Qwen/Qwen3-0.6B"} 0.42
