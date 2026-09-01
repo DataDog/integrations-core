@@ -110,42 +110,58 @@ pipeline:
           # This duplicates pgprefix_datadog and stays first for compatibility.
           _prefix %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id}
         matchRules: |
+          # log_line_prefix = '%m [%p] %d %a %u %h %c '
           suggested_format %{_prefix} %{_pg_body}
 
           # The pid is absent from some startup and fatal lines.
+          # log_line_prefix = '%m [%p] ' (PostgreSQL's built-in default)
           default_format %{_pg_timestamp}\s+(?:\[%{_pg_pid}\]\s+)?%{_pg_body}
 
+          # log_line_prefix = '%t-%c-' (Azure Database for PostgreSQL default)
           pgprefix_azure %{_pg_timestamp}-%{_pg_session_id}-%{_pg_body}
 
+          # log_line_prefix = '<%m %r %a %d %u %p %c %x>' (synthetic bracketed test fixture, not a known vendor default)
           pgprefix_bracket <%{_pg_timestamp} %{_pg_remote} %{_pg_app_name} %{_pg_dbname} %{_pg_user} %{_pg_pid} %{_pg_session_id} %{_pg_ps}>%{_pg_body}
 
+          # log_line_prefix = '%m [%p] %d %a %u %h %c ' (same as suggested_format; kept for compatibility, see comment below)
           pgprefix_datadog %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id} %{_pg_body}
 
+          # log_line_prefix = ' sql_error_code = %e time_ms = "%m" pid="%p" proc_start_time="%s" session_id="%c" vtid="%v" tid="%x" log_line="%l" database="%d" connection_source="%r" user="%u" application_name="%a" ' (Heroku Postgres)
           pgprefix_heroku \s*sql_error_code = %{_pg_state_code} time_ms = "%{_pg_timestamp}" pid="%{_pg_pid}" proc_start_time="%{_pg_session_start}" session_id="%{_pg_session_id}" vtid="%{_pg_vxid}" tid="%{_pg_txid}" log_line="%{_pg_line_num}" (?:database="%{_pg_dbname}" connection_source="%{_pg_remote}" user="%{_pg_user}" application_name="%{_pg_app_name}" )?%{_pg_body}
 
+          # log_line_prefix = 'pid=%p,user=%u,db=%d,app=%a,client=%h ' (synthetic key-value test fixture, not a known vendor default)
           pgprefix_kv_client pid=%{_pg_pid},user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name},client=%{_pg_remote_host} %{_pg_body}
 
+          # log_line_prefix = '%t:%r:%u@%d:[%p]:' (Amazon RDS default)
           pgprefix_rds %{_pg_timestamp}:%{_pg_remote}:%{_pg_user}@%{_pg_dbname}:\[%{_pg_pid}\]:%{_pg_body}
 
+          # log_line_prefix = '%t:%r:%u@%d:[%p]:%l:%e:%s:%v:%x:%c:%a:' (RDS with the enhanced-logging fields enabled)
           pgprefix_rds_enhanced %{_pg_timestamp}:%{_pg_remote}:%{_pg_user}@%{_pg_dbname}:\[%{_pg_pid}\]:%{_pg_line_num}:%{_pg_state_code}:%{_pg_session_start}:%{_pg_vxid}:%{_pg_txid}:%{_pg_session_id}:(?:%{_pg_app_name}:)?%{_pg_body}
 
+          # log_line_prefix = '%m [%p][%b]: [%l-1] db=%d,user=%u '
           pgprefix_verbose_user_backend %{_pg_timestamp} \[%{_pg_pid}\]\[%{_pg_backend_type}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
 
           # With %q, atdb, default, and pganalyze background-process prefixes are
           # byte-identical and yield the same fields. Keep their rules adjacent;
           # their full-line forms remain distinguishable.
+          # log_line_prefix = '%m [%p]: [%l-1] db=%d,user=%u,host=%h '
           pgprefix_verbose_user_host %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user},host=%{_pg_remote_host} %{_pg_body}
 
+          # log_line_prefix = '%m [%p]: [%l-1] db=%d,user=%u '
           pgprefix_verbose_user %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
 
+          # log_line_prefix = '%m [%p] %q%u@%d '
           pgprefix_atdb %{_pg_timestamp} \[%{_pg_pid}\] (?:%{_pg_user}@%{_pg_dbname} )?%{_pg_body}
 
+          # log_line_prefix = '%m [%p] ' (identical form to default_format; kept as a distinct named rule for the pid-present case)
           pgprefix_default %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_body}
 
+          # log_line_prefix = '%m [%p] %q[user=%u,db=%d,app=%a] ' (pganalyze recommended prefix)
           pgprefix_pganalyze %{_pg_timestamp} \[%{_pg_pid}\] (?:\[user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name}\] )?%{_pg_body}
 
           # Keep the fallback last because matchRules are first-match-wins. It
           # preserves the raw line for best-effort extraction from unknown prefixes.
+          # Matches any log_line_prefix not covered above.
           pgprefix_unparsed %{data:message}
     # ════════════════════════════════════════════════════════════════════
     # Stage 2 promotes jsonlog-compatible fields to standard attributes. Duration
