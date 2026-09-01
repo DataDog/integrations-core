@@ -2,17 +2,48 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from collections.abc import Mapping
+from typing import Any
 
 import mock
 import pytest
+import requests
 import requests_kerberos
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import EnvVars
 
+from .common import RequestsTransport
+
 pytestmark = [pytest.mark.unit]
+
+
+class EnvironmentRecordingTransport(RequestsTransport):
+    def __init__(self, variable: str) -> None:
+        super().__init__()
+        self.variable = variable
+        self.values: list[str | None] = []
+
+    def send(
+        self,
+        request: requests.PreparedRequest,
+        stream: bool = False,
+        timeout: Any = None,
+        verify: bool | str = True,
+        cert: Any = None,
+        proxies: Mapping[str, str] | None = None,
+    ) -> requests.Response:
+        self.values.append(os.environ.get(self.variable))
+        return super().send(request, stream=stream, timeout=timeout, verify=verify, cert=cert, proxies=proxies)
+
+
+def _create_requests_client(instance: dict[str, object], transport: RequestsTransport) -> RequestsWrapper:
+    session = requests.Session()
+    session.mount('http://', transport)
+    http = RequestsWrapper(instance, {}, session=session)
+    http.persist_connections = True
+    return http
 
 
 def test_config_kerberos_legacy():
@@ -106,74 +137,62 @@ def test_config_kerberos_unknown():
 
 
 def test_config_kerberos_keytab_file():
-    instance = {'auth_type': 'kerberos', 'kerberos_keytab': '/test/file'}
-    init_config = {}
-
-    http = RequestsWrapper(instance, init_config)
+    instance = {'auth_type': 'kerberos', 'kerberos_auth': 'disabled', 'kerberos_keytab': '/test/file'}
+    transport = EnvironmentRecordingTransport('KRB5_CLIENT_KTNAME')
+    transport.respond()
+    http = _create_requests_client(instance, transport)
 
     assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=lambda *args, **kwargs: FakeHTTPResponse(text=os.environ.get('KRB5_CLIENT_KTNAME', '')),
-    ):
-        response = http.get('https://www.google.com')
-        assert response.text == '/test/file'
+    response = http.get('http://www.google.com')
 
+    assert response.status_code == 200
+    assert transport.values == ['/test/file']
     assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
 
 def test_config_kerberos_cache():
-    instance = {'auth_type': 'kerberos', 'kerberos_cache': '/test/file'}
-    init_config = {}
-
-    http = RequestsWrapper(instance, init_config)
+    instance = {'auth_type': 'kerberos', 'kerberos_auth': 'disabled', 'kerberos_cache': '/test/file'}
+    transport = EnvironmentRecordingTransport('KRB5CCNAME')
+    transport.respond()
+    http = _create_requests_client(instance, transport)
 
     assert os.environ.get('KRB5CCNAME') is None
 
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=lambda *args, **kwargs: FakeHTTPResponse(text=os.environ.get('KRB5CCNAME', '')),
-    ):
-        response = http.get('https://www.google.com')
-        assert response.text == '/test/file'
+    response = http.get('http://www.google.com')
 
+    assert response.status_code == 200
+    assert transport.values == ['/test/file']
     assert os.environ.get('KRB5CCNAME') is None
 
 
 def test_config_kerberos_cache_restores_rollback():
-    instance = {'auth_type': 'kerberos', 'kerberos_cache': '/test/file'}
-    init_config = {}
-
-    http = RequestsWrapper(instance, init_config)
+    instance = {'auth_type': 'kerberos', 'kerberos_auth': 'disabled', 'kerberos_cache': '/test/file'}
+    transport = EnvironmentRecordingTransport('KRB5CCNAME')
+    transport.respond()
+    http = _create_requests_client(instance, transport)
 
     with EnvVars({'KRB5CCNAME': 'old'}):
-        with mock.patch(
-            'requests.Session.get',
-            side_effect=lambda *args, **kwargs: FakeHTTPResponse(text=os.environ.get('KRB5CCNAME', '')),
-        ):
-            response = http.get('https://www.google.com')
-            assert response.text == '/test/file'
+        response = http.get('http://www.google.com')
 
+        assert response.status_code == 200
+        assert transport.values == ['/test/file']
         assert os.environ.get('KRB5CCNAME') == 'old'
 
 
 def test_config_kerberos_keytab_file_rollback():
-    instance = {'auth_type': 'kerberos', 'kerberos_keytab': '/test/file'}
-    init_config = {}
-
-    http = RequestsWrapper(instance, init_config)
+    instance = {'auth_type': 'kerberos', 'kerberos_auth': 'disabled', 'kerberos_keytab': '/test/file'}
+    transport = EnvironmentRecordingTransport('KRB5_CLIENT_KTNAME')
+    transport.respond()
+    http = _create_requests_client(instance, transport)
 
     with EnvVars({'KRB5_CLIENT_KTNAME': 'old'}):
         assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
-        with mock.patch(
-            'requests.Session.get',
-            side_effect=lambda *args, **kwargs: FakeHTTPResponse(text=os.environ.get('KRB5_CLIENT_KTNAME', '')),
-        ):
-            response = http.get('https://www.google.com')
-            assert response.text == '/test/file'
+        response = http.get('http://www.google.com')
 
+        assert response.status_code == 200
+        assert transport.values == ['/test/file']
         assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
 
