@@ -16,9 +16,14 @@ from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
-from datadog_checks.kafka_consumer.constants import HIGH_WATERMARK, KAFKA_INTERNAL_TOPICS
+from datadog_checks.kafka_consumer.constants import HIGH_WATERMARK, KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
 MAX_TIMESTAMPS = 1000
+
+# Cap on how many offending (consumer_group, topic, partition, offset) tuples one
+# unexpected-negative-offset warning names, so `agent status` stays readable on a cluster where
+# many partitions are affected. The warning always reports the full count alongside the sample.
+MAX_REPORTED_NEGATIVE_OFFSETS = 5
 
 # Total broker-timestamp entries retained per cluster, ~0.5 GiB at ~89 bytes/entry. The
 # per-partition history is scaled down from this budget as the partition count grows.
@@ -84,6 +89,7 @@ class KafkaCheck(AgentCheck):
         # Fetch Kafka consumer offsets
 
         consumer_offsets = {}
+        discarded_partitions = set()
 
         try:
             self.client.request_metadata_update()
@@ -99,8 +105,7 @@ class KafkaCheck(AgentCheck):
 
         try:
             # Fetch consumer offsets
-            # Expected format: {consumer_group: {(topic, partition): offset}}
-            consumer_offsets = self.get_consumer_offsets()
+            consumer_offsets, discarded_partitions = self.get_consumer_offsets()
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
@@ -123,7 +128,10 @@ class KafkaCheck(AgentCheck):
                 if self.config._cluster_monitoring_enabled or self.config._monitor_all_broker_highwatermarks:
                     partitions = None
                 else:
-                    partitions = set()
+                    # Seed with the partitions whose committed offset was discarded. A highwater
+                    # mark belongs to the partition, not to any group's committed position, so
+                    # broker_offset stays available even where consumer_offset cannot be computed.
+                    partitions = set(discarded_partitions)
                     for _, offsets in consumer_offsets.items():
                         for topic, partition in offsets:
                             partitions.add((topic, partition))
@@ -248,8 +256,27 @@ class KafkaCheck(AgentCheck):
             payload['connect_api_status'] = connect_status
         self._emit_cluster_monitoring_event(payload)
 
-    def get_consumer_offsets(self):
-        # {(consumer_group, topic, partition): offset}
+    def _warn_on_unexpected_negative_offsets(self, unexpected_negatives: list[tuple], monitored_offsets: int) -> None:
+        if not unexpected_negatives:
+            return
+        self.warning(
+            "%d of %d monitored committed offset(s) hold an unexpected negative value and are being "
+            "discarded: a committed offset is never negative, so these are not consumer positions. "
+            "consumer_offset and consumer_lag will be missing for those partitions; broker_offset is "
+            "still reported. Showing up to %d as (consumer_group, topic, partition, offset): %s",
+            len(unexpected_negatives),
+            monitored_offsets,
+            MAX_REPORTED_NEGATIVE_OFFSETS,
+            unexpected_negatives[:MAX_REPORTED_NEGATIVE_OFFSETS],
+        )
+
+    def get_consumer_offsets(self) -> tuple[dict, set]:
+        """Collect the committed offsets of every monitored consumer group.
+
+        Returns ``({consumer_group: {(topic, partition): offset}}, {(topic, partition)})``. The
+        second element holds the partitions whose committed offset was discarded: they have no
+        consumer offset, but they still need a highwater mark.
+        """
         self.log.debug('Getting consumer offsets')
         consumer_offsets = defaultdict(dict)
 
@@ -259,6 +286,9 @@ class KafkaCheck(AgentCheck):
         offsets = self._get_offsets_for_groups(consumer_groups)
         self.log.debug('%s futures to be waited on', len(offsets))
 
+        monitored_offsets = 0
+        unexpected_negatives = []
+        discarded_partitions = set()
         for consumer_group, topic_partitions in offsets:
             self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
 
@@ -266,6 +296,19 @@ class KafkaCheck(AgentCheck):
                 self.log.debug('RESULTS TOPIC: %s', topic)
                 self.log.debug('RESULTS PARTITION: %s', partition)
                 self.log.debug('RESULTS OFFSET: %s', offset)
+
+                # Filter on the consumer group first. A group the operator excluded from their
+                # config should not reach the warning below, and should not keep a partition in
+                # the highwater request set either.
+                is_monitored = (
+                    self.config._monitor_unlisted_consumer_groups
+                    or not self.config._consumer_groups_compiled_regex
+                    or self.config._consumer_groups_compiled_regex.match(f"{consumer_group},{topic},{partition}")
+                )
+                if not is_monitored:
+                    continue
+
+                monitored_offsets += 1
 
                 # A real committed offset is always a non-negative, monotonically increasing
                 # per-partition sequence number assigned by the broker. librdkafka reuses the
@@ -275,17 +318,24 @@ class KafkaCheck(AgentCheck):
                 # any other negative sentinel librdkafka may return here.
                 # https://github.com/confluentinc/librdkafka/blob/master/src/rdkafka.h
                 if offset < 0:
+                    # OFFSET_INVALID is the routine case, and a high-volume one: every partition a
+                    # group has never committed to reports it on every run. So it stays silent, and
+                    # its partition is left out of the highwater request set rather than spending
+                    # the context limit on partitions nobody asked about. Any other negative means
+                    # __consumer_offsets holds a value that is not a position at all: name it so the
+                    # operator can explain the missing metrics, and keep the partition's
+                    # broker_offset, which the bad committed value does not affect.
+                    if offset != OFFSET_INVALID:
+                        unexpected_negatives.append((consumer_group, topic, partition, offset))
+                        discarded_partitions.add((topic, partition))
                     continue
 
-                if (
-                    self.config._monitor_unlisted_consumer_groups
-                    or not self.config._consumer_groups_compiled_regex
-                    or self.config._consumer_groups_compiled_regex.match(f"{consumer_group},{topic},{partition}")
-                ):
-                    consumer_offsets[consumer_group][(topic, partition)] = offset
+                consumer_offsets[consumer_group][(topic, partition)] = offset
+
+        self._warn_on_unexpected_negative_offsets(unexpected_negatives, monitored_offsets)
 
         self.log.debug('Got %s consumer offsets', len(consumer_offsets))
-        return consumer_offsets
+        return consumer_offsets, discarded_partitions
 
     def _get_consumer_groups(self):
         # Get all consumer groups to monitor

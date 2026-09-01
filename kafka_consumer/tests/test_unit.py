@@ -13,6 +13,7 @@ import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
+from datadog_checks.kafka_consumer.kafka_consumer import MAX_REPORTED_NEGATIVE_OFFSETS
 
 pytestmark = [pytest.mark.unit]
 
@@ -275,22 +276,6 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'kafka_cluster_id:cluster_id',
         ],
     )
-
-
-def test_when_no_committed_offset_then_consumer_metrics_are_skipped(check, kafka_instance, dd_run_check, aggregator):
-    # Given: a partition with no committed offset, which librdkafka can surface as a negative
-    # logical offset (e.g. -1001 OFFSET_INVALID, or -2 OFFSET_BEGINNING) rather than a real offset.
-    mock_client = seed_mock_client()
-    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", -2)])]
-    kafka_consumer_check = check(kafka_instance)
-    kafka_consumer_check.client = mock_client
-
-    # When
-    dd_run_check(kafka_consumer_check)
-
-    # Then: the partition is skipped rather than reporting a negative offset and inflated lag
-    aggregator.assert_metric("kafka.consumer_offset", count=0)
-    aggregator.assert_metric("kafka.consumer_lag", count=0)
 
 
 def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
@@ -1238,3 +1223,180 @@ def test_get_partition_offsets_drops_negative_offsets():
     results = client.get_partition_offsets([("healthy_topic", 0), ("wrapped_topic", 0)])
 
     assert results == [("healthy_topic", 0, 100)]
+
+
+@pytest.mark.parametrize(
+    'offset, expected_consumer_count, expected_broker_count, expect_warning',
+    [
+        # librdkafka's logical offsets. None is a consumer position, so none may become a
+        # kafka.consumer_offset -- that much #24938 already guarantees. They split on what else
+        # they produce: OFFSET_INVALID is what a group that has never committed to a partition
+        # reports on every run, so it is silent and its partition is kept out of the highwater
+        # request set. Every other negative is a value that has no business being in
+        # __consumer_offsets, so the operator is warned and the partition keeps its
+        # kafka.broker_offset.
+        pytest.param(-1001, 0, 0, False, id='OFFSET_INVALID'),
+        pytest.param(-1000, 0, 1, True, id='OFFSET_STORED'),
+        pytest.param(-2, 0, 1, True, id='OFFSET_BEGINNING'),
+        pytest.param(-1, 0, 1, True, id='OFFSET_END'),
+        # 0 is a legitimate committed offset: a group that has consumed only the first record of
+        # a partition sits there. It is also the most common value on a real cluster, so the
+        # guard has to be `< 0` and never `<= 0`.
+        pytest.param(0, 1, 1, False, id='first_record'),
+        pytest.param(5, 1, 1, False, id='mid_partition'),
+    ],
+)
+def test_committed_offset_value_handling(
+    check,
+    kafka_instance,
+    dd_run_check,
+    aggregator,
+    offset,
+    expected_consumer_count,
+    expected_broker_count,
+    expect_warning,
+):
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", offset)])]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric("kafka.consumer_offset", count=expected_consumer_count)
+    aggregator.assert_metric("kafka.consumer_lag", count=expected_consumer_count)
+    # The broker count is what pins the asymmetry in both directions. Widening the discard branch
+    # to every negative would push each never-committed partition into the highwater request set,
+    # spending the context limit on partitions nobody asked to monitor, and only the
+    # OFFSET_INVALID row here would catch it.
+    aggregator.assert_metric("kafka.broker_offset", count=expected_broker_count)
+
+    # Assert on the collected warnings rather than the log text: these are what `agent status`
+    # renders, and an empty list cannot pass vacuously the way an absent substring can.
+    if expect_warning:
+        assert len(kafka_consumer_check.warnings) == 1
+        assert "hold an unexpected negative value" in kafka_consumer_check.warnings[0]
+        assert f"('consumer_group1', 'topic1', 'partition1', {offset})" in kafka_consumer_check.warnings[0]
+    else:
+        assert kafka_consumer_check.warnings == []
+
+
+def test_negative_committed_offset_does_not_suppress_sibling_partitions(
+    check, kafka_instance, dd_run_check, aggregator
+):
+    """One partition holding a logical offset must not cost the rest of the topic its metrics."""
+    partitions = ['partition1', 'partition2', 'partition3']
+    mock_client = seed_mock_client()
+    mock_client.consumer_get_cluster_id_and_list_topics.return_value = ('cluster_id', [('topic1', partitions)])
+    mock_client.get_partitions_for_topic.return_value = partitions
+    mock_client.list_consumer_group_offsets.return_value = [
+        (
+            "consumer_group1",
+            [("topic1", "partition1", 10), ("topic1", "partition2", -2), ("topic1", "partition3", 20)],
+        )
+    ]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric("kafka.consumer_offset", count=2)
+    aggregator.assert_metric(
+        "kafka.consumer_offset",
+        value=10,
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+    aggregator.assert_metric(
+        "kafka.consumer_offset",
+        value=20,
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition3',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+    # The highwater offset is 80 for every partition, so lag follows the two surviving offsets.
+    aggregator.assert_metric("kafka.consumer_lag", count=2)
+    aggregator.assert_metric(
+        "kafka.consumer_lag",
+        value=70,
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+    # partition2 keeps its broker_offset despite the discarded commit: the highwater request set
+    # is seeded with the discarded partitions, so only the consumer-side metrics go missing.
+    aggregator.assert_metric("kafka.broker_offset", count=3)
+    for partition in partitions:
+        aggregator.assert_metric(
+            "kafka.broker_offset",
+            value=80,
+            count=1,
+            tags=['topic:topic1', f'partition:{partition}', 'kafka_cluster_id:cluster_id', 'optional:tag1'],
+        )
+
+
+def test_negative_offset_outside_configured_partitions_is_silent(check, kafka_instance, dd_run_check):
+    """A partition the operator did not ask to monitor must not reach the warning."""
+    # `consumer_groups_regex` is the option that compiles into _consumer_groups_compiled_regex, and
+    # its patterns are unioned with those from `consumer_groups` -- so clear the latter to keep the
+    # match set to exactly what this test declares. The broker returns committed offsets for every
+    # partition a group has an entry for, not only the ones the regex selects, so the filter has to
+    # run before the negative check or an excluded partition still reaches `agent status`.
+    kafka_instance['consumer_groups'] = {}
+    kafka_instance['consumer_groups_regex'] = {'consumer_group1': {'topic1': [0]}}
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, -2), ("topic1", 1, -2)])]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    assert len(kafka_consumer_check.warnings) == 1
+    warning = kafka_consumer_check.warnings[0]
+    # Assert on the rendered tuple list as a whole rather than on the excluded partition's absence.
+    # A bare `not in` would also pass if the message stopped naming tuples altogether, and the
+    # excluded partition's tuple is a substring-match away from the included one's.
+    assert warning.endswith("[('consumer_group1', 'topic1', 0, -2)]")
+    # Partition 1 was filtered out before the negative check, so it is not in the denominator.
+    assert "1 of 1 monitored committed offset(s)" in warning
+
+
+def test_unexpected_negative_offset_report_is_capped(check, kafka_instance, dd_run_check, aggregator):
+    """The sample of offending tuples is capped; the count and the broker offsets are not."""
+    affected = MAX_REPORTED_NEGATIVE_OFFSETS + 3
+    partitions = [f'partition{i}' for i in range(affected)]
+    mock_client = seed_mock_client()
+    mock_client.consumer_get_cluster_id_and_list_topics.return_value = ('cluster_id', [('topic1', partitions)])
+    mock_client.get_partitions_for_topic.return_value = partitions
+    mock_client.list_consumer_group_offsets.return_value = [
+        ("consumer_group1", [("topic1", partition, -2) for partition in partitions])
+    ]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    assert len(kafka_consumer_check.warnings) == 1
+    warning = kafka_consumer_check.warnings[0]
+    # The count is the whole population, so an operator can tell a truncated sample from a
+    # complete one; only the rendered tuple list is capped. Each tuple names the topic once.
+    assert f"{affected} of {affected} monitored committed offset(s)" in warning
+    assert warning.count("'topic1'") == MAX_REPORTED_NEGATIVE_OFFSETS
+    # The cap governs the message only -- every affected partition still keeps its highwater mark.
+    aggregator.assert_metric("kafka.broker_offset", count=affected)
