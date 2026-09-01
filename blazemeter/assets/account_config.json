@@ -34,13 +34,18 @@
     }
   ],
   "health_probe": {
-    "http_method": "GET",
+    "http_method": "POST",
     "path": "/v4/search",
     "http_headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
       {
         "name": "Accept",
         "value": "application/json"
       }
-    ]
+    ],
+    "request_body": "{\"entity\":\"master\",\"limit\":1,\"skip\":0,\"fields\":[\"id\"]}"
   }
 }
