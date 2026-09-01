@@ -183,9 +183,15 @@ pipeline:
           pg_date_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.date}
 
           pg_date %{date("yyyy-MM-dd HH:mm:ss z"):db.date}
+
+          pg_date_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):db.date}\s*
+
+          pg_date_notz %{date("yyyy-MM-dd HH:mm:ss"):db.date}\s*
       samples:
         - 2026-08-17 20:45:57.031 UTC
         - 2026-08-17 20:45:45 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
     # date() creates an attribute; the date remapper below sets the official date.
     - type: grok-parser
       name: Extract `db.statement` from `message`
@@ -344,9 +350,15 @@ pipeline:
           pg_backend_start_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.backend_start}
 
           pg_backend_start %{date("yyyy-MM-dd HH:mm:ss z"):db.backend_start}
+
+          pg_backend_start_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):db.backend_start}\s*
+
+          pg_backend_start_notz %{date("yyyy-MM-dd HH:mm:ss"):db.backend_start}\s*
       samples:
         - 2025-09-15 19:02:57 UTC
         - 2026-08-17 20:45:57.031 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
     # Retained for compatibility; the Stage 2 status remapper normally wins first.
     - type: status-remapper
       name: Define `db.severity` as the official status of the log
