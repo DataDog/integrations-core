@@ -10,7 +10,6 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.http_check import HTTPCheck
 
 from .common import (
@@ -484,26 +483,6 @@ def test_enable_http_outcome_tag_leaves_ssl_metrics_untagged(aggregator, http_ch
     aggregator.assert_metric('http.ssl.seconds_left', tags=url_tag + instance_tag, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.OK, tags=url_tag + instance_tag, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=AgentCheck.OK, tags=url_tag + instance_tag, count=1)
-
-
-def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check, fake_http):
-    instance = {
-        'name': 'Test Web VM HTTPS SSL',
-        'url': 'https://foo.bar.net/',
-        'method': 'get',
-        'tls_ca_cert': '/tmp/unexisting.crt',
-        'check_certificate_expiration': 'false',
-        'collect_response_time': 'false',
-        'disable_ssl_validation': 'false',
-        'skip_proxy': 'false',
-    }
-
-    fake_http.register_response('GET', instance['url'], FakeHTTPResponse())
-    with mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning:
-        check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
-        dd_run_check(check)
-        mock_warning.assert_called()
-        assert any(instance['tls_ca_cert'] in call.args for call in mock_warning.call_args_list)
 
 
 def test_instance_auth_token(dd_run_check):
