@@ -149,7 +149,6 @@ INSTANCE_TAG = 'instance:http_outcome_tag'
 
 
 def _mock_response(status_code):
-    """Build an agnostic response carrying a fixed body and elapsed time."""
     return FakeHTTPResponse(content=b'hello', text='hello', status_code=status_code, elapsed=timedelta(seconds=0.5))
 
 

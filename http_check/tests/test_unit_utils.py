@@ -132,7 +132,6 @@ def test_parse_proxy_url():
     ],
 )
 def test_fetch_cert_honors_proxy_bypass(bypass, expect_proxy_set):
-    # _fetch_cert applies the HTTPS proxy only when should_bypass_proxy is false.
     instance = {'name': 'cert', 'url': 'https://valid.mock:443'}
     check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
     check.http.options['proxies'] = {'https': 'http://proxy.example:3128'}

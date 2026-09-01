@@ -60,7 +60,6 @@ def test_from_instance():
 
 
 def test_from_instance_header_override_is_case_insensitive():
-    """User headers override defaults case-insensitively without duplicating keys."""
     config = from_instance({'url': 'https://example.com', 'name': 'UpService', 'headers': {'user-agent': 'Custom-UA'}})
 
     headers = config.headers
