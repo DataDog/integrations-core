@@ -75,6 +75,25 @@ def test_fake_response_raises_configured_status_error():
     assert error.response is response
 
 
+@pytest.mark.parametrize(
+    ('iter_method', 'response_options', 'first_result'),
+    [
+        pytest.param('iter_content', {'content_chunks': (b'first',)}, b'first', id='content'),
+        pytest.param('iter_lines', {'lines': ('first',)}, 'first', id='lines'),
+    ],
+)
+def test_fake_response_raises_configured_stream_error_after_results(iter_method, response_options, first_result):
+    error = HTTPClientTimeoutError('timed out')
+    response = FakeHTTPResponse(stream_error=error, **response_options)
+    stream = getattr(response, iter_method)()
+
+    assert next(stream) == first_result
+    with pytest.raises(HTTPClientTimeoutError) as exc_info:
+        next(stream)
+
+    assert exc_info.value is error
+
+
 def test_fake_client_matches_responses_and_records_requests():
     client = FakeHTTPClient()
     page_one = FakeHTTPResponse(status_code=202)
