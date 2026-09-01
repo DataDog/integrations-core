@@ -47,14 +47,13 @@ instances:
 
     ## @param openmetrics_endpoint - string - required
     ## The URL of the IRIS built-in `/api/monitor/metrics` endpoint, which exposes
-    ## Prometheus/OpenMetrics telemetry. This endpoint is unauthenticated by default; use the
-    ## `auth_token`, `username`/`password`, or `headers` options below if the endpoint has been
-    ## secured.
+    ## OpenMetrics telemetry data. This endpoint is unauthenticated by default. If the endpoint
+    ## has been secured, use the `auth_token`, `username` and `password`, or `headers` options
+    ## below.
     ##
     ## Note: interoperability metrics (`interop.*`) are only emitted once the "Record Statistics
-    ## for SAM" setting is enabled (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a
-    ## running production. The always-on interface-count family is served separately at
-    ## `/api/monitor/interop/interfaces`; add a second instance pointing there to collect it.
+    ## for SAM" (System Alerting and Monitoring) setting is enabled
+    ## (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a running production.
     #
   - openmetrics_endpoint: http://%%host%%:52773/api/monitor/metrics
 

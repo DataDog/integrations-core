@@ -114,12 +114,108 @@ iris_ecp_conn 0
 # HELP iris_ecp_conn_max Maximum active ECP connections from this system as an ECP application server
 # TYPE iris_ecp_conn_max gauge
 iris_ecp_conn_max 2
+# HELP iris_ecps_big_kill Big string kills (per connection) on this system as an ECP data server
+# TYPE iris_ecps_big_kill counter
+iris_ecps_big_kill{id="IRISAPP:IRIS-APP-01:IRIS"} 0
+# HELP iris_ecps_big_kill_per_sec Big string kills (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_big_kill_per_sec gauge
+iris_ecps_big_kill_per_sec 0
+# HELP iris_ecps_big_string Big string data requests received (per connection) on this system as an ECP data server
+# TYPE iris_ecps_big_string counter
+iris_ecps_big_string{id="IRISAPP:IRIS-APP-01:IRIS"} 0
+# HELP iris_ecps_big_string_per_sec Big string data requests received (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_big_string_per_sec gauge
+iris_ecps_big_string_per_sec 0
+# HELP iris_ecps_block_sent Database blocks sent (per connection) by this system as an ECP data server
+# TYPE iris_ecps_block_sent counter
+iris_ecps_block_sent{id="IRISAPP:IRIS-APP-01:IRIS"} 90
+# HELP iris_ecps_block_sent_per_sec Database blocks sent (per second, summed across all connections) by this system as an ECP data server
+# TYPE iris_ecps_block_sent_per_sec gauge
+iris_ecps_block_sent_per_sec 0
+# HELP iris_ecps_byte_rcvd Bytes received (per connection) by this system as an ECP data server
+# TYPE iris_ecps_byte_rcvd counter
+iris_ecps_byte_rcvd{id="IRISAPP:IRIS-APP-01:IRIS"} 138275104
+# HELP iris_ecps_byte_rcvd_per_sec Bytes received (per second, summed across all connections) by this system as an ECP data server
+# TYPE iris_ecps_byte_rcvd_per_sec gauge
+iris_ecps_byte_rcvd_per_sec 0
+# HELP iris_ecps_byte_sent Bytes sent (per connection) by this system as an ECP data server
+# TYPE iris_ecps_byte_sent counter
+iris_ecps_byte_sent{id="IRISAPP:IRIS-APP-01:IRIS"} 4409232
+# HELP iris_ecps_byte_sent_per_sec Bytes sent (per second, summed across all connections) by this system as an ECP data server
+# TYPE iris_ecps_byte_sent_per_sec gauge
+iris_ecps_byte_sent_per_sec 0
 # HELP iris_ecps_conn Total active client connections to this system as an ECP data server
 # TYPE iris_ecps_conn gauge
-iris_ecps_conn 0
+iris_ecps_conn 1
 # HELP iris_ecps_conn_max Maximum active client connections to this system as an ECP data server
 # TYPE iris_ecps_conn_max gauge
 iris_ecps_conn_max 1
+# HELP iris_ecps_glo_ref Global references (per connection) on this system as an ECP data server
+# TYPE iris_ecps_glo_ref counter
+iris_ecps_glo_ref{id="IRISAPP:IRIS-APP-01:IRIS"} 71436
+# HELP iris_ecps_glo_ref_per_sec Global references (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_glo_ref_per_sec gauge
+iris_ecps_glo_ref_per_sec 0
+# HELP iris_ecps_glo_update Global updates (per connection) on this system as an ECP data server
+# TYPE iris_ecps_glo_update counter
+iris_ecps_glo_update{id="IRISAPP:IRIS-APP-01:IRIS"} 71411
+# HELP iris_ecps_glo_update_per_sec Global updates (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_glo_update_per_sec gauge
+iris_ecps_glo_update_per_sec 0
+# HELP iris_ecps_lock_fail Locks failed (per connection) on this system as an ECP data server
+# TYPE iris_ecps_lock_fail counter
+iris_ecps_lock_fail{id="IRISAPP:IRIS-APP-01:IRIS"} 0
+# HELP iris_ecps_lock_fail_per_sec Locks failed (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_lock_fail_per_sec gauge
+iris_ecps_lock_fail_per_sec 0
+# HELP iris_ecps_lock_grant Locks granted (per connection) on this system as an ECP data server
+# TYPE iris_ecps_lock_grant counter
+iris_ecps_lock_grant{id="IRISAPP:IRIS-APP-01:IRIS"} 64801
+# HELP iris_ecps_lock_grant_per_sec Locks granted (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_lock_grant_per_sec gauge
+iris_ecps_lock_grant_per_sec 0
+# HELP iris_ecps_lock_que Current lock queue size (per connection) on this system as an ECP data server
+# TYPE iris_ecps_lock_que counter
+iris_ecps_lock_que{id="IRISAPP:IRIS-APP-01:IRIS"} 0
+# HELP iris_ecps_lock_que_fail Locks queue failed (per connection) on this system as an ECP data server
+# TYPE iris_ecps_lock_que_fail counter
+iris_ecps_lock_que_fail{id="IRISAPP:IRIS-APP-01:IRIS"} 0
+# HELP iris_ecps_lock_que_fail_per_sec Locks queue failed (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_lock_que_fail_per_sec gauge
+iris_ecps_lock_que_fail_per_sec 0
+# HELP iris_ecps_lock_que_grant Locks queue granted (per connection) on this system as an ECP data server
+# TYPE iris_ecps_lock_que_grant counter
+iris_ecps_lock_que_grant{id="IRISAPP:IRIS-APP-01:IRIS"} 129602
+# HELP iris_ecps_lock_que_grant_per_sec Locks queue granted (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_lock_que_grant_per_sec gauge
+iris_ecps_lock_que_grant_per_sec 0
+# HELP iris_ecps_lock_que_per_sec Current lock queue size (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_lock_que_per_sec gauge
+iris_ecps_lock_que_per_sec 0
+# HELP iris_ecps_req_buff Buffer requests received (per connection) by this system as an ECP data server
+# TYPE iris_ecps_req_buff counter
+iris_ecps_req_buff{id="IRISAPP:IRIS-APP-01:IRIS"} 129608
+# HELP iris_ecps_req_buff_per_sec Buffer requests received (per second, summed across all connections) by this system as an ECP data server
+# TYPE iris_ecps_req_buff_per_sec gauge
+iris_ecps_req_buff_per_sec 0
+# HELP iris_ecps_req_rcvd Requests received (per connection) by this system as an ECP data server
+# TYPE iris_ecps_req_rcvd counter
+iris_ecps_req_rcvd{id="IRISAPP:IRIS-APP-01:IRIS"} 201040
+# HELP iris_ecps_req_rcvd_per_sec Requests received (per second, summed across all connections) by this system as an ECP data server
+# TYPE iris_ecps_req_rcvd_per_sec gauge
+iris_ecps_req_rcvd_per_sec 0
+# HELP iris_ecps_routine_purge Server routine purges (per connection) on this system as an ECP data server
+# TYPE iris_ecps_routine_purge counter
+iris_ecps_routine_purge{id="IRISAPP:IRIS-APP-01:IRIS"} 0
+# HELP iris_ecps_routine_purge_per_sec Server routine purges (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_routine_purge_per_sec gauge
+iris_ecps_routine_purge_per_sec 0
+# HELP iris_ecps_svr_block_purge Block purges (per connection) on this system as an ECP data server
+# TYPE iris_ecps_svr_block_purge counter
+iris_ecps_svr_block_purge{id="IRISAPP:IRIS-APP-01:IRIS"} 0
+# HELP iris_ecps_svr_block_purge_per_sec Block purges (per second, summed across all connections) on this system as an ECP data server
+# TYPE iris_ecps_svr_block_purge_per_sec gauge
+iris_ecps_svr_block_purge_per_sec 0
 # HELP iris_glo_a_seize_per_sec Global resource Aseizes (per second)
 # TYPE iris_glo_a_seize_per_sec gauge
 iris_glo_a_seize_per_sec 0

@@ -12,7 +12,7 @@ from typing import Any
 
 # ECP and mirror activity metrics, only published once the instance actually participates in a
 # distributed cache relationship or a mirror.
-_TOPOLOGY_GATED_PREFIXES = (
+TOPOLOGY_GATED_PREFIXES = (
     'intersystems_iris.ecp.',
     'intersystems_iris.ecps.',
     'intersystems_iris.mirror.',
@@ -20,7 +20,7 @@ _TOPOLOGY_GATED_PREFIXES = (
 
 # ...with these exceptions, which report configured capacity or the instance's own role rather
 # than peer activity, and so are published even by a standalone instance.
-_TOPOLOGY_INDEPENDENT = frozenset(
+TOPOLOGY_INDEPENDENT = frozenset(
     {
         'intersystems_iris.ecp.conn',
         'intersystems_iris.ecp.conn_max',
@@ -35,7 +35,7 @@ _TOPOLOGY_INDEPENDENT = frozenset(
 # only published once matching traffic has been recorded, so the short-lived demo production
 # does not reliably surface them. The `http.*` subset additionally needs outbound HTTP adapter
 # traffic, which the demo production does not generate at all.
-_SAMPLING_GATED = frozenset(
+SAMPLING_GATED = frozenset(
     {
         'intersystems_iris.interop.avg_processing_time',
         'intersystems_iris.interop.avg_queueing_time',
@@ -58,7 +58,7 @@ _SAMPLING_GATED = frozenset(
 
 # Metrics gated on instance state rather than topology: a database configured with a size cap,
 # and SQL queries in flight at the exact moment of the scrape.
-_STATE_GATED = frozenset(
+STATE_GATED = frozenset(
     {
         'intersystems_iris.db.file_limit_percent',
         'intersystems_iris.sql.active_queries',
@@ -68,7 +68,9 @@ _STATE_GATED = frozenset(
 )
 
 
-def unconditional_metadata_metrics(metadata_metrics: dict[str, Any]) -> dict[str, Any]:
+def unconditional_metadata_metrics(
+    metadata_metrics: dict[str, Any], emitted_topology_prefixes: tuple[str, ...] = ()
+) -> dict[str, Any]:
     """
     `metadata_metrics` minus the deployment-conditional families above, i.e. exactly what a
     reachable standalone IRIS instance is expected to publish.
@@ -77,10 +79,16 @@ def unconditional_metadata_metrics(metadata_metrics: dict[str, Any]) -> dict[str
     metric with no emitter behind it still fails the build -- while tolerating the families this
     environment cannot produce. If a future test topology starts emitting one of the excused
     families, the corresponding entry should move out of the sets above.
+
+    `emitted_topology_prefixes` re-admits topology-gated families the caller's environment does
+    produce: the offline fixture was captured from an ECP data server with a live client, so the
+    unit test asserts the full `intersystems_iris.ecps.*` family, while the container-backed
+    integration and E2E tests -- standalone instances with no ECP peers -- do not.
     """
-    conditional = _SAMPLING_GATED | _STATE_GATED
+    conditional = SAMPLING_GATED | STATE_GATED
+    gated = tuple(prefix for prefix in TOPOLOGY_GATED_PREFIXES if prefix not in emitted_topology_prefixes)
     return {
         name: metadata
         for name, metadata in metadata_metrics.items()
-        if name not in conditional and (name in _TOPOLOGY_INDEPENDENT or not name.startswith(_TOPOLOGY_GATED_PREFIXES))
+        if name not in conditional and (name in TOPOLOGY_INDEPENDENT or not name.startswith(gated))
     }

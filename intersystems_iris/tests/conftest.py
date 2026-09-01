@@ -2,19 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from pathlib import Path
-from typing import Iterator
+from typing import Callable, Iterator
 
 import pytest
 import requests
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.dev.utils import find_free_port
+from datadog_checks.intersystems_iris import IrisCheck
 
 HERE = Path(__file__).parent
 COMPOSE_FILE = HERE / "docker" / "docker-compose.yaml"
+FIXTURE_PATH = str(HERE / "fixtures" / "metrics.txt")
 
 
 def _interop_metrics_present(endpoint: str) -> None:
@@ -55,3 +58,20 @@ def instance() -> InstanceType:
     # here is never actually dialed. Integration/e2e tests use the dynamic, free-port endpoint
     # yielded by `dd_environment` instead (see `test_integration.py`).
     return {"openmetrics_endpoint": "http://localhost:52773/api/monitor/metrics"}
+
+
+@pytest.fixture
+def scraped_aggregator(
+    dd_run_check: Callable[..., None],
+    aggregator: AggregatorStub,
+    instance: InstanceType,
+    mock_http_response: Callable[..., None],
+) -> AggregatorStub:
+    # Aggregator populated from the offline exposition fixture. The check is run twice because
+    # the counter and rate transformers need a previous sample before they submit anything, so a
+    # single run would leave those families out of the aggregator entirely.
+    mock_http_response(file_path=FIXTURE_PATH)
+    check = IrisCheck('intersystems_iris', {}, [instance])
+    dd_run_check(check)
+    dd_run_check(check)
+    return aggregator
