@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base.stubs import tagger
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.docker import CONTAINER_STABILITY_LOG_PATTERNS
 from datadog_checks.dev.kubernetes import assert_all_discovery_candidates_stable_kubernetes
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -33,7 +34,7 @@ DISCOVERY_STABILITY_LOG_PATTERNS = tuple(
 )
 
 
-def assert_strimzi_e2e_telemetry(aggregator):
+def assert_strimzi_e2e_telemetry(aggregator: AggregatorStub) -> None:
     for endpoint_metrics in (
         E2E_CLUSTER_OPERATOR_METRICS,
         TOPIC_OPERATOR_METRICS,

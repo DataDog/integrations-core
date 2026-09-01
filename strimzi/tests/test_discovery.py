@@ -36,7 +36,7 @@ def build_service(
     return Service(id=service_id, host=host, ports=ports)
 
 
-def assert_candidate_endpoint(candidate: dict[str, Any], endpoint_field: str, host: str, port: int):
+def assert_candidate_endpoint(candidate: dict[str, Any], endpoint_field: str, host: str, port: int) -> None:
     instance = candidate['instances'][0]
     non_empty_endpoint_fields = {field for field in DISCOVERY_ENDPOINT_FIELDS if instance.get(field)}
 
