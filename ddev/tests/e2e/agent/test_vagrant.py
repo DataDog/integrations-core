@@ -351,16 +351,51 @@ class TestStart:
         mock_vagrantfile_template.render.assert_called_once()
         render_kwargs = mock_vagrantfile_template.render.call_args.kwargs
         systemd_env_vars_str = render_kwargs['systemd_env_vars_str']
-        assert systemd_env_vars_str.startswith('sudo tee /etc/datadog-agent/environment > /dev/null <<EOF\n')
-        assert 'DD_LOGS_ENABLED=true' in systemd_env_vars_str
-        assert 'DD_APM_ENABLED=false' in systemd_env_vars_str
-        assert 'DD_API_KEY=' in systemd_env_vars_str
+        assert systemd_env_vars_str.startswith("sudo tee /etc/datadog-agent/environment > /dev/null <<'EOF'\n")
+        assert 'DD_LOGS_ENABLED="true"' in systemd_env_vars_str
+        assert 'DD_APM_ENABLED="false"' in systemd_env_vars_str
+        assert 'DD_API_KEY="' in systemd_env_vars_str
         assert systemd_env_vars_str.endswith('\nEOF\nsudo chmod 600 /etc/datadog-agent/environment')
+
+    def test_systemd_environment_file_preserves_literal_values(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+        mocker,
+        mock_env_data_storage,
+        mock_vagrantfile_template,
+        mock_platform_run,
+        vagrant_env_cleanup,
+    ):
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        integration = 'glusterfs'
+        environment = 'py3.12'
+        metadata = {}
+
+        agent = VagrantAgent(app, get_integration(integration), environment, metadata, config_file)
+        agent.start(
+            agent_build='',
+            local_packages={},
+            # Values that a shell would expand or that break systemd EnvironmentFile parsing if unescaped
+            env_vars={'DD_TEST': 'a $HOME $(pwd) `pwd` "quoted" back\\slash'},
+        )
+
+        mock_vagrantfile_template.render.assert_called_once()
+        render_kwargs = mock_vagrantfile_template.render.call_args.kwargs
+        systemd_env_vars_str = render_kwargs['systemd_env_vars_str']
+        # The quoted heredoc keeps the provisioning shell from expanding the value…
+        assert "<<'EOF'" in systemd_env_vars_str
+        # …and the value is quoted and escaped per systemd EnvironmentFile syntax
+        assert 'DD_TEST="a $HOME $(pwd) `pwd` \\"quoted\\" back\\\\slash"' in systemd_env_vars_str
 
     @pytest.mark.parametrize(
         'guest_os, expected_systemd_env_vars_str',
         [
-            pytest.param(None, 'sudo tee /etc/datadog-agent/environment > /dev/null <<EOF\n', id='linux'),
+            pytest.param(None, "sudo tee /etc/datadog-agent/environment > /dev/null <<'EOF'\n", id='linux'),
             pytest.param('windows', '', id='windows'),
         ],
     )

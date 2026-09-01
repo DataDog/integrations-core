@@ -35,6 +35,15 @@ if TYPE_CHECKING:
     from ddev.utils.fs import Path
 
 
+def _encode_environment_file_value(value: str) -> str:
+    """Quote and escape a value for a systemd EnvironmentFile (``KEY="<value>"`` lines).
+
+    A systemd EnvironmentFile does not perform variable expansion, so a value is preserved
+    literally as long as double quotes and backslashes are escaped per systemd syntax.
+    """
+    return value.replace('\\', '\\\\').replace('"', '\\"')
+
+
 @contextmanager
 def disable_integration_before_install(config_file: Path):
     """
@@ -178,11 +187,15 @@ class VagrantAgent(AgentInterface):
 
         # The Agent runs as a systemd service, which does not source login-shell profile scripts,
         # so persist the env vars in the service's EnvironmentFile to make sure the Agent receives them.
+        # The quoted heredoc keeps the provisioning shell from expanding the values, and each value is
+        # quoted and escaped per systemd EnvironmentFile syntax.
         # The heredoc terminators must stay at the start of the line.
         systemd_env_vars_str = ""
         if exported_env_vars and not self._is_windows_vm:
-            systemd_env_vars_str = "sudo tee /etc/datadog-agent/environment > /dev/null <<EOF\n"
-            systemd_env_vars_str += "\n".join(f"{key}={value}" for key, value in sorted(exported_env_vars.items()))
+            systemd_env_vars_str = "sudo tee /etc/datadog-agent/environment > /dev/null <<'EOF'\n"
+            systemd_env_vars_str += "\n".join(
+                f'{key}="{_encode_environment_file_value(value)}"' for key, value in sorted(exported_env_vars.items())
+            )
             systemd_env_vars_str += "\nEOF\nsudo chmod 600 /etc/datadog-agent/environment"
 
         vm_hostname = self._vm_name  # Already sanitized and unique
