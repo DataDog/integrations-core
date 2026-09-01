@@ -159,13 +159,14 @@ pipeline:
       grok:
         supportRules: |
         matchRules: |
-          pg_duration_and_rest .*duration:\s+%{number:duration}\s+ms\s+%{data:message}
-
-          pg_duration_only .*duration:\s+%{number:duration}\s+ms\s*%{data}
+          # `%{data}` is lazy; a greedy `.*` anchors on the LAST `duration: N ms`,
+          # which query text can supply. The optional tail leaves a bare duration alone.
+          pg_duration %{data}duration:\s+%{number:duration}\s+ms(?:\s+%{data:message})?
       samples:
         - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
         - '2025-09-16 18:26:45.429 UTC:1.2.3.4(31674):p@p:[87]:1:00000:2025-09-16 18:25:58 UTC:5/2050:0:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
         - 'duration: 12.345 ms'
+        - "duration: 0.5 ms  plan:\n\t{\"Query Text\": \"SELECT 1 -- duration: 99 ms and more\"}"
     # Promote Stage 1's parsed body over the raw prefix line. The remapper consumes
     # its source, matching intake preprocessing for jsonlog records.
     - type: message-remapper
