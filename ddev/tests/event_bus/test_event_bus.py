@@ -156,7 +156,6 @@ class MockOrchestrator(EventBusOrchestrator):
         grace_period: float = 10,
         fail_fast: bool = False,
         executor: Executor | None = None,
-        propagate_keyboard_interrupt: bool = True,
     ):
         super().__init__(
             logger=logger,
@@ -164,7 +163,6 @@ class MockOrchestrator(EventBusOrchestrator):
             grace_period=grace_period,
             fail_fast=fail_fast,
             executor=executor,
-            propagate_keyboard_interrupt=propagate_keyboard_interrupt,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -1320,23 +1318,18 @@ def test_an_interrupted_run_hands_the_interrupt_back_once_it_has_wound_down(
     sent: signal.Signals, propagate: bool, expectation: AbstractContextManager
 ):
     """Handling SIGINT is what stops `KeyboardInterrupt` reaching the caller, and with it whatever the
-    caller does about one: Click turns it into `Aborted!` and exit 1, so without this an interrupted
-    command would report success.
+    caller does about one: Click turns it into `Aborted!` and exit 1, so a caller that wants that back
+    asks for it here.
 
     Raised after the wind-down rather than instead of it, so the cleanup still happens first.
     """
     signaller = Signaller("signaller", sent)
-    orchestrator = MockOrchestrator(
-        logging.getLogger("test_interrupt_propagation"),
-        max_timeout=30,
-        grace_period=1,
-        propagate_keyboard_interrupt=propagate,
-    )
+    orchestrator = MockOrchestrator(logging.getLogger("test_interrupt_propagation"), max_timeout=30, grace_period=1)
     orchestrator.register_processor(signaller, [Memo])
     orchestrator.submit_message(Memo("memo1"))
 
     with caught_rather_than_fatal(sent), expectation:
-        orchestrator.run()
+        orchestrator.run(propagate_keyboard_interrupt=propagate)
 
     # Whatever the caller sees, the bus wound down first rather than being cut short.
     assert orchestrator.stopping
@@ -1374,9 +1367,7 @@ def test_a_signal_reaches_the_bus_rather_than_the_process(sent: signal.Signals):
     The bus having handled the signal is what leaves that fallback untouched.
     """
     signaller = Signaller("signaller", sent)
-    orchestrator = MockOrchestrator(
-        logging.getLogger("test_signal_stop"), max_timeout=30, grace_period=1, propagate_keyboard_interrupt=False
-    )
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_stop"), max_timeout=30, grace_period=1)
     orchestrator.register_processor(signaller, [Memo])
     orchestrator.submit_message(Memo("memo1"))
 

@@ -142,7 +142,6 @@ class EventBusOrchestrator(ABC):
         logger: logging.Logger,
         max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
-        propagate_keyboard_interrupt: bool = True,
         executor: Executor | None = None,
         fail_fast: bool = False,
     ):
@@ -158,10 +157,6 @@ class EventBusOrchestrator(ABC):
                 or killing the process) will stop it.
             grace_period: The timeout in seconds to wait for a new message to be submitted after all
                 messages have been processed.
-            propagate_keyboard_interrupt: Whether ``run`` re-raises ``KeyboardInterrupt`` once a run
-                interrupted by SIGINT has finished winding down. Handling the signal is what stops the
-                interpreter raising it, and with it whatever the caller does about one, such as Click's
-                abort. Turn it off where the bus reports the outcome itself.
             executor: The executor to use for running sync processors.
                       The default will be a ThreadpoolExecutor with 4 workers.
             fail_fast: If True, any exception that escapes an ``on_error`` handler stops
@@ -192,7 +187,6 @@ class EventBusOrchestrator(ABC):
         self._loop: asyncio.AbstractEventLoop | None = None
         self._stopping = threading.Event()
         self._displaced_signal_handlers: dict[signal.Signals, SignalHandler] = {}
-        self._propagate_keyboard_interrupt = propagate_keyboard_interrupt
         self._interrupted = False
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
@@ -320,7 +314,7 @@ class EventBusOrchestrator(ABC):
         else:
             self._queue.put_nowait(message)
 
-    def run(self):
+    def run(self, *, propagate_keyboard_interrupt: bool = False):
         """
         Launch the orchestrator and start consuming messages from the message queue.
 
@@ -334,12 +328,15 @@ class EventBusOrchestrator(ABC):
         - finalize()
           - [hook] on_finalize(exc_info)
 
-        Re-raises ``KeyboardInterrupt`` after all of that when a SIGINT arrived and
-        ``propagate_keyboard_interrupt`` is set, so an interrupted run does not report success to
-        whatever launched it. A caller that reads state off the bus afterwards wants it off.
+        Args:
+            propagate_keyboard_interrupt: Re-raise ``KeyboardInterrupt`` after a run interrupted by
+                SIGINT has wound down. Handling the signal is what stops the interpreter raising it, and
+                with it whatever the caller does about one, such as Click's abort. Off by default: a bus
+                that wound down cleanly has not failed. Callers that read state off the bus afterwards,
+                or report the outcome themselves, want it off.
         """
         asyncio.run(self._entry_point())
-        if self._interrupted and self._propagate_keyboard_interrupt:
+        if self._interrupted and propagate_keyboard_interrupt:
             raise KeyboardInterrupt
 
     async def _entry_point(self):
