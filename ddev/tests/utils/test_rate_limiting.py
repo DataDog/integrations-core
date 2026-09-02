@@ -705,3 +705,38 @@ async def test_instrumented_limiter_does_not_consume_bucket_token_during_governo
 def test_instrumented_limiter_observe_without_governor_does_not_raise():
     limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000))
     limiter.observe(make_snapshot(limit=100, remaining=50, reset_at=2000.0))
+
+
+async def test_relaxing_stops_rationing_the_budget(clock: FakeClock, slept: list[float]) -> None:
+    """Pacing spreads what is left of the budget over the window, which outlasts a dying process.
+
+    A cancelled CI job has about ten seconds. Rationing a low budget over a half-hour window puts
+    every request after the first outside that, so the cleanup would land one call and lose the rest.
+    """
+    governor = BudgetGovernor(now=clock, reserve_fraction=0.15)
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=10, time_period=60), budget_governor=governor)
+    governor.observe(make_snapshot(clock=clock, limit=1000, remaining=100, reset_in=1800))
+
+    limiter.relax(max_wait_seconds=2.0, max_rate=10_000)
+    for _ in range(8):
+        async with limiter:
+            pass
+
+    assert slept == []
+
+
+async def test_relaxing_gives_up_on_a_pause_it_cannot_outlast(clock: FakeClock, slept: list[float]) -> None:
+    """A provider pause is real and cannot be skipped, but blocking on it wastes the time left.
+
+    Failing at once lets the caller move to the next thing it wants to say before the kill arrives.
+    """
+    governor = BudgetGovernor(now=clock, reserve_fraction=0.15)
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=10, time_period=60), budget_governor=governor)
+    governor.observe(make_snapshot(retry_after=60))
+
+    limiter.relax(max_wait_seconds=2.0, max_rate=10_000)
+
+    with pytest.raises(RateLimitWaitAbandoned):
+        async with limiter:
+            pass
+    assert slept == []

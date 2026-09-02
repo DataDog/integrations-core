@@ -113,7 +113,7 @@ async def test_default_rate_limiter_is_constructed_and_observes_403() -> None:
     assert governor is not None
 
     with pytest.raises(httpx.HTTPStatusError):
-        await client._request("GET", "/x")
+        await client._rate_limited_request("GET", "/x")
 
     # The 403's retry-after was observed (before raise_for_status), arming the shared pause;
     # exact pause arithmetic is covered by the clocked governor tests.
@@ -129,7 +129,7 @@ async def test_retry_on_secondary_limit_returns_success(monkeypatch: pytest.Monk
     transport, calls = recording_transport([httpx.Response(403, headers={"retry-after": "5"}), httpx.Response(200)])
     client = governed_client(clock, transport, on_event=events.append)
 
-    response = await client._request("GET", "/x")
+    response = await client._rate_limited_request("GET", "/x")
 
     assert response.status_code == 200
     assert len(calls) == 2
@@ -160,7 +160,7 @@ async def test_retry_on_secondary_limit_without_valid_wait_returns_success(
     transport, calls = recording_transport([rate_limited_response, httpx.Response(200)])
     client = governed_client(clock, transport, on_event=events.append)
 
-    response = await client._request("GET", "/x")
+    response = await client._rate_limited_request("GET", "/x")
 
     assert response.status_code == 200
     assert len(calls) == 2
@@ -184,7 +184,7 @@ async def test_retry_on_primary_exhaustion_waits_until_reset(monkeypatch: pytest
     )
     client = governed_client(clock, transport, on_event=events.append)
 
-    response = await client._request("GET", "/x")
+    response = await client._rate_limited_request("GET", "/x")
 
     assert response.status_code == 200
     assert len(calls) == 2
@@ -200,20 +200,24 @@ async def test_authentication_error_is_actionable_and_not_retried(status_code: i
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
 
     with pytest.raises(GitHubAuthenticationError) as exc_info:
-        await client._request("GET", "/x")
+        await client._rate_limited_request("GET", "/x")
 
     assert len(calls) == 1
     assert exc_info.value.response.status_code == status_code
     assert "ddev config set github.token" in str(exc_info.value)
 
 
-async def test_no_retry_on_transport_error() -> None:
-    """A transport error is never retried (the action may have executed); it propagates immediately."""
+async def test_the_rate_limit_layer_does_not_retry_a_transport_error() -> None:
+    """A transport error is not a rate-limit signal, so this layer must leave it alone.
+
+    Retrying belongs to the retry strategy, which decides by whether the request can be replayed;
+    treating one as a rate-limit event here would retry it for every endpoint, dispatches included.
+    """
     transport, calls = recording_transport([httpx.ConnectError("boom")])
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
 
     with pytest.raises(httpx.ConnectError):
-        await client._request("GET", "/x")
+        await client._rate_limited_request("GET", "/x")
 
     assert len(calls) == 1
 
@@ -228,7 +232,7 @@ async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatc
     client = governed_client(clock, transport, max_rate_limit_retries=1)
 
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client._request("GET", "/x")
+        await client._rate_limited_request("GET", "/x")
 
     assert len(calls) == 2
     assert type(exc_info.value) is httpx.HTTPStatusError

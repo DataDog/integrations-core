@@ -91,6 +91,30 @@ def test_v2_both_endpoints_build_two_scrapers():
     assert endpoints == ["http://agent/metrics", "http://op/metrics"]
 
 
+def test_v2_metric_limit_issue_uses_generated_scraper_endpoints(datadog_agent):
+    agent_endpoint = "http://z-agent/metrics"
+    operator_endpoint = "http://a-operator/metrics"
+    check = CiliumCheckV2(
+        "cilium",
+        {},
+        [{"agent_endpoint": agent_endpoint, "operator_endpoint": operator_endpoint}],
+    )
+    check._parse_config()
+    check.configure_scrapers()
+
+    check._on_metric_limit_state(True, 20, 5)
+
+    [issue] = datadog_agent._sent_reported_issues["cilium"]
+    assert "openmetrics_endpoint" not in check.instance
+    assert issue["id"] == "openmetrics-dropped-config:659a0d48b0fa9caf"
+    assert issue["title"] == "Dropping 15 of 20 OpenMetrics metrics"
+    assert issue["extra"]["endpoints"] == [operator_endpoint, agent_endpoint]
+    assert "2 configured endpoints" in issue["description"]
+    assert "totals cover the complete check run" in issue["description"]
+    assert agent_endpoint in issue["description"]
+    assert operator_endpoint in issue["description"]
+
+
 def test_v2_agent_scraper_uses_agent_metrics_not_operator():
     check = CiliumCheckV2("cilium", {}, [{"agent_endpoint": "http://agent/metrics"}])
     check._parse_config()

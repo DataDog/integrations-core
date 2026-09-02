@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Aggregate state the gatherer owns and the PR updater renders.
+"""Aggregate state the gatherer owns and the run reporter renders.
 
 ``DispatcherProgress`` -> ``BatchProgress`` -> ``JobProgress`` -> ``JobAttemptProgress``: batches,
 their planned jobs, and each job's executions in attempt order.
@@ -123,7 +123,7 @@ class BatchProgress:
 class DispatcherProgress:
     """The complete point-in-time aggregate across all batches.
 
-    Carries all state known at its revision, so the PR updater renders the newest snapshot and
+    Carries all state known at its revision, so the run reporter renders the newest snapshot and
     discards the rest. The counters derive from ``JobProgress.latest`` only, so a job retried to
     success counts once.
     """
