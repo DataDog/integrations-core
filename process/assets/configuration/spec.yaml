@@ -137,7 +137,7 @@ files:
           example:
             warning: [<BELOW_VALUE> , <TOP_VALUE>]
             critical: [<BELOW_VALUE> , <TOP_VALUE>]
-        fleet_configurable: false
+        fleet_configurable: true
       - name: collect_children
         description: |
           If true, the check also collects metrics from all child processes of a matched process.
