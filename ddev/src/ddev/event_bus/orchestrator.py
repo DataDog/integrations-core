@@ -85,9 +85,10 @@ class BaseProcessor[T: BaseMessage]:
     def on_stop_requested(self) -> None:
         """React to the bus being asked to wind down, by shortening work already in flight.
 
-        Called once per processor, before the bus acts on the request and possibly from a signal
-        handler, so it must not block or await. Raising is contained: the stop still happens and the
-        other processors are still told.
+        Called once per processor. :attr:`stopping` is already set and the bus may already be acting on
+        it, so this cannot assume anything is still running; shorten what is in flight rather than
+        expecting to run first. May be called from a signal handler, so it must not block or await.
+        Raising is contained: the stop still happens and the other processors are still told.
         """
 
     def submit_message(self, message: BaseMessage) -> None:
@@ -168,7 +169,7 @@ class EventBusOrchestrator(ABC):
         # because the pool's own threads discard from it as they finish.
         self._sync_work: set[Future] = set()
         self._sync_work_lock = threading.Lock()
-        self._stop_lock = threading.Lock()
+        self._stop_claim = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         self._processors: list[Processor] = []
@@ -211,16 +212,17 @@ class EventBusOrchestrator(ABC):
         ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
         loop awaits them directly and would otherwise be held for as long as they take.
 
-        Every registered processor's :meth:`BaseProcessor.on_stop_requested` runs before this returns; a
-        caller that finds the stop already claimed returns at once.
+        Sets :attr:`stopping`, then runs every registered processor's
+        :meth:`BaseProcessor.on_stop_requested`. A second caller returns at once rather than waiting for
+        those to finish.
         """
-        # Claimed atomically, and before the hooks: two threads may call this, and one that raises must
-        # not leave the bus running. Notifying outside the lock, so a hook cannot hold it.
-        with self._stop_lock:
-            if self.stopping:
-                return
-            self._stopping.set()
+        # A one-shot latch, never released, so the first caller is the one that notifies. Non-blocking
+        # because a signal handler runs on the thread it interrupted: waiting here for a lock that
+        # thread already holds would deadlock it, and the handler is often the one for SIGTERM.
+        if not self._stop_claim.acquire(blocking=False):
+            return
 
+        self._stopping.set()
         self._logger.info("Stop requested; the bus will wind down")
         self._notify_processors_of_stop()
 

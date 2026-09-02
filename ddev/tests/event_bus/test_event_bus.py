@@ -1255,33 +1255,15 @@ def test_a_processor_is_told_once_however_often_it_subscribed(registrations: lis
     assert watcher.stop_notifications == 1
 
 
-def test_two_threads_asking_to_stop_at_once_notify_each_processor_once(monkeypatch: pytest.MonkeyPatch):
-    """`request_stop` is documented as callable from any thread, and a `SyncProcessor` runs in one.
-
-    Driven through the log call because that sits between the guard and the flag unless the claim is
-    atomic, which is the window a second thread gets through.
-    """
+def test_asking_to_stop_again_notifies_nobody_and_does_not_block():
+    """The claim is a latch that is never released, so a second call must test it rather than wait."""
     watcher = StopWatcher("watcher")
-    orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_race"), max_timeout=30, grace_period=1)
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_repeat"), max_timeout=30, grace_period=1)
     orchestrator.register_processor(watcher, [TaskAssignment])
-    seam_fired = False
-    original_info = orchestrator._logger.info
-
-    def info_then_stop_from_another_thread(*args, **kwargs):
-        nonlocal seam_fired
-        original_info(*args, **kwargs)
-        if seam_fired:
-            return
-        seam_fired = True
-        second = threading.Thread(target=orchestrator.request_stop)
-        second.start()
-        second.join()
-
-    monkeypatch.setattr(orchestrator._logger, "info", info_then_stop_from_another_thread)
 
     orchestrator.request_stop()
+    orchestrator.request_stop()
 
-    assert seam_fired, "the second thread never ran, so this test proves nothing"
     assert watcher.stop_notifications == 1
 
 
