@@ -1236,11 +1236,19 @@ class StopWatcher(AsyncProcessor[TaskAssignment | Announcement]):
             raise RuntimeError("this processor cannot wind down")
 
 
-def test_a_processor_is_told_once_however_often_it_subscribed():
+@pytest.mark.parametrize(
+    "registrations",
+    [
+        pytest.param([[TaskAssignment, Announcement]], id="one-call-two-types"),
+        pytest.param([[TaskAssignment], [Announcement]], id="two-calls"),
+    ],
+)
+def test_a_processor_is_told_once_however_often_it_subscribed(registrations: list[list[type[BaseMessage]]]):
     """Subscriptions are per message type, so notifying per subscription would repeat the hook."""
     watcher = StopWatcher("watcher")
     orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_once"), max_timeout=30, grace_period=1)
-    orchestrator.register_processor(watcher, [TaskAssignment, Announcement])
+    for message_types in registrations:
+        orchestrator.register_processor(watcher, message_types)
 
     orchestrator.request_stop()
 

@@ -170,6 +170,9 @@ class EventBusOrchestrator(ABC):
         self._sync_work_lock = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
+        # Also kept flat, because `_subscribers` holds a processor once per message type it takes and
+        # lifecycle hooks are owed to each processor once.
+        self._processors: list[Processor] = []
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
@@ -197,6 +200,9 @@ class EventBusOrchestrator(ABC):
         processor.bus = self
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
+        # By identity: a subclass defining `__eq__` would otherwise drop a distinct processor.
+        if not any(registered is processor for registered in self._processors):
+            self._processors.append(processor)
 
     def request_stop(self) -> None:
         """Ask the bus to wind down, from any thread.
@@ -217,24 +223,13 @@ class EventBusOrchestrator(ABC):
         self._notify_processors_of_stop()
 
     def _notify_processors_of_stop(self) -> None:
-        for processor in self._registered_processors():
+        for processor in self._processors:
             try:
                 processor.on_stop_requested()
             except Exception as e:
                 # Swallowed rather than routed: the caller may be a signal handler, where raising loses
                 # the processors behind this one.
                 self._logger.error("on_stop_requested failed for '%s': %s", processor.name, e, exc_info=e)
-
-    def _registered_processors(self) -> list[Processor]:
-        """Every registered processor, once each, since ``_subscribers`` is keyed by message type.
-
-        Keyed by identity because a subclass defining ``__eq__`` would collide or be unhashable.
-        """
-        unique: dict[int, Processor] = {}
-        for processors in self._subscribers.values():
-            for processor in processors:
-                unique.setdefault(id(processor), processor)
-        return list(unique.values())
 
     def submit_message(self, message: BaseMessage):
         """Adds a message to the queue, from any thread.
