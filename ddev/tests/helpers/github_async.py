@@ -58,6 +58,7 @@ from ddev.utils.github_async.models import (
 )
 from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
+from ddev.utils.rate_limiting import RelaxedRateLimits
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
@@ -120,7 +121,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         # Cancelling returns nothing, and a run already terminal is the outcome asked for.
         'cancel_workflow_run': lambda: None,
-        'relax_rate_limits': lambda: None,
+        'enter_shutdown_mode': lambda: None,
         'create_issue_comment': lambda: GitHubResponse(
             data=IssueComment(
                 id=DEFAULT_COMMENT_ID,
@@ -506,8 +507,8 @@ class FakeAsyncGitHubClient:
             timeout=timeout,
         )
 
-    def relax_rate_limits(self, *, max_wait_seconds: float, max_rate: float) -> None:
-        self._call('relax_rate_limits', max_wait_seconds=max_wait_seconds, max_rate=max_rate)
+    def enter_shutdown_mode(self, *, rate_limits: RelaxedRateLimits | None = None) -> None:
+        self._call('enter_shutdown_mode', rate_limits=rate_limits)
 
     async def create_check_run(
         self,

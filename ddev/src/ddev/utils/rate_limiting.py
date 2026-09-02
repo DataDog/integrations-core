@@ -301,6 +301,24 @@ class BudgetGovernor:
         )
 
 
+@dataclasses.dataclass(frozen=True)
+class RelaxedRateLimits:
+    """How far to relax pacing for a process that will not live long enough to spend its budget.
+
+    Paired because neither works alone: a rate with no wait cap still blocks on a provider pause, and
+    a cap with no rate still waits for a slot.
+    """
+
+    max_wait_seconds: float
+    max_rate: float
+
+    def __post_init__(self) -> None:
+        if self.max_wait_seconds < 0:
+            raise ValueError(f"max_wait_seconds must be zero or greater, got {self.max_wait_seconds}")
+        if self.max_rate <= 0:
+            raise ValueError(f"max_rate must be greater than zero, got {self.max_rate}")
+
+
 class InstrumentedAsyncLimiter:
     """Thin async context manager wrapper around AsyncLimiter.
 

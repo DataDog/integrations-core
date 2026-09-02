@@ -16,6 +16,7 @@ import pytest
 
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
+from ddev.utils.rate_limiting import RelaxedRateLimits
 from tests.cli.ci.tests.helpers import comment_page
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.utils.github_async.helpers import first_page
@@ -306,6 +307,8 @@ async def test_calls_are_recorded_regardless_of_response(fake: FakeAsyncGitHubCl
 # One call per mirror, paired with an argument the recording must carry back. Every mirror belongs
 # here: `test_every_mirror_is_in_the_call_table` fails when one is added without being registered,
 # which is the case a hand-written test per method cannot catch.
+SHUTDOWN_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
+
 MIRROR_CALLS = [
     ('get_pull_request', lambda f, _: f.get_pull_request('o', 'r', 5), {'pull_number': 5}),
     ('list_pull_requests', lambda f, _: f.list_pull_requests('o', 'r', head='o:branch'), {'head': 'o:branch'}),
@@ -331,9 +334,9 @@ MIRROR_CALLS = [
         {'commit_id': 'abc123', 'line': 10},
     ),
     (
-        'relax_rate_limits',
-        lambda f, _: f.relax_rate_limits(max_wait_seconds=2.0, max_rate=10_000.0),
-        {'max_rate': 10_000.0},
+        'enter_shutdown_mode',
+        lambda f, _: f.enter_shutdown_mode(rate_limits=SHUTDOWN_RATE_LIMITS),
+        {'rate_limits': SHUTDOWN_RATE_LIMITS},
     ),
     (
         'create_check_run',
