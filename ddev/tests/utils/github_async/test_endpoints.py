@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import nullcontext as does_not_raise
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -651,3 +652,23 @@ async def test_endpoint_forwards_response_headers(case: EndpointCase) -> None:
     client = make_client(httpx.MockTransport(handler))
     result = await case.call(client)
     assert result.headers["x-ratelimit-remaining"] == "42"
+
+
+@pytest.mark.parametrize(
+    ("status_code", "expectation"),
+    [
+        pytest.param(202, does_not_raise(), id="accepted"),
+        pytest.param(409, does_not_raise(), id="already_terminal"),
+        pytest.param(404, pytest.raises(httpx.HTTPStatusError), id="not_found"),
+    ],
+)
+async def test_cancelling_a_run_that_already_finished_is_not_a_failure(status_code: int, expectation) -> None:
+    """GitHub answers 409 once a run is terminal, which is the state the caller asked for.
+
+    Treating it as a failure would have the caller report a cleanup step as broken for doing nothing,
+    and a run finishing between the decision to cancel it and the call is ordinary.
+    """
+    client = make_client(httpx.MockTransport(lambda request: httpx.Response(status_code)))
+
+    with expectation:
+        await client.cancel_workflow_run("DataDog", "integrations-core", 123)

@@ -1,7 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Unit tests for the V2 statement metrics layers (DeltaDetector, ObfuscationLookup, PostgresStatementMetricsV2)."""
+"""Unit tests for PostgresStatementMetricsV2.
+
+The diffing and caching primitives it builds on are covered in
+``datadog_checks_base/tests/base/utils/db/query_metrics/``; what belongs here is the Postgres
+specifics layered on top and the wiring between them.
+"""
 
 import json
 from unittest import mock
@@ -9,10 +14,9 @@ from unittest import mock
 import pytest
 from semver import VersionInfo
 
+from datadog_checks.base.utils.db.query_metrics import TextKind
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import build_config
-from datadog_checks.postgres.delta_detector import DeltaDetector
-from datadog_checks.postgres.obfuscation_lookup import ObfuscationLookup
 from datadog_checks.postgres.statements import (
     PG_STAT_STATEMENTS_TIMING_COLUMNS,
     PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17,
@@ -21,254 +25,24 @@ from datadog_checks.postgres.statements_v2 import (
     DEFAULT_PGSS_MAX,
     LIGHTWEIGHT_DESIRED_COLUMNS,
     PostgresStatementMetricsV2,
+    classify_query_text,
 )
 
-METRIC_COLS = frozenset({'calls', 'total_exec_time', 'rows', 'shared_blks_hit'})
 
-
-# ---------------------------------------------------------------------------
-# DeltaDetector
-# ---------------------------------------------------------------------------
-
-
-class TestDeltaDetector:
-    def _make_row(self, queryid, dbid=1, userid=1, datname='mydb', rolname='myrole', **counters):
-        row = {
-            'queryid': queryid,
-            'dbid': dbid,
-            'userid': userid,
-            'datname': datname,
-            'rolname': rolname,
-            'calls': 0,
-            'total_exec_time': 0.0,
-            'rows': 0,
-            'shared_blks_hit': 0,
-        }
-        row.update(counters)
-        return row
-
-    def test_first_cycle_returns_no_derivatives(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        rows = [self._make_row(101, calls=10, rows=100)]
-        result = dd.compute(rows)
-        assert result.derivative_rows == []
-        assert result.changed_pgss_keys == set()
-
-    def test_second_cycle_returns_derivatives_for_changed_rows(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        dd.compute([self._make_row(101, calls=10, rows=100)])
-
-        result = dd.compute([self._make_row(101, calls=15, rows=150)])
-        assert len(result.derivative_rows) == 1
-        dr = result.derivative_rows[0]
-        assert dr['calls'] == 5
-        assert dr['rows'] == 50
-        assert dr['queryid'] == 101
-        assert (101, 1, 1) in result.changed_pgss_keys
-
-    def test_unchanged_rows_are_not_emitted(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        rows = [
-            self._make_row(101, calls=10),
-            self._make_row(102, calls=20),
-        ]
-        dd.compute(rows)
-        rows_same = [
-            self._make_row(101, calls=10),
-            self._make_row(102, calls=25),
-        ]
-        result = dd.compute(rows_same)
-        assert len(result.derivative_rows) == 1
-        assert result.derivative_rows[0]['queryid'] == 102
-
-    def test_negative_diff_discards_row(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        dd.compute([self._make_row(101, calls=10, rows=100)])
-        result = dd.compute([self._make_row(101, calls=5, rows=50)])
-        assert result.derivative_rows == []
-
-    def test_vanished_pgss_keys_detected(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        dd.compute([self._make_row(101, calls=10), self._make_row(102, calls=20)])
-        result = dd.compute([self._make_row(101, calls=15)])
-        assert (102, 1, 1) in result.vanished_pgss_keys
-
-    def test_execution_indicator_required(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        dd.compute([self._make_row(101, calls=10, total_exec_time=100.0)])
-        result = dd.compute([self._make_row(101, calls=10, total_exec_time=105.0)])
-        assert result.derivative_rows == []
-
-    def test_new_queryid_is_not_in_changed_set(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        dd.compute([self._make_row(101, calls=10)])
-        result = dd.compute([self._make_row(101, calls=15), self._make_row(102, calls=5)])
-        assert (101, 1, 1) in result.changed_pgss_keys
-        assert (102, 1, 1) not in result.changed_pgss_keys
-
-    def test_duplicate_queryid_rows_are_merged(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        dd.compute([self._make_row(101, calls=10, rows=100)])
-        rows = [
-            self._make_row(101, calls=8, rows=60),
-            self._make_row(101, calls=7, rows=55),
-        ]
-        result = dd.compute(rows)
-        assert len(result.derivative_rows) == 1
-        assert result.derivative_rows[0]['calls'] == 5
-        assert result.derivative_rows[0]['rows'] == 15
-
-    def test_reset_clears_state(self):
-        dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
-        dd.compute([self._make_row(101, calls=10)])
-        dd.reset()
-        result = dd.compute([self._make_row(101, calls=15)])
-        assert result.derivative_rows == []
-
-
-# ---------------------------------------------------------------------------
-# ObfuscationLookup
-# ---------------------------------------------------------------------------
-
-
-class TestObfuscationLookup:
-    def _make_lookup(self, maxsize=100):
-        return ObfuscationLookup(maxsize=maxsize, obfuscate_options='{}')
-
-    def test_empty_lookup_all_misses(self):
-        lk = self._make_lookup()
-        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1), (3, 1, 1)})
-        assert hits == {}
-        assert misses == {(1, 1, 1), (2, 1, 1), (3, 1, 1)}
-
-    def test_populate_then_lookup(self):
-        lk = self._make_lookup()
-        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
-        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1), (3, 1, 1)})
-        assert (1, 1, 1) in hits
-        assert (2, 1, 1) in hits
-        assert misses == {(3, 1, 1)}
-        assert hits[(1, 1, 1)].obfuscated_query is not None
-        assert hits[(1, 1, 1)].query_signature is not None
-
-    def test_hit_and_miss_counters(self):
-        lk = self._make_lookup()
-        lk.populate({(1, 1, 1): 'SELECT 1'})
-        lk.reset_stats()
-        lk.lookup({(1, 1, 1), (2, 1, 1)})
-        assert lk.hits == 1
-        assert lk.misses == 1
-
-    def test_evict_removes_pgss_key(self):
-        lk = self._make_lookup()
-        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
-        lk.evict({(1, 1, 1)})
-        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1)})
-        assert (1, 1, 1) in misses
-        assert (2, 1, 1) in hits
-
-    def test_multiple_pgss_keys_share_signature(self):
-        """Different pgss keys with the same normalized SQL share one ObfuscationResult."""
-        lk = self._make_lookup()
-        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
-        hits, _ = lk.lookup({(1, 1, 1), (2, 1, 1)})
-        assert hits[(1, 1, 1)].query_signature == hits[(2, 1, 1)].query_signature
-        assert lk.queryid_map_size == 2
-        assert lk.signature_map_size == 1
-
-    def test_lru_eviction_on_max_size(self):
-        lk = self._make_lookup(maxsize=2)
-        lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2', (3, 3, 3): 'SELECT 3'})
-        assert lk.queryid_map_size == 2
-        _, misses = lk.lookup({(1, 1, 1)})
-        assert (1, 1, 1) in misses
-
-    def test_populate_returns_results(self):
-        lk = self._make_lookup()
-        results = lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
-        assert (1, 1, 1) in results
-        assert (2, 1, 1) in results
-        assert results[(1, 1, 1)].obfuscated_query is not None
-
-    def test_evict_does_not_remove_shared_signature(self):
-        """Evicting one pgss key removes tier-1 mapping but keeps tier-2 if other keys share it."""
-        lk = self._make_lookup()
-        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
-        lk.evict({(1, 1, 1)})
-        hits, _ = lk.lookup({(2, 1, 1)})
-        assert (2, 1, 1) in hits
-
-    def test_lookup_updates_lru_order(self):
-        lk = self._make_lookup(maxsize=2)
-        lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2'})
-        lk.lookup({(1, 1, 1)})
-        lk.populate({(3, 3, 3): 'SELECT 3'})
-        hits, _ = lk.lookup({(1, 1, 1)})
-        assert (1, 1, 1) in hits
-        _, misses = lk.lookup({(2, 2, 2)})
-        assert (2, 2, 2) in misses
-
-    # --- negative cache (ignored keys) ---
-
-    def test_mark_ignored_excludes_from_hits_and_misses(self):
-        """A negatively-cached key is neither a hit nor a miss on lookup."""
-        lk = self._make_lookup()
-        lk.mark_ignored({(1, 1, 1)})
-        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1)})
-        assert (1, 1, 1) not in hits
-        assert (1, 1, 1) not in misses
-        assert misses == {(2, 1, 1)}
-        assert lk.ignored_map_size == 1
-
-    def test_ignored_keys_do_not_increment_miss_counter(self):
-        lk = self._make_lookup()
-        lk.mark_ignored({(1, 1, 1)})
-        lk.reset_stats()
-        lk.lookup({(1, 1, 1)})
-        assert lk.misses == 0
-        assert lk.hits == 0
-
-    def test_evict_forgets_ignored_key(self):
-        """Evicting a vanished key clears its negative-cache entry so it can be re-evaluated."""
-        lk = self._make_lookup()
-        lk.mark_ignored({(1, 1, 1)})
-        lk.evict({(1, 1, 1)})
-        assert lk.ignored_map_size == 0
-        _, misses = lk.lookup({(1, 1, 1)})
-        assert (1, 1, 1) in misses
-
-    def test_ignored_keys_lru_trimmed_to_maxsize(self):
-        lk = self._make_lookup(maxsize=2)
-        lk.mark_ignored({(1, 1, 1), (2, 2, 2), (3, 3, 3)})
-        assert lk.ignored_map_size == 2
-
-    def test_mark_ignored_drops_stale_positive_mapping(self):
-        """An ignored key must not resurface as a hit via a stale tier-1 mapping.
-
-        Reproduces the case where a key keeps its tier-1 mapping after its tier-2
-        signature was evicted: marking it ignored must drop the tier-1 entry so that,
-        even after the negative entry is trimmed and the signature is repopulated by
-        another key, the ignored key never produces a positive hit.
-        """
-        lk = self._make_lookup()
-        # Two keys share the same normalized SQL (one signature).
-        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
-        assert lk.queryid_map_size == 2
-
-        # Key (1, 1, 1) turns out to be ignorable; its tier-1 mapping must be dropped.
-        lk.mark_ignored({(1, 1, 1)})
-        assert (1, 1, 1) not in lk._key_to_sig
-
-        # The shared signature is still cached (via the other key), but the ignored key
-        # must not hit it.
-        hits, misses = lk.lookup({(1, 1, 1)})
-        assert (1, 1, 1) not in hits
-        assert (1, 1, 1) not in misses
-
-
-# ---------------------------------------------------------------------------
-# PostgresStatementMetricsV2 — unit tests (no live database)
-# ---------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    "text, expected_kind",
+    [
+        pytest.param('/* DDIGNORE */ SELECT secret', TextKind.EXCLUDED, id='ddignore'),
+        pytest.param('<insufficient privilege>', TextKind.UNAVAILABLE, id='insufficient_privilege'),
+        pytest.param('SELECT city FROM persons', TextKind.STATEMENT, id='ordinary_statement'),
+    ],
+)
+def test_classify_query_text(text, expected_kind):
+    """The kind a text maps to decides whether the resolver ever asks for that key again: EXCLUDED is
+    a permanent verdict, UNAVAILABLE is retried. The shared resolver's own tests classify with a
+    stand-in, so this mapping is only pinned here.
+    """
+    assert classify_query_text(text) is expected_kind
 
 
 class TestPostgresStatementMetricsV2:
@@ -326,72 +100,26 @@ class TestPostgresStatementMetricsV2:
         v2._log.warning.assert_called_once()
         assert 'dropped' in v2._log.warning.call_args[0][0].lower()
 
-    # --- obfuscation text filtering ---
+    # --- resolver wiring ---
 
-    @pytest.mark.parametrize(
-        "sentinel",
-        [
-            pytest.param('<insufficient privilege>', id='insufficient_privilege'),
-            pytest.param('/* DDIGNORE */ SELECT secret', id='ddignore'),
-        ],
-    )
-    def test_resolve_obfuscations_filters_sentinel(self, sentinel):
-        """Sentinel query texts are excluded from the obfuscation lookup."""
-        v2 = self._make()
-        key = (1, 1, 1)
-        with mock.patch.object(v2, '_fetch_query_texts', return_value={key: sentinel}):
-            result = v2._resolve_obfuscations({key}, set())
-        assert key not in result
+    def test_resolve_obfuscations_applies_the_postgres_classifier(self):
+        """The collector hands its own fetcher and classifier to the shared resolver.
 
-    def test_resolve_obfuscations_partial_filter(self):
-        """Only sentinel-valued keys are filtered; valid queries still appear in the result."""
+        One call covering both a sentinel and an ordinary statement shows the classifier reaching the
+        resolver per key; how each kind is then cached or retried belongs to the resolver's own tests.
+        """
         v2 = self._make()
         bad_key = (1, 1, 1)
         good_key = (2, 1, 1)
+        keys = {bad_key, good_key}
         with mock.patch.object(
             v2,
             '_fetch_query_texts',
             return_value={bad_key: '<insufficient privilege>', good_key: 'SELECT 1'},
         ):
-            result = v2._resolve_obfuscations({bad_key, good_key}, set())
+            result = v2._resolve_obfuscations(keys, keys)
         assert bad_key not in result
         assert good_key in result
-
-    def test_resolve_obfuscations_skips_known_ddignore_keys_on_later_cycles(self):
-        """A DDIGNORE key is fetched once, negative-cached, then skipped (no fetch) on later cycles."""
-        v2 = self._make()
-        ddignore_key = (1, 1, 1)
-
-        with mock.patch.object(
-            v2, '_fetch_query_texts', return_value={ddignore_key: '/* DDIGNORE */ SELECT 1'}
-        ) as fetch:
-            v2._resolve_obfuscations({ddignore_key}, set())
-            assert fetch.call_count == 1
-            assert ddignore_key in v2._obfuscation_lookup._ignored_keys
-
-            # Second cycle: same key changes again but is now skipped before the fetch.
-            result = v2._resolve_obfuscations({ddignore_key}, set())
-            assert result == {}
-            assert fetch.call_count == 1
-
-    def test_resolve_obfuscations_does_not_fetch_when_all_keys_ignored(self):
-        """When every changed key is already negative-cached, no text fetch is issued."""
-        v2 = self._make()
-        ddignore_key = (1, 1, 1)
-        v2._obfuscation_lookup.mark_ignored({ddignore_key})
-        with mock.patch.object(v2, '_fetch_query_texts') as fetch:
-            result = v2._resolve_obfuscations({ddignore_key}, set())
-        assert result == {}
-        fetch.assert_not_called()
-
-    def test_resolve_obfuscations_forgets_ignored_key_when_vanished(self):
-        """An ignored key that vanishes from pgss is dropped from the negative cache via evict."""
-        v2 = self._make()
-        ddignore_key = (1, 1, 1)
-        v2._obfuscation_lookup.mark_ignored({ddignore_key})
-        with mock.patch.object(v2, '_fetch_query_texts', return_value={}):
-            v2._resolve_obfuscations(set(), {ddignore_key})
-        assert ddignore_key not in v2._obfuscation_lookup._ignored_keys
 
     # --- execute query cancel event ---
 
@@ -424,12 +152,12 @@ class TestPostgresStatementMetricsV2:
         ],
     )
     def test_sync_cache_sizes(self, pg_setting, initial_maxsize, expected_maxsize):
-        """_sync_cache_sizes reconciles _obfuscation_lookup._maxsize with the live pg setting."""
+        """_sync_cache_sizes reconciles the cache bound with the live pg_stat_statements.max setting."""
         v2 = self._make()
         v2._check.pg_settings = {'pg_stat_statements.max': pg_setting} if pg_setting is not None else {}
-        v2._obfuscation_lookup._maxsize = initial_maxsize
+        v2._obfuscation_lookup.maxsize = initial_maxsize
         v2._sync_cache_sizes()
-        assert v2._obfuscation_lookup._maxsize == expected_maxsize
+        assert v2._obfuscation_lookup.maxsize == expected_maxsize
 
     # --- zero-derivative short-circuit ---
 
@@ -445,18 +173,23 @@ class TestPostgresStatementMetricsV2:
             mock.patch.object(v2, '_sync_cache_sizes'),
             mock.patch.object(v2, '_load_lightweight_snapshot', return_value=snapshot),
         ):
-            # First call: seeds DeltaDetector (no previous) → no derivatives
+            # The two calls return nothing for different reasons: the first has no baseline to diff
+            # against yet, and the second diffs an identical snapshot.
             assert v2._collect_metrics_rows() == []
-            # Second call: identical snapshot, zero counter change → no derivatives
             assert v2._collect_metrics_rows() == []
 
-        # Delta gauges were still emitted with value 0 on both calls
+        gauge_names = [c[0][0] for c in v2._check.gauge.call_args_list]
+
         derivative_gauge_calls = [
             c
             for c in v2._check.gauge.call_args_list
             if c[0][0] == 'dd.postgres.statement_metrics.delta.derivative_rows'
         ]
         assert all(c[0][1] == 0 for c in derivative_gauge_calls)
+
+        # Resolution still ran, which is what prunes cache entries for statements that have left
+        # pg_stat_statements; skipping it on quiet cycles would let the cache grow unbounded.
+        assert gauge_names.count('dd.postgres.statement_metrics.lookup.dropped') == 2
 
     # --- track_io_timing column exclusion ---
 

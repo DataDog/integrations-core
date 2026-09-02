@@ -82,13 +82,32 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             if not self._accepts(message.batch_id, log_extra):
                 return
 
-        gathered = [self._gather_job(batch_job_result, message) for batch_job_result in message.batch_jobs]
+        gathered: list[tuple[JobResult, JobAttemptProgress]] = []
+        for batch_job_result in message.batch_jobs:
+            # Checked per job because a repository-wide batch has hundreds, and this runs in a thread
+            # the bus cannot interrupt. Abandoned rather than partly registered: the batch stays
+            # planned, so the run reports what it is, unfinished.
+            if self.stopping:
+                self._logger.warning(
+                    "Gathering abandoned after %s of %s jobs: the bus is shutting down",
+                    len(gathered),
+                    len(message.batch_jobs),
+                    extra=log_extra,
+                )
+                return
+            gathered.append(self._gather_job(batch_job_result, message))
+
         results = [result for result, _ in gathered]
         status = self._build_workflow_status(message, results)
 
         # Register, bump the revision, and emit under one lock, so two batches finishing at once
         # cannot build a comment from half-updated state.
         with self._lock:
+            # The per-job check cannot see a flip during the last job or while the status was built,
+            # and this block is the publish gate: registering now would contradict a cancelled run.
+            if self.stopping:
+                self._logger.warning("Batch gathered but left unregistered: the bus is shutting down", extra=log_extra)
+                return
             # Re-checked: another thread may have gathered this batch while this one parsed.
             if not self._accepts(message.batch_id, log_extra):
                 return

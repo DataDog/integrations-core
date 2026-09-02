@@ -42,6 +42,12 @@ COMMENT_MARKER = "<!-- ddev-dispatcher-tests -->"
 # Width of the text progress bar, in cells.
 PROGRESS_BAR_WIDTH = 24
 
+# Terminal but unfinished, which no other state in a report expresses: the rest derive from `done`.
+CANCELLED_HEADING = "## 🚫 Dispatcher tests · cancelled"
+CANCELLED_NOTE = "Anything below is what had been gathered by then, and batches still running were cancelled too."
+# Said instead when no batch ever reported, where the note above would point at results that are absent.
+CANCELLED_WITHOUT_RESULTS_NOTE = "The run was cancelled before any batch reported, so there are no results to show."
+
 # Blocks are joined by a blank line, so each one costs two bytes beyond its own length. Newlines are
 # one byte in UTF-8, so this is the same number in either unit.
 SECTION_SEPARATOR = 2
@@ -79,41 +85,49 @@ def _size(text: str) -> int:
     return len(text.encode("utf-8"))
 
 
-def render_comment(progress: DispatcherProgress) -> str:
+def render_comment(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
     """First of three tiers, budgeted in bytes against the client's own limit so the two cannot drift.
 
     The message's ``revision`` is deliberately not rendered: internal ordering metadata, already logged.
     """
-    return _render(progress, (partial(_failures, detail=True), _unavailable, _retried), shows_unavailable=True)
+    return _render(
+        progress, (partial(_failures, detail=True), _unavailable, _retried), shows_unavailable=True, cancelled=cancelled
+    )
 
 
-def render_compact_comment(progress: DispatcherProgress) -> str:
+def render_compact_comment(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
     """Second tier: the failures keep their detail, the secondary sections go.
 
     Which tests failed is why anyone opens the comment; a retried-job list is one line per retry and can
     be the largest section in a flaky run.
     """
-    return _render(progress, (partial(_failures, detail=True),), shows_unavailable=False)
+    return _render(progress, (partial(_failures, detail=True),), shows_unavailable=False, cancelled=cancelled)
 
 
-def render_minimal_comment(progress: DispatcherProgress) -> str:
+def render_minimal_comment(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
     """Last tier: batches, totals and a line per failed job, without naming the failed tests.
 
     The per-test lists are the dominant cost — 2.1 kB for a job with 40 failures against ~150 bytes for
     its summary line — so dropping them is what makes this fit. Only the batch table is unbudgeted, and
     it would need ~464 batches to exhaust the limit on its own.
     """
-    return _render(progress, (partial(_failures, detail=False),), shows_unavailable=False)
+    return _render(progress, (partial(_failures, detail=False),), shows_unavailable=False, cancelled=cancelled)
 
 
-def _render(progress: DispatcherProgress, sections: tuple[SectionBuilder, ...], *, shows_unavailable: bool) -> str:
+def _render(
+    progress: DispatcherProgress,
+    sections: tuple[SectionBuilder, ...],
+    *,
+    shows_unavailable: bool,
+    cancelled: bool = False,
+) -> str:
     """Assemble a body from the header, whichever *sections* this tier keeps, and the footer.
 
     ``shows_unavailable`` tells the header whether this tier keeps ``_unavailable``, so the alert can
     neither point at a section that is not here nor stay silent about results it dropped.
     """
-    header = _header(progress, shows_unavailable=shows_unavailable)
-    footer = _footer(progress)
+    header = _header(progress, shows_unavailable=shows_unavailable, cancelled=cancelled)
+    footer = _footer(progress, cancelled=cancelled)
 
     # The header and footer always survive; the detail sections compete for what is left. Two
     # newlines join every block, so each section costs its own length plus that separator.
@@ -127,6 +141,15 @@ def _render(progress: DispatcherProgress, sections: tuple[SectionBuilder, ...], 
         remaining -= _size(section) + SECTION_SEPARATOR
 
     return "\n\n".join([header, *built, footer])
+
+
+def render_cancelled_notice() -> str:
+    """What a run cancelled before any batch reported has to say: that it ran, and that it stopped.
+
+    There is no snapshot to render, and the comment is the only place a reader learns the run existed.
+    """
+    footer = _footer(None, cancelled=True)
+    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}\n\n{footer}"
 
 
 def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
@@ -157,10 +180,10 @@ def summary_line(progress: DispatcherProgress) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _header(progress: DispatcherProgress, *, shows_unavailable: bool) -> str:
+def _header(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: bool = False) -> str:
     """Marker, heading, in-progress alert and totals: the part that must never be truncated."""
-    blocks = [COMMENT_MARKER, _heading(progress)]
-    alert = _alert(progress, shows_unavailable=shows_unavailable)
+    blocks = [COMMENT_MARKER, _heading(progress, cancelled=cancelled)]
+    alert = _alert(progress, shows_unavailable=shows_unavailable, cancelled=cancelled)
     if alert is not None:
         blocks.append(alert)
     blocks.append(_totals(progress))
@@ -168,8 +191,10 @@ def _header(progress: DispatcherProgress, *, shows_unavailable: bool) -> str:
     return "\n\n".join(blocks)
 
 
-def _heading(progress: DispatcherProgress) -> str:
+def _heading(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
     """The run's outcome in one line. A failure outranks an unestablished result, which outranks a pass."""
+    if cancelled:
+        return CANCELLED_HEADING
     if not progress.done:
         return "## 🔄 Dispatcher tests · in progress"
     if _has_failure(progress):
@@ -179,13 +204,15 @@ def _heading(progress: DispatcherProgress) -> str:
     return "## ✅ Dispatcher tests · passed"
 
 
-def _alert(progress: DispatcherProgress, *, shows_unavailable: bool) -> str | None:
+def _alert(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: bool = False) -> str | None:
     """A native GitHub alert, so an unfinished run cannot be mistaken for a final one at a glance.
 
     A fallback tier sheds the section that lists unestablished results, so the alert states the count
     itself rather than pointing below, and carries it alongside a failure too. Without that, a fallback
     body would read as though every result was established.
     """
+    if cancelled:
+        return f"> [!CAUTION]\n> **The run was cancelled before it finished.** {CANCELLED_NOTE}"
     if not progress.done:
         return f"> [!NOTE]\n> **Tests are still running.** {_outstanding(progress)}\n> {FOOTER_RUNNING_NOTE}"
 
@@ -424,17 +451,17 @@ def _list_section(heading: str, entries: list[str], budget: int, noun: str) -> s
 # ---------------------------------------------------------------------------
 
 
-def _footer(progress: DispatcherProgress) -> str:
+def _footer(progress: DispatcherProgress | None, *, cancelled: bool = False) -> str:
     """Whether this is the last word, and where the run that produced it lives.
 
     No status emoji on a finished run: the outcome is the heading's job, and a ✅ here read as "all
     good" on a run that had failed. What a reader cannot get anywhere else in the comment is which
     commit was tested and where Dispatcher itself ran, so that is what this says.
     """
-    if not progress.done:
+    if not cancelled and (progress is None or not progress.done):
         return f"<sub>\n⏳ {FOOTER_RUNNING_NOTE}\n</sub>"
 
-    note = "Dispatcher finished"
+    note = "Dispatcher was cancelled" if cancelled else "Dispatcher finished"
     if sha := get_commit_sha():
         note += f" on <code>{html.escape(sha)}</code>"
     if run_url := get_workflow_run_url():

@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
@@ -12,12 +13,13 @@ from typing import Any
 import pytest
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
-from ddev.cli.ci.tests.status import Status, conclusion_to_status
-from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
+from ddev.cli.ci.tests.status import Status, conclusion_to_check_run_conclusion, conclusion_to_status
+from ddev.cli.ci.tests.task_test_runner import CANCEL_REQUEST_TIMEOUT, TaskTestRunner, TestRunnerOptions
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
+    CheckRunConclusion,
     WorkflowJob,
     WorkflowJobsList,
     WorkflowRun,
@@ -157,6 +159,24 @@ def test_conclusion_to_status(conclusion: str | None, expected: Status):
     result = conclusion_to_status(conclusion)
     assert result is expected
     assert isinstance(result, Status)
+
+
+@pytest.mark.parametrize(
+    ("conclusion", "expected"),
+    [
+        ("success", CheckRunConclusion.SUCCESS),
+        ("timed_out", CheckRunConclusion.TIMED_OUT),
+        (None, CheckRunConclusion.NEUTRAL),
+        ("startup_failure", CheckRunConclusion.FAILURE),
+    ],
+)
+def test_conclusion_to_check_run_conclusion(conclusion: str | None, expected: CheckRunConclusion):
+    """A workflow run's conclusion is a free-form string, a check run's is a closed set of eight.
+
+    `startup_failure` is a real workflow conclusion with no check-run member, so passing it through
+    would have GitHub reject the request that closes the check run.
+    """
+    assert conclusion_to_check_run_conclusion(conclusion) is expected
 
 
 # ---------------------------------------------------------------------------
@@ -671,3 +691,74 @@ async def test_failure_at_submit_message_closes_check_run_as_success(tmp_path: P
     assert len(update_calls) == 1
     assert update_calls[0].kwargs["status"] == "completed"
     assert update_calls[0].kwargs["conclusion"] == "success"
+
+
+async def test_a_run_that_finished_on_its_own_is_not_cancelled(tmp_path: Path):
+    """Nothing to cancel once a run reached a terminal state, and asking wastes a call.
+
+    Under cancellation the budget is a few seconds shared by every cleanup call, so spending one on a
+    run that is already done costs one that is not.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run()))
+    mock_artifacts(client, [])
+    mock_jobs(client, [])
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    await runner.process_message(make_batch(batch_id="batch-1"))
+    await runner.cancel_dispatched_runs()
+
+    assert client.calls_to("cancel_workflow_run") == []
+
+
+async def test_cancelling_a_run_does_not_wait_out_the_clients_default_timeout(tmp_path: Path):
+    """A GitHub that accepts the connection then stalls must not consume the whole teardown budget.
+
+    The retry policy's timeout bounds the ladder, not an attempt in flight, so without a per-request
+    timeout this inherits the client's 30s default. The process is killed after roughly ten, so one
+    stalled call would mean no run is cancelled at all.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    task = asyncio.create_task(runner.process_message(make_batch(batch_id="batch-1")))
+    async with asyncio.timeout(5):
+        while not client.calls_to("create_check_run"):
+            await asyncio.sleep(0)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    await runner.cancel_dispatched_runs()
+
+    assert client.last_call("cancel_workflow_run").kwargs["timeout"] == CANCEL_REQUEST_TIMEOUT
+
+
+async def test_a_run_still_going_when_the_batch_is_cancelled_is_cancelled_too(tmp_path: Path):
+    """A dispatched run outlives the process that asked for it and keeps burning runner minutes.
+
+    The batch's own `finally` runs when its task is cancelled, so anything cleared there would be gone
+    before the cleanup looked, which is exactly when there is something to cancel.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    task = asyncio.create_task(runner.process_message(make_batch(batch_id="batch-1")))
+    await asyncio.sleep(0)
+    # Bounded, so a regression that never creates the check run fails here instead of spinning until
+    # the CI job's own timeout, which reports nothing useful.
+    async with asyncio.timeout(5):
+        while not client.calls_to("create_check_run"):
+            await asyncio.sleep(0)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    await runner.cancel_dispatched_runs()
+
+    assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
