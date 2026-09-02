@@ -449,6 +449,10 @@ class RequestsWrapper(object):
             self._session.close()
             self._session = None
 
+        # Adapters own the connection pools and outlive the session, which closes only what it has mounted.
+        for adapter in self._https_adapters.values():
+            adapter.close()
+
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
         """Return a persistent cookie, or default if it is missing or ambiguous."""
         try:

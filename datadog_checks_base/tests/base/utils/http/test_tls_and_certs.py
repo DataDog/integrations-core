@@ -562,3 +562,35 @@ class TestSSLContextAdapter:
                 http.get('https://example.com', verify=True)
 
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+
+    def test_close_releases_adapter_used_without_a_persistent_session(self):
+        """close() should release pooled connections when no persistent session was ever created."""
+
+        with mock.patch('requests.Session.get'):
+            http = RequestsWrapper({'tls_verify': True}, {})
+            http.get('https://example.com', persist=False)
+
+            (adapter,) = http._https_adapters.values()
+            adapter.poolmanager.connection_from_url('https://example.com')
+            assert len(adapter.poolmanager.pools) == 1
+
+            http.close()
+
+            assert len(adapter.poolmanager.pools) == 0
+
+    def test_close_releases_adapter_displaced_by_another_tls_config(self):
+        """close() should release pooled connections held by adapters no longer mounted on the session."""
+
+        with mock.patch('requests.Session.get'):
+            http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
+            http.get('https://example.com', verify=True)
+            http.get('https://example.com', verify=False)
+
+            adapters = list(http._https_adapters.values())
+            assert len(adapters) == 2
+            for adapter in adapters:
+                adapter.poolmanager.connection_from_url('https://example.com')
+
+            http.close()
+
+            assert [len(adapter.poolmanager.pools) for adapter in adapters] == [0, 0]
