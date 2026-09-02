@@ -214,8 +214,10 @@ class EventBusOrchestrator(ABC):
         Called by :meth:`initialize`. Override to handle a different set, or to do nothing where the
         process has another owner for them.
 
-        Handling SIGINT here also means it stops arriving as ``KeyboardInterrupt``, so shutdown takes
-        the same path whichever signal comes first.
+        One handler per signal, despite the name: this replaces whatever was installed rather than
+        chaining onto it, so two buses in a process would leave only the second one hearing anything.
+        For SIGINT what it replaces is the handler that raises ``KeyboardInterrupt``, which is what
+        makes shutdown take the same path whichever signal comes first.
         """
         loop = asyncio.get_running_loop()
         for received in SHUTDOWN_SIGNALS:
