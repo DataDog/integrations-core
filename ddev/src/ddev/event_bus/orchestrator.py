@@ -168,10 +168,9 @@ class EventBusOrchestrator(ABC):
         # because the pool's own threads discard from it as they finish.
         self._sync_work: set[Future] = set()
         self._sync_work_lock = threading.Lock()
+        self._stop_lock = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
-        # Also kept flat, because `_subscribers` holds a processor once per message type it takes and
-        # lifecycle hooks are owed to each processor once.
         self._processors: list[Processor] = []
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
@@ -212,14 +211,17 @@ class EventBusOrchestrator(ABC):
         ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
         loop awaits them directly and would otherwise be held for as long as they take.
 
-        Every registered processor's :meth:`BaseProcessor.on_stop_requested` runs before this returns.
+        Every registered processor's :meth:`BaseProcessor.on_stop_requested` runs before this returns; a
+        caller that finds the stop already claimed returns at once.
         """
-        if self.stopping:
-            return
+        # Claimed atomically, and before the hooks: two threads may call this, and one that raises must
+        # not leave the bus running. Notifying outside the lock, so a hook cannot hold it.
+        with self._stop_lock:
+            if self.stopping:
+                return
+            self._stopping.set()
 
         self._logger.info("Stop requested; the bus will wind down")
-        # Set before the hooks, so one that raises cannot leave the bus running.
-        self._stopping.set()
         self._notify_processors_of_stop()
 
     def _notify_processors_of_stop(self) -> None:
