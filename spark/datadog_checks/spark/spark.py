@@ -8,6 +8,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPClientReadTimeoutError
 
 from .constants import (
     APPLICATION_STATES,
@@ -666,7 +667,10 @@ class SparkCheck(AgentCheck):
                 response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
                 response.raise_for_status()
 
-        except Timeout as e:
+        except (HTTPClientReadTimeoutError, Timeout) as e:
+            if isinstance(e, HTTPClientReadTimeoutError) and self._should_suppress_connection_error(e, tags):
+                return None
+
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
