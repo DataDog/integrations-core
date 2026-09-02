@@ -113,7 +113,14 @@ class Dispatcher(EventBusOrchestrator):
         grace_period: float,
         run_logger: logging.Logger | None = None,
     ):
-        super().__init__(run_logger or logger, max_timeout=max_timeout, grace_period=grace_period)
+        super().__init__(
+            run_logger or logger,
+            max_timeout=max_timeout,
+            grace_period=grace_period,
+            # A cancelled run reports itself, on the pull request and in the run summary, and the caller
+            # reads that outcome once this returns. Raising instead would skip it.
+            propagate_keyboard_interrupt=False,
+        )
         self._batches = batches
         self._client = client
         self._runner = runner

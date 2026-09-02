@@ -156,6 +156,7 @@ class MockOrchestrator(EventBusOrchestrator):
         grace_period: float = 10,
         fail_fast: bool = False,
         executor: Executor | None = None,
+        propagate_keyboard_interrupt: bool = True,
     ):
         super().__init__(
             logger=logger,
@@ -163,6 +164,7 @@ class MockOrchestrator(EventBusOrchestrator):
             grace_period=grace_period,
             fail_fast=fail_fast,
             executor=executor,
+            propagate_keyboard_interrupt=propagate_keyboard_interrupt,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -1305,6 +1307,43 @@ def caught_rather_than_fatal(sent: signal.Signals) -> Generator[list[signal.Sign
 
 
 @requires_signals
+@pytest.mark.parametrize(
+    ("sent", "propagate", "expectation"),
+    [
+        pytest.param(signal.SIGINT, True, pytest.raises(KeyboardInterrupt), id="sigint-propagates"),
+        pytest.param(signal.SIGINT, False, does_not_raise(), id="sigint-suppressed"),
+        # Nothing in the interpreter raises for SIGTERM, so there is nothing to hand back.
+        pytest.param(signal.SIGTERM, True, does_not_raise(), id="sigterm-has-no-exception"),
+    ],
+)
+def test_an_interrupted_run_hands_the_interrupt_back_once_it_has_wound_down(
+    sent: signal.Signals, propagate: bool, expectation: AbstractContextManager
+):
+    """Handling SIGINT is what stops `KeyboardInterrupt` reaching the caller, and with it whatever the
+    caller does about one: Click turns it into `Aborted!` and exit 1, so without this an interrupted
+    command would report success.
+
+    Raised after the wind-down rather than instead of it, so the cleanup still happens first.
+    """
+    signaller = Signaller("signaller", sent)
+    orchestrator = MockOrchestrator(
+        logging.getLogger("test_interrupt_propagation"),
+        max_timeout=30,
+        grace_period=1,
+        propagate_keyboard_interrupt=propagate,
+    )
+    orchestrator.register_processor(signaller, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+
+    with caught_rather_than_fatal(sent), expectation:
+        orchestrator.run()
+
+    # Whatever the caller sees, the bus wound down first rather than being cut short.
+    assert orchestrator.stopping
+    assert signaller.stop_notifications == 1
+
+
+@requires_signals
 @pytest.mark.parametrize("sent", [signal.SIGINT, signal.SIGTERM], ids=lambda s: s.name)
 def test_a_run_gives_back_the_handler_it_displaced(sent: signal.Signals):
     """Nothing says the bus owns the process: a caller may have its own handler and outlive the run.
@@ -1328,23 +1367,21 @@ def test_a_run_gives_back_the_handler_it_displaced(sent: signal.Signals):
 
 @requires_signals
 @pytest.mark.parametrize("sent", [signal.SIGINT, signal.SIGTERM], ids=lambda s: s.name)
-def test_a_signal_winds_the_bus_down_instead_of_killing_the_process(sent: signal.Signals):
-    """Installing a handler is what replaces the default that would end the process.
+def test_a_signal_reaches_the_bus_rather_than_the_process(sent: signal.Signals):
+    """Both defaults end a run, differently: SIGINT raises `KeyboardInterrupt` where it lands and
+    SIGTERM kills outright, so the fallback keeps a regression reportable rather than fatal.
 
-    Both defaults are fatal to a run, differently: SIGINT raises `KeyboardInterrupt` and SIGTERM kills
-    outright, so the fallback below keeps a regression reportable. The bus having handled the signal is
-    what leaves that fallback untouched.
+    The bus having handled the signal is what leaves that fallback untouched.
     """
     signaller = Signaller("signaller", sent)
-    orchestrator = MockOrchestrator(logging.getLogger("test_signal_stop"), max_timeout=30, grace_period=1)
+    orchestrator = MockOrchestrator(
+        logging.getLogger("test_signal_stop"), max_timeout=30, grace_period=1, propagate_keyboard_interrupt=False
+    )
     orchestrator.register_processor(signaller, [Memo])
     orchestrator.submit_message(Memo("memo1"))
 
     with caught_rather_than_fatal(sent) as reached_the_process:
-        try:
-            orchestrator.run()
-        except KeyboardInterrupt:  # pragma: no cover
-            pytest.fail(f"{sent.name} reached the interpreter instead of the bus")
+        orchestrator.run()
 
     assert reached_the_process == []
     assert orchestrator.stopping
